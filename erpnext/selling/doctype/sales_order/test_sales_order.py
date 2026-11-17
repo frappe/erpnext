@@ -64,6 +64,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
+		frappe.db.rollback()
 
 	def test_maximum_discount_for_percentage_amount_and_rate(self):
 		frappe.db.set_value("Price List", "Standard Selling", "currency", "INR")
