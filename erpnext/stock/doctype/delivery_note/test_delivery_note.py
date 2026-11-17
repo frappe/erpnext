@@ -2720,6 +2720,25 @@ class TestDeliveryNote(ERPNextTestSuite):
 		# the moving average, not the zero of a bundle without serial no rates
 		self.assertEqual(frappe.db.get_value("Packed Item", dn.packed_items[0].name, "incoming_rate"), 25)
 
+	def test_packed_item_incoming_rate_is_for_the_packed_qty(self):
+		component = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		for days, qty, rate in ((-2, 2, 10), (-1, 3, 40)):
+			make_stock_entry(
+				item_code=component,
+				target="_Test Warehouse - _TC",
+				qty=qty,
+				basic_rate=rate,
+				posting_date=add_days(nowdate(), days),
+			)
+
+		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
+		dn.save()
+
+		# FIFO rate of the 2 packed, not of the 5 in the warehouse
+		self.assertEqual(dn.packed_items[0].incoming_rate, 10)
+
 	def test_delivery_note_bundle_with_batched_item(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
