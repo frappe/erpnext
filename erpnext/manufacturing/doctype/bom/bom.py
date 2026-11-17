@@ -1307,110 +1307,20 @@ def get_bom_items_as_dict(
 			qty_field="stock_qty",
 		)
 
-<<<<<<< HEAD
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
-=======
-def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
-	is_stock_item = cint(not opts.include_non_stock_items)
-	stock_item_condition = t.item_doc.is_stock_item.isin([1, is_stock_item])
-	if opts.fetch_secondary_items:
-		return _add_secondary_item_columns(query, t, stock_item_condition)
-
-	# BOM Item rate is per row UOM, while BOM Explosion Item rate is per stock UOM. Select the
-	# matching quantity so a normal BOM row's conversion factor is not applied twice.
-	qty_col = t.bom_item.stock_qty if cint(opts.fetch_exploded) else t.bom_item.qty
-	amount_col = (Sum(qty_col / IfNull(t.bom_doc.quantity, 1) * t.bom_item.rate) * opts.qty).as_("amount")
-
-	if cint(opts.fetch_exploded):
-		return _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition)
-
-	rate_col = t.bom_item.base_rate
-	if opts.fetch_qty_in_stock_uom:
-		rate_col = rate_col / IfNull(NullIf(t.bom_item.conversion_factor, 0), 1)
-
-	return _add_normal_item_columns(
-		query, t, amount_col, rate_col, stock_item_condition, track_semi_finished_goods
-	)
-
-
-def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
-	bom_item_table = frappe.qb.DocType("BOM Item")
-	idx_subquery = (
-		frappe.qb.from_(bom_item_table)
-		.select(bom_item_table.idx)
-		.where((bom_item_table.item_code == t.bom_item.item_code) & (bom_item_table.parent == bom))
-		.limit(1)
-	)
-
-	# non-grouped columns are constant per grouped item_code -> Max() preserves the value while
-	# keeping the GROUP BY postgres-valid; the correlated idx subquery references only item_code
-	# (a grouped column) so it stays valid and still overrides the explosion idx for display.
-	query = query.select(
-		Max(t.bom_item.description).as_("description"),
-		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
-		Count(t.bom_item.name).distinct().as_("line_count"),
-		Max(t.bom_item.operation).as_("operation"),
-		Max(t.bom_item.include_item_in_manufacturing).as_("include_item_in_manufacturing"),
-		Max(t.bom_item.rate).as_("rate"),
-		Max(t.bom_item.sourced_by_supplier).as_("sourced_by_supplier"),
-		amount_col,
-		idx_subquery.as_("idx"),
-	).where(stock_item_condition)
-
-	return query, [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
-
-
-def _add_secondary_item_columns(query, t, stock_item_condition):
-	# grouped by (item_code, secondary_item_type), which the BOM keeps unique, so every Max()
-	# below returns the single grouped row's own value while keeping the GROUP BY valid on
-	# postgres.
-	query = query.select(
-		Max(t.item_doc.description).as_("description"),
-		Max(t.bom_item.cost_allocation_per).as_("cost_allocation_per"),
-		Max(t.bom_item.process_loss_per).as_("process_loss_per"),
-		t.bom_item.secondary_item_type,
-		Max(t.bom_item.name).as_("name"),
-	).where(stock_item_condition)
-
-	return query, [t.bom_item.item_code, t.bom_item.secondary_item_type]
-
-
-def _add_normal_item_columns(query, t, amount_col, rate_col, stock_item_condition, track_semi_finished_goods):
-	# Grouped also by bom_no/is_phantom_item: the pair MUST come from the same BOM Item row --
-	# _add_bom_item_to_dict recurses into bom_no when is_phantom_item is set, so independent Max()
-	# per column could pair one line's phantom flag with another line's bom_no and explode the
-	# wrong sub-BOM (same fix as sub_assembly_queries). The remaining non-grouped columns are
-	# constant per grouped item_code (+operation/operation_row_id) -> Max() keeps the GROUP BY
-	# valid on postgres while returning the value MySQL picked arbitrarily.
-	# rate_col is base_rate, per stock UOM when the qty is in stock UOM.
-	query = query.select(
-		Max(t.bom_item.description).as_("description"),
-		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
-		Count(t.bom_item.name).distinct().as_("line_count"),
-		Max(t.bom_item.operation).as_("operation"),
-		Max(t.bom_item.include_item_in_manufacturing).as_("include_item_in_manufacturing"),
-		Max(t.bom_item.sourced_by_supplier).as_("sourced_by_supplier"),
-		Max(t.bom_item.uom).as_("uom"),
-		Max(t.bom_item.conversion_factor).as_("conversion_factor"),
-		amount_col,
-		Max(rate_col).as_("rate"),
-		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
-		t.bom_item.is_phantom_item,
-		t.bom_item.bom_no,
-	).where(stock_item_condition | (t.bom_item.is_phantom_item == 1))
-
-	if track_semi_finished_goods:
-		group_by = [t.bom_item.item_code, t.bom_item.operation_row_id, t.item_doc.stock_uom]
->>>>>>> fa6a517 (fix(manufacturing): return BOM item rate per stock UOM with a stock UOM qty)
 	else:
+		rate_col = "bom_item.base_rate"
+		if fetch_qty_in_stock_uom:
+			rate_col += " / ifnull(nullif(bom_item.conversion_factor, 0), 1)"
+
 		query = query.format(
 			table="BOM Item",
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
-			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
+			select_columns=f""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate """,
+				bom_item.description, {rate_col} as rate """,
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 
