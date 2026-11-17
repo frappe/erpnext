@@ -133,7 +133,8 @@ def make_packing_list(doc, order_packed_items=None):
 					if location:
 						update_packed_item_with_pick_list_info(item_row, pi_row, location)
 
-					if set_price_from_children:  # create/update bundle item wise price dict
+					# a zero qty row has no component amount to price it from
+					if set_price_from_children and item_row.qty:
 						update_product_bundle_rate(parent_items_price, pi_row, item_row)
 
 	if not reset:
