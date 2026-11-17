@@ -7,11 +7,15 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 <<<<<<< HEAD
+<<<<<<< HEAD
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Criterion
 =======
 from frappe.query_builder import Case, Criterion
 >>>>>>> f2fe397 (fix(manufacturing): count running time logs in the workstation overlap check)
+=======
+from frappe.query_builder import Criterion
+>>>>>>> caa7472 (fix(manufacturing): keep time log columns typed in the running overlap check)
 from frappe.query_builder.functions import IfNull, Max, Min, Sum
 from frappe.utils import (
 	add_days,
@@ -465,9 +469,14 @@ class JobCard(Document):
 		query = self.apply_employee_filters(query, jc, jctl, args, doctype, open_job_cards)
 		query = self.apply_docstatus_filters(query, jc, doctype)
 
-		return query.run(as_dict=True)
+		time_logs = query.run(as_dict=True)
+		for log in time_logs:
+			# only a running time log comes back without a To Time
+			log.to_time = log.to_time or RUNNING_TIME_LOG_END
+		return time_logs
 
 	def get_base_overlap_query(self, jc, jctl, args, include_running=False):
+<<<<<<< HEAD
 		to_time, row_to_time = args.to_time, jctl.to_time
 		if include_running:
 			# a running time log has no To Time yet and keeps the workstation busy
@@ -479,11 +488,17 @@ class JobCard(Document):
 			)
 
 >>>>>>> f2fe397 (fix(manufacturing): count running time logs in the workstation overlap check)
+=======
+		# a running time log has no To Time yet and keeps the workstation busy
+		to_time = (args.to_time or RUNNING_TIME_LOG_END) if include_running else args.to_time
+>>>>>>> caa7472 (fix(manufacturing): keep time log columns typed in the running overlap check)
 		time_conditions = [
-			((jctl.from_time < args.from_time) & (row_to_time > args.from_time)),
-			((jctl.from_time < to_time) & (row_to_time > to_time)),
-			((jctl.from_time >= args.from_time) & (row_to_time <= to_time)),
+			((jctl.from_time < args.from_time) & (jctl.to_time > args.from_time)),
+			((jctl.from_time < to_time) & (jctl.to_time > to_time)),
+			((jctl.from_time >= args.from_time) & (jctl.to_time <= to_time)),
 		]
+		if include_running:
+			time_conditions.append(jctl.to_time.isnull() & (jc.docstatus == 0) & (jctl.from_time < to_time))
 
 		query = (
 			frappe.qb.from_(jctl)
@@ -492,7 +507,7 @@ class JobCard(Document):
 				jc.name.as_("name"),
 				jctl.name.as_("row_name"),
 				jctl.from_time,
-				row_to_time.as_("to_time"),
+				jctl.to_time,
 				jc.workstation,
 				jc.workstation_type,
 			)
@@ -503,7 +518,7 @@ class JobCard(Document):
 				& (jc.name != f"{args.parent or 'No Name'}")
 				& (jc.docstatus < 2)
 			)
-			.orderby(row_to_time)
+			.orderby(jctl.to_time)
 		)
 
 		if self.workstation:
