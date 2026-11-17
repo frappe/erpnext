@@ -10,6 +10,7 @@ from frappe.utils import add_days, flt, formatdate, getdate, today
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.sales_forecast.test_sales_forecast import make_sales_forecast
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
 	MaterialRequirementsPlanningReport,
@@ -883,6 +884,20 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(getdate(buckets[0].delivery_date), getdate("2026-10-27"))
 		self.assertEqual(getdate(buckets[-1].delivery_date), getdate("2026-11-26"))
 		self.assertAlmostEqual(sum(bucket.qty for bucket in buckets), 31)
+
+	def test_forecast_is_limited_to_the_report_dates(self):
+		forecast = make_sales_forecast(from_date=add_days(today(), 10), demand_number=1)
+		from_date, to_date = add_days(today(), 20), add_days(today(), 30)
+		report = MaterialRequirementsPlanningReport(frappe._dict(from_date=from_date, to_date=to_date))
+
+		dates = [
+			row.delivery_date
+			for row in report.get_sales_forecast_data()
+			if row.sales_forecast == forecast.name
+		]
+
+		self.assertEqual(min(dates), getdate(from_date))
+		self.assertEqual(max(dates), getdate(to_date))
 
 	def test_float_noise_in_qty_does_not_round_up_chart_and_lead_time(self):
 		qty = 7 / 3 * 27  # 63.00000000000001
