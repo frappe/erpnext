@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -147,3 +148,23 @@ class TestSellingControllerConversions(ERPNextTestSuite):
 		)
 
 		self.assertEqual(dn.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_inter_company_sale_keeps_the_last_purchase_rate_check(self):
+		item_code = make_item(properties={"is_stock_item": 0}).name
+		frappe.db.set_value("Item", item_code, "last_purchase_rate", 120)
+
+		si = create_sales_invoice(
+			item_code=item_code,
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			rate=90,
+			do_not_save=True,
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "last purchase rate", si.save)
