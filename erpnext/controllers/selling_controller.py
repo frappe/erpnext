@@ -1164,6 +1164,7 @@ class SellingController(StockController):
 				if not item.get(so_field) or not item.so_detail:
 					continue
 
+<<<<<<< HEAD
 				sre_list = frappe.db.get_all(
 					"Stock Reservation Entry",
 					{
@@ -1176,6 +1177,23 @@ class SellingController(StockController):
 					},
 					order_by="creation",
 				)
+=======
+				table = frappe.qb.DocType("Stock Reservation Entry")
+				query = (
+					frappe.qb.from_(table)
+					.select(table.name, table.reservation_based_on)
+					.where(
+						(table.docstatus == 1)
+						& (table.voucher_type == "Sales Order")
+						& (table.voucher_no == item.get(so_field))
+						& (table.voucher_detail_no == item.so_detail)
+						& (table.warehouse == item.warehouse)
+						& (table.delivered_qty < table.reserved_qty)
+					)
+					.orderby(table.creation)
+				)
+				sre_list = get_serial_and_batch_reservations_first(query.run(as_dict=True))
+>>>>>>> e6b5184 (fix(stock): match Serial and Batch reservations before Qty ones on delivery)
 
 				# Skip if no Stock Reservation Entries.
 				if not sre_list:
@@ -1235,7 +1253,7 @@ class SellingController(StockController):
 
 				sre_list = frappe.db.get_all(
 					"Stock Reservation Entry",
-					{
+					filters={
 						"docstatus": 1,
 						"voucher_type": "Sales Order",
 						"voucher_no": item.get(so_field),
@@ -1243,8 +1261,10 @@ class SellingController(StockController):
 						"warehouse": item.warehouse,
 						"status": ["in", ["Partially Delivered", "Delivered"]],
 					},
+					fields=["name", "reservation_based_on"],
 					order_by="creation",
 				)
+				sre_list = get_serial_and_batch_reservations_first(sre_list)
 
 				# Skip if no Stock Reservation Entries.
 				if not sre_list:
@@ -1370,6 +1390,70 @@ def get_serial_and_batch_bundle(
 	return doc.name
 
 
+<<<<<<< HEAD
+=======
+def get_serial_and_batch_reservations_first(sre_list: list[dict]) -> list[str]:
+	"""Reservation names, Serial and Batch ones first so they claim their serial / batch nos before Qty ones."""
+	return [sre.name for sre in sorted(sre_list, key=lambda sre: sre.reservation_based_on == "Qty")]
+
+
+def get_delivered_serial_batch_for_reservation(item):
+	"""Serial nos and per-batch qty delivered by a stock row.
+
+	The detail may be stored in a Serial and Batch Bundle or directly in the row's
+	``serial_no``/``batch_no`` fields (``use_serial_batch_fields``). Reading from whichever is
+	present keeps the Stock Reservation Entry delivered-qty update independent of a bundle being
+	created -- delivering reserved serial/batch stock used to crash when the row had no bundle.
+	"""
+	serial_nos, batch_qty = [], {}
+
+	if item.get("serial_and_batch_bundle"):
+		bundle = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+		for row in bundle.entries:
+			if row.serial_no:
+				serial_nos.append(row.serial_no)
+			if row.batch_no:
+				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
+	else:
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
+		if item.get("serial_no"):
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
+			)
+		if item.get("batch_no"):
+			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
+
+	return serial_nos, batch_qty
+
+
+def get_reserved_warehouses_by_order_row(so_details: list) -> dict:
+	if not so_details:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	rows = (
+		frappe.qb.from_(sre)
+		.select(sre.voucher_detail_no, sre.warehouse)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_detail_no.isin(so_details))
+			& (sre.delivered_qty < sre.reserved_qty)
+		)
+		.groupby(sre.voucher_detail_no, sre.warehouse)
+		.orderby(Min(sre.creation))
+	).run(as_dict=True)
+
+	reserved_warehouses = {}
+	for row in rows:
+		reserved_warehouses.setdefault(row.voucher_detail_no, []).append(row.warehouse)
+
+	return reserved_warehouses
+
+
+>>>>>>> e6b5184 (fix(stock): match Serial and Batch reservations before Qty ones on delivery)
 def get_ledger_qty(qty) -> float:
 	"""Stock qty as the stock ledger keeps balances, rounded to its precision."""
 	return flt(qty, frappe.get_precision("Stock Ledger Entry", "actual_qty"))
