@@ -555,7 +555,8 @@ class ProductionPlan(Document):
 					return
 
 	def update_requested_status(self):
-		if self.mr_items and all(flt(d.requested_qty) >= flt(d.quantity) for d in self.mr_items):
+		rows_to_request = [d for d in self.mr_items if flt(d.quantity) > 0]
+		if rows_to_request and all(flt(d.requested_qty) >= flt(d.quantity) for d in rows_to_request):
 			self.status = "Material Requested"
 
 	def get_production_items(self):

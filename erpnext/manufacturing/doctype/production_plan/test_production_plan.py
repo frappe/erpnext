@@ -1422,6 +1422,22 @@ class TestProductionPlan(ERPNextTestSuite):
 			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "requested_qty"), 12
 		)
 
+	def test_plan_with_all_raw_materials_in_stock_is_not_material_requested(self):
+		rm_item = make_item("_Test PP All In Stock RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test PP All In Stock FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], currency="INR")
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=100, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			for_warehouse="Stores - _TC",
+			ignore_existing_ordered_qty=1,
+		)
+
+		self.assertEqual([row.quantity for row in plan.mr_items], [0])
+		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Submitted")
+
 	def test_patch_marks_a_plan_requested_in_full_as_material_requested(self):
 		from erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion import execute
 
