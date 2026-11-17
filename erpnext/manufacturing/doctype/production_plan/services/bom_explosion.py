@@ -214,6 +214,7 @@ def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, pl
 		Count(bom_item.name).distinct().as_("line_count"),
 		Max(item.default_bom).as_("default_bom"),
 		Max(bom_item.bom_no).as_("line_bom_no"),
+		Max(bom_item.do_not_explode).as_("do_not_explode"),
 		Max(bom_item.stock_uom).as_("stock_uom"),
 		Max(item.min_order_qty).as_("min_order_qty"),
 		Max(item.safety_stock).as_("safety_stock"),
@@ -239,7 +240,8 @@ def _subitem_filter(bom_item, bom, item, bom_no, include_non_stock_items):
 def _process_subitem(
 	doc, data, item_details, d, company, include_non_stock_items, include_subcontracted_items
 ):
-	child_bom = d.line_bom_no or d.default_bom
+	# a Do Not Explode line has no BOM, so it must not take the item's default BOM
+	child_bom = d.line_bom_no or (None if d.do_not_explode else d.default_bom)
 	if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
 		return
 
