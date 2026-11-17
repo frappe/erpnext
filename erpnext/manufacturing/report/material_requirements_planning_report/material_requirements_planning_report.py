@@ -1423,7 +1423,8 @@ def convert_to_daily_bucket_data(data):
 	for row in data:
 		start_date, end_date = get_forecast_period(row)
 		no_of_days = days_diff(end_date, start_date)
-		for i in range(no_of_days):
+		shares = round_whole_number_shares(row.item_code, [row.qty / no_of_days] * no_of_days, row.qty)
+		for i, share in enumerate(shares):
 			bucketed_data.append(
 				frappe._dict(
 					{
@@ -1433,7 +1434,7 @@ def convert_to_daily_bucket_data(data):
 						"sales_forecast": row.sales_forecast,
 						"stock_uom": row.stock_uom,
 						"parent_warehouse": row.parent_warehouse,
-						"qty": row.qty / no_of_days,
+						"qty": share,
 					}
 				)
 			)
@@ -1613,11 +1614,18 @@ def split_forecast_qty(rows, qty):
 		qty * flt(d.planned_qty) / total_planned_qty if total_planned_qty else (qty if idx == 0 else 0)
 		for idx, d in enumerate(rows)
 	]
-	if flt(qty) == round(qty) and is_whole_number_item(rows[0].item_code):
-		shares = round_shares_keeping_total(shares, round(qty))
+	shares = round_whole_number_shares(rows[0].item_code, shares, qty)
 
 	for d, share in zip(rows, shares, strict=True):
 		d.sales_forecast_qty += share
+
+
+def round_whole_number_shares(item_code, shares, qty):
+	"""Round the shares of a whole qty of a whole number item to whole numbers, keeping their total."""
+	if flt(qty) == round(qty) and is_whole_number_item(item_code):
+		return round_shares_keeping_total(shares, round(qty))
+
+	return shares
 
 
 def is_whole_number_item(item_code):
