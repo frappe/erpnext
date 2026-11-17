@@ -3,6 +3,7 @@ import copy
 import frappe
 from frappe import _
 from frappe.email import sendmail_to_system_managers
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	add_days,
@@ -65,12 +66,13 @@ def build_conditions(process_type, account, company):
 		parent = frappe.qb.DocType("Purchase Invoice")
 		deferred_account = item.deferred_expense_account
 
+	conditions = []
+	if company:
+		conditions.append(parent.company == company)
 	if account:
-		return deferred_account == account
-	elif company:
-		return parent.company == company
+		conditions.append(deferred_account == account)
 
-	return None
+	return Criterion.all(conditions) if conditions else None
 
 
 def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_date=None, conditions=None):
