@@ -372,6 +372,24 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_dn.items[0].update({"rate": 4, "price_list_rate": 4})
 		self.assertRaises(frappe.ValidationError, return_dn.insert)
 
+	def test_purchase_return_maps_after_accepted_and_rejected_warehouse_returns(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		pr = make_purchase_receipt(qty=5, rejected_qty=5)
+		accepted_return = make_purchase_return(pr.name)
+		accepted_return.items[0].update({"qty": -2, "rejected_qty": -1, "received_qty": -3})
+		accepted_return.submit()
+
+		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_return.items[0].update({"qty": -1, "received_qty": -1})
+		rejected_return.submit()
+
+		self.assertEqual(make_purchase_return(pr.name).items[0].qty, -3)
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
