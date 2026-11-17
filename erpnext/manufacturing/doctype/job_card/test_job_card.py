@@ -738,32 +738,34 @@ class TestJobCard(FrappeTestCase):
 		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
 	)
 	def test_corrective_job_card_takes_the_rate_of_its_new_workstation(self):
-		workstation = make_jc_review_workstation(hour_rate=600)
-		rework_workstation = make_jc_review_workstation(hour_rate=1500)
-		operation = make_jc_review_operation(workstation)
-		rework = make_jc_review_operation(rework_workstation, is_corrective_operation=1)
-		wo = make_jc_review_work_order(
-			make_jc_review_item(),
-			[{"item_code": make_jc_review_item(), "qty": 1}],
-			[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
-			skip_transfer=1,
-		)
-		job_card = get_jc_review_job_cards(wo.name)[0]
-		job_card.append("time_logs", jc_review_log("2031-03-06 08:00:00", 60, 10))
-		job_card.submit()
-
-		corrective_job_card = make_corrective_job_card(
-			job_card.name, operation=rework, for_operation=operation
-		)
-		corrective_job_card.workstation = rework_workstation
-		corrective_job_card.append("time_logs", jc_review_log("2031-03-06 10:00:00", 60, 10))
+		wo, corrective_job_card = make_jc_review_corrective_job_card_on_new_workstation()
 		corrective_job_card.submit()
 
 		self.assertEqual(corrective_job_card.hour_rate, 1500)
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "corrective_operation_cost"), 1500)
 
 	@ERPNextTestSuite.change_settings(
+<<<<<<< HEAD
 >>>>>>> 68be601 (test: corrective Job Card takes the rate of its new workstation)
+=======
+		"Manufacturing Settings",
+		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
+	)
+	def test_amended_corrective_job_card_keeps_its_manual_rate(self):
+		_wo, corrective_job_card = make_jc_review_corrective_job_card_on_new_workstation()
+		corrective_job_card.insert()
+		corrective_job_card.hour_rate = 1400
+		corrective_job_card.submit()
+		corrective_job_card.cancel()
+
+		amended = frappe.copy_doc(corrective_job_card)
+		amended.amended_from = corrective_job_card.name
+		amended.insert()
+
+		self.assertEqual(amended.hour_rate, 1400)
+
+	@ERPNextTestSuite.change_settings(
+>>>>>>> c0b64f0 (test: amended corrective Job Card keeps its manual hour rate)
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_if_corrective_jc_ops_cost_is_added_to_manufacture_stock_entry(self):
@@ -2724,6 +2726,37 @@ def make_jc_review_scheduled_job_card(planned_start, time_in_mins, workstation=N
 	return get_jc_review_job_cards(wo.name)[0]
 
 
+<<<<<<< HEAD
+=======
+def make_jc_review_corrective_job_card_on_new_workstation():
+	"""Return a Work Order and an unsaved corrective card moved from a 600 to a 1,500 per hour workstation."""
+	workstation = make_jc_review_workstation(hour_rate=600)
+	rework_workstation = make_jc_review_workstation(hour_rate=1500)
+	operation = make_jc_review_operation(workstation)
+	rework = make_jc_review_operation(rework_workstation, is_corrective_operation=1)
+	wo = make_jc_review_work_order(
+		make_jc_review_item(),
+		[{"item_code": make_jc_review_item(), "qty": 1}],
+		[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+		skip_transfer=1,
+	)
+	job_card = get_jc_review_job_cards(wo.name)[0]
+	job_card.append("time_logs", jc_review_log("2031-03-06 08:00:00", 60, 10))
+	job_card.submit()
+
+	corrective_job_card = make_corrective_job_card(job_card.name, operation=rework, for_operation=operation)
+	corrective_job_card.workstation = rework_workstation
+	corrective_job_card.append("time_logs", jc_review_log("2031-03-06 10:00:00", 60, 10))
+	return wo, corrective_job_card
+
+
+def make_jc_review_employee():
+	from erpnext.setup.doctype.employee.test_employee import make_employee
+
+	return make_employee(f"jc-review-{frappe.generate_hash(length=8)}@example.com", company="_Test Company")
+
+
+>>>>>>> c0b64f0 (test: amended corrective Job Card keeps its manual hour rate)
 def get_jc_review_job_cards(work_order):
 	return [
 		frappe.get_doc("Job Card", name)
