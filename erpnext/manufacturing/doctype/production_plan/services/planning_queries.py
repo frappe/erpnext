@@ -194,6 +194,7 @@ def get_item_or_template_bom_query(bom, so_item):
 			(item.name == so_item.item_code)
 			& bom.item.isin([item.name, item.variant_of])
 			& (bom.is_active == 1)
+			& (bom.docstatus == 1)
 		)
 	)
 
@@ -235,7 +236,9 @@ def _apply_open_so_filters(plan, query, so, so_item):
 def _packed_item_subquery(bom, so, so_item):
 	pi = frappe.qb.DocType("Packed Item")
 	bom_exists = ExistsCriterion(
-		frappe.qb.from_(bom).select(bom.name).where((bom.item == pi.item_code) & (bom.is_active == 1))
+		frappe.qb.from_(bom)
+		.select(bom.name)
+		.where((bom.item == pi.item_code) & (bom.is_active == 1) & (bom.docstatus == 1))
 	)
 	return (
 		frappe.qb.from_(pi)

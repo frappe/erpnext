@@ -57,7 +57,7 @@ class SalesOrderSourcingService:
 		bom_exists = ExistsCriterion(
 			frappe.qb.from_(bom)
 			.select(bom.name)
-			.where((bom.item == mr_item.item_code) & (bom.is_active == 1))
+			.where((bom.item == mr_item.item_code) & (bom.is_active == 1) & (bom.docstatus == 1))
 		)
 		return (
 			frappe.qb.from_(mr)
@@ -389,7 +389,9 @@ def _so_packed_columns(so_item, pi):
 
 def _so_packed_filter(bom, so_item, pi, so_list):
 	bom_exists = ExistsCriterion(
-		frappe.qb.from_(bom).select(bom.name).where((bom.item == pi.item_code) & (bom.is_active == 1))
+		frappe.qb.from_(bom)
+		.select(bom.name)
+		.where((bom.item == pi.item_code) & (bom.is_active == 1) & (bom.docstatus == 1))
 	)
 	pending = ((so_item.work_order_qty > so_item.delivered_qty) & (so_item.qty > so_item.work_order_qty)) | (
 		(so_item.work_order_qty <= so_item.delivered_qty) & (so_item.qty > so_item.delivered_qty)
@@ -430,7 +432,9 @@ def _mr_item_planned_qty_query(mr_item):
 
 def _mr_items_filter(bom, mr_item, mr_list):
 	bom_exists = ExistsCriterion(
-		frappe.qb.from_(bom).select(bom.name).where((bom.item == mr_item.item_code) & (bom.is_active == 1))
+		frappe.qb.from_(bom)
+		.select(bom.name)
+		.where((bom.item == mr_item.item_code) & (bom.is_active == 1) & (bom.docstatus == 1))
 	)
 	return (
 		(mr_item.parent.isin(mr_list))
