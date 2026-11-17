@@ -2,6 +2,7 @@ import frappe
 from frappe.utils import today
 
 from erpnext.stock.get_item_details import (
+	get_batch_based_item_price,
 	get_batch_qty,
 	get_bin_details,
 	get_conversion_factor,
@@ -768,6 +769,37 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		self.assertEqual(dn.items[0].batch_no, batches[0])
 		self.assertEqual(dn.items[0].rate, 100)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	def test_batch_price_skipped_for_rate_locked_row(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item_code, batches = self.make_batched_item_with_stock([1])
+		so = make_sales_order(item_code=item_code, qty=1, rate=100)
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": so.selling_price_list,
+				"item_code": item_code,
+				"batch_no": batches[0],
+				"price_list_rate": 200,
+			}
+		).insert()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].name = "new-delivery-note-item-1"
+		ctx = {
+			"doctype": "Delivery Note",
+			"company": dn.company,
+			"price_list": dn.selling_price_list,
+			"batch_no": batches[0],
+			"uom": dn.items[0].uom,
+			"child_docname": dn.items[0].name,
+		}
+
+		self.assertEqual(get_batch_based_item_price(ctx, item_code), 200)
+		self.assertEqual(get_batch_based_item_price(ctx, item_code, doc=dn.as_dict()), 0)
 
 	def make_batched_item_with_stock(self, quantities, uoms=None, **properties):
 		from erpnext.stock.doctype.item.test_item import make_item
