@@ -2726,6 +2726,15 @@ class TestSalesInvoice(ERPNextTestSuite):
 		"""The receivable is posted at the base rounded total and the round off at the base
 		adjustment, so the entries balance without a second round off."""
 		frappe.db.set_value("Currency", "JPY", "enabled", 1)
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "JPY",
+				"to_currency": "INR",
+				"exchange_rate": 0.567,
+			}
+		).insert()
 		debit_to = create_account(
 			account_name="_Test Receivable JPY",
 			parent_account="Accounts Receivable - _TC",

@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe.tests import change_settings
@@ -9,6 +10,10 @@ from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.selling.doctype.quotation.quotation import make_sales_order
+from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+	patched_requests_get,
+	test_exchange_values,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1261,22 +1266,16 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation.status, "Ordered")
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
-	def test_make_quotation_qar_to_inr(self):
+	@patch("requests.get", side_effect=patched_requests_get)
+	def test_make_quotation_qar_to_inr(self, mock_get):
+		# QAR is pegged to USD, so the USD to INR rate is fetched and divided by the peg
 		quotation = make_quotation(
 			currency="QAR",
-			transaction_date="2026-01-01",
+			transaction_date="2016-01-15",
 		)
 
-		cache = frappe.cache()
-		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "QAR", "INR")
-		value = cache.get_value(key)
-		expected_rate = flt(value) / 3.64
-
-		self.assertEqual(
-			quotation.conversion_rate,
-			expected_rate,
-			f"Expected conversion rate {expected_rate}, got {quotation.conversion_rate}",
-		)
+		usd_to_inr = flt(test_exchange_values["2016-01-15"])
+		self.assertEqual(quotation.conversion_rate, usd_to_inr / 3.64)
 
 	def test_over_order_limit(self):
 		quotation = make_quotation(qty=5)
