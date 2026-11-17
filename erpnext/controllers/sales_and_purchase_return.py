@@ -1368,7 +1368,7 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 		warehouse_field = "warehouse"
 
 	warehouse = row.get(warehouse_field)
-	qty = abs(get_return_bundle_qty(row, qty_field))
+	qty = abs(get_return_bundle_qty(parent_doc, row, qty_field))
 
 	filterd_serial_batch = frappe._dict(
 		{
@@ -1491,7 +1491,7 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 			"voucher_type": parent_doc.doctype,
 			"voucher_no": parent_doc.name,
 			"voucher_detail_no": child_doc.name,
-			"qty": get_return_bundle_qty(child_doc, qty_field),
+			"qty": get_return_bundle_qty(parent_doc, child_doc, qty_field),
 			"company": parent_doc.company,
 			"do_not_submit": True,
 		}
@@ -1500,12 +1500,13 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 	return cls_obj.name
 
 
-def get_return_bundle_qty(row, qty_field):
+def get_return_bundle_qty(parent_doc, row, qty_field):
 	"""Rejected qty is in the transaction UOM, a bundle in the stock UOM."""
-	from erpnext.controllers.buying_controller import get_stock_qty
-
 	if qty_field == "rejected_qty":
-		return get_stock_qty(row, row.rejected_qty)
+		return parent_doc.get_rejected_stock_qty(row)
+
+	if row.get("return_qty_from_rejected_warehouse"):
+		return parent_doc.get_rejected_warehouse_return_stock_qty(row, qty_field)
 
 	return row.get(qty_field)
 

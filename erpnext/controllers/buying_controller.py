@@ -237,14 +237,12 @@ class BuyingController(SubcontractingController):
 		if row.get("rejected_serial_and_batch_bundle") or not row.rejected_warehouse:
 			return
 
-		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
-
 		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
 			package,
 			row.rejected_warehouse,
 			type_of_transaction="Inward",
 			do_not_submit=True,
-			qty=rejected_qty,
+			qty=self.get_rejected_stock_qty(row),
 			exclude_serial_nos=self.get_accepted_serial_nos(row),
 		)
 
@@ -914,14 +912,134 @@ class BuyingController(SubcontractingController):
 	def is_internal_receipt(self) -> bool:
 		return self.is_internal_transfer() and self.is_stock_receipt()
 
-	def get_source_warehouse_qty(self, row, accepted_qty):
+	def get_source_warehouse_qty(self, row, accepted_qty) -> float:
 		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 			return accepted_qty
 
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
-		return get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty))
+		return flt(accepted_qty + self.get_rejected_stock_qty(row), row.precision("stock_qty"))
+
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty in the stock UOM. An internal receipt takes it out of the stock qty it
+		receives, so the accepted and rejected parts add up to what leaves the in-transit warehouse."""
+		if not self.is_internal_receipt():
+			return get_stock_qty(row, row.rejected_qty)
+
+		if self.is_return:
+			return self.get_rejected_return_stock_qty(row, row.rejected_qty, row.rejected_warehouse)
+
+		return flt(
+			get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty)) - get_stock_qty(row, row.qty),
+			row.precision("stock_qty"),
+		)
+
+	def get_accepted_stock_qty(self, row) -> float:
+		"""Accepted qty in the stock UOM. An internal receipt's return from the rejected warehouse takes
+		back no more than the receipt put there."""
+		if row.get("return_qty_from_rejected_warehouse") and self.is_internal_receipt():
+			return self.get_rejected_return_stock_qty(row, row.qty, row.warehouse)
+
+		return get_stock_qty(row, row.qty)
+
+	def get_rejected_warehouse_return_stock_qty(self, row, qty_field) -> float:
+		if not self.is_internal_receipt():
+			return super().get_rejected_warehouse_return_stock_qty(row, qty_field)
+
+		return self.get_accepted_stock_qty(row)
+
+	def get_rejected_return_stock_qty(self, row, qty, warehouse) -> float:
+		"""Stock qty a return of an internal receipt takes back from its rejected warehouse: no more than
+		the receipt put there, less its other returns, and all of it when the return takes back all the
+		rejected qty left. Without what the receipt put there, it takes back the row's qty."""
+		stock_qty = get_stock_qty(row, qty)
+		if not flt(qty):
+			return stock_qty
+
+		stock_left = self.get_rejected_qty_left_to_return(row, warehouse)
+		if stock_left is None:
+			return stock_qty
+
+		if stock_left <= 0:
+			return 0.0
+
+		precision = row.precision("rejected_qty")
+		if flt(abs(flt(qty)), precision) >= self.get_rejected_uom_qty_left_to_return(row):
+			return -stock_left
+
+		return max(stock_qty, -stock_left)
+
+	def get_receipt_reference_field(self) -> str:
+		return "purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
+
+	def get_rejected_qty_left_to_return(self, row, warehouse) -> float | None:
+		"""Stock qty the returned receipt row put in the rejected warehouse that its other returns have not
+		taken back, or None when they posted nothing there."""
+		reference_field = self.get_receipt_reference_field()
+		receipt_row = row.get(reference_field)
+		if not receipt_row:
+			return None
+
+		receipt_item = frappe.qb.DocType(row.doctype)
+		receipt_and_other_returns = (
+			frappe.qb.from_(receipt_item)
+			.select(receipt_item.name)
+			.where(
+				(receipt_item.name == receipt_row)
+				| ((receipt_item[reference_field] == receipt_row) & (receipt_item.parent != self.name))
+			)
+		)
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		qty_left = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.actual_qty))
+			.where(
+				(sle.warehouse == warehouse)
+				& (sle.is_cancelled == 0)
+				& sle.voucher_detail_no.isin(receipt_and_other_returns)
+			)
+			.run()[0][0]
+		)
+		return None if qty_left is None else flt(qty_left, row.precision("stock_qty"))
+
+	def get_rejected_uom_qty_left_to_return(self, row) -> float:
+		"""Rejected qty of the returned receipt row that its other returns have not taken back, in the UOM
+		of the return row."""
+		reference_field = self.get_receipt_reference_field()
+		receipt_row = row.get(reference_field)
+		fields = ["qty", "rejected_qty", "conversion_factor"]
+		if row.doctype == "Purchase Receipt Item":
+			fields.append("return_qty_from_rejected_warehouse")
+
+		rows = frappe.get_all(
+			row.doctype,
+			filters={"docstatus": 1, "parent": ("!=", self.name)},
+			or_filters={"name": receipt_row, reference_field: receipt_row},
+			fields=fields,
+		)
+		stock_qty = sum(
+			(flt(d.rejected_qty) + (flt(d.qty) if d.get("return_qty_from_rejected_warehouse") else 0))
+			* flt(d.conversion_factor)
+			for d in rows
+		)
+		return flt(stock_qty / flt(row.conversion_factor or 1), row.precision("rejected_qty"))
+
+	def set_posted_qty_for_cancel(self, sl_entries) -> None:
+		"""An internal receipt reverses the stock qty its entries posted, which a later change to how it
+		splits the stock qty must not alter."""
+		posted_qty = {
+			(sle.voucher_detail_no, sle.warehouse, sle.actual_qty > 0): sle.actual_qty
+			for sle in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_type": self.doctype, "voucher_no": self.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "warehouse", "actual_qty"],
+			)
+		}
+		for sle in sl_entries:
+			key = (sle.voucher_detail_no, sle.warehouse, flt(sle.actual_qty) > 0)
+			if key in posted_qty:
+				sle.actual_qty = posted_qty[key]
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
@@ -1015,7 +1133,7 @@ class BuyingController(SubcontractingController):
 
 			source_reversal_sle = None
 
-			pr_qty = get_stock_qty(d, d.qty)
+			pr_qty = self.get_accepted_stock_qty(d)
 			source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
 			if source_qty and (d.warehouse or not pr_qty):
@@ -1124,7 +1242,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": get_stock_qty(d, d.rejected_qty),
+							"actual_qty": self.get_rejected_stock_qty(d),
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
@@ -1137,6 +1255,9 @@ class BuyingController(SubcontractingController):
 
 		if self.get("is_old_subcontracting_flow"):
 			self.make_sl_entries_for_supplier_warehouse(sl_entries)
+
+		if self.docstatus == 2 and self.is_internal_receipt():
+			self.set_posted_qty_for_cancel(sl_entries)
 
 		self.make_sl_entries(
 			sl_entries,

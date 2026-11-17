@@ -2230,6 +2230,190 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		self.assertEqual(received_qty, -delivered_qty)
 
+	def test_internal_transfer_pr_rejected_qty_adds_up_to_the_delivered_stock_qty(self):
+		"""Accepted and rejected stock qty of an internal transfer add up to what left for transit,
+		even when each part rounds up on its own in the stock UOM, also for a batch item."""
+		for tag, properties in (
+			("Plain", {}),
+			("Batch", {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-RRIT-.####"}),
+		):
+			with self.subTest(tag):
+				item_doc = make_item(
+					f"Test Rounded Rejected Internal Transfer {tag} Item",
+					{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 1.00555}], **properties},
+				)
+				pr, warehouses, dn = self.make_rounded_internal_receipt(item_doc)
+
+				stock_qty = {
+					d.warehouse: d.actual_qty
+					for d in frappe.get_all(
+						"Stock Ledger Entry",
+						filters={"voucher_no": pr.name, "is_cancelled": 0},
+						fields=["warehouse", "actual_qty"],
+					)
+				}
+				delivered_qty = frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_no": dn.name, "warehouse": warehouses.transit},
+					"actual_qty",
+				)
+				precision = pr.items[0].precision("stock_qty")
+
+				self.assertEqual(stock_qty[warehouses.transit], -delivered_qty)
+				self.assertEqual(
+					flt(stock_qty[warehouses.accepted] + stock_qty[warehouses.rejected], precision),
+					delivered_qty,
+				)
+
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_transfer_pr_rejected_return_takes_back_the_rejected_stock_qty(self):
+		"""A return of the rejected qty takes back the rejected stock qty its receipt put in, whether that
+		rounded down or up."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		def make_rejected_only_return(pr):
+			rejected_return = make_return_doc("Purchase Receipt", pr.name)
+			rejected_return.items[0].update({"qty": 0, "received_qty": -3})
+			return rejected_return
+
+		for conversion_factor in (0.3356, 0.3344):
+			item_doc = make_item(
+				f"Test Rejected Return Internal Transfer Item {conversion_factor}",
+				{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
+			)
+			for make_rejected_return in (
+				make_rejected_only_return,
+				lambda pr: make_purchase_return_against_rejected_warehouse(pr.name),
+			):
+				with self.subTest(conversion_factor=conversion_factor, make_return=make_rejected_return):
+					pr, warehouses, _dn = self.make_rounded_internal_receipt(
+						item_doc, conversion_factor, qty=3, rejected_qty=3
+					)
+					make_rejected_return(pr).submit()
+
+					rejected_bin = {"item_code": item_doc.name, "warehouse": warehouses.rejected}
+					self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 0)
+
+	def test_internal_transfer_pr_rejected_return_in_another_uom_takes_back_only_its_qty(self):
+		"""A partial return of the rejected qty in another UOM takes back only its own stock qty."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item_doc = make_item(
+			"Test Rejected Return In Another UOM Internal Transfer Item",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 10}]},
+		)
+		pr, warehouses, _dn = self.make_rounded_internal_receipt(item_doc, 10)
+
+		rejected_return = make_return_doc("Purchase Receipt", pr.name)
+		rejected_return.items[0].update(
+			{"uom": "Kg", "conversion_factor": 1, "qty": 0, "rejected_qty": -2, "received_qty": -2}
+		)
+		rejected_return.submit()
+
+		rejected_bin = {"item_code": item_doc.name, "warehouse": warehouses.rejected}
+		self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 8)
+
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_transfer_pr_rejected_return_after_all_its_stock_qty_is_taken_back(self):
+		"""Once returns take back all the rejected stock qty of an internal receipt, a return of the
+		rejected qty still left takes back nothing more."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		item_doc = make_item(
+			"Test Rejected Return After Stock Taken Back Internal Transfer Item",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		)
+		pr, warehouses, _dn = self.make_rounded_internal_receipt(item_doc, 0.3356, qty=3, rejected_qty=3)
+
+		for rejected_qty in (2.98, 0.02):
+			rejected_return = make_return_doc("Purchase Receipt", pr.name)
+			rejected_return.items[0].update(
+				{"qty": 0, "rejected_qty": -rejected_qty, "received_qty": -rejected_qty}
+			)
+			rejected_return.submit()
+
+		rejected_bin = {"item_code": item_doc.name, "warehouse": warehouses.rejected}
+		self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 0)
+
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_transfer_pr_cancel_reverses_its_posted_stock_qty(self):
+		"""Cancelling an internal receipt posted with an older split reverses what it posted."""
+		from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
+
+		item_doc = make_item(
+			"Test Cancel Of Old Split Internal Transfer Item",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 1.00444}]},
+		)
+		with patch.object(
+			BuyingController,
+			"get_rejected_stock_qty",
+			lambda self, row: get_stock_qty(row, row.rejected_qty),
+		):
+			pr, warehouses, _dn = self.make_rounded_internal_receipt(item_doc, 1.00444)
+
+		sle_filters = {"voucher_no": pr.name, "warehouse": warehouses.rejected}
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), 1.0)
+
+		pr.cancel()
+		net_qty = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr.name},
+			fields=["warehouse", "sum(actual_qty) as qty"],
+			group_by="warehouse",
+		)
+		for d in net_qty:
+			self.assertEqual(flt(d.qty, 2), 0, d.warehouse)
+
+	def make_rounded_internal_receipt(self, item_doc, conversion_factor=1.00555, qty=1, rejected_qty=1):
+		"""Submitted internal receipt of a delivery in Box, split into accepted and rejected qty whose stock
+		qty rounds unevenly."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		warehouses = frappe._dict(
+			source=create_warehouse("_Test Rounded Transfer From", company=company),
+			transit=create_warehouse("_Test Rounded Transfer Transit", company=company),
+			accepted=create_warehouse("_Test Rounded Transfer To", company=company),
+			rejected=create_warehouse("_Test Rounded Transfer Rejected", company=company),
+		)
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=warehouses.source, qty=20, rate=100
+		)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=qty + rejected_qty,
+			rate=100,
+			warehouse=warehouses.source,
+			target_warehouse=warehouses.transit,
+			do_not_submit=True,
+		)
+		dn.items[0].update({"uom": "Box", "conversion_factor": conversion_factor})
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": warehouses.accepted,
+				"qty": qty,
+				"rejected_qty": rejected_qty,
+				"received_qty": qty + rejected_qty,
+				"rejected_warehouse": warehouses.rejected,
+			}
+		)
+		pr.submit()
+		return pr, warehouses, dn
+
 	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_internal_transfer_pr_with_every_unit_rejected(self):
 		"""A receipt that rejects the whole transfer still empties the in-transit warehouse."""
