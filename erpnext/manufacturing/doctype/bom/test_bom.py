@@ -2166,6 +2166,23 @@ class TestBOM(ERPNextTestSuite):
 		)[rm_item]
 		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
 
+	def test_base_rate_is_rounded_for_foreign_currency_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_box_item("_Test BOM Box Rate RM")
+		bom = make_bom(
+			item=make_item(properties={"is_stock_item": 1}).name, raw_materials=[rm_item], do_not_save=True
+		)
+		bom.items[0].update({"uom": "Box", "conversion_factor": 12})
+		bom.conversion_rate = 80.07
+		bom.insert()
+		self.assertEqual(bom.items[0].base_rate, 120)
+
+		detail = bom.get_bom_material_detail(
+			{"item_code": rm_item, "uom": "Box", "conversion_factor": 12, "fetch_rate": True}
+		)
+		self.assertEqual(detail["base_rate"], 120)
+
 
 def make_stage_items():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
