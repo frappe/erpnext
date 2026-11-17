@@ -89,8 +89,8 @@ class StockEntrySABB(BaseStockEntry):
 
 		return None
 
-	def get_serial_nos_and_batches_from_sres(self, scio_detail, qty, only_pending=True):
-		"""Serial nos and batch qty reserved for scio_detail, taken in order up to qty."""
+	def get_serial_nos_and_batches_from_sres(self, scio_detail, qty, taken, only_pending=True):
+		"""Serial nos and batch qty reserved for scio_detail, up to qty, skipping what earlier rows `taken`."""
 		serial_nos, batch_nos = [], frappe._dict()
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 
@@ -100,7 +100,13 @@ class StockEntrySABB(BaseStockEntry):
 			frappe.qb.from_(table)
 			.join(child_table)
 			.on(table.name == child_table.parent)
-			.select(child_table.serial_no, child_table.batch_no, child_table.qty, child_table.delivered_qty)
+			.select(
+				child_table.name,
+				child_table.serial_no,
+				child_table.batch_no,
+				child_table.qty,
+				child_table.delivered_qty,
+			)
 			.where((table.docstatus == 1) & (table.voucher_detail_no == scio_detail))
 		)
 
@@ -112,11 +118,13 @@ class StockEntrySABB(BaseStockEntry):
 		for d in query.run(as_dict=True):
 			if flt(qty, precision) <= 0:
 				break
-			if d.serial_no in serial_nos:
+			available = (d.qty - d.delivered_qty if only_pending else d.delivered_qty) - taken[d.name]
+			if d.serial_no in serial_nos or flt(available, precision) <= 0:
 				continue
 
-			entry_qty = min(d.qty - d.delivered_qty if only_pending else d.delivered_qty, qty)
+			entry_qty = min(available, qty)
 			qty -= entry_qty
+			taken[d.name] += entry_qty
 			if d.serial_no:
 				serial_nos.append(d.serial_no)
 			if d.batch_no:
@@ -126,6 +134,7 @@ class StockEntrySABB(BaseStockEntry):
 
 	def get_serial_batch_fields_for_subcontracting_inward(self):
 		serial_nos, batch_nos = frappe._dict(), frappe._dict()
+		taken = defaultdict(float)
 		for row in self.doc.items:
 			if self.doc.purpose in [
 				"Return Raw Material to Customer",
@@ -136,6 +145,7 @@ class StockEntrySABB(BaseStockEntry):
 					serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
 						row.scio_detail,
 						row.transfer_qty,
+						taken,
 						only_pending=self.doc.purpose != "Subcontracting Return",
 					)
 

@@ -1,6 +1,8 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from collections import defaultdict
+
 import frappe
 
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_stock_entry_from_wo
@@ -595,7 +597,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			entry.db_insert()
 
 		_, picked = StockEntrySABB(frappe.new_doc("Stock Entry")).get_serial_nos_and_batches_from_sres(
-			"_FG Return Row", 3, only_pending=False
+			"_FG Return Row", 3, defaultdict(float), only_pending=False
 		)
 		self.assertEqual(picked, {first: 1, second: 2})
 
