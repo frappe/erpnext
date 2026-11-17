@@ -899,9 +899,8 @@ class StockReconciliation(StockController):
 					if buying_price and buying_price.price_list_rate:
 						# the price is per its own UOM, the valuation rate per stock UOM
 						conversion_factor = get_conversion_factor(row.item_code, buying_price.uom)
-						row.valuation_rate = flt(
-							buying_price.price_list_rate / conversion_factor["conversion_factor"],
-							row.precision("valuation_rate"),
+						row.valuation_rate = (
+							buying_price.price_list_rate / conversion_factor["conversion_factor"]
 						)
 
 					else:
