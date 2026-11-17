@@ -7,7 +7,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
-from frappe.query_builder import Criterion, Tuple
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
@@ -101,7 +101,6 @@ def stock_entry_row_requires_inspection(purpose, row):
 	return False
 
 
-BIN_LOCK_RETRIES = 4
 STOCK_ITEM_TABLES = ("items", "packed_items", "supplied_items", "stock_items")
 STOCK_WAREHOUSE_FIELDS = (
 	"warehouse",
@@ -2209,8 +2208,10 @@ class StockController(AccountsController):
 		return message
 
 	def run_before_save_methods(self):
+		from erpnext.stock.utils import lock_bins
+
 		if self._action in ("submit", "cancel") and self.has_stock_update:
-			self.lock_bins()
+			lock_bins(self.get_item_warehouses())
 
 		super().run_before_save_methods()
 
@@ -2220,28 +2221,6 @@ class StockController(AccountsController):
 			return False
 
 		return not self.meta.has_field("update_stock") or bool(self.update_stock)
-
-	def lock_bins(self):
-		item_warehouses = self.get_item_warehouses()
-		if not item_warehouses:
-			return
-
-		bin = frappe.qb.DocType("Bin")
-		query = (
-			frappe.qb.from_(bin)
-			.select(bin.name)
-			.where(Tuple(bin.item_code, bin.warehouse).isin(sorted(item_warehouses)))
-			.orderby(bin.name)
-			.for_update()
-		)
-
-		for _attempt in range(BIN_LOCK_RETRIES):
-			try:
-				return query.run()
-			except frappe.QueryTimeoutError:
-				continue
-
-		return query.run()
 
 	def get_item_warehouses(self):
 		item_warehouses = set()

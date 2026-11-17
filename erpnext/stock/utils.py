@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder import Tuple
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
@@ -311,6 +312,24 @@ def get_or_make_bin(item_code: str, warehouse: str) -> str:
 		bin_obj = _create_bin(item_code, warehouse)
 		bin_record = bin_obj.name
 	return bin_record
+
+
+def lock_bins(item_warehouses):
+	"""Lock the Bins of the (item_code, warehouse) pairs by name, in sorted order."""
+	if not item_warehouses:
+		return
+
+	bin = frappe.qb.DocType("Bin")
+	bin_names = (
+		frappe.qb.from_(bin)
+		.select(bin.name)
+		.where(Tuple(bin.item_code, bin.warehouse).isin(sorted(item_warehouses)))
+		.run(pluck=True)
+	)
+	if bin_names:
+		frappe.qb.from_(bin).select(bin.name).where(bin.name.isin(bin_names)).orderby(
+			bin.name
+		).for_update().run()
 
 
 def _create_bin(item_code, warehouse):
