@@ -2169,6 +2169,43 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.items[0].rate, 10)
 		self.assertEqual(bom.items[1].rate, 0)
 
+	def test_price_list_change_reprices_non_stock_row_valid_today(self):
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": frappe.generate_hash(length=10),
+				"currency": "INR",
+				"buying": 1,
+			}
+		).insert()
+		non_stock_item = make_item(properties={"is_stock_item": 0}).name
+		for rate, valid_from in ((10, -30), (12, 30)):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": non_stock_item,
+					"price_list": price_list.name,
+					"price_list_rate": rate,
+					"valid_from": add_days(today(), valid_from),
+				}
+			).insert()
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": make_item(properties={"is_stock_item": 1}).name,
+				"company": "_Test Company",
+				"currency": "INR",
+				"rm_cost_as_per": "Valuation Rate",
+				"items": [{"item_code": non_stock_item, "qty": 1, "rate": 5}],
+			}
+		).insert()
+		bom.update({"rm_cost_as_per": "Price List", "buying_price_list": price_list.name})
+		bom.apply_price_list()
+
+		self.assertEqual(bom.items[0].rate, 10)
+		self.assertEqual(bom.raw_material_cost, 10)
+
 	def test_get_items_rate_in_stock_uom(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
