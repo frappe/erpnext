@@ -6,6 +6,7 @@ import frappe
 from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.permission_test_utils import make_fenced_user
@@ -130,8 +131,6 @@ class TestSellingControllerConversions(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_internal_transfer_skips_the_last_purchase_rate_check(self):
 		"""An internal transfer moves stock at its valuation rate, below the last purchase rate."""
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item_code=item_code, target="Stores - TCP1", qty=10, basic_rate=89.48)
 		frappe.db.set_value("Item", item_code, "last_purchase_rate", 120)
