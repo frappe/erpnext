@@ -10,6 +10,7 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_warehouses_condition
+from erpnext.stock.reorder_item import get_reorder_levels_for_variants
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -306,7 +307,15 @@ def get_item_map(item_code, include_uom):
 
 	query = (
 		frappe.qb.from_(item)
-		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.select(
+			item.name,
+			item.item_name,
+			item.description,
+			item.item_group,
+			item.brand,
+			item.stock_uom,
+			item.variant_of,
+		)
 		.where(
 			(item.is_stock_item == 1)
 			& (item.disabled == 0)
@@ -329,7 +338,9 @@ def get_item_map(item_code, include_uom):
 	query = frappe.qb.from_(ir).select("*")
 
 	if item_code:
-		query = query.where(ir.parent == item_code)
+		# a variant without re-order levels uses its template's
+		templates = [d.variant_of for d in items if d.variant_of]
+		query = query.where(ir.parent.isin([item_code, *templates]))
 
 	reorder_levels = frappe._dict()
 	for d in query.run(as_dict=True):
@@ -337,6 +348,8 @@ def get_item_map(item_code, include_uom):
 			reorder_levels[d.parent] = []
 
 		reorder_levels[d.parent].append(d)
+
+	reorder_levels = get_reorder_levels_for_variants(reorder_levels)
 
 	item_map = frappe._dict()
 	for item in items:
