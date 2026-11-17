@@ -335,13 +335,20 @@ def _set_so_item_pending_qty(items):
 
 
 def _set_packed_item_pending_qty(items):
+	"""Share out what is left to plan of each component of a Sales Order line across its packed rows."""
 	planned_qty = get_planned_bundle_component_qty([item.name for item in items])
+	totals = {}
+	for item in items:
+		key = (item.name, item.item_code)
+		unplanned, pending = totals.get(key, (-planned_qty.get(key, 0), 0))
+		totals[key] = (unplanned + flt(item.qty), pending + flt(item.pending_qty))
+	remaining = {key: min(unplanned, pending) for key, (unplanned, pending) in totals.items()}
+
 	precision = frappe.get_precision("Production Plan Item", "planned_qty")
 	for item in items:
 		key = (item.name, item.item_code)
-		allocated = min(planned_qty.get(key, 0), flt(item.qty))
-		planned_qty[key] = planned_qty.get(key, 0) - allocated
-		item.pending_qty = flt(max(min(flt(item.pending_qty), flt(item.qty) - allocated), 0), precision)
+		item.pending_qty = flt(max(min(flt(item.pending_qty), remaining[key]), 0), precision)
+		remaining[key] -= item.pending_qty
 
 
 def _so_packed_columns(so_item, pi):
