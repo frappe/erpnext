@@ -415,7 +415,8 @@ class TestJobCard(ERPNextTestSuite):
 
 		row = get_job_card_timer(job_card.name)
 		self.assertEqual((row["timer_action"], row["is_running"]), ("start", False))
-		self.assertAlmostEqual(row["elapsed_seconds"], 3 * 3600, delta=60)
+		# the open log covers the closed one, so the hours count once
+		self.assertAlmostEqual(row["elapsed_seconds"], 2 * 3600, delta=60)
 		self.assertEqual(row["open_log_count"], 1)
 
 	def test_repeated_start_is_refused(self):
