@@ -375,6 +375,8 @@ def update_stock(ctx, out, doc=None, has_locked_rate=False):
 					rate = _get_batch_based_item_price(
 						{
 							"price_list": doc.get("selling_price_list") if doc else ctx.price_list,
+							"customer": ctx.customer,
+							"transaction_date": ctx.transaction_date,
 							"uom": out.uom,
 							"batch_no": batch_no,
 						},
@@ -1582,8 +1584,6 @@ def get_batch_based_item_price(ctx: ItemDetailsCtx, item_code: str):
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def _get_batch_based_item_price(ctx: ItemDetailsCtx, item_code: str):
 	item_price = get_item_price(ctx, item_code, force_batch_no=True)
-	if not item_price:
-		item_price = get_item_price(ctx, item_code, ignore_party=True, force_batch_no=True)
 
 	is_free_item = ctx.get("items", [{}])[0].get("is_free_item")
 
