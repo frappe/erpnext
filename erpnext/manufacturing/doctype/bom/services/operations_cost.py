@@ -99,18 +99,33 @@ def _add_operation_workstation_costs(stock_entry, work_order, row, op_expense_ac
 
 	consumed = get_consumed_operating_cost(work_order.name, stock_entry.bom_no, row.name) or []
 	cost_added = False
-	for wc in workstation_cost:
-		if _append_workstation_cost(stock_entry, row, wc, consumed, op_expense_account, total_component_rate):
+	component_costs = _split_actual_operating_cost(row, workstation_cost, total_component_rate)
+	for wc, cost in zip(workstation_cost, component_costs, strict=True):
+		if _append_workstation_cost(stock_entry, row, wc, cost, consumed, op_expense_account):
 			cost_added = True
 	return cost_added
 
 
-def _append_workstation_cost(stock_entry, row, wc, consumed, op_expense_account, total_component_rate):
+def _split_actual_operating_cost(row, workstation_cost, total_component_rate):
+	"""Actual cost per component by rate, rounded on the running total so the shares add up to it."""
+	precision = row.precision("actual_operating_cost")
+	costs, allocated, cumulative_rate = [], 0.0, 0.0
+	for wc in workstation_cost:
+		cumulative_rate += flt(wc.operating_cost)
+		cumulative_cost = flt(
+			flt(row.actual_operating_cost) * cumulative_rate / total_component_rate, precision
+		)
+		costs.append(cumulative_cost - allocated)
+		allocated = cumulative_cost
+	return costs
+
+
+def _append_workstation_cost(stock_entry, row, wc, cost, consumed, op_expense_account):
 	expense_account = get_component_account(wc.operating_component, stock_entry.company) or op_expense_account
 	consumed_op_cost = next(
 		(c for c in consumed if c.get("operating_component") == wc.operating_component), {}
 	)
-	actual = _actual_operating_cost(wc, row, consumed_op_cost, total_component_rate)
+	actual = flt(cost - flt(consumed_op_cost.get("consumed_cost")), row.precision("actual_operating_cost"))
 	if not actual:
 		return False
 
@@ -120,11 +135,6 @@ def _append_workstation_cost(stock_entry, row, wc, consumed, op_expense_account,
 	row_data = _workstation_cost_row(expense_account, row, wc, actual, operating_cost, qty)
 	stock_entry.append("additional_costs", row_data)
 	return True
-
-
-def _actual_operating_cost(wc, row, consumed_op_cost, total_component_rate):
-	cost = flt(row.actual_operating_cost) * flt(wc.operating_cost) / total_component_rate
-	return flt(cost - flt(consumed_op_cost.get("consumed_cost")), row.precision("actual_operating_cost"))
 
 
 def _workstation_cost_row(expense_account, row, wc, actual, operating_cost, qty):
