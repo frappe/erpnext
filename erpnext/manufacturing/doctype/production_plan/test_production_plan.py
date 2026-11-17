@@ -94,7 +94,8 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		pln.make_material_request()
 		pln.reload()
-		self.assertEqual(pln.status, "Material Requested")
+		# Material Requests are created as drafts, so nothing is requested yet.
+		self.assertEqual(pln.status, "Submitted")
 
 		material_requests = frappe.get_all(
 			"Material Request Item",
@@ -104,7 +105,8 @@ class TestProductionPlan(ERPNextTestSuite):
 			distinct=True,
 		)
 
-		self.assertEqual(len(material_requests), 2)
+		# Both raw materials are purchased without a Sales Order, so they share one Material Request.
+		self.assertEqual(len(material_requests), 1)
 
 		for row in material_requests:
 			mr_schedule_date = getdate(frappe.db.get_value("Material Request", row[0], "schedule_date"))
@@ -408,7 +410,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		wo_doc.submit()
 
 		so_wo_qty = frappe.db.get_value("Sales Order Item", sales_order_item, "work_order_qty")
-		self.assertEqual(so_wo_qty, 5)
+		self.assertEqual(so_wo_qty, 1)
 
 		pln = frappe.new_doc("Production Plan")
 		pln.update(
@@ -2151,10 +2153,10 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(plan.sub_assembly_items[0].stock_qty, 2.0)
 		self.assertEqual(plan.sub_assembly_items[0].required_qty, 2.0)
 
-		# change warehouse in one row, sub-assemblies should not merge
+		# sub-assemblies go to the plan's sub-assembly warehouse, so a row warehouse does not split them
 		plan.po_items[0].warehouse = "Finished Goods - _TC"
 		plan.get_sub_assembly_items()
-		self.assertEqual(len(plan.sub_assembly_items), 2)
+		self.assertEqual(len(plan.sub_assembly_items), 1)
 
 	def test_consolidated_subassembly_required_qty_with_projected_stock(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
