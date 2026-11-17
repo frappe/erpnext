@@ -602,11 +602,10 @@ class StockController(AccountsController):
 					if sre_doc.reservation_based_on == "Serial and Batch":
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
-								is_open = (
-									entry.qty > entry.delivered_qty
-									if self._action == "submit"
-									else entry.delivered_qty
-								)
+								is_open = entry.qty > entry.delivered_qty
+								if self._action == "cancel":
+									# the entry counts every usage of the reservation, so give back only this one's
+									is_open = entry.delivered_qty and working_qty < sre_doc.get(field)
 								if entry.serial_no in serial_nos and is_open:
 									entry.delivered_qty = 1 if self._action == "submit" else 0
 									entry.db_update()
@@ -615,12 +614,11 @@ class StockController(AccountsController):
 						else:
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in batch_qty:
-									delivered_qty = min(
-										(entry.qty - entry.delivered_qty)
-										if self._action == "submit"
-										else entry.delivered_qty,
-										batch_qty[entry.batch_no],
-									)
+									open_qty = entry.qty - entry.delivered_qty
+									if self._action == "cancel":
+										# the entry counts every usage of the reservation, so give back only this one's
+										open_qty = min(entry.delivered_qty, sre_doc.get(field) - working_qty)
+									delivered_qty = min(open_qty, batch_qty[entry.batch_no])
 									entry.delivered_qty = flt(
 										entry.delivered_qty
 										+ (
