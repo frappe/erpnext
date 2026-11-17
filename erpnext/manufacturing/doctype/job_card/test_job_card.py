@@ -443,7 +443,7 @@ class TestJobCard(ERPNextTestSuite):
 				for_quantity=2,
 				total_completed_qty=0,
 				has_time_logs=False,
-				logged_minutes=0,
+				time_logs=[],
 				open_log_starts=[],
 				last_log_open=False,
 				employees=[],
@@ -451,7 +451,10 @@ class TestJobCard(ERPNextTestSuite):
 			job_card.update(overrides)
 			return JobCardTimer(job_card)
 
-		closed_cycle = {"has_time_logs": True, "logged_minutes": 60}
+		closed_cycle = {
+			"has_time_logs": True,
+			"time_logs": [frappe._dict(from_time="2024-03-01 08:00:00", to_time="2024-03-01 09:00:00")],
+		}
 
 		self.assertIsNone(timer(has_pending_transfer=True).get_action())
 		self.assertEqual(timer(has_pending_transfer=True, skip_material_transfer=1).get_action(), "start")
