@@ -7,13 +7,18 @@ frappe.ui.form.on("Subcontracting Inward Order Item", {
 	qty(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		const service_item = frm.doc.service_items[row.idx - 1];
-		frappe.model.set_value(
-			service_item.doctype,
-			service_item.name,
-			"qty",
-			row.qty * row.subcontracting_conversion_factor
-		);
 		frappe.model.set_value(service_item.doctype, service_item.name, "fg_item_qty", row.qty);
+		frappe.db
+			.get_value("Sales Order Item", row.sales_order_item, "conversion_factor", null, "Sales Order")
+			.then(({ message }) => {
+				const qty = (row.qty * row.subcontracting_conversion_factor) / message.conversion_factor;
+				frappe.model.set_value(
+					service_item.doctype,
+					service_item.name,
+					"qty",
+					flt(qty, precision("qty", service_item))
+				);
+			});
 	},
 	before_items_remove(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
