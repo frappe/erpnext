@@ -4639,6 +4639,11 @@ class TestJobCard(ERPNextTestSuite):
 		second_card.append("time_logs", jc_review_log("2031-03-04 08:30:00", 30, 10))
 		self.assertRaises(OverlapError, second_card.save)
 
+		# a qty-only time log takes no workstation time
+		second_card.reload()
+		second_card.append("time_logs", {"completed_qty": 10})
+		second_card.save()
+
 		running_card.reload()
 		running_card.complete_job_card(
 			qty=10, for_quantity=10, pending_qty=0, process_loss_qty=0, end_time="2031-03-04 09:30:00"
