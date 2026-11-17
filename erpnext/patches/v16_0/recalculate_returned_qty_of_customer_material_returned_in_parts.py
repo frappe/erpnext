@@ -34,7 +34,11 @@ def get_returned_rows():
 			received_item.returned_qty,
 			Sum(entry_item.transfer_qty).as_("qty"),
 		)
-		.where((entry.docstatus == 1) & (entry.purpose == "Return Raw Material to Customer"))
+		.where(
+			(entry.docstatus == 1)
+			& (entry.purpose == "Return Raw Material to Customer")
+			& (entry.subcontracting_inward_order == received_item.parent)
+		)
 		.groupby(received_item.name, received_item.parent, received_item.returned_qty)
 		.run(as_dict=True)
 	)
