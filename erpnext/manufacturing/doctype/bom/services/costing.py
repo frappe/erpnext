@@ -159,10 +159,11 @@ class BOMCostingService:
 		self.doc.total_cost = (
 			self.doc.operating_cost + self.doc.raw_material_cost - self.doc.secondary_items_cost
 		)
-		self.doc.base_total_cost = (
+		self.doc.base_total_cost = flt(
 			self.doc.base_operating_cost
 			+ self.doc.base_raw_material_cost
-			- self.doc.base_secondary_items_cost
+			- self.doc.base_secondary_items_cost,
+			self.doc.precision("base_total_cost"),
 		)
 
 		if self.doc.total_cost != old_cost:
@@ -177,6 +178,10 @@ class BOMCostingService:
 				self._accumulate_operation_cost(d, update_hour_rate, save)
 		elif self.doc.get("fg_based_operating_cost"):
 			self._set_fg_based_operating_cost()
+
+		self.doc.base_operating_cost = flt(
+			self.doc.base_operating_cost, self.doc.precision("base_operating_cost")
+		)
 
 	def _accumulate_operation_cost(self, d, update_hour_rate, save=True):
 		if d.workstation or d.workstation_type:
@@ -246,7 +251,9 @@ class BOMCostingService:
 				d.db_update()
 
 		self.doc.raw_material_cost = total_rm_cost
-		self.doc.base_raw_material_cost = base_total_rm_cost
+		self.doc.base_raw_material_cost = flt(
+			base_total_rm_cost, self.doc.precision("base_raw_material_cost")
+		)
 
 	def _rm_rate_args(self, d):
 		return {
