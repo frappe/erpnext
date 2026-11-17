@@ -1250,7 +1250,7 @@ class JobCard(Document):
 			self.update_corrective_in_work_order(wo)
 
 		elif self.operation_id:
-			self.validate_produced_quantity(for_quantity, process_loss_qty, pending_qty, wo)
+			self.validate_produced_quantity(for_quantity, process_loss_qty, wo)
 			self.update_work_order_data(for_quantity, process_loss_qty, pending_qty, time_in_mins, wo)
 
 	def update_semi_finished_good_details(self):
@@ -1297,12 +1297,13 @@ class JobCard(Document):
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.save()
 
-	def validate_produced_quantity(self, for_quantity, process_loss_qty, pending_qty, wo):
+	def validate_produced_quantity(self, for_quantity, process_loss_qty, wo):
 		if self.docstatus < 2:
 			return
 
 		operation = next((row for row in wo.operations if row.name == self.operation_id), {})
-		operation_total = (for_quantity + process_loss_qty + pending_qty) * flt(wo.qty)
+		# pending qty is handed to another card, so it is not done by the remaining cards
+		operation_total = (for_quantity + process_loss_qty) * flt(wo.qty)
 		operation_total = flt(
 			operation_total / get_operation_qty(wo, operation), wo.precision("produced_qty")
 		)
