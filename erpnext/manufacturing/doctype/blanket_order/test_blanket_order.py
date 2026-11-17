@@ -345,6 +345,16 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(get_blanket_order_details(lookup).blanket_order, selling.name)
 		self.assertFalse(get_blanket_order_details({**lookup, "customer": None}))
 
+		link_filters = {
+			"company": "_Test Company",
+			"blanket_order_type": "Selling",
+			"item": item,
+			"party": selling.customer,
+			"quotation_to": "Customer",
+		}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, link_filters)
+		self.assertEqual([order[0] for order in orders], [selling.name])
+
 		def quotation_against(bo):
 			quotation = make_quotation(item_code=item, party_name=selling.customer, do_not_save=True)
 			quotation.items[0].against_blanket_order = 1
@@ -361,6 +371,9 @@ class TestBlanketOrder(ERPNextTestSuite):
 		frappe.db.set_value("Customer", other_customer.customer, "lead_name", lead.name)
 		lead_lookup = {**lookup, "quotation_to": "Lead", "customer": lead.name}
 		self.assertEqual(get_blanket_order_details(lead_lookup).blanket_order, other_customer.name)
+		lead_filters = {**link_filters, "party": lead.name, "quotation_to": "Lead"}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, lead_filters)
+		self.assertEqual([order[0] for order in orders], [other_customer.name])
 		lead_quotation = quotation_against(other_customer)
 		lead_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
 		lead_quotation.insert()
@@ -427,7 +440,12 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.InvalidStatusError, make_order, bo.name)
 		self.assertRaises(frappe.InvalidStatusError, po.save)
 
-		filters = {"company": bo.company, "blanket_order_type": "Purchasing", "item": bo.items[0].item_code}
+		filters = {
+			"company": bo.company,
+			"blanket_order_type": "Purchasing",
+			"item": bo.items[0].item_code,
+			"party": bo.supplier,
+		}
 		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
 		self.assertNotIn(bo.name, [order[0] for order in orders])
 
@@ -590,7 +608,12 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.InvalidStatusError, po.save)
 
 		for row, is_listed in ((bo.items[0], False), (bo.items[1], True)):
-			filters = {"company": bo.company, "blanket_order_type": "Purchasing", "item": row.item_code}
+			filters = {
+				"company": bo.company,
+				"blanket_order_type": "Purchasing",
+				"item": row.item_code,
+				"party": bo.supplier,
+			}
 			orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
 			self.assertEqual(bo.name in [order[0] for order in orders], is_listed)
 
@@ -669,6 +692,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 			"company": bo.company,
 			"blanket_order_type": "Purchasing",
 			"item": bo.items[0].item_code,
+			"party": bo.supplier,
 			"transaction_date": today(),
 		}
 		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
@@ -959,6 +983,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 			"currency": transaction_currency,
 			"blanket_order_type": "Selling",
 			"item": blanket_order.items[0].item_code,
+			"party": blanket_order.customer,
 		}
 		matching_orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
 		self.assertIn(blanket_order.name, [order[0] for order in matching_orders])
