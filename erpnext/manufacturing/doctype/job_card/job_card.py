@@ -234,12 +234,12 @@ class JobCard(Document):
 			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
 	def set_corrective_hour_rate(self):
-		"""Keep a manual rate until the workstation changes, starting from the source card's."""
+		"""Keep a manual rate until the workstation changes, starting from the amended or source card's."""
 		previous = self.get_doc_before_save()
 		previous_workstation = (
 			previous.workstation
 			if previous
-			else frappe.db.get_value("Job Card", self.for_job_card, "workstation")
+			else frappe.db.get_value("Job Card", self.amended_from or self.for_job_card, "workstation")
 		)
 		if self.workstation and self.workstation != previous_workstation:
 			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
