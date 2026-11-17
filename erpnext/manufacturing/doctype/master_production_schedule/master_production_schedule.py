@@ -56,11 +56,9 @@ class MasterProductionSchedule(Document):
 
 		item_wise_data = self.get_item_wise_mps_data(actual_demand_data)
 
-		if not item_wise_data:
-			return []
-
-		self.update_item_details(item_wise_data)
-		self.add_mps_data(item_wise_data)
+		if item_wise_data:
+			self.update_item_details(item_wise_data)
+			self.add_mps_data(item_wise_data)
 
 		if not self.is_new():
 			self.save()
