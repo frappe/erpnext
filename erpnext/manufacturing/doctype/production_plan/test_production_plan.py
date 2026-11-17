@@ -2626,6 +2626,41 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual([row.item_code for row in plan.po_items], ["Subassembly Item 1"])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_work_order_output_is_not_counted_twice(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		warehouse = "_Test Warehouse - _TC"
+		fg_item = make_item("_Test FG For Reserved WO Output", {"is_stock_item": 1}).name
+		raw_material = make_item("_Test RM For Reserved WO Output", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[raw_material])
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=6, basic_rate=100)
+		sales_order = make_sales_order(item_code=fg_item, qty=10, warehouse=warehouse)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=6,
+			sales_order=sales_order.name,
+			source_warehouse=warehouse,
+			wip_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			skip_transfer=1,
+			reserve_stock=1,
+			do_not_save=1,
+		)
+		work_order.sales_order_item = sales_order.items[0].name
+		work_order.submit()
+		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 6)).submit()
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "stock_reserved_qty"), 6
+		)
+
+		plan = create_production_plan(
+			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
+		)
+		self.assertEqual([row.planned_qty for row in plan.po_items], [4])
+
 	def test_production_plan_cannot_exceed_sales_order_qty(self):
 		so = make_sales_order(
 			item_list=[
