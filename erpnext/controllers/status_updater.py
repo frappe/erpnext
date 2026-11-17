@@ -728,8 +728,10 @@ class StatusUpdater(Document):
 					round_total = round_total(d)
 
 				if round_total:
-					args["source_dt_value"] = flt(
-						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
+					args["source_dt_value"] = round_total_as_target(
+						args["source_dt_value"],
+						frappe.db.get_value(args["target_dt"], args["detail_id"], args["target_ref_field"]),
+						frappe.get_precision(args["target_dt"], args["target_field"]),
 					)
 
 				target_value = args["source_dt_value"]
@@ -922,6 +924,15 @@ class StatusUpdater(Document):
 					ref_doc.db_set("billing_status", "Partly Billed")
 
 			ref_doc.set_status(update=True)
+
+
+def round_total_as_target(total, target_value, precision) -> float:
+	"""Round a total of parts to precision only if the target value is rounded too, so the parts add up to it.
+	A target saved unrounded, before its rows rounded their stock qty, keeps the unrounded total."""
+	if flt(target_value, precision) != flt(target_value):
+		return flt(total)
+
+	return flt(total, precision)
 
 
 def get_allowance_for(
