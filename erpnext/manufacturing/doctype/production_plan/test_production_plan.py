@@ -4913,29 +4913,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
 	)
 	def test_closing_a_plan_releases_its_untouched_reservations(self):
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-			get_items_for_material_requests,
-		)
-
-		warehouse = "_Test Warehouse - _TC"
-		raw_material = make_item(properties={"is_stock_item": 1}).name
-		finished_good = make_item(properties={"is_stock_item": 1}).name
-		make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
-		make_stock_entry(item_code=raw_material, target=warehouse, qty=5, basic_rate=100)
-
-		plan = create_production_plan(
-			item_code=finished_good,
-			planned_qty=5,
-			ignore_existing_ordered_qty=1,
-			do_not_submit=1,
-			warehouse=warehouse,
-			for_warehouse=warehouse,
-			reserve_stock=1,
-		)
-		plan.set("mr_items", [])
-		for row in get_items_for_material_requests(plan.as_dict()):
-			plan.append("mr_items", row)
-		plan.submit()
+		plan = self.make_plan_with_reserved_raw_material()
 		self.assertTrue(
 			frappe.db.exists("Stock Reservation Entry", {"voucher_no": plan.name, "docstatus": 1})
 		)
@@ -4959,6 +4937,51 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertFalse(
 			frappe.db.exists("Stock Reservation Entry", {"voucher_no": plan.name, "docstatus": 1})
 		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserve_and_unreserve_stock_accept_dict_doc(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			cancel_stock_reservation_entries,
+			make_stock_reservation_entries,
+		)
+
+		plan = self.make_plan_with_reserved_raw_material()
+		filters = {"voucher_no": plan.name, "docstatus": 1}
+		sre_list = frappe.get_all("Stock Reservation Entry", filters=filters, pluck="name")
+		self.assertTrue(sre_list)
+
+		# The dialogs send the form's doc as a dict.
+		cancel_stock_reservation_entries(doc=plan.as_dict(), sre_list=sre_list)
+		self.assertFalse(frappe.db.exists("Stock Reservation Entry", filters))
+
+		make_stock_reservation_entries(doc=plan.as_dict(), table_name="mr_items")
+		self.assertTrue(frappe.db.exists("Stock Reservation Entry", filters))
+
+	def make_plan_with_reserved_raw_material(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_items_for_material_requests,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=5, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=finished_good,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for row in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", row)
+		plan.submit()
+		return plan
 
 	def test_only_submitted_plan_can_be_closed_or_reopened(self):
 		finished_good = make_item(properties={"is_stock_item": 1}).name
