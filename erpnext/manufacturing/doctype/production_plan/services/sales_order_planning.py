@@ -305,7 +305,6 @@ def _so_item_columns(so_item):
 		(so_item.stock_qty - _reserved_qty_from_stock(so_item)).as_("qty"),
 		_reserved_work_order_output_qty(so_item).as_("reserved_work_order_output_qty"),
 		so_item.work_order_qty,
-		so_item.stock_qty,
 		so_item.production_plan_qty,
 		so_item.delivered_qty,
 		so_item.conversion_factor,
