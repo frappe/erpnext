@@ -2278,7 +2278,8 @@ class WorkOrder(Document):
 		}
 		names = frappe.get_all(
 			"Stock Reservation Entry",
-			filters={**filters, "status": ("not in", ["Closed", "Cancelled", "Completed"])},
+			# a fully transferred reservation is Closed, and must reopen when its transfer is cancelled
+			filters={**filters, "docstatus": 1},
 			pluck="name",
 		)
 		if self.status == "Closed":
