@@ -1,5 +1,5 @@
 from collections import defaultdict
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import frappe
 from frappe.utils import get_url_to_form
@@ -902,11 +902,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				self.assertEqual(row.serial_no, "Subcontracting-002\nSubcontracting-001")
 				self.assertEqual(row.batch_no, batch.name)
 				lookup.assert_called_once_with(
-					"Subcontracting-Order-Row", 2, only_pending=purpose != "Subcontracting Return"
+					"Subcontracting-Order-Row", 2, only_pending=purpose != "Subcontracting Return", taken=ANY
 				)
-				row.serial_no = "Manual-Selection"
+				row.serial_no = "Subcontracting-001"
 				service.get_serial_batch_fields_for_subcontracting_inward()
-				self.assertEqual(row.serial_no, "Manual-Selection")
+				self.assertEqual(row.serial_no, "Subcontracting-001")
 
 	def test_subcontracting_inward_reserved_batches_come_in_number_order(self):
 		first_by_id = self.make_number("Batch", "Reserved-B")
