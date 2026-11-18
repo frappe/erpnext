@@ -743,7 +743,7 @@ class SubcontractingReceipt(SubcontractingController):
 			+ flt(lcv_cost_per_qty)
 			+ flt(fg_row.service_cost_per_qty)
 		) * flt(fg_row.received_qty) - flt(own_cost)
-		return (fg_item_cost * (cost_allocation_per / 100)) / qty
+		return (fg_item_cost * (cost_allocation_per / 100)) / qty if qty else 0.0
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
