@@ -6154,6 +6154,27 @@ class TestProductionPlan(ERPNextTestSuite):
 		frappe.set_user(planner)
 		self.assertEqual([row[0] for row in sales_order_query(filters={"item_code": item})], [sales_order])
 
+	def test_sales_order_query_skips_closed_orders_and_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		closed_order = make_sales_order(item_code=item, qty=3, rate=100)
+		closed_order.update_status("Closed")
+		order_with_closed_row = make_sales_order(
+			item_list=[
+				{"item_code": item, "warehouse": "_Test Warehouse - _TC", "qty": 3, "rate": 100},
+				{"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC", "qty": 3, "rate": 100},
+			]
+		)
+		update_closed_status(
+			"Sales Order", order_with_closed_row.name, [order_with_closed_row.items[0].name], 1
+		)
+		open_order = make_sales_order(item_code=item, qty=3, rate=100).name
+
+		rows = sales_order_query(filters={"company": "_Test Company", "item_code": item})
+		self.assertEqual([row[0] for row in rows], [open_order])
+
 	def test_sales_order_query_follows_item_user_permission_on_order_rows(self):
 		from erpnext.manufacturing.doctype.production_plan.mapper import get_so_details, sales_order_query
 
