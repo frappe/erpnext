@@ -627,6 +627,11 @@ class SubcontractingInwardController:
 			fg_item_name = frappe.get_cached_value(
 				"Work Order", self.work_order, "subcontracting_inward_order_item"
 			)
+			secondary_qty = defaultdict(float)
+			for item in self.items:
+				if item.secondary_item_type or item.valuation_type:
+					secondary_qty[(item.item_code, item.t_warehouse)] += item.transfer_qty
+
 			produced_qty, delivered_qty = frappe.get_value(
 				"Subcontracting Inward Order Item", fg_item_name, ["produced_qty", "delivered_qty"]
 			)
@@ -650,10 +655,10 @@ class SubcontractingInwardController:
 						["produced_qty", "delivered_qty"],
 						as_dict=True,
 					)
-					if (
-						scio_secondary_item
-						and scio_secondary_item.delivered_qty
-						> scio_secondary_item.produced_qty - item.transfer_qty
+					precision = item.precision("transfer_qty")
+					if scio_secondary_item and flt(scio_secondary_item.delivered_qty, precision) > flt(
+						scio_secondary_item.produced_qty - secondary_qty[(item.item_code, item.t_warehouse)],
+						precision,
 					):
 						frappe.throw(
 							_(
