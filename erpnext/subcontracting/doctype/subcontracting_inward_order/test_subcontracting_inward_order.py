@@ -1652,6 +1652,17 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_subcontracting_inward_order, so.name)
 		self.assertRaises(frappe.ValidationError, scio.submit)
 
+	def test_inward_order_refuses_two_rows_for_one_sales_order_item(self):
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.append("items", scio.items[0].as_dict(no_default_fields=True))
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Duplicate row 2 with same Sales Order Item", scio.submit
+		)
+
 	def test_delivery_mapper_qty(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
