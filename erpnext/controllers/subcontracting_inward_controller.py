@@ -665,6 +665,7 @@ class SubcontractingInwardController:
 						"Subcontracting Inward Order Received Item",
 						{
 							"docstatus": 1,
+							"reference_name": fg_item_name,
 							"rm_item_code": item.item_code,
 							"warehouse": item.s_warehouse,
 							"is_customer_provided_item": 0,
