@@ -5582,11 +5582,11 @@ class TestWorkOrder(FrappeTestCase):
 		workstation = frappe.get_doc(
 			{"doctype": "Workstation", "workstation_name": "_Test Batch Cost WS", "hour_rate_rent": 100}
 		).insert()
-		for batch_based, cost_based_on_bom_qty in ((0, 0), (1, 0), (0, 1)):
+		for batch_based, cost_based_on_bom_qty, quantity in ((0, 0, 1), (1, 0, 1), (0, 1, 1), (1, 0, 5)):
 			operation = frappe.get_doc(
 				{
 					"doctype": "Operation",
-					"name": f"_Test Batch Cost Op {batch_based}{cost_based_on_bom_qty}",
+					"name": f"_Test Batch Cost Op {batch_based}{cost_based_on_bom_qty}{quantity}",
 					"workstation": workstation.name,
 					"batch_size": 10,
 					"create_job_card_based_on_batch_size": batch_based,
@@ -5598,6 +5598,7 @@ class TestWorkOrder(FrappeTestCase):
 					"item": make_item(properties={"is_stock_item": 1}).name,
 					"company": "_Test Company",
 					"currency": "INR",
+					"quantity": quantity,
 					"with_operations": 1,
 					"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
 					"operations": [
@@ -5617,7 +5618,7 @@ class TestWorkOrder(FrappeTestCase):
 				production_item=bom.item, bom_no=bom.name, qty=10, do_not_save=True
 			)
 			work_order.insert()
-			self.assertEqual(work_order.planned_operating_cost, flt(bom.operating_cost * 10))
+			self.assertEqual(work_order.planned_operating_cost, flt(bom.operating_cost * 10 / quantity))
 
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
