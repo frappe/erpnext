@@ -6004,10 +6004,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer.submit()
 
 	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
-		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
-	)
-	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "backflush_raw_materials_based_on": "BOM"}
 	)
 	def test_material_consumption_proposes_pending_qty(self):
@@ -6026,6 +6022,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(proposal.fg_completed_qty, 6)
 		self.assertEqual([row.qty for row in proposal.items], [12])
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
+	)
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_material_consumption_uses_batch_reservation(self):
 		production_item = "Test Consumption Reservation FG"
