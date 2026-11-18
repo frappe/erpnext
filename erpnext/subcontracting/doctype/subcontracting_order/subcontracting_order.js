@@ -421,6 +421,11 @@ frappe.ui.form.on("Subcontracting Order", {
 				},
 			})
 			.then((r) => {
+				if (!dialog.fields_dict.sr_entries.df.data.length) {
+					frappe.msgprint(__("No reserved stock to unreserve."));
+					return;
+				}
+
 				dialog.fields_dict.sr_entries.grid.refresh();
 				dialog.show();
 			});
