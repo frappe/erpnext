@@ -4379,10 +4379,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
 		company = "_Test Company with perpetual inventory"
-		for charge, expected in ((100, [-33.33, -33.33, -33.34]), (-100, [33.33, 33.33, 33.34])):
-			with self.subTest(charge=charge):
+		for currency, conversion_rate, charge, expected in (
+			("INR", 1, 100, [-33.33, -33.33, -33.34]),
+			("INR", 1, -100, [33.33, 33.33, 33.34]),
+			# the rest is taken in company currency: 100.50 - 33.50 - 33.50 is 33.50, which is 33.33 USD
+			("USD", 1.005, 100, [-33.33, -33.33, -33.33]),
+		):
+			with self.subTest(currency=currency, charge=charge):
 				pr = make_purchase_receipt(
 					company=company,
+					currency=currency,
+					conversion_rate=conversion_rate,
 					warehouse="Stores - TCP1",
 					supplier_warehouse="Work In Progress - TCP1",
 					item_code=make_item(properties={"is_stock_item": 1}).name,
