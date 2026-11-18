@@ -448,10 +448,14 @@ class TestPlanAdapter(ERPNextTestSuite):
 		tasks, _terminal_keys = loaders.build_bom_operation_tasks(bom_no, 10, "batch")
 		self.assertEqual(tasks[0].duration_mins, 60)
 
-	def test_operation_duration_is_rounded(self):
+	def test_operation_duration_drops_float_noise(self):
 		row = frappe._dict(operation=self.operation, time_in_mins=60, fixed_time=0, batch_size=0)
 		# 60 / 29 * 232 is 480.00000000000006 in floats
 		self.assertEqual(loaders.get_operation_duration(row, 232, 29, {}), 480)
+
+		# 1 unit of a 1 minute batch of 10,000 stays schedulable
+		row.update(time_in_mins=1, batch_size=10000)
+		self.assertEqual(loaders.get_operation_duration(row, 1, 1, {self.operation: 1}), 0.0001)
 
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()
