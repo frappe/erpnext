@@ -47,14 +47,21 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	process_scan() {
+		const input = this.scan_barcode_field.value;
+		this.scan_barcode_field.set_value("");
+		if (!input) {
+			return Promise.resolve();
+		}
+
+		// scans share the selector flags, so each one waits for the one before it
+		const scan = (this.last_scan || Promise.resolve()).then(() => this.scan(input));
+		this.last_scan = scan.catch(() => {});
+		return scan;
+	}
+
+	scan(input) {
 		return new Promise((resolve, reject) => {
 			let me = this;
-
-			const input = this.scan_barcode_field.value;
-			this.scan_barcode_field.set_value("");
-			if (!input) {
-				return;
-			}
 
 			this.scan_api_call(input, async (r) => {
 				let data = r && r.message;
