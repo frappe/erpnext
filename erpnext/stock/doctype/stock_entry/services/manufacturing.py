@@ -553,7 +553,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not wo:
 			return
 		work_order_qty = flt(wo.material_transferred_for_manufacturing) or flt(wo.qty)
-		wo_qty_to_produce = work_order_qty - flt(wo.produced_qty)
+		wo_qty_to_produce = work_order_qty - flt(wo.produced_qty) - flt(wo.process_loss_qty)
 		alternative_items = self.get_alternative_items(wo.get("required_items"))
 		for item in wo.get("required_items"):
 			self._append_unconsumed_item(item, wo, wo_qty_to_produce, alternative_items)
