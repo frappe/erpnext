@@ -40,14 +40,12 @@ class ReturnChargesService:
 	) -> float:
 		"""Rounded share of the charge that the returned stock carried.
 		The return of the last stock that carried it takes the rest, so the returns add up to the charge."""
-		precision = original_charge.precision("tax_amount")
-		total_share = self.get_returned_base_share(original, original_charge, total_qty)
-		if abs(flt(total_share, precision)) >= abs(flt(original_charge.base_tax_amount, precision)):
+		if is_fully_returned(original, original_charge, total_qty):
 			base_share = original_charge.base_tax_amount + earlier_base_charge
 		else:
 			base_share = self.get_returned_base_share(original, original_charge, returned_qty)
 
-		return flt(base_share / self.doc.conversion_rate, precision)
+		return flt(base_share / self.doc.conversion_rate, original_charge.precision("tax_amount"))
 
 	def is_traced_to_original(self) -> bool:
 		"""Only rows linked to the original row tell which charge the returned stock carried."""
@@ -110,30 +108,46 @@ class ReturnChargesService:
 	@staticmethod
 	def get_returned_base_share(original, original_charge, returned_qty) -> float:
 		"""Part of the charge, in company currency, that the returned stock carried."""
-		items = [row for row in original.get("items") if row.item_code]
-		if original_charge.get("allocate_full_amount_to_stock_items"):
-			stock_items = original.get_stock_items() + original.get_asset_items()
-			items = [row for row in items if row.item_code in stock_items]
+		return sum(
+			charge * returned / carried_qty
+			for _row, charge, returned, carried_qty in get_carried_charges(
+				original, original_charge, returned_qty
+			)
+		)
 
-		charge_per_item = {}
-		original._spread_charge_over_items(charge_per_item, flt(original_charge.base_tax_amount), items)
 
-		bills_rejected = bills_rejected_quantity(original)
-		share = 0.0
-		for row in items:
-			# a row carries its charge on the stock its net amount paid for, or on its rejected qty if it accepts nothing
-			qty = returned_qty.get(row.name, {"accepted": 0.0, "rejected": 0.0})
-			if flt(row.qty):
-				carried_qty = original.get_valued_stock_qty(row)
-				returned = qty["accepted"] + (qty["rejected"] if bills_rejected else 0.0)
-			else:
-				carried_qty = get_stock_qty(row, row.rejected_qty)
-				returned = qty["rejected"]
+def is_fully_returned(original, original_charge, returned_qty) -> bool:
+	"""Whether all the stock that carried the charge is returned."""
+	return all(
+		flt(returned - carried_qty, row.precision("stock_qty")) >= 0
+		for row, charge, returned, carried_qty in get_carried_charges(original, original_charge, returned_qty)
+		if charge
+	)
 
-			if carried_qty:
-				share += charge_per_item.get(row.idx, 0.0) * returned / carried_qty
 
-		return share
+def get_carried_charges(original, original_charge, returned_qty):
+	"""Share of the charge in company currency, returned qty and carried stock qty of each row that carries it."""
+	items = [row for row in original.get("items") if row.item_code]
+	if original_charge.get("allocate_full_amount_to_stock_items"):
+		stock_items = original.get_stock_items() + original.get_asset_items()
+		items = [row for row in items if row.item_code in stock_items]
+
+	charge_per_item = {}
+	original._spread_charge_over_items(charge_per_item, flt(original_charge.base_tax_amount), items)
+
+	bills_rejected = bills_rejected_quantity(original)
+	for row in items:
+		# a row carries its charge on the stock its net amount paid for, or on its rejected qty if it accepts nothing
+		qty = returned_qty.get(row.name, {"accepted": 0.0, "rejected": 0.0})
+		if flt(row.qty):
+			carried_qty = original.get_valued_stock_qty(row)
+			returned = qty["accepted"] + (qty["rejected"] if bills_rejected else 0.0)
+		else:
+			carried_qty = get_stock_qty(row, row.rejected_qty)
+			returned = qty["rejected"]
+
+		if carried_qty:
+			yield row, charge_per_item.get(row.idx, 0.0), returned, carried_qty
 
 
 def pair_with_original_charges(charges, original_charges) -> list:
