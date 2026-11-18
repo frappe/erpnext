@@ -75,6 +75,7 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 			[("Finished Goods - _TC", 4), ("Stores - _TC", 3)],
 		)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_actual_demand_leaves_out_closed_rows(self):
 		from erpnext.controllers.item_close import update_closed_status
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
