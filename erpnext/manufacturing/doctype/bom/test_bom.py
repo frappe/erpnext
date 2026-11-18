@@ -1274,6 +1274,40 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(bom.items[0].rate, 10)
 		self.assertEqual(bom.items[1].rate, 0)
 
+	def test_batch_operation_on_workstation_type_is_costed_per_batch(self):
+		workstation_type = frappe.get_doc(
+			{"doctype": "Workstation Type", "workstation_type": "_Test Batch WS Type", "hour_rate_rent": 100}
+		).insert()
+		operation = frappe.get_doc(
+			{
+				"doctype": "Operation",
+				"name": "_Test Batch Op On WS Type",
+				"batch_size": 10,
+				"create_job_card_based_on_batch_size": 1,
+			}
+		).insert()
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": make_item(properties={"is_stock_item": 1}).name,
+				"company": "_Test Company",
+				"currency": "INR",
+				"with_operations": 1,
+				"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+				"operations": [
+					{
+						"operation": operation.name,
+						"workstation_type": workstation_type.name,
+						"hour_rate": 100,
+						"time_in_mins": 60,
+						"batch_size": 10,
+					}
+				],
+			}
+		).insert()
+
+		self.assertEqual(bom.operating_cost, 10)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
