@@ -696,6 +696,7 @@ class BOM(WebsiteGenerator):
 		return kwargs
 
 	def _build_rm_detail(self, args, item, rate):
+		rate = flt(rate, self.precision("rate", "items"))
 		ret_item = {
 			"item_name": item and args["item_name"] or "",
 			"description": item and args["description"] or "",
