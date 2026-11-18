@@ -3057,8 +3057,12 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 
 		pi = make_internal_transfer_invoice()
+		warehouse = pi.items[0].warehouse
+		value_before = self.get_stock_value_by_warehouse(pi)[warehouse]
+
 		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company, charges=50)
 
+		self.assertEqual(flt(self.get_stock_value_by_warehouse(pi)[warehouse] - value_before, 2), 50)
 		self.assert_warehouse_accounts_match_stock(pi)
 
 	def assert_warehouse_accounts_match_stock(self, invoice):
