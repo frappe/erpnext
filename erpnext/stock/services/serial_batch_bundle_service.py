@@ -376,6 +376,9 @@ class SerialBatchBundleService:
 		bundle_details["ignore_serial_nos"] = list(picked_serial_nos[item_code])
 		bundle_details["already_picked_batches"] = picked_batches
 		sn_doc = self.create_serial_batch_bundle(bundle_details, row)
+		if row.doctype == "Packed Item":
+			# validate looked up the incoming rate before the serial or batch nos were picked
+			row.db_set("incoming_rate", flt(sn_doc.avg_rate, row.precision("incoming_rate")))
 		entries = sn_doc.get("entries") or []
 		picked_serial_nos[item_code].extend(d.serial_no for d in entries if d.serial_no)
 		# a row's own batch no is already counted in picked_batches

@@ -1402,7 +1402,9 @@ def get_serial_and_batch_bundle(
 	)
 
 	doc = sn_doc.make_serial_and_batch_bundle()
-	child.db_set("serial_and_batch_bundle", doc.name)
+	# validate looked up the incoming rate before the serial or batch nos were picked
+	incoming_rate = flt(doc.avg_rate, child.precision("incoming_rate"))
+	child.db_set({"serial_and_batch_bundle": doc.name, "incoming_rate": incoming_rate})
 	if picked_serial_nos is not None:
 		picked_serial_nos[child.item_code].extend(
 			d.serial_no for d in doc.get("entries") or [] if d.serial_no
