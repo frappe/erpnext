@@ -84,7 +84,6 @@ from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	get_row_wise_serial_batch,
 	get_sre_details,
 	make_stock_reservation_entries,
-	release_unused_inward_reservations,
 )
 from erpnext.manufacturing.doctype.work_order.services.status import (
 	StatusService,
@@ -2820,9 +2819,6 @@ class WorkOrder(Document):
 =======
 	def update_required_items(self):
 		RequiredItemsService(self).update_required_items()
-		if self.status == "Completed" and self.subcontracting_inward_order:
-			release_unused_inward_reservations(work_order=self.name)
-
 		self.update_subcontracting_inward_order_received_items()
 >>>>>>> a60ed0a (fix(subcontracting): return extra customer material held by a Work Order)
 
