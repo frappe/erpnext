@@ -3857,7 +3857,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 						qty = min(qty, original_qty)
 						if d.batch_no:
 							new_row = frappe.copy_doc(d)
-							new_row.name = None
+							new_row.update({"name": None, "use_serial_batch_fields": 1})
 							self.assign_reserved_batch(new_row, batches, details, batch_no, qty)
 							new_items_to_add.append(new_row)
 						else:
