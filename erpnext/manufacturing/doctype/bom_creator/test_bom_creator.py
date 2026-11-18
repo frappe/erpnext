@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.manufacturing.doctype.bom.test_bom import make_usd_buying_price_list
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
 from erpnext.manufacturing.doctype.bom_creator.item_matcher import ItemMatcher
 from erpnext.manufacturing.doctype.bom_creator.step_file import read_step_file
@@ -578,8 +579,6 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(design.raw_material_cost, 10)
 
 	def test_price_list_in_creator_currency_uses_its_conversion_rate(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import make_usd_buying_price_list
-
 		price_list = make_usd_buying_price_list(83)
 		material = make_item("_Test Creator USD Price List Material").name
 		frappe.get_doc(
@@ -596,6 +595,18 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(design.plc_conversion_rate, 80)
 		self.assertEqual(design.items[0].rate, 10)
+
+	def test_currency_change_refreshes_the_price_list_exchange_rate(self):
+		design = make_bom_creator(
+			currency="USD",
+			conversion_rate=80,
+			rm_cost_as_per="Price List",
+			buying_price_list=make_usd_buying_price_list(83),
+		)
+		design.currency = "INR"
+		design.save()
+
+		self.assertEqual(design.plc_conversion_rate, 83)
 
 	def test_currency_change_refreshes_the_exchange_rate(self):
 		if not frappe.db.exists("Currency", "TSR"):
