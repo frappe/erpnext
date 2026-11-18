@@ -2143,9 +2143,7 @@ def get_serial_no(_args: Any, serial_nos: list | None = None, sales_order: str |
 
 def update_party_blanket_order(ctx: frappe._dict, out: frappe._dict):
 	if out["against_blanket_order"]:
-		blanket_order_details = _get_blanket_order_details(ctx)
-		if blanket_order_details:
-			out.update(blanket_order_details)
+		out.update(_get_blanket_order_details(ctx) or {"blanket_order": None, "blanket_order_rate": 0})
 
 
 @frappe.whitelist()
