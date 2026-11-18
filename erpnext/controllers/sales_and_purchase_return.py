@@ -54,18 +54,9 @@ def validate_return_warehouse_stock(doc):
 	if doc.doctype == "Purchase Invoice" and not doc.update_stock:
 		return
 
-	receipt_rows = frappe.get_all(
-		f"{doc.doctype} Item",
-		filters={"parent": doc.return_against},
-		fields=["name", "item_code", "warehouse", "rejected_warehouse"],
-		limit_page_length=0,
-	)
+	moved_rows = get_moved_rows(doc)
 	qty_left = {}
-	for row in doc.items:
-		receipt_warehouses = get_receipt_warehouses_if_moved(doc, row, receipt_rows)
-		if not receipt_warehouses:
-			continue
-
+	for row in get_rows_taking_moved_stock(doc, moved_rows):
 		rate = flt(
 			get_rate_for_return(doc.doctype, doc.name, row.item_code, doc.return_against, item_row=row),
 			9,
@@ -77,7 +68,7 @@ def validate_return_warehouse_stock(doc):
 
 		# stock_qty is set later in validate
 		qty_left[key] -= abs(flt(flt(row.qty) * flt(row.conversion_factor or 1), row.precision("stock_qty")))
-		if flt(qty_left[key], row.precision("stock_qty")) < 0:
+		if row.idx in moved_rows and flt(qty_left[key], row.precision("stock_qty")) < 0:
 			frappe.throw(
 				_(
 					"Row #{0}: {1} does not hold enough of item {2} at the rate of {3}, at which {4} received it. Move the goods back to {5} and return them from there."
@@ -87,10 +78,34 @@ def validate_return_warehouse_stock(doc):
 					bold(row.item_code),
 					bold(fmt_money(rate, currency=erpnext.get_company_currency(doc.company))),
 					get_link_to_form(doc.doctype, doc.return_against),
-					bold(receipt_warehouses[0]),
+					bold(moved_rows[row.idx][0]),
 				),
 				title=_("Return Warehouse"),
 			)
+
+
+def get_moved_rows(doc) -> dict:
+	"""Receipt warehouses of each return row, by idx, that takes FIFO or LIFO stock from another warehouse."""
+	receipt_rows = frappe.get_all(
+		f"{doc.doctype} Item",
+		filters={"parent": doc.return_against},
+		fields=["name", "item_code", "warehouse", "rejected_warehouse"],
+		limit_page_length=0,
+	)
+	moved_rows = {}
+	for row in doc.items:
+		if receipt_warehouses := get_receipt_warehouses_if_moved(doc, row, receipt_rows):
+			moved_rows[row.idx] = receipt_warehouses
+
+	return moved_rows
+
+
+def get_rows_taking_moved_stock(doc, moved_rows) -> list:
+	"""Return rows that take stock of a moved row's item and warehouse, moved rows last."""
+	moved_stock = {(row.item_code, row.warehouse) for row in doc.items if row.idx in moved_rows}
+	rows = [row for row in doc.items if flt(row.qty) < 0 and (row.item_code, row.warehouse) in moved_stock]
+	# a row returned from its receipt warehouse takes the receipt lot first
+	return sorted(rows, key=lambda row: row.idx in moved_rows)
 
 
 def get_receipt_warehouses_if_moved(doc, row, receipt_rows) -> list:
