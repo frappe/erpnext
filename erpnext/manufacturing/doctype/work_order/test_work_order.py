@@ -3656,7 +3656,13 @@ class TestWorkOrder(ERPNextTestSuite):
 	def test_disassembled_qty_sums_without_float_noise(self):
 		wo = frappe.new_doc("Work Order")
 		wo.update({"docstatus": 1, "produced_qty": 0.3, "disassembled_qty": 0.1})
-		with patch.object(wo, "db_set"):
+		with (
+			patch.object(wo, "db_set"),
+			patch(
+				"erpnext.stock.doctype.stock_entry.services.manufacturing.get_available_fg_qty",
+				return_value=0.2,
+			),
+		):
 			wo.update_disassembled_qty(0.2)
 
 		self.assertEqual(wo.disassembled_qty, 0.3)
