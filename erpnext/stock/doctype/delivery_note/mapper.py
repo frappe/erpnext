@@ -704,8 +704,10 @@ def get_received_stock_qty_already_mapped(target_doc, ref_field: str) -> dict:
 
 
 def validate_no_counterpart_delivery_note(purchase_receipt: str):
-	"""Delivery Note rows link no Purchase Receipt rows, so its header link marks the receipt as delivered."""
+	"""Delivery Note rows link no Purchase Receipt rows, so the header links mark the receipt as delivered."""
 	if delivery_note := frappe.db.get_value(
+		"Purchase Receipt", purchase_receipt, "inter_company_reference"
+	) or frappe.db.get_value(
 		"Delivery Note", {"inter_company_reference": purchase_receipt, "docstatus": 1, "is_return": 0}
 	):
 		frappe.throw(
