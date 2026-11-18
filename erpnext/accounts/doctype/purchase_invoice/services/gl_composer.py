@@ -723,7 +723,12 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		elif (
 			doc.update_stock
-			and (transit_stock_value is not None or voucher_wise_stock_value.get((item.name, item.warehouse)))
+			and (
+				transit_stock_value is not None
+				or voucher_wise_stock_value.get((item.name, item.warehouse))
+				# a return of a row whose stock is all returned moves no stock
+				or (doc.is_return and not item.is_fixed_asset)
+			)
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
