@@ -121,6 +121,15 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual([row.demand_qty for row in rows if row.item_code == item], [150])
 
+	def test_non_planned_order_uses_up_the_forecast_of_its_period(self):
+		item, mps = make_forecast_with_mps_demand(70)
+		make_mrp_sales_order(item, 25, add_days(today(), 20), warehouse="Stores - _TC")
+
+		rows = [row for row in get_mrp_row_list(mps) if row.item_code == item]
+
+		self.assertEqual(sum(flt(row.adhoc_qty) for row in rows), 25)
+		self.assertAlmostEqual(sum(row.planned_qty for row in rows), 100)
+
 	def test_mps_demand_before_the_report_dates_uses_up_its_forecast_period(self):
 		item, mps = make_forecast_with_mps_demand(150)
 
@@ -1140,11 +1149,11 @@ def get_mrp_row_list(mps, **filters):
 	return [row for row in rows if row.get("item_code")]
 
 
-def make_mrp_sales_order(item_code, qty, delivery_date, transaction_date=None):
+def make_mrp_sales_order(item_code, qty, delivery_date, transaction_date=None, warehouse=WAREHOUSE):
 	sales_order = make_sales_order(
 		item_code=item_code,
 		qty=qty,
-		warehouse=WAREHOUSE,
+		warehouse=warehouse,
 		transaction_date=transaction_date or today(),
 		do_not_save=True,
 	)
