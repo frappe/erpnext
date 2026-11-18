@@ -1648,8 +1648,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		make_accepted_return(-3).submit()
 		self.assertRaises(StockOverReturnError, make_accepted_return(-1).save)
 
-		make_subcontract_return_against_rejected_warehouse(scr.name).submit()
+		rejected_return = make_subcontract_return_against_rejected_warehouse(scr.name)
 		over_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		rejected_return.submit()
+
 		over_return.items[0].qty = -2
 		self.assertRaises(StockOverReturnError, over_return.save)
 
