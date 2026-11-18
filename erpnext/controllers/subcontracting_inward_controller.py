@@ -1051,6 +1051,8 @@ class SubcontractingInwardController:
 					)
 					doc_updates = {}
 					for key, value in secondary_items_dict.items():
+						if key not in secondary_items:
+							continue
 						if (
 							self._action == "cancel"
 							and value.produced_qty - abs(secondary_items.get(key)) == 0
@@ -1077,11 +1079,11 @@ class SubcontractingInwardController:
 				next_secondary_idx = (
 					frappe.db.count("Subcontracting Inward Order Secondary Item", {"parent": scio}) + 1
 				)
-				for secondary_item in [
-					item
-					for item in secondary_items_list
-					if (item.item_code, item.t_warehouse) not in [(d.item_code, d.warehouse) for d in result]
-				]:
+				existing_keys = {(d.item_code, d.warehouse) for d in result}
+				new_rows = {(item.item_code, item.t_warehouse): item for item in secondary_items_list}
+				for key, secondary_item in new_rows.items():
+					if key in existing_keys:
+						continue
 					doc = frappe.new_doc(
 						"Subcontracting Inward Order Secondary Item",
 						parent=scio,
@@ -1092,7 +1094,7 @@ class SubcontractingInwardController:
 						fg_item_code=fg_item_code,
 						stock_uom=secondary_item.stock_uom,
 						warehouse=secondary_item.t_warehouse,
-						produced_qty=secondary_item.transfer_qty,
+						produced_qty=secondary_items[key],
 						secondary_item_type=secondary_item.secondary_item_type,
 						delivered_qty=0,
 						reference_name=frappe.get_value(
