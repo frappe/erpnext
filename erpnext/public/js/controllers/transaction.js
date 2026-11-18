@@ -2195,12 +2195,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					ctx: params,
 					item_code: row.item_code,
 				},
-				callback: function (r) {
+				callback: (r) => {
 					if (!r.exc && r.message) {
 						row.price_list_rate = r.message;
 						row.rate = r.message;
-						refresh_field("rate", row.name, row.parentfield);
-						refresh_field("price_list_rate", row.name, row.parentfield);
+						this.calculate_taxes_and_totals();
 					}
 				},
 			});
