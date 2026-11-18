@@ -594,7 +594,11 @@ def get_reposting_data(file_path) -> dict:
 	)
 
 	if not file_name:
-		return frappe._dict()
+		frappe.throw(
+			_(
+				"The reposting data file {0} is missing. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	attached_file = frappe.get_doc("File", file_name)
 
@@ -603,12 +607,13 @@ def get_reposting_data(file_path) -> dict:
 		content = content.encode("utf-8")
 
 	try:
-		data = gzip.decompress(content)
+		data = json.loads(gzip.decompress(content).decode("utf-8"))
 	except Exception:
-		return frappe._dict()
-
-	if data := json.loads(data.decode("utf-8")):
-		data = data
+		frappe.throw(
+			_(
+				"The reposting data file {0} is corrupted. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	return parse_json(data)
 
@@ -1866,13 +1871,13 @@ class update_entries_after:
 				sle.voucher_type + " Item", sle.voucher_detail_no, "incoming_rate", outgoing_rate
 			)
 		else:
-			# packed item
-			frappe.db.set_value(
-				"Packed Item",
-				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
-				"incoming_rate",
-				outgoing_rate,
-			)
+			# packed item; a component packed from several locations has a row per bundle or warehouse
+			filters = {"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code}
+			if sle.serial_and_batch_bundle:
+				filters["serial_and_batch_bundle"] = sle.serial_and_batch_bundle
+			else:
+				filters["warehouse"] = sle.warehouse
+			frappe.db.set_value("Packed Item", filters, "incoming_rate", outgoing_rate)
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
@@ -2519,9 +2524,11 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
+		if voucher_no:
+			query = query.where((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
+
 		if posting_datetime:
 			query = query.where(get_prior_ledger_condition(table, posting_datetime, creation))
 
@@ -2561,12 +2568,16 @@ def get_valuation_rate(
 			& (sle_entry.warehouse == warehouse)
 			& (sle_entry.valuation_rate >= 0)
 			& (sle_entry.is_cancelled == 0)
-			& ~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
 		)
 		.orderby(sle_entry.posting_datetime, order=Order.desc)
 		.orderby(sle_entry.creation, order=Order.desc)
 		.limit(1)
 	)
+	if voucher_no:
+		last_sle_query = last_sle_query.where(
+			~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
+		)
+
 	if posting_datetime:
 		last_sle_query = last_sle_query.where(
 			get_prior_ledger_condition(sle_entry, posting_datetime, creation)
@@ -2758,6 +2769,9 @@ def get_next_reco_datetime_condition(sle, kwargs):
 	current_datetime = get_combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 
 	creation = kwargs.get("creation")
+	if kwargs.get("is_cancelled"):
+		creation = get_creation_of_cancelled_entry(kwargs)
+
 	if not creation:
 		# No creation tiebreaker available; fall back to the posting_datetime-only bound.
 		return sle.posting_datetime >= current_datetime
@@ -2765,6 +2779,29 @@ def get_next_reco_datetime_condition(sle, kwargs):
 	return (sle.posting_datetime > current_datetime) | (
 		(sle.posting_datetime == current_datetime) & (sle.creation > creation)
 	)
+
+
+def get_creation_of_cancelled_entry(args):
+	"""Creation of the entry that a cancellation reverses, which keeps its place in the ledger order."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	entry = (
+		frappe.qb.from_(sle)
+		.select(sle.creation)
+		.where(
+			(sle.voucher_type == args.voucher_type)
+			& (sle.voucher_no == args.voucher_no)
+			& (sle.voucher_detail_no == args.voucher_detail_no)
+			& (sle.item_code == args.item_code)
+			& (sle.warehouse == args.warehouse)
+			& (sle.is_cancelled == 1)
+			& (sle.name != args.name)
+			& (sle.actual_qty * flt(args.actual_qty) <= 0)
+		)
+		.orderby(sle.creation, order=Order.desc)
+		.limit(1)
+	).run()
+
+	return entry[0][0] if entry else None
 
 
 def get_next_stock_reco(kwargs):
