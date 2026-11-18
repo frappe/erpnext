@@ -890,7 +890,10 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 
 
 def release_inward_reservation(sre: dict, qty: float, serial_batch: frappe._dict | None = None) -> float:
-	"""Lower a Work Order reservation by `qty`, not below what it used and within `serial_batch` if given, and give it back to the inward order reservation it came from."""
+	"""Lower a Work Order reservation by `qty`, not below what it used and within `serial_batch` if given, and give it back to the inward order reservation it came from.
+
+	What it releases is taken out of `serial_batch`, so the next reservation gets only what is left.
+	"""
 	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
 	released = frappe._dict(serial_nos=[], batches=defaultdict(float))
 	if doc.reservation_based_on == "Serial and Batch":
@@ -898,6 +901,8 @@ def release_inward_reservation(sre: dict, qty: float, serial_batch: frappe._dict
 		add_serial_batch(released, doc, entry_qty)
 		lower_serial_batch_qty(doc, entry_qty)
 		qty = sum(entry_qty.values())
+		if serial_batch:
+			remove_serial_batch(serial_batch, released)
 
 	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
 	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
@@ -943,6 +948,14 @@ def add_serial_batch(serial_batch: frappe._dict, doc: Document, entry_qty: dict[
 			serial_batch.serial_nos.append(entry.serial_no)
 		if entry.batch_no:
 			serial_batch.batches[entry.batch_no] += qty
+
+
+def remove_serial_batch(serial_batch: frappe._dict, released: frappe._dict) -> None:
+	serial_batch.serial_nos = [
+		serial_no for serial_no in serial_batch.serial_nos if serial_no not in released.serial_nos
+	]
+	for batch_no, qty in released.batches.items():
+		serial_batch.batches[batch_no] = serial_batch.batches.get(batch_no, 0) - qty
 
 
 def lower_serial_batch_qty(doc: Document, entry_qty: dict[str, float]) -> None:
