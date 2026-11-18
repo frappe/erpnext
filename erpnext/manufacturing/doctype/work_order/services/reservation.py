@@ -862,9 +862,10 @@ def get_inward_reservations(scio_detail: str) -> list[dict]:
 
 
 def release_inward_reservation(sre: dict, qty: float) -> None:
-	"""Lower a Work Order reservation by `qty` and give it back to the inward order reservation it came from."""
+	"""Lower a Work Order reservation by `qty`, not below what it used, and give it back to the inward order reservation it came from."""
 	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
-	reserved_qty = flt(doc.reserved_qty - qty, doc.precision("reserved_qty"))
+	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
+	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
 	doc.db_set(
 		{"reserved_qty": reserved_qty, "voucher_qty": max(sre.required_qty, reserved_qty)},
 		update_modified=False,
