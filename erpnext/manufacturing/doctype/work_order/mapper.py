@@ -324,19 +324,21 @@ def get_pending_consumption_qty_based_on_bom(work_order):
 
 def get_pending_consumption_qty_based_on_transfer(work_order):
 	"""A material left in WIP is pending for the transferred qty less the For Quantity of the entries
-	that consumed it, as the consumption entry counts it."""
+	that consumed it, as the consumption entry counts it. One already covered is drained by any qty,
+	so it is pending for what is left to produce."""
+	precision = work_order.precision("qty")
 	transferred_qty = flt(work_order.material_transferred_for_manufacturing)
+	pending_to_produce = transferred_qty - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
 	covered_qty = get_covered_qty_by_item(work_order.name)
 	pending_qty = max(
 		(
-			transferred_qty - covered_qty.get(row.item_code, 0)
+			max(flt(transferred_qty - covered_qty.get(row.item_code, 0), precision), 0) or pending_to_produce
 			for row in work_order.required_items
 			if flt(flt(row.transferred_qty) - flt(row.consumed_qty), row.precision("consumed_qty")) > 0
 		),
 		default=0,
 	)
-	pending_to_produce = transferred_qty - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
-	return max(flt(min(pending_qty, pending_to_produce), work_order.precision("qty")), 0)
+	return max(flt(min(pending_qty, pending_to_produce), precision), 0)
 
 
 def get_covered_qty_by_item(work_order):
