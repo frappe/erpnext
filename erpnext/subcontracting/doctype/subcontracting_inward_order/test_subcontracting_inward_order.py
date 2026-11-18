@@ -1533,7 +1533,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.submit()
 
-<<<<<<< HEAD
 	def test_rm_return_cancel_blocked_by_later_work_order(self):
 		so, scio = create_so_scio()
 		batch_no = receive_batch_twice(scio)[0]
@@ -1697,7 +1696,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		rm_return.cancel()
 		self.assertEqual(rm_return.docstatus, 2)
-=======
+
 	def test_material_from_customer_skips_fully_received_material(self):
 		for received_qty in (5, 7):
 			with self.subTest(received_qty=received_qty):
@@ -1707,19 +1706,12 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 				rm_in.items[0].qty = received_qty
 				rm_in.submit()
 
-<<<<<<< HEAD
-		scio.reload()
-		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		self.assertNotIn("Basic RM", [item.item_code for item in rm_in.items])
->>>>>>> 22c33c4 (test: Material from Customer skips a fully received material)
-=======
 				scio.reload()
 				rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
 				self.assertEqual(
 					[(item.item_code, item.qty) for item in rm_in.items],
 					[("RM with Serial", 5), ("RM with Batch", 5), ("RM with Serial and Batch", 5)],
 				)
->>>>>>> 499130f (test: cover exact receipt and keep pending materials in Material from Customer test)
 
 	def test_variant_without_bom_uses_template_bom(self):
 		variant, template_bom = make_subcontracted_variant()
