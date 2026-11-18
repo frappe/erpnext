@@ -8,6 +8,7 @@ from frappe.utils import flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	release_unused_inward_reservations,
+	restore_inward_reservations,
 )
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_details_for_voucher,
@@ -1144,16 +1145,22 @@ class SubcontractingInwardController:
 		if self.purpose == "Return Raw Material to Customer":
 			if self._action == "cancel":
 				self.validate_no_later_work_order_reservation()
+				self.adjust_inward_reservations(release=False)
+				restore_inward_reservations(self.subcontracting_inward_order, self.get_return_qty())
 			else:
 				self.release_unused_work_order_reservations()
-			self.adjust_inward_reservations(release=self._action == "submit")
+				self.adjust_inward_reservations(release=True)
 
-	def release_unused_work_order_reservations(self):
-		"""Take the qty the inward order no longer holds from the unused part of its Work Order reservations."""
+	def get_return_qty(self) -> dict[str, float]:
+		"""Returned stock qty of each inward order row."""
 		return_qty = defaultdict(float)
 		for item in self.items:
 			return_qty[item.scio_detail] += item.transfer_qty
+		return return_qty
 
+	def release_unused_work_order_reservations(self):
+		"""Take the qty the inward order no longer holds from the unused part of its Work Order reservations."""
+		return_qty = self.get_return_qty()
 		reserved_qty = get_sre_reserved_qty_details_for_voucher(
 			"Subcontracting Inward Order", self.subcontracting_inward_order
 		)

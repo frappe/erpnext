@@ -24,6 +24,7 @@ from erpnext.manufacturing.doctype.production_plan.services.reservation import h
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
 	clear_reserve_stock_if_disabled,
+	get_sre_reserved_qty_details_for_voucher,
 )
 
 _SCIO_FIELDS = [
@@ -826,6 +827,27 @@ def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -
 		short_qty[sre.from_voucher_detail_no] -= released_qty
 
 
+def restore_inward_reservations(scio: str, return_qty: dict[str, float]) -> None:
+	"""Give Work Orders back, up to `return_qty` per inward order row, the customer material a return released from them."""
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	free_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio)
+	for sre in get_inward_reservations(scio, list(return_qty)):
+		restore_qty = flt(
+			min(
+				sre.voucher_qty - sre.reserved_qty,
+				flt(free_qty.get(sre.from_voucher_detail_no)),
+				return_qty[sre.from_voucher_detail_no],
+			),
+			precision,
+		)
+		if restore_qty <= 0:
+			continue
+
+		release_inward_reservation(sre, -restore_qty)
+		free_qty[sre.from_voucher_detail_no] -= restore_qty
+		return_qty[sre.from_voucher_detail_no] -= restore_qty
+
+
 def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
 	"""Reserved qty of each Work Order row beyond its need."""
 	sres_by_row = defaultdict(list)
@@ -853,6 +875,7 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 			sre.voucher_detail_no,
 			sre.from_voucher_detail_no,
 			sre.reserved_qty,
+			sre.voucher_qty,
 			(sre.delivered_qty + sre.transferred_qty + sre.consumed_qty).as_("used_qty"),
 			wo_item.required_qty,
 		)
@@ -869,15 +892,12 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 
 
 def release_inward_reservation(sre: dict, qty: float) -> float:
-	"""Lower a Work Order reservation by `qty`, not below what it used, and give it back to the inward order reservation it came from."""
+	"""Lower a Work Order reservation by `qty` (raise it when negative), not below what it used, and give the change back to the inward order reservation it came from."""
 	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
 	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
 	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
 	released_qty = doc.reserved_qty - reserved_qty
-	doc.db_set(
-		{"reserved_qty": reserved_qty, "voucher_qty": max(sre.required_qty, reserved_qty)},
-		update_modified=False,
-	)
+	doc.db_set("reserved_qty", reserved_qty, update_modified=False)
 	doc.update_status()
 	doc.update_reserved_qty_in_voucher()
 	doc.update_delivered_qty_in_from_voucher_reservations()
