@@ -5909,6 +5909,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, inter_company_receipt.submit)
 
 	def test_inter_company_receipt_of_bundle_sold_in_another_uom(self):
+		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		company = "_Test Company with perpetual inventory"
@@ -5935,9 +5936,13 @@ class TestDeliveryNote(ERPNextTestSuite):
 		delivery_note.submit()
 
 		receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		extra_receipt = make_inter_company_purchase_receipt(delivery_note.name)
 		receipt.items[0].warehouse = "Stores - TCP1"
 		receipt.submit()
 		self.assertEqual(receipt.items[0].stock_qty, 20)
+
+		extra_receipt.items[0].update({"qty": 1, "warehouse": "Stores - TCP1"})
+		self.assertRaises(OverAllowanceError, extra_receipt.submit)
 
 	def test_inter_company_receipt_receives_bundle_components(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
