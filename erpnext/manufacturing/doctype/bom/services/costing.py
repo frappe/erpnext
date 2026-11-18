@@ -74,12 +74,12 @@ class BOMCostingService:
 			return
 		frappe.msgprint(msg, alert=True)
 
-	def apply_price_list(self, row=None):
-		"""Reprice the rows, or one row, at the selected price list, non-stock rows included."""
+	def apply_price_list(self):
+		"""Reprice the rows at the selected price list, non-stock rows included."""
 		self.doc.set_plc_conversion_rate()
 		for d in self.doc.get("items"):
-			if not row or d.name == row:
-				d.rate = self.get_rm_rate(self._rm_rate_args(d), notify=False)
+			if d.item_code:
+				d.rate = flt(self.get_rm_rate(self._rm_rate_args(d), notify=False), d.precision("rate"))
 
 		self.calculate_cost()
 

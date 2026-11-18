@@ -834,8 +834,10 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 
 	apply_price_list(item) {
-		// price rows the way the BOM saves them, not with the transaction pricing
-		return this.frm.call("apply_price_list", { row: item?.name });
+		// a row is repriced by get_bom_material_detail; the BOM is repriced the way it saves
+		if (!item) {
+			return this.frm.call({ method: "apply_price_list", doc: this.frm.doc, freeze: true });
+		}
 	}
 
 	plc_conversion_rate() {
