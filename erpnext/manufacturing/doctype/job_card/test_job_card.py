@@ -1569,6 +1569,25 @@ class TestJobCard(ERPNextTestSuite):
 		from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
 
 		work_order = self.make_two_operation_work_order(qty=10)
+		frappe.delete_doc("Job Card", self.lose_first_operation(work_order))
+
+		block = self.make_second_operation_schedule_block(work_order)
+		self.assertEqual(filter_covered_schedule_rows([block]), [])
+
+	def test_schedule_block_is_not_covered_by_job_cards_of_another_work_order(self):
+		from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
+
+		lost_work_order = self.make_two_operation_work_order(qty=10)
+		frappe.db.set_value("Job Card", self.lose_first_operation(lost_work_order), "total_time_in_mins", 30)
+		pending_work_order = self.make_two_operation_work_order(qty=10)
+		frappe.db.delete("Job Card", {"work_order": pending_work_order.name})
+
+		self.make_second_operation_schedule_block(lost_work_order)
+		block = self.make_second_operation_schedule_block(pending_work_order)
+		self.assertEqual(filter_covered_schedule_rows([block]), [block])
+
+	def lose_first_operation(self, work_order):
+		"""Submits the first job card with its full qty lost; returns the second job card."""
 		first, second = frappe.get_all(
 			"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
 		)
@@ -1577,13 +1596,10 @@ class TestJobCard(ERPNextTestSuite):
 			"time_logs",
 			{"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 08:30:00", "completed_qty": 0},
 		)
-		job_card.process_loss_qty = 10
+		job_card.process_loss_qty = work_order.qty
 		job_card.save()
 		job_card.submit()
-		frappe.delete_doc("Job Card", second)
-
-		block = self.make_second_operation_schedule_block(work_order)
-		self.assertEqual(filter_covered_schedule_rows([block]), [])
+		return second
 
 	def make_second_operation_schedule_block(self, work_order):
 		work_order.db_set({"production_plan": "Test Loss Plan", "production_plan_item": "Test Loss Plan Row"})
