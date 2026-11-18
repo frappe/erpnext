@@ -4117,7 +4117,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertRaises(OverAllowanceError, extra_pi.submit)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
-	def test_internal_pi_for_the_remainder_of_rounded_stock_qty(self):
+	def test_internal_pi_qty_counts_rounded_stock_qty(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		item = make_item(
@@ -4127,21 +4127,28 @@ class TestSalesInvoice(ERPNextTestSuite):
 				"uoms": [{"uom": "_Test UOM 1", "conversion_factor": 1.667}],
 			}
 		).name
-		si = make_internal_sales_invoice(item, qty=1, uom="Kg")
+		box = {
+			"uom": "_Test UOM 1",
+			"conversion_factor": 1.667,
+			"qty": 0.2,
+			"warehouse": "Finished Goods - TCP1",
+		}
 
-		for _ in range(2):
-			pi = make_inter_company_transaction("Sales Invoice", si.name)
-			pi.items[0].update(
-				{
-					"uom": "_Test UOM 1",
-					"conversion_factor": 1.667,
-					"qty": 0.2,
-					"warehouse": "Finished Goods - TCP1",
-				}
-			)
-			pi.submit()
+		# two rows of one Sales Invoice row, each rounded on its own
+		rounded_qty = flt(0.2 * 1.667, frappe.get_precision("Purchase Invoice Item", "stock_qty"))
+		si = make_internal_sales_invoice(item, qty=2 * rounded_qty, uom="Kg")
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(box)
+		pi.append("items", pi.items[0].as_dict(no_default_fields=True))
+		pi.submit()
 
 		# the mapper offers 1 Kg less the stored, rounded stock qty
+		si = make_internal_sales_invoice(item, qty=1, uom="Kg")
+		for _ in range(2):
+			pi = make_inter_company_transaction("Sales Invoice", si.name)
+			pi.items[0].update(box)
+			pi.submit()
+
 		pi = make_inter_company_transaction("Sales Invoice", si.name)
 		pi.items[0].warehouse = "Finished Goods - TCP1"
 		pi.submit()
