@@ -185,10 +185,10 @@ class StockInternalTransferService:
 
 		if self.doc.doctype == "Purchase Invoice":
 			reference_field, item_reference_field = "inter_company_invoice_reference", "sales_invoice_item"
-			fields = ["item_code", "qty", "conversion_factor"]
+			fields = ["item_code", "stock_qty"]
 		else:
 			reference_field, item_reference_field = "inter_company_reference", "delivery_note_item"
-			fields = ["item_code", "qty", "conversion_factor", "delivery_note_packed_item"]
+			fields = ["item_code", "stock_qty", "delivery_note_packed_item"]
 
 		other_items = get_inter_company_items(
 			self.doc.doctype,
@@ -197,12 +197,14 @@ class StockInternalTransferService:
 			fields,
 		)
 
-		# a cancelled document no longer counts
-		own_items = self.doc.items if self.doc.docstatus == 1 else []
+		received_rows = [(row, row.stock_qty) for row in other_items]
+		# a cancelled document no longer counts; own rows get their stock_qty only after this check
+		if self.doc.docstatus == 1:
+			received_rows += [(row, flt(row.qty) * flt(row.conversion_factor)) for row in self.doc.items]
+
 		item_wise_received_qty = defaultdict(float)
-		for row in [*other_items, *own_items]:
+		for row, stock_qty in received_rows:
 			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
-			# own rows get their stock_qty only after this check
-			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty) * flt(row.conversion_factor)
+			item_wise_received_qty[(reference, row.item_code)] += flt(stock_qty)
 
 		return item_wise_received_qty
