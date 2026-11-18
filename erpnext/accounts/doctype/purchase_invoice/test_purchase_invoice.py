@@ -3071,6 +3071,15 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
 
+		stock_value = self.get_stock_value_by_warehouse(invoice)
+		self.assertEqual(set(stock_value), {invoice.items[0].warehouse, invoice.items[0].from_warehouse})
+
+		for warehouse, value in stock_value.items():
+			self.assertEqual(
+				flt(booked_value[get_inventory_account(invoice.company, warehouse)], 2), flt(value, 2)
+			)
+
+	def get_stock_value_by_warehouse(self, invoice):
 		stock_value = {}
 		for stock_entry in frappe.get_all(
 			"Stock Ledger Entry",
@@ -3080,10 +3089,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			stock_value.setdefault(stock_entry.warehouse, 0)
 			stock_value[stock_entry.warehouse] += flt(stock_entry.stock_value_difference)
 
-		for warehouse, value in stock_value.items():
-			self.assertEqual(
-				flt(booked_value[get_inventory_account(invoice.company, warehouse)], 2), flt(value, 2)
-			)
+		return stock_value
 
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
