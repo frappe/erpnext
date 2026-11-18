@@ -420,7 +420,6 @@ class MasterProductionSchedule(Document):
 				_("No open Material Requests found for the given criteria."),
 				alert=True,
 			)
-			return
 
 		for row in materials_requests:
 			self.append(
@@ -471,11 +470,7 @@ class MasterProductionSchedule(Document):
 			data = parse_json(data)
 
 		self.set("sales_orders", [])
-		sales_orders = self.get_sales_orders(data)
-		if not sales_orders:
-			return
-
-		for row in sales_orders:
+		for row in self.get_sales_orders(data):
 			self.append(
 				"sales_orders",
 				{
