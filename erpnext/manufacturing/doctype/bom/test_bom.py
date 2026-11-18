@@ -57,7 +57,7 @@ class TestBOM(ERPNextTestSuite):
 
 		rm_item = make_box_item("_Test BOM Box Rate RM")
 		fg_item = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], currency="INR", do_not_save=True)
 		bom.items[0].update({"uom": "Box", "conversion_factor": 12})
 		bom.insert()
 		bom.submit()
