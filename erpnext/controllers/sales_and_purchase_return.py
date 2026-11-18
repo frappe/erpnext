@@ -104,7 +104,7 @@ def get_stock_takes(doc) -> list:
 	receipt_rows = frappe.get_all(
 		f"{doc.doctype} Item",
 		filters={"parent": doc.return_against},
-		fields=["name", "item_code", "warehouse", "rejected_warehouse"],
+		fields=["name", "item_code", "warehouse", "rejected_warehouse", "qty", "rejected_qty"],
 		limit_page_length=0,
 	)
 	takes = []
@@ -127,7 +127,7 @@ def get_stock_takes(doc) -> list:
 
 
 def get_receipt_warehouses_if_moved(doc, take, receipt_rows) -> list:
-	"""Warehouses of the receipt row, if the take is FIFO or LIFO stock from another one."""
+	"""Warehouses the receipt row stocked, if the take is FIFO or LIFO stock from another one."""
 	row = take.row
 	# serial and batch items go back at their own rate
 	item = frappe.get_cached_value(
@@ -150,7 +150,7 @@ def get_receipt_warehouses_if_moved(doc, take, receipt_rows) -> list:
 		for receipt_row in receipt_rows
 		if receipt_row.name == reference or (not reference and receipt_row.item_code == row.item_code)
 		for warehouse_field, qty_field in fields
-		if receipt_row.get(warehouse_field)
+		if receipt_row.get(warehouse_field) and flt(receipt_row.get(qty_field))
 	]
 	if not receipt_warehouses or take.warehouse in receipt_warehouses:
 		return []
