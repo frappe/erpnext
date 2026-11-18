@@ -19,7 +19,8 @@ class ReturnChargesService:
 		self.detail_field = get_return_against_item_fields(doc.doctype)
 
 	def set_returned_valuation_charges(self) -> None:
-		"""Set each Actual valuation charge to the share the returned stock carried on the original."""
+		"""Set each Actual valuation charge to the share the returned stock carried on the original.
+		The return of the last stock that carried a charge takes the rest, so the returns add up to it."""
 		doc = self.doc
 		charges = get_actual_valuation_charges(doc)
 		if not (doc.is_return and doc.return_against and charges and self.is_traced_to_original()):
@@ -29,23 +30,19 @@ class ReturnChargesService:
 		original_charges = get_actual_valuation_charges(original)
 		returned_qty = self.get_returned_qty_by_original_row()
 		total_qty = add_returned_qty(self.get_earlier_returned_qty_by_original_row(), returned_qty)
+		# an earlier return's charge that matches none of the original's hides what that return reversed
 		earlier_charges = self.get_earlier_returned_charges(original_charges)
+		can_take_rest = earlier_charges is not None
 		for tax, original_charge in pair_with_original_charges(charges, original_charges):
-			tax.tax_amount = -self.get_returned_charge(
-				original, original_charge, returned_qty, total_qty, earlier_charges[original_charge.name]
-			)
+			if not original_charge:
+				continue
 
-	def get_returned_charge(
-		self, original, original_charge, returned_qty, total_qty, earlier_base_charge
-	) -> float:
-		"""Rounded share of the charge that the returned stock carried.
-		The return of the last stock that carried it takes the rest, so the returns add up to the charge."""
-		if is_fully_returned(original, original_charge, total_qty):
-			base_share = original_charge.base_tax_amount + earlier_base_charge
-		else:
-			base_share = self.get_returned_base_share(original, original_charge, returned_qty)
+			if can_take_rest and is_fully_returned(original, original_charge, total_qty):
+				base_share = original_charge.base_tax_amount + earlier_charges[original_charge.name]
+			else:
+				base_share = self.get_returned_base_share(original, original_charge, returned_qty)
 
-		return flt(base_share / self.doc.conversion_rate, original_charge.precision("tax_amount"))
+			tax.tax_amount = -flt(base_share / doc.conversion_rate, original_charge.precision("tax_amount"))
 
 	def is_traced_to_original(self) -> bool:
 		"""Only rows linked to the original row tell which charge the returned stock carried."""
@@ -60,9 +57,9 @@ class ReturnChargesService:
 			).items()
 		}
 
-	def get_earlier_returned_charges(self, original_charges) -> defaultdict:
+	def get_earlier_returned_charges(self, original_charges) -> defaultdict | None:
 		"""Actual valuation charges of the other submitted stock returns in company currency, added up by
-		the original charge they were mapped from."""
+		the original charge they were mapped from. None if one of them matches none of the original's."""
 		filters = {"docstatus": 1, "is_return": 1, "return_against": self.doc.return_against}
 		if self.doc.doctype == "Purchase Invoice":
 			filters["update_stock"] = 1
@@ -86,6 +83,9 @@ class ReturnChargesService:
 		charges = defaultdict(float)
 		for taxes in taxes_by_return.values():
 			for tax, original_charge in pair_with_original_charges(taxes, original_charges):
+				if not original_charge:
+					return None
+
 				charges[original_charge.name] += flt(tax.base_tax_amount)
 
 		return charges
@@ -157,7 +157,7 @@ def get_carried_charges(original, original_charge, returned_qty):
 def pair_with_original_charges(charges, original_charges) -> list:
 	"""Each charge with the original charge it was mapped from, claimed by one charge only. Other charges,
 	such as those of returns made before that link, take the next unclaimed original charge on the same
-	account and description."""
+	account and description, or None."""
 	by_name = {tax.name: tax for tax in original_charges}
 	claimed = {}
 	for tax in charges:
@@ -177,8 +177,7 @@ def pair_with_original_charges(charges, original_charges) -> list:
 			same_charges = unclaimed.get((tax.account_head, tax.description))
 			original_tax = same_charges.pop(0) if same_charges else None
 
-		if original_tax:
-			pairs.append((tax, original_tax))
+		pairs.append((tax, original_tax))
 
 	return pairs
 
