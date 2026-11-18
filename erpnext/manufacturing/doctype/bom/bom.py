@@ -901,11 +901,13 @@ class BOM(WebsiteGenerator):
 	@property
 	def has_stale_conversion_rate(self):
 		"""Currency changed without a new conversion rate."""
-		return (
-			not self.is_new()
-			and self.has_value_changed("currency")
-			and not self.has_value_changed("conversion_rate")
-		)
+		previous = self.get_doc_before_save()
+		if not previous:
+			return False
+
+		precision = self.precision("conversion_rate")
+		rate_unchanged = flt(previous.conversion_rate, precision) == flt(self.conversion_rate, precision)
+		return previous.currency != self.currency and rate_unchanged
 
 	def set_plc_conversion_rate(self):
 		if self.rm_cost_as_per in ["Valuation Rate", "Last Purchase Rate"]:
