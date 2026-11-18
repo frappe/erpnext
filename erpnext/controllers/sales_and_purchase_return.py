@@ -252,8 +252,9 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
-		taken_back = taken_back_qty.get(get_order_row(doc, row))
-		bundle_stock_qty = take_back_stock_qty(row, taken_back) if taken_back else get_packed_stock_qty(row)
+		bundle_stock_qty = get_packed_stock_qty(row)
+		if taken_back := taken_back_qty.get(get_order_row(doc, row)):
+			take_back_stock_qty(row, taken_back)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component in components[bundle]:
 			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
@@ -267,9 +268,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
 			component_stock_qty = get_component_stock_qty_per_unit(component, None, so_packed_item)
 			if taken_back and so_packed_item:
-				component_qty = take_back_component_qty(
-					so_packed_item, component_stock_qty, bundle_stock_qty, taken_back
-				)
+				component_qty = take_back_component_qty(so_packed_item, component_stock_qty, taken_back)
 			else:
 				component_qty = bundle_stock_qty * component_stock_qty
 			returned.stock_qty = flt(returned.stock_qty) + component_qty
