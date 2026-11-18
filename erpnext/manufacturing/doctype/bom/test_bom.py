@@ -2096,14 +2096,18 @@ class TestBOM(ERPNextTestSuite):
 		bom.submit()
 		self.assertEqual(bom.raw_material_cost, 60)
 
-		def assert_exploded_row():
+		def assert_exploded_row(rate, amount):
 			row = bom.exploded_items[0]
-			self.assertEqual((len(bom.exploded_items), row.stock_qty, row.rate, row.amount), (1, 2, 30, 60))
+			self.assertEqual(
+				(len(bom.exploded_items), row.stock_qty, row.rate, row.amount), (1, 2, rate, amount)
+			)
 
-		assert_exploded_row()
+		assert_exploded_row(30, 60)
+		make_stock_entry(item_code=rm_item, qty=10, rate=150, target="_Test Warehouse 1 - _TC")
 		bom.update_cost()
 		bom.reload()
-		assert_exploded_row()
+		self.assertEqual(bom.raw_material_cost, 110)
+		assert_exploded_row(55, 110)
 
 >>>>>>> 220704d (test: BOM exploded item used at two rates keeps the raw material cost)
 	def test_price_list_rate_valid_today(self):
