@@ -66,6 +66,23 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Stock Reservation Entry", reservation))
 
+	def test_manufacture_cancel_checks_only_its_own_extra_material(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		make_stock_entry(
+			item_code="_Test Item", qty=5, to_warehouse="Stores - _TC", purpose="Material Receipt"
+		)
+		_, manufacture = make_manufacture_with_extra_item(2)
+		so, _ = make_manufacture_with_extra_item(3)
+
+		si = make_sales_invoice(so.name)
+		si.items = [item for item in si.items if item.item_code == "_Test Item"]
+		si.submit()
+
+		manufacture.reload()
+		manufacture.cancel()
+		self.assertEqual(manufacture.docstatus, 2)
+
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
 
@@ -1784,3 +1801,18 @@ def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
 	scio.submit()
 	scio.reload()
 	return so, scio
+
+
+def make_manufacture_with_extra_item(qty):
+	"""Submit a Manufacture entry for a new inward order with `qty` of an own item outside the BOM."""
+	so, scio = create_so_scio()
+	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+	manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+	manufacture.append("items", {"item_code": "_Test Item", "qty": qty, "s_warehouse": "Stores - _TC"})
+	manufacture.submit()
+	return so, manufacture
