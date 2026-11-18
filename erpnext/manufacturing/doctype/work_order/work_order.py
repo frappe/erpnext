@@ -1102,7 +1102,7 @@ class WorkOrder(Document):
 			.on(se.name == sed.parent)
 			.select(sed.item_code, sed.s_warehouse, Sum(sed.transfer_qty).as_("qty"))
 			.where(
-				(se.purpose == "Manufacture")
+				se.purpose.isin(["Manufacture", "Material Consumption for Manufacture"])
 				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
 				& (se.docstatus == 1)
 				& (se.work_order == self.name)
