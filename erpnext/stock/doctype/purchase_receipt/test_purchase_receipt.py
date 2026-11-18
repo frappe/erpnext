@@ -6798,7 +6798,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_internal_pr_qty_change_in_another_uom(self):
 		"""Changing the qty of a draft internal receipt resizes its package in stock UOM."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		company = "_Test Company with perpetual inventory"
