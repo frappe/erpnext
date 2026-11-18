@@ -655,7 +655,11 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			return None
 
 		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
-		return None if stock_value is None else -flt(stock_value)
+		# a return of a row whose stock is all returned moves no stock
+		if stock_value is None and not self.doc.is_return:
+			return None
+
+		return -flt(stock_value)
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
