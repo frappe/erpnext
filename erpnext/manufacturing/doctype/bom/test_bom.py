@@ -2166,6 +2166,24 @@ class TestBOM(ERPNextTestSuite):
 		)[rm_item]
 		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
 
+	def test_rm_rate_is_rounded_to_its_precision(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(
+			item=make_item(properties={"is_stock_item": 1}).name,
+			raw_materials=[rm_item],
+			rm_qty=1000,
+			do_not_save=True,
+		)
+		bom.conversion_rate = 83
+		bom.insert()
+
+		# 10 INR at 83 INR a USD
+		self.assertEqual((bom.items[0].rate, bom.items[0].amount), (0.12, 120))
+		detail = bom.get_bom_material_detail({"item_code": rm_item, "fetch_rate": True})
+		self.assertEqual(detail["rate"], 0.12)
+
 
 def make_stage_items():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
