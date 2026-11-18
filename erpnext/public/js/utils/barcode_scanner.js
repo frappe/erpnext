@@ -254,9 +254,17 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			};
 
 			if (this.prompt_qty) {
-				frappe.prompt(__("Please enter quantity for item {0}", [item_code]), ({ value }) => {
-					increment(value).then(resolve, reject);
+				const dialog = new frappe.ui.Dialog({
+					title: __("Please enter quantity for item {0}", [item_code]),
+					fields: [{ fieldname: "value", fieldtype: "Float", label: __("Quantity"), reqd: 1 }],
+					primary_action: ({ value }) => {
+						resolve(increment(value));
+						dialog.hide();
+					},
+					// closing without a quantity abandons the scan; a no-op once one was entered
+					on_hide: reject,
 				});
+				dialog.show();
 			} else if (this.frm.has_items) {
 				this.prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no, resolve, reject);
 			} else {
