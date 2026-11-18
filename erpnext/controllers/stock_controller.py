@@ -1133,20 +1133,19 @@ def make_bundle_for_material_transfer(**kwargs):
 		for idx, row in enumerate(keep, start=1):
 			row.idx = idx
 
-	qty = 0
 	if (
-		len(bundle_doc.entries) == 1
+		flt(kwargs.qty)
 		and abs(flt(kwargs.qty)) < abs(flt(bundle_doc.total_qty))
 		and not bundle_doc.has_serial_no
 	):
-		qty = kwargs.qty
+		bundle_doc.entries = get_entries_up_to_qty(bundle_doc.entries, kwargs.qty)
 
 	if kwargs.total_qty and not bundle_doc.has_serial_no:
 		set_entries_total_qty(bundle_doc.entries, kwargs.total_qty)
 
 	for row in bundle_doc.entries:
 		row.is_outward = 0
-		row.qty = abs(qty or row.qty)
+		row.qty = abs(row.qty)
 		row.stock_value_difference = abs(row.stock_value_difference)
 		if kwargs.type_of_transaction == "Outward":
 			row.qty *= -1
@@ -1200,6 +1199,23 @@ def add_transfer_to_reservation(sre_doc, transfer) -> None:
 
 	transfer.qty -= qty
 	sre_doc.transferred_qty = flt(flt(sre_doc.transferred_qty) + qty, sre_doc.precision("transferred_qty"))
+
+
+def get_entries_up_to_qty(entries, qty):
+	"""The entries, in order, that make up `qty`, the last one cut down to fit."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	remaining = abs(flt(qty))
+	kept = []
+	for row in entries:
+		if remaining <= 0:
+			break
+
+		row.qty = min(abs(flt(row.qty)), remaining)
+		remaining = flt(remaining - row.qty, precision)
+		row.idx = len(kept) + 1
+		kept.append(row)
+
+	return kept
 
 
 def set_entries_total_qty(entries, total_qty):
