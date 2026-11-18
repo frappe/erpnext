@@ -6029,6 +6029,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([row.qty for row in proposal.items], [4])
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"material_consumption": 1,
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+		},
+	)
+	def test_transfer_based_consumption_proposal_drains_edited_consumption(self):
+		consumption = "Material Consumption for Manufacture"
+		work_order = make_transferred_consumption_work_order()
+		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, consumption, 4))
+		stock_entry.items[0].qty = 12
+		stock_entry.submit()
+
+		proposal = frappe.get_doc(make_stock_entry(work_order.name, consumption))
+		self.assertEqual(proposal.fg_completed_qty, 6)
+		self.assertEqual([row.qty for row in proposal.items], [8])
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
 	)
