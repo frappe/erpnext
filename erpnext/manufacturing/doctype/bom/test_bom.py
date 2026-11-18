@@ -2131,7 +2131,7 @@ class TestBOM(ERPNextTestSuite):
 				"item": make_item(properties={"is_stock_item": 1}).name,
 				"company": "_Test Company",
 				"currency": "USD",
-				"conversion_rate": 80,
+				"conversion_rate": 80.0000000001,  # beyond the field precision
 				"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
 			}
 		).insert()
