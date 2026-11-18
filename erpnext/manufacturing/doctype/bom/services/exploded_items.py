@@ -62,8 +62,7 @@ class BOMExplodedItemsService:
 		# the same item at another rate, e.g. from a sub-assembly: merge at the weighted rate
 		amount = flt(existing.stock_qty) * flt(existing.rate) + flt(args.stock_qty) * flt(args.rate)
 		existing.stock_qty += args.stock_qty
-		if existing.stock_qty:
-			existing.rate = amount / existing.stock_qty
+		existing.rate = amount / existing.stock_qty
 
 	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
 		"""Add all items from Flat BOM of child BOM"""
