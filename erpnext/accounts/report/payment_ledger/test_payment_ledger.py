@@ -34,6 +34,25 @@ class TestPaymentLedger(ERPNextTestSuite):
 		outstanding = [x for x in data if x.get("against_voucher_no") == "Outstanding:"]
 		self.assertEqual(outstanding[0].get("amount"), 0)
 
+	def test_show_cancelled_entries(self):
+		sinv = create_sales_invoice(
+			company=self.company,
+			debit_to=self.debit_to,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			income_account=self.income_account,
+			warehouse=self.warehouse,
+		)
+		sinv.cancel()
+
+		filters = frappe._dict({"company": self.company, "voucher_no": sinv.name})
+		self.assertFalse(execute(filters=filters)[1])
+
+		filters.show_cancelled_entries = 1
+		amounts = [x.amount for x in execute(filters=filters)[1] if x.get("voucher_no") == sinv.name]
+		self.assertEqual(len(amounts), 2)
+		self.assertEqual(sum(amounts), 0)
+
 	def test_user_permission_on_company(self):
 		own = create_sales_invoice(
 			company=self.company,

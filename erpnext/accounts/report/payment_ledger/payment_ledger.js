@@ -84,10 +84,18 @@ function get_filters() {
 			fieldtype: "Check",
 			width: 100,
 		},
+		{
+			fieldname: "show_cancelled_entries",
+			label: __("Show Cancelled Entries"),
+			fieldtype: "Check",
+			width: 100,
+		},
 	];
 	return filters;
 }
 
 frappe.query_reports["Payment Ledger"] = {
 	filters: get_filters(),
+	// own check area, else checkboxes land in General Ledger's stale one and vanish
+	separate_check_filters: true,
 };
