@@ -107,6 +107,14 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					get_stock_value_difference(doc.name, item.name, item.from_warehouse)
 				)
 				credit_amount = outgoing_amount
+			elif (
+				doc.get("is_return")
+				and item.return_qty_from_rejected_warehouse
+				and not doc.is_internal_transfer()
+			):
+				# Take back the rejected stock value the receipt credited, less the charges it carried.
+				outgoing_amount = flt(stock_value_diff) - flt(item.item_tax_amount)
+				credit_amount = outgoing_amount
 
 			if (
 				item.get("rejected_qty")
