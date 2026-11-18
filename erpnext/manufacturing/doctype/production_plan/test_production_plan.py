@@ -2711,6 +2711,28 @@ class TestProductionPlan(ERPNextTestSuite):
 		):
 			plans[1].submit()
 
+	def test_production_plan_cannot_submit_closed_sales_order_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "Test Production Item 1", "qty": 5, "rate": 100},
+				{"item_code": "Subassembly Item 1", "qty": 7, "rate": 100},
+			]
+		)
+		plan = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", skip_getting_mr_items=True, do_not_submit=True
+		)
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 1)
+		self.assertRaisesRegex(frappe.ValidationError, "Row #2", plan.submit)
+
+		plan.reload()
+		plan.set("po_items", [row for row in plan.po_items if row.sales_order_item == so.items[0].name])
+		plan.save()
+		so.reload()
+		so.update_status("Closed")
+		self.assertRaisesRegex(frappe.ValidationError, "Row #1", plan.submit)
+
 	def test_production_plan_pending_qty_independent_items(self):
 		"Test Prod Plan impact if items are added independently (no from SO or MR)."
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
