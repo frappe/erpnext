@@ -3047,8 +3047,12 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		returned.update_stock = 1
 		returned.submit()
 
-		for invoice in (pi, returned):
+		for invoice, accepted_value in ((pi, 134), (returned, -134)):
 			self.assert_warehouse_accounts_match_stock(invoice)
+
+			stock_value = self.get_stock_value_by_warehouse(invoice)
+			self.assertEqual(flt(stock_value[row.warehouse], 2), accepted_value)
+			self.assertEqual(flt(stock_value[row.from_warehouse], 2), -accepted_value)
 
 	def test_landed_cost_on_an_internal_transfer_invoice(self):
 		"""Landed cost on a stock updating internal transfer invoice goes into the accepted warehouse."""
