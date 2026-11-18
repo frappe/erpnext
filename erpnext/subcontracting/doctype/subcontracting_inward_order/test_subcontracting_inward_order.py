@@ -84,6 +84,24 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		manufacture.cancel()
 		self.assertEqual(manufacture.docstatus, 2)
 
+	def test_manufacture_cancel_checks_billed_bom_own_material(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		next(item for item in manufacture.items if item.item_code == "Self RM").qty = 6
+		manufacture.submit()
+		make_sales_invoice(so.name).submit()
+
+		manufacture.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "billed quantity", manufacture.cancel)
+
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
 
