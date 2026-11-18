@@ -1212,17 +1212,18 @@ def is_rejected_subcontracting_return(return_row, original_rejected_warehouse) -
 
 
 def get_warehouses_for_return(voucher_type, name):
+	"""Warehouses the receipt row put stock into."""
 	warehouses = []
 	warehouse_details = frappe.get_all(
 		voucher_type + " Item",
 		filters={"name": name, "docstatus": 1},
-		fields=["warehouse", "rejected_warehouse"],
+		fields=["warehouse", "rejected_warehouse", "qty", "rejected_qty"],
 	)
 
 	for d in warehouse_details:
-		if d.warehouse:
+		if d.warehouse and d.qty:
 			warehouses.append(d.warehouse)
-		if d.rejected_warehouse:
+		if d.rejected_warehouse and d.rejected_qty:
 			warehouses.append(d.rejected_warehouse)
 
 	return warehouses
