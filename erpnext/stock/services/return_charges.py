@@ -31,7 +31,7 @@ class ReturnChargesService:
 		returned_qty = self.get_returned_qty_by_original_row()
 		total_qty = add_returned_qty(self.get_earlier_returned_qty_by_original_row(), returned_qty)
 		# an earlier return's charge that matches none of the original's hides what that return reversed
-		earlier_charges = self.get_earlier_returned_charges(original_charges)
+		earlier_charges = self.get_earlier_returned_charges(get_valuation_charges(original))
 		can_take_rest = earlier_charges is not None
 		for tax, original_charge in pair_with_original_charges(charges, original_charges):
 			if not original_charge:
@@ -58,8 +58,8 @@ class ReturnChargesService:
 		}
 
 	def get_earlier_returned_charges(self, original_charges) -> defaultdict | None:
-		"""Actual valuation charges of the other submitted stock returns in company currency, added up by
-		the original charge they were mapped from. None if one of them matches none of the original's."""
+		"""Valuation charges of the other submitted stock returns in company currency, added up by the
+		original charge they were mapped from. None if one of them matches none of the original's."""
 		filters = {"docstatus": 1, "is_return": 1, "return_against": self.doc.return_against}
 		if self.doc.doctype == "Purchase Invoice":
 			filters["update_stock"] = 1
@@ -72,10 +72,16 @@ class ReturnChargesService:
 				filters={
 					"parenttype": self.doc.doctype,
 					"parent": ["in", earlier_returns],
-					"charge_type": "Actual",
 					"category": ["in", ["Valuation", "Valuation and Total"]],
 				},
-				fields=["parent", "original_tax_row", "account_head", "description", "base_tax_amount"],
+				fields=[
+					"parent",
+					"charge_type",
+					"original_tax_row",
+					"account_head",
+					"description",
+					"base_tax_amount",
+				],
 				order_by="idx",
 			):
 				taxes_by_return[tax.parent].append(tax)
@@ -83,10 +89,10 @@ class ReturnChargesService:
 		charges = defaultdict(float)
 		for taxes in taxes_by_return.values():
 			for tax, original_charge in pair_with_original_charges(taxes, original_charges):
-				if not original_charge:
+				if original_charge and original_charge.charge_type == tax.charge_type:
+					charges[original_charge.name] += flt(tax.base_tax_amount)
+				elif flt(tax.base_tax_amount):
 					return None
-
-				charges[original_charge.name] += flt(tax.base_tax_amount)
 
 		return charges
 
@@ -193,9 +199,9 @@ def add_returned_qty(earlier_qty, returned_qty) -> dict:
 	return total_qty
 
 
+def get_valuation_charges(doc) -> list:
+	return [tax for tax in doc.get("taxes") if tax.category in ("Valuation", "Valuation and Total")]
+
+
 def get_actual_valuation_charges(doc) -> list:
-	return [
-		tax
-		for tax in doc.get("taxes")
-		if tax.charge_type == "Actual" and tax.category in ("Valuation", "Valuation and Total")
-	]
+	return [tax for tax in get_valuation_charges(doc) if tax.charge_type == "Actual"]
