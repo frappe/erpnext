@@ -78,7 +78,10 @@ from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timeshe
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.stock.doctype.delivery_note.delivery_note import (
+	update_billed_amount_based_on_so,
+	update_billing_percentage_of_returns,
+)
 from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -2466,6 +2469,17 @@ class SalesInvoice(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
+
+		# Returns of all deliveries of a Sales Order row share the row's over-billed qty.
+		so_details = [d.so_detail for d in self.items if d.so_detail]
+		sibling_delivery_notes = frappe.get_all(
+			"Delivery Note Item",
+			filters={"so_detail": ("in", so_details), "docstatus": 1},
+			pluck="parent",
+			distinct=True,
+		)
+		for dn in set(updated_delivery_notes + sibling_delivery_notes):
+			update_billing_percentage_of_returns(dn)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		super().on_recurring(reference_doc, auto_repeat_doc)
