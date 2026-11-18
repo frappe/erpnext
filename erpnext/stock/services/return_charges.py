@@ -54,20 +54,22 @@ class ReturnChargesService:
 		return all(row.get(self.detail_field) for row in self.doc.get("items"))
 
 	def get_earlier_returned_qty_by_original_row(self) -> dict:
-		"""Accepted and rejected stock qty of the other submitted returns, by original row."""
+		"""Accepted and rejected stock qty of the other submitted stock returns, by original row."""
 		return {
 			row_name: {"accepted": flt(qty.stock_qty), "rejected": flt(qty.rejected_qty)}
-			for (_item_code, row_name), qty in get_already_returned_items(self.doc).items()
+			for (_item_code, row_name), qty in get_already_returned_items(
+				self.doc, stock_returns_only=True
+			).items()
 		}
 
 	def get_earlier_returned_charges(self, original_charges) -> defaultdict:
-		"""Actual valuation charges of the other submitted returns in company currency, added up by the
-		original charge they were mapped from."""
-		earlier_returns = frappe.get_all(
-			self.doc.doctype,
-			filters={"docstatus": 1, "is_return": 1, "return_against": self.doc.return_against},
-			pluck="name",
-		)
+		"""Actual valuation charges of the other submitted stock returns in company currency, added up by
+		the original charge they were mapped from."""
+		filters = {"docstatus": 1, "is_return": 1, "return_against": self.doc.return_against}
+		if self.doc.doctype == "Purchase Invoice":
+			filters["update_stock"] = 1
+
+		earlier_returns = frappe.get_all(self.doc.doctype, filters=filters, pluck="name")
 		taxes_by_return = defaultdict(list)
 		if earlier_returns:
 			for tax in frappe.get_all(
