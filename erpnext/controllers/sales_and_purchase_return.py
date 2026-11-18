@@ -221,7 +221,10 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		get_order_packed_items,
 		get_order_row,
 		get_product_bundle_items_by_name,
+		get_taken_back_qty,
 		pop_order_packed_item,
+		take_back_component_qty,
+		take_back_stock_qty,
 	)
 
 	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
@@ -233,6 +236,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		)
 	)
 	order_packed_items = get_order_packed_items(doc)
+	taken_back_qty = get_taken_back_qty(doc, order_packed_items)
 	bundles, components = {}, {}
 	for row in returned_rows:
 		if row.item_code not in bundle_items:
@@ -249,6 +253,8 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
 		bundle_stock_qty = get_packed_stock_qty(row)
+		if taken_back := taken_back_qty.get(get_order_row(doc, row)):
+			take_back_stock_qty(row, taken_back)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component in components[bundle]:
 			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
@@ -261,7 +267,11 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 			)
 			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
 			component_stock_qty = get_component_stock_qty_per_unit(component, None, so_packed_item)
-			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * component_stock_qty
+			if taken_back and so_packed_item:
+				component_qty = take_back_component_qty(so_packed_item, component_stock_qty, taken_back)
+			else:
+				component_qty = bundle_stock_qty * component_stock_qty
+			returned.stock_qty = flt(returned.stock_qty) + component_qty
 			if flt(returned.stock_qty, row.precision("stock_qty")) > flt(
 				ref.stock_qty, row.precision("stock_qty")
 			):
@@ -385,9 +395,10 @@ def get_returned_stock_qty(row):
 	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
 
 
-def get_packed_stock_qty(row):
-	"""Stock qty of a returned bundle row as packing reads it, rounded when the row rounds its stock qty."""
-	stock_qty = get_returned_stock_qty(row)
+def get_packed_stock_qty(row, stock_qty_taken_back=0):
+	"""Stock qty of a returned bundle row, plus what earlier returns of its row took back, as packing reads it:
+	rounded when the row rounds its stock qty."""
+	stock_qty = stock_qty_taken_back + get_returned_stock_qty(row)
 	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
 	return stock_qty

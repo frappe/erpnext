@@ -523,6 +523,48 @@ class TestDeliveryNote(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_return_of_a_bundle_whose_stock_qty_rounds(self):
 		"""A bundle row whose stock qty rounds returns its components at the qty they were packed at."""
+		dn = self.make_bundle_delivery_whose_stock_qty_rounds()
+
+		make_sales_return(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_returned, 100)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_returns_of_parts_of_a_bundle_whose_stock_qty_rounds(self):
+		"""The return of the rest of a bundle row takes back all of its components that are left."""
+		dn = self.make_bundle_delivery_whose_stock_qty_rounds()
+
+		first_return = make_sales_return(dn.name)
+		first_return.items[0].qty = -3
+		first_return.submit()
+		last_return = make_sales_return(dn.name)
+		last_return.submit()
+
+		self.assertEqual(first_return.packed_items[0].qty, -101)
+		self.assertEqual(last_return.packed_items[0].qty, -100)
+		dn.reload()
+		self.assertEqual(dn.per_returned, 100)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_return_of_a_bundle_after_a_cancelled_return_of_a_part(self):
+		"""A return made after an earlier return of a part is cancelled takes back what is left of the components."""
+		dn = self.make_bundle_delivery_whose_stock_qty_rounds()
+
+		first_return = make_sales_return(dn.name)
+		first_return.items[0].qty = -3
+		first_return.submit()
+		make_sales_return(dn.name).submit()
+		first_return.cancel()
+		last_return = make_sales_return(dn.name)
+		last_return.submit()
+
+		self.assertEqual(last_return.packed_items[0].qty, -101)
+
+	def make_bundle_delivery_whose_stock_qty_rounds(self):
+		"""Delivery of 6 Box of a bundle at 0.3356 Kg per Box (2.01 Kg), packing 100 components per Kg."""
 		bundle = make_item(
 			"_Test Bundle For Rounded Returns",
 			{"is_stock_item": 0, "stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
@@ -533,11 +575,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn = create_delivery_note(item_code=bundle, qty=6, rate=100, do_not_submit=True)
 		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
 		dn.submit()
-
-		make_sales_return(dn.name).submit()
-
-		dn.reload()
-		self.assertEqual(dn.per_returned, 100)
+		return dn
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")

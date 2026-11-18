@@ -12,6 +12,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
+from erpnext.controllers.sales_and_purchase_return import get_packed_stock_qty, get_returned_stock_qty
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
 
 
@@ -78,6 +79,7 @@ def make_packing_list(doc, order_packed_items=None):
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 	if order_packed_items is None:
 		order_packed_items = get_order_packed_items(doc)
+	taken_back_qty = get_taken_back_qty(doc, order_packed_items)
 
 	reset = reset_packing_list(doc)
 
@@ -91,6 +93,8 @@ def make_packing_list(doc, order_packed_items=None):
 			item_row.is_product_bundle = 1 if bundle_name else 0
 
 		if bundle_name:
+			if taken_back := taken_back_qty.get(get_order_row(doc, item_row)):
+				take_back_stock_qty(item_row, taken_back)
 			for bundle_item, so_packed_item in get_bundle_components(
 				doc, item_row, bundle_name, order_packed_items
 			):
@@ -104,7 +108,9 @@ def make_packing_list(doc, order_packed_items=None):
 				)
 				pi_row.product_bundle = bundle_name
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
+				update_packed_item_basic_data(
+					item_row, pi_row, bundle_item, item_data, so_packed_item, taken_back
+				)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc, so_packed_item)
 				update_packed_item_price_data(pi_row, item_data, doc)
 
@@ -359,17 +365,19 @@ def get_packed_item_details(item_code, company):
 	return query.run(as_dict=True)[0]
 
 
-def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data, so_packed_item=None):
+def update_packed_item_basic_data(
+	main_item_row, pi_row, packing_item, item_data, so_packed_item=None, taken_back=None
+):
 	pi_row.parent_item = main_item_row.item_code
 	pi_row.parent_detail_docname = main_item_row.name or main_item_row.idx
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
-	pi_row.qty = flt(
-		get_component_stock_qty_per_unit(packing_item, item_data.stock_uom, so_packed_item)
-		* flt(main_item_row.stock_qty),
-		pi_row.precision("qty"),
-	)
+	qty_per_unit = get_component_stock_qty_per_unit(packing_item, item_data.stock_uom, so_packed_item)
+	if taken_back and so_packed_item:
+		pi_row.qty = -take_back_component_qty(so_packed_item, qty_per_unit, taken_back)
+	else:
+		pi_row.qty = flt(qty_per_unit * flt(main_item_row.stock_qty), pi_row.precision("qty"))
 	pi_row.conversion_factor = main_item_row.conversion_factor
 	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
@@ -450,9 +458,87 @@ def get_order_row(doc, item_row):
 	"""Row whose packed rows ``item_row`` keeps the qty of."""
 	if not doc.get("is_return"):
 		return item_row.get("so_detail")
-	return item_row.get(
-		"dn_detail" if doc.doctype == "Delivery Note" else frappe.scrub(doc.doctype) + "_item"
+	return item_row.get(get_return_against_row_field(doc))
+
+
+def get_return_against_row_field(doc):
+	return "dn_detail" if doc.doctype == "Delivery Note" else frappe.scrub(doc.doctype) + "_item"
+
+
+def get_taken_back_qty(doc, order_packed_items) -> dict:
+	"""What the submitted returns of each row a return takes back from have taken back of it: its stock qty, and
+	the qty of each of its packed rows by name."""
+	if not doc.get("is_return"):
+		return {}
+
+	taken_back = {
+		row: frappe._dict(stock_qty=0.0, packed_qty={})
+		for item in doc.get("items")
+		if (row := get_order_row(doc, item))
+	}
+	if not taken_back:
+		return {}
+
+	field = get_return_against_row_field(doc)
+	parent = frappe.qb.DocType(doc.doctype)
+	item = frappe.qb.DocType(f"{doc.doctype} Item")
+	packed_item = frappe.qb.DocType("Packed Item")
+	rows = (
+		frappe.qb.from_(item)
+		.join(parent)
+		.on(parent.name == item.parent)
+		.join(packed_item)
+		.on((packed_item.parent == item.parent) & (packed_item.parent_detail_docname == item.name))
+		.select(
+			item.name,
+			item[field].as_("returned_row"),
+			item.qty,
+			item.conversion_factor,
+			packed_item.parent_item,
+			packed_item.item_code,
+			packed_item.qty.as_("packed_qty"),
+		)
+		.where(
+			(parent.return_against == doc.return_against)
+			& (parent.docstatus == 1)
+			& item[field].isin(list(taken_back))
+		)
+		.orderby(item.name)
+		.orderby(packed_item.idx)
+		.run(as_dict=True)
 	)
+
+	returned_packed_rows = {}
+	for row in rows:
+		returned = taken_back[row.returned_row]
+		if row.name not in returned_packed_rows:
+			returned.stock_qty += get_returned_stock_qty(row)
+			returned_packed_rows[row.name] = list(order_packed_items.get(row.returned_row, []))
+
+		if packed_row := pop_order_packed_item(
+			returned_packed_rows[row.name], row.parent_item, row.item_code
+		):
+			returned.packed_qty[packed_row.name] = returned.packed_qty.get(packed_row.name, 0) + abs(
+				flt(row.packed_qty)
+			)
+
+	return taken_back
+
+
+def take_back_stock_qty(row, taken_back):
+	"""Add ``row`` to the stock qty taken back of its returned row, and keep the total as packing reads it."""
+	taken_back.packed_stock_qty = get_packed_stock_qty(row, taken_back.stock_qty)
+	taken_back.stock_qty += get_returned_stock_qty(row)
+
+
+def take_back_component_qty(packed_row, qty_per_unit, taken_back) -> float:
+	"""Qty of a returned ``packed_row`` a return row takes back: what all of the row returned so far packs, less
+	what earlier returns took back. Returns of parts then add up to what was delivered."""
+	precision = frappe.get_precision("Packed Item", "qty")
+	taken = taken_back.packed_qty.get(packed_row.name, 0)
+	qty = max(flt(flt(qty_per_unit * taken_back.packed_stock_qty, precision) - taken, precision), 0)
+	taken_back.packed_qty[packed_row.name] = taken + qty
+	return qty
 
 
 def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
