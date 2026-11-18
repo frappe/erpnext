@@ -1556,6 +1556,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.submit()
 
+<<<<<<< HEAD
 	def test_rm_return_cancel_blocked_by_later_work_order(self):
 		so, scio = create_so_scio()
 		batch_no = receive_batch_twice(scio)[0]
@@ -1719,6 +1720,22 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		rm_return.cancel()
 		self.assertEqual(rm_return.docstatus, 2)
+=======
+	def test_material_from_customer_keeps_fully_received_material_at_zero(self):
+		for received_qty in (5, 7):
+			with self.subTest(received_qty=received_qty):
+				so, scio = create_so_scio()
+				rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+				rm_in.items = [item for item in rm_in.items if item.item_code == "Basic RM"]
+				rm_in.items[0].qty = received_qty
+				rm_in.submit()
+
+				scio.reload()
+				rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+				row = next(item for item in rm_in.items if item.item_code == "Basic RM")
+				self.assertEqual(row.qty, 0)
+				self.assertTrue(row.scio_detail)
+>>>>>>> 446de9c (test: Material from Customer keeps a fully received material at zero qty)
 
 	def test_variant_without_bom_uses_template_bom(self):
 		variant, template_bom = make_subcontracted_variant()
