@@ -2126,15 +2126,20 @@ class WorkOrder(Document):
 			transferred_items[item_code] = flt(transferred_items.get(item_code)) + qty
 
 		row_wise_serial_batch = frappe._dict({})
+		sent_to_subcontractor = {}
 		if self.reserve_stock:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
+			sent_to_subcontractor = self._subcontract_transferred_qty_by_item()
 
 		transferred_by_row = distribute_transfers_over_rows(self.required_items, transferred_by_key)
 		for row in self.required_items:
 			transferred_qty = transferred_by_row[row.name]
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
 			if self.reserve_stock:
-				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
+				# stock sent to a subcontractor uses the reservation too
+				sent_qty = flt(sent_to_subcontractor.pop((row.item_code, row.source_warehouse), 0))
+				used_qty = flt(transferred_qty + sent_qty, row.precision("transferred_qty"))
+				self.update_qty_in_stock_reservation(row, used_qty, row_wise_serial_batch)
 
 		self.recompute_material_transferred_for_manufacturing(transferred_items)
 
