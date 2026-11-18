@@ -666,7 +666,7 @@ class SubcontractingReceipt(SubcontractingController):
 		per_unit = secondary_item.stock_qty / bom.quantity
 		received_qty = self.get_secondary_qty(item, per_unit, fg_qty_before, "received_qty")
 		qty = self.get_secondary_qty(
-			item, per_unit - (secondary_item.process_loss_qty / bom.quantity), fg_qty_before, "qty"
+			item, per_unit * (1 - flt(secondary_item.process_loss_per) / 100), fg_qty_before, "qty"
 		)
 		# a return's zero row is dropped, or priced from the receipt once it gets the qty left
 		rate = (
