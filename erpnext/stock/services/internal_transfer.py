@@ -98,9 +98,7 @@ class StockInternalTransferService:
 		for key, transferred_qty in item_wise_transfer_qty.items():
 			recevied_qty = flt(item_wise_received_qty.get(key), precision)
 			if over_receipt_allowance:
-				transferred_qty = transferred_qty + flt(
-					transferred_qty * over_receipt_allowance / 100, precision
-				)
+				transferred_qty += transferred_qty * over_receipt_allowance / 100
 
 			if recevied_qty > flt(transferred_qty, precision):
 				from erpnext.controllers.status_updater import OverAllowanceError
