@@ -13,7 +13,12 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
+from erpnext.stock.get_item_details import (
+	get_bundle_row_stock_qty,
+	get_conversion_factor,
+	get_item_details,
+	get_price_list_rate,
+)
 
 
 class PackedItem(Document):
@@ -98,9 +103,10 @@ def make_packing_list(doc, order_packed_items=None):
 			return_qty = get_return_qty(doc, item_row, component_rows, returned_packed_qty)
 			for bundle_item, so_packed_item in component_rows:
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
+				qty = get_packed_qty(item_row, bundle_item, item_data, so_packed_item)
 				# a component picked from several locations gets a packed row per location
 				locations = get_pick_list_locations(
-					doc, item_row, bundle_item, item_data, so_packed_item, stale_packed_items_table
+					doc, item_row, bundle_item, qty, so_packed_item, stale_packed_items_table
 				)
 				for location in locations or [None]:
 					pi_row = add_packed_item_row(
@@ -113,7 +119,7 @@ def make_packing_list(doc, order_packed_items=None):
 						location=location,
 					)
 					pi_row.product_bundle = bundle_name
-					update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
+					update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, qty)
 					if so_packed_item and so_packed_item.name in return_qty:
 						pi_row.qty = return_qty[so_packed_item.name]
 					update_packed_item_stock_data(
@@ -144,8 +150,8 @@ def get_bundle_components(doc, item_row, bundle_name, order_packed_items):
 
 
 def get_kept_packed_items(doc):
-	"""Yield (packed row, bundle row, stock qty per bundle unit) for each packed row of the last
-	build that make_packing_list keeps for the bundle rows as they are now."""
+	"""Yield (packed row, stock qty) for each packed row of the last build that make_packing_list
+	keeps for the bundle rows as they are now."""
 	packed_items_table = get_indexed_packed_items_table(doc)
 	order_packed_items = get_order_packed_items(doc)
 	# only a bundle row that has packed rows can keep one
@@ -160,20 +166,26 @@ def get_kept_packed_items(doc):
 		for bundle_item, so_packed_item in get_bundle_components(
 			doc, item_row, bundle_name, order_packed_items
 		):
-			stale_rows = get_stale_packed_rows(
-				doc,
-				item_row,
-				bundle_item,
-				packed_items_table,
-				get_linked_packed_item(doc, so_packed_item),
-			)
-			if stale_rows:
-				packed_row = stale_rows.pop(0)
-				yield (
-					packed_row,
-					item_row,
-					get_component_stock_qty_per_unit(bundle_item, packed_row.uom, so_packed_item),
-				)
+			yield from get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_items_table)
+
+
+def get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_items_table):
+	"""Yield (packed row, stock qty) for each stale row of the component that a re-pack keeps,
+	one per Pick List location it is packed from."""
+	stale_rows = get_stale_packed_rows(
+		doc, item_row, bundle_item, packed_items_table, get_linked_packed_item(doc, so_packed_item)
+	)
+	if not stale_rows:
+		return
+
+	precision = frappe.get_precision("Packed Item", "qty")
+	qty_per_unit = get_component_stock_qty_per_unit(bundle_item, stale_rows[0].uom, so_packed_item)
+	qty = flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision)
+	locations = get_pick_list_locations(doc, item_row, bundle_item, qty, so_packed_item, packed_items_table)
+	for location in locations or [None]:
+		if stale_rows:
+			packed_row = stale_rows.pop(get_stale_row_idx(stale_rows, location))
+			yield packed_row, flt(location.pack_qty, precision) if location else qty
 
 
 def is_product_bundle(item_code: str) -> bool:
@@ -410,13 +422,13 @@ def get_packed_item_details(item_code, company):
 	return query.run(as_dict=True)[0]
 
 
-def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data, so_packed_item=None):
+def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data, qty):
 	pi_row.parent_item = main_item_row.item_code
 	pi_row.parent_detail_docname = main_item_row.name or main_item_row.idx
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
-	pi_row.qty = get_packed_qty(main_item_row, packing_item, item_data, so_packed_item)
+	pi_row.qty = qty
 	pi_row.conversion_factor = main_item_row.conversion_factor
 	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
@@ -605,8 +617,8 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 	return pairs
 
 
-def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_packed_item, packed_items_table):
-	"""Pick List rows to pack a component from, each with its ``pack_qty``."""
+def get_pick_list_locations(doc, main_item_row, packing_item, qty, so_packed_item, packed_items_table):
+	"""Pick List rows to pack the component's stock ``qty`` from, each with its ``pack_qty``."""
 	if not main_item_row.get("against_pick_list"):
 		return []
 
@@ -639,7 +651,6 @@ def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_pack
 	)
 	stale_rows = packed_items_table.get(key, [])
 	pl_rows.sort(key=lambda row: not any(is_packed_from(stale_row, row) for stale_row in stale_rows))
-	qty = get_packed_qty(main_item_row, packing_item, item_data, so_packed_item)
 	return allocate_picked_qty(pl_rows, qty)
 
 
