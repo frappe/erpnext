@@ -372,13 +372,14 @@ class SubcontractingInwardOrder(SubcontractingController):
 				{"name": rm_item.bom_detail_no},
 				"qty_consumed_per_unit",
 			)
-			return flt(
+			qty = flt(
 				rm_item.required_qty
 				- rm_item.received_qty
 				+ rm_item.returned_qty
 				+ qty_consumed_per_unit * data.process_loss_qty,
 				frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty"),
 			)
+			return max(qty, 0)
 
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
@@ -392,16 +393,12 @@ class SubcontractingInwardOrder(SubcontractingController):
 				if not rm_item.required_qty or not rm_item.is_customer_provided_item:
 					continue
 
-				qty = calculate_qty_as_per_bom(rm_item)
-				if qty <= 0:
-					continue
-
 				target.append(
 					"items",
 					{
 						"scio_detail": rm_item.get("name"),
 						"item_code": rm_item.get("rm_item_code"),
-						"qty": qty,
+						"qty": calculate_qty_as_per_bom(rm_item),
 						"t_warehouse": rm_item.get("warehouse"),
 						"stock_uom": rm_item.get("stock_uom"),
 					},

@@ -1737,7 +1737,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return.cancel()
 		self.assertEqual(rm_return.docstatus, 2)
 
-	def test_material_from_customer_skips_fully_received_material(self):
+	def test_material_from_customer_keeps_fully_received_material_at_zero(self):
 		for received_qty in (5, 7):
 			with self.subTest(received_qty=received_qty):
 				so, scio = create_so_scio()
@@ -1748,10 +1748,9 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 				scio.reload()
 				rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-				self.assertEqual(
-					[(item.item_code, item.qty) for item in rm_in.items],
-					[("RM with Serial", 5), ("RM with Batch", 5), ("RM with Serial and Batch", 5)],
-				)
+				row = next(item for item in rm_in.items if item.item_code == "Basic RM")
+				self.assertEqual(row.qty, 0)
+				self.assertTrue(row.scio_detail)
 
 	def test_variant_without_bom_uses_template_bom(self):
 		variant, template_bom = make_subcontracted_variant()
