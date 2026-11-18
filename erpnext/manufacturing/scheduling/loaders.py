@@ -256,7 +256,8 @@ def get_operation_duration(row, qty, bom_qty, batch_size_flags):
 	"""Operation time for `qty`, per batch as in the Work Order."""
 	if row.fixed_time:
 		return flt(row.time_in_mins)
-	return _operation_time_per_unit(row, bom_qty, 1, False, batch_size_flags) * flt(qty)
+	duration = _operation_time_per_unit(row, bom_qty, 1, False, batch_size_flags) * flt(qty)
+	return flt(duration, frappe.get_precision("Work Order Operation", "time_in_mins"))
 
 
 def build_operation_task(row, duration, prefix, previous_group, earliest_start, priority):
