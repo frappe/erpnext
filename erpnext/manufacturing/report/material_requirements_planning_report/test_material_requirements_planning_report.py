@@ -165,6 +165,20 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(get_item_lead_time(rm_a, "Purchase"), 21)
 		self.assertEqual(get_item_lead_time(rm_b, "Purchase"), 9)
 
+	def test_purchase_lead_time_uses_ordering_supplier(self):
+		rm = make_item("_Test MRP Ordering Supplier Lead RM", {"is_stock_item": 1}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Lead Time",
+				"item_code": rm,
+				"purchase_time": 3,
+				"supplier_lead_times": [{"supplier": SUPPLIER, "purchase_time": 10, "buffer_time": 1}],
+			}
+		).insert()
+
+		self.assertEqual(get_item_lead_time(rm, "Purchase"), 3)
+		self.assertEqual(get_item_lead_time(rm, "Purchase", supplier=SUPPLIER), 11)
+
 	@freeze_time("2026-09-01 10:00:00.123456")
 	def test_manufacturing_buffer_moves_release_date_earlier(self):
 		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
