@@ -478,6 +478,31 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual(actual_qty, -5)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_stock_return_of_a_row_whose_stock_is_all_returned_books_no_stock_value(self):
+		"""The return that moves no stock, as the row's other returns took it all back, books no stock value."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = make_item(
+			"_Test Item For Returns Of Parts",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.006}]},
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		pi = make_purchase_invoice(item_code=item, qty=2, rate=100, update_stock=1, do_not_save=1)
+		pi.items[0].update({"uom": "Box", "conversion_factor": 0.006})
+		pi.submit()
+
+		first_return = make_return_doc(pi.doctype, pi.name)
+		first_return.items[0].update({"qty": -1, "received_qty": -1})
+		first_return.submit()
+		last_return = make_return_doc(pi.doctype, pi.name)
+		last_return.submit()
+
+		stock_account = get_inventory_account(pi.company, pi.items[0].warehouse)
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"voucher_no": last_return.name, "account": stock_account})
+		)
+
 	def test_settled_purchase_invoice_cannot_be_held(self):
 		pi = make_purchase_invoice()
 
