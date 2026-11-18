@@ -8309,9 +8309,78 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		over_return.items[0].received_qty = -1
 		self.assertRaises(StockOverReturnError, over_return.save)
 
+<<<<<<< HEAD
 	def test_accepted_return_after_rejected_warehouse_return(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return,
+=======
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	def test_rejected_warehouse_return_takes_back_the_rejected_stock_value(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(
+			"_Test Item Rejected In Rounded Boxes",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		).name
+		pr = make_purchase_receipt(
+			company=company,
+			item_code=item,
+			warehouse="Stores - TCP1",
+			rejected_warehouse=create_warehouse("_Test Warehouse - Rejected Material", company=company),
+			qty=4,
+			rejected_qty=2,
+			rate=100,
+			do_not_save=1,
+		)
+		pr.items[0].uom = "Box"
+		pr.items[0].conversion_factor = 0.3356
+		pr.submit()
+
+		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_return.submit()
+
+		srbnb_account = frappe.get_cached_value("Company", company, "stock_received_but_not_billed")
+		rejected_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": pr.name, "warehouse": pr.items[0].rejected_warehouse, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		srbnb_debit = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": rejected_return.name, "account": srbnb_account, "is_cancelled": 0},
+			"debit",
+		)
+
+		self.assertNotEqual(rejected_value, 200)
+		self.assertEqual(srbnb_debit, rejected_value)
+
+	def test_rejected_qty_return_after_accepted_qty_return(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_purchase_receipt(
+			qty=5,
+			rejected_qty=5,
+			warehouse="_Test Warehouse - _TC",
+			rejected_warehouse="_Test Rejected Warehouse - _TC",
+		)
+
+		accepted_return = make_purchase_return(pr.name)
+		accepted_return.items[0].rejected_qty = 0
+		accepted_return.submit()
+
+		rejected_return = make_purchase_return(pr.name)
+		self.assertEqual(rejected_return.items[0].qty, 0)
+		self.assertEqual(rejected_return.items[0].rejected_qty, -5)
+		rejected_return.submit()
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_rejected_warehouse_return_rows_share_the_rejected_qty(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+>>>>>>> 4ab5740 (test: rejected warehouse return takes back the rejected stock value)
 			make_purchase_return_against_rejected_warehouse,
 		)
 
