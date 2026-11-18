@@ -467,7 +467,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		other_order = frappe._dict(item_code="_Test Item", delivery_date=delivery_date, adhoc_qty=5)
 		planned_order = frappe._dict(item_code="_Test Item", delivery_date=delivery_date, adhoc_qty=10)
 
-		rows = list(report.get_demand_beyond_mps([other_order], [planned_order]))
+		rows = list(report.get_demand_beyond_mps([other_order], [planned_order], report.mps_data))
 
 		self.assertEqual([row.adhoc_qty for row in rows], [5])
 
