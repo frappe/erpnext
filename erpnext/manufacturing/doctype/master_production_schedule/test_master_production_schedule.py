@@ -128,6 +128,7 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual(mps.items, [])
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_get_sales_orders_lists_an_order_once(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
