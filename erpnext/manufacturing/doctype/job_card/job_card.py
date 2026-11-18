@@ -1002,7 +1002,7 @@ class JobCard(Document):
 		required_qty = self.get_required_qty(d, operation_qty or doc.qty, other_job_cards_qty)
 		if row := next((row for row in unmatched_rows if row.item_code == d.item_code), None):
 			unmatched_rows.remove(row)
-			row.required_qty = required_qty
+			row.required_qty = max(required_qty, flt(row.transferred_qty))
 			return
 
 		self.append(
