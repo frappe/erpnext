@@ -962,8 +962,35 @@ erpnext.bom.calculate_rm_cost = function (doc) {
 	cur_frm.set_value("base_raw_material_cost", base_total_rm_cost);
 };
 
+// Valuation Rate and Manual rows keep their cost; % of Component Cost rows split the rest
+erpnext.bom.calculate_secondary_items_cost = function (doc) {
+	const rows = doc.secondary_items || [];
+	const cost_precision = precision("raw_material_cost", doc);
+	const has_own_cost = (row) => ["Valuation Rate", "Manual"].includes(row.valuation_type);
+	const own_cost = rows
+		.filter(has_own_cost)
+		.reduce((total, row) => total + flt(row.cost, cost_precision), 0);
+	const allocation_basis = flt(doc.raw_material_cost) - own_cost;
+
+	let total = 0;
+	let base_total = 0;
+	rows.forEach((row) => {
+		row.cost = has_own_cost(row)
+			? flt(row.cost, cost_precision)
+			: flt((allocation_basis * flt(row.cost_allocation_per)) / 100, cost_precision);
+		row.base_cost = flt(row.cost * flt(doc.conversion_rate), cost_precision);
+		total += row.cost;
+		base_total += row.base_cost;
+	});
+
+	doc.secondary_items_cost = total;
+	doc.base_secondary_items_cost = base_total;
+	refresh_field(["secondary_items", "secondary_items_cost", "base_secondary_items_cost"]);
+};
+
 // Calculate Total Cost
 erpnext.bom.calculate_total = function (doc) {
+	erpnext.bom.calculate_secondary_items_cost(doc);
 	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.secondary_items_cost);
 	var base_total_cost =
 		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_secondary_items_cost);
@@ -1181,10 +1208,12 @@ erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
 		},
 		callback(r) {
 			const cost = flt(r.message.rate) * flt(row.stock_qty);
-			frappe.model.set_value(cdt, cdn, {
-				cost: cost,
-				base_cost: cost * flt(doc.conversion_rate || 1),
-			});
+			frappe.model
+				.set_value(cdt, cdn, {
+					cost: cost,
+					base_cost: cost * flt(doc.conversion_rate || 1),
+				})
+				.then(() => erpnext.bom.calculate_total(doc));
 		},
 	});
 };
