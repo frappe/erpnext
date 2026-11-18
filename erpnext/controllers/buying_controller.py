@@ -1160,9 +1160,9 @@ class BuyingController(SubcontractingController):
 
 	def get_accepted_stock_qty(self, row) -> float:
 		"""Accepted qty in the stock UOM. A return takes back no more than its receipt row put in the
-		warehouse, less the row's other returns, so returns of parts add up to it. A row with a package
-		is not capped, as its package holds the qty."""
-		if not self.is_return or row.get("serial_and_batch_bundle"):
+		warehouse, less the row's other returns, so returns of parts add up to it. A serial / batch item
+		is not capped, as its package holds the qty, even before submit makes the package."""
+		if not self.is_return or has_serial_or_batch(row.item_code):
 			return get_stock_qty(row, row.qty)
 
 		return self.get_return_stock_qty(row, row.qty, row.warehouse)
@@ -1881,6 +1881,12 @@ def get_purchase_expense_account(item_code, company):
 def get_stock_qty(row, qty) -> float:
 	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+
+def has_serial_or_batch(item_code) -> bool:
+	return bool(item_code) and any(
+		frappe.get_cached_value("Item", item_code, ["has_serial_no", "has_batch_no"])
+	)
 
 
 def get_posted_stock_qty_by_row(row_names, warehouse) -> dict:
