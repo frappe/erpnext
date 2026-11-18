@@ -191,7 +191,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				):
 					account_currency = get_account_currency(item.expense_account)
 					warehouse_debit_amount = self.make_stock_adjustment_entry(
-						gl_entries, item, voucher_wise_stock_value, account_currency
+						gl_entries, item, voucher_wise_stock_value
 					)
 
 					if item.from_warehouse:
@@ -648,9 +648,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				item.precision("base_net_amount"),
 			)
 			if billed_amount != rejected_amount:
-				self.make_stock_variance_entry(
-					gl_entries, item, billed_amount - rejected_amount, rejected_account["account_currency"]
-				)
+				self.make_stock_variance_entry(gl_entries, item, billed_amount - rejected_amount)
 
 		return rejected_amount if transfers_rejected_material else 0.0
 
@@ -668,7 +666,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
 		return None if stock_value is None else -flt(stock_value)
 
-	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
+	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value):
 		doc = self.doc
 		net_amt_precision = item.precision("base_net_amount")
 
@@ -713,9 +711,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 
 			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
-				self.make_stock_variance_entry(
-					gl_entries, item, stock_amount - returned_stock_value, account_currency
-				)
+				self.make_stock_variance_entry(gl_entries, item, stock_amount - returned_stock_value)
 
 		elif (
 			doc.update_stock
@@ -724,14 +720,12 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
-			self.make_stock_variance_entry(
-				gl_entries, item, warehouse_debit_amount - stock_amount, account_currency
-			)
+			self.make_stock_variance_entry(gl_entries, item, warehouse_debit_amount - stock_amount)
 			warehouse_debit_amount = stock_amount
 
 		return warehouse_debit_amount
 
-	def make_stock_variance_entry(self, gl_entries, item, amount, account_currency):
+	def make_stock_variance_entry(self, gl_entries, item, amount):
 		"""Book the difference between what the invoice paid for and the stock value it moved."""
 		doc = self.doc
 		gl_entries.append(
@@ -745,7 +739,6 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 					"cost_center": item.cost_center,
 					"project": item.project or doc.project,
 				},
-				account_currency,
 				item=item,
 			)
 		)
