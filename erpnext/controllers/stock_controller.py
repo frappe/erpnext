@@ -274,6 +274,7 @@ class StockController(AccountsController):
 		include_bundle=None,
 		exclude_serial_nos=None,
 		total_qty=0,
+		from_last=False,
 	):
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
@@ -286,6 +287,7 @@ class StockController(AccountsController):
 			include_bundle,
 			exclude_serial_nos,
 			total_qty,
+			from_last,
 		)
 
 	def get_sl_entries(self, d, args):
@@ -1138,7 +1140,8 @@ def make_bundle_for_material_transfer(**kwargs):
 		and abs(flt(kwargs.qty)) < abs(flt(bundle_doc.total_qty))
 		and not bundle_doc.has_serial_no
 	):
-		bundle_doc.entries = get_entries_up_to_qty(bundle_doc.entries, kwargs.qty)
+		entries = bundle_doc.entries[::-1] if kwargs.from_last else bundle_doc.entries
+		bundle_doc.entries = get_entries_up_to_qty(entries, kwargs.qty)
 
 	if kwargs.total_qty and not bundle_doc.has_serial_no:
 		set_entries_total_qty(bundle_doc.entries, kwargs.total_qty)

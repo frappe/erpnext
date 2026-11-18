@@ -307,6 +307,7 @@ class BuyingController(SubcontractingController):
 			do_not_submit=True,
 			qty=get_stock_qty(row, row.rejected_qty),
 			exclude_serial_nos=self.get_accepted_serial_nos(row),
+			from_last=True,
 		)
 
 		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
