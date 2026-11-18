@@ -1288,6 +1288,30 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
 
+	def test_return_from_another_warehouse_needs_the_receipt_stock(self):
+		fg_item = make_subcontracted_fg_item("FIFO")
+		other_warehouse = "_Test Warehouse 2 - _TC"
+		make_stock_entry(item_code=fg_item, target=other_warehouse, qty=5, basic_rate=100)
+		scr = make_fg_receipt(fg_item, rm_rate=100)
+
+		def make_return():
+			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+			scr_return.items[0].update({"qty": -2, "received_qty": -2, "warehouse": other_warehouse})
+			return scr_return.save()
+
+		# the other warehouse holds stock at 100 only
+		self.assertRaisesRegex(frappe.ValidationError, "does not hold enough", make_return().submit)
+
+		make_stock_entry(item_code=fg_item, source=scr.items[0].warehouse, target=other_warehouse, qty=2)
+		scr_return = make_return()
+		scr_return.submit()
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
+
 	def test_return_sends_back_the_edited_consumed_qty(self):
 		sco = make_order_with_two_batches_transferred()
 		scr = make_subcontracting_receipt(sco.name)
