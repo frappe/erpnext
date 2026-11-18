@@ -1157,9 +1157,13 @@ class SubcontractingInwardController:
 		reserved_qty = get_sre_reserved_qty_details_for_voucher(
 			"Subcontracting Inward Order", self.subcontracting_inward_order
 		)
+		short_qty = {}
 		for scio_detail, qty in return_qty.items():
-			if (short_qty := qty - flt(reserved_qty.get(scio_detail))) > 0:
-				release_unused_inward_reservations(scio_detail=scio_detail, qty=short_qty)
+			if (missing_qty := qty - flt(reserved_qty.get(scio_detail))) > 0:
+				short_qty[scio_detail] = missing_qty
+
+		if short_qty:
+			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
 
 >>>>>>> a60ed0a (fix(subcontracting): return extra customer material held by a Work Order)
 	def validate_no_later_work_order_reservation(self):
