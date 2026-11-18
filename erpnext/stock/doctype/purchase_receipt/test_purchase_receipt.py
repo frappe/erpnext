@@ -4320,9 +4320,33 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_returns_of_parts_of_a_receipt_reverse_its_whole_actual_valuation_charge(self):
 		"""Returns of parts of a row reverse the charge on the stock they take back, so they add up to the
 		charge the row carried."""
+		item = self.make_item_for_returns_of_parts(0.3356)
+		first_return, last_return = self.return_receipt_with_charge_in_parts(item, 0.3356)
+
+		self.assertEqual(first_return.taxes[0].tax_amount + last_return.taxes[0].tax_amount, -100)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_returns_of_parts_of_a_batch_receipt_reverse_the_charge_on_the_stock_they_take_back(self):
+		"""A batch row's return takes back its own stock qty, also when its package is made on submit, so
+		the charge on what is left stays."""
+		item = make_item(
+			"_Test Batch Item For Returns Of Parts",
+			{
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3344}],
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBRP-.#####",
+			},
+		).name
+		first_return, last_return = self.return_receipt_with_charge_in_parts(item, 0.3344)
+
+		self.assertEqual(first_return.taxes[0].tax_amount + last_return.taxes[0].tax_amount, -99.5)
+
+	def return_receipt_with_charge_in_parts(self, item, conversion_factor):
+		"""Receipt of 6 Box with an Actual valuation charge of 100, returned as 3 Box and then the rest."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
-		item = self.make_item_for_returns_of_parts(0.3356)
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
@@ -4330,7 +4354,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			item_code=item,
 			qty=6,
 			uom="Box",
-			conversion_factor=0.3356,
+			conversion_factor=conversion_factor,
 			rate=100,
 			do_not_submit=True,
 		)
@@ -4351,8 +4375,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		first_return.submit()
 		last_return = make_return_doc("Purchase Receipt", pr.name)
 		last_return.submit()
-
-		self.assertEqual(first_return.taxes[0].tax_amount + last_return.taxes[0].tax_amount, -100)
+		return first_return, last_return
 
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
