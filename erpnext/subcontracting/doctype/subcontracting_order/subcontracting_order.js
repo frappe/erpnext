@@ -406,12 +406,13 @@ frappe.ui.form.on("Subcontracting Order", {
 				callback: (r) => {
 					if (!r.exc && r.message) {
 						r.message.forEach((sre) => {
-							if (flt(sre.reserved_qty) > flt(sre.delivered_qty)) {
+							let held_qty = erpnext.stock_reservation.get_held_qty(sre);
+							if (held_qty > 0) {
 								dialog.fields_dict.sr_entries.df.data.push({
 									sre: sre.name,
 									item_code: sre.item_code,
 									warehouse: sre.warehouse,
-									qty: flt(sre.reserved_qty) - flt(sre.delivered_qty),
+									qty: held_qty,
 								});
 							}
 						});
@@ -419,6 +420,11 @@ frappe.ui.form.on("Subcontracting Order", {
 				},
 			})
 			.then((r) => {
+				if (!dialog.fields_dict.sr_entries.df.data.length) {
+					frappe.msgprint(__("No reserved stock to unreserve."));
+					return;
+				}
+
 				dialog.fields_dict.sr_entries.grid.refresh();
 				dialog.show();
 			});
