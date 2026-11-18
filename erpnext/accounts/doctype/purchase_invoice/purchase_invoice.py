@@ -1179,14 +1179,15 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
-						credit_amount = item.base_net_amount
-						if self.is_internal_supplier and item.valuation_rate:
-							credit_amount = flt(item.valuation_rate * item.stock_qty)
-
 						rejected_amount = self.make_rejected_warehouse_gl_entry(
 							gl_entries, item, voucher_wise_stock_value, warehouse_account
 						)
-						credit_amount += rejected_amount
+						credit_amount = self.get_transit_stock_value(item, voucher_wise_stock_value)
+						if credit_amount is None:
+							credit_amount = item.base_net_amount
+							if self.is_internal_supplier and item.valuation_rate:
+								credit_amount = flt(item.valuation_rate * item.stock_qty)
+							credit_amount += rejected_amount
 
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
@@ -1555,6 +1556,20 @@ class PurchaseInvoice(BuyingController):
 
 		return rejected_amount if transfers_rejected_material else 0.0
 
+	def get_transit_stock_value(self, item, voucher_wise_stock_value) -> float | None:
+		"""Stock value an internal transfer took out of the in-transit warehouse, negative for a return.
+
+		None when the rejected material stays in transit, as its stock value cannot be told apart then.
+		"""
+		if not (item.from_warehouse and self.is_internal_transfer()):
+			return None
+
+		if item.rejected_warehouse == item.from_warehouse:
+			return None
+
+		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
+		return None if stock_value is None else -flt(stock_value)
+
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		net_amt_precision = item.precision("base_net_amount")
 
@@ -1563,7 +1578,24 @@ class PurchaseInvoice(BuyingController):
 			net_amt_precision,
 		)
 
-		if self.is_return and self.update_stock and (self.is_internal_supplier or not self.return_against):
+		transit_stock_value = self.get_transit_stock_value(item, voucher_wise_stock_value)
+		if transit_stock_value is not None:
+			# The accepted and rejected warehouses together take what left transit, plus the landed
+			# cost; round each part as it is posted so the entries balance.
+			rejected_stock_value = voucher_wise_stock_value.get((item.name, item.rejected_warehouse))
+			warehouse_debit_amount = flt(
+				flt(transit_stock_value, net_amt_precision)
+				- flt(rejected_stock_value, net_amt_precision)
+				+ flt(item.landed_cost_voucher_amount),
+				net_amt_precision,
+			)
+
+		if (
+			transit_stock_value is None
+			and self.is_return
+			and self.update_stock
+			and (self.is_internal_supplier or not self.return_against)
+		):
 			net_rate = item.base_net_amount
 			if item.sales_incoming_rate:
 				# Material of a transfer goes back at the rate it came in with, the rejected
@@ -1616,7 +1648,7 @@ class PurchaseInvoice(BuyingController):
 
 		elif (
 			self.update_stock
-			and voucher_wise_stock_value.get((item.name, item.warehouse))
+			and (transit_stock_value is not None or voucher_wise_stock_value.get((item.name, item.warehouse)))
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
