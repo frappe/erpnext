@@ -2036,7 +2036,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		let show =
-			cint(this.frm.doc.discount_amount) ||
+			flt(this.frm.doc.discount_amount) ||
 			(this.frm.doc.taxes || []).filter(function (d) {
 				return d.included_in_print_rate === 1;
 			}).length;
@@ -2143,7 +2143,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		);
 
 		var show =
-			cint(this.frm.doc.discount_amount) ||
+			flt(this.frm.doc.discount_amount) ||
 			(this.frm.doc.taxes || []).filter(function (d) {
 				return d.included_in_print_rate === 1;
 			}).length;
