@@ -307,9 +307,10 @@ def get_pending_consumption_qty(work_order):
 
 
 def get_pending_consumption_qty_based_on_bom(work_order):
-	"""Consumption runs ahead of production, so the larger of the produced qty (with process loss)
-	and the qty whose materials are all consumed is done."""
-	consumed_for_qty = min(
+	"""The consumption entry takes each material per the BOM, so the most consumed material decides
+	what is done, and no material is proposed beyond what is left. Consumption runs ahead of
+	production, so the produced qty (with process loss) is done when larger."""
+	consumed_for_qty = max(
 		(
 			flt(row.consumed_qty) * flt(work_order.qty) / flt(row.required_qty)
 			for row in work_order.required_items
