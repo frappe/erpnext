@@ -86,6 +86,7 @@ class MaterialRequirementsPlanningReport:
 		self.update_sales_forecast_data()
 
 		self.item_rm_details = self.get_raw_materials_data(items)
+		self.load_lead_times()
 
 		self._bin_details = self.get_item_wise_bin_details()
 		self._safety_stock_reserved = set()
@@ -539,7 +540,7 @@ class MaterialRequirementsPlanningReport:
 			row.capacity = 0
 			row.type_of_material = get_type_of_material(rm_details.get("is_purchase_item"), row.bom_no)
 			if rm_details.raw_materials:
-				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
+				row.capacity = self.get_capacity(row.item_code)
 
 			self.set_lead_time(row)
 			data.append(row)
@@ -555,13 +556,28 @@ class MaterialRequirementsPlanningReport:
 
 		return data
 
+	def load_lead_times(self):
+		items = self.fg_items + self.rm_items
+		suppliers = {item: details.default_supplier for item, details in self.item_details.items()}
+		self.lead_times = get_item_lead_times(items)
+		self.purchase_lead_days = get_purchase_lead_days(items, self.lead_times, suppliers)
+
+	def get_capacity(self, item_code):
+		capacity = (self.lead_times.get(item_code) or {}).get("capacity_per_day")
+		if not capacity:
+			return 0.0
+
+		no_of_days = {"Daily": 1, "Weekly": 7}.get(self.filters.bucket_size, 30)
+		return math.ceil(cint(capacity) * no_of_days)
+
 	def set_lead_time(self, row):
-		lead_time = get_item_lead_time(
-			row.item_code,
-			row.type_of_material,
-			flt(row.required_qty, self.qty_precision),
-			row.default_supplier,
-		)
+		if row.type_of_material == "Manufacture":
+			lead_time = get_manufacture_lead_time(
+				self.lead_times.get(row.item_code), flt(row.required_qty, self.qty_precision)
+			)
+		else:
+			lead_time = self.purchase_lead_days[row.item_code]
+
 		row.lead_time = math.ceil(lead_time)
 		row.release_date = add_days(row.delivery_date, -row.lead_time)
 
@@ -818,12 +834,13 @@ class MaterialRequirementsPlanningReport:
 
 	def update_rm_details(self, raw_materials, delivery_date, planned_qty, bom_no, data, warehouse=None):
 		for material in raw_materials:
+			details = self.item_details[material.item_code]
 			row = frappe._dict(
 				{
 					"item_code": material.item_code,
 					"item_name": material.item_name,
-					"default_warehouse": material.default_warehouse,
-					"default_supplier": material.default_supplier,
+					"default_warehouse": details.default_warehouse,
+					"default_supplier": details.default_supplier,
 					"planned_qty": material.qty * planned_qty,
 					"projected_qty": 0,
 					"delivery_date": delivery_date,
@@ -831,16 +848,16 @@ class MaterialRequirementsPlanningReport:
 					"parent_bom": bom_no,
 					"bom_no": material.bom_no,
 					"warehouse": warehouse,
-					"min_order_qty": flt(material.get("min_order_qty", 0)),
-					"purchase_uom": material.get("purchase_uom"),
-					"safety_stock": flt(material.get("safety_stock", 0)),
+					"min_order_qty": flt(details.min_order_qty),
+					"purchase_uom": details.purchase_uom,
+					"safety_stock": flt(details.safety_stock),
 				}
 			)
 
 			row.capacity = 0
-			row.type_of_material = get_type_of_material(material.get("is_purchase_item"), material.bom_no)
+			row.type_of_material = get_type_of_material(details.is_purchase_item, material.bom_no)
 			if material.raw_materials:
-				row.capacity = get_item_capacity(material.item_code, self.filters.bucket_size)
+				row.capacity = self.get_capacity(material.item_code)
 
 			self.update_required_qty(row)
 			self.set_lead_time(row)
@@ -934,29 +951,15 @@ class MaterialRequirementsPlanningReport:
 		return items
 
 	def get_raw_materials_data(self, items):
+		company = self.filters.get("company")
+		self.item_details = get_item_details(items, company)
 		item_wise_rm_details = frappe._dict()
 		for item_code in items:
-			if item_code not in item_wise_rm_details:
-				item_wise_rm_details[item_code] = frappe.db.get_value(
-					"Item",
-					item_code,
-					[
-						"default_bom as bom_no",
-						"safety_stock",
-						"min_order_qty",
-						"purchase_uom",
-						"is_purchase_item",
-					],
-					as_dict=True,
-				)
+			if item_code in item_wise_rm_details:
+				continue
 
-			item_data = item_wise_rm_details[item_code]
-			if details := get_item_details(item_code, self.filters.get("company")):
-				item_data.update(details)
-
-			if item_code not in self.fg_items:
-				self.fg_items.append(item_code)
-
+			item_data = item_wise_rm_details[item_code] = frappe._dict(self.item_details[item_code])
+			self.fg_items.append(item_code)
 			if item_data.bom_no:
 				item_data.raw_materials = self.get_raw_materials(item_data.bom_no, indent=0)
 
@@ -971,10 +974,11 @@ class MaterialRequirementsPlanningReport:
 					item_data, bom_no=row.bom_no, raw_materials=self.get_raw_materials(row.bom_no)
 				)
 
+		new_items = [item for item in self.rm_items if item not in self.item_details]
+		self.item_details.update(get_item_details(new_items, company))
 		return item_wise_rm_details
 
 	def get_raw_materials(self, bom_no, indent=0):
-		company = self.filters.get("company")
 		raw_materials = frappe.get_all(
 			"BOM",
 			filters=[["BOM Item", "parent", "=", bom_no], ["BOM", "docstatus", "=", 1]],
@@ -992,9 +996,6 @@ class MaterialRequirementsPlanningReport:
 		for material in raw_materials:
 			material.indent = indent
 			material.qty = flt(material.stock_qty / material.parent_qty)
-
-			if details := get_item_details(material.item_code, company):
-				material.update(details)
 
 			if material.item_code not in self.rm_items:
 				self.rm_items.append(material.item_code)
@@ -1339,71 +1340,91 @@ def get_type_of_material(is_purchase_item, bom_no):
 	return "Purchase" if is_purchase_item and not bom_no else "Manufacture"
 
 
-@frappe.request_cache
-def get_item_details(item_code, company):
-	data = frappe.db.get_value(
+def get_item_details(item_codes, company):
+	if not item_codes:
+		return {}
+
+	items = frappe.get_all(
 		"Item",
-		item_code,
-		["safety_stock", "min_order_qty", "purchase_uom", "is_purchase_item"],
-		as_dict=True,
-	) or frappe._dict({"safety_stock": 0})
-
-	default_data = frappe.db.get_value(
-		"Item Default",
-		{"parent": item_code, "company": company},
-		["default_warehouse", "default_supplier"],
-		as_dict=True,
+		filters={"name": ("in", item_codes)},
+		fields=[
+			"name",
+			"item_group",
+			"default_bom as bom_no",
+			"safety_stock",
+			"min_order_qty",
+			"purchase_uom",
+			"is_purchase_item",
+		],
 	)
+	defaults = get_item_defaults(items, company)
 
-	if default_data:
-		data.update(default_data)
-
-	if not data.get("default_supplier"):
+	details = {}
+	for item in items:
+		item_default = defaults.get(("Item", item.name)) or {}
 		# fall back to the item's Item Group default supplier (mirrors BuyingController)
-		item_group = frappe.db.get_value("Item", item_code, "item_group")
-		data.default_supplier = frappe.db.get_value(
-			"Item Default", {"parent": item_group, "company": company}, "default_supplier"
+		group_default = defaults.get(("Item Group", item.item_group)) or {}
+		details[item.name] = frappe._dict(
+			bom_no=item.bom_no,
+			safety_stock=item.safety_stock,
+			min_order_qty=item.min_order_qty,
+			purchase_uom=item.purchase_uom,
+			is_purchase_item=item.is_purchase_item,
+			default_warehouse=item_default.get("default_warehouse"),
+			default_supplier=item_default.get("default_supplier") or group_default.get("default_supplier"),
 		)
 
-	return data
+	return details
 
 
-def get_item_lead_time(item_code, type_of_material, qty=1, supplier=None):
-	"""Return calendar days, scaling only manufacturing time by the required quantity."""
-	if type_of_material != "Manufacture":
-		return get_purchase_lead_time(item_code, supplier)
+def get_item_defaults(items, company):
+	parents = {item.name for item in items} | {item.item_group for item in items}
+	rows = frappe.get_all(
+		"Item Default",
+		filters={
+			"parent": ("in", list(parents)),
+			"parenttype": ("in", ["Item", "Item Group"]),
+			"company": company,
+		},
+		fields=["parenttype", "parent", "default_warehouse", "default_supplier"],
+	)
+	return {(row.parenttype, row.parent): row for row in rows}
 
-	if qty <= 0:
+
+def get_manufacture_lead_time(lead_time, qty):
+	"""Return calendar days, scaling manufacturing time by the required quantity."""
+	if not lead_time or qty <= 0:
 		return 0
 
-	details = get_item_lead_time_details(item_code)
 	# Keep MRP's 24-hour planning day; buffer days do not increase production capacity.
-	time_in_days = max(flt(details.manufacturing_time_in_mins), 0) * qty / 1440.0
-	return time_in_days + flt(details.buffer_time)
+	time_in_days = max(flt(lead_time.manufacturing_time_in_mins), 0) * qty / 1440.0
+	return time_in_days + flt(lead_time.buffer_time)
 
 
-@frappe.request_cache
-def get_purchase_lead_time(item_code, supplier=None):
-	details = get_item_lead_time_details(item_code)
-	lead_times = {item_code: details} if details else {}
-	chosen_suppliers = {item_code: [supplier]} if supplier else {}
+def get_purchase_lead_days(item_codes, lead_times, suppliers=None):
+	"""Return purchase lead days of each item for its ordering supplier."""
+	chosen_suppliers = {item: [supplier] for item, supplier in (suppliers or {}).items() if supplier}
 	lead_days, _suppliers = get_material_lead_days(
-		[item_code], lead_times, get_supplier_lead_times([item_code]), chosen_suppliers
+		item_codes, lead_times, get_supplier_lead_times(item_codes), chosen_suppliers
 	)
-	return lead_days[item_code]
+	return lead_days
 
 
-@frappe.request_cache
-def get_item_lead_time_details(item_code):
-	return (
-		frappe.db.get_value(
+def get_item_lead_times(item_codes):
+	return {
+		row.item_code: row
+		for row in frappe.get_all(
 			"Item Lead Time",
-			{"item_code": item_code},
-			["manufacturing_time_in_mins", "purchase_time", "buffer_time"],
-			as_dict=True,
+			filters={"item_code": ("in", item_codes)},
+			fields=[
+				"item_code",
+				"capacity_per_day",
+				"manufacturing_time_in_mins",
+				"purchase_time",
+				"buffer_time",
+			],
 		)
-		or frappe._dict()
-	)
+	}
 
 
 def convert_to_daily_bucket_data(data):
@@ -1449,24 +1470,6 @@ def convert_to_daily_bucket_data(data):
 				)
 
 	return bucketed_data
-
-
-@frappe.request_cache
-def get_item_capacity(item_code, bucket_size):
-	capacity = frappe.db.get_value(
-		"Item Lead Time",
-		{"item_code": item_code},
-		"capacity_per_day",
-	)
-
-	if not capacity:
-		return 0.0
-
-	no_of_days = 7 if bucket_size == "Weekly" else 30
-	if bucket_size == "Daily":
-		no_of_days = 1
-
-	return math.ceil(cint(capacity) * no_of_days)
 
 
 @frappe.whitelist()

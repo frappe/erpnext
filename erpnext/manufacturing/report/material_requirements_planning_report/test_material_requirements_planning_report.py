@@ -15,7 +15,9 @@ from erpnext.manufacturing.report.material_requirements_planning_report.material
 	MaterialRequirementsPlanningReport,
 	convert_to_daily_bucket_data,
 	execute,
-	get_item_lead_time,
+	get_item_lead_times,
+	get_manufacture_lead_time,
+	get_purchase_lead_days,
 	make_order,
 )
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -146,7 +148,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			}
 		).insert()
 
-		lead_time = get_item_lead_time(item, "Manufacture")
+		lead_time = get_manufacture_lead_time(get_item_lead_times([item])[item], 1)
 		self.assertAlmostEqual(lead_time, 7 / 1440 + 2, places=8)
 
 	def test_purchase_lead_time_uses_supplier_and_item_lead_times(self):
@@ -162,8 +164,9 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			}
 		).insert()
 
-		self.assertEqual(get_item_lead_time(rm_a, "Purchase"), 21)
-		self.assertEqual(get_item_lead_time(rm_b, "Purchase"), 9)
+		lead_days = get_purchase_lead_days([rm_a, rm_b], get_item_lead_times([rm_a, rm_b]))
+		self.assertEqual(lead_days[rm_a], 21)
+		self.assertEqual(lead_days[rm_b], 9)
 
 	def test_purchase_lead_time_uses_ordering_supplier(self):
 		rm = make_item("_Test MRP Ordering Supplier Lead RM", {"is_stock_item": 1}).name
@@ -176,8 +179,9 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			}
 		).insert()
 
-		self.assertEqual(get_item_lead_time(rm, "Purchase"), 3)
-		self.assertEqual(get_item_lead_time(rm, "Purchase", supplier=SUPPLIER), 11)
+		lead_times = get_item_lead_times([rm])
+		self.assertEqual(get_purchase_lead_days([rm], lead_times)[rm], 3)
+		self.assertEqual(get_purchase_lead_days([rm], lead_times, {rm: SUPPLIER})[rm], 11)
 
 	@freeze_time("2026-09-01 10:00:00.123456")
 	def test_manufacturing_buffer_moves_release_date_earlier(self):

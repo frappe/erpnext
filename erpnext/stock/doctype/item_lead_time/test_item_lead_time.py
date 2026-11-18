@@ -18,7 +18,7 @@ class TestItemLeadTime(ERPNextTestSuite):
 
 	def test_mrp_capacity_follows_renamed_item(self):
 		from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
-			get_item_capacity,
+			get_item_lead_times,
 		)
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -26,7 +26,7 @@ class TestItemLeadTime(ERPNextTestSuite):
 		self.make_lead_time(item_code, capacity_per_day=40)
 		new_item_code = frappe.rename_doc("Item", item_code, f"{item_code}-RENAMED")
 
-		self.assertEqual(get_item_capacity(new_item_code, "Daily"), 40)
+		self.assertEqual(get_item_lead_times([new_item_code])[new_item_code].capacity_per_day, 40)
 
 	def test_capacity_is_computed_and_negative_times_refused(self):
 		from erpnext.stock.doctype.item.test_item import make_item
