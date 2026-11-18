@@ -57,7 +57,7 @@ def validate_return_warehouse_stock(doc):
 	receipt_rows = frappe.get_all(
 		f"{doc.doctype} Item",
 		filters={"parent": doc.return_against},
-		fields=["name", "warehouse", "rejected_warehouse"],
+		fields=["name", "item_code", "warehouse", "rejected_warehouse"],
 		limit_page_length=0,
 	)
 	qty_left = {}
@@ -95,8 +95,7 @@ def validate_return_warehouse_stock(doc):
 
 def get_receipt_warehouses_if_moved(doc, row, receipt_rows) -> list:
 	"""Warehouses of the receipt row, if the return row takes FIFO or LIFO stock from another one."""
-	reference = row.get(get_return_against_item_fields(doc.doctype))
-	if flt(row.qty) >= 0 or not (row.warehouse and reference):
+	if flt(row.qty) >= 0 or not (row.item_code and row.warehouse):
 		return []
 
 	# serial and batch items go back at their own rate
@@ -111,10 +110,12 @@ def get_receipt_warehouses_if_moved(doc, row, receipt_rows) -> list:
 	):
 		return []
 
+	# a row added by hand has no reference and goes back against any receipt row of its item
+	reference = row.get(get_return_against_item_fields(doc.doctype))
 	receipt_warehouses = [
 		warehouse
 		for receipt_row in receipt_rows
-		if receipt_row.name == reference
+		if receipt_row.name == reference or (not reference and receipt_row.item_code == row.item_code)
 		for warehouse in (receipt_row.warehouse, receipt_row.rejected_warehouse)
 		if warehouse
 	]
