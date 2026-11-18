@@ -42,7 +42,7 @@ class ReturnChargesService:
 		The return of the last stock that carried it takes the rest, so the returns add up to the charge."""
 		precision = original_charge.precision("tax_amount")
 		total_share = self.get_returned_base_share(original, original_charge, total_qty)
-		if flt(total_share, precision) >= flt(original_charge.base_tax_amount, precision):
+		if abs(flt(total_share, precision)) >= abs(flt(original_charge.base_tax_amount, precision)):
 			return flt(original_charge.tax_amount + earlier_charge, precision)
 
 		base_share = self.get_returned_base_share(original, original_charge, returned_qty)
