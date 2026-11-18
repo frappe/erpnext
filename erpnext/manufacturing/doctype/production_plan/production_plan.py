@@ -351,7 +351,34 @@ class ProductionPlan(Document):
 			self.update_bin_qty()
 
 	def before_submit(self):
+		self.validate_closed_sales_order_items()
 		self.validate_sales_order_planned_qty()
+
+	def validate_closed_sales_order_items(self):
+		so_items = [row.sales_order_item for row in self.po_items + self.prod_plan_references]
+		so_items = list({name for name in so_items if name})
+		if not so_items:
+			return
+
+		so_item = frappe.qb.DocType("Sales Order Item")
+		so = frappe.qb.DocType("Sales Order")
+		closed = (
+			frappe.qb.from_(so_item)
+			.join(so)
+			.on(so.name == so_item.parent)
+			.select(so_item.parent, so_item.idx, so_item.item_code)
+			.where(so_item.name.isin(so_items) & ((so_item.closed == 1) | (so.status == "Closed")))
+			.orderby(so_item.parent, so_item.idx)
+			.limit(1)
+			.run(as_dict=True)
+		)
+		if closed:
+			frappe.throw(
+				_("Row #{0} ({1}) of Sales Order {2} is closed, so it cannot be planned.").format(
+					closed[0].idx, frappe.bold(closed[0].item_code), closed[0].parent
+				),
+				title=_("Sales Order Row Closed"),
+			)
 
 	def validate_sales_order_planned_qty(self):
 		planned_qty = self.get_so_item_planned_qty()
