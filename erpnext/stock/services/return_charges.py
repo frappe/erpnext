@@ -36,16 +36,17 @@ class ReturnChargesService:
 			)
 
 	def get_returned_charge(
-		self, original, original_charge, returned_qty, total_qty, earlier_charge
+		self, original, original_charge, returned_qty, total_qty, earlier_base_charge
 	) -> float:
 		"""Rounded share of the charge that the returned stock carried.
 		The return of the last stock that carried it takes the rest, so the returns add up to the charge."""
 		precision = original_charge.precision("tax_amount")
 		total_share = self.get_returned_base_share(original, original_charge, total_qty)
 		if abs(flt(total_share, precision)) >= abs(flt(original_charge.base_tax_amount, precision)):
-			return flt(original_charge.tax_amount + earlier_charge, precision)
+			base_share = original_charge.base_tax_amount + earlier_base_charge
+		else:
+			base_share = self.get_returned_base_share(original, original_charge, returned_qty)
 
-		base_share = self.get_returned_base_share(original, original_charge, returned_qty)
 		return flt(base_share / self.doc.conversion_rate, precision)
 
 	def is_traced_to_original(self) -> bool:
@@ -60,8 +61,8 @@ class ReturnChargesService:
 		}
 
 	def get_earlier_returned_charges(self, original_charges) -> defaultdict:
-		"""Actual valuation charges of the other submitted returns, added up by the original charge they
-		were mapped from."""
+		"""Actual valuation charges of the other submitted returns in company currency, added up by the
+		original charge they were mapped from."""
 		earlier_returns = frappe.get_all(
 			self.doc.doctype,
 			filters={"docstatus": 1, "is_return": 1, "return_against": self.doc.return_against},
@@ -77,7 +78,7 @@ class ReturnChargesService:
 					"charge_type": "Actual",
 					"category": ["in", ["Valuation", "Valuation and Total"]],
 				},
-				fields=["parent", "original_tax_row", "account_head", "description", "tax_amount"],
+				fields=["parent", "original_tax_row", "account_head", "description", "base_tax_amount"],
 				order_by="idx",
 			):
 				taxes_by_return[tax.parent].append(tax)
@@ -85,7 +86,7 @@ class ReturnChargesService:
 		charges = defaultdict(float)
 		for taxes in taxes_by_return.values():
 			for tax, original_charge in pair_with_original_charges(taxes, original_charges):
-				charges[original_charge.name] += flt(tax.tax_amount)
+				charges[original_charge.name] += flt(tax.base_tax_amount)
 
 		return charges
 
