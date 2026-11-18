@@ -478,6 +478,31 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual(actual_qty, -5)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_stock_return_of_a_row_whose_stock_is_all_returned_books_no_stock_value(self):
+		"""The return that moves no stock, as the row's other returns took it all back, books no stock value."""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = make_item(
+			"_Test Item For Returns Of Parts",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.006}]},
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		pi = make_purchase_invoice(item_code=item, qty=2, rate=100, update_stock=1, do_not_save=1)
+		pi.items[0].update({"uom": "Box", "conversion_factor": 0.006})
+		pi.submit()
+
+		first_return = make_return_doc(pi.doctype, pi.name)
+		first_return.items[0].update({"qty": -1, "received_qty": -1})
+		first_return.submit()
+		last_return = make_return_doc(pi.doctype, pi.name)
+		last_return.submit()
+
+		stock_account = get_inventory_account(pi.company, pi.items[0].warehouse)
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"voucher_no": last_return.name, "account": stock_account})
+		)
+
 	def test_settled_purchase_invoice_cannot_be_held(self):
 		pi = make_purchase_invoice()
 
@@ -3177,44 +3202,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	def test_return_of_an_internal_transfer_invoice_in_another_uom(self):
 		"""A return takes back the stock value the invoice moved, when the stock qty is rounded."""
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		company = "_Test Company with perpetual inventory"
-		item = make_item(
-			"_Test Kg Item For Returned Transfer",
-			{
-				"stock_uom": "Kg",
-				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 0.3356}],
-			},
-		).name
-		make_purchase_receipt(
-			item_code=item, company=company, warehouse="Stores - TCP1", qty=20, rate=100, uom="Kg"
-		)
-
-		si = create_sales_invoice(
-			company=company,
-			customer="_Test Internal Customer 2",
-			item_code=item,
-			qty=4,
-			rate=100,
-			warehouse="Stores - TCP1",
-			update_stock=1,
-			cost_center="Main - TCP1",
-			debit_to="Debtors - TCP1",
-			income_account="Sales - TCP1",
-			do_not_save=1,
-		)
-		si.items[0].update(
-			{"uom": "Box", "conversion_factor": 0.3356, "target_warehouse": "Work In Progress - TCP1"}
-		)
-		si.submit()
-
-		pi = make_inter_company_purchase_invoice(si.name)
-		pi.update_stock = 1
-		pi.items[0].warehouse = "Finished Goods - TCP1"
-		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
-		pi.submit()
+		pi = self.make_internal_transfer_invoice_in_boxes(qty=4, conversion_factor=0.3356)
 
 		returned = make_return_doc("Purchase Invoice", pi.name)
 		returned.update_stock = 1
@@ -3226,6 +3214,70 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				{"voucher_no": returned.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
 			)
 		)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_internal_transfer_invoice_return_that_moves_no_stock_books_nothing(self):
+		"""The return that moves no stock, as the row's other returns took it all back, books no stock value."""
+		pi = self.make_internal_transfer_invoice_in_boxes(qty=2, conversion_factor=0.006)
+
+		first_return = make_return_doc("Purchase Invoice", pi.name)
+		first_return.update_stock = 1
+		first_return.items[0].update({"qty": -1, "received_qty": -1})
+		first_return.submit()
+		last_return = make_return_doc("Purchase Invoice", pi.name)
+		last_return.update_stock = 1
+		last_return.submit()
+
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": last_return.name}))
+
+	def make_internal_transfer_invoice_in_boxes(self, qty, conversion_factor):
+		"""Internal transfer invoice of an item kept in Kg and moved in Box, from Stores via Work In Progress."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(
+			"_Test Kg Item For Returned Transfer",
+			{
+				"stock_uom": "Kg",
+				"uoms": [
+					{"uom": "Kg", "conversion_factor": 1},
+					{"uom": "Box", "conversion_factor": conversion_factor},
+				],
+			},
+		).name
+		make_purchase_receipt(
+			item_code=item, company=company, warehouse="Stores - TCP1", qty=20, rate=100, uom="Kg"
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item,
+			qty=qty,
+			rate=100,
+			warehouse="Stores - TCP1",
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].update(
+			{
+				"uom": "Box",
+				"conversion_factor": conversion_factor,
+				"target_warehouse": "Work In Progress - TCP1",
+			}
+		)
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+		return pi
 
 	def test_stock_updating_invoice_rejects_every_unit_of_a_row(self):
 		"""A row of a stock updating invoice may be rejected in full."""

@@ -498,6 +498,29 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		stock_bin = {"item_code": item, "warehouse": pr.items[0].warehouse}
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 1.0)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_return_of_a_row_whose_stock_is_all_returned_takes_back_nothing(self):
+		"""Once the returns of a row have taken back all its stock, the return of its rest takes no other stock,
+		and cancelling it puts nothing back."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = self.make_item_for_returns_of_parts(0.006)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item, qty=2, uom="Box", conversion_factor=0.006, rate=100)
+
+		first_return = make_return_doc("Purchase Receipt", pr.name)
+		first_return.items[0].update({"qty": -1, "received_qty": -1})
+		first_return.submit()
+		last_return = make_return_doc("Purchase Receipt", pr.name)
+		last_return.submit()
+
+		stock_bin = {"item_code": item, "warehouse": "_Test Warehouse - _TC"}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 5)
+
+		last_return.cancel()
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 5)
+
 	def return_receipt_in_parts(self, conversion_factor=0.3356):
 		"""Receipt of 6 Box, returned as two parts of 3 Box, whose stock qty rounds unevenly: at 0.3356 Kg
 		the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down (1.00 Kg each of 2.01 Kg)."""
