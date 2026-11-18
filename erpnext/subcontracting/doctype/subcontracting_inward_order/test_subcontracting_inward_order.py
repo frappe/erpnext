@@ -741,6 +741,41 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertEqual((scio.per_delivered, scio.status), (100, "Delivered"))
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 20}
+	)
+	def test_overproduced_row_does_not_cover_a_short_row(self):
+		item = {"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}
+		so = make_sales_order(is_subcontracted=1, item_list=[item, item.copy()])
+		scio = make_subcontracting_inward_order(so.name)
+		for row in scio.items:
+			row.delivery_warehouse = "_Test Warehouse - _TC"
+		scio.submit()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		for wo_name, qty in zip(scio.make_work_order(), (6, 4), strict=True):
+			wo = frappe.get_doc("Work Order", wo_name)
+			wo.skip_transfer = 1
+			wo.required_items[-1].source_warehouse = "Stores - _TC"
+			wo.submit()
+			manufacture = frappe.new_doc("Stock Entry").update(
+				make_stock_entry_from_wo(wo.name, "Manufacture")
+			)
+			manufacture.items[-1].qty = qty
+			manufacture.fg_completed_qty = qty
+			manufacture.submit()
+
+		scio.reload()
+		self.assertEqual((scio.per_produced, scio.status), (90, "Ongoing"))
+
+		with self.change_settings("Selling Settings", allow_delivery_of_overproduced_qty=1):
+			frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
+
+		scio.reload()
+		self.assertEqual([row.delivered_qty for row in scio.items], [6, 4])
+		self.assertEqual((scio.per_delivered, scio.status), (90, "Ongoing"))
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
