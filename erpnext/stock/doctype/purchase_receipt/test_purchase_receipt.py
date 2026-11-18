@@ -1401,14 +1401,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		for sle in sl_entries:
 			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
 
-<<<<<<< HEAD
 		pr.cancel()
-=======
+
 	def test_internal_transfer_fifo_matches_transit_rate_after_repost(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
+		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		with self.change_settings("Stock Settings", allow_internal_transfer_at_arms_length_price=1):
@@ -1468,7 +1468,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				)
 				self.assertEqual(frappe.parse_json(transit.stock_queue), [[75.0, 0.61], [2500.0, 0.85]])
 				self.assertFalse(get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True))
->>>>>>> 044a275 (fix(stock): match FIFO rates at database precision)
 
 	def test_internal_transfer_on_half_cent_moves_no_value(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
