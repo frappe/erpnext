@@ -373,10 +373,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 				"qty_consumed_per_unit",
 			)
 			qty = flt(
-				qty_consumed_per_unit * data.process_loss_qty,
+				rm_item.required_qty
+				- rm_item.received_qty
+				+ rm_item.returned_qty
+				+ qty_consumed_per_unit * data.process_loss_qty,
 				frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty"),
 			)
-			return rm_item.required_qty - rm_item.received_qty + rm_item.returned_qty + qty
+			return max(qty, 0)
 
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
