@@ -161,11 +161,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-09-16 11:42:07.000000",
-=======
  "modified": "2026-11-17 19:30:00.000000",
->>>>>>> 17dc970 (fix(manufacturing): hide Generate Demand on a submitted Sales Forecast)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Sales Forecast",
