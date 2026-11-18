@@ -71,167 +71,11 @@ frappe.ui.form.on("BOM", {
 				title: __("Mandatory"),
 			});
 		}
-<<<<<<< HEAD
-=======
-
-		frm.events.set_default_last_step(frm);
-	},
-
-	set_default_last_step(frm) {
-		const steps = frm.doc.operations || [];
-		if (!frm.doc.track_semi_finished_goods || !steps.length) return;
-
-		if (!steps.some((row) => row.is_final_finished_good)) {
-			const makes_bom_item = steps.filter((row) => row.finished_good === frm.doc.item);
-			const last_step = steps[steps.length - 1];
-			if (makes_bom_item.length === 1) {
-				makes_bom_item[0].is_final_finished_good = 1;
-			} else if (!makes_bom_item.length && !last_step.finished_good) {
-				last_step.is_final_finished_good = 1;
-			}
-		}
-
-		steps
-			.filter((row) => row.is_final_finished_good && !row.finished_good)
-			.forEach((row) => (row.finished_good = frm.doc.item));
-	},
-
-	set_company_filters: function (frm, fieldname) {
-		frm.set_query(fieldname, () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
-	},
-
-	track_semi_finished_goods(frm) {
-		frm.trigger("toggle_fields_for_semi_finished_goods");
-	},
-
-	toggle_fields_for_semi_finished_goods(frm) {
-		let fields = [
-			"finished_good",
-			"finished_good_qty",
-			"bom_no",
-			"skip_material_transfer",
-			"wip_warehouse",
-			"fg_warehouse",
-			"is_subcontracted",
-			"is_final_finished_good",
-		];
-
-		fields.forEach((field) => {
-			frm.fields_dict["operations"].grid.update_docfield_property(
-				field,
-				"read_only",
-				!frm.doc.track_semi_finished_goods
-			);
-
-			frm.fields_dict["operations"].grid.update_docfield_property(
-				field,
-				"in_list_view",
-				frm.doc.track_semi_finished_goods
-			);
-
-			frm.fields_dict["operations"].grid.update_docfield_property(
-				field,
-				"hidden",
-				!frm.doc.track_semi_finished_goods
-			);
-		});
-
-		frm.fields_dict["operations"].grid.reset_grid();
-		frm.events.render_stage_summary(frm);
-	},
-
-	render_stage_summary(frm) {
-		const wrapper = frm.get_field("stage_summary")?.$wrapper;
-		if (!wrapper) return;
-
-		wrapper.empty();
-		if (!frm.doc.track_semi_finished_goods || !frm.doc.operations?.length) return;
-
-		const can_add = !frm.is_new() && frm.doc.docstatus === 0;
-		const rows = frm.doc.operations.map((row) => frm.events.get_stage_summary_row(frm, row, can_add));
-
-		wrapper.html(`
-			<div style="border:1px solid var(--border-color);border-radius:var(--border-radius-md);margin-bottom:var(--margin-lg);">
-				${rows.join("")}
-			</div>`);
-
-		wrapper.find(".stage-add-materials").on("click", (event) => {
-			const row = frm.doc.operations.find((d) => d.name === $(event.currentTarget).attr("data-row"));
-			frm.events._prompt_for_raw_materials(frm, row);
-		});
-	},
-
-	get_stage_summary_row(frm, row, can_add) {
-		const escape = frappe.utils.escape_html;
-		const count = (frm.doc.items || []).filter(
-			(item) => item.item_code && cint(item.operation_row_id) === cint(row.idx)
-		).length;
-
-		let [color, status] = ["red", __("No raw materials")];
-		if (count) {
-			[color, status] = [
-				"green",
-				count === 1 ? __("1 raw material") : __("{0} raw materials", [count]),
-			];
-		} else if (row.bom_no) {
-			[color, status] = ["blue", __("From BOM")];
-		}
-
-		const makes = row.finished_good ? escape(row.finished_good) : __("Output Item not set");
-		const last = row.is_final_finished_good
-			? ` <span class="text-muted">(${__("Last Step")})</span>`
-			: "";
-		const add_button =
-			can_add && !count && !row.bom_no
-				? `<button class="btn btn-xs btn-default stage-add-materials" data-row="${row.name}">${__(
-						"Add Raw Materials"
-				  )}</button>`
-				: "";
-
-		const border =
-			row.idx < frm.doc.operations.length ? "border-bottom:1px solid var(--border-color);" : "";
-
-		return `<div style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;${border}">
-			<span class="ellipsis" style="flex:2;">${row.idx}. ${escape(row.operation || "")}</span>
-			<span class="ellipsis" style="flex:3;">${__("Makes")} ${makes}${last}</span>
-			<span style="flex:2;"><span class="indicator-pill no-indicator-dot ${color}">${status}</span></span>
-			<span style="flex:0 0 140px;text-align:right;white-space:nowrap;">${add_button}</span>
-		</div>`;
-	},
-
-	toggle_percentage_field(frm) {
-		let show = Boolean(frm.doc.set_qty_based_on_percentage);
-
-		frm.fields_dict["items"].grid.update_docfield_property("percentage", "in_list_view", show);
-		frm.fields_dict["items"].grid.update_docfield_property("percentage", "hidden", !show);
-		frm.fields_dict["items"].grid.update_docfield_property("qty", "read_only", show);
-		frm.fields_dict["items"].grid.reset_grid();
-	},
-
-	set_qty_based_on_percentage(frm) {
-		frm.trigger("toggle_percentage_field");
-		if (frm.doc.set_qty_based_on_percentage) {
-			erpnext.bom.set_qty_from_percentage(frm);
-		} else {
-			frm.set_df_property("items", "description", "");
-		}
 	},
 
 	quantity(frm) {
-		erpnext.bom.set_qty_from_percentage(frm);
 		erpnext.bom.calculate_op_cost(frm.doc);
 		erpnext.bom.calculate_total(frm.doc);
-	},
-
-	uom(frm) {
-		erpnext.bom.set_qty_from_percentage(frm);
->>>>>>> 45e7b4c (fix(manufacturing): refresh the BOM form operating cost when its inputs change)
 	},
 
 	with_operations: function (frm) {
@@ -690,55 +534,6 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			this.frm.events.update_cost(this.frm);
 		}
 	}
-<<<<<<< HEAD
-=======
-
-	hour_rate(doc) {
-		erpnext.bom.calculate_op_cost(doc);
-		erpnext.bom.calculate_total(doc);
-	}
-
-	time_in_mins(doc) {
-		this.hour_rate(doc);
-	}
-
-	batch_size(doc) {
-		this.hour_rate(doc);
-	}
-
-	set_cost_based_on_bom_qty(doc) {
-		this.hour_rate(doc);
-	}
-
-	bom_no(doc, cdt, cdn) {
-		get_bom_material_detail(doc, cdt, cdn, false);
-	}
-
-	is_default(doc) {
-		if (doc.is_default) this.frm.set_value("is_active", 1);
-	}
-
-	qty(doc) {
-		erpnext.bom.calculate_rm_cost(doc);
-		erpnext.bom.calculate_total(doc);
-	}
-
-	rate(doc, cdt, cdn) {
-		let d = locals[cdt][cdn];
-
-		if (d.bom_no) {
-			frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-			get_bom_material_detail(doc, cdt, cdn, false);
-		} else {
-			erpnext.bom.calculate_rm_cost(doc);
-			erpnext.bom.calculate_total(doc);
-		}
-	}
-
-	validate(doc) {
-		erpnext.bom.update_cost(doc);
-	}
->>>>>>> 45e7b4c (fix(manufacturing): refresh the BOM form operating cost when its inputs change)
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({ frm: cur_frm }));
@@ -749,6 +544,8 @@ cur_frm.cscript.hour_rate = function (doc) {
 };
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
+cur_frm.cscript.batch_size = cur_frm.cscript.hour_rate;
+cur_frm.cscript.set_cost_based_on_bom_qty = cur_frm.cscript.hour_rate;
 
 cur_frm.cscript.bom_no = function (doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn, false);
