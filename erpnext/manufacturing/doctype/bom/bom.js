@@ -273,6 +273,8 @@ frappe.ui.form.on("BOM", {
 
 	quantity(frm) {
 		erpnext.bom.set_qty_from_percentage(frm);
+		erpnext.bom.calculate_op_cost(frm.doc);
+		erpnext.bom.calculate_total(frm.doc);
 	},
 
 	uom(frm) {
@@ -856,6 +858,14 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 
 	time_in_mins(doc) {
+		this.hour_rate(doc);
+	}
+
+	batch_size(doc) {
+		this.hour_rate(doc);
+	}
+
+	set_cost_based_on_bom_qty(doc) {
 		this.hour_rate(doc);
 	}
 
