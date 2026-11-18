@@ -804,16 +804,13 @@ def _accumulate_serial_batch(row_wise_serial_batch, entry):
 		details.batch_nos[entry.batch_no] += abs(entry.qty)
 
 
-def release_unused_inward_reservations(
-	work_order: str | None = None, scio_detail: str | None = None, qty: float | None = None
-) -> None:
+def release_unused_inward_reservations(scio_detail: str, qty: float) -> None:
 	"""Give the inward order back, up to `qty`, the customer material Work Orders hold beyond their need.
 
 	An open Work Order needs its required qty, or the qty it used if more; a completed one only the qty it used.
 	"""
-	qty = float("inf") if qty is None else qty
 	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
-	sres = get_inward_reservations(work_order, scio_detail)
+	sres = get_inward_reservations(scio_detail)
 	unused_qty = get_unused_inward_qty(sres)
 	for sre in sres:
 		release_qty = flt(
@@ -842,12 +839,12 @@ def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
 	return unused_qty
 
 
-def get_inward_reservations(work_order: str | None, scio_detail: str | None) -> list[dict]:
-	"""Qty based Work Order reservations taken from an inward order, newest first."""
+def get_inward_reservations(scio_detail: str) -> list[dict]:
+	"""Qty based Work Order reservations taken from an inward order row, newest first."""
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
-	query = (
+	return (
 		frappe.qb.from_(sre)
 		.inner_join(wo)
 		.on(wo.name == sre.voucher_no)
@@ -866,15 +863,10 @@ def get_inward_reservations(work_order: str | None, scio_detail: str | None) -> 
 			& (sre.voucher_type == "Work Order")
 			& (sre.from_voucher_type == "Subcontracting Inward Order")
 			& (sre.reservation_based_on == "Qty")
+			& (sre.from_voucher_detail_no == scio_detail)
 		)
 		.orderby(sre.creation, order=Order.desc)
-	)
-	if work_order:
-		query = query.where(sre.voucher_no == work_order)
-	if scio_detail:
-		query = query.where(sre.from_voucher_detail_no == scio_detail)
-
-	return query.run(as_dict=True)
+	).run(as_dict=True)
 
 
 def release_inward_reservation(sre: dict, qty: float) -> None:
