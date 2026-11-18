@@ -307,19 +307,19 @@ def get_pending_consumption_qty(work_order):
 
 
 def get_pending_consumption_qty_based_on_bom(work_order):
-	"""The consumption entry takes each material per the BOM, so the most consumed material decides
-	what is done, and no material is proposed beyond what is left. Consumption runs ahead of
-	production, so the produced qty (with process loss) is done when larger."""
-	consumed_for_qty = max(
+	"""The qty the materials left for the order cover, as the consumption entry takes each per the BOM,
+	at most what is left to produce."""
+	basis_field = "required_qty" if work_order.skip_transfer else "transferred_qty"
+	left_for_qty = min(
 		(
-			flt(row.consumed_qty) * flt(work_order.qty) / flt(row.required_qty)
+			(flt(row.get(basis_field)) - flt(row.consumed_qty)) * flt(work_order.qty) / flt(row.required_qty)
 			for row in work_order.required_items
 			if (row.include_item_in_manufacturing or row.is_additional_item) and flt(row.required_qty) > 0
 		),
 		default=0,
 	)
-	done_qty = max(flt(work_order.produced_qty) + flt(work_order.process_loss_qty), consumed_for_qty)
-	return max(flt(flt(work_order.qty) - done_qty, work_order.precision("qty")), 0)
+	pending_to_produce = flt(work_order.qty) - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
+	return max(flt(min(left_for_qty, pending_to_produce), work_order.precision("qty")), 0)
 
 
 def get_pending_consumption_qty_based_on_transfer(work_order):
