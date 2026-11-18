@@ -528,7 +528,10 @@ class MaterialRequirementsPlanningReport:
 
 	def set_lead_time(self, row):
 		lead_time = get_item_lead_time(
-			row.item_code, row.type_of_material, flt(row.required_qty, self.qty_precision)
+			row.item_code,
+			row.type_of_material,
+			flt(row.required_qty, self.qty_precision),
+			row.default_supplier,
 		)
 		row.lead_time = math.ceil(lead_time)
 		row.release_date = add_days(row.delivery_date, -row.lead_time)
@@ -1353,10 +1356,10 @@ def get_item_details(item_code, company):
 	return data
 
 
-def get_item_lead_time(item_code, type_of_material, qty=1):
+def get_item_lead_time(item_code, type_of_material, qty=1, supplier=None):
 	"""Return calendar days, scaling only manufacturing time by the required quantity."""
 	if type_of_material != "Manufacture":
-		return get_purchase_lead_time(item_code)
+		return get_purchase_lead_time(item_code, supplier)
 
 	if qty <= 0:
 		return 0
@@ -1368,11 +1371,12 @@ def get_item_lead_time(item_code, type_of_material, qty=1):
 
 
 @frappe.request_cache
-def get_purchase_lead_time(item_code):
+def get_purchase_lead_time(item_code, supplier=None):
 	details = get_item_lead_time_details(item_code)
 	lead_times = {item_code: details} if details else {}
+	chosen_suppliers = {item_code: [supplier]} if supplier else {}
 	lead_days, _suppliers = get_material_lead_days(
-		[item_code], lead_times, get_supplier_lead_times([item_code]), {}
+		[item_code], lead_times, get_supplier_lead_times([item_code]), chosen_suppliers
 	)
 	return lead_days[item_code]
 
