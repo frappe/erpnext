@@ -4379,46 +4379,48 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
 		company = "_Test Company with perpetual inventory"
-		pr = make_purchase_receipt(
-			company=company,
-			warehouse="Stores - TCP1",
-			supplier_warehouse="Work In Progress - TCP1",
-			item_code=make_item(properties={"is_stock_item": 1}).name,
-			qty=3,
-			rate=100,
-			do_not_submit=True,
-		)
-		pr.append(
-			"taxes",
-			{
-				"category": "Valuation",
-				"charge_type": "Actual",
-				"account_head": "Expenses Included In Valuation - TCP1",
-				"description": "Freight",
-				"tax_amount": 100,
-			},
-		)
-		pr.submit()
+		for charge, expected in ((100, [-33.33, -33.33, -33.34]), (-100, [33.33, 33.33, 33.34])):
+			with self.subTest(charge=charge):
+				pr = make_purchase_receipt(
+					company=company,
+					warehouse="Stores - TCP1",
+					supplier_warehouse="Work In Progress - TCP1",
+					item_code=make_item(properties={"is_stock_item": 1}).name,
+					qty=3,
+					rate=100,
+					do_not_submit=True,
+				)
+				pr.append(
+					"taxes",
+					{
+						"category": "Valuation",
+						"charge_type": "Actual",
+						"account_head": "Expenses Included In Valuation - TCP1",
+						"description": "Freight",
+						"tax_amount": charge,
+					},
+				)
+				pr.submit()
 
-		returns = []
-		for _ in range(3):
-			pr_return = make_purchase_return(pr.name)
-			pr_return.items[0].update({"qty": -1, "received_qty": -1})
-			pr_return.submit()
-			returns.append(pr_return)
+				returns = []
+				for _ in range(3):
+					pr_return = make_purchase_return(pr.name)
+					pr_return.items[0].update({"qty": -1, "received_qty": -1})
+					pr_return.submit()
+					returns.append(pr_return)
 
-		# the last return takes the rest of the charge, as the stock ledger takes the rest of the stock value
-		self.assertEqual([pr_return.taxes[0].tax_amount for pr_return in returns], [-33.33, -33.33, -33.34])
-		self.assertFalse(
-			frappe.db.exists(
-				"GL Entry",
-				{
-					"voucher_no": ["in", [pr_return.name for pr_return in returns]],
-					"account": "Cost of Goods Sold - TCP1",
-					"is_cancelled": 0,
-				},
-			)
-		)
+				# the last return takes the rest of the charge, as the stock ledger takes the rest of the stock value
+				self.assertEqual([pr_return.taxes[0].tax_amount for pr_return in returns], expected)
+				self.assertFalse(
+					frappe.db.exists(
+						"GL Entry",
+						{
+							"voucher_no": ["in", [pr_return.name for pr_return in returns]],
+							"account": "Cost of Goods Sold - TCP1",
+							"is_cancelled": 0,
+						},
+					)
+				)
 
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
