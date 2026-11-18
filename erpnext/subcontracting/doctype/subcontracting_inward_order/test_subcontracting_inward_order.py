@@ -668,6 +668,44 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(scio.items[0].delivered_qty, 2)
 		self.assertEqual(scio.items[0].returned_qty, 1)
 
+	def test_subcontracting_return_refuses_batch_beyond_its_delivered_qty(self):
+		from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+		so, scio = create_so_scio(service_item="Service Item 3", fg_item="FG Item with Batch")
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		batches = []
+		for qty in (3, 2):
+			manufacture = frappe.new_doc("Stock Entry").update(
+				make_stock_entry_from_wo(wo.name, "Manufacture", qty)
+			)
+			manufacture.submit()
+			fg_row = next(item for item in manufacture.items if item.is_finished_item)
+			batches.append(next(iter(get_batch_nos(fg_row.serial_and_batch_bundle))))
+		scio.reload()
+		frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
+
+		def make_return(qty, batch_no):
+			scio.reload()
+			fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+			fg_return.items[0].update(
+				{
+					"qty": qty,
+					"t_warehouse": "Stores - _TC",
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
+				}
+			)
+			return fg_return
+
+		make_return(3, batches[0]).submit()
+		self.assertRaisesRegex(frappe.ValidationError, "left to return", make_return(2, batches[0]).submit)
+		make_return(2, batches[1]).submit()
+
 	def test_process_loss_receipt_qty_for_multi_unit_bom(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
 		new_bom.quantity = 2
