@@ -470,7 +470,7 @@ def get_batch_qty_taken_by_rows(doc, item_code, warehouse):
 
 
 def get_current_packed_items(doc):
-	"""Packed rows at the qty this save gives them; the rows of a removed bundle row are left out."""
+	"""Packed rows as this save re-packs them; the rows of a removed bundle row are left out."""
 	from erpnext.stock.doctype.packed_item.packed_item import get_kept_packed_items
 
 	if not doc.get("packed_items"):
@@ -479,7 +479,7 @@ def get_current_packed_items(doc):
 	if not isinstance(doc, Document):
 		doc = frappe.get_doc(doc)
 
-	return [frappe._dict(packed_row.as_dict(), qty=qty) for packed_row, qty in get_kept_packed_items(doc)]
+	return list(get_kept_packed_items(doc))
 
 
 def get_bundle_row_stock_qty(item_row):

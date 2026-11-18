@@ -150,8 +150,8 @@ def get_bundle_components(doc, item_row, bundle_name, order_packed_items):
 
 
 def get_kept_packed_items(doc):
-	"""Yield (packed row, stock qty) for each packed row of the last build that make_packing_list
-	keeps for the bundle rows as they are now."""
+	"""Yield a copy of each packed row that make_packing_list makes from the last build
+	for the bundle rows as they are now."""
 	packed_items_table = get_indexed_packed_items_table(doc)
 	order_packed_items = get_order_packed_items(doc)
 	# only a bundle row that has packed rows can keep one
@@ -170,7 +170,7 @@ def get_kept_packed_items(doc):
 
 
 def get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_items_table):
-	"""Yield (packed row, stock qty) for each stale row of the component that a re-pack keeps,
+	"""Yield a copy of each row a re-pack makes of the component's stale rows,
 	one per Pick List location it is packed from."""
 	stale_rows = get_stale_packed_rows(
 		doc, item_row, bundle_item, packed_items_table, get_linked_packed_item(doc, so_packed_item)
@@ -179,13 +179,22 @@ def get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_i
 		return
 
 	precision = frappe.get_precision("Packed Item", "qty")
-	qty_per_unit = get_component_stock_qty_per_unit(bundle_item, stale_rows[0].uom, so_packed_item)
+	uom = stale_rows[0].uom
+	qty_per_unit = get_component_stock_qty_per_unit(bundle_item, uom, so_packed_item)
 	qty = flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision)
 	locations = get_pick_list_locations(doc, item_row, bundle_item, qty, so_packed_item, packed_items_table)
 	for location in locations or [None]:
-		if stale_rows:
-			packed_row = stale_rows.pop(get_stale_row_idx(stale_rows, location))
-			yield packed_row, flt(location.pack_qty, precision) if location else qty
+		# a location with no stale row left gets a new row, as in add_packed_item_row
+		stale_row = stale_rows.pop(get_stale_row_idx(stale_rows, location)) if stale_rows else None
+		packed_row = frappe.get_doc(
+			stale_row.as_dict()
+			if stale_row
+			else {"doctype": "Packed Item", "item_code": bundle_item.item_code, "uom": uom}
+		)
+		packed_row.qty = qty
+		if location:
+			update_packed_item_with_pick_list_info(item_row, packed_row, location)
+		yield packed_row
 
 
 def is_product_bundle(item_code: str) -> bool:
