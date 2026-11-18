@@ -2201,6 +2201,7 @@ class TestBOM(ERPNextTestSuite):
 			}
 		).insert()
 		bom.update({"rm_cost_as_per": "Price List", "buying_price_list": price_list.name})
+		bom.append("items", {"qty": 1})  # a blank row on the form
 		bom.apply_price_list()
 
 		self.assertEqual(bom.items[0].rate, 10)
