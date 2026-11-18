@@ -726,7 +726,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		scio.reload()
 		self.assertEqual(scio.items[0].produced_qty, 6)
-		self.assertEqual((scio.per_produced, scio.status), (120, "Produced"))
+		self.assertEqual((scio.per_produced, scio.status), (100, "Produced"))
 
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		self.assertEqual(delivery.items[0].qty, 5)
@@ -739,7 +739,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			delivery.submit()
 
 		scio.reload()
-		self.assertEqual((scio.per_delivered, scio.status), (120, "Delivered"))
+		self.assertEqual((scio.per_delivered, scio.status), (100, "Delivered"))
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
