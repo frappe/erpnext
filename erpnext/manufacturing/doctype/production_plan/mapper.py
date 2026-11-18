@@ -45,7 +45,12 @@ def sales_order_query(
 		.on(table.parent == so_table.name)
 		.select(table.parent)
 		.distinct()
-		.where((table.stock_qty > table.production_plan_qty) & (table.docstatus == 1))
+		.where(
+			(table.stock_qty > table.production_plan_qty)
+			& (table.docstatus == 1)
+			& (table.closed == 0)
+			& (so_table.status.notin(["Stopped", "Closed"]))
+		)
 	)
 	query = _apply_sales_order_filters(query, so_table, table, filters, txt)
 	for condition in get_user_permission_conditions_qb("Sales Order", so_table):
