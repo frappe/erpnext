@@ -683,6 +683,22 @@ class SubcontractingInwardController:
 				if item.secondary_item_type or item.valuation_type:
 					secondary_qty[(item.item_code, item.t_warehouse)] += item.transfer_qty
 
+			# BOM rows have no warehouse
+			own_materials = {
+				(row.rm_item_code, row.warehouse): row
+				for row in frappe.get_all(
+					"Subcontracting Inward Order Received Item",
+					filters={"docstatus": 1, "reference_name": fg_item_name, "is_customer_provided_item": 0},
+					fields=[
+						"rm_item_code",
+						"warehouse",
+						"required_qty",
+						"consumed_qty",
+						"billed_qty",
+						"returned_qty",
+					],
+				)
+			}
 			consumed_by_item = defaultdict(float)
 			for item in [item for item in self.items if not item.is_finished_item]:
 				if item.secondary_item_type or item.valuation_type:
@@ -708,25 +724,16 @@ class SubcontractingInwardController:
 							).format(item.idx, get_link_to_form("Item", item.item_code))
 						)
 				else:
-					scio_rm_item = frappe.get_value(
-						"Subcontracting Inward Order Received Item",
-						{
-							"docstatus": 1,
-							"reference_name": fg_item_name,
-							"rm_item_code": item.item_code,
-							"warehouse": item.s_warehouse,
-							"is_customer_provided_item": 0,
-							"is_additional_item": 1,
-						},
-						["consumed_qty", "billed_qty", "returned_qty"],
-						as_dict=True,
-					)
 					key = (item.item_code, item.s_warehouse)
+					scio_rm_item = own_materials.get(key) or own_materials.get((item.item_code, None))
 					consumed_by_item[key] += item.transfer_qty
 					precision = item.precision("transfer_qty")
 					if scio_rm_item and flt(
 						scio_rm_item.billed_qty - scio_rm_item.returned_qty, precision
-					) > flt(scio_rm_item.consumed_qty - consumed_by_item[key], precision):
+					) > flt(
+						max(scio_rm_item.required_qty, scio_rm_item.consumed_qty - consumed_by_item[key]),
+						precision,
+					):
 						frappe.throw(
 							_(
 								"Row #{0}: Cannot cancel this Manufacturing Stock Entry as billed quantity of Item {1} cannot be greater than consumed quantity."
