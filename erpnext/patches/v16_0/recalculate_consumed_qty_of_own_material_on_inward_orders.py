@@ -3,9 +3,6 @@ from frappe.query_builder.functions import Count, IfNull, Sum
 from frappe.utils import flt
 
 RECEIVED_ITEM = "Subcontracting Inward Order Received Item"
-entry = frappe.qb.DocType("Stock Entry")
-entry_item = frappe.qb.DocType("Stock Entry Detail")
-work_order = frappe.qb.DocType("Work Order")
 
 
 def execute():
@@ -16,6 +13,7 @@ def execute():
 
 def get_affected_inward_order_rows():
 	"""Finished good rows with own material on two rows of one Manufacture entry, or with duplicate extra rows."""
+	entry, entry_item, work_order = get_entry_tables()
 	from_entries = (
 		get_own_material_query()
 		.select(entry.subcontracting_inward_order, work_order.subcontracting_inward_order_item)
@@ -44,6 +42,7 @@ def get_affected_inward_order_rows():
 
 def get_own_material_query():
 	"""Own material rows of inward Manufacture entries."""
+	entry, entry_item, work_order = get_entry_tables()
 	item = frappe.qb.DocType("Item")
 	return (
 		frappe.qb.from_(entry_item)
@@ -61,6 +60,14 @@ def get_own_material_query():
 			& (IfNull(entry_item.valuation_type, "") == "")
 			& (item.is_customer_provided_item == 0)
 		)
+	)
+
+
+def get_entry_tables():
+	return (
+		frappe.qb.DocType("Stock Entry"),
+		frappe.qb.DocType("Stock Entry Detail"),
+		frappe.qb.DocType("Work Order"),
 	)
 
 
@@ -112,6 +119,7 @@ def merge_row(target, row):
 
 def get_consumed_qty(inward_order, fg_row):
 	"""Qty of each own material and warehouse consumed by the submitted Manufacture entries of a finished good row."""
+	entry, entry_item, work_order = get_entry_tables()
 	data = (
 		get_own_material_query()
 		.select(entry_item.item_code, entry_item.s_warehouse, Sum(entry_item.transfer_qty))
