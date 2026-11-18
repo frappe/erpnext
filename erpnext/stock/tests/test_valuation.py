@@ -2,7 +2,7 @@ import json
 import unittest
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -76,7 +76,7 @@ class TestFIFOValuation(unittest.TestCase):
 	def test_removing_rate_at_database_precision(self):
 		for rounding_method in ["Banker's Rounding", "Banker's Rounding (legacy)", "Commercial Rounding"]:
 			with self.subTest(rounding_method=rounding_method):
-				with self.change_settings("System Settings", rounding_method=rounding_method):
+				with change_settings("System Settings", rounding_method=rounding_method):
 					queue = FIFOValuation([[1, 0.61], [2, 1025 / 1024], [1, 1.000976563]])
 					self.assertEqual(queue.remove_stock(1, 1.000976563), [[1, 1025 / 1024]])
 					self.assertEqual(queue.state, [[1, 0.61], [1, 1025 / 1024], [1, 1.000976563]])
