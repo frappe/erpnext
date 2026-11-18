@@ -3102,12 +3102,18 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi = make_internal_transfer_invoice(rejected_qty=2)
 		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company, charges=50)
 
-		stock_value_added = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": pi.name, "is_cancelled": 0},
-			fields=[{"SUM": "stock_value_difference", "as": "total"}],
-		)[0].total
-		self.assertEqual(flt(stock_value_added, 2), 50)
+		moved_value = {
+			d.warehouse: flt(d.stock_value_difference, 2)
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pi.name, "is_cancelled": 0},
+				fields=["warehouse", "stock_value_difference"],
+			)
+		}
+		row = pi.items[0]
+		self.assertEqual(moved_value[row.from_warehouse], -201)
+		self.assertEqual(moved_value[row.warehouse], 167.33)
+		self.assertEqual(moved_value[row.rejected_warehouse], 83.67)
 		self.assert_warehouse_accounts_match_stock(pi)
 
 	def assert_warehouse_accounts_match_stock(self, invoice):
