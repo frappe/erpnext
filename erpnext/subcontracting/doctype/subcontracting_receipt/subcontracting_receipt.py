@@ -491,6 +491,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.link_returned_secondary_items(original_rows)
 		self.set_remaining_secondary_qty(original_rows)
+		self.remove_returned_secondary_rows_without_qty()
 
 		if recalculate_rate:
 			self.set_additional_costs()
@@ -585,6 +586,16 @@ class SubcontractingReceipt(SubcontractingController):
 			row.qty = flt(flt(returned.get("qty")) - original_row.qty, row.precision("qty"))
 			row.process_loss_qty = flt(row.received_qty - row.qty, row.precision("process_loss_qty"))
 
+	def remove_returned_secondary_rows_without_qty(self):
+		"""A return's secondary row that rounds to nothing is returned by a later return."""
+		if not self.is_return:
+			return
+
+		for row in list(self.items):
+			qty = flt(flt(row.received_qty) - flt(row.process_loss_qty), row.precision("qty"))
+			if row.bom_secondary_item and not qty:
+				self.remove(row)
+
 	@staticmethod
 	def returns_last_finished_goods(row, original_rows):
 		original_row = original_rows.get(row.subcontracting_receipt_item)
@@ -645,10 +656,8 @@ class SubcontractingReceipt(SubcontractingController):
 		percentage_rows = []
 		for secondary_item in bom.secondary_items:
 			if secondary_item.valuation_type in ("Valuation Rate", "Manual"):
-				if row := self.append_secondary_item(
-					item, bom, secondary_item, warehouse, 0.0, fg_qty_before
-				):
-					own_cost += flt(row.qty) * flt(row.rate)
+				row = self.append_secondary_item(item, bom, secondary_item, warehouse, 0.0, fg_qty_before)
+				own_cost += flt(row.qty) * flt(row.rate)
 			else:
 				percentage_rows.append(secondary_item)
 
@@ -661,11 +670,12 @@ class SubcontractingReceipt(SubcontractingController):
 		qty = self.get_secondary_qty(
 			item, per_unit - (secondary_item.process_loss_qty / bom.quantity), fg_qty_before, "qty"
 		)
-		if self.is_return and not qty:
-			# rounds to nothing this time; the running total returns it with a later return
-			return
-
-		rate = self.get_secondary_item_rate(item, secondary_item, warehouse, qty, own_cost)
+		# a return's zero row is dropped, or priced from the receipt once it gets the qty left
+		rate = (
+			0.0
+			if self.is_return and not qty
+			else self.get_secondary_item_rate(item, secondary_item, warehouse, qty, own_cost)
+		)
 
 		return self.append(
 			"items",
@@ -733,7 +743,7 @@ class SubcontractingReceipt(SubcontractingController):
 			+ flt(lcv_cost_per_qty)
 			+ flt(fg_row.service_cost_per_qty)
 		) * flt(fg_row.received_qty) - flt(own_cost)
-		return (fg_item_cost * (cost_allocation_per / 100)) / qty
+		return (fg_item_cost * (cost_allocation_per / 100)) / qty if qty else 0.0
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
