@@ -155,6 +155,18 @@ class BlanketOrder(Document):
 				)
 			)
 
+		self.validate_order_items(order_doc)
+
+	def validate_order_items(self, order_doc) -> None:
+		item_codes = {row.item_code for row in self.items}
+		for row in order_doc.get("items"):
+			if row.blanket_order == self.name and row.item_code not in item_codes:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not in Blanket Order {2}").format(
+						row.idx, frappe.bold(row.item_code), frappe.bold(self.name)
+					)
+				)
+
 	def set_order_rates(self, order_doc) -> None:
 		rates = {row.item_code: flt(row.rate) for row in self.items}
 		for row in order_doc.get("items"):
