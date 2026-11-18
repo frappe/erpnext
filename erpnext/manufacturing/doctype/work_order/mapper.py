@@ -310,12 +310,15 @@ def get_pending_consumption_qty_based_on_bom(work_order):
 	"""The qty the materials left for the order cover, as the consumption entry takes each per the BOM,
 	at most what is left to produce."""
 	basis_field = "required_qty" if work_order.skip_transfer else "transferred_qty"
+	materials = {}
+	for row in work_order.required_items:
+		if (row.include_item_in_manufacturing or row.is_additional_item) and flt(row.required_qty) > 0:
+			material = materials.setdefault(row.item_code, frappe._dict(left_qty=0.0, required_qty=0.0))
+			material.left_qty += flt(row.get(basis_field)) - flt(row.consumed_qty)
+			material.required_qty += flt(row.required_qty)
+
 	left_for_qty = min(
-		(
-			(flt(row.get(basis_field)) - flt(row.consumed_qty)) * flt(work_order.qty) / flt(row.required_qty)
-			for row in work_order.required_items
-			if (row.include_item_in_manufacturing or row.is_additional_item) and flt(row.required_qty) > 0
-		),
+		(material.left_qty * flt(work_order.qty) / material.required_qty for material in materials.values()),
 		default=0,
 	)
 	pending_to_produce = flt(work_order.qty) - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
