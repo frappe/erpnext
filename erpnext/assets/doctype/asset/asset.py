@@ -214,8 +214,19 @@ class Asset(AccountsController):
 		if not self.flags.asset_created_via_asset_capitalization:
 			add_asset_activity(self.name, _("Asset created"))
 
+	def on_trash(self):
+		super().on_trash()
+		self.delete_draft_depreciation_schedules()
+
 	def after_delete(self):
 		frappe.db.delete("Asset Activity", {"asset": self.name})
+
+	def delete_draft_depreciation_schedules(self):
+		# draft schedules are created on save and their link would block the delete
+		for schedule in frappe.get_all(
+			"Asset Depreciation Schedule", filters={"asset": self.name, "docstatus": 0}, pluck="name"
+		):
+			frappe.delete_doc("Asset Depreciation Schedule", schedule)
 
 	def set_purchase_doc_row_item(self):
 		if self.is_existing_asset or self.is_composite_asset:
