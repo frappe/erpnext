@@ -7881,12 +7881,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			target_warehouse=create_warehouse("_Test Transfer Transit", company=company),
 		)
 
-		def make_receipt(qty):
+		def make_receipt(qty, rejected_qty=0):
 			pr = make_inter_company_purchase_receipt(dn.name)
 			pr.items[0].update(
-				{"warehouse": create_warehouse("_Test Transfer To", company=company), "qty": qty}
+				{
+					"warehouse": create_warehouse("_Test Transfer To", company=company),
+					"rejected_warehouse": create_warehouse("_Test Transfer Rejected", company=company),
+					"qty": qty,
+					"rejected_qty": rejected_qty,
+					"received_qty": qty + rejected_qty,
+				}
 			)
-			pr.items[0].received_qty = qty
 			return pr.insert()
 
 		def get_package_qty(pr):
@@ -7902,6 +7907,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.items[0].update({"qty": 4, "received_qty": 4})
 		pr.save()
 		self.assertEqual(get_package_qty(pr), 4)
+
+		# accepted and rejected material do not take the same batch twice
+		make_receipt(3, rejected_qty=2).submit()
 
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
