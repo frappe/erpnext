@@ -171,7 +171,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 			if (frm.doc.reserve_stock) {
 				if (frm.doc.status !== "Closed") {
-					if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+					if (frm.doc.__onload && frm.doc.__onload.unreserved_qty) {
 						frm.add_custom_button(
 							__("Reserve"),
 							() => frm.events.create_stock_reservation_entries(frm),

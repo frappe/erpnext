@@ -1143,7 +1143,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
-		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).has_unreserved_stock())
+		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).get_unreserved_qty())
 
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
