@@ -366,6 +366,8 @@ class TransactionBase(StatusUpdater):
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
 					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
+					"against_blanket_order": item.get("against_blanket_order"),
+					"blanket_order": item.get("blanket_order"),
 				}
 			),
 			self,
