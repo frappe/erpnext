@@ -23,6 +23,7 @@ class ReturnChargesService:
 		original = frappe.get_doc(doc.doctype, doc.return_against)
 		returned_qty = self.get_returned_qty_by_original_row()
 		for tax, original_tax in pair_with_original_charges(charges, get_actual_valuation_charges(original)):
+			tax.original_tax_row = original_tax.name
 			base_share = self.get_returned_base_share(original, original_tax, returned_qty)
 			tax.tax_amount = -flt(base_share / doc.conversion_rate, tax.precision("tax_amount"))
 
