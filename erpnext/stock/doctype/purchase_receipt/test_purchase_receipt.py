@@ -7761,6 +7761,66 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(stock_value["Finished Goods - TCP1"], -stock_value["Work In Progress - TCP1"])
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 
+	def test_landed_cost_keeps_what_internal_pr_took_out_of_transit(self):
+		"""A Landed Cost Voucher posts an internal receipt again with the qty it took out of transit."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		transit = "Work In Progress - TCP1"
+		item = make_item(
+			"_Test Kg Item For Landed Cost On Transit",
+			{
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 0.3356}],
+			},
+		).name
+		make_purchase_receipt(
+			item_code=item,
+			company=company,
+			warehouse="Stores - TCP1",
+			qty=20,
+			rate=100,
+			uom="Kg",
+			posting_date=add_days(today(), -2),
+		)
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=6,
+			rate=100,
+			warehouse="Stores - TCP1",
+			target_warehouse=transit,
+			posting_date=add_days(today(), -1),
+			do_not_submit=True,
+		)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		dn.submit()
+
+		receipts = []
+		for _ in range(2):
+			pr = make_inter_company_purchase_receipt(dn.name)
+			pr.items[0].update({"qty": 3, "received_qty": 3, "warehouse": "Finished Goods - TCP1"})
+			pr.submit()
+			receipts.append(pr)
+
+		make_return_doc("Purchase Receipt", receipts[0].name).submit()
+		create_landed_cost_voucher("Purchase Receipt", receipts[1].name, company)
+
+		taken_qty = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": receipts[1].name, "warehouse": transit, "is_cancelled": 0},
+			"actual_qty",
+		)
+		self.assertEqual(taken_qty, -1.0)
+
 	def test_internal_pr_qty_change_in_another_uom(self):
 		"""Changing the qty of a draft internal receipt resizes its package in stock UOM."""
 		item = make_item(
