@@ -1190,7 +1190,7 @@ class WorkOrder(Document):
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 
-		def _get_operations(bom_no, qty=1):
+		def _get_operations(bom_no, qty=1, units=1):
 			data = frappe.get_all(
 				"BOM Operation",
 				filters={"parent": bom_no},
@@ -1211,10 +1211,17 @@ class WorkOrder(Document):
 				order_by="idx",
 			)
 
+			batch_based = get_batch_based_operations(d.operation for d in data)
 			for d in data:
-				if not d.fixed_time:
-					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
 				d.status = "Pending"
+				if d.fixed_time:
+					continue
+
+				# as in the BOM, a batch based operation's time is per batch, whatever the BOM quantity
+				if d.operation in batch_based or d.set_cost_based_on_bom_qty:
+					d.time_in_mins = flt(d.time_in_mins) * flt(units) / flt(d.batch_size)
+				else:
+					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
 
 			return data
 
@@ -1230,7 +1237,11 @@ class WorkOrder(Document):
 
 			for node in bom_traversal:
 				if node.is_bom:
-					operations.extend(_get_operations(node.name, qty=node.exploded_qty / node.bom_qty))
+					operations.extend(
+						_get_operations(
+							node.name, qty=node.exploded_qty / node.bom_qty, units=node.exploded_qty
+						)
+					)
 
 		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
 		operations.extend(_get_operations(self.bom_no, qty=1.0 / bom_qty))
@@ -1242,23 +1253,9 @@ class WorkOrder(Document):
 		self.calculate_time()
 
 	def calculate_time(self):
-		batch_based = set(
-			frappe.get_all(
-				"Operation",
-				filters={
-					"name": ("in", list({d.operation for d in self.operations}) or [""]),
-					"create_job_card_based_on_batch_size": 1,
-				},
-				pluck="name",
-			)
-		)
 		for d in self.get("operations"):
-			if d.fixed_time:
-				continue
-
-			# as in the BOM, the time is per batch only for a batch based operation
-			is_per_batch = d.operation in batch_based or d.get("set_cost_based_on_bom_qty")
-			d.time_in_mins = flt(d.time_in_mins) * flt(self.qty) / (flt(d.batch_size) if is_per_batch else 1)
+			if not d.fixed_time:
+				d.time_in_mins = flt(d.time_in_mins) * flt(self.qty)
 
 		self.calculate_operating_cost()
 
@@ -1724,17 +1721,7 @@ class WorkOrder(Document):
 			fields=["parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
 			order_by="idx",
 		)
-		batch_based = set(
-			frappe.get_all(
-				"Operation",
-				filters={
-					"name": ("in", list({d.operation for d in operations}) or [""]),
-					"create_job_card_based_on_batch_size": 1,
-				},
-				pluck="name",
-			)
-		)
-
+		batch_based = get_batch_based_operations(d.operation for d in operations)
 		source_operations = {}
 		for d in operations:
 			d.keeps_own_time = cint(d.fixed_time) or (d.operation in batch_based and flt(d.batch_size))
@@ -1765,6 +1752,16 @@ class WorkOrder(Document):
 		if operation.bom and operation.bom != self.bom_no:
 			row["batch_size"] = flt(bom_qty) or 1
 		return row
+
+
+def get_batch_based_operations(operations):
+	return set(
+		frappe.get_all(
+			"Operation",
+			filters={"name": ("in", list(set(operations)) or [""]), "create_job_card_based_on_batch_size": 1},
+			pluck="name",
+		)
+	)
 
 
 @frappe.whitelist()
