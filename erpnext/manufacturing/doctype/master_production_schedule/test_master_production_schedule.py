@@ -128,6 +128,20 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual(mps.items, [])
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_get_sales_orders_lists_an_order_once(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test MPS Repeated Row Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=1, do_not_submit=True)
+		order.append("items", {**order.items[0].as_dict(), "name": None, "qty": 2})
+		order.submit()
+
+		mps = make_mps(to_date=add_days(today(), 30), select_items=[item])
+		mps.fetch_sales_orders(customer=order.customer)
+
+		self.assertEqual([row.sales_order for row in mps.sales_orders], [order.name])
+
 	def test_mps_details_need_read_permission(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
