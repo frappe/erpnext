@@ -3373,6 +3373,54 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			"set_valuation_rate_for_rejected_materials": 1,
 		},
 	)
+	def test_rejected_stock_of_a_standard_cost_item_books_its_variance(self):
+		"""Rejected stock goes in at the standard rate of 90 and is billed at 100, so the difference
+		is a purchase price variance, as for the accepted stock."""
+		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
+			create_item_standard_cost,
+			create_standard_cost_item,
+			ensure_ppv_account,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		ppv_account = ensure_ppv_account(company)
+		item = create_standard_cost_item().name
+		create_item_standard_cost(item, 90, company=company)
+		rejected_warehouse = create_warehouse("_Test Standard Cost Rejected", company=company)
+
+		pi = make_purchase_invoice(
+			company=company,
+			item_code=item,
+			warehouse="Stores - TCP1",
+			qty=1,
+			rejected_qty=2,
+			rate=100,
+			rejected_warehouse=rejected_warehouse,
+			update_stock=1,
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+		)
+
+		check_gl_entries(
+			self,
+			pi.name,
+			[
+				[pi.credit_to, 0, 300, pi.posting_date],
+				[get_inventory_account(company, "Stores - TCP1"), 90, 0, pi.posting_date],
+				[get_inventory_account(company, rejected_warehouse), 180, 0, pi.posting_date],
+				[ppv_account, 30, 0, pi.posting_date],
+			],
+			pi.posting_date,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
 	def test_stock_updating_invoice_bills_the_rejected_quantity(self):
 		"""With the rejected quantity billed and valued, the invoice pays for every unit received and
 		the stock it moves matches the entries it books."""
