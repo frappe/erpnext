@@ -17,7 +17,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
@@ -297,25 +296,22 @@ def _new_manufacture_stock_entry(work_order, purpose, qty):
 
 def get_pending_consumption_qty(work_order):
 	"""Consumption runs ahead of production, so the larger of the produced qty (with process loss)
-	and the For Quantity already consumed is done."""
+	and the qty whose materials are all consumed is done."""
 	based_on_transfer = (
 		not work_order.skip_transfer
 		and get_backflush_based_on(work_order.bom_no) == "Material Transferred for Manufacture"
 	)
 	planned_qty = work_order.material_transferred_for_manufacturing if based_on_transfer else work_order.qty
 
-	ste = frappe.qb.DocType("Stock Entry")
-	consumed_qty = (
-		frappe.qb.from_(ste)
-		.select(Sum(ste.fg_completed_qty))
-		.where(
-			(ste.work_order == work_order.name)
-			& (ste.docstatus == 1)
-			& (ste.purpose == "Material Consumption for Manufacture")
-		)
-	).run()[0][0]
-
-	done_qty = max(flt(work_order.produced_qty) + flt(work_order.process_loss_qty), flt(consumed_qty))
+	consumed_for_qty = min(
+		(
+			flt(row.consumed_qty) * flt(work_order.qty) / flt(row.required_qty)
+			for row in work_order.required_items
+			if row.include_item_in_manufacturing and flt(row.required_qty) > 0
+		),
+		default=0,
+	)
+	done_qty = max(flt(work_order.produced_qty) + flt(work_order.process_loss_qty), consumed_for_qty)
 	return max(flt(flt(planned_qty) - done_qty, work_order.precision("qty")), 0)
 
 
