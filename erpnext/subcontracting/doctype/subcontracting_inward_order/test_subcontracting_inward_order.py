@@ -1483,6 +1483,31 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio = make_subcontracting_inward_order(so.name)
 		self.assertEqual(scio.items[0].qty, 18)
 
+	def test_draft_inward_order_follows_updated_sales_order_fg_qty(self):
+		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+
+		item_list = [
+			{"item_code": "Service Item 1", "qty": 10, "fg_item": "Basic FG Item", "fg_item_qty": 10}
+		]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.insert()
+
+		row = so.items[0]
+		trans_item = {
+			"docname": row.name,
+			"item_code": row.item_code,
+			"qty": row.qty,
+			"rate": row.rate,
+			"fg_item": row.fg_item,
+			"fg_item_qty": 5,
+		}
+		update_child_qty_rate("Sales Order", frappe.as_json([trans_item]), so.name)
+
+		scio = frappe.get_doc(scio.doctype, scio.name)
+		self.assertRaisesRegex(frappe.ValidationError, "higher than the available quantity", scio.submit)
+
 	def test_receipt_cancel_keeps_other_receipt_reservation(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_reserved_qty_details_for_voucher,
