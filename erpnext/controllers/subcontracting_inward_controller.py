@@ -945,15 +945,21 @@ class SubcontractingInwardController:
 		)
 
 		if data := data.run(as_dict=True):
-			used_item_wh = []
+			# a warehouse with its own extra row is never the BOM row's
+			used_item_wh = [(d.rm_item_code, d.warehouse) for d in data if d.warehouse]
 			doc_updates = {}
 			for d in data:
 				if not d.warehouse:
 					d.warehouse = next(
-						key[1]
-						for key in item_code_wh.keys()
-						if key[0] == d.rm_item_code and key not in used_item_wh
+						(
+							key[1]
+							for key in item_code_wh.keys()
+							if key[0] == d.rm_item_code and key not in used_item_wh
+						),
+						None,
 					)
+					if not d.warehouse:
+						continue
 					used_item_wh.append((d.rm_item_code, d.warehouse))
 
 				qty = d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)]
