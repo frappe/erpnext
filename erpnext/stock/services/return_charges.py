@@ -118,10 +118,14 @@ class ReturnChargesService:
 
 def is_fully_returned(original, original_charge, returned_qty) -> bool:
 	"""Whether all the stock that carried the charge is returned."""
-	return all(
-		flt(returned - carried_qty, row.precision("stock_qty")) >= 0
+	carriers = [
+		(row, returned, carried_qty)
 		for row, charge, returned, carried_qty in get_carried_charges(original, original_charge, returned_qty)
 		if charge
+	]
+	return bool(carriers) and all(
+		flt(returned - carried_qty, row.precision("stock_qty")) >= 0
+		for row, returned, carried_qty in carriers
 	)
 
 
