@@ -4652,6 +4652,61 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], 1000)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], -1000)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_returns_of_parts_of_an_internal_receipt_with_rejected_qty_put_back_only_its_transit_qty(self):
+		"""Returns of parts of an internal receipt row with rejected qty put no more back in transit than
+		the row took out."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		company = "_Test Company with perpetual inventory"
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		item = self.make_item_for_returns_of_parts(0.006)
+
+		make_purchase_receipt(
+			item_code=item, company=company, warehouse=from_warehouse, qty=10, rate=100, uom="Kg"
+		)
+		make_purchase_receipt(
+			item_code=item, company=company, warehouse=to_warehouse, qty=1, rate=100, uom="Kg"
+		)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=4,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			do_not_submit=True,
+		)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.006})
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": to_warehouse,
+				"qty": 2,
+				"rejected_qty": 2,
+				"received_qty": 4,
+				"rejected_warehouse": create_warehouse("_Test Transfer Rejected", company=company),
+			}
+		)
+		pr.submit()
+
+		first_return = make_return_doc("Purchase Receipt", pr.name)
+		first_return.items[0].update({"qty": -1, "rejected_qty": 0, "received_qty": -1})
+		first_return.submit()
+		make_return_doc("Purchase Receipt", pr.name).submit()
+
+		transit_bin = {"item_code": item, "warehouse": transit_warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), 0.02)
+
 	def test_internal_transfer_package_holds_the_rounded_stock_qty(self):
 		"""The accepted package of an internal receipt with a UOM holds the stock qty its ledger entry posts."""
 		item_doc = make_item(
