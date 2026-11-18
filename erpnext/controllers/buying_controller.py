@@ -25,7 +25,10 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 	is_rejected_material_valued,
 )
 from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
-from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.controllers.sales_and_purchase_return import (
+	get_rate_for_return,
+	get_return_against_item_fields,
+)
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.setup.utils import get_exchange_rate
@@ -1170,26 +1173,34 @@ class BuyingController(SubcontractingController):
 	def get_return_stock_qty(self, row, qty, warehouse) -> float:
 		"""Stock qty a return row takes back from the warehouse: no more than its receipt row put there,
 		less the row's other returns, and all that is left once it returns the rest of the row's qty."""
-		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
 			return flt(self.get_posted_return_qty(row, warehouse))
 
 		left = self.get_receipt_row_left_to_return(row, warehouse)
 		if not left:
-			return stock_qty
+			return get_stock_qty(row, qty)
 
-		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
-		if flt(unreturned_stock_qty, row.precision("stock_qty")) <= 0:
-			return -left.stock_qty
+		# rows of this return post together, so the rows before it count as returned
+		for earlier_row in self.get_earlier_rows_of_receipt_row(row, warehouse):
+			take_back_from_left(left, earlier_row, earlier_row.qty)
 
-		return max(stock_qty, -left.stock_qty)
+		return take_back_from_left(left, row, qty)
+
+	def get_earlier_rows_of_receipt_row(self, row, warehouse) -> list:
+		"""Rows of this return before the row that return its receipt row to the warehouse."""
+		reference_field = get_return_against_item_fields(self.doctype)
+		return [
+			d
+			for d in self.get("items")
+			if d.idx < row.idx
+			and d.get(reference_field) == row.get(reference_field)
+			and d.warehouse == warehouse
+		]
 
 	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
 		"""Unrounded and posted stock qty the returned receipt row put in the warehouse that its other
 		returns have not taken back, or None if the receipt row put nothing there."""
-		reference_field = (
-			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
-		)
+		reference_field = get_return_against_item_fields(self.doctype)
 		receipt_row = row.get(reference_field)
 		if not receipt_row:
 			return None
@@ -1897,6 +1908,19 @@ def get_posted_stock_qty_by_row(row_names, warehouse) -> dict:
 		.groupby(sle.voucher_detail_no)
 		.run()
 	)
+
+
+def take_back_from_left(left, row, qty) -> float:
+	"""Stock qty a return row takes back of what is left of its receipt row, and takes it off left: no
+	more than is left, and all of it once the row returns the rest of the receipt row's qty."""
+	left.unrounded_stock_qty += flt(qty) * flt(row.conversion_factor)
+	if flt(left.unrounded_stock_qty, row.precision("stock_qty")) <= 0:
+		stock_qty = -left.stock_qty
+	else:
+		stock_qty = max(get_stock_qty(row, qty), -left.stock_qty)
+
+	left.stock_qty = flt(left.stock_qty + stock_qty, row.precision("stock_qty"))
+	return stock_qty
 
 
 def get_transit_amount(row, qty) -> float:
