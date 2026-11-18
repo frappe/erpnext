@@ -15,6 +15,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
+	_get_stock_reservation_entries_for_voucher,
 	clear_reserve_stock_if_disabled,
 	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
@@ -112,8 +113,8 @@ class SubcontractingOrder(SubcontractingController):
 		)
 
 		if self.reserve_stock:
-			if self.has_unreserved_stock():
-				self.set_onload("has_unreserved_stock", True)
+			if unreserved_qty := self.get_unreserved_qty():
+				self.set_onload("unreserved_qty", unreserved_qty)
 
 			if has_reserved_stock(self.doctype, self.name):
 				self.set_onload("has_reserved_stock", True)
@@ -554,12 +555,37 @@ class SubcontractingOrder(SubcontractingController):
 				if sre.make_stock_reservation_entries():
 					frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
 
-	def has_unreserved_stock(self) -> bool:
-		for item in self.get("supplied_items"):
-			if item.required_qty - flt(item.total_supplied_qty) - flt(item.stock_reserved_qty) > 0:
-				return True
+	def get_unreserved_qty(self) -> dict[str, float]:
+		"""Qty of each supplied item row that is neither supplied nor reserved, for rows that have some."""
+		held_qty = defaultdict(float)
+		for sre in _get_stock_reservation_entries_for_voucher(
+			self.doctype,
+			self.name,
+			fields=[
+				"voucher_detail_no",
+				"from_voucher_type",
+				"reserved_qty",
+				"delivered_qty",
+				"transferred_qty",
+				"consumed_qty",
+			],
+		):
+			# a transfer's reservation holds stock that total_supplied_qty already counts
+			if sre.from_voucher_type != "Stock Entry":
+				held_qty[sre.voucher_detail_no] += (
+					sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty
+				)
 
-		return False
+		unreserved_qty = {}
+		for item in self.supplied_items:
+			qty = flt(
+				item.required_qty - flt(item.total_supplied_qty) - held_qty[item.name],
+				item.precision("required_qty"),
+			)
+			if qty > 0:
+				unreserved_qty[item.name] = qty
+
+		return unreserved_qty
 
 	def release_stock_reservations(self):
 		sre_list = []

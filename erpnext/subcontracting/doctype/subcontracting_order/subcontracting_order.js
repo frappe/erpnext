@@ -174,7 +174,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 			if (frm.doc.reserve_stock) {
 				if (frm.doc.status !== "Closed") {
-					if (frm.doc.__onload && frm.doc.__onload.has_unreserved_stock) {
+					if (frm.doc.__onload && frm.doc.__onload.unreserved_qty) {
 						frm.add_custom_button(
 							__("Reserve"),
 							() => frm.events.create_stock_reservation_entries(frm),
@@ -303,10 +303,9 @@ frappe.ui.form.on("Subcontracting Order", {
 		});
 
 		frm.doc.supplied_items.forEach((item) => {
-			let unreserved_qty =
-				flt(item.required_qty) - flt(item.total_supplied_qty) - flt(item.stock_reserved_qty);
+			let unreserved_qty = frm.doc.__onload.unreserved_qty?.[item.name];
 
-			if (unreserved_qty > 0) {
+			if (unreserved_qty) {
 				dialog.fields_dict.items.df.data.push({
 					__checked: 1,
 					subcontracting_order_supplied_item: item.name,
@@ -410,12 +409,13 @@ frappe.ui.form.on("Subcontracting Order", {
 				callback: (r) => {
 					if (!r.exc && r.message) {
 						r.message.forEach((sre) => {
-							if (flt(sre.reserved_qty) > flt(sre.delivered_qty)) {
+							let held_qty = erpnext.stock_reservation.get_held_qty(sre);
+							if (held_qty > 0) {
 								dialog.fields_dict.sr_entries.df.data.push({
 									sre: sre.name,
 									item_code: sre.item_code,
 									warehouse: sre.warehouse,
-									qty: flt(sre.reserved_qty) - flt(sre.delivered_qty),
+									qty: held_qty,
 								});
 							}
 						});
@@ -423,6 +423,11 @@ frappe.ui.form.on("Subcontracting Order", {
 				},
 			})
 			.then((r) => {
+				if (!dialog.fields_dict.sr_entries.df.data.length) {
+					frappe.msgprint(__("No reserved stock to unreserve."));
+					return;
+				}
+
 				dialog.fields_dict.sr_entries.grid.refresh();
 				dialog.show();
 			});

@@ -1088,7 +1088,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
-		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).has_unreserved_stock())
+		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).get_unreserved_qty())
 
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
@@ -1500,6 +1500,41 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual([tuple(reservation) for reservation in reservations], [(6, 6), (4, 0)])
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
+	def test_transfer_takes_every_batch_the_order_reserved(self):
+		sco = make_reserving_order_with_new_items(
+			"Reserved Batches",
+			rm_properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCORB-.####"},
+		)
+		row = sco.supplied_items[0]
+		# the order reserves 2 + 2, so the second batch has only 1 free
+		for qty, rate in ((2, 100), (3, 120)):
+			make_stock_entry(
+				item_code=row.rm_item_code, qty=qty, to_warehouse=row.reserve_warehouse, rate=rate
+			)
+		sco.submit()
+
+		transfer = make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=get_rm_items(sco.supplied_items), itemwise_details={}
+		)
+
+		reservation = frappe.get_doc(
+			"Stock Reservation Entry",
+			{"voucher_no": sco.name, "docstatus": 1, "warehouse": row.reserve_warehouse},
+		)
+		picked = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={"voucher_no": transfer.name, "docstatus": 1},
+			fields=["entries.batch_no", "entries.qty"],
+		)
+		self.assertEqual(
+			{entry.batch_no: abs(entry.qty) for entry in picked},
+			{entry.batch_no: entry.qty for entry in reservation.sb_entries},
+		)
+		self.assertEqual(reservation.status, "Closed")
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
 	)
 	def test_transfer_cancel_keeps_earlier_unreserved_qty_off_a_later_reservation(self):
@@ -1558,6 +1593,20 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			sco.reserve_raw_materials,
 			items=[{"name": row.name, "qty_to_reserve": 1}],
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_unreserved_qty_skips_the_reservation_of_transferred_stock(self):
+		sco = make_reserving_order_with_new_items("Unreserved After Transfer", qty=10)
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 6
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		sco.reload()
+		self.assertEqual(sco.get_unreserved_qty(), {sco.supplied_items[0].name: 4})
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}

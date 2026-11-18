@@ -213,7 +213,7 @@ def _get_item_details(
 		and not ctx.get("serial_and_batch_bundle")
 		and (ctx.get("use_serial_batch_fields") or ctx.get("doctype") == "POS Invoice")
 	):
-		update_stock(ctx, out, doc)
+		update_stock(ctx, out, doc, has_locked_rate=bool(source_row))
 
 	if ctx.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(ctx.transaction_date, item.lead_time_days)
@@ -321,7 +321,7 @@ def set_valuation_rate(out: ItemDetails | dict, ctx: ItemDetailsCtx):
 		out.update(_get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
 
 
-def update_stock(ctx, out, doc=None):
+def update_stock(ctx, out, doc=None, has_locked_rate=False):
 	if (
 		(
 			ctx.get("doctype") in ["Delivery Note", "POS Invoice"]
@@ -359,12 +359,13 @@ def update_stock(ctx, out, doc=None):
 			batch_no = get_batch_no_covering_qty(kwargs, doc, out.stock_qty)
 			if batch_no:
 				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
-				rate = _get_batch_based_item_price(
-					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
-					out.item_code,
-				)
-				if rate:
-					out.update({"rate": rate, "price_list_rate": rate})
+				if not has_locked_rate:
+					rate = _get_batch_based_item_price(
+						{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
+						out.item_code,
+					)
+					if rate:
+						out.update({"rate": rate, "price_list_rate": rate})
 
 		if out.has_serial_no and needs_serial_nos(ctx, out):
 			set_serial_nos_for_outward(ctx, out, kwargs, doc)
@@ -2099,9 +2100,7 @@ def get_serial_no(_args, serial_nos=None, sales_order=None):
 
 def update_party_blanket_order(ctx: ItemDetailsCtx, out: ItemDetails | dict):
 	if out["against_blanket_order"]:
-		blanket_order_details = _get_blanket_order_details(ctx)
-		if blanket_order_details:
-			out.update(blanket_order_details)
+		out.update(_get_blanket_order_details(ctx) or {"blanket_order": None, "blanket_order_rate": 0})
 
 
 @frappe.whitelist()

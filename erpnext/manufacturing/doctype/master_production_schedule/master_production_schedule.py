@@ -503,6 +503,7 @@ class MasterProductionSchedule(Document):
 				doctype.status,
 				doctype.grand_total,
 			)
+			.distinct()
 			.where((doctype.docstatus == 1) & (doctype.status.notin(["Closed", "Completed"])))
 			.orderby(doctype.delivery_date)
 		)
