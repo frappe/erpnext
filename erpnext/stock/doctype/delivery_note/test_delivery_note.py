@@ -549,34 +549,31 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
-	def test_return_of_the_rest_of_a_bundle_row_whose_components_are_all_back(self):
-		"""The rest of a bundle row whose earlier returns took back all of its components takes back none."""
-		dn = self.make_bundle_delivery_whose_stock_qty_rounds(qty=3, conversion_factor=0.0066)
+	def test_return_of_a_bundle_after_a_cancelled_return_of_a_part(self):
+		"""A return made after an earlier return of a part is cancelled takes back what is left of the components."""
+		dn = self.make_bundle_delivery_whose_stock_qty_rounds()
 
-		for _ in range(3):
-			last_return = make_sales_return(dn.name)
-			last_return.items[0].qty = -1
-			last_return.submit()
+		first_return = make_sales_return(dn.name)
+		first_return.items[0].qty = -3
+		first_return.submit()
+		make_sales_return(dn.name).submit()
+		first_return.cancel()
+		last_return = make_sales_return(dn.name)
+		last_return.submit()
 
-		self.assertEqual(last_return.packed_items[0].qty, 0)
-		dn.reload()
-		self.assertEqual(dn.per_returned, 100)
+		self.assertEqual(last_return.packed_items[0].qty, -101)
 
-	def make_bundle_delivery_whose_stock_qty_rounds(self, qty=6, conversion_factor=0.3356):
-		"""Delivery of a bundle in Box at ``conversion_factor`` Kg per Box, packing 100 components per Kg."""
+	def make_bundle_delivery_whose_stock_qty_rounds(self):
+		"""Delivery of 6 Box of a bundle at 0.3356 Kg per Box (2.01 Kg), packing 100 components per Kg."""
 		bundle = make_item(
 			"_Test Bundle For Rounded Returns",
-			{
-				"is_stock_item": 0,
-				"stock_uom": "Kg",
-				"uoms": [{"uom": "Box", "conversion_factor": conversion_factor}],
-			},
+			{"is_stock_item": 0, "stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
 		).name
 		component = make_item("_Test Component For Rounded Returns", {"stock_uom": "Nos"}).name
 		make_product_bundle(bundle, [component], qty=100)
 		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=300, basic_rate=10)
-		dn = create_delivery_note(item_code=bundle, qty=qty, rate=100, do_not_submit=True)
-		dn.items[0].update({"uom": "Box", "conversion_factor": conversion_factor})
+		dn = create_delivery_note(item_code=bundle, qty=6, rate=100, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
 		dn.submit()
 		return dn
 
