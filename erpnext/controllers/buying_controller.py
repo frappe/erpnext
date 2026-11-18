@@ -1173,6 +1173,12 @@ class BuyingController(SubcontractingController):
 		if self.docstatus == 2:
 			return -flt(self.get_posted_qty(row.name, row.from_warehouse, outward=not self.is_return)) or qty
 
+		# a Landed Cost Voucher or repost cancels the row's entries and posts them again: keep what it moved
+		if reposted_qty := self.get_posted_qty(
+			row.name, row.from_warehouse, outward=not self.is_return, cancelled=True
+		):
+			return -flt(reposted_qty)
+
 		if self.is_return:
 			qty_left = self.get_qty_left_to_return(row)
 			return max(qty, -qty_left) if flt(qty_left) > 0 else qty
@@ -1278,18 +1284,19 @@ class BuyingController(SubcontractingController):
 		)
 		return sum(flt(d.qty) for d in rows), flt(taken_qty)
 
-	def get_posted_qty(self, voucher_detail_no, warehouse, outward):
+	def get_posted_qty(self, voucher_detail_no, warehouse, outward, cancelled=False):
 		"""Qty of the row's entry out of or into the warehouse; a row can have both when rejected stock
-		stays in transit."""
+		stays in transit. Of cancelled entries, the first is the original: later ones include reversals."""
 		return frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
 				"voucher_detail_no": voucher_detail_no,
 				"warehouse": warehouse,
-				"is_cancelled": 0,
+				"is_cancelled": cint(cancelled),
 				"actual_qty": ("<", 0) if outward else (">", 0),
 			},
 			"actual_qty",
+			order_by="creation",
 		)
 
 	def get_received_stock_qty(self, row, accepted_qty):
