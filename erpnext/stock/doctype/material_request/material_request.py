@@ -231,7 +231,13 @@ class MaterialRequest(BuyingController):
 				item.item_code,
 			)
 			if rate is not None:
-				item.db_set({"rate": rate, "amount": flt(rate * item.qty, item.precision("amount"))})
+				item.db_set(
+					{
+						"price_list_rate": rate,
+						"rate": rate,
+						"amount": flt(rate * item.qty, item.precision("amount")),
+					}
+				)
 
 		frappe.msgprint(
 			_("Item rates have been updated based on the selected Buying Price List {0}").format(
