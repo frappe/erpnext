@@ -200,21 +200,27 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				this.frm.has_items = false;
 			}
 
-			frappe.run_serially([
-				() => this.set_selector_trigger_flag(data),
-				() => this.set_barcode(row, barcode),
-				() => this.set_warehouse(row),
-				() =>
-					this.set_item(row, item_code, barcode, batch_no, serial_no).then((qty) => {
-						this.show_scan_message(row.idx, !is_new_row, qty);
-					}),
-				() => this.set_serial_no(row, serial_no),
-				() => this.set_batch_no(row, batch_no),
-				() => this.clean_up(),
-				() => this.set_barcode_uom(row, uom),
-				() => this.revert_selector_flag(),
-				() => resolve(row),
-			]);
+			frappe
+				.run_serially([
+					() => this.set_selector_trigger_flag(data),
+					() => this.set_barcode(row, barcode),
+					() => this.set_warehouse(row),
+					() =>
+						this.set_item(row, item_code, barcode, batch_no, serial_no).then((qty) => {
+							this.show_scan_message(row.idx, !is_new_row, qty);
+						}),
+					() => this.set_serial_no(row, serial_no),
+					() => this.set_batch_no(row, batch_no),
+					() => this.clean_up(),
+					() => this.set_barcode_uom(row, uom),
+					() => this.revert_selector_flag(),
+					() => resolve(row),
+				])
+				.catch(() => {
+					this.clean_up();
+					this.revert_selector_flag();
+					reject();
+				});
 		});
 	}
 
@@ -237,7 +243,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	set_item(row, item_code, barcode, batch_no, serial_no) {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
 			const increment = async (value = 1) => {
 				const item_data = { item_code: item_code, use_serial_batch_fields: 1.0 };
 				frappe.flags.trigger_from_barcode_scanner = true;
@@ -248,12 +254,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			if (this.prompt_qty) {
 				frappe.prompt(__("Please enter quantity for item {0}", [item_code]), ({ value }) => {
-					increment(value).then((value) => resolve(value));
+					increment(value).then(resolve, reject);
 				});
 			} else if (this.frm.has_items) {
 				this.prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no);
 			} else {
-				increment().then((value) => resolve(value));
+				increment().then(resolve, reject);
 			}
 		});
 	}
