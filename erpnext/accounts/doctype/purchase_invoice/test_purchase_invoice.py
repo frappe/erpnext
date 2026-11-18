@@ -3115,6 +3115,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), 0)
 		sle_filters = {"voucher_no": pi.name, "warehouse": transit_warehouse, "is_cancelled": 0}
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), -1)
+		self.assert_warehouse_accounts_match_stock(pi)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 50})
 	def test_internal_transfer_invoice_after_a_billing_only_return_is_not_capped_to_transit(self):
