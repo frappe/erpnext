@@ -830,14 +830,13 @@ erpnext.bom.calculate_op_cost = function (doc) {
 
 	if (doc.with_operations) {
 		doc.operations.forEach((item) => {
-			let row_cost = (flt(item.hour_rate) * flt(item.time_in_mins)) / 60;
-			let operating_cost = flt(row_cost, 2);
-			let base_operating_cost = flt(operating_cost * doc.conversion_rate, 2);
-			let cost_per_unit = row_cost / (flt(item.batch_size) || 1);
-			let base_cost_per_unit = cost_per_unit * flt(doc.conversion_rate);
+			let operating_cost = (flt(item.hour_rate) * flt(item.time_in_mins)) / 60;
+			let base_operating_cost = operating_cost * flt(doc.conversion_rate);
+			let cost_per_unit = operating_cost / (flt(item.batch_size) || 1);
+			let base_cost_per_unit = base_operating_cost / (flt(item.batch_size) || 1);
 			frappe.model.set_value("BOM Operation", item.name, {
-				operating_cost: operating_cost,
-				base_operating_cost: base_operating_cost,
+				operating_cost: flt(operating_cost, precision("operating_cost", item)),
+				base_operating_cost: flt(base_operating_cost, precision("base_operating_cost", item)),
 				cost_per_unit: cost_per_unit,
 				base_cost_per_unit: base_cost_per_unit,
 			});
