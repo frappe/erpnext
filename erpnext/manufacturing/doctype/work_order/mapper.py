@@ -301,18 +301,21 @@ def get_pending_consumption_qty(work_order):
 		not work_order.skip_transfer
 		and get_backflush_based_on(work_order.bom_no) == "Material Transferred for Manufacture"
 	)
-	planned_qty = work_order.material_transferred_for_manufacturing if based_on_transfer else work_order.qty
+	planned_qty = flt(
+		work_order.material_transferred_for_manufacturing if based_on_transfer else work_order.qty
+	)
+	basis_field = "transferred_qty" if based_on_transfer else "required_qty"
 
 	consumed_for_qty = min(
 		(
-			flt(row.consumed_qty) * flt(work_order.qty) / flt(row.required_qty)
+			flt(row.consumed_qty) * planned_qty / flt(row.get(basis_field))
 			for row in work_order.required_items
-			if row.include_item_in_manufacturing and flt(row.required_qty) > 0
+			if (row.include_item_in_manufacturing or row.is_additional_item) and flt(row.get(basis_field)) > 0
 		),
 		default=0,
 	)
 	done_qty = max(flt(work_order.produced_qty) + flt(work_order.process_loss_qty), consumed_for_qty)
-	return max(flt(flt(planned_qty) - done_qty, work_order.precision("qty")), 0)
+	return max(flt(planned_qty - done_qty, work_order.precision("qty")), 0)
 
 
 def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehouse, source_stock_entry):
