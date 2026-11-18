@@ -2290,6 +2290,7 @@ class WorkOrder(Document):
 			# a fully transferred reservation is Closed, and must reopen when its transfer is cancelled
 			filters={**filters, "docstatus": 1},
 			pluck="name",
+			order_by="creation",
 		)
 		if self.status == "Closed":
 			names += frappe.get_all(
