@@ -257,18 +257,20 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					increment(value).then(resolve, reject);
 				});
 			} else if (this.frm.has_items) {
-				this.prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no);
+				this.prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no, resolve, reject);
 			} else {
 				increment().then(resolve, reject);
 			}
 		});
 	}
 
-	prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no) {
+	prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no, resolve, reject) {
 		var me = this;
 		this.dialog = new frappe.ui.Dialog({
 			title: __("Scan barcode for item {0}", [item_code]),
 			fields: me.get_fields_for_dialog(row, item_code, barcode, batch_no, serial_no),
+			// closing without Update abandons the scan; a no-op once Update has resolved it
+			on_hide: reject,
 		});
 
 		this.dialog.set_primary_action(__("Update"), () => {
@@ -280,13 +282,17 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				flt(this.dialog.get_value("qty")) - flt(this.dialog.get_value("scanned_qty"));
 			frappe.model.set_value(row.doctype, row.name, item_data);
 
-			frappe.run_serially([
-				() => this.set_batch_no(row, this.dialog.get_value("batch_no")),
-				() => this.set_barcode(row, this.dialog.get_value("barcode")),
-				() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
-				() => this.add_child_for_remaining_qty(row),
-				() => this.clean_up(),
-			]);
+			resolve(
+				frappe
+					.run_serially([
+						() => this.set_batch_no(row, this.dialog.get_value("batch_no")),
+						() => this.set_barcode(row, this.dialog.get_value("barcode")),
+						() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
+						() => this.add_child_for_remaining_qty(row),
+						() => this.clean_up(),
+					])
+					.then(() => item_data[this.qty_field])
+			);
 
 			this.dialog.hide();
 		});
