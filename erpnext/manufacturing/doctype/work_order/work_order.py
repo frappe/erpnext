@@ -2139,8 +2139,9 @@ class WorkOrder(Document):
 				# stock sent to a subcontractor uses the reservation too; rows of the same item share it
 				key = (row.item_code, row.source_warehouse)
 				sent_qty = sent_to_subcontractor.get(key, 0.0)
-				used_qty = flt(transferred_qty + sent_qty, row.precision("transferred_qty"))
-				unused_qty = self.update_qty_in_stock_reservation(row, used_qty, row_wise_serial_batch)
+				unused_qty = self.update_qty_in_stock_reservation(
+					row, transferred_qty + sent_qty, row_wise_serial_batch
+				)
 				sent_to_subcontractor[key] = min(sent_qty, unused_qty)
 
 		self.recompute_material_transferred_for_manufacturing(transferred_items)
