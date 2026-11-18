@@ -759,8 +759,15 @@ frappe.ui.form.on("Asset", {
 	net_purchase_amount: function (frm) {
 		if (frm.doc.finance_books && frm.doc.finance_books.length) {
 			frm.doc.finance_books.forEach((d) => {
+				if (d.salvage_value_percentage) {
+					d.expected_value_after_useful_life = flt(
+						frm.doc.net_purchase_amount * (d.salvage_value_percentage / 100),
+						precision("net_purchase_amount")
+					);
+				}
 				frm.events.set_depreciation_rate(frm, d);
 			});
+			frm.refresh_field("finance_books");
 		} else if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
 			frm.trigger("set_finance_book");
 		}
