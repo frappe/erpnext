@@ -174,7 +174,7 @@ def get_required_operation_qty(work_orders):
 	for operation_row in operations:
 		work_order = by_name[operation_row.parent]
 		upstream_loss = get_upstream_process_loss(work_order, operation_row)
-		qty = get_operation_qty(work_order, operation_row) - upstream_loss
+		qty = max(get_operation_qty(work_order, operation_row) - upstream_loss, 0)
 		add_operation_qty(required, work_order, operation_row.operation, qty)
 
 	return required
