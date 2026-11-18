@@ -668,8 +668,12 @@ class SubcontractingReceipt(SubcontractingController):
 		qty = self.get_secondary_qty(
 			item, per_unit - (secondary_item.process_loss_qty / bom.quantity), fg_qty_before, "qty"
 		)
-		# a row that rounds to nothing is priced once it gets a qty
-		rate = self.get_secondary_item_rate(item, secondary_item, warehouse, qty, own_cost) if qty else 0.0
+		# a return's zero row is dropped, or priced from the receipt once it gets the qty left
+		rate = (
+			0.0
+			if self.is_return and not qty
+			else self.get_secondary_item_rate(item, secondary_item, warehouse, qty, own_cost)
+		)
 
 		return self.append(
 			"items",
