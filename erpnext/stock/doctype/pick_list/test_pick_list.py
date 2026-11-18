@@ -1689,22 +1689,7 @@ class TestPickList(ERPNextTestSuite):
 	def test_split_bundle_delivery_takes_batch_qty_of_each_packed_row(self):
 		from erpnext.stock.get_item_details import get_batch_qty_taken_by_rows
 
-		component = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "PLSBQ-.#####",
-			}
-		).name
-		for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
-			make_stock_entry(item=component, to_warehouse=warehouse, qty=2, basic_rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=4, rate=100)
-		pick_list = create_pick_list(sales_order.name)
-		pick_list.submit()
-
+		component, pick_list = pick_batch_bundle_from_two_warehouses("PLSBQ-.#####")
 		delivery_note = create_delivery_note(pick_list.name)
 		delivery_note.save()
 
@@ -1713,6 +1698,38 @@ class TestPickList(ERPNextTestSuite):
 			self.assertEqual(
 				get_batch_qty_taken_by_rows(delivery_note, component, row.warehouse), [(row.batch_no, 2)]
 			)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_split_bundle_delivery_takes_batch_qty_of_a_location_the_re_pack_adds(self):
+		from erpnext.stock.get_item_details import get_batch_qty_taken_by_rows
+
+		component, pick_list = pick_batch_bundle_from_two_warehouses("PLRPA-.#####")
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.items[0].qty = 2
+		delivery_note.save()
+		kept_warehouse = delivery_note.packed_items[0].warehouse
+		dropped = next(row for row in pick_list.locations if row.warehouse != kept_warehouse)
+
+		# unsaved: the re-pack packs the dropped location again
+		delivery_note.items[0].qty = 4
+		self.assertEqual(
+			get_batch_qty_taken_by_rows(delivery_note, component, dropped.warehouse), [(dropped.batch_no, 2)]
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_split_bundle_delivery_releases_serial_nos_the_re_pack_trims(self):
+		from erpnext.stock.get_item_details import get_used_serial_nos
+
+		delivery_note = create_delivery_note(pick_bundle_from_two_warehouses().name)
+		delivery_note.save()
+
+		# unsaved: a lower bundle qty trims a packed row's serial nos
+		delivery_note.items[0].qty = 3
+		used_serial_nos = get_used_serial_nos(delivery_note)
+		delivery_note.save()
+
+		self.assertEqual(len(used_serial_nos), 3)
+		self.assertEqual(used_serial_nos, get_used_serial_nos(delivery_note, "packed_items"))
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_split_bundle_delivery_keeps_edited_serial_nos_on_save(self):
@@ -4588,6 +4605,27 @@ def make_serialized_bundle_pick_list():
 	pick_list = create_pick_list(sales_order.name)
 	pick_list.submit()
 	return pick_list
+
+
+def pick_batch_bundle_from_two_warehouses(batch_number_series):
+	"""Submitted Pick List of 4 bundles whose batch component is picked 2 from each of two warehouses."""
+	component = make_item(
+		properties={
+			"is_stock_item": 1,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": batch_number_series,
+		}
+	).name
+	for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=2, basic_rate=100)
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+
+	sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=4, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	return component, pick_list
 
 
 def pick_bundle_from_two_warehouses():
