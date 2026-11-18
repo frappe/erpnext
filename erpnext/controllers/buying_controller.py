@@ -1186,7 +1186,8 @@ class BuyingController(SubcontractingController):
 
 	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict:
 		"""Unrounded and posted stock qty the returned receipt row put in the warehouse that its other
-		returns have not taken back."""
+		returns have not taken back. For the source warehouse of an internal transfer, it is the qty the
+		receipt row took out that its other returns have not put back."""
 		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
 		reference_field = (
 			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
@@ -1205,6 +1206,7 @@ class BuyingController(SubcontractingController):
 				receipt_item.conversion_factor,
 				receipt_item.warehouse,
 				receipt_item.rejected_warehouse,
+				receipt_item.from_warehouse,
 			)
 			.where(
 				(receipt_item.docstatus == 1)
@@ -1223,22 +1225,29 @@ class BuyingController(SubcontractingController):
 				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
 			if d.rejected_warehouse == warehouse:
 				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
+			if d.from_warehouse == warehouse:
+				left.unrounded_stock_qty += (flt(d.qty) + flt(d.rejected_qty)) * flt(d.conversion_factor)
 
 		left.stock_qty = flt(sum(posted_qty.values()), row.precision("stock_qty"))
+		if warehouse == row.from_warehouse:
+			left.stock_qty = -left.stock_qty
 		return left
 
 	def get_posted_return_qty(self, row, warehouse):
-		"""Qty the return row's entry took out of the warehouse."""
-		return frappe.db.get_value(
+		"""Qty the return row's entry took out of the warehouse, or put back into the source warehouse of
+		an internal transfer, as a negative qty."""
+		is_source_warehouse = warehouse == row.from_warehouse
+		qty = frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
 				"voucher_detail_no": row.name,
 				"warehouse": warehouse,
 				"is_cancelled": 0,
-				"actual_qty": ("<", 0),
+				"actual_qty": (">", 0) if is_source_warehouse else ("<", 0),
 			},
 			"actual_qty",
 		)
+		return -flt(qty) if is_source_warehouse else qty
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		if not self.has_rejected_stock(row):
@@ -1247,7 +1256,13 @@ class BuyingController(SubcontractingController):
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
-		return get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty))
+		qty = flt(row.qty) + flt(row.rejected_qty)
+		if self.is_return and not (
+			row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle")
+		):
+			return self.get_return_stock_qty(row, qty, row.from_warehouse)
+
+		return get_stock_qty(row, qty)
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
