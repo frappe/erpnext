@@ -227,17 +227,20 @@ class RequiredItemsService:
 		direct_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		item_transfer_qty = self._qty_covered_by_item_transfers()
-		material_transferred = direct_qty + min(item_transfer_qty, max(flt(self.doc.qty) - direct_qty, 0))
+		# Item transfers first make up what the direct transfers left out.
+		item_transfer_qty = min(
+			self._qty_covered_by(self._material_transfer_qty_by_item(is_return=0, without_for_quantity=True)),
+			self._qty_covered_by(self._material_transfer_qty_by_item(is_return=0)) - direct_qty,
+		)
+		material_transferred = direct_qty + max(min(item_transfer_qty, flt(self.doc.qty) - direct_qty), 0)
 		self.doc.db_set(
 			"material_transferred_for_manufacturing",
 			flt(material_transferred, self.doc.precision("material_transferred_for_manufacturing")),
 		)
 
-	def _qty_covered_by_item_transfers(self):
+	def _qty_covered_by(self, transferred_items):
 		"""Pick list and material request transfers set fg_completed_qty=0; use the min-fraction of
-		their item transfers so partial availability does not mark the order as fully transferred."""
-		transferred_items = self._material_transfer_qty_by_item(is_return=0, without_for_quantity=True)
+		item transfers so partial availability does not mark the order as fully transferred."""
 		required_by_item = {}
 		for row in self.doc.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
