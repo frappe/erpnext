@@ -1252,10 +1252,11 @@ erpnext.work_order = {
 					let se_name = this.value;
 					let qty = max_qty;
 					if (se_name) {
-						qty = await frappe.xcall(
+						const source_qty = await frappe.xcall(
 							"erpnext.manufacturing.doctype.work_order.work_order.get_disassembly_available_qty",
 							{ stock_entry_name: se_name }
 						);
+						qty = Math.min(max_qty, source_qty);
 					}
 
 					frm.disassembly_prompt.set_value("qty", qty);
