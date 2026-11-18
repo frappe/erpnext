@@ -231,7 +231,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 
 	stock_qty() {
-		this.calculate_totals();
+		this.get_all_item_warehouse_details();
 	}
 
 	qty() {
