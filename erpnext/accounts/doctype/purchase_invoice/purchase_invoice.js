@@ -510,6 +510,15 @@ function hide_fields(frm) {
 	frm.refresh_fields();
 }
 
+function reset_receipt_qty(frm) {
+	for (const row of frm.doc.items || []) {
+		if (!row.pr_detail) {
+			row.received_qty = 0;
+			row.rejected_qty = 0;
+		}
+	}
+}
+
 frappe.ui.form.on("Purchase Invoice Item", {
 	expense_account: function (frm, cdt, cdn) {
 		let d = locals[cdt][cdn];
@@ -722,6 +731,9 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	update_stock: function (frm) {
+		if (!frm.doc.update_stock) {
+			reset_receipt_qty(frm);
+		}
 		hide_fields(frm);
 		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock ? true : false);
 	},
