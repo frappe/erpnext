@@ -50,8 +50,9 @@ class MaterialCost:
 			or (not design.is_new() and design.has_value_changed("price_list_currency"))
 			or (previous and previous.currency == design.price_list_currency)
 		):
-			design.plc_conversion_rate = get_exchange_rate(
-				design.price_list_currency, company_currency, args="for_buying"
+			design.plc_conversion_rate = (
+				get_exchange_rate(design.price_list_currency, company_currency, args="for_buying")
+				or design.plc_conversion_rate
 			)
 
 	def set_conversion_factors(self):
