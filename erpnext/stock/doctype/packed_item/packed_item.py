@@ -505,10 +505,8 @@ def get_returned_bundle_stock_qty(row, stock_qty, left=None) -> float:
 		return stock_qty
 
 	unrounded_stock_qty = flt(row.qty) * flt(row.conversion_factor)
-	if flt(left.stock_qty) > 0 and (
-		flt(left.unrounded_stock_qty + unrounded_stock_qty, row.precision("stock_qty")) <= 0
-	):
-		stock_qty = -left.stock_qty
+	if flt(left.unrounded_stock_qty + unrounded_stock_qty, row.precision("stock_qty")) <= 0:
+		stock_qty = -max(flt(left.stock_qty, row.precision("stock_qty")), 0)
 
 	left.stock_qty += stock_qty
 	left.unrounded_stock_qty += unrounded_stock_qty
