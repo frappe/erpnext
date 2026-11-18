@@ -589,9 +589,86 @@ class ProductionPlan(Document):
 		if previous_status != self.status and "Completed" in (previous_status, self.status):
 			self.update_bin_qty()
 
+<<<<<<< HEAD
 	@property
 	def has_unordered_items(self):
 		return any(flt(d.planned_qty) > flt(d.ordered_qty) for d in self.po_items)
+=======
+	def before_submit(self):
+		self.validate_closed_sales_order_items()
+		self.validate_sales_order_planned_qty()
+
+	def validate_closed_sales_order_items(self):
+		so_items = [row.sales_order_item for row in self.po_items + self.prod_plan_references]
+		so_items = list({name for name in so_items if name})
+		if not so_items:
+			return
+
+		so_item = frappe.qb.DocType("Sales Order Item")
+		so = frappe.qb.DocType("Sales Order")
+		closed = (
+			frappe.qb.from_(so_item)
+			.join(so)
+			.on(so.name == so_item.parent)
+			.select(so_item.parent, so_item.idx, so_item.item_code)
+			.where(so_item.name.isin(so_items) & ((so_item.closed == 1) | (so.status == "Closed")))
+			.orderby(so_item.parent, so_item.idx)
+			.limit(1)
+			.run(as_dict=True)
+		)
+		if closed:
+			frappe.throw(
+				_("Row #{0} ({1}) of Sales Order {2} is closed, so it cannot be planned.").format(
+					closed[0].idx, frappe.bold(closed[0].item_code), closed[0].parent
+				),
+				title=_("Sales Order Row Closed"),
+			)
+
+	def validate_sales_order_planned_qty(self):
+		planned_qty = self.get_so_item_planned_qty()
+		if not planned_qty:
+			return
+
+		already_planned = self.get_so_wise_planned_qty(list({key[0] for key in planned_qty}))
+		so_items = {
+			row.name: row
+			for row in frappe.get_all(
+				"Sales Order Item",
+				filters={"name": ("in", [key[1] for key in planned_qty])},
+				fields=["name", "item_code", "stock_qty", "stock_uom"],
+			)
+		}
+		allowance = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
+		)
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
+
+		for (sales_order, so_item), qty in planned_qty.items():
+			row = so_items[so_item]
+			unplanned_qty = flt(
+				flt(row.stock_qty) * (1 + allowance / 100) - flt(already_planned.get((sales_order, so_item))),
+				precision,
+			)
+			if flt(qty, precision) > unplanned_qty:
+				frappe.throw(
+					_(
+						"Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan."
+					).format(
+						qty, row.stock_uom, frappe.bold(row.item_code), sales_order, max(unplanned_qty, 0)
+					),
+					title=_("Sales Order Qty Exceeded"),
+				)
+
+	def get_so_item_planned_qty(self):
+		"""Planned qty per Sales Order line, excluding product bundle components."""
+		planned_qty = {}
+		for row in self.po_items:
+			if row.sales_order and row.sales_order_item and not row.product_bundle_item:
+				key = (row.sales_order, row.sales_order_item)
+				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+
+		return planned_qty
+>>>>>>> bf675b5 (fix(manufacturing): refuse to submit a Production Plan for closed Sales Order rows)
 
 	def on_submit(self):
 		self.update_bin_qty()
