@@ -1170,6 +1170,13 @@ class BuyingController(SubcontractingController):
 
 		return self.get_return_stock_qty(row, row.qty, row.warehouse)
 
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty in the stock UOM, capped on a return like the accepted qty."""
+		if not self.is_return or row.get("rejected_serial_and_batch_bundle"):
+			return get_stock_qty(row, row.rejected_qty)
+
+		return self.get_return_stock_qty(row, row.rejected_qty, row.rejected_warehouse)
+
 	def get_return_stock_qty(self, row, qty, warehouse) -> float:
 		"""Stock qty a return row takes back from the warehouse: no more than its receipt row put there,
 		less the row's other returns, and all that is left once it returns the rest of the row's qty."""
@@ -1464,7 +1471,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": get_stock_qty(d, d.rejected_qty),
+							"actual_qty": self.get_rejected_stock_qty(d),
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
