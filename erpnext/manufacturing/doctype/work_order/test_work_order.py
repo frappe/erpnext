@@ -5407,6 +5407,31 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(get_bin(rm_item, source_warehouse).reserved_stock, 3)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_transfer_stays_on_the_oldest_reservation(self):
+		source_warehouse = "Stores - _TC"
+		fg_item = make_item("Test Oldest Reservation FG", {"is_stock_item": 1}).name
+		rm_item = make_item("Test Oldest Reservation RM", {"is_stock_item": 1}).name
+		test_stock_entry.make_stock_entry(item_code=rm_item, target=source_warehouse, qty=10, basic_rate=10)
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=source_warehouse)
+
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=15, reserve_stock=1, source_warehouse=source_warehouse
+		)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+		test_stock_entry.make_stock_entry(item_code=rm_item, target=source_warehouse, qty=5, basic_rate=10)
+		make_stock_reservation_entries(wo, items=get_unreserved_items(wo), is_transfer=0)
+
+		frappe.get_doc("Work Order", wo.name).update_status()
+
+		sre = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": wo.name, "warehouse": source_warehouse, "docstatus": 1},
+			fields=["reserved_qty", "transferred_qty"],
+			order_by="creation",
+		)
+		self.assertEqual([(row.reserved_qty, row.transferred_qty) for row in sre], [(10, 10), (5, 0)])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_stock_reservation_for_batched_raw_material(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
