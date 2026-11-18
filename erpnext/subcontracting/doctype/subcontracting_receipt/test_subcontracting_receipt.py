@@ -3035,6 +3035,32 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.load_from_db()
 		self.assertEqual(scr.per_returned, 100)
 
+	def test_partial_return_with_all_scrap_keeps_finished_good_rate(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_subcontract_return,
+		)
+
+		scr = make_receipt_with_scrap_item()
+		scr.submit()
+
+		scr_return = make_subcontract_return(scr.name)
+		scr_return.items[0].qty = -1
+		scr_return.submit()
+
+		self.assertEqual(scr_return.items[1].qty, -2)
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+		self.assertEqual(
+			flt(scr_return.items[0].amount, 2),
+			flt(
+				frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_detail_no": scr_return.items[0].name, "is_cancelled": 0},
+					"stock_value_difference",
+				),
+				2,
+			),
+		)
+
 	def test_return_does_not_rebuild_scrap_items(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return,
