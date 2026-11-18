@@ -48,7 +48,11 @@ def validate_return(doc):
 def validate_return_warehouse_stock(doc):
 	"""Refuse a purchase return from a warehouse the receipt row did not stock
 	unless that warehouse holds the returned qty at the receipt rate."""
-	if doc.docstatus != 1 or doc.doctype not in ("Purchase Receipt", "Purchase Invoice"):
+	if doc.docstatus != 1 or doc.doctype not in (
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Subcontracting Receipt",
+	):
 		return
 
 	if doc.doctype == "Purchase Invoice" and not doc.update_stock:
