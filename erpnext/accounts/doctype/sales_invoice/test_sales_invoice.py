@@ -4104,26 +4104,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
 
 	def test_internal_pi_qty_is_checked_in_stock_uom(self):
-		company = "_Test Company with perpetual inventory"
-		make_stock_entry(
-			item_code="_Test Item", target="Stores - TCP1", company=company, qty=10, basic_rate=100
-		)
-		si = create_sales_invoice(
-			company=company,
-			customer="_Test Internal Customer 2",
-			debit_to="Debtors - TCP1",
-			warehouse="Stores - TCP1",
-			income_account="Sales - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			cost_center="Main - TCP1",
-			currency="INR",
-			qty=10,
-			do_not_save=1,
-		)
-		si.selling_price_list = "_Test Price List Rest of the World"
-		si.update_stock = 1
-		si.items[0].target_warehouse = "Work In Progress - TCP1"
-		si.submit()
+		si = make_internal_sales_invoice("_Test Item", qty=10)
 
 		pi = make_inter_company_transaction("Sales Invoice", si.name)
 		extra_pi = make_inter_company_transaction("Sales Invoice", si.name)
@@ -4134,6 +4115,36 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		extra_pi.items[0].update({"qty": 9, "warehouse": "Finished Goods - TCP1"})
 		self.assertRaises(OverAllowanceError, extra_pi.submit)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_internal_pi_for_the_remainder_of_rounded_stock_qty(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "_Test UOM 1", "conversion_factor": 1.667}],
+			}
+		).name
+		si = make_internal_sales_invoice(item, qty=1, uom="Kg")
+
+		for _ in range(2):
+			pi = make_inter_company_transaction("Sales Invoice", si.name)
+			pi.items[0].update(
+				{
+					"uom": "_Test UOM 1",
+					"conversion_factor": 1.667,
+					"qty": 0.2,
+					"warehouse": "Finished Goods - TCP1",
+				}
+			)
+			pi.submit()
+
+		# the mapper offers 1 Kg less the stored, rounded stock qty
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.submit()
 
 	def test_cancelling_one_partial_inter_company_pi_keeps_sales_invoice_linked_to_the_other(self):
 		si = create_sales_invoice(
@@ -6977,6 +6988,29 @@ def create_sales_invoice(**args):
 		si.payment_schedule = []
 
 	return si
+
+
+def make_internal_sales_invoice(item_code, qty, uom=None):
+	company = "_Test Company with perpetual inventory"
+	make_stock_entry(item_code=item_code, target="Stores - TCP1", company=company, qty=qty, basic_rate=100)
+	si = create_sales_invoice(
+		item_code=item_code,
+		uom=uom,
+		company=company,
+		customer="_Test Internal Customer 2",
+		debit_to="Debtors - TCP1",
+		warehouse="Stores - TCP1",
+		income_account="Sales - TCP1",
+		expense_account="Cost of Goods Sold - TCP1",
+		cost_center="Main - TCP1",
+		currency="INR",
+		qty=qty,
+		do_not_save=1,
+	)
+	si.selling_price_list = "_Test Price List Rest of the World"
+	si.update_stock = 1
+	si.items[0].target_warehouse = "Work In Progress - TCP1"
+	return si.submit()
 
 
 def create_sales_invoice_against_cost_center(**args):
