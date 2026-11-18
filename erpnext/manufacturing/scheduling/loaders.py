@@ -257,7 +257,8 @@ def get_operation_duration(row, qty, bom_qty, batch_size_flags):
 	if row.fixed_time:
 		return flt(row.time_in_mins)
 	duration = _operation_time_per_unit(row, bom_qty, 1, False, batch_size_flags) * flt(qty)
-	return flt(duration, frappe.get_precision("Work Order Operation", "time_in_mins"))
+	# 9 decimals, as a Float column stores it: drops float noise but keeps tiny batch durations
+	return flt(duration, 9)
 
 
 def build_operation_task(row, duration, prefix, previous_group, earliest_start, priority):
