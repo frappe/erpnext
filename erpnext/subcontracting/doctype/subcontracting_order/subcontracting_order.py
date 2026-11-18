@@ -114,7 +114,6 @@ class SubcontractingOrder(SubcontractingController):
 
 		if self.reserve_stock:
 			if unreserved_qty := self.get_unreserved_qty():
-				self.set_onload("has_unreserved_stock", True)
 				self.set_onload("unreserved_qty", unreserved_qty)
 
 			if has_reserved_stock(self.doctype, self.name):
@@ -555,9 +554,6 @@ class SubcontractingOrder(SubcontractingController):
 			else:
 				if sre.make_stock_reservation_entries():
 					frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
-
-	def has_unreserved_stock(self) -> bool:
-		return bool(self.get_unreserved_qty())
 
 	def get_unreserved_qty(self) -> dict[str, float]:
 		"""Qty of each supplied item row that is neither supplied nor reserved, for rows that have some."""
