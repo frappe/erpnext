@@ -7801,6 +7801,24 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(abs(total_qty), 2)
 
+	def test_internal_pr_rejected_qty_change_resizes_rejected_package(self):
+		"""Changing the rejected qty of a draft internal receipt resizes its rejected package."""
+		item = make_item(
+			"_Test Batch Item For Rejected Qty Change",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIRQC-.####"},
+		)
+
+		pr, *_ = self.make_transfer_receipt(item, 1, 2)
+		pr.save()
+
+		pr.items[0].update({"rejected_qty": 1, "received_qty": 2})
+		pr.save()
+
+		total_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", pr.items[0].rejected_serial_and_batch_bundle, "total_qty"
+		)
+		self.assertEqual(abs(total_qty), 1)
+
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"

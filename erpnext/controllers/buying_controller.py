@@ -177,28 +177,8 @@ class BuyingController(SubcontractingController):
 				if reference and not item.serial_and_batch_bundle and bundle_ids.get(reference):
 					item.serial_and_batch_bundle = self.make_accepted_package(item, bundle_ids.get(reference))
 
-				elif (
-					not self.is_new()
-					and item.serial_and_batch_bundle
-					and next(
-						(
-							old_item
-							for old_item in self.get_doc_before_save().items
-							if old_item.name == item.name
-							and get_stock_qty(old_item, old_item.qty) != get_stock_qty(item, item.qty)
-						),
-						None,
-					)
-					and len(
-						sabe := frappe.get_all(
-							"Serial and Batch Entry",
-							filters={"parent": item.serial_and_batch_bundle, "serial_no": ["is", "not set"]},
-							pluck="name",
-						)
-					)
-					== 1
-				):
-					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", get_stock_qty(item, item.qty))
+				elif item.serial_and_batch_bundle:
+					self.resize_package(item, "serial_and_batch_bundle", "qty")
 
 				if item.get(field) and bundle_ids.get(item.get(field)):
 					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
@@ -288,7 +268,11 @@ class BuyingController(SubcontractingController):
 		if not self.has_rejected_stock(row) or self.is_return:
 			return
 
-		if row.get("rejected_serial_and_batch_bundle") or not row.rejected_warehouse:
+		if row.get("rejected_serial_and_batch_bundle"):
+			self.resize_package(row, "rejected_serial_and_batch_bundle", "rejected_qty")
+			return
+
+		if not row.rejected_warehouse:
 			return
 
 		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
@@ -301,6 +285,24 @@ class BuyingController(SubcontractingController):
 		)
 
 		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
+
+	def resize_package(self, row, bundle_field, qty_field) -> None:
+		"""Resize the batch package of a saved draft row whose stock qty changed."""
+		if self.is_new():
+			return
+
+		qty = get_stock_qty(row, row.get(qty_field))
+		old_row = next((d for d in self.get_doc_before_save().items if d.name == row.name), None)
+		if not old_row or get_stock_qty(old_row, old_row.get(qty_field)) == qty:
+			return
+
+		package = frappe.get_doc("Serial and Batch Bundle", row.get(bundle_field))
+		entries = [d for d in package.entries if not d.serial_no]
+		if package.voucher_detail_no != row.name or len(entries) != 1:
+			return
+
+		entries[0].qty = qty
+		package.save(ignore_permissions=True)
 
 	def get_accepted_serial_nos(self, row) -> list:
 		if not row.get("serial_and_batch_bundle"):
