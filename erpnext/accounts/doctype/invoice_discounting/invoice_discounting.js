@@ -52,6 +52,7 @@ frappe.ui.form.on("Invoice Discounting", {
 
 	refresh: (frm) => {
 		frm.events.show_general_ledger(frm);
+		erpnext.accounts.show_payment_ledger(frm);
 
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("Get Invoices"), function () {
