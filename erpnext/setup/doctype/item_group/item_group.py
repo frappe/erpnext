@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.permissions import has_user_permission
 from frappe.utils.nestedset import NestedSet, get_root_of
 
 
@@ -110,6 +111,7 @@ def get_company_resolved_defaults(company: str) -> dict:
 		return {}
 
 	company_doc = frappe.get_cached_doc("Company", company)
+	check_company_defaults_permission(company_doc)
 
 	return {
 		"default_warehouse": company_doc.get("default_warehouse"),
@@ -130,3 +132,18 @@ def get_company_resolved_defaults(company: str) -> dict:
 		"default_price_list": "",
 		"default_supplier": "",
 	}
+
+
+def check_company_defaults_permission(company_doc) -> None:
+	if frappe.has_permission("Company", "read", company_doc):
+		return
+
+	# Item Manager edits Item and Item Group defaults without Company read access
+	can_edit_defaults = frappe.has_permission("Item Group", "write") or frappe.has_permission("Item", "write")
+	if can_edit_defaults and has_user_permission(company_doc):
+		return
+
+	frappe.throw(
+		_("Not permitted to read the defaults of Company {0}").format(frappe.bold(company_doc.name)),
+		frappe.PermissionError,
+	)
