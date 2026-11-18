@@ -2721,23 +2721,23 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Packed Item", dn.packed_items[0].name, "incoming_rate"), 25)
 
 	def test_packed_item_incoming_rate_is_for_the_packed_qty(self):
-		component = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-		for days, qty, rate in ((-2, 2, 10), (-1, 3, 40)):
-			make_stock_entry(
-				item_code=component,
-				target="_Test Warehouse - _TC",
-				qty=qty,
-				basic_rate=rate,
-				posting_date=add_days(nowdate(), days),
-			)
+		bundle = make_bundle_of_a_fifo_item()
 
 		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
 		dn.save()
 
 		# FIFO rate of the 2 packed, not of the 5 in the warehouse
 		self.assertEqual(dn.packed_items[0].incoming_rate, 10)
+
+	def test_packed_item_incoming_rate_is_for_the_qty_of_this_save(self):
+		bundle = make_bundle_of_a_fifo_item()
+
+		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
+		self.assertEqual(dn.packed_items[0].incoming_rate, 10)
+
+		dn.items[0].qty = 4
+		dn.save()
+		self.assertEqual(dn.packed_items[0].incoming_rate, 25)
 
 	def test_delivery_note_bundle_with_batched_item(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
@@ -6391,6 +6391,22 @@ def get_serial_batch_item_row(item, qty):
 		"warehouse": "_Test Warehouse - _TC",
 		"use_serial_batch_fields": 1,
 	}
+
+
+def make_bundle_of_a_fifo_item():
+	"""A Product Bundle of a FIFO item received 2 at 10, then 3 at 40, into _Test Warehouse - _TC."""
+	item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [item])
+	for days, qty, rate in ((-2, 2, 10), (-1, 3, 40)):
+		make_stock_entry(
+			item_code=item,
+			target="_Test Warehouse - _TC",
+			qty=qty,
+			basic_rate=rate,
+			posting_date=add_days(nowdate(), days),
+		)
+	return bundle
 
 
 def make_bundle_of_a_serial_item(serial_no_series):
