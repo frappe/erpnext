@@ -210,16 +210,22 @@ class calculate_taxes_and_totals:
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
 	def calculate_item_rate(self, item):
-		base_rate = get_effective_base_rate(item, item.price_list_rate)
+		# An item no rule applied to may still hold "[]", which must not override the rate typed in
+		applied_rules = get_applied_pricing_rules(item.pricing_rules)
+		has_pricing_rules = bool(applied_rules) and not self.doc.ignore_pricing_rule
+
+		# pricing rules apply on the price list rate, as on the invoices and receipts made from this order
+		base_rate = (
+			flt(item.price_list_rate)
+			if has_pricing_rules
+			else get_effective_base_rate(item, item.price_list_rate)
+		)
 		if not base_rate:
 			remove_margin(item)
 			remove_discount(item)
 			item.rate_with_margin = 0
 			return
 
-		# An item no rule applied to may still hold "[]", which must not override the rate typed in
-		applied_rules = get_applied_pricing_rules(item.pricing_rules)
-		has_pricing_rules = bool(applied_rules) and not self.doc.ignore_pricing_rule
 		if has_pricing_rules:
 			remove_margin(item)
 
