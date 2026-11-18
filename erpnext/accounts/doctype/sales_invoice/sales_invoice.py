@@ -1120,6 +1120,7 @@ class SalesInvoice(SellingController):
 			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 			make_packing_list(self)
+			self.set_incoming_rate(self.packed_items)
 		else:
 			self.set("packed_items", [])
 

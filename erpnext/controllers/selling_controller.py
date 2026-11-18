@@ -688,7 +688,9 @@ class SellingController(StockController):
 
 				sales_order.update_reserved_qty(so_item_rows)
 
-	def set_incoming_rate(self):
+	def set_incoming_rate(self, rows=None):
+		"""Incoming rate of ``rows``, the item rows by default; packed rows get theirs after packing."""
+
 		def reset_incoming_rate():
 			old_item = next(
 				(
@@ -737,8 +739,7 @@ class SellingController(StockController):
 		)
 
 		old_doc = self.get_doc_before_save()
-		items = self.get("items") + (self.get("packed_items") or [])
-		for d in items:
+		for d in self.get("items") if rows is None else rows:
 			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				continue
 
