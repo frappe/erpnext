@@ -900,7 +900,7 @@ class BOM(WebsiteGenerator):
 
 	@property
 	def has_stale_conversion_rate(self):
-		"""Currency changed without a new conversion rate, e.g. through the API."""
+		"""Currency changed without a new conversion rate."""
 		return (
 			not self.is_new()
 			and self.has_value_changed("currency")
