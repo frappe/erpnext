@@ -197,14 +197,15 @@ class StockInternalTransferService:
 			fields,
 		)
 
-		received_rows = [(row, row.stock_qty) for row in other_items]
-		# a cancelled document no longer counts; own rows get their stock_qty only after this check
-		if self.doc.docstatus == 1:
-			received_rows += [(row, flt(row.qty) * flt(row.conversion_factor)) for row in self.doc.items]
+		# a cancelled document no longer counts
+		own_items = self.doc.items if self.doc.docstatus == 1 else []
+		if own_items:
+			# validate sets it only after this check
+			self.doc.set_qty_as_per_stock_uom()
 
 		item_wise_received_qty = defaultdict(float)
-		for row, stock_qty in received_rows:
+		for row in [*other_items, *own_items]:
 			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
-			item_wise_received_qty[(reference, row.item_code)] += flt(stock_qty)
+			item_wise_received_qty[(reference, row.item_code)] += flt(row.stock_qty)
 
 		return item_wise_received_qty
