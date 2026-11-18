@@ -4375,6 +4375,20 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual([tax.tax_amount for tax in pr_return.taxes], [-30, -10])
 
+	def test_return_keeps_the_charge_a_duplicated_row_was_matched_to(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_receipt_with_freight_charges(10, 30)
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.remove(pr_return.taxes[0])
+		pr_return.append("taxes", {**pr_return.taxes[0].as_dict(), "name": None, "idx": None})
+		pr_return.save()
+		pr_return.remove(pr_return.taxes[0])
+		pr_return.submit()
+
+		self.assertEqual([tax.tax_amount for tax in pr_return.taxes], [-10])
+
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
