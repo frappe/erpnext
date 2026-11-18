@@ -205,6 +205,7 @@ frappe.ui.form.on("Journal Entry Account", {
 					row.account = d.account;
 					row.party = d.party;
 					row.party_type = d.party_type;
+					row.account_currency = d.account_currency;
 					row.exchange_rate = d.exchange_rate;
 				}
 			});
@@ -443,6 +444,7 @@ Object.assign(erpnext.journal_entry, {
 		if (!frm.doc.company) frappe.throw(__("Please select Company first"));
 		if (!frm.doc.posting_date) frappe.throw(__("Please select Posting Date first"));
 
+		const { account_currency, exchange_rate } = row;
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_details_and_party_type",
 			args: {
@@ -451,10 +453,13 @@ Object.assign(erpnext.journal_entry, {
 				company: frm.doc.company,
 				debit: flt(row.debit_in_account_currency),
 				credit: flt(row.credit_in_account_currency),
-				exchange_rate: row.exchange_rate,
 			},
 			callback: ({ message }) => {
 				if (!message) return;
+				// keep a set rate only while the currency stays the same
+				if (message.account_currency == account_currency && ![0, 1].includes(flt(exchange_rate))) {
+					message.exchange_rate = exchange_rate;
+				}
 				$.extend(row, message);
 				erpnext.journal_entry.set_amount_on_last_row(frm, cdt, cdn);
 				erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
