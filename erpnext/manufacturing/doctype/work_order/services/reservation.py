@@ -959,6 +959,12 @@ def remove_serial_batch(serial_batch: frappe._dict, released: frappe._dict) -> N
 
 
 def lower_serial_batch_qty(doc: Document, entry_qty: dict[str, float]) -> None:
+	"""Lower these entries of a reservation by their qty and drop the ones left empty."""
 	for entry in doc.sb_entries:
-		if qty := entry_qty.get(entry.name):
-			entry.db_set("qty", flt(entry.qty - qty, entry.precision("qty")), update_modified=False)
+		if not (qty := entry_qty.get(entry.name)):
+			continue
+
+		if remaining_qty := flt(entry.qty - qty, entry.precision("qty")):
+			entry.db_set("qty", remaining_qty, update_modified=False)
+		else:
+			frappe.db.delete("Serial and Batch Entry", entry.name)
