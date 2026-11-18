@@ -473,12 +473,15 @@ class TestSalesOrder(ERPNextTestSuite):
 
 	def test_billable_orders_filtered_by_item_code(self):
 		so = make_sales_order(qty=10, rate=100)
-		filters = {"docstatus": 1, "company": so.company, "customer": so.customer}
 
 		def is_offered(item_code):
-			rows = get_potentially_billable_sales_orders(
-				"Sales Order", "", "name", 0, 50, {**filters, "item_code": item_code}
-			)
+			filters = [
+				["Sales Order", "docstatus", "=", 1],
+				["Sales Order", "company", "=", so.company],
+				["Sales Order", "customer", "=", so.customer],
+				["Sales Order Item", "item_code", "=", item_code],
+			]
+			rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
 			return so.name in [row.name for row in rows]
 
 		self.assertTrue(is_offered(so.items[0].item_code))
