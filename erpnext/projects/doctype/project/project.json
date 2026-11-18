@@ -320,12 +320,14 @@
   {
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Costing Amount (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "total_purchase_cost",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Purchase Cost (via Purchase Invoice)",
    "read_only": 1
   },
@@ -345,24 +347,28 @@
   {
    "fieldname": "total_sales_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Sales amount (via Sales Order)",
    "read_only": 1
   },
   {
    "fieldname": "total_billable_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Billable amount (via Timesheet)",
    "read_only": 1
   },
   {
    "fieldname": "total_billed_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Billed amount (via Sales Invoice)",
    "read_only": 1
   },
   {
    "fieldname": "total_consumed_material_cost",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Consumed Material Cost",
    "read_only": 1
   },
@@ -382,6 +388,7 @@
   {
    "fieldname": "gross_margin",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Gross Margin",
    "oldfieldname": "gross_margin_value",
    "oldfieldtype": "Currency",
@@ -395,6 +402,7 @@
   {
    "fieldname": "per_gross_margin",
    "fieldtype": "Percent",
+   "hidden": 1,
    "label": "Gross Margin %",
    "oldfieldname": "per_gross_margin",
    "oldfieldtype": "Currency",
@@ -566,7 +574,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-11-13 12:52:01.000000",
+ "modified": "2026-11-18 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
