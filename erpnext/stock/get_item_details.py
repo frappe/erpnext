@@ -180,11 +180,7 @@ def _get_item_details(
 		and not args.get("serial_and_batch_bundle")
 		and (args.get("use_serial_batch_fields") or args.get("doctype") == "POS Invoice")
 	):
-<<<<<<< HEAD
-		update_stock(args, out, doc)
-=======
-		update_stock(ctx, out, doc, has_locked_rate=bool(source_row))
->>>>>>> eba5799 (fix(stock): keep the source rate when a batch is auto-picked on a rate-locked row)
+		update_stock(args, out, doc, has_locked_rate=bool(source_row))
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date, item.lead_time_days)
