@@ -965,20 +965,22 @@ erpnext.bom.calculate_rm_cost = function (doc) {
 // Valuation Rate and Manual rows keep their cost; % of Component Cost rows split the rest
 erpnext.bom.calculate_secondary_items_cost = function (doc) {
 	const rows = doc.secondary_items || [];
-	const has_own_cost = (row) => ["Valuation Rate", "Manual"].includes(row.valuation_type);
-	const own_cost = rows.filter(has_own_cost).reduce((total, row) => total + flt(row.cost), 0);
-	const allocation_basis = flt(doc.raw_material_cost) - own_cost;
 	const cost_precision = precision("raw_material_cost", doc);
+	const has_own_cost = (row) => ["Valuation Rate", "Manual"].includes(row.valuation_type);
+	const own_cost = rows
+		.filter(has_own_cost)
+		.reduce((total, row) => total + flt(row.cost, cost_precision), 0);
+	const allocation_basis = flt(doc.raw_material_cost) - own_cost;
 
 	let total = 0;
 	let base_total = 0;
 	rows.forEach((row) => {
-		if (!has_own_cost(row)) {
-			row.cost = flt((allocation_basis * flt(row.cost_allocation_per)) / 100, cost_precision);
-			row.base_cost = flt(row.cost * flt(doc.conversion_rate), cost_precision);
-		}
-		total += flt(row.cost);
-		base_total += flt(row.base_cost);
+		row.cost = has_own_cost(row)
+			? flt(row.cost, cost_precision)
+			: flt((allocation_basis * flt(row.cost_allocation_per)) / 100, cost_precision);
+		row.base_cost = flt(row.cost * flt(doc.conversion_rate), cost_precision);
+		total += row.cost;
+		base_total += row.base_cost;
 	});
 
 	doc.secondary_items_cost = total;
