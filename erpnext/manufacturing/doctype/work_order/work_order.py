@@ -734,11 +734,13 @@ class WorkOrder(Document):
 		"""Excess received qty to move into this Work Order's reservation on submit."""
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
 			self.qty_change = frappe._dict()
+			if not self.plans_rest_of_inward_order_item():
+				return
 
 			data = frappe.get_all(
 				"Subcontracting Inward Order Received Item",
 				{"reference_name": scio_item_name, "docstatus": 1, "is_customer_provided_item": 1},
-				["rm_item_code", "required_qty as bom_qty", "work_order_qty", "received_qty"],
+				["rm_item_code", "required_qty as bom_qty", "received_qty"],
 			)
 			for d in data:
 				wo_item = next(
@@ -750,8 +752,32 @@ class WorkOrder(Document):
 					None,
 				)
 
-				if wo_item and d.work_order_qty == d.bom_qty and d.received_qty > d.bom_qty:
+				if wo_item and d.received_qty > d.bom_qty:
 					self.qty_change[wo_item.name] = d.received_qty - d.bom_qty
+
+	def plans_rest_of_inward_order_item(self) -> bool:
+		"""Whether the submitted Work Orders of the inward order item now plan all of its qty."""
+		work_order = frappe.qb.DocType("Work Order")
+		planned_qty = (
+			frappe.qb.from_(work_order)
+			.select(
+				Sum(
+					Case()
+					.when(
+						work_order.status == "Closed", work_order.produced_qty + work_order.process_loss_qty
+					)
+					.else_(work_order.qty)
+				)
+			)
+			.where(
+				(work_order.docstatus == 1)
+				& (work_order.subcontracting_inward_order_item == self.subcontracting_inward_order_item)
+			)
+		).run()[0][0]
+		item_qty = frappe.db.get_value(
+			"Subcontracting Inward Order Item", self.subcontracting_inward_order_item, "qty"
+		)
+		return flt(flt(planned_qty) - item_qty, self.precision("qty")) >= 0
 
 	def update_subcontracting_inward_order_received_items(self):
 		"""Recompute the qty of each raw material allocated to Work Orders on the inward order."""
@@ -1295,7 +1321,7 @@ class WorkOrder(Document):
 
 
 def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) -> dict[str, float]:
-	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty or the qty it used if more."""
+	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed or completed order the qty it used or still holds, any other its required qty or the qty it used if more."""
 	work_order = frappe.qb.DocType("Work Order")
 	work_order_item = frappe.qb.DocType("Work Order Item")
 	used_qty = (
@@ -1315,7 +1341,8 @@ def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) 
 			Sum(
 				Case()
 				.when(
-					(work_order.status == "Closed") | (used_qty > work_order_item.required_qty),
+					work_order.status.isin(["Closed", "Completed"])
+					| (used_qty > work_order_item.required_qty),
 					used_qty,
 				)
 				.else_(work_order_item.required_qty)

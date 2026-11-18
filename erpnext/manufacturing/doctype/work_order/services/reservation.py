@@ -827,14 +827,15 @@ def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -
 
 
 def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
-	"""Reserved qty of each Work Order row beyond its need."""
+	"""Reserved qty of each Work Order row beyond its need: what it used if completed, else its required or used qty."""
 	sres_by_row = defaultdict(list)
 	for sre in sres:
 		sres_by_row[sre.voucher_detail_no].append(sre)
 
 	unused_qty = {}
 	for voucher_detail_no, rows in sres_by_row.items():
-		needed_qty = max(rows[0].required_qty, sum(row.used_qty for row in rows))
+		used_qty = sum(row.used_qty for row in rows)
+		needed_qty = used_qty if rows[0].status == "Completed" else max(rows[0].required_qty, used_qty)
 		unused_qty[voucher_detail_no] = sum(row.reserved_qty for row in rows) - needed_qty
 
 	return unused_qty
@@ -843,9 +844,12 @@ def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
 def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 	"""Qty based Work Order reservations taken from these inward order rows, newest first."""
 	sre = frappe.qb.DocType("Stock Reservation Entry")
+	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
 	return (
 		frappe.qb.from_(sre)
+		.inner_join(wo)
+		.on(wo.name == sre.voucher_no)
 		.inner_join(wo_item)
 		.on(wo_item.name == sre.voucher_detail_no)
 		.select(
@@ -855,6 +859,7 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 			sre.reserved_qty,
 			(sre.delivered_qty + sre.transferred_qty + sre.consumed_qty).as_("used_qty"),
 			wo_item.required_qty,
+			wo.status,
 		)
 		.where(
 			(sre.docstatus == 1)
