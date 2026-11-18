@@ -2682,6 +2682,41 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(len(get_serial_nos_from_bundle(dn.packed_items[0].serial_and_batch_bundle)), 2)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_packed_item_incoming_rate_is_of_the_batch_picked_on_submit(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "DNPBR-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [item])
+		for days, rate in ((-2, 10), (-1, 40)):
+			make_stock_entry(
+				item_code=item,
+				target="_Test Warehouse - _TC",
+				qty=2,
+				basic_rate=rate,
+				posting_date=add_days(nowdate(), days),
+			)
+
+		for use_serial_batch_fields in (0, 1):
+			with self.subTest(use_serial_batch_fields=use_serial_batch_fields):
+				frappe.db.set_single_value(
+					"Stock Settings", "use_serial_batch_fields", use_serial_batch_fields
+				)
+				dn = create_delivery_note(item_code=bundle, qty=1)
+
+				# rate of the first batch, not the average of both
+				self.assertEqual(
+					frappe.db.get_value("Packed Item", dn.packed_items[0].name, "incoming_rate"), 10
+				)
+
 	def test_delivery_note_bundle_with_batched_item(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
