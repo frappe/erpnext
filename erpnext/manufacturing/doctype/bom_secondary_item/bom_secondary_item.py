@@ -40,5 +40,5 @@ class BOMSecondaryItem(Document):
 
 def get_manual_rate(row) -> float:
 	"""Rate of a Manual row: its cost is for the qty made, net of process loss."""
-	made_qty = flt(row.stock_qty) - flt(row.process_loss_qty)
+	made_qty = flt(row.stock_qty) * (1 - flt(row.process_loss_per) / 100)
 	return flt(row.base_cost) / made_qty if made_qty else 0

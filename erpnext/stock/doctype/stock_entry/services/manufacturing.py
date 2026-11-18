@@ -109,7 +109,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			item_args["bom_secondary_item"] = row.name
 			if row.get("valuation_type") == "Manual":
 				item_args["set_basic_rate_manually"] = 1
-				item_args["basic_rate"] = flt(row.get("manual_rate"))
+				item_args["basic_rate"] = get_manual_rate(row)
 
 			if row.secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
 				item_args["t_warehouse"] = self.wo_doc.scrap_warehouse
@@ -1098,7 +1098,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			for row in frappe.get_all(
 				"BOM Secondary Item",
 				filters={"name": ("in", names)},
-				fields=["name", "valuation_type", "base_cost", "stock_qty", "process_loss_qty"],
+				fields=["name", "valuation_type", "base_cost", "stock_qty", "process_loss_per"],
 			)
 		}
 
@@ -1444,7 +1444,8 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.process_loss_per,
 			doctype.secondary_item_type,
 			doctype.valuation_type,
-			(doctype.base_cost / NullIf(doctype.stock_qty - doctype.process_loss_qty, 0)).as_("manual_rate"),
+			doctype.base_cost,
+			doctype.stock_qty,
 		)
 	if table_name == "BOM Item":
 		return query.select(
