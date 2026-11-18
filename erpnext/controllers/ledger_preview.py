@@ -1,15 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-"""Read-side GL / Stock Ledger preview helpers.
+"""Read-side GL / Stock / Payment Ledger preview helpers.
 
 A dry-run consumer of the posting path, shared across accounts and stock vouchers
-(Sales/Purchase Invoice, Payment Entry, Delivery Note, Purchase Receipt,
-Subcontracting Receipt, Stock Entry): it submits-in-memory, reads the resulting
-GL/SLE entries and formats them for the datatable preview, then rolls back. Lives
-separately from the posting services it orchestrates. The whitelisted
-``show_*_preview`` entry points stay on ``stock_controller`` (their dotted path is
-referenced from client JS).
+(Sales/Purchase Invoice, Payment Entry, Journal Entry, Invoice Discounting, Delivery
+Note, Purchase Receipt, Subcontracting Receipt, Stock Entry): it submits-in-memory,
+reads the resulting GL/SLE/Payment Ledger entries and formats them for the datatable
+preview, then rolls back. Lives separately from the posting services it orchestrates.
+The whitelisted ``show_*_preview`` entry points stay on ``stock_controller`` (their
+dotted path is referenced from client JS).
 """
 
 import frappe
@@ -43,13 +43,7 @@ def get_accounting_ledger_preview(doc, filters):
 	# to the savepoint so the preview never persists anything, regardless of caller.
 	frappe.db.savepoint("ledger_preview")
 	try:
-		doc.docstatus = 1
-
-		if doc.get("update_stock") or doc.doctype in STOCK_LEDGER_PREVIEW_DOCTYPES:
-			make_serial_and_batch_bundles_for_preview(doc)
-			doc.update_stock_ledger()
-
-		doc.make_gl_entries()
+		make_gl_entries_for_preview(doc)
 		columns = get_gl_columns(filters)
 		masked_fields = frappe.get_meta("GL Entry").get_masked_fields()
 		gl_entries = mask_dict_results(
@@ -62,6 +56,39 @@ def get_accounting_ledger_preview(doc, filters):
 		frappe.db.rollback(save_point="ledger_preview")
 
 	return gl_columns, gl_data
+
+
+def get_payment_ledger_preview(doc, filters):
+	from erpnext.accounts.report.payment_ledger.payment_ledger import PaymentLedger
+
+	pl_columns, pl_data = [], []
+	fields = [
+		"posting_date",
+		"account",
+		"party_type",
+		"party",
+		"against_voucher_type",
+		"against_voucher_no",
+		"amount",
+	]
+
+	# Payment Ledger Entries are written from the GL map, so dry run the GL posting
+	frappe.db.savepoint("ledger_preview")
+	try:
+		make_gl_entries_for_preview(doc)
+		report = PaymentLedger(filters)
+		report.get_columns()
+		masked_fields = frappe.get_meta("Payment Ledger Entry").get_masked_fields()
+		pl_entries = mask_dict_results(
+			get_pl_entries_for_preview(doc.doctype, doc.name, fields), masked_fields
+		)
+
+		pl_columns = get_columns(report.columns, fields, get_company_currency(filters.company), masked_fields)
+		pl_data = get_data(fields, pl_entries)
+	finally:
+		frappe.db.rollback(save_point="ledger_preview")
+
+	return pl_columns, pl_data
 
 
 def get_stock_ledger_preview(doc, filters):
@@ -138,6 +165,25 @@ def get_sl_entries_for_preview(doctype, docname, fields):
 
 def get_gl_entries_for_preview(doctype, docname, fields):
 	return frappe.get_all("GL Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=fields)
+
+
+def get_pl_entries_for_preview(doctype, docname, fields):
+	return frappe.get_all(
+		"Payment Ledger Entry",
+		filters={"voucher_type": doctype, "voucher_no": docname},
+		fields=fields,
+		order_by="creation",
+	)
+
+
+def make_gl_entries_for_preview(doc):
+	doc.docstatus = 1
+
+	if doc.get("update_stock") or doc.doctype in STOCK_LEDGER_PREVIEW_DOCTYPES:
+		make_serial_and_batch_bundles_for_preview(doc)
+		doc.update_stock_ledger()
+
+	doc.make_gl_entries()
 
 
 def make_serial_and_batch_bundles_for_preview(doc):

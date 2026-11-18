@@ -6,6 +6,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.payment_ledger.payment_ledger import execute
+from erpnext.controllers.ledger_preview import get_payment_ledger_preview
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -52,6 +53,26 @@ class TestPaymentLedger(ERPNextTestSuite):
 		amounts = [x.amount for x in execute(filters=filters)[1] if x.get("voucher_no") == sinv.name]
 		self.assertEqual(len(amounts), 2)
 		self.assertEqual(sum(amounts), 0)
+
+	def test_payment_ledger_preview(self):
+		sinv = create_sales_invoice(
+			company=self.company,
+			debit_to=self.debit_to,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			income_account=self.income_account,
+			warehouse=self.warehouse,
+			do_not_submit=True,
+		)
+
+		columns, data = get_payment_ledger_preview(sinv, frappe._dict(company=self.company))
+
+		self.assertEqual(len(columns), 7)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0][1:6], [self.debit_to, "Customer", sinv.customer, sinv.doctype, sinv.name])
+		self.assertEqual(data[0][6], sinv.base_grand_total)
+		self.assertFalse(frappe.db.exists("Payment Ledger Entry", {"voucher_no": sinv.name}))
+		self.assertEqual(frappe.db.get_value("Sales Invoice", sinv.name, "docstatus"), 0)
 
 	def test_user_permission_on_company(self):
 		own = create_sales_invoice(

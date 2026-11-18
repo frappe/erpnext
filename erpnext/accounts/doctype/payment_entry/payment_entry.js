@@ -249,6 +249,7 @@ frappe.ui.form.on("Payment Entry", {
 		// internal transfers have no party, so nothing hits the payment ledger
 		if (frm.doc.party) {
 			erpnext.accounts.show_payment_ledger(frm);
+			erpnext.accounts.ledger_preview.show_payment_ledger_preview(frm);
 		}
 		if (
 			frm.doc.references &&
