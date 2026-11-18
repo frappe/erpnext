@@ -1188,21 +1188,25 @@ class BuyingController(SubcontractingController):
 			return get_stock_qty(row, qty)
 
 		# rows of this return post together, so the rows before it count as returned
-		for earlier_row in self.get_earlier_rows_of_receipt_row(row, warehouse):
-			take_back_from_left(left, earlier_row, earlier_row.qty)
+		for earlier_row, earlier_qty in self.get_earlier_returns_of_receipt_row(row, warehouse):
+			take_back_from_left(left, earlier_row, earlier_qty)
 
 		return take_back_from_left(left, row, qty)
 
-	def get_earlier_rows_of_receipt_row(self, row, warehouse) -> list:
-		"""Rows of this return before the row that return its receipt row to the warehouse."""
+	def get_earlier_returns_of_receipt_row(self, row, warehouse) -> list:
+		"""Rows of this return before the row that return its receipt row to the warehouse, each with the
+		qty it returns there: its accepted qty to the warehouse, its rejected qty to the rejected warehouse."""
 		reference_field = get_return_against_item_fields(self.doctype)
-		return [
-			d
-			for d in self.get("items")
-			if d.idx < row.idx
-			and d.get(reference_field) == row.get(reference_field)
-			and d.warehouse == warehouse
-		]
+		earlier_returns = []
+		for d in self.get("items"):
+			if d.idx >= row.idx or d.get(reference_field) != row.get(reference_field):
+				continue
+			if d.warehouse == warehouse:
+				earlier_returns.append((d, d.qty))
+			if d.rejected_warehouse == warehouse:
+				earlier_returns.append((d, d.rejected_qty))
+
+		return earlier_returns
 
 	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
 		"""Unrounded and posted stock qty the returned receipt row put in the warehouse that its other
