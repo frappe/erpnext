@@ -1173,13 +1173,12 @@ class BuyingController(SubcontractingController):
 	def get_return_stock_qty(self, row, qty, warehouse) -> float:
 		"""Stock qty a return row takes back from the warehouse: no more than its receipt row put there,
 		less the row's other returns, and all that is left once it returns the rest of the row's qty."""
-		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
 			return flt(self.get_posted_return_qty(row, warehouse))
 
 		left = self.get_receipt_row_left_to_return(row, warehouse)
 		if not left:
-			return stock_qty
+			return get_stock_qty(row, qty)
 
 		# rows of this return post together, so the rows before it count as returned
 		for earlier_row in self.get_earlier_rows_of_receipt_row(row, warehouse):
