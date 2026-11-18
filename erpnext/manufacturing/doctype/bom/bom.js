@@ -253,37 +253,11 @@ frappe.ui.form.on("BOM", {
 		</div>`;
 	},
 
-<<<<<<< HEAD
-=======
-	toggle_percentage_field(frm) {
-		let show = Boolean(frm.doc.set_qty_based_on_percentage);
-
-		frm.fields_dict["items"].grid.update_docfield_property("percentage", "in_list_view", show);
-		frm.fields_dict["items"].grid.update_docfield_property("percentage", "hidden", !show);
-		frm.fields_dict["items"].grid.update_docfield_property("qty", "read_only", show);
-		frm.fields_dict["items"].grid.reset_grid();
-	},
-
-	set_qty_based_on_percentage(frm) {
-		frm.trigger("toggle_percentage_field");
-		if (frm.doc.set_qty_based_on_percentage) {
-			erpnext.bom.set_qty_from_percentage(frm);
-		} else {
-			frm.set_df_property("items", "description", "");
-		}
-	},
-
 	quantity(frm) {
-		erpnext.bom.set_qty_from_percentage(frm);
 		erpnext.bom.calculate_op_cost(frm.doc);
 		erpnext.bom.calculate_total(frm.doc);
 	},
 
-	uom(frm) {
-		erpnext.bom.set_qty_from_percentage(frm);
-	},
-
->>>>>>> 45e7b4c (fix(manufacturing): refresh the BOM form operating cost when its inputs change)
 	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
 		frm.trigger("toggle_fields_for_semi_finished_goods");
@@ -853,55 +827,6 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 			this.frm.events.update_cost(this.frm);
 		}
 	}
-<<<<<<< HEAD
-=======
-
-	hour_rate(doc) {
-		erpnext.bom.calculate_op_cost(doc);
-		erpnext.bom.calculate_total(doc);
-	}
-
-	time_in_mins(doc) {
-		this.hour_rate(doc);
-	}
-
-	batch_size(doc) {
-		this.hour_rate(doc);
-	}
-
-	set_cost_based_on_bom_qty(doc) {
-		this.hour_rate(doc);
-	}
-
-	bom_no(doc, cdt, cdn) {
-		get_bom_material_detail(doc, cdt, cdn, false);
-	}
-
-	is_default(doc) {
-		if (doc.is_default) this.frm.set_value("is_active", 1);
-	}
-
-	qty(doc) {
-		erpnext.bom.calculate_rm_cost(doc);
-		erpnext.bom.calculate_total(doc);
-	}
-
-	rate(doc, cdt, cdn) {
-		let d = locals[cdt][cdn];
-
-		if (d.bom_no) {
-			frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-			get_bom_material_detail(doc, cdt, cdn, false);
-		} else {
-			erpnext.bom.calculate_rm_cost(doc);
-			erpnext.bom.calculate_total(doc);
-		}
-	}
-
-	validate(doc) {
-		erpnext.bom.update_cost(doc);
-	}
->>>>>>> 45e7b4c (fix(manufacturing): refresh the BOM form operating cost when its inputs change)
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({ frm: cur_frm }));
@@ -912,6 +837,8 @@ cur_frm.cscript.hour_rate = function (doc) {
 };
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
+cur_frm.cscript.batch_size = cur_frm.cscript.hour_rate;
+cur_frm.cscript.set_cost_based_on_bom_qty = cur_frm.cscript.hour_rate;
 
 cur_frm.cscript.bom_no = function (doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn, false);
