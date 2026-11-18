@@ -1277,9 +1277,8 @@ class RepackStockEntry(BaseManufactureStockEntry):
 		self.validate_conversion_output_qty(consumed_qty, production_item)
 
 		is_submitting = self.doc.docstatus == 1
-		available_qty = flt(
-			get_available_fg_qty(self.doc.work_order, exclude=self.doc.name, for_update=is_submitting),
-			precision,
+		available_qty = get_available_fg_qty(
+			self.doc.work_order, exclude=self.doc.name, for_update=is_submitting
 		)
 		if consumed_qty > available_qty:
 			frappe.throw(
@@ -1896,7 +1895,10 @@ def get_available_fg_qty(work_order, exclude=None, for_update=False):
 		"Work Order", work_order, ["produced_qty", "disassembled_qty"], for_update=for_update
 	)
 	converted_qty = get_converted_fg_qty(work_order, exclude=exclude, for_update=for_update)
-	return flt(produced_qty) - flt(disassembled_qty) - converted_qty
+	return flt(
+		flt(produced_qty) - flt(disassembled_qty) - converted_qty,
+		frappe.get_precision("Work Order", "produced_qty"),
+	)
 
 
 def get_converted_fg_qty(work_order, exclude=None, for_update=False):
