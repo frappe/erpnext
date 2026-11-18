@@ -641,8 +641,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 		)
 
-		if doc.is_return and doc.return_against and not doc.is_internal_supplier:
-			# The stock goes back at the invoice's rate, the debit note bills it at its own.
+		# Stock can move at another value than the invoice bills, e.g. at the standard rate. A return
+		# without return_against books this variance with the accepted stock's.
+		if not doc.is_internal_supplier and (doc.return_against or not doc.is_return):
 			billed_amount = flt(
 				item.valuation_rate * get_stock_qty(item, item.rejected_qty),
 				item.precision("base_net_amount"),
