@@ -498,7 +498,7 @@ def get_stock_qty_left_to_return(doc) -> dict:
 	return stock_qty_left
 
 
-def get_returned_bundle_stock_qty(row, stock_qty, left=None) -> float:
+def get_returned_bundle_stock_qty(row, stock_qty, left) -> float:
 	"""Stock qty a bundle row packs: ``stock_qty``, or on the return of the rest of a row all that is left
 	of it, so that rounded returns of parts add up to the row. ``left`` takes off what this row takes back."""
 	if not left:

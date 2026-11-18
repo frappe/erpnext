@@ -387,7 +387,7 @@ def get_returned_stock_qty(row):
 	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
 
 
-def get_packed_stock_qty(row, stock_qty_left=None):
+def get_packed_stock_qty(row, stock_qty_left):
 	"""Stock qty of a returned bundle row as packing reads it, rounded when the row rounds its stock qty, or
 	all that is left of the returned row on the return of its rest."""
 	from erpnext.stock.doctype.packed_item.packed_item import get_returned_bundle_stock_qty
