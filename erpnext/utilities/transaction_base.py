@@ -326,9 +326,6 @@ class TransactionBase(StatusUpdater):
 					"barcode": item.get("barcode"),
 					"serial_no": item.get("serial_no"),
 					"batch_no": item.get("batch_no"),
-					"against_blanket_order": item.get("against_blanket_order")
-					or bool(item.get("blanket_order")),
-					"blanket_order": item.get("blanket_order"),
 					"set_warehouse": self.get("set_warehouse"),
 					"warehouse": item.get("warehouse"),
 					"customer": self.get("customer") or self.get("party_name"),
@@ -370,6 +367,8 @@ class TransactionBase(StatusUpdater):
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
 					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
+					"against_blanket_order": item.get("against_blanket_order"),
+					"blanket_order": item.get("blanket_order"),
 				}
 			),
 			self,
@@ -552,7 +551,7 @@ class TransactionBase(StatusUpdater):
 	def set_item_rate_and_discounts(self, item_obj: object, item_details: dict) -> None:
 		# Field order precedance
 		# blanket_order_rate -> margin_type -> discount_percentage -> discount_amount
-		effective_item_rate = get_effective_base_rate(item_obj, item_details)
+		effective_item_rate = get_effective_base_rate(item_obj, item_details.price_list_rate)
 
 		if item_obj.margin_type == "Percentage":
 			item_obj.rate_with_margin = flt(effective_item_rate) + flt(effective_item_rate) * (

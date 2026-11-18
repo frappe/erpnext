@@ -24,10 +24,7 @@ from erpnext.controllers.accounts_controller import (
 	validate_taxes_and_charges,
 )
 from erpnext.deprecation_dumpster import deprecated
-from erpnext.manufacturing.doctype.blanket_order.blanket_order_pricing import (
-	get_effective_base_rate,
-	refresh_order_rates,
-)
+from erpnext.manufacturing.doctype.blanket_order.blanket_order_pricing import get_effective_base_rate
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_item_tax_map,
@@ -46,7 +43,6 @@ class calculate_taxes_and_totals:
 		frappe.flags.round_row_wise_tax = frappe.get_single_value("Accounts Settings", "round_row_wise_tax")
 
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
-		refresh_order_rates(self.doc)
 		self.calculate()
 
 	def filter_rows(self):
@@ -214,7 +210,7 @@ class calculate_taxes_and_totals:
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
 	def calculate_item_rate(self, item):
-		base_rate = get_effective_base_rate(item, self.doc)
+		base_rate = get_effective_base_rate(item, item.price_list_rate)
 		if not base_rate:
 			remove_margin(item)
 			remove_discount(item)
