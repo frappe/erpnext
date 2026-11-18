@@ -382,6 +382,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
+	def test_secondary_qty_nets_off_the_unrounded_bom_process_loss(self):
+		fg_item = "Subcontracted Item SA1"
+		bom = make_bom_with_secondary_item(fg_item, secondary_qty=1)
+		# 33.333% of 1, stored at a float precision of 2
+		frappe.db.set_value(
+			"BOM Secondary Item",
+			bom.secondary_items[0].name,
+			{"process_loss_per": 33.333, "process_loss_qty": 0.33},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 300)
+
+		secondary_row = next(row for row in scr.items if row.bom_secondary_item)
+		self.assertEqual(secondary_row.qty, flt(300 * (1 - 0.33333), secondary_row.precision("qty")))
+
 	def test_full_return_with_secondary_items_marks_the_receipt_returned(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item)
