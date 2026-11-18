@@ -3218,6 +3218,91 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(flt(moved_value[transit_warehouse]), -1000)
 		self.assertEqual(flt(moved_value[rejected_warehouse]), 1000)
 
+	def make_transfer_invoice(self, tag, item_doc, qty, rejected):
+		"""Unsaved stock updating invoice of an internal transfer, received from an in-transit warehouse."""
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+			prepare_data_for_internal_transfer,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		wh = frappe._dict(
+			source=create_warehouse(f"_Test {tag} Transfer From", company=company),
+			transit=create_warehouse(f"_Test {tag} Transfer Transit", company=company),
+			accepted=create_warehouse(f"_Test {tag} Transfer To", company=company),
+			rejected=create_warehouse(f"_Test {tag} Transfer Rejected", company=company),
+		)
+
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=wh.source, qty=qty + rejected, rate=100
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item_doc.name,
+			qty=qty + rejected,
+			rate=100,
+			warehouse=wh.source,
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].target_warehouse = wh.transit
+		si.insert()
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].update(
+			{
+				"warehouse": wh.accepted,
+				"qty": qty,
+				"rejected_qty": rejected,
+				"received_qty": qty + rejected,
+				"rejected_warehouse": wh.rejected,
+				"expense_account": "Cost of Goods Sold - TCP1",
+			}
+		)
+		return pi, wh
+
+	def test_internal_transfer_invoice_resizes_package_without_package_permission(self):
+		"""A user who may not write packages can still change the rejected qty of a draft transfer
+		invoice."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			"_Test Batch Item For Invoice Package Resize",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIIPR-.####"},
+		)
+		user = "test_pi_package_resize@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Test PI Package Resize",
+					"roles": [{"role": "Accounts User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		pi, _ = self.make_transfer_invoice("Package Resize", item, 1, 2)
+		with self.set_user(user):
+			pi.insert()
+			pi.items[0].update({"rejected_qty": 1, "received_qty": 2})
+			pi.save()
+
+		total_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", pi.items[0].rejected_serial_and_batch_bundle, "total_qty"
+		)
+		self.assertEqual(total_qty, 1)
+
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
 		with, and the entries say the same as the stock."""
