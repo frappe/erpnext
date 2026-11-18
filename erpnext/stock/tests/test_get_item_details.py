@@ -763,7 +763,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
 	)
 	def test_auto_picked_batch_keeps_sales_order_rate(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		item_code, batches = self.make_batched_item_with_stock([1])
