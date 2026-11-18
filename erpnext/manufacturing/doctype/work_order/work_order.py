@@ -1295,7 +1295,7 @@ class WorkOrder(Document):
 
 
 def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) -> dict[str, float]:
-	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed or completed order the qty it used or still holds, any other its required qty or the qty it used if more."""
+	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty or the qty it used if more."""
 	work_order = frappe.qb.DocType("Work Order")
 	work_order_item = frappe.qb.DocType("Work Order Item")
 	used_qty = (
@@ -1315,8 +1315,7 @@ def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) 
 			Sum(
 				Case()
 				.when(
-					work_order.status.isin(["Closed", "Completed"])
-					| (used_qty > work_order_item.required_qty),
+					(work_order.status == "Closed") | (used_qty > work_order_item.required_qty),
 					used_qty,
 				)
 				.else_(work_order_item.required_qty)
