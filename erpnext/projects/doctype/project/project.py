@@ -8,6 +8,7 @@ import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
 from frappe.desk.reportview import get_match_cond
+from frappe.email.email_body import get_message_id
 from frappe.model.document import Document
 from frappe.query_builder import Case, Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp
@@ -17,6 +18,7 @@ from frappe.utils import (
 	flt,
 	get_datetime,
 	get_link_to_form,
+	get_string_between,
 	get_time,
 	get_url,
 	nowtime,
@@ -690,13 +692,38 @@ def send_project_update_email_to_users(project):
 		"Email Account", dict(enable_incoming=1, default_incoming=1), "email_id"
 	)
 
+	for recipient in get_users_email(doc):
+		send_project_update_copy(doc, project_update, recipient, incoming_email_account)
+
+
+def send_project_update_copy(
+	project: Document, project_update: Document, recipient: str, reply_to: str | None
+):
+	# Not linked to the Project Update, so its name stays off the timeline
+	# (Frappe also matches In-Reply-To by Communication name).
+	communication = frappe.get_doc(
+		{
+			"doctype": "Communication",
+			"communication_type": "Communication",
+			"communication_medium": "Email",
+			"sent_or_received": "Sent",
+			"subject": project.subject,
+			"content": project.message,
+			"recipients": recipient,
+			"message_id": get_string_between("<", get_message_id(), ">"),
+		}
+	).insert(ignore_permissions=True)
+	frappe.db.delete("Communication Link", {"parent": communication.name})
+
 	frappe.sendmail(
-		recipients=get_users_email(doc),
-		message=doc.message,
-		subject=doc.subject,
+		recipients=[recipient],
+		message=project.message,
+		subject=project.subject,
 		reference_doctype=project_update.doctype,
 		reference_name=project_update.name,
-		reply_to=incoming_email_account,
+		reply_to=reply_to,
+		message_id=communication.message_id,
+		communication=communication.name,
 	)
 
 
@@ -713,7 +740,7 @@ def collect_project_status():
 def get_uncollected_replies(project_update):
 	collected = Counter((row.user, row.project_status) for row in project_update.users)
 	new_replies = []
-	for reply in get_project_update_replies(project_update.name):
+	for reply in get_project_update_replies(project_update):
 		key = (reply["user"], reply["project_status"])
 		if collected[key]:
 			collected[key] -= 1
@@ -722,25 +749,32 @@ def get_uncollected_replies(project_update):
 	return new_replies
 
 
-def get_project_update_replies(project_update):
+def get_project_update_replies(project_update: Document) -> list[dict]:
 	replies = frappe.get_all(
 		"Communication",
-		fields=["content", "text_content", "sender"],
+		fields=["in_reply_to", "sender", "content", "text_content"],
 		filters=dict(
 			reference_doctype="Project Update",
-			reference_name=project_update,
+			reference_name=project_update.name,
 			communication_type="Communication",
 			sent_or_received="Received",
 		),
 		order_by="creation asc",
 	)
+	sent_copies = get_sent_copies(project_update.name)
+	project_users = set(
+		frappe.get_all(
+			"Project User", filters={"parent": project_update.project, "parenttype": "Project"}, pluck="user"
+		)
+	)
 
 	users = []
 	for d in replies:
-		user_data = frappe.db.get_value(
-			"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
+		author = get_reply_author(d, sent_copies)
+		user_data = author and frappe.db.get_value(
+			"User", {"email": author}, ["full_name", "user_image", "name"], as_dict=True
 		)
-		if not user_data:
+		if not user_data or user_data.name not in project_users:
 			continue
 
 		users.append(
@@ -755,6 +789,41 @@ def get_project_update_replies(project_update):
 			}
 		)
 	return users
+
+
+def get_sent_copies(project_update: str) -> dict[str, str]:
+	"""Map each copy's Communication name to its recipient."""
+	copies = frappe.get_all(
+		"Email Queue",
+		filters={
+			"reference_doctype": "Project Update",
+			"reference_name": project_update,
+			"communication": ["is", "set"],
+		},
+		pluck="communication",
+	)
+	if not copies:
+		return {}
+	# Emails sent from the form are queued too, but they are linked; copies are not.
+	return dict(
+		frappe.get_all(
+			"Communication",
+			filters={"name": ["in", copies], "reference_doctype": ["is", "not set"]},
+			fields=["name", "recipients"],
+			as_list=True,
+		)
+	)
+
+
+def get_reply_author(reply: dict, sent_copies: dict) -> str | None:
+	"""Credit only a direct reply to a copy, from the address the copy was sent to."""
+	if not sent_copies:
+		return reply.sender  # update sent before per-user copies (upgrade day only)
+
+	recipient = sent_copies.get(reply.in_reply_to)
+	if recipient and recipient.lower() == (reply.sender or "").lower():
+		return recipient
+	return None
 
 
 def send_project_status_email_to_users():
