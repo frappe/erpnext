@@ -7,11 +7,8 @@ from graphlib import TopologicalSorter
 import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
-<<<<<<< HEAD
 from frappe.desk.reportview import get_match_cond
-=======
 from frappe.email.email_body import get_message_id
->>>>>>> 5d66d48 (fix: member validation on project)
 from frappe.model.document import Document
 from frappe.query_builder import Case, Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp

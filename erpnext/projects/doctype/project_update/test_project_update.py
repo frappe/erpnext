@@ -69,7 +69,8 @@ class TestProjectUpdate(ERPNextTestSuite):
 
 	def test_replies_are_collected_once(self):
 		project_update = make_project_update()
-		receive_reply(project_update, "admin@example.com", "Done with design")
+		copy = send_copy(project_update, "admin@example.com")
+		receive_reply(project_update, copy, "admin@example.com", "Done with design")
 
 		collect_project_status()
 		collect_project_status()
