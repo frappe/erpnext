@@ -633,7 +633,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		done_qty = flt(self.wo_doc.produced_qty) + flt(self.wo_doc.process_loss_qty)
 		total_qty = ceil(flt(qty_per_unit * (done_qty + fg_completed_qty), precision))
 		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
-		return max(flt(total_qty - consumed_qty, precision), 0)
+		return max(ceil(flt(total_qty - consumed_qty, precision)), 0)
 
 	def _resolve_rm_warehouse(self, row):
 		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
