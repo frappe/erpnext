@@ -841,12 +841,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 					and not item.set_basic_rate_manually
 					and not is_costed_out_of_finished_item(item)
 				)
-				# the same basis the finished good splits: manual finished goods take their value first
-				allocation_basis = (
-					secondary_items_cost_basis
-					- self.get_costed_out_items_cost()
-					- self.get_manually_rated_finished_items()[1]
-				)
+				allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
+				# the basis automatic finished goods split: manual ones take their value first
+				if self.get_finished_items_qty():
+					allocation_basis -= self.get_manually_rated_finished_items()[1]
 				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
 				has_derived_rate = True
 
