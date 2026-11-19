@@ -27,6 +27,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_op_cost_from_sub_assemblies,
 	validate_bom_no,
 )
+from erpnext.manufacturing.doctype.bom.services.costing import get_good_qty
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -1034,7 +1035,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return 0.0
 
 		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no).get(row.bom_secondary_item, 0)
-		boms_made = qty_per_finished_good * flt(self.fg_completed_qty) / flt(qty_per_bom)
+		bom = frappe.get_cached_value("BOM", bom_no, ["quantity", "process_loss_qty"], as_dict=True)
+		sub_assemblies_made = (
+			qty_per_finished_good * flt(self.fg_completed_qty) * flt(bom.quantity) / flt(qty_per_bom)
+		)
+		# a batch yields only its good qty, as in the BOM explosion
+		boms_made = sub_assemblies_made / get_good_qty(bom)
 		consumed_rates = self.get_consumed_rates()
 		components = frappe.get_all(
 			"BOM Explosion Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
