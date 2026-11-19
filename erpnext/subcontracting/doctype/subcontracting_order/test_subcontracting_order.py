@@ -1152,6 +1152,9 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		make_stock_transfer_entry(
 			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
 		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty -= 5
+		scr.submit()
 
 		frappe.flags.args = frappe._dict(
 			subcontract_order=sco.name,
