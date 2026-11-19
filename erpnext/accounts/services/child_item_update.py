@@ -44,6 +44,7 @@ class ChildItemUpdater:
 		self._transacted_stock_qty: dict | None = None
 		self._rfqs_before_update: set[str] = set()
 		self._packed_items_before_update: dict = {}
+		self._projects_before_update: set[str] = set()
 
 	@cached_property
 	def _rows_with_kept_reservation(self) -> set[str]:
@@ -70,6 +71,8 @@ class ChildItemUpdater:
 			self._packed_items_before_update = get_packed_items_of_order_rows(
 				{row.name for row in self.parent.items}
 			)
+			# a removed row's project drops its amount too
+			self._projects_before_update = self.parent.get_projects()
 
 		if self.parent_doctype == "Quotation":
 			self._transacted_stock_qty = get_ordered_items(self.parent.name)
@@ -262,7 +265,7 @@ class ChildItemUpdater:
 			parent.validate_for_duplicate_items()
 			parent.validate_warehouse()
 			parent.update_reserved_qty()
-			parent.update_project()
+			parent.update_project(self._projects_before_update)
 			parent.update_prevdoc_status("submit", update_quotation_qty=True)
 			parent.update_delivery_status()
 
