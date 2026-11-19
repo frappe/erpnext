@@ -708,6 +708,46 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.gross_margin, sales_invoice.base_net_total)
 		self.assertEqual(project.per_gross_margin, 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"sales_update_frequency": "Each Transaction", "allow_multiple_items": 1}
+	)
+	def test_sales_amount_follows_sales_order_row_project(self):
+		"""Each Sales Order row counts for its own project. A row with an empty or cleared project
+		counts for the order's project."""
+		header, row, row_only = (
+			make_project({"project_name": f"_Test SO Row Project {frappe.generate_hash(length=6)}"})
+			for _ in range(3)
+		)
+
+		def order_row(rate, project):
+			return {
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": rate,
+				"project": project,
+			}
+
+		order = make_sales_order(
+			item_list=[order_row(3000, header.name), order_row(2000, row.name), order_row(1000, "")],
+			do_not_save=True,
+		)
+		order.project = header.name
+		order.insert()
+		order.submit()
+		make_sales_order(item_list=[order_row(4000, row_only.name)])
+
+		def sales_amount(project):
+			return frappe.db.get_value("Project", project.name, "total_sales_amount")
+
+		self.assertEqual(sales_amount(header), 4000)
+		self.assertEqual(sales_amount(row), 2000)
+		self.assertEqual(sales_amount(row_only), 4000)
+
+		order.cancel()
+		self.assertEqual(sales_amount(header), 0)
+		self.assertEqual(sales_amount(row), 0)
+
 	def test_consumed_material_cost_from_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 

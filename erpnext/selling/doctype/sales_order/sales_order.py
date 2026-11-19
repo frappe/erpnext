@@ -639,8 +639,10 @@ class SalesOrder(SellingController):
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") != "Each Transaction":
 			return
 
-		if self.project:
-			project = frappe.get_lazy_doc("Project", self.project)
+		# rows can name other projects than the order
+		projects = {self.project, *(row.project for row in self.items)}
+		for name in filter(None, projects):
+			project = frappe.get_lazy_doc("Project", name)
 			project.update_sales_amount()
 			project.db_update()
 
