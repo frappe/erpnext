@@ -60,9 +60,11 @@ class TestValuationPools(ERPNextTestSuite):
 		pool = QueuePool(last_in_first_out=True)
 		pool.receive(10, 100)
 		pool.receive(10, 120)
+		pool.receive(10, 100)
+		pool.receive(10, 150)
 
 		self.assertEqual(pool.issue(4, preferred_rate=100), 4 * 100)
-		self.assertEqual(pool.layers, [[6, 100], [10, 120]])
+		self.assertEqual(pool.layers, [[10, 100], [10, 120], [6, 100], [10, 150]])
 
 	def test_queue_goes_negative_and_receipt_makes_up_the_shortfall(self):
 		pool = QueuePool()
