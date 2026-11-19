@@ -308,6 +308,10 @@ class SalesInvoice(SellingController):
 			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 	def validate(self):
+		# Only POS consolidation may mark an invoice as consolidated.
+		if not self.flags.is_consolidated:
+			self.is_consolidated = 0
+
 		self.validate_auto_set_posting_time()
 		super().validate()
 
@@ -1302,7 +1306,7 @@ class SalesInvoice(SellingController):
 
 	def counts_coupon_use(self):
 		# Returns and POS consolidation do not redeem the coupon again.
-		if self.is_return or self.get("is_consolidated"):
+		if self.is_return or (self.doctype == "Sales Invoice" and self.is_consolidated):
 			return False
 
 		if not self.items or any(
