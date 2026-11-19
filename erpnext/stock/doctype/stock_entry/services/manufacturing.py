@@ -1308,9 +1308,10 @@ class RepackStockEntry(BaseManufactureStockEntry):
 			)
 
 	def validate_repack_entry(self):
-		fg_items = {row.item_code: row for row in self.doc.items if row.is_finished_item}
+		fg_rows = [row for row in self.doc.items if row.is_finished_item]
+		fg_items = list(dict.fromkeys(row.item_code for row in fg_rows))
 
-		if len(fg_items) > 1 and not all(row.set_basic_rate_manually for row in fg_items.values()):
+		if len(fg_items) > 1 and not all(row.set_basic_rate_manually for row in fg_rows):
 			frappe.throw(
 				_(
 					"When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
