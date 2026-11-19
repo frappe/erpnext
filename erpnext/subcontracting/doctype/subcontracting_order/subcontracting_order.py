@@ -503,8 +503,7 @@ class SubcontractingOrder(SubcontractingController):
 				item_dict = {d["name"]: d for d in items}
 				items = [item for item in self.supplied_items if item.name in item_dict]
 
-			reservation_items = []
-			is_transfer = False
+			reservation_items, plan_items = [], []
 			for item in items or self.supplied_items:
 				data = frappe._dict(
 					{
@@ -542,7 +541,6 @@ class SubcontractingOrder(SubcontractingController):
 							as_dict=True,
 						)
 						if plan_item and flt(item.stock_reserved_qty) < flt(plan_item.stock_reserved_qty):
-							is_transfer = True
 							data.update(
 								{
 									"from_voucher_no": self.production_plan,
@@ -550,12 +548,17 @@ class SubcontractingOrder(SubcontractingController):
 									"from_voucher_detail_no": plan_item.name,
 								}
 							)
+							plan_items.append(data)
+							continue
 
 				reservation_items.append(data)
 
-			if is_transfer:
-				hand_off_reserved_stock(self.production_plan, self.doctype, reservation_items)
-			elif StockReservation(self, items=reservation_items).make_stock_reservation_entries():
+			if plan_items:
+				hand_off_reserved_stock(self.production_plan, self.doctype, plan_items)
+			if (
+				reservation_items
+				and StockReservation(self, items=reservation_items).make_stock_reservation_entries()
+			):
 				frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
 
 	def has_unreserved_stock(self) -> bool:
