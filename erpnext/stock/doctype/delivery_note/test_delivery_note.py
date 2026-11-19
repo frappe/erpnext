@@ -4888,6 +4888,23 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(sales_return.per_billed, 0)
 		self.assertEqual(make_sales_invoice(sales_return.name).items[0].qty, -2)
 
+	def test_return_deducted_on_sales_order_invoice_is_billed(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as make_si_from_so
+
+		so = make_sales_order(qty=10)
+		delivery_note = create_dn_against_so(so.name, delivered_qty=10)
+		deducted_return = make_sales_return(delivery_note.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+
+		so_invoice = make_si_from_so(so.name)
+		self.assertEqual(so_invoice.items[0].qty, 8)
+		so_invoice.submit()
+
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
 	def test_return_settled_on_split_delivery_with_so_billing(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as make_si_from_so
 
