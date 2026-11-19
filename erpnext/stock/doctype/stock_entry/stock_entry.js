@@ -1270,6 +1270,7 @@ frappe.ui.form.on("Stock Entry Detail", {
 		// empty the fields the new item may not set, so the previous item's values do not stick
 		d.image = "";
 		d.basic_rate = 0;
+		frm.events.calculate_basic_amount(frm, d);
 
 		if (d.item_code) {
 			var args = {
