@@ -48,8 +48,6 @@ class TaxRule(Document):
 		customer: DF.Link | None
 		customer_group: DF.Link | None
 		from_date: DF.Date | None
-		item: DF.Link | None
-		item_group: DF.Link | None
 		priority: DF.Int
 		purchase_tax_template: DF.Link | None
 		sales_tax_template: DF.Link | None
@@ -95,8 +93,6 @@ class TaxRule(Document):
 			"customer_group": self.customer_group,
 			"supplier": self.supplier,
 			"supplier_group": self.supplier_group,
-			"item": self.item,
-			"item_group": self.item_group,
 			"billing_city": self.billing_city,
 			"billing_county": self.billing_county,
 			"billing_state": self.billing_state,
