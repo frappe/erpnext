@@ -39,7 +39,7 @@
    "search_index": 1
   },
   {
-   "columns": 4,
+   "columns": 2,
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "in_global_search": 1,
@@ -72,7 +72,6 @@
    "columns": 2,
    "fieldname": "total_amount",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Grand Total",
    "print_hide": 1,
    "read_only": 1
@@ -185,7 +184,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-30 11:26:43.949841",
+ "modified": "2026-11-19 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

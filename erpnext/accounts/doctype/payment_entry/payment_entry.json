@@ -12,6 +12,7 @@
  "field_order": [
   "payment_tab",
   "type_of_payment",
+  "naming_series",
   "payment_type",
   "payment_order_status",
   "column_break_5",
@@ -20,10 +21,13 @@
   "company",
   "party_section",
   "party_type",
+  "apply_tds",
+  "tax_withholding_category",
   "book_advance_payments_in_separate_party_account",
   "reconcile_on_advance_payment_date",
   "column_break_11",
   "party",
+  "party_name",
   "column_break_party",
   "contact_person",
   "contact_email",
@@ -39,6 +43,16 @@
   "reference_date",
   "column_break_clearance",
   "clearance_date",
+  "payment_accounts_section",
+  "paid_from",
+  "paid_from_account_type",
+  "paid_from_account_currency",
+  "paid_from_bank_account",
+  "column_break_18",
+  "paid_to",
+  "paid_to_account_type",
+  "paid_to_account_currency",
+  "paid_to_bank_account",
   "payment_amounts_section",
   "paid_amount",
   "paid_amount_after_tax",
@@ -52,16 +66,6 @@
   "base_received_amount",
   "base_received_amount_after_tax",
   "column_break_amount",
-  "payment_accounts_section",
-  "paid_from",
-  "paid_from_account_type",
-  "paid_from_account_currency",
-  "paid_from_bank_account",
-  "column_break_18",
-  "paid_to",
-  "paid_to_account_type",
-  "paid_to_account_currency",
-  "paid_to_bank_account",
   "section_break_14",
   "get_outstanding_invoices",
   "get_outstanding_orders",
@@ -77,10 +81,11 @@
   "write_off_difference_amount",
   "deductions_or_loss_section",
   "deductions",
+  "accounting_dimensions_section",
+  "project",
+  "dimension_col_break",
+  "cost_center",
   "taxes_tab",
-  "tax_withholding_section",
-  "apply_tds",
-  "tax_withholding_category",
   "section_tax_withholding_entry",
   "tax_withholding_group",
   "ignore_tax_withholding_threshold",
@@ -95,10 +100,6 @@
   "column_break_61",
   "total_taxes_and_charges",
   "more_info_tab",
-  "accounting_dimensions_section",
-  "project",
-  "dimension_col_break",
-  "cost_center",
   "remarks_section",
   "custom_remarks",
   "remarks",
@@ -107,8 +108,6 @@
   "column_break_print",
   "print_heading",
   "section_break_12",
-  "naming_series",
-  "party_name",
   "status",
   "title",
   "is_opening",
@@ -241,11 +240,9 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval:!doc.paid_from || !doc.paid_to || doc.payment_type == \"Internal Transfer\"",
    "fieldname": "payment_accounts_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Details"
+   "label": "Accounts"
   },
   {
    "bold": 1,
@@ -383,14 +380,14 @@
    "options": "Payment Entry Reference"
   },
   {
-   "depends_on": "eval:doc.paid_from && doc.paid_to",
+   "depends_on": "eval:doc.paid_from && doc.paid_to && (doc.party || doc.difference_amount)",
    "fieldname": "section_break_34",
    "fieldtype": "Section Break",
    "label": "Summary"
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_amount && doc.received_amount && doc.references)",
+   "depends_on": "eval:(doc.party && doc.paid_amount && doc.received_amount && doc.references)",
    "fieldname": "total_allocated_amount",
    "fieldtype": "Currency",
    "label": "Total Allocated Amount",
@@ -410,7 +407,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:(doc.paid_amount && doc.received_amount && doc.references)",
+   "depends_on": "eval:(doc.party && doc.paid_amount && doc.received_amount && doc.references)",
    "description": "Not matched to any invoice or order. It stays on the party's account as an advance.",
    "fieldname": "unallocated_amount",
    "fieldtype": "Currency",
@@ -443,6 +440,7 @@
    "label": "Deductions or Loss"
   },
   {
+   "description": "Bank charges, discounts or rounding that explain the gap between the amount paid and the invoices settled. Each row is booked to its account.",
    "fieldname": "deductions",
    "fieldtype": "Table",
    "label": "Payment Deductions or Loss",
@@ -472,6 +470,7 @@
   },
   {
    "depends_on": "eval:doc.docstatus==1",
+   "description": "Date the bank cleared this payment. Set from Bank Clearance or Bank Reconciliation.",
    "fieldname": "clearance_date",
    "fieldtype": "Date",
    "label": "Clearance Date",
@@ -519,12 +518,14 @@
    "print_hide": 1
   },
   {
+   "description": "From the Company Bank Account.",
    "fetch_from": "bank_account.bank",
    "fieldname": "bank",
    "fieldtype": "Read Only",
    "label": "Bank"
   },
   {
+   "description": "From the Company Bank Account.",
    "fetch_from": "bank_account.bank_account_no",
    "fieldname": "bank_account_no",
    "fieldtype": "Read Only",
@@ -627,6 +628,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:(doc.taxes && doc.taxes.length) || doc.sales_taxes_and_charges_template || doc.purchase_taxes_and_charges_template",
+   "description": "Taxes charged on this payment, such as tax on an advance.",
    "fieldname": "taxes_and_charges_section",
    "fieldtype": "Section Break",
    "hide_border": 1,
@@ -775,6 +777,7 @@
   {
    "default": "No",
    "depends_on": "eval: doc.book_advance_payments_in_separate_party_account == 1",
+   "description": "Set to Yes only for an advance entered as part of your opening balances.",
    "fieldname": "is_opening",
    "fieldtype": "Select",
    "label": "Is Opening",
@@ -785,6 +788,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.party_type == 'Supplier'",
+   "description": "Deduct tax at source using the Supplier's Tax Withholding Category.",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Consider for Tax Withholding"
@@ -798,6 +802,7 @@
    "label": "Tax Withholding Entry"
   },
   {
+   "description": "Picks which rates of the Tax Withholding Category apply. Leave empty to use the rates without a group.",
    "fieldname": "tax_withholding_group",
    "fieldtype": "Link",
    "label": "Tax Withholding Group",
@@ -805,6 +810,7 @@
   },
   {
    "default": "0",
+   "description": "Deduct tax even if the Supplier has not crossed the category's threshold.",
    "fieldname": "ignore_tax_withholding_threshold",
    "fieldtype": "Check",
    "label": "Ignore Tax Withholding Threshold"
@@ -818,6 +824,7 @@
   },
   {
    "default": "0",
+   "description": "Tick to edit the entries below yourself. Otherwise they are calculated when you save.",
    "fieldname": "override_tax_withholding_entries",
    "fieldtype": "Check",
    "label": "Edit Tax Withholding Entries"
@@ -872,11 +879,6 @@
    "fieldname": "taxes_tab",
    "fieldtype": "Tab Break",
    "label": "Taxes"
-  },
-  {
-   "fieldname": "tax_withholding_section",
-   "fieldtype": "Section Break",
-   "label": "Tax Withholding"
   },
   {
    "fieldname": "connections_tab",
@@ -934,7 +936,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-11-16 10:00:00.000000",
+ "modified": "2026-11-19 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
