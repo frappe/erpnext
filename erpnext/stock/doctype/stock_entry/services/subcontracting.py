@@ -34,9 +34,10 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 				self.validate_subcontracting_order_for_bom(se_item, subcontract_order, qty_in_entry)
 
 		elif backflush_raw_materials_based_on == "Material Transferred for Subcontract":
+			finished_goods = self.get_order_finished_goods()
 			finished_good_of_rows = self.get_finished_good_of_order_rows()
 			for row in self.doc.items:
-				self.validate_subcontracting_order_for_transfer(row, finished_good_of_rows)
+				self.validate_subcontracting_order_for_transfer(row, finished_goods, finished_good_of_rows)
 
 	def validate_subcontracting_order_for_bom(self, child_row, subcontract_order, qty_in_entry):
 		item_code = child_row.original_item or child_row.item_code
@@ -121,6 +122,15 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 					)
 				)
 
+	def get_order_finished_goods(self):
+		return set(
+			frappe.get_all(
+				f"{self.doc.subcontract_data.order_doctype} Item",
+				filters={"parent": self.doc.get(self.doc.subcontract_data.order_field)},
+				pluck="item_code",
+			)
+		)
+
 	def get_finished_good_of_order_rows(self):
 		"""Finished good of each raw material row of the order."""
 		return dict(
@@ -132,7 +142,7 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 			)
 		)
 
-	def validate_subcontracting_order_for_transfer(self, child_row, finished_good_of_rows):
+	def validate_subcontracting_order_for_transfer(self, child_row, finished_goods, finished_good_of_rows):
 		if not child_row.subcontracted_item:
 			frappe.throw(
 				_("Row {0}: Subcontracted Item is mandatory for the raw material {1}").format(
@@ -140,7 +150,7 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 				)
 			)
 
-		if child_row.subcontracted_item not in finished_good_of_rows.values():
+		if child_row.subcontracted_item not in finished_goods:
 			frappe.throw(
 				_("Row {0}: Subcontracted Item {1} is not a finished good of {2} {3}").format(
 					child_row.idx,
