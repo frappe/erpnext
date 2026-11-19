@@ -4653,6 +4653,31 @@ class TestWorkOrder(FrappeTestCase):
 
 	@change_settings(
 		"Manufacturing Settings",
+		{
+			"material_consumption": 1,
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+		},
+	)
+	def test_bom_from_work_order_includes_material_consumption(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
+		)
+		for purpose in (
+			"Material Transfer for Manufacture",
+			"Material Consumption for Manufacture",
+			"Manufacture",
+		):
+			frappe.get_doc(make_stock_entry(work_order.name, purpose, 10)).submit()
+
+		new_bom = frappe.get_doc("Work Order", work_order.name).make_bom()
+		self.assertEqual([(d.item_code, d.qty) for d in new_bom.items], [(rm_item, 20)])
+
+	@change_settings(
+		"Manufacturing Settings",
 		{"backflush_raw_materials_based_on": "BOM", "validate_components_quantities_per_bom": 1},
 	)
 	def test_partial_alternative_item_transfer_for_bom_based_manufacture(self):
