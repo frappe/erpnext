@@ -2347,13 +2347,16 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			scr = make_service_receipt(
 				"Subcontracted Service Item 10", "Subcontracted Item SA10", 10, 100, 10, fg_row_values
 			)
+			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+			scr_return.submit()
 
-			service_credit = frappe.get_all(
-				"GL Entry",
-				filters={"voucher_no": scr.name, "account": service_expense_account, "is_cancelled": 0},
-				pluck="credit",
-			)
-			self.assertEqual(service_credit, [1000])
+			for voucher_no, side in ((scr.name, "credit"), (scr_return.name, "debit")):
+				service_amount = frappe.get_all(
+					"GL Entry",
+					filters={"voucher_no": voucher_no, "account": service_expense_account, "is_cancelled": 0},
+					pluck=side,
+				)
+				self.assertEqual(service_amount, [1000])
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
