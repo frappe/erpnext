@@ -136,6 +136,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_header_with_purchase_order()
 		self.validate_rows_with_purchase_order()
 		self.validate_supplied_items()
+		self.validate_additional_cost_accounts()
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")

@@ -159,6 +159,7 @@ class SubcontractingReceipt(SubcontractingController):
 		if not self.get("is_return"):
 			self.validate_inspection()
 			self.validate_purchase_orders_share_terms()
+			self.validate_additional_cost_accounts()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be a future date"))
