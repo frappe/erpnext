@@ -358,3 +358,8 @@ class BOMCostingService:
 def get_good_qty(bom):
 	good_qty = flt(bom.quantity) - flt(bom.process_loss_qty)
 	return good_qty if good_qty > 0 else flt(bom.quantity) or 1
+
+
+def get_exploded_good_qty(bom):
+	"""Qty a child BOM's components are spread over when exploded: a phantom BOM's loss is ignored."""
+	return (flt(bom.quantity) or 1) if bom.is_phantom_bom else get_good_qty(bom)
