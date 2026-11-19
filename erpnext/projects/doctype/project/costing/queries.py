@@ -176,12 +176,14 @@ class ProjectCostQueries:
 
 	def billed_items(self) -> tuple[QueryBuilder, QueryBuilder]:
 		"""Submitted Sales Invoice items billed to the project, in two parts: items that leave the
-		project empty and take their invoice's, and items that name the project themselves."""
+		project empty and take their invoice's, and items that name the project themselves.
+
+		A cleared project cell is saved as an empty string, so it is empty too."""
 		invoice = qb.DocType("Sales Invoice")
 		item = qb.DocType("Sales Invoice Item")
 		items = qb.from_(item).join(invoice).on(invoice.name == item.parent)
 		from_invoice = items.where(
-			item.project.isnull() & (invoice.project == self.project) & (invoice.docstatus == 1)
+			NullIf(item.project, "").isnull() & (invoice.project == self.project) & (invoice.docstatus == 1)
 		)
 		from_item = items.where((item.project == self.project) & (item.docstatus == 1))
 		return from_invoice, from_item
