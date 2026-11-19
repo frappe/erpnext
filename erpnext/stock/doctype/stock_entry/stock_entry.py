@@ -55,6 +55,7 @@ from .services.manufacturing import (
 	MaterialConsumptionForManufactureStockEntry,
 	OperationsNotCompleteError,
 	RepackStockEntry,
+	get_secondary_items_from_sub_assemblies,
 )
 from .services.material_receipt_issue import (
 	MaterialIssueStockEntry,
@@ -842,7 +843,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					and not is_costed_out_of_finished_item(item)
 				)
 				if self.is_sub_assembly_secondary_item(d):
-					allocation_basis = self.get_sub_assembly_component_cost(d, secondary_items_qty)
+					allocation_basis = self.get_sub_assembly_component_cost(d)
 				else:
 					allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
 				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
@@ -1001,24 +1002,29 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return is_costed_out_of_finished_item(row) or self.is_sub_assembly_secondary_item(row)
 
 	def is_sub_assembly_secondary_item(self, row) -> bool:
-		"""A % of Component Cost row of a sub-assembly BOM: it takes its share of that BOM's
-		components, and the finished good and the top BOM's rows split what is left."""
+		"""A secondary row of a sub-assembly BOM: it takes its share of that BOM's components,
+		and the finished good and the top BOM's rows split what is left."""
 		return bool(
 			self.bom_no
 			and row.bom_secondary_item
-			and not is_costed_out_of_finished_item(row)
 			and frappe.get_cached_value("BOM Secondary Item", row.bom_secondary_item, "parent") != self.bom_no
 		)
 
-	def get_sub_assembly_component_cost(self, row, secondary_qty) -> float:
-		"""Consumed cost of the components of the sub-assembly BOM the secondary row comes from."""
+	def get_sub_assembly_component_cost(self, row) -> float:
+		"""Consumed cost of the components of the sub-assembly BOM the secondary row comes from.
+		Scaled by the finished qty, not the row's qty, which process loss and whole-number UOMs change."""
 		bom_no, qty_per_bom = frappe.get_cached_value(
 			"BOM Secondary Item", row.bom_secondary_item, ["parent", "stock_qty"]
 		)
 		if not flt(qty_per_bom):
 			return 0.0
 
-		boms_made = flt(secondary_qty) / flt(qty_per_bom)
+		qty_per_finished_good = sum(
+			flt(d.qty)
+			for d in get_secondary_items_from_sub_assemblies(self.bom_no)
+			if d.name == row.bom_secondary_item
+		)
+		boms_made = qty_per_finished_good * flt(self.fg_completed_qty) / flt(qty_per_bom)
 		consumed_rates = {d.item_code: flt(d.basic_rate) for d in self.get("items") if d.s_warehouse}
 		components = frappe.get_all(
 			"BOM Explosion Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
