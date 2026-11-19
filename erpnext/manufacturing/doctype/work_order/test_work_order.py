@@ -8039,7 +8039,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
 		)
 		wo = make_review_work_order(fg_item, bom.name, 10)
-		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 6)).submit()
 		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4)).submit()
 		close_work_order(wo.name, "Closed")
 
