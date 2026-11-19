@@ -1267,8 +1267,9 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	item_code(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
-		// since some items may not have image, so empty the image field to avoid setting the image of previous item
+		// empty the fields the new item may not set, so the previous item's values do not stick
 		d.image = "";
+		d.basic_rate = 0;
 
 		if (d.item_code) {
 			var args = {
