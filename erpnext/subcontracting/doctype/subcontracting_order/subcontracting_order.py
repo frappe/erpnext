@@ -295,7 +295,7 @@ class SubcontractingOrder(SubcontractingController):
 	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("items"):
 			bom = frappe.get_doc("BOM", item.bom)
-			rm_cost = sum(flt(rm_item.base_amount) for rm_item in bom.items)
+			rm_cost = sum(flt(rm_item.base_rate) * flt(rm_item.qty) for rm_item in bom.items)
 			item.rm_cost_per_qty = flt(rm_cost / flt(bom.quantity), item.precision("rm_cost_per_qty"))
 
 	def calculate_items_qty_and_amount(self):
