@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 
-from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet, patch_usd_rate
 from erpnext.projects.report.timesheet_billing_summary.timesheet_billing_summary import execute, group_by
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
@@ -50,9 +50,15 @@ class TestTimesheetBillingSummary(ERPNextTestSuite):
 		self.assertEqual(row["project"], self.project.name)
 
 	def test_billing_amount_in_company_currency(self):
-		ts = make_timesheet(
-			self.employee, simulate=True, is_billable=1, project=self.project.name, exchange_rate=2
-		)
+		with patch_usd_rate(2):
+			ts = make_timesheet(
+				self.employee,
+				simulate=True,
+				is_billable=1,
+				project=self.project.name,
+				exchange_rate=2,
+				timesheet_currency="USD",
+			)
 
 		row = next(r for r in self.run_report() if r.get("timesheet") == ts.name)
 		self.assertEqual(row["billing_amount"], ts.time_logs[0].billing_amount * 2)
