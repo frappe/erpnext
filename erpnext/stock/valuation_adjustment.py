@@ -964,9 +964,6 @@ def get_later_than(ledger, sle):
 		"creation",
 		order_by="creation asc",
 	)
-	if not created:
-		return later
-
 	return later | ((ledger.posting_datetime == posting_datetime) & (ledger.creation > created))
 
 
