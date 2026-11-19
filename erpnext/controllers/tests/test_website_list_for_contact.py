@@ -146,3 +146,17 @@ class TestWebsiteListForContact(ERPNextTestSuite):
 			rows = get_list_data(doctype="Purchase Order")
 
 		self.assertIn(purchase_order.name, [row.name for row in rows])
+
+	def test_portal_user_is_linked_to_contact_with_their_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Customer"], generated_id=True) as user:
+			# only the email ties the Contact to the user
+			contact = frappe.db.get_value("Contact", {"user": user.name})
+			frappe.db.set_value("Contact", contact, "user", None)
+
+			customer = frappe.get_doc("Customer", "_Test Customer 1")
+			customer.append("portal_users", {"user": user.name})
+			customer.save()
+
+			self.assertTrue(frappe.get_doc("Contact", contact).has_link("Customer", "_Test Customer 1"))

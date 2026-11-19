@@ -281,6 +281,26 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 		for age_range in expected_ageing:
 			self.assertEqual(expected_ageing[age_range], ageing.get(age_range))
 
+	def test_emails_are_sent_from_the_session_users_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		process_soa = create_process_soa(
+			name="_Test Statement Sender",
+			customers=[{"customer": "_Test Customer", "billing_email": "billing@example.com"}],
+		)
+		with (
+			patch(
+				"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.get_report_pdf",
+				return_value={"_Test Customer": b"%PDF"},
+			),
+			patch("frappe.enqueue") as enqueue,
+			test_user(roles=["Accounts User"], generated_id=True) as user,
+			self.set_user(user.name),
+		):
+			send_emails(process_soa.name)
+
+			self.assertEqual(enqueue.call_args.kwargs["sender"], user.email)
+
 
 def create_process_soa(**args):
 	args = frappe._dict(args)

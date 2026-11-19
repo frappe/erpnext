@@ -14,6 +14,7 @@ from frappe.utils import (
 	add_days,
 	cint,
 	get_datetime,
+	get_email_addresses,
 	get_link_to_form,
 	get_weekday,
 	getdate,
@@ -1024,7 +1025,7 @@ def notify_error_to_stock_managers(doc, traceback):
 			"Please check the error message and take necessary actions to fix the error and then restart the reposting again."
 		)
 	)
-	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+	frappe.sendmail(recipients=get_email_addresses(recipients), subject=subject, message=message)
 
 
 def get_recipients():

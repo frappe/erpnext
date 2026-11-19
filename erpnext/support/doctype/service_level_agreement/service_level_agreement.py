@@ -845,7 +845,6 @@ def reset_service_level_agreement(doctype: str, docname: str, reason: str, user:
 			"comment_type": "Info",
 			"reference_doctype": doc.doctype,
 			"reference_name": doc.name,
-			"comment_email": frappe.session.user,
 			"content": f" resetted Service Level Agreement - {_(reason)}",
 		}
 	).insert(ignore_permissions=True)

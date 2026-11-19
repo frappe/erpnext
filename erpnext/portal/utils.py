@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import get_email_address
 
 
 def set_default_role(doc, method):
@@ -44,18 +45,19 @@ def create_customer_or_supplier():
 	if not doctype:
 		return
 
-	if party_exists(doctype, user):
+	email = get_email_address(user)
+	if party_exists(doctype, email):
 		return
 
 	fullname = frappe.utils.get_fullname(user)
 	party = create_party(doctype, fullname)
 	alternate_doctype = "Customer" if doctype == "Supplier" else "Supplier"
 
-	if party_exists(alternate_doctype, user):
+	if party_exists(alternate_doctype, email):
 		# if user is both customer and supplier, alter fullname to avoid contact name duplication
 		fullname += "-" + doctype
 
-	create_party_contact(doctype, fullname, user, party.name)
+	create_party_contact(doctype, fullname, email, party.name)
 	return party
 
 
@@ -76,18 +78,18 @@ def create_party(doctype, fullname):
 	return party
 
 
-def create_party_contact(doctype, fullname, user, party_name):
+def create_party_contact(doctype, fullname, email, party_name):
 	contact = frappe.new_doc("Contact")
-	contact.update({"first_name": fullname, "email_id": user})
+	contact.update({"first_name": fullname, "email_id": email})
 	contact.append("links", dict(link_doctype=doctype, link_name=party_name))
-	contact.append("email_ids", dict(email_id=user, is_primary=True))
+	contact.append("email_ids", dict(email_id=email, is_primary=True))
 	contact.flags.ignore_mandatory = True
 	contact.insert(ignore_permissions=True)
 
 
-def party_exists(doctype, user):
+def party_exists(doctype, email):
 	# check if contact exists against party and if it is linked to the doctype
-	contact_name = frappe.db.get_value("Contact", {"email_id": user})
+	contact_name = frappe.db.get_value("Contact", {"email_id": email})
 	if contact_name:
 		contact = frappe.get_doc("Contact", contact_name)
 		doctypes = [d.link_doctype for d in contact.links]

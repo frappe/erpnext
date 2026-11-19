@@ -11,6 +11,7 @@ from frappe.utils import (
 	add_months,
 	cint,
 	flt,
+	get_email_addresses,
 	get_last_day,
 	get_link_to_form,
 	getdate,
@@ -339,7 +340,7 @@ def notify_depr_entry_posting_error(failed_asset_names, error_log_names):
 
 	message = get_message_for_depr_entry_posting_error(asset_links, error_log_links)
 
-	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+	frappe.sendmail(recipients=get_email_addresses(recipients), subject=subject, message=message)
 
 
 def get_comma_separated_links(names, doctype):

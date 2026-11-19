@@ -3,6 +3,7 @@
 
 
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, flt, getdate, nowdate
@@ -14,6 +15,7 @@ from erpnext.selling.doctype.customer.customer import (
 	get_customer_outstanding,
 	get_customer_overdue_amount,
 	get_overdue_billing_threshold,
+	send_emails,
 )
 from erpnext.selling.doctype.customer.mapper import (
 	make_quotation,
@@ -669,6 +671,20 @@ class TestCustomer(ERPNextTestSuite):
 
 		contact.reload()
 		self.assertTrue(contact.has_link("Customer", customer.name))
+
+	def test_credit_limit_email_is_sent_to_user_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with (
+			self.change_settings("Accounts Settings", {"credit_controller": "Sales Master Manager"}),
+			test_user(roles=["Sales Master Manager"], generated_id=True) as user,
+			patch("frappe.sendmail") as sendmail,
+		):
+			send_emails("_Test Customer", "_Test Company")
+
+		recipients = sendmail.call_args.kwargs["recipients"]
+		self.assertIn(user.email, recipients)
+		self.assertNotIn(user.name, recipients)
 
 
 def get_customer_dict(customer_name):

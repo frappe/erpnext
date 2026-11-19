@@ -8,7 +8,7 @@ from frappe.contacts.doctype.contact.contact import get_full_name
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import get_url
+from frappe.utils import get_email_address, get_url, get_user_by_email
 from frappe.utils.html_utils import sanitize_html
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
@@ -236,8 +236,8 @@ class RequestforQuotation(BuyingController):
 		"""Create a new user for the supplier if not set in contact"""
 		update_password_link, contact = "", ""
 
-		if frappe.db.exists("User", rfq_supplier.email_id):
-			user = frappe.get_doc("User", rfq_supplier.email_id)
+		if user := get_user_by_email(rfq_supplier.email_id):
+			user = frappe.get_doc("User", user)
 		else:
 			user, update_password_link = self.create_user(rfq_supplier, link)
 
@@ -253,10 +253,10 @@ class RequestforQuotation(BuyingController):
 			contact = frappe.new_doc("Contact")
 			contact.first_name = rfq_supplier.supplier_name or rfq_supplier.supplier
 			contact.append("links", {"link_doctype": "Supplier", "link_name": rfq_supplier.supplier})
-			contact.append("email_ids", {"email_id": user.name, "is_primary": 1})
+			contact.append("email_ids", {"email_id": user.email, "is_primary": 1})
 
 		if not contact.email_id and not contact.user:
-			contact.email_id = user.name
+			contact.email_id = user.email
 			contact.user = user.name
 
 		contact.save(ignore_permissions=True)
@@ -334,7 +334,7 @@ class RequestforQuotation(BuyingController):
 		if fixed_procurement_email:
 			sender = frappe.db.get_value("Email Account", fixed_procurement_email, "email_id")
 		else:
-			sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
+			sender = frappe.session.user not in STANDARD_USERS and get_email_address() or None
 
 		message_template = self.mfs_html if self.use_html else self.message_for_supplier
 		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti

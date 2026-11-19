@@ -5,7 +5,7 @@
 import frappe
 from frappe.query_builder.functions import Lower
 from frappe.rate_limiter import rate_limit
-from frappe.utils import escape_html, strip_html, validate_email_address
+from frappe.utils import escape_html, get_email_address, strip_html, validate_email_address
 
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public Contact Us form; only parses the sender and sets lead ownership
@@ -34,7 +34,9 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 	lead = None
 	# a guest's address is unverified, so only a signed-in sender is matched to a customer
 	customer = (
-		get_customer_from_contact_email(sender) if frappe.session.user.lower() == sender.lower() else None
+		get_customer_from_contact_email(sender)
+		if frappe.session.user != "Guest" and (get_email_address() or "").lower() == sender.lower()
+		else None
 	)
 
 	if not customer:

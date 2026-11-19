@@ -759,7 +759,7 @@ class TestIssue(TestSetUp):
 			frappe.db.get_value(
 				"Comment", {"reference_name": issue.name, "comment_type": "Info"}, "comment_email"
 			),
-			"Administrator",
+			frappe.utils.get_email_address("Administrator"),
 		)
 
 		website_user = create_user("test_sla_website_user@example.com")
@@ -851,6 +851,31 @@ class TestIssue(TestSetUp):
 		issue.reload()
 		self.assertEqual(issue.first_responded_on, frappe.flags.current_time)
 		self.assertEqual(issue.agreement_status, "Resolution Due")
+
+	def test_raised_by_defaults_to_session_user_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Support Team"], generated_id=True) as user, self.set_user(user.name):
+			issue = frappe.get_doc({"doctype": "Issue", "subject": "Raised by me"}).insert(
+				ignore_permissions=True
+			)
+
+		self.assertEqual(issue.raised_by, user.email)
+
+	def test_portal_user_with_generated_id_sees_and_changes_own_issues(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		from erpnext.support.doctype.issue.issue import get_issue_list
+
+		with test_user(roles=["Customer"], generated_id=True) as user:
+			issue = make_issue()
+			issue.db_set("raised_by", user.email)
+			issue = frappe.get_doc("Issue", issue.name)
+
+			with self.set_user(user.name):
+				self.assertIn(issue.name, [d.name for d in get_issue_list("Issue", None, None, 0, 500)])
+				issue.raised_by = user.email.upper()
+				self.assertTrue(frappe.has_website_permission(issue, "write"))
 
 
 class TestFirstResponseTime(TestSetUp):

@@ -16,6 +16,7 @@ from frappe.utils import (
 	fmt_money,
 	format_time,
 	formatdate,
+	get_email_address,
 	get_link_to_report,
 	get_url_to_form,
 	get_url_to_list,
@@ -137,7 +138,7 @@ class EmailDigest(Document):
 			frappe.local.form_dict = original_form
 		if message:
 			frappe.sendmail(
-				recipients=recipient,
+				recipients=get_email_address(recipient),
 				subject=_("{0} Digest").format(_(self.frequency)),
 				message=message,
 				reference_doctype=self.doctype,
