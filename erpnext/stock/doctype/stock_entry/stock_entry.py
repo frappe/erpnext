@@ -762,6 +762,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if any(d.s_warehouse for d in self.get("items")):
 			return True
 
+		# without continuous consumption, a Manufacture lacks raw materials only if earlier entries consumed them
+		if (
+			self.purpose == "Manufacture"
+			and self.work_order
+			and not frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
+		):
+			return True
+
 		return self.is_rm_cost_from_consumption_entries()
 
 	def is_rm_cost_from_consumption_entries(self) -> bool:
