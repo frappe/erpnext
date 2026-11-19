@@ -1543,20 +1543,19 @@ class SubcontractingController(StockController):
 			frappe.throw(msg, title=_("Incorrect Batch Consumed"))
 
 	def __validate_serial_no(self, row, key, bundle_entries):
-		if self.__transferred_items.get(key).get("serial_no"):
-			serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
-			incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
+		serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
+		incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
 
-			if incorrect_sn:
-				numbers = SerialBatchIdentity("Serial No").get_number_map(incorrect_sn)
-				incorrect_sn = "\n".join(escape_html(numbers.get(name, name)) for name in incorrect_sn)
-				link = get_link_to_form(
-					self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
-				)
-				msg = _("The Serial Nos {0} have not been supplied against the {1} {2}").format(
-					incorrect_sn, self.subcontract_data.order_doctype, link
-				)
-				frappe.throw(msg, title=_("Incorrect Serial Number Consumed"))
+		if incorrect_sn:
+			numbers = SerialBatchIdentity("Serial No").get_number_map(incorrect_sn)
+			incorrect_sn = "\n".join(escape_html(numbers.get(name, name)) for name in incorrect_sn)
+			link = get_link_to_form(
+				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
+			)
+			msg = _("The Serial Nos {0} have not been supplied against the {1} {2}").format(
+				incorrect_sn, self.subcontract_data.order_doctype, link
+			)
+			frappe.throw(msg, title=_("Incorrect Serial Number Consumed"))
 
 	def __validate_supplied_or_received_items(self):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
