@@ -180,6 +180,7 @@ class JobCard(Document):
 		if self.docstatus == 1 or self.time_logs or flt(self.process_loss_qty):
 			self.validate_sequence_id()
 		self.set_sub_operations()
+		self.link_secondary_items_to_bom()
 		self.update_sub_operation_status()
 		if self.sub_operations:
 			self.set_total_completed_qty_from_sub_operations()
@@ -441,10 +442,39 @@ class JobCard(Document):
 				"bom_secondary_item": values.name,
 			}
 
+<<<<<<< HEAD
 			secondary_item["stock_qty"] -= flt(
 				secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
 				self.precision("for_quantity"),
 			)
+=======
+	def link_secondary_items_to_bom(self):
+		"""Link each secondary item to the BOM row of its item and type, so it keeps that row's valuation."""
+		bom_no = self.semi_fg_bom or self.bom_no
+		if not bom_no or not self.secondary_items:
+			return
+
+		bom_rows = {
+			(row.item_code, row.secondary_item_type): row.name
+			for row in frappe.get_all(
+				"BOM Secondary Item",
+				filters={"parent": bom_no, "parenttype": "BOM"},
+				fields=["name", "item_code", "secondary_item_type"],
+			)
+		}
+		for row in self.secondary_items:
+			row.bom_secondary_item = bom_rows.get((row.item_code, row.secondary_item_type))
+
+	def append_secondary_item(self, item_code, values):
+		secondary_item = {
+			"item_code": item_code,
+			"stock_qty": values.qty,
+			"item_name": values.item_name,
+			"stock_uom": values.stock_uom,
+			"secondary_item_type": values.secondary_item_type,
+			"bom_secondary_item": values.name,
+		}
+>>>>>>> 58a1dbd (fix(manufacturing): link Job Card secondary items to their BOM row)
 
 			self.append("secondary_items", secondary_item)
 
