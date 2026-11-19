@@ -143,7 +143,7 @@ class TestSubcontractingBOM(ERPNextTestSuite):
 		)
 
 		bom.is_active = 0
-		self.assertRaises(frappe.ValidationError, bom.save)
+		self.assertRaisesRegex(frappe.ValidationError, "active Subcontracting BOM", bom.save)
 
 	def test_quantities_must_be_greater_than_zero(self):
 		variant, template_bom = make_subcontracted_variant()
