@@ -37,9 +37,8 @@ frappe.ui.form.on("Subcontracting Order Item", {
 		const service_item = get_service_item(frm, locals[cdt][cdn]);
 		if (!service_item) return;
 
-		frm.toggle_enable(["service_items"], true);
-		frm.get_field("service_items").grid.grid_rows_by_docname[service_item.name].remove();
-		frm.toggle_enable(["service_items"], false);
+		frappe.model.clear_doc(service_item.doctype, service_item.name);
+		frm.refresh_field("service_items");
 	},
 });
 
