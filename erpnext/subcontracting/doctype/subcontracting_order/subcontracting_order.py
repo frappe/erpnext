@@ -738,8 +738,8 @@ def get_additional_cost_share(order: Document, items: dict) -> float:
 	if not pending_cost:
 		return 0.0
 
-	remaining_cost = max(total_cost - get_additional_cost_taken_by_receipts(order.name), 0)
-	return remaining_cost / total_cost * min(received_cost / pending_cost, 1)
+	remaining_share = max(1 - get_additional_cost_taken_by_receipts(order.name) / total_cost, 0)
+	return remaining_share * min(received_cost / pending_cost, 1)
 
 
 def get_additional_cost_taken_by_receipts(order: str) -> float:
