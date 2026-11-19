@@ -1478,7 +1478,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		}
 
 		// a duplicated row keeps its own warehouses
-		if (!row.item_code) {
+		if (!row.s_warehouse && !row.t_warehouse) {
 			if (this.frm.doc.from_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 			if (this.frm.doc.to_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 		}
