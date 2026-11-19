@@ -678,6 +678,20 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(stock_bin.reserved_qty_for_sub_contract, reserved_qty_before_transfer)
 
+	def test_transfer_locks_bin_of_reserve_warehouse(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.set_reserve_warehouse = "_Test Warehouse 2 - _TC"
+		sco.insert()
+		sco.submit()
+
+		row = sco.supplied_items[0]
+		transfer = make_supplied_item_transfer(sco, row)
+		transfer.items[0].s_warehouse = "_Test Warehouse - _TC"
+
+		item_warehouses = transfer.get_item_warehouses()
+		self.assertIn((row.rm_item_code, "_Test Warehouse - _TC"), item_warehouses)
+		self.assertIn((row.rm_item_code, "_Test Warehouse 2 - _TC"), item_warehouses)
+
 	def test_alternative_item_transfer_without_supplied_row_releases_reserved_qty(self):
 		sco = get_subcontracting_order()
 		row = sco.supplied_items[0]
