@@ -786,6 +786,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items], [5, 5]
 		)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": True})
 	def test_return_booked_on_one_row_keeps_consumed_qty_positive(self):
 		suffix = "Split Return"
 		service_item = make_item(f"Subcontracted Service Item {suffix}", {"is_stock_item": 0}).name
