@@ -50,6 +50,17 @@ class TestVideo(FrappeTestCase):
 		batch_update_youtube_data()
 		self.assertEqual(frappe.db.get_value("Video", video.name, "view_count"), 5000)
 
+	def test_batch_update_needs_video_settings_permission(self):
+		user = frappe.new_doc("User")
+		user.email = "test-video-website-user@example.com"
+		user.first_name = "Test Video"
+		user.user_type = "Website User"
+		user.send_welcome_email = 0
+		user.insert(ignore_if_duplicate=True)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, batch_update_youtube_data)
+
 
 def make_video(title: str, url: str, provider: str = "YouTube"):
 	return frappe.get_doc(
