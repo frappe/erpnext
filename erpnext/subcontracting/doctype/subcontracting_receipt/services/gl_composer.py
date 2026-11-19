@@ -80,12 +80,12 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 					)
 
 					# the stock value holds the service cost of rejected and lost units too
-					service_cost = flt(
-						flt(item.service_cost_per_qty)
-						* doc.get_qty_for_costing(item)
-						* received_qty_ratios.get(item.name, 1),
-						item.precision("amount"),
-					)
+					if item.name in received_qty_ratios:
+						service_qty = flt(item.qty) * received_qty_ratios[item.name]
+					else:
+						service_qty = doc.get_qty_for_costing(item)
+
+					service_cost = flt(flt(item.service_cost_per_qty) * service_qty, item.precision("amount"))
 
 					self.add_gl_entry(
 						gl_entries=gl_entries,
