@@ -689,6 +689,21 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		adjustment.cancel()
 		make_stock_entry(item_code=item, target=WAREHOUSE, qty=1, rate=100, posting_date=last_year(10))
 
+	def test_entry_at_the_adjustment_time_made_before_it_cannot_be_cancelled(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		issue = make_stock_entry(
+			item_code=item,
+			source=WAREHOUSE,
+			qty=2,
+			posting_date=get_adjustment_date(),
+			posting_time="00:00:00",
+		)
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+		frappe.get_doc("Stock Reconciliation", result["adjustment_entry"]).submit()
+
+		issue.reload()
+		self.assertRaises(BackdatedEntryBeforeAdjustmentError, issue.cancel)
+
 	def test_no_backdated_entry_of_an_adjusted_batch(self):
 		item = self.make_batch_issued_at_wrong_value()
 		batch_no = frappe.db.get_value("Batch", {"item": item}, "name")
