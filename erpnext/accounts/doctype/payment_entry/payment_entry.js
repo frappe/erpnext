@@ -255,6 +255,9 @@ frappe.ui.form.on("Payment Entry", {
 		frm.events.show_general_ledger(frm);
 		frm.events.show_party_balance(frm);
 		frm.events.show_unallocated_note(frm);
+		if (frm.doc.docstatus !== 0) {
+			frm.set_df_property("difference_amount", "description", "");
+		}
 		frm.events.setup_reference_buttons(frm);
 		frm.events.show_allocate_button(frm);
 		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(frm);
@@ -434,15 +437,19 @@ frappe.ui.form.on("Payment Entry", {
 			return;
 		}
 
-		frm.add_custom_button(__("Allocate to Invoices"), () => {
-			frappe.route_options = {
-				company: frm.doc.company,
-				party_type: frm.doc.party_type,
-				party: frm.doc.party,
-				payment_name: frm.doc.name,
-			};
-			frappe.set_route("Form", "Payment Reconciliation");
-		});
+		frm.add_custom_button(
+			__("Allocate to Invoices"),
+			() => {
+				frappe.route_options = {
+					company: frm.doc.company,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party,
+					payment_name: frm.doc.name,
+				};
+				frappe.set_route("Form", "Payment Reconciliation");
+			},
+			__("Actions")
+		);
 	},
 
 	setup_reference_buttons: function (frm) {
@@ -543,11 +550,7 @@ frappe.ui.form.on("Payment Entry", {
 
 		const cached = frm.party_balance;
 		if (cached && cached.party_type === frm.doc.party_type && cached.party === frm.doc.party) {
-			frm.set_df_property(
-				"party",
-				"description",
-				frm.events.get_party_balance_text(frm, cached.balance)
-			);
+			frm.set_df_property("party", "description", frm.events.get_party_balance_text(frm, cached));
 			return;
 		}
 
@@ -566,17 +569,17 @@ frappe.ui.form.on("Payment Entry", {
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
 					balance: r.message.party_balance,
+					currency: r.message.party_account_currency,
 				};
 				frm.events.show_party_balance(frm);
 			},
 		});
 	},
 
-	get_party_balance_text: function (frm, balance) {
+	get_party_balance_text: function (frm, { balance, currency }) {
 		if (balance == null) return "";
 
-		const company_currency = frappe.get_doc(":Company", frm.doc.company)?.default_currency;
-		const amount = format_currency(Math.abs(balance), company_currency);
+		const amount = format_currency(Math.abs(balance), currency);
 
 		if (Math.abs(flt(balance)) < 0.005) {
 			return __("Nothing outstanding");
@@ -607,7 +610,7 @@ frappe.ui.form.on("Payment Entry", {
 			frm.doc.docstatus === 1 &&
 			frappe.model.can_write("Payment Reconciliation")
 		) {
-			note = __("Not matched to an invoice yet. Use Allocate to Invoices to match it.");
+			note = __("Not matched to an invoice yet. Use Actions > Allocate to Invoices to match it.");
 		}
 
 		frm.set_df_property("unallocated_amount", "description", note);
@@ -775,6 +778,7 @@ frappe.ui.form.on("Payment Entry", {
 									party_type: frm.doc.party_type,
 									party: frm.doc.party,
 									balance: r.message.party_balance,
+									currency: r.message.party_account_currency,
 								};
 								frm.events.show_party_balance(frm);
 							},
