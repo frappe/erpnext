@@ -7659,6 +7659,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr, *_ = self.make_transfer_receipt(item, 1, 2)
 		pr.save()
 		package = pr.items[0].rejected_serial_and_batch_bundle
+		self.assertTrue(package)
 
 		pr.items[0].update({"rejected_qty": 0, "received_qty": 1})
 		pr.save()
@@ -7676,6 +7677,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr, *_ = self.make_transfer_receipt(item, 1, 2)
 		pr.save()
 		package = pr.items[0].serial_and_batch_bundle
+		self.assertTrue(package)
 
 		pr.items[0].update({"qty": 0, "rejected_qty": 3})
 		pr.save()
