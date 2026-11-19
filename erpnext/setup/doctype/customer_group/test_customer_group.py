@@ -2,12 +2,66 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.permissions import setup_custom_perms
 
 from erpnext.accounts.party import DuplicatePartyAccountError
+from erpnext.tests.permission_test_utils import make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCustomerGroup(ERPNextTestSuite):
+	def test_customer_role_can_only_select_customer_groups(self):
+		group = frappe.get_doc(
+			doctype="Customer Group", customer_group_name="_Test Portal Customer Group", is_group=0
+		).insert()
+		user = make_fenced_user("customer-group-portal@example.com", ["Customer"])
+		with self.set_user(user):
+			self.assertEqual(
+				frappe.get_list("Customer Group", filters={"name": group.name}, pluck="name"), [group.name]
+			)
+			for permission in ("read", "print", "email", "export", "report", "share"):
+				with self.subTest(permission=permission):
+					self.assertFalse(frappe.has_permission("Customer Group", permission, doc=group))
+
+	def test_customer_with_sales_master_role_can_edit_and_print_customer_groups(self):
+		group = frappe.get_doc(
+			doctype="Customer Group", customer_group_name="_Test Staff Customer Group", is_group=0
+		).insert()
+		user = make_fenced_user("customer-group-staff@example.com", ["Customer", "Sales Master Manager"])
+		with self.set_user(user):
+			group.check_permission("read")
+			group.default_price_list = "Standard Selling"
+			group.save()
+			self.assertTrue(frappe.has_permission("Customer Group", "print", doc=group))
+		self.assertEqual(group.reload().default_price_list, "Standard Selling")
+
+	def test_customer_group_permission_upgrade_preserves_custom_access(self):
+		from erpnext.patches.v16_0.restrict_customer_group_permissions import execute
+
+		self.addCleanup(frappe.clear_cache, doctype="Customer Group")
+		setup_custom_perms("Customer Group")
+		legacy_rule = frappe.get_doc(
+			"Custom DocPerm", {"parent": "Customer Group", "role": "Customer", "permlevel": 0}
+		)
+		output_permissions = ("print", "email", "export", "report", "share")
+		legacy_rule.update(dict.fromkeys(output_permissions, 1)).save()
+		frappe.copy_doc(legacy_rule).update({"read": 1, "if_owner": 1}).insert()
+		frappe.copy_doc(legacy_rule).update({"parent": "Territory"}).insert()
+		filters = {"parent": ["in", ("Customer Group", "Territory")], "name": ["!=", legacy_rule.name]}
+		preserved_rules = frappe.get_all("Custom DocPerm", filters=filters, fields=["*"], order_by="name")
+
+		execute()
+		execute()
+
+		legacy_rule.reload()
+		self.assertEqual(legacy_rule.select, 1)
+		for permission in output_permissions:
+			with self.subTest(permission=permission):
+				self.assertEqual(legacy_rule.get(permission), 0)
+		self.assertEqual(
+			frappe.get_all("Custom DocPerm", filters=filters, fields=["*"], order_by="name"), preserved_rules
+		)
+
 	def test_group_name_cannot_match_customer_on_insert_or_rename(self):
 		customer = frappe.get_doc(
 			{
