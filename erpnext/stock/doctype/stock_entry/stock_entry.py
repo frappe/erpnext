@@ -1091,7 +1091,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			d.additional_cost = flt(d.additional_cost + base_amount, d.precision("additional_cost"))
 
 	def get_additional_cost_split(self) -> list[tuple]:
-		"""(row, expense account, amount, base amount) for each additional cost's share of each
+		"""(row, expense account, amount, base amount) for each expense account's share of each
 		incoming row. Shares are rounded so the rows and the accounts carry exactly the cost."""
 		incoming_items, basis, total_basis = self.get_additional_cost_allocation()
 		if not total_basis:
@@ -1101,13 +1101,22 @@ class StockEntry(StockController, SubcontractingInwardController):
 		weights = [flt(d.get(basis)) / total_basis for d in incoming_items]
 
 		split = []
-		for cost in self.get("additional_costs"):
-			amounts = split_by_weights(flt(cost.amount), weights, precision)
-			base_amounts = split_by_weights(flt(cost.base_amount), weights, precision)
-			for d, amount, base_amount in zip(incoming_items, amounts, base_amounts, strict=True):
-				split.append((d, cost.expense_account, amount, base_amount))
+		for account, (amount, base_amount) in self.get_additional_costs_by_account().items():
+			amounts = split_by_weights(amount, weights, precision)
+			base_amounts = split_by_weights(base_amount, weights, precision)
+			for d, row_amount, row_base_amount in zip(incoming_items, amounts, base_amounts, strict=True):
+				split.append((d, account, row_amount, row_base_amount))
 
 		return split
+
+	def get_additional_costs_by_account(self) -> dict:
+		"""(amount, base amount) of the additional costs per expense account."""
+		costs = {}
+		for cost in self.get("additional_costs"):
+			amount, base_amount = costs.get(cost.expense_account, (0.0, 0.0))
+			costs[cost.expense_account] = (amount + flt(cost.amount), base_amount + flt(cost.base_amount))
+
+		return costs
 
 	def get_additional_cost_allocation(self):
 		if self.purpose in ("Repack", "Manufacture"):
