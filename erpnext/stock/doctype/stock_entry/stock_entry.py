@@ -2132,12 +2132,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 def split_by_weights(amount: float, weights: list[float], precision: int) -> list[float]:
 	"""`amount` split by `weights`. Rounds the running total, so the shares add up to `amount`
 	and a row with no weight gets nothing."""
-	shares, allocated, cumulative_weight = [], 0.0, 0.0
+	shares, previous_total, cumulative_weight = [], 0.0, 0.0
 	for weight in weights:
 		cumulative_weight += weight
-		share = flt(amount * cumulative_weight - allocated, precision)
-		allocated += share
-		shares.append(share)
+		total = flt(amount * cumulative_weight, precision)
+		shares.append(flt(total - previous_total, precision))
+		previous_total = total
 
 	return shares
 
