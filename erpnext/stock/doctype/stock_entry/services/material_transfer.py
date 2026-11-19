@@ -254,8 +254,8 @@ class MaterialTransferStockEntry(BaseMaterialTransferStockEntry):
 		qty_at_supplier = order.get_raw_material_qty_at_supplier()
 		returned_qty = defaultdict(float)
 		for row in self.doc.items:
-			returned_qty[row.item_code] += self.get_stock_qty(row)
 			precision = row.precision("transfer_qty")
+			returned_qty[row.item_code] += flt(self.get_stock_qty(row), precision)
 			allowed_qty = flt(qty_at_supplier[row.item_code], precision)
 			if flt(returned_qty[row.item_code], precision) > allowed_qty:
 				frappe.throw(
