@@ -311,9 +311,7 @@ def get_overbilled_qty_of_delivery_rows(so_details: set) -> dict[str, float]:
 		.groupby(dn_item.dn_detail)
 		.run()
 	)
-	invoiced_qty = {}
-	for delivery_note in {row.parent for row in delivery_rows}:
-		invoiced_qty.update(get_invoiced_qty_against_dn(delivery_note=delivery_note))
+	invoiced_qty = get_invoiced_qty_against_dn(dn_details=[row.name for row in delivery_rows])
 
 	# Rows, returns and invoices can use different UOMs: share in stock qty.
 	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
@@ -480,7 +478,7 @@ def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = Tru
 
 
 def get_invoiced_qty_against_dn(
-	*, delivery_note: str | None = None, dn_detail: str | None = None
+	*, delivery_note: str | None = None, dn_details: list[str] | None = None
 ) -> dict[str, float]:
 	"""Return directly invoiced qty, excluding returns that do not update DN billing."""
 	si = frappe.qb.DocType("Sales Invoice").as_("si")
@@ -499,8 +497,8 @@ def get_invoiced_qty_against_dn(
 
 	if delivery_note:
 		query = query.where(si_item.delivery_note == delivery_note)
-	if dn_detail:
-		query = query.where(si_item.dn_detail == dn_detail)
+	if dn_details is not None:
+		query = query.where(si_item.dn_detail.isin(dn_details))
 
 	return {row.dn_detail: flt(row.qty) for row in query.run(as_dict=True)}
 
@@ -552,6 +550,10 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 		.run(as_dict=True)
 	)
 
+	billed_qty_against_dns = {}
+	if dn_details_without_si := [dnd.name for dnd in dn_details if not dnd.si_detail]:
+		billed_qty_against_dns = get_invoiced_qty_against_dn(dn_details=dn_details_without_si)
+
 	qty_map = {}
 	for dnd in dn_details:
 		# Cap FIFO capacity at net delivered qty so returns free qty for later DNs
@@ -563,7 +565,7 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 			billed_qty_against_so -= billed_qty_against_dn
 		else:
 			# Get billed qty directly against Delivery Note
-			billed_qty_against_dn = get_invoiced_qty_against_dn(dn_detail=dnd.name).get(dnd.name, 0)
+			billed_qty_against_dn = billed_qty_against_dns.get(dnd.name, 0)
 
 		# Distribute qty billed directly against SO between DNs based on FIFO
 		if billed_qty_against_so and billed_qty_against_dn < net_qty:
