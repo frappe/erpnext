@@ -117,6 +117,9 @@ class ProjectCostQueries:
 			| (invoice_item.delivered_by_supplier == 1)
 		)
 		not_subcontracted = purchase_order.is_subcontracted.isnull() | (purchase_order.is_subcontracted == 0)
+		project_from_header = (invoice.project == self.project) & (
+			invoice_item.project.isnull() | (invoice_item.project == "")
+		)
 		query = (
 			qb.from_(invoice_item)
 			.join(invoice)
@@ -129,7 +132,8 @@ class ProjectCostQueries:
 			.on(item.name == invoice_item.item_code)
 			.left_join(purchase_order)
 			.on(purchase_order.name == invoice_item.purchase_order)
-			.where((invoice_item.project == self.project) & (invoice_item.docstatus == 1))
+			.where((invoice_item.project == self.project) | project_from_header)
+			.where(invoice_item.docstatus == 1)
 			.where(never_stocked & not_subcontracted)
 		)
 		query = query.where(Coalesce(account.account_type, "") != VALUATION_ACCOUNT_TYPE).where(

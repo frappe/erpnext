@@ -1079,6 +1079,42 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.cancel()
 		self.assertEqual(frappe.db.get_value("Project", project.name, "total_purchase_cost"), 0)
 
+	def test_purchase_cost_falls_back_to_the_invoice_project(self):
+		header_project = make_project(
+			{"project_name": f"_Test Invoice Header Project {frappe.generate_hash(length=6)}"}
+		)
+		row_project = make_project(
+			{"project_name": f"_Test Invoice Row Project {frappe.generate_hash(length=6)}"}
+		)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item", qty=1, rate=600, do_not_save=True, do_not_submit=True
+		)
+		invoice.project = header_project.name
+		for rate, project in ((400, ""), (200, row_project.name)):
+			row = invoice.append("items", invoice.items[0].as_dict(no_default_fields=True))
+			row.rate = rate
+			row.project = project
+		invoice.submit()
+
+		debits = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": invoice.doctype, "voucher_no": invoice.name, "debit": (">", 0)},
+			fields=["project", "debit"],
+		)
+		self.assertEqual(
+			{entry.project: entry.debit for entry in debits},
+			{header_project.name: 1000, row_project.name: 200},
+		)
+		self.assertEqual(header_project.reload().total_purchase_cost, 1000)
+		self.assertEqual(row_project.reload().total_purchase_cost, 200)
+
+		header_project.save()
+		self.assertEqual(header_project.reload().total_purchase_cost, 1000)
+
+		invoice.reload().cancel()
+		self.assertEqual(header_project.reload().total_purchase_cost, 0)
+		self.assertEqual(row_project.reload().total_purchase_cost, 0)
+
 	def test_return_purchase_invoice_with_perpetual_inventory(self):
 		pi = make_purchase_invoice(
 			company="_Test Company with perpetual inventory",
