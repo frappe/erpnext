@@ -15,7 +15,8 @@ from .stock_entry_base import BaseStockEntry
 
 class SendToSubcontractorStockEntry(BaseStockEntry):
 	def validate(self):
-		self.validate_subcontract_order()
+		if self.doc.get(self.doc.subcontract_data.order_field):
+			self.validate_subcontract_order()
 
 	def validate_subcontract_order(self):
 		"""Throw exception if more raw material is transferred against Subcontract Order than in
