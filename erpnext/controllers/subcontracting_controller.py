@@ -1770,15 +1770,14 @@ class SubcontractingController(StockController):
 		if not total_weight:
 			return
 
-		# rounded shares, the last row takes the remainder, so the rows carry exactly the cost
+		# round the running total, so no share goes negative and the shares add up to the cost
 		precision = self.precision("total_additional_costs")
-		allocated = 0.0
-		for idx, (item, weight) in enumerate(zip(fg_rows, weights, strict=True)):
-			if idx == len(fg_rows) - 1:
-				share = flt(self.total_additional_costs - allocated, precision)
-			else:
-				share = flt(self.total_additional_costs * weight / total_weight, precision)
-			allocated += share
+		allocated = cumulative_weight = 0.0
+		for item, weight in zip(fg_rows, weights, strict=True):
+			cumulative_weight += weight
+			cumulative_share = flt(self.total_additional_costs * cumulative_weight / total_weight, precision)
+			share = flt(cumulative_share - allocated, precision)
+			allocated = cumulative_share
 
 			if qty := self.get_qty_for_costing(item):
 				item.additional_cost_per_qty = share / qty
