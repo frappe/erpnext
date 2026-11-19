@@ -4,22 +4,17 @@
 frappe.ui.form.on("Video", {
 	refresh: function (frm) {
 		frm.events.toggle_youtube_statistics_section(frm);
-<<<<<<< HEAD
-		frm.add_custom_button(__("Watch Video"), () => frappe.help.show_video(frm.doc.url, frm.doc.title));
-=======
 		frm.add_custom_button(__("Watch Video"), () => frm.events.watch_video(frm));
 	},
 
 	watch_video: (frm) => {
 		if (frm.doc.provider !== "YouTube") {
 			open_external_video(frm.doc.url);
-		} else if (frm.doc.youtube_video_id || frappe.utils.is_url(frm.doc.url || "")) {
-			// an unsaved Video has no id yet, so play its URL
-			frappe.help.show_video(frm.doc.youtube_video_id || frm.doc.url, frm.doc.title);
+		} else if (frappe.utils.is_url(frm.doc.url || "")) {
+			frappe.help.show_video(frm.doc.url, frm.doc.title);
 		} else {
 			frappe.throw(__("Invalid video URL"));
 		}
->>>>>>> 0f66a75 (fix(video): allow only web URLs for non-YouTube videos)
 	},
 
 	toggle_youtube_statistics_section: (frm) => {
