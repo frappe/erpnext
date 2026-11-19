@@ -1625,7 +1625,8 @@ class SubcontractingController(StockController):
 			consumed_qty = 0
 			for item_code, sent_qty in items_sent.get(row.name, {}).items():
 				key = (item_code, row.main_item_code, row.parent)
-				qty = min(itemwise_consumed_qty.get(key, 0), sent_qty)
+				# a return of components books an item's return on one of its rows, so a row can net below 0
+				qty = min(itemwise_consumed_qty.get(key, 0), max(sent_qty, 0))
 				consumed_qty += qty
 				itemwise_consumed_qty[key] -= qty
 
