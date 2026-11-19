@@ -746,4 +746,7 @@ def update_subcontracting_order_status(sco: str | Document, status: str | None =
 	if sco.docstatus != 1:
 		frappe.throw(_("Only a submitted Subcontracting Order can be closed or re-opened."))
 
+	if not status and sco.status == "Closed":
+		sco.validate_purchase_order_rows_are_open()
+
 	set_subcontracting_order_status(sco, status)
