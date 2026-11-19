@@ -237,16 +237,16 @@ class QueuePool:
 		return value_before - self.value
 
 	def get_layer_to_consume(self, preferred_rate: float | None) -> int:
-		indexes = list(range(len(self.layers)))
+		indexes = range(len(self.layers))
 		if self.last_in_first_out:
-			indexes.reverse()
+			indexes = reversed(indexes)
 
 		if preferred_rate is not None:
 			for index in indexes:
 				if self.layers[index][1] == preferred_rate:
 					return index
 
-		return indexes[0]
+		return -1 if self.last_in_first_out else 0
 
 	def set_balance(self, qty: float, rate: float) -> None:
 		self.layers = [[qty, rate]]
