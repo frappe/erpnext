@@ -4,6 +4,7 @@
 import re
 
 import frappe
+import regex
 from frappe import _
 from frappe.model.document import Document
 
@@ -13,6 +14,7 @@ PLAIN_NUMBER_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
 # Tokens accepted by safe-expr-eval on the frontend (must stay in sync).
 ALLOWED_FORMULA_TOKEN = re.compile(r"\s+|transaction_amount|\d+(?:\.\d+)?|[+\-*/%^()]")
 PYTHON_ONLY_OPERATORS = ("**", "//")
+DESCRIPTION_REGEX_TIMEOUT = 0.1  # seconds
 
 
 def _is_expr_eval_formula(formula: str) -> bool:
@@ -138,8 +140,8 @@ class BankTransactionRule(Document):
 		for rule in self.description_rules:
 			if rule.check == "Regex":
 				try:
-					re.compile(rule.value)
-				except re.error:
+					regex.compile(rule.value)
+				except regex.error:
 					frappe.throw(_("Invalid regex pattern."))
 
 		if self.bank_entry_type == "Single Account":
@@ -219,10 +221,29 @@ class BankTransactionRule(Document):
 					return True
 
 			if rule_desc_rule.check == "Regex":
-				if re.search(value, desc):
+				if self.matches_description_regex(rule_desc_rule.value or "", transaction):
 					return True
 
 		return False
+
+	def matches_description_regex(self, pattern: str, transaction: BankTransaction) -> bool:
+		try:
+			return bool(
+				regex.search(
+					pattern,
+					transaction.description or "",
+					flags=regex.IGNORECASE,
+					timeout=DESCRIPTION_REGEX_TIMEOUT,
+				)
+			)
+		except TimeoutError:
+			frappe.log_error(
+				title="Bank Transaction Rule regex timed out",
+				message=f"Rule {self.name}: pattern {pattern!r} timed out on Bank Transaction {transaction.name}, treated as no match.",
+				reference_doctype=self.doctype,
+				reference_name=self.name,
+			)
+			return False
 
 
 def scheduler_run_rule_evaluation():
