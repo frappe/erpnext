@@ -4573,26 +4573,32 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
 	)
 	def test_partial_manufactures_round_whole_number_raw_material_once(self):
-		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
-		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
-		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
-		bom = make_bom(item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=1)
-		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=4, basic_rate=100)
-		work_order = make_wo_order_test_record(
-			production_item=fg_item,
-			bom_no=bom.name,
-			qty=4,
-			skip_transfer=1,
-			source_warehouse="Stores - _TC",
-		)
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=1)
 
-		consumed_qty = []
+		consumed_qty, fg_rates = [], []
 		for _ in range(4):
-			manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
-			manufacture.submit()
+			manufacture = submit_manufacture_of_one(work_order)
 			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+			fg_rates.append(next(row.valuation_rate for row in manufacture.items if row.is_finished_item))
 
 		self.assertEqual(consumed_qty, [1, 0, 0, 0])
+		self.assertEqual(fg_rates, [100, 0, 0, 0])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_take_whole_number_raw_material_not_consumed_yet(self):
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=2)
+		consumed_qty = []
+		for _ in range(4):
+			manufacture = submit_manufacture_of_one(work_order)
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+		self.assertEqual(consumed_qty, [1, 0, 1, 0])
+
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=1)
+		submit_manufacture_of_one(work_order).cancel()
+		manufacture = submit_manufacture_of_one(work_order)
+		self.assertEqual(sum(row.qty for row in manufacture.items if row.item_code == rm_item), 1)
 
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
@@ -9524,6 +9530,25 @@ def allow_alternative_item(work_order, item_code, alternative_item_code):
 				"alternative_item_code": alternative_item_code,
 			}
 		).insert()
+
+
+def make_whole_number_partial_work_order(rm_qty):
+	"""Work Order for 4 Nos of a finished good that needs rm_qty Nos of a whole-number raw material."""
+	frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+	fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+	bom = make_bom(item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=rm_qty)
+	test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=4, basic_rate=100)
+	work_order = make_wo_order_test_record(
+		production_item=fg_item, bom_no=bom.name, qty=4, skip_transfer=1, source_warehouse="Stores - _TC"
+	)
+	return work_order, rm_item
+
+
+def submit_manufacture_of_one(work_order):
+	manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+	manufacture.submit()
+	return manufacture
 
 
 def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
