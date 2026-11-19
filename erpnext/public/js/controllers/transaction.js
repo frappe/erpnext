@@ -904,23 +904,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								async () => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
-										const fetch_valuation_rate_for_internal_transactions =
-											await frappe.db.get_single_value(
-												"Accounts Settings",
-												"fetch_valuation_rate_for_internal_transaction"
-											);
-										if (fetch_valuation_rate_for_internal_transactions) {
-											me.get_incoming_rate(
-												item,
-												me.frm.doc.posting_date,
-												me.frm.doc.posting_time,
-												me.frm.doc.doctype,
-												me.frm.doc.company
-											);
-											return;
-										}
-									}
+									if (await me.set_internal_valuation_rate(item)) return;
 									me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 								},
 								() => {
@@ -1059,6 +1043,25 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.calculate_taxes_and_totals();
 			this.frm.refresh_fields();
 		}
+	}
+
+	async set_internal_valuation_rate(item) {
+		if (!this.frm.doc.is_internal_customer && !this.frm.doc.is_internal_supplier) return false;
+
+		const fetch_valuation_rate = await frappe.db.get_single_value(
+			"Accounts Settings",
+			"fetch_valuation_rate_for_internal_transaction"
+		);
+		if (fetch_valuation_rate) {
+			this.get_incoming_rate(
+				item,
+				this.frm.doc.posting_date,
+				this.frm.doc.posting_time,
+				this.frm.doc.doctype,
+				this.frm.doc.company
+			);
+		}
+		return fetch_valuation_rate;
 	}
 
 	get_incoming_rate(item, posting_date, posting_time, voucher_type, company) {
@@ -1854,6 +1857,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => this.apply_price_list(item, true), //reapply price list before applying pricing rule
 				() => this.calculate_stock_uom_rate(doc, cdt, cdn),
 				() => this.apply_pricing_rule(item, true),
+				// the outgoing rate of an internal delivery depends on the qty
+				() => this.frm.doc.is_internal_customer && this.set_internal_valuation_rate(item),
 			]);
 		} else {
 			this.conversion_factor(doc, cdt, cdn, true);
