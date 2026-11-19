@@ -1,7 +1,10 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
+import regex
 from frappe import qb
 from frappe.exceptions import ValidationError
 
@@ -126,6 +129,24 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 		doc = self._rule("rx", [{"check": "Regex", "value": r"inv-\d+"}])
 		self.assertTrue(doc.evaluate_rule(self._make_transaction(deposit=1, description="INV-12345 payment")))
 		self.assertFalse(doc.evaluate_rule(self._make_transaction(deposit=1, description="invoice abc")))
+
+		doc = self._rule("rx_class", [{"check": "Regex", "value": r"ref \D+"}])
+		self.assertTrue(doc.evaluate_rule(self._make_transaction(deposit=1, description="REF ACME")))
+		self.assertFalse(doc.evaluate_rule(self._make_transaction(deposit=1, description="REF 12345")))
+
+	def test_evaluate_rule_description_regex_timeout_is_no_match(self):
+		real_search = regex.search
+
+		def time_out_on_bang(pattern, text, **kwargs):
+			if text.endswith("!"):
+				raise TimeoutError
+			return real_search(pattern, text, **kwargs)
+
+		doc = self._rule("rx_slow", [{"check": "Regex", "value": r"(a|aa)+$"}])
+		with patch.object(regex, "search", side_effect=time_out_on_bang) as search:
+			self.assertFalse(doc.evaluate_rule(self._make_transaction(deposit=1, description="aaaa!")))
+			self.assertTrue(doc.evaluate_rule(self._make_transaction(deposit=1, description="aaaa")))
+			self.assertEqual(search.call_count, 2)
 
 	def test_evaluate_rule_composite_fails_on_description(self):
 		doc = self._rule(
