@@ -2101,8 +2101,7 @@ class StockEntry(StockController):
 
 	def get_additional_cost_split(self) -> list[tuple]:
 		"""(row, expense account, amount, base amount) for each additional cost's share of each
-		incoming row. Shares are rounded and the last row takes the remainder, so the rows and the
-		accounts carry exactly the cost."""
+		incoming row. Shares are rounded so the rows and the accounts carry exactly the cost."""
 		incoming_items, basis, total_basis = self.get_additional_cost_allocation()
 		if not total_basis:
 			return []
@@ -4374,9 +4373,16 @@ class StockEntry(StockController):
 
 
 def split_by_weights(amount: float, weights: list[float], precision: int) -> list[float]:
-	"""`amount` split by `weights` and rounded; the last share takes the remainder."""
-	shares = [flt(amount * weight, precision) for weight in weights[:-1]]
-	return [*shares, flt(amount - sum(shares), precision)]
+	"""`amount` split by `weights`. Rounds the running total, so the shares add up to `amount`
+	and a row with no weight gets nothing."""
+	shares, allocated, cumulative_weight = [], 0.0, 0.0
+	for weight in weights:
+		cumulative_weight += weight
+		share = flt(amount * cumulative_weight - allocated, precision)
+		allocated += share
+		shares.append(share)
+
+	return shares
 
 
 @frappe.whitelist()
