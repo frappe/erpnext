@@ -620,8 +620,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.append_raw_material_with_alternatives(item_args, alternative_items.get(row.item_code))
 
 	def get_wo_raw_material_qty(self, row):
-		"""For a whole number UOM, round up the running total of the order's Manufacture entries,
-		not each entry, so partial entries do not consume a whole unit each."""
+		"""For a whole number UOM, round up the running total of the order's Manufacture entries
+		and take what earlier entries did not consume, so partial entries do not consume a whole unit each."""
 		qty_per_unit = row.required_qty / self.wo_doc.qty
 		fg_completed_qty = flt(self.doc.fg_completed_qty)
 		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
@@ -631,7 +631,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		done_qty = flt(self.wo_doc.produced_qty) + flt(self.wo_doc.process_loss_qty)
 		total_qty = ceil(flt(qty_per_unit * (done_qty + fg_completed_qty), precision))
-		return max(total_qty - ceil(flt(qty_per_unit * done_qty, precision)), 0)
+		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
+		return max(flt(total_qty - consumed_qty, precision), 0)
 
 	def _resolve_rm_warehouse(self, row):
 		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
