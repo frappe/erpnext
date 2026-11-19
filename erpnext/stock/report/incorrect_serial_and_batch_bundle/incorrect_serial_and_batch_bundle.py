@@ -170,6 +170,7 @@ def is_pending_pos_invoice_bundle(doc):
 
 
 def set_bundle_docstatus(doc, docstatus):
-	doc.db_set({"is_cancelled": cint(docstatus == 2), "docstatus": docstatus})
+	values = {"is_cancelled": cint(docstatus == 2), "docstatus": docstatus}
+	doc.db_set(values)
 	for entry in doc.entries:
-		entry.db_set("docstatus", docstatus)
+		entry.db_set(values)

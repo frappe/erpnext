@@ -32,6 +32,7 @@ from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
+	set_bundle_header_values,
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -442,11 +443,7 @@ class PickList(TransactionBase):
 				and frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "docstatus")
 				== 1
 			):
-				frappe.db.set_value(
-					"Serial and Batch Bundle",
-					row.serial_and_batch_bundle,
-					{"is_cancelled": 1, "voucher_no": ""},
-				)
+				set_bundle_header_values(row.serial_and_batch_bundle, {"is_cancelled": 1, "voucher_no": ""})
 
 				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
 				row.db_set("serial_and_batch_bundle", None)

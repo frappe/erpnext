@@ -39,6 +39,43 @@ SERIAL_NO_QUERY_BATCH_SIZE = 500
 # their bundles only reserve stock; a POS Invoice's bundle moves to its Sales Invoice on consolidation
 RESERVING_VOUCHER_TYPES = ("Pick List", "POS Invoice")
 
+# bundle fields that each Serial and Batch Entry also stores, so ledger queries read one table
+ENTRY_HEADER_FIELDS = (
+	"posting_datetime",
+	"voucher_type",
+	"voucher_no",
+	"voucher_detail_no",
+	"type_of_transaction",
+	"is_cancelled",
+	"item_code",
+)
+
+
+def set_bundle_header_values(bundles, values):
+	"""Update bundles without saving them, and copy the values their entries also store."""
+	if isinstance(bundles, str):
+		bundles = [bundles]
+
+	if not bundles:
+		return
+
+	frappe.db.set_value("Serial and Batch Bundle", {"name": ("in", bundles)}, values)
+	set_entry_header_values(bundles, values)
+
+
+def set_entry_header_values(bundles, values):
+	"""Copy the bundle values in `values` that the entries of `bundles` also store."""
+	if isinstance(bundles, str):
+		bundles = [bundles]
+
+	entry_values = {field: values[field] for field in (*ENTRY_HEADER_FIELDS, "creation") if field in values}
+	if not bundles or not entry_values:
+		return
+
+	frappe.db.set_value(
+		"Serial and Batch Entry", {"parent": ("in", bundles)}, entry_values, update_modified=False
+	)
+
 
 def get_serial_no_status(sle):
 	warehouse = sle.warehouse if sle.actual_qty > 0 else None
@@ -485,11 +522,12 @@ class SerialBatchBundle:
 
 		frappe.db.set_value(self.child_doctype, self.sle.voucher_detail_no, update_values)
 
-		frappe.db.set_value(
+		bundles = frappe.get_all(
 			"Serial and Batch Bundle",
-			{"voucher_no": self.sle.voucher_no, "voucher_type": self.sle.voucher_type},
-			{"is_cancelled": 1},
+			filters={"voucher_no": self.sle.voucher_no, "voucher_type": self.sle.voucher_type},
+			pluck="name",
 		)
+		set_bundle_header_values(bundles, {"is_cancelled": 1})
 
 		if self.sle.serial_and_batch_bundle:
 			frappe.get_cached_doc(

@@ -35,9 +35,11 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 )
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem
 from erpnext.stock.serial_batch_bundle import (
+	ENTRY_HEADER_FIELDS,
 	BatchNoValuation,
 	SerialNoValuation,
 	get_batches_from_bundle,
+	set_entry_header_values,
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -120,6 +122,7 @@ class SerialandBatchBundle(Document):
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
 		self.validate_voucher_no()
+		self.set_child_details()
 
 		if self.type_of_transaction == "Maintenance":
 			return
@@ -147,6 +150,12 @@ class SerialandBatchBundle(Document):
 			self.set_incoming_rate()
 
 		self.calculate_qty_and_amount()
+
+	def set_child_details(self):
+		for row in self.entries:
+			for field in ENTRY_HEADER_FIELDS:
+				if row.get(field) != self.get(field):
+					row.set(field, self.get(field))
 
 	def validate_serial_no_status(self):
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
@@ -1001,11 +1010,9 @@ class SerialandBatchBundle(Document):
 	def set_serial_and_batch_values(self, parent, row, qty_field=None):
 		self.validate_not_linked_to_another_draft(parent, row)
 
-		values_to_set = {}
+		values_to_set = {"is_cancelled": 0}
 		if not self.voucher_no or self.voucher_no != row.parent:
 			values_to_set["voucher_no"] = row.parent
-
-		self.db_set("is_cancelled", 0)
 
 		if self.voucher_type != parent.doctype:
 			values_to_set["voucher_type"] = parent.doctype
@@ -1034,8 +1041,8 @@ class SerialandBatchBundle(Document):
 			if row.get(return_ref_field):
 				values_to_set["returned_against"] = row.get(return_ref_field)
 
-		if values_to_set:
-			self.db_set(values_to_set)
+		self.db_set(values_to_set)
+		set_entry_header_values(self.name, values_to_set)
 
 		self.calculate_total_qty(save=True)
 
