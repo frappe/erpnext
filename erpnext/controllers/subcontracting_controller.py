@@ -1856,7 +1856,11 @@ def make_rm_stock_entry(
 <<<<<<< HEAD
 =======
 				pending_qty = get_pending_qty_by_material(rm_items)
+<<<<<<< HEAD
 >>>>>>> af04ced (fix(subcontracting): map only the raw material qty still pending across the order to Material to Supplier)
+=======
+				precision = target_doc.precision("qty", "items")
+>>>>>>> b905981 (fix(subcontracting): round the mapped Material to Supplier qty to its precision)
 				for fg_item_code in fg_item_code_list:
 					for rm_item in rm_items:
 						if (
@@ -1871,7 +1875,7 @@ def make_rm_stock_entry(
 								row_pending_qty = flt(rm_item.get("required_qty")) - flt(
 									rm_item.get("total_supplied_qty")
 								)
-								qty = max(min(row_pending_qty, pending_qty[rm_item_code]), 0)
+								qty = max(flt(min(row_pending_qty, pending_qty[rm_item_code]), precision), 0)
 								pending_qty[rm_item_code] -= qty
 
 							if qty <= 0:
