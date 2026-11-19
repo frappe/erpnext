@@ -1097,7 +1097,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not total_basis:
 			return []
 
-		precision = self.precision("additional_cost", "items")
+		precision = incoming_items[0].precision("additional_cost")
 		weights = [flt(d.get(basis)) / total_basis for d in incoming_items]
 
 		split = []
