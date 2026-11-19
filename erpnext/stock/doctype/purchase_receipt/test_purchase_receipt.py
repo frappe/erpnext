@@ -7656,7 +7656,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIRQX-.####"},
 		)
 
-		pr, *_ = self.make_transfer_receipt(item, 1, 2)
+		pr, *_ = self.make_transfer_receipt("Rejected Qty Cleared", item, 1, 2)
 		pr.save()
 		package = pr.items[0].rejected_serial_and_batch_bundle
 		self.assertTrue(package)
@@ -7674,7 +7674,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIAQX-.####"},
 		)
 
-		pr, *_ = self.make_transfer_receipt(item, 1, 2)
+		pr, *_ = self.make_transfer_receipt("Accepted Qty Cleared", item, 1, 2)
 		pr.save()
 		package = pr.items[0].serial_and_batch_bundle
 		self.assertTrue(package)
