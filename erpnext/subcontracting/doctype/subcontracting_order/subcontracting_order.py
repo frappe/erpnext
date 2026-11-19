@@ -135,6 +135,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_service_items()
 		self.validate_header_with_purchase_order()
 		self.validate_rows_with_purchase_order()
+		self.validate_purchase_order_rows_are_open()
 		self.validate_supplied_items()
 		self.set_missing_values()
 		self.validate_with_previous_doc()
@@ -167,7 +168,7 @@ class SubcontractingOrder(SubcontractingController):
 			for d in frappe.get_all(
 				"Purchase Order Item",
 				filters={"parent": self.purchase_order},
-				fields=["name", "item_code", "rate", "qty", "fg_item", "fg_item_qty"],
+				fields=["name", "item_code", "rate", "qty", "fg_item", "fg_item_qty", "closed"],
 			)
 		}
 
@@ -259,6 +260,21 @@ class SubcontractingOrder(SubcontractingController):
 				frappe.throw(
 					_("Row {0}: Service Item {1} and its rate must match Purchase Order {2}.").format(
 						service_item.idx, service_item.item_code, self.purchase_order
+					)
+				)
+
+	def validate_purchase_order_rows_are_open(self):
+		"""A row still to be received cannot be on a closed Purchase Order row."""
+		po_items = self.get_purchase_order_items()
+		for item in self.items:
+			po_item = po_items[item.purchase_order_item]
+			if po_item.closed and flt(item.received_qty) < flt(item.qty):
+				frappe.throw(
+					_("Row #{0}: Item {1} is closed in {2} {3} and cannot be processed further").format(
+						item.idx,
+						frappe.bold(po_item.item_code),
+						_("Purchase Order"),
+						frappe.bold(self.purchase_order),
 					)
 				)
 
