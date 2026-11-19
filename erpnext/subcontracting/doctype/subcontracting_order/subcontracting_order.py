@@ -726,7 +726,8 @@ def get_additional_cost_share(order: Document, items: dict) -> float:
 	in proportion to the qty it takes of what is still to be received."""
 	total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in order.items)
 	if not total_cost:
-		return 0.0
+		# costs that net to zero leave valuation unchanged, so keep their rows in full
+		return 1.0
 
 	pending_cost = received_cost = 0.0
 	for row in order.items:
