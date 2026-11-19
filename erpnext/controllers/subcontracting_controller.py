@@ -78,7 +78,8 @@ class SubcontractingController(StockController):
 				else "received_items"
 			)
 			self.validate_company_of_warehouses()
-			self.validate_additional_cost_accounts()
+			if self.doctype != "Subcontracting Inward Order":
+				self.validate_additional_cost_accounts()
 			self.set_valuation_rate_for_rm()
 		else:
 			super().validate()
