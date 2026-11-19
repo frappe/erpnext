@@ -1291,7 +1291,7 @@ erpnext.work_order = {
 		const allowance =
 			qty == null ? (flt(frm.doc.qty) * this.get_allowance_percentage(frm, purpose)) / 100 : 0;
 		const allowed_qty = flt(max + allowance, precision("qty"));
-		// only the overproduction allowance may be left
+		// only the allowance may be left
 		const default_qty = max || allowed_qty;
 		const pending_process_loss =
 			purpose === "Manufacture" ? this.get_pending_operation_process_loss(frm) : 0;
