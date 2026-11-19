@@ -449,9 +449,10 @@ class JobCard(Document):
 			)
 =======
 	def link_secondary_items_to_bom(self):
-		"""Link each secondary item to the BOM row of its item and type, so it keeps that row's valuation."""
+		"""Link a secondary item added by hand to the BOM row of its item and type, so it keeps that row's valuation."""
 		bom_no = self.semi_fg_bom or self.bom_no
-		if not bom_no or not self.secondary_items:
+		unlinked_rows = [row for row in self.secondary_items if not row.bom_secondary_item]
+		if not bom_no or not unlinked_rows:
 			return
 
 		bom_rows = {
@@ -462,7 +463,7 @@ class JobCard(Document):
 				fields=["name", "item_code", "secondary_item_type"],
 			)
 		}
-		for row in self.secondary_items:
+		for row in unlinked_rows:
 			row.bom_secondary_item = bom_rows.get((row.item_code, row.secondary_item_type))
 
 	def append_secondary_item(self, item_code, values):
