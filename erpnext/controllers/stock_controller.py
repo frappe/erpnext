@@ -176,8 +176,37 @@ class StockController(AccountsController):
 				.limit(1)
 			).run(as_dict=True)
 
+<<<<<<< HEAD
 			if data:
 				data = data[0]
+=======
+	@property
+	def first_sle_creation(self):
+		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
+			"creation",
+			order_by="creation asc",
+		)
+
+	def get_inventory_account_dict(
+		self, row, inventory_account_map, warehouse_field=None, *, raise_error=True
+	):
+		account_dict = frappe._dict()
+
+		if isinstance(row, dict):
+			row = frappe._dict(row)
+
+		if self.use_item_inventory_account:
+			item_code = (
+				row.rm_item_code if hasattr(row, "rm_item_code") and row.rm_item_code else row.item_code
+			)
+
+			account_dict = inventory_account_map.get(item_code)
+
+			if not account_dict:
+>>>>>>> 6c8fa3a (refactor(stock): move first_sle_creation to StockController)
 				frappe.throw(
 					_("Serial and Batch Bundle {0} is already used in {1} {2}.").format(
 						frappe.bold(data.serial_and_batch_bundle), data.voucher_type, data.voucher_no
