@@ -4,6 +4,7 @@ import time
 from unittest.mock import patch
 
 import frappe
+from frappe.query_builder import Table
 from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import nowdate, nowtime
 
@@ -181,7 +182,13 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		locked = threading.Event()
 		thread = threading.Thread(
 			target=hold_bin_lock,
-			args=(frappe.local.site, frappe.local.sites_path, get_or_make_bin(*item_warehouse), locked),
+			args=(
+				frappe.local.site,
+				frappe.local.sites_path,
+				get_or_make_bin(*item_warehouse),
+				frappe.db._conn.thread_id(),
+				locked,
+			),
 		)
 		thread.start()
 		self.assertTrue(locked.wait(30))
@@ -597,14 +604,27 @@ class TestStockBalancePermissions(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(saved.items[0].t_warehouse, WAREHOUSE)
 
 
-def hold_bin_lock(site, sites_path, bin_name, locked):
+def hold_bin_lock(site, sites_path, bin_name, waiter_id, locked):
 	frappe.init(site, sites_path=sites_path)
 	frappe.connect()
 	try:
 		bin = frappe.qb.DocType("Bin")
 		frappe.qb.from_(bin).select(bin.name).where(bin.name == bin_name).for_update().run()
 		locked.set()
-		time.sleep(3)
+		wait_until_connection_waits_for_lock(waiter_id)
+		time.sleep(2)
 	finally:
 		frappe.db.rollback()
 		frappe.destroy()
+
+
+def wait_until_connection_waits_for_lock(connection_id, timeout=30):
+	process = Table("PROCESSLIST", schema="information_schema")
+	query = (
+		frappe.qb.from_(process)
+		.select(process.ID)
+		.where((process.ID == connection_id) & process.INFO.like("%for update%"))
+	)
+	deadline = time.monotonic() + timeout
+	while not query.run() and time.monotonic() < deadline:
+		time.sleep(0.1)
