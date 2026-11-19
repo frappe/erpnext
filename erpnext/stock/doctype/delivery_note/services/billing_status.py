@@ -214,9 +214,9 @@ def get_earlier_credits(original_rows: list, return_doc) -> list:
 def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 	"""Qty of each return row against `delivery_note` that its invoices already deducted.
 
-	An invoice made from a Delivery Note leaves out the returned qty. Once the original row is
-	invoiced up to its net qty, these returns are settled and need no credit note. Earlier
-	returns are settled first.
+	An invoice made from a Delivery Note or its Sales Order leaves out the returned qty. Once the
+	original row is invoiced up to its net qty, these returns are settled and need no credit note.
+	Earlier returns are settled first.
 	"""
 	dn = frappe.qb.DocType("Delivery Note")
 	dn_item = frappe.qb.DocType("Delivery Note Item")
@@ -245,10 +245,9 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 			fields=["name", "qty", "conversion_factor", "so_detail", "si_detail"],
 		)
 	}
-	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
-	overbilled_qty = get_overbilled_qty_of_delivery_rows(
-		{row.so_detail for row in original_rows.values() if row.so_detail}
-	)
+	so_details = {row.so_detail for row in original_rows.values() if row.so_detail}
+	invoiced_qty = get_invoiced_qty_of_rows(delivery_note, so_details)
+	overbilled_qty = get_overbilled_qty_of_delivery_rows(so_details)
 	# A return row can use another UOM than its original row: compare qty in the original's UOM.
 	for row in return_rows:
 		original_factor = flt(original_rows[row.dn_detail].conversion_factor) or 1
@@ -504,6 +503,16 @@ def get_invoiced_qty_against_dn(
 		query = query.where(si_item.dn_detail == dn_detail)
 
 	return {row.dn_detail: flt(row.qty) for row in query.run(as_dict=True)}
+
+
+def get_invoiced_qty_of_rows(delivery_note: str, so_details: set) -> dict[str, float]:
+	"""Invoiced qty per Delivery Note row, directly or through its Sales Order row."""
+	qty_map = get_invoiced_qty_against_dn(delivery_note=delivery_note)
+	# Use the same FIFO distribution as update_billed_amount_based_on_so.
+	for so_detail in so_details:
+		qty_map.update(get_invoiced_qty_based_on_so(so_detail))
+
+	return qty_map
 
 
 def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
