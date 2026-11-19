@@ -817,7 +817,6 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.total_consumed_material_cost, 1000)
 
 	def test_landed_cost_after_delivery_reaches_consumed_cost(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
@@ -852,21 +851,86 @@ class TestProject(ERPNextTestSuite):
 		delivery_note.project = project.name
 		delivery_note.insert()
 		delivery_note.submit()
-		make_purchase_invoice(
-			company=company,
-			warehouse="Stores - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			cost_center="Main - TCP1",
-			item_code="_Test Non Stock Item",
-			qty=1,
-			rate=50,
-			project=project.name,
-		)
 		create_landed_cost_voucher("Purchase Receipt", receipt.name, company, charges=50)
 
 		project.reload()
 		self.assertEqual(project.total_purchase_cost, 0)
 		self.assertEqual(project.total_consumed_material_cost, 1050)
+		self.assertEqual(project.gross_margin, -1050)
+
+	def test_landed_cost_claim_reduces_purchase_cost_on_the_vendor_invoice_project(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.projects.doctype.project.costing.drivers import CostDrivers
+		from erpnext.projects.doctype.project.costing.queries import ProjectCostQueries
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Vendor Claim {frappe.generate_hash(length=6)}"})
+		other_project = make_project(
+			{"project_name": f"_Test Other Vendor Claim Project {frappe.generate_hash(length=6)}"}
+		)
+		item = make_item(properties={"is_stock_item": 1}).name
+		receipt = make_purchase_receipt(item_code=item, qty=10, rate=100)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=80,
+			project=project.name,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		invoice.apply_discount_on = "Net Total"
+		invoice.discount_amount = 20
+		other_row = invoice.append("items", invoice.items[0].as_dict(no_default_fields=True))
+		other_row.project = other_project.name
+		other_row.rate = 20
+		invoice.submit()
+		self.assertEqual(other_project.reload().total_purchase_cost, 16)
+		self.assertEqual(project.reload().total_purchase_cost, 64)
+
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=40,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 40})
+		voucher.insert()
+		self.assertEqual(project.reload().total_purchase_cost, 64)
+		voucher.submit()
+
+		self.assertEqual(project.reload().total_purchase_cost, 32)
+		self.assertEqual(other_project.reload().total_purchase_cost, 8)
+		month = getdate(invoice.posting_date).strftime("%Y-%m")
+		self.assertEqual(ProjectCostQueries(project.name).purchase_cost(by_month=True), {month: 32})
+		self.assertEqual(CostDrivers(project.name, {}).suppliers()[0]["amount"], 32)
+
+		issue_to_project(item, 10, project.name)
+		self.assertEqual(project.reload().total_consumed_material_cost, 1040)
+		self.assertEqual(project.gross_margin, -1072)
+
+		voucher.cancel()
+		self.assertEqual(other_project.reload().total_purchase_cost, 16)
+		self.assertEqual(project.reload().total_purchase_cost, 64)
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
+	def test_purchase_cost_excludes_stock_valuation_expense_accounts(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		project = make_project({"project_name": f"_Test Valuation Invoice {frappe.generate_hash(length=6)}"})
+		make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=20, project=project.name)
+		make_purchase_invoice(
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=50,
+			project=project.name,
+			expense_account="Expenses Included In Valuation - _TC",
+		)
+
+		self.assertEqual(project.reload().total_purchase_cost, 20)
 
 	def test_drop_shipped_stock_is_purchase_cost(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -1036,6 +1100,8 @@ class TestProject(ERPNextTestSuite):
 			charges=50,
 		)
 
+		self.assertEqual(project.reload().total_purchase_cost, 0)
+
 		issue = make_stock_entry(
 			item_code=finished_good, qty=1, from_warehouse=warehouse, company=company, do_not_save=True
 		)
@@ -1045,6 +1111,7 @@ class TestProject(ERPNextTestSuite):
 
 		project.reload()
 		self.assertEqual(project.total_consumed_material_cost, 1050)
+		self.assertEqual(project.gross_margin, -1050)
 
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from

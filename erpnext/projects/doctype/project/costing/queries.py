@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import qb
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Extract, NullIf, Sum
 from frappe.utils import flt
 from pypika.enums import DatePart
@@ -10,14 +11,6 @@ from pypika.queries import QueryBuilder, Table
 from pypika.terms import Term
 
 CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
-
-# Receipt rows that carry capitalised landed cost, and the document each one belongs to.
-LANDED_COST_RECEIPTS = {
-	"Purchase Receipt Item": "Purchase Receipt",
-	"Purchase Invoice Item": "Purchase Invoice",
-	"Subcontracting Receipt Item": "Subcontracting Receipt",
-	"Stock Entry Detail": "Stock Entry",
-}
 
 MonthlyAmounts = dict[str, float]
 
@@ -48,13 +41,8 @@ class ProjectCostQueries:
 		return sum_amount(self.time_logs(), detail.hours, work_date(detail), by_month)
 
 	def purchase_cost(self, by_month: bool = False) -> float | MonthlyAmounts:
-		"""Non-stock items bought for the project, less the landed cost capitalised into stock.
-
-		Stock items count once they are consumed, in `material_cost`.
-		"""
-		return combine(
-			self.non_stock_purchase_cost(by_month), self.capitalised_landed_cost(by_month), sign=-1
-		)
+		"""Purchase costs that are expensed directly. Capitalised costs count in material_cost."""
+		return self.non_stock_purchase_cost(by_month)
 
 	def material_cost(self, by_month: bool = False) -> float | MonthlyAmounts:
 		"""Stock consumed against the project, plus costs capitalised on its stock entries."""
@@ -105,17 +93,18 @@ class ProjectCostQueries:
 
 	def non_stock_purchase_cost(self, by_month: bool) -> float | MonthlyAmounts:
 		invoice = qb.DocType("Purchase Invoice")
-		invoice_item = qb.DocType("Purchase Invoice Item")
-		query = self.non_stock_purchase_items()
-		return sum_amount(query, invoice_item.base_net_amount, invoice.posting_date, by_month)
+		return sum_amount(
+			self.non_stock_purchase_items(), non_stock_purchase_amount(), invoice.posting_date, by_month
+		)
 
 	def non_stock_purchase_items(self) -> QueryBuilder:
-		"""Purchase invoice items that never enter stock: non-stock and drop-shipped items, unless
-		they were bought on a subcontracting order."""
+		"""Non-stock and drop-shipped purchases outside subcontracting and stock valuation."""
 		invoice = qb.DocType("Purchase Invoice")
 		invoice_item = qb.DocType("Purchase Invoice Item")
 		item = qb.DocType("Item")
 		purchase_order = qb.DocType("Purchase Order")
+		account = qb.DocType("Account")
+		claimed = Coalesce(invoice.claimed_landed_cost_amount, 0)
 		never_stocked = (
 			item.is_stock_item.isnull()
 			| (item.is_stock_item == 0)
@@ -126,6 +115,8 @@ class ProjectCostQueries:
 			qb.from_(invoice_item)
 			.join(invoice)
 			.on(invoice.name == invoice_item.parent)
+			.left_join(account)
+			.on(account.name == invoice_item.expense_account)
 			.left_join(item)
 			.on(item.name == invoice_item.item_code)
 			.left_join(purchase_order)
@@ -133,23 +124,10 @@ class ProjectCostQueries:
 			.where((invoice_item.project == self.project) & (invoice_item.docstatus == 1))
 			.where(never_stocked & not_subcontracted)
 		)
+		query = query.where(Coalesce(account.account_type, "") != "Expenses Included In Valuation").where(
+			(claimed <= 0) | (claimed < invoice.base_net_total)
+		)
 		return self.keep_readable(query, invoice.name, "Purchase Invoice")
-
-	def capitalised_landed_cost(self, by_month: bool) -> float | MonthlyAmounts:
-		total = {} if by_month else 0.0
-		for row_doctype, parent_doctype in LANDED_COST_RECEIPTS.items():
-			row = qb.DocType(row_doctype)
-			parent = qb.DocType(parent_doctype)
-			query = (
-				qb.from_(row)
-				.join(parent)
-				.on(parent.name == row.parent)
-				.where((row.project == self.project) & (row.docstatus == 1))
-			)
-			total = combine(
-				total, sum_amount(query, row.landed_cost_voucher_amount, parent.posting_date, by_month)
-			)
-		return total
 
 	def stock_value_consumed(self, by_month: bool) -> float | MonthlyAmounts:
 		ledger = qb.DocType("Stock Ledger Entry")
@@ -225,6 +203,21 @@ class ProjectCostQueries:
 			return query
 		readable = frappe.qb.get_query(doctype, fields=["name"], ignore_permissions=False)
 		return query.where(document.isin(readable))
+
+
+def non_stock_purchase_amount() -> Term:
+	invoice = qb.DocType("Purchase Invoice")
+	item = qb.DocType("Purchase Invoice Item")
+	claimed = invoice.claimed_landed_cost_amount
+	# Allocate partial claims across the discounted row amounts used for purchase cost.
+	return (
+		Case()
+		.when(
+			claimed > 0,
+			item.base_net_amount * (invoice.base_net_total - claimed) / NullIf(invoice.base_net_total, 0),
+		)
+		.else_(item.base_net_amount)
+	)
 
 
 def sum_by(query: QueryBuilder, group: Term, amount: Term) -> dict[str, float]:
