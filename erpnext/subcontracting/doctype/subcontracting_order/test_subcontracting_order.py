@@ -31,6 +31,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	get_mapped_subcontracting_receipt,
 	make_subcontracting_receipt,
 	update_subcontracting_order_status,
 )
@@ -325,10 +326,6 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(scr.items[0].qty, 9)
 
 	def test_partial_receipts_map_bom_process_loss_in_whole_units(self):
-		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			get_mapped_subcontracting_receipt,
-		)
-
 		sco = get_subcontracting_order()
 		frappe.db.set_value("BOM", sco.items[0].bom, "process_loss_percentage", 10)
 		frappe.db.set_value("UOM", sco.items[0].stock_uom, "must_be_whole_number", 1)
