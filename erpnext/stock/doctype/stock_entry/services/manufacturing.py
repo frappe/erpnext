@@ -1115,11 +1115,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def _get_pending_secondary_qty(self):
 		if self.doc.job_card:
 			return flt(self.doc.fg_completed_qty)
-		# completed qty leaves out the process loss that For Quantity includes
+		# completed qty leaves out the unbooked job card loss that For Quantity includes
 		return (
 			flt(self.get_completed_job_card_qty())
 			- flt(self.wo_doc.produced_qty)
-			+ flt(self.doc.process_loss_qty)
+			+ flt(self.doc.get_pending_process_loss_qty())
 		)
 
 	def _adjust_secondary_item_qtys(self, secondary_items, used_secondary_items, pending_qty):
