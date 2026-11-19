@@ -2113,6 +2113,23 @@ class TestWorkOrder(ERPNextTestSuite):
 		available_by_attribution = {row.original_item: row.qty for row in return_entry.items}
 		self.assertEqual(available_by_attribution, {None: 1.0, "_Test Item Home Desktop 100": 2.0})
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
+	def test_material_consumption_refused_on_closed_work_order(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
+		)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		consumption = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Consumption for Manufacture", 10)
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "closed Work Order", consumption.submit)
+
 	def test_work_order_material_request_and_bom_details(self):
 		from erpnext.stock.doctype.material_request.material_request import (
 			make_stock_entry as mr_to_stock_entry,
