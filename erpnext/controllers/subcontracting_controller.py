@@ -998,7 +998,6 @@ class SubcontractingController(StockController):
 		fields_list = [
 			"item_code",
 			"name",
-			"rate",
 			"stock_uom",
 			"source_warehouse",
 			"description",
@@ -1008,6 +1007,12 @@ class SubcontractingController(StockController):
 
 		if doctype == "BOM Item":
 			fields_list.extend(["is_phantom_item", "bom_no"])
+			# BOM Item rate is in the BOM currency and UOM
+			fields.append(
+				{"DIV": ["`tabBOM Item`.`base_rate`", "`tabBOM Item`.`conversion_factor`"], "as": "rate"}
+			)
+		else:
+			fields_list.append("rate")
 
 		for field in fields_list:
 			fields.append(f"`tab{doctype}`.`{field}` As {alias_dict.get(field, field)}")
@@ -1142,6 +1147,7 @@ class SubcontractingController(StockController):
 			rm_obj.required_qty = flt(qty, rm_obj.precision("required_qty"))
 			if self.doctype != "Subcontracting Inward Order":
 				rm_obj.amount = flt(rm_obj.required_qty * rm_obj.rate, rm_obj.precision("amount"))
+				rm_obj.rate = flt(rm_obj.rate, rm_obj.precision("rate"))
 		else:
 			rm_obj.consumed_qty = flt(qty, rm_obj.precision("consumed_qty"))
 			rm_obj.required_qty = flt(bom_item.required_qty or qty, rm_obj.precision("required_qty"))
