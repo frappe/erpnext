@@ -13,7 +13,8 @@ def create_prospect_against_crm_deal():
 	prospect = frappe.new_doc("Prospect")
 	prospect.company_name = doc.organization or doc.lead_name
 	prospect.no_of_employees = doc.no_of_employees
-	prospect.prospect_owner = doc.deal_owner
+	# CRM may be on another site, so the owner comes as an email, not a user ID
+	prospect.prospect_owner = doc.deal_owner and frappe.utils.get_user_by_email(doc.deal_owner)
 	prospect.company = doc.erpnext_company
 	prospect.crm_deal = doc.crm_deal
 	prospect.territory = doc.territory
