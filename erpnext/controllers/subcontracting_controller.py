@@ -1789,7 +1789,11 @@ class SubcontractingController(StockController):
 		]
 		total_weight = sum(weights)
 		if not total_weight:
-			return
+			frappe.throw(
+				_(
+					"Cannot distribute Additional Costs based on {0}, as the finished goods have zero {0}."
+				).format(_(self.distribute_additional_costs_based_on))
+			)
 
 		# round the running total, so no share goes negative and the shares add up to the cost
 		precision = self.precision("total_additional_costs")
