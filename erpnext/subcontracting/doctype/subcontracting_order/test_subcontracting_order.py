@@ -182,6 +182,30 @@ class TestSubcontractingOrder(FrappeTestCase):
 			change(sco)
 			self.assertRaises(frappe.ValidationError, sco.insert)
 
+	def test_finished_good_needs_its_service_item_row(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 200,
+				"fg_item": "Subcontracted Item SA1",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_save=1)
+		sco.service_items.pop(0)
+
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
 	def test_purchase_order_is_fully_subcontracted_with_a_non_integer_ratio(self):
 		service_items = [
 			{
