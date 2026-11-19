@@ -1163,17 +1163,14 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			return []
 		secondary_items = get_secondary_items_from_job_card(self.doc.work_order, self.doc.job_card)
 		self.link_bom_secondary_items(secondary_items)
-		return secondary_items
+		return merge_secondary_items(secondary_items)
 
 	def link_bom_secondary_items(self, secondary_items):
 		"""Link rows without a BOM row, such as Job Card rows added by hand, to the BOM row of their item and type."""
-		bom_rows = {
-			(row.item_code, row.secondary_item_type): row.name for row in super().get_bom_secondary_items()
-		}
+		bom_rows = {get_secondary_item_key(row): row.name for row in super().get_bom_secondary_items()}
 		for row in secondary_items:
-			row.bom_secondary_item = row.bom_secondary_item or bom_rows.get(
-				(row.item_code, row.secondary_item_type)
-			)
+			if not row.bom_secondary_item:
+				row.bom_secondary_item = bom_rows.get(get_secondary_item_key(row))
 
 	def get_secondary_items_from_job_card(self):
 		secondary_items = self.get_job_card_secondary_items()
@@ -1582,6 +1579,18 @@ def get_secondary_item_key(row):
 		row.item_code,
 		row.secondary_item_type or ("Scrap" if row.get("valuation_type") == "Valuation Rate" else ""),
 	)
+
+
+def merge_secondary_items(rows):
+	"""Sum the qty of rows that share a secondary item key."""
+	merged = {}
+	for row in rows:
+		key = get_secondary_item_key(row)
+		if key in merged:
+			merged[key].stock_qty += row.stock_qty
+		else:
+			merged[key] = row
+	return list(merged.values())
 
 
 SECONDARY_GROUP_KEY = ("item_code", "secondary_item_type", "bom_secondary_item")
