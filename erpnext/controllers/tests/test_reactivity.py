@@ -216,6 +216,10 @@ class TestReactivity(ERPNextTestSuite):
 				company=company,
 				posting_date=add_days(today(), days),
 			)
+		# a later issue uses up the 100 layer, so the current outgoing rate is 200
+		make_stock_entry(
+			item_code=item, source=warehouse, qty=10, company=company, posting_date=add_days(today(), -2)
+		)
 
 		delivery_note = frappe.get_doc(
 			{
@@ -234,5 +238,5 @@ class TestReactivity(ERPNextTestSuite):
 		row = delivery_note.append("items", {"item_code": item, "qty": 5, "warehouse": warehouse})
 		delivery_note.process_item_selection(row.idx)
 
-		# FIFO cost of the 5 units that leave, not the queue average of 150
+		# FIFO cost of the 5 units that leave on the posting date, not the queue average of 150
 		self.assertEqual(row.rate, 100)
