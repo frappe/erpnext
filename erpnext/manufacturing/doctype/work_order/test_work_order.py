@@ -178,9 +178,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		s = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 7))
-		s.insert()
-
-		self.assertRaises(StockOverProductionError, s.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "not yet produced", s.insert)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
 	def test_manufacture_refused_beyond_transferred_qty(self):
