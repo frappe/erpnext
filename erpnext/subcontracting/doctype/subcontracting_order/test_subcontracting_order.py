@@ -1068,6 +1068,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
 		self.assertFalse([row for row in ste.items if row.item_code == "Subcontracted SRM Item 1"])
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_material_to_supplier_counts_shared_raw_material_per_finished_good(self):
+		sco = make_order_sharing_a_raw_material()
+		transfer_shared_raw_material(sco, "Subcontracted Item SA7", 15)
+
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		self.assertEqual(
+			[
+				(row.subcontracted_item, row.qty)
+				for row in ste.items
+				if row.item_code == "Subcontracted SRM Item 1"
+			],
+			[("Subcontracted Item Shared RM", 10)],
+		)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 10})
 	def test_material_to_supplier_skips_fully_sent_materials(self):
 		make_subcontracted_item(item_code="Subcontracted Item Two RM")
