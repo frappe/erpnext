@@ -1,0 +1,1161 @@
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+from collections import defaultdict
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+
+import erpnext
+from erpnext.controllers.sales_and_purchase_return import (
+	get_already_returned_items,
+	get_rate_for_return,
+	validate_return,
+)
+from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
+from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.utils import get_combine_datetime
+
+from .mapper import (
+	can_combine_purchase_orders,
+	get_purchase_orders,
+	get_uncombinable_orders_message,
+	make_purchase_receipt,
+)
+
+
+class BOMQuantityError(frappe.ValidationError):
+	pass
+
+
+class SubcontractingReceipt(SubcontractingController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
+			LandedCostTaxesandCharges,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_receipt_item.subcontracting_receipt_item import (
+			SubcontractingReceiptItem,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_receipt_supplied_item.subcontracting_receipt_supplied_item import (
+			SubcontractingReceiptSuppliedItem,
+		)
+
+		additional_costs: DF.Table[LandedCostTaxesandCharges]
+		address_display: DF.TextEditor | None
+		amended_from: DF.Link | None
+		auto_repeat: DF.Link | None
+		bill_date: DF.Date | None
+		bill_no: DF.Data | None
+		billing_address: DF.Link | None
+		billing_address_display: DF.TextEditor | None
+		company: DF.Link
+		contact_display: DF.SmallText | None
+		contact_email: DF.SmallText | None
+		contact_mobile: DF.SmallText | None
+		contact_person: DF.Link | None
+		cost_center: DF.Link | None
+		distribute_additional_costs_based_on: DF.Literal["Qty", "Amount"]
+		in_words: DF.Data | None
+		instructions: DF.SmallText | None
+		is_return: DF.Check
+		items: DF.Table[SubcontractingReceiptItem]
+		language: DF.Data | None
+		letter_head: DF.Link | None
+		lr_date: DF.Date | None
+		lr_no: DF.Data | None
+		naming_series: DF.Literal["MAT-SCR-.YYYY.-", "MAT-SCR-RET-.YYYY.-"]
+		per_returned: DF.Percent
+		posting_date: DF.Date
+		posting_time: DF.Time
+		project: DF.Link | None
+		range: DF.Data | None
+		rejected_warehouse: DF.Link | None
+		remarks: DF.SmallText | None
+		represents_company: DF.Link | None
+		return_against: DF.Link | None
+		select_print_heading: DF.Link | None
+		set_posting_time: DF.Check
+		set_warehouse: DF.Link | None
+		shipping_address: DF.Link | None
+		shipping_address_display: DF.TextEditor | None
+		status: DF.Literal["", "Draft", "Completed", "Return", "Return Issued", "Cancelled", "Closed"]
+		supplied_items: DF.Table[SubcontractingReceiptSuppliedItem]
+		supplier: DF.Link
+		supplier_address: DF.Link | None
+		supplier_delivery_note: DF.Data | None
+		supplier_name: DF.Data | None
+		supplier_warehouse: DF.Link | None
+		title: DF.Data | None
+		total: DF.Currency
+		total_additional_costs: DF.Currency
+		total_qty: DF.Float
+		transporter_name: DF.Data | None
+	# end: auto-generated types
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.status_updater = [
+			{
+				"target_dt": "Subcontracting Order Item",
+				"join_field": "subcontracting_order_item",
+				"target_field": "received_qty",
+				"target_parent_dt": "Subcontracting Order",
+				"target_parent_field": "per_received",
+				"target_ref_field": "qty",
+				"source_dt": "Subcontracting Receipt Item",
+				"source_field": "received_qty",
+				"percent_join_field": "subcontracting_order",
+				"overflow_type": "receipt",
+			},
+		]
+
+	def onload(self):
+		self.set_onload(
+			"backflush_based_on",
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
+		)
+
+		if self.docstatus == 1:
+			self.set_onload(
+				"allow_to_make_qc_after_submission",
+				frappe.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				),
+			)
+
+	def before_validate(self):
+		self.save_inventory_dimensions()
+		super().before_validate()
+		self.validate_items_qty()
+		self.set_items_bom()
+		self.set_items_received_qty()
+		self.set_items_cost_center()
+
+		if self.company:
+			default_expense_account = self.get_company_default(
+				"default_expense_account", ignore_validation=True
+			)
+			self.set_service_expense_account(default_expense_account)
+			self.set_expense_account_for_subcontracted_items(default_expense_account)
+
+	def validate(self):
+		self.reset_supplied_items()
+		self.validate_posting_time()
+
+		if not self.get("is_return"):
+			self.validate_inspection()
+			self.validate_purchase_orders_share_terms()
+
+		if getdate(self.posting_date) > getdate(nowdate()):
+			frappe.throw(_("Posting Date cannot be a future date"))
+
+		super().validate()
+		# Secondary rows get a read-only qty from the BOM, so the user cannot round it.
+		self.validate_item_stock_uom_is_integer(
+			"item_code",
+			["qty", "received_qty", "rejected_qty"],
+			"Subcontracting Receipt Item",
+			row_filter=lambda row: not (row.secondary_item_type or row.valuation_type),
+		)
+
+		self.set_missing_values()
+		# after set_missing_values, so the secondary rates are computed from the same
+		# calculated per-qty costs the Get Secondary Items button uses, and before
+		# validate_return, so a return validates the rows it saves
+		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
+			self.get_secondary_items(recalculate_rate=True)
+
+		self.validate_with_previous_doc()
+		validate_return(self)
+		self.validate_return_supplier_warehouse()
+
+		if self.get("_action") == "submit":
+			self.validate_returned_raw_materials()
+			self.validate_secondary_items()
+			self.validate_accepted_warehouse()
+			self.validate_rejected_warehouse()
+
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
+		self.get_current_stock()
+
+		self.set_supplied_items_expense_account()
+		self.set_supplied_items_cost_center()
+		self.set_supplied_items_inventory_dimensions()
+
+	def validate_purchase_orders_share_terms(self):
+		if not can_combine_purchase_orders(purchase_orders := get_purchase_orders(self)):
+			frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
+
+	def validate_return_supplier_warehouse(self):
+		if not (self.is_return and self.return_against):
+			return
+
+		original = frappe.db.get_value("Subcontracting Receipt", self.return_against, "supplier_warehouse")
+		if self.supplier_warehouse != original:
+			frappe.throw(
+				_("{0} must be {1}, the same as in {2}").format(
+					_(self.meta.get_label("supplier_warehouse")),
+					frappe.bold(original),
+					frappe.bold(self.return_against),
+				),
+				title=_("Warehouse Mismatch"),
+			)
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Subcontracting Order Item": {
+					"ref_dn_field": "subcontracting_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+				"Purchase Order Item": {
+					"ref_dn_field": "purchase_order_item",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
+
+	def on_submit(self):
+		self.validate_closed_subcontracting_order()
+		self.validate_bom_required_qty()
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
+		self.set_subcontracting_order_status(update_bin=False)
+		self.set_consumed_qty_in_subcontract_order()
+		self.make_bundle_for_sales_purchase_return()
+
+		for table_name in ["items", "supplied_items"]:
+			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.validate_returned_serial_batches()
+		self.update_stock_reservation_entries()
+		self.update_stock_ledger()
+		self.validate_consumed_batches()
+		self.make_gl_entries()
+		self.repost_future_sle_and_gle()
+		self.update_status()
+		self.auto_create_purchase_receipt()
+		self.update_job_card()
+
+	def validate_consumed_batches(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		bundles = frappe._dict(
+			frappe.get_all(
+				"Subcontracting Receipt Supplied Item",
+				filters={"parent": self.name},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
+		for row in self.supplied_items:
+			row.serial_and_batch_bundle = bundles.get(row.name) or row.serial_and_batch_bundle
+
+		SerialBatchBundleService(self).validate_outward_bundle_batches(
+			check_expiry=False, rows=self.supplied_items, qty_field="consumed_qty"
+		)
+
+	def on_update(self):
+		for table_field in ["items", "supplied_items"]:
+			if self.get(table_field):
+				self.set_serial_and_batch_bundle(table_field)
+
+	def on_cancel(self):
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+			"Quality Inspection",
+		)
+		self.validate_closed_subcontracting_order()
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
+		self.set_consumed_qty_in_subcontract_order()
+		self.set_subcontracting_order_status(update_bin=False)
+		self.update_stock_ledger()
+		self.update_stock_reservation_entries()
+		self.make_gl_entries_on_cancel()
+		self.repost_future_sle_and_gle()
+		self.update_status()
+		self.delete_auto_created_batches()
+		self.update_job_card()
+
+	@frappe.whitelist()
+	def reset_raw_materials(self):
+		self.supplied_items = []
+		self.flags.reset_raw_materials = True
+		self.create_raw_materials_supplied_or_received()
+
+	def validate_closed_subcontracting_order(self):
+		self.check_for_on_hold_or_closed_status("Subcontracting Order", "subcontracting_order")
+
+	def update_job_card(self):
+		for row in self.get("items"):
+			if row.job_card:
+				doc = frappe.get_doc("Job Card", row.job_card)
+				doc.set_manufactured_qty()
+
+	def set_service_expense_account(self, default_expense_account):
+		for row in self.get("items"):
+			if not row.service_expense_account and row.purchase_order_item:
+				service_item = frappe.db.get_value(
+					"Purchase Order Item", row.purchase_order_item, "item_code"
+				)
+
+				if service_item:
+					if default := (
+						get_item_defaults(service_item, self.company)
+						or get_item_group_defaults(service_item, self.company)
+						or get_brand_defaults(service_item, self.company)
+					):
+						if service_expense_account := default.get("expense_account"):
+							row.service_expense_account = service_expense_account
+
+			if not row.service_expense_account:
+				row.service_expense_account = default_expense_account
+
+	def set_expense_account_for_subcontracted_items(self, default_expense_account):
+		for row in self.get("items"):
+			if not row.expense_account:
+				if default := (
+					get_item_defaults(row.item_code, self.company)
+					or get_item_group_defaults(row.item_code, self.company)
+					or get_brand_defaults(row.item_code, self.company)
+				):
+					if expense_account := default.get("expense_account"):
+						row.expense_account = expense_account
+
+			if not row.expense_account:
+				row.expense_account = default_expense_account
+
+	def get_manufactured_qty(self, job_card):
+		table = frappe.qb.DocType("Subcontracting Receipt Item")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.qty))
+			.where((table.job_card == job_card) & (table.docstatus == 1))
+		)
+
+		qty = query.run()[0][0] or 0.0
+		return flt(qty)
+
+	def validate_items_qty(self):
+		for item in self.items:
+			# secondary rows are checked on submit, after a return has rebuilt them
+			if item.secondary_item_type or item.valuation_type:
+				continue
+
+			if not (item.qty or item.rejected_qty):
+				frappe.throw(
+					_("Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.").format(
+						item.idx
+					)
+				)
+
+	def set_items_bom(self):
+		if self.is_return:
+			for item in self.items:
+				if not item.bom:
+					item.bom = frappe.db.get_value(
+						"Subcontracting Receipt Item",
+						{"name": item.subcontracting_receipt_item, "parent": self.return_against},
+						"bom",
+					)
+		else:
+			for item in self.items:
+				if not item.bom:
+					item.bom = frappe.db.get_value(
+						"Subcontracting Order Item",
+						{"name": item.subcontracting_order_item, "parent": item.subcontracting_order},
+						"bom",
+					)
+
+	def set_items_received_qty(self):
+		"""Set before the supplied items are built from it."""
+		for item in self.items:
+			if item.bom:
+				item.received_qty = self.get_qty_for_costing(item)
+
+	def set_items_cost_center(self):
+		if self.company:
+			cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
+
+			for item in self.items:
+				if not item.cost_center:
+					item.cost_center = cost_center
+
+	def set_supplied_items_cost_center(self):
+		for item in self.supplied_items:
+			if not item.cost_center:
+				item.cost_center = get_default_cost_center(
+					{"project": self.project},
+					get_item_defaults(item.rm_item_code, self.company),
+					get_item_group_defaults(item.rm_item_code, self.company),
+					get_brand_defaults(item.rm_item_code, self.company),
+					self.company,
+				)
+
+	def set_supplied_items_inventory_dimensions(self):
+		if hasattr(self, "inventory_dimensions") and (inventory_dimensions := get_inventory_dimensions()):
+			for item in self.supplied_items:
+				key = (
+					item.reference_name,
+					item.rm_item_code,
+					item.main_item_code,
+					item.batch_no,
+					item.serial_no,
+				)
+
+				for dimension in inventory_dimensions:
+					dimension_values = self.inventory_dimensions.get(dimension.source_fieldname, {})
+					if key in dimension_values:
+						item.set(dimension.source_fieldname, dimension_values[key])
+
+	def set_supplied_items_expense_account(self):
+		for item in self.supplied_items:
+			if not item.expense_account:
+				item.expense_account = get_default_expense_account(
+					frappe._dict(
+						{
+							"expense_account": self.get_company_default(
+								"default_expense_account", ignore_validation=True
+							)
+						}
+					),
+					get_item_defaults(item.rm_item_code, self.company),
+					get_item_group_defaults(item.rm_item_code, self.company),
+					get_brand_defaults(item.rm_item_code, self.company),
+				)
+
+	def save_inventory_dimensions(self):
+		if inventory_dimensions := get_inventory_dimensions():
+			if not getattr(self, "inventory_dimensions", None):
+				self.inventory_dimensions = {}
+
+			for dimension in inventory_dimensions:
+				self.inventory_dimensions[dimension.source_fieldname] = {
+					(d.reference_name, d.rm_item_code, d.main_item_code, d.batch_no, d.serial_no): d.get(
+						dimension.source_fieldname
+					)
+					for d in self.supplied_items
+				}
+
+	def reset_supplied_items(self):
+		if (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			== "BOM"
+			and self.supplied_items
+		):
+			if not any(
+				item.serial_and_batch_bundle or item.batch_no or item.serial_no
+				for item in self.supplied_items
+			):
+				self.supplied_items = []
+			else:
+				self.update_rate_for_supplied_items()
+
+	@frappe.whitelist()
+	def get_secondary_items(self, recalculate_rate: bool | None = False):
+		self.remove_secondary_items()
+
+		original_rows = self.get_returned_receipt_rows()
+		# rejected goods yield no secondary items
+		rejected_return_rows = self.get_rejected_return_rows()
+		for item in list(self.items):
+			if item.bom and item.name not in rejected_return_rows:
+				# finished goods returned so far, as a negative qty
+				returned_qty = original_rows.get(item.subcontracting_receipt_item, {}).get("returned_qty")
+				self.add_secondary_items_of_fg_row(item, -flt(returned_qty))
+
+		self.link_returned_secondary_items(original_rows)
+		self.set_remaining_secondary_qty(original_rows)
+
+		if recalculate_rate:
+			self.set_additional_costs()
+			self.calculate_items_qty_and_amount()
+
+	def get_returned_receipt_rows(self) -> dict:
+		"""Rows of the receipt this return is against, by name."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		return {
+			row.name: row
+			for row in frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against},
+				fields=[
+					"name",
+					"item_code",
+					"qty",
+					"received_qty",
+					"reference_name",
+					"bom_secondary_item",
+					"secondary_item_type",
+					"valuation_type",
+					"returned_qty",
+				],
+			)
+		}
+
+	def link_returned_secondary_items(self, original_rows):
+		"""Link each rebuilt secondary row of a return to its row on the returned receipt."""
+		if not original_rows:
+			return
+
+		secondary_rows = {}
+		legacy_rows = defaultdict(list)
+		for row in original_rows.values():
+			if row.bom_secondary_item:
+				secondary_rows[(row.reference_name, row.bom_secondary_item)] = row.name
+			elif row.secondary_item_type or row.valuation_type:
+				legacy_rows[row.reference_name].append(row)
+
+		for fg_row in self.items:
+			if fg_row.bom and fg_row.subcontracting_receipt_item in legacy_rows:
+				secondary_rows.update(
+					self.pair_legacy_secondary_rows(fg_row, legacy_rows[fg_row.subcontracting_receipt_item])
+				)
+
+		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
+		for row in self.items:
+			if row.bom_secondary_item:
+				row.subcontracting_receipt_item = secondary_rows.get(
+					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
+				)
+
+	@staticmethod
+	def pair_legacy_secondary_rows(fg_row, receipt_rows):
+		"""Pair receipt rows made before v16 with the BOM rows of their item by qty rank, as migration may reorder the BOM."""
+		bom_rows = frappe.get_cached_doc("BOM", fg_row.bom).secondary_items
+		pairs = {}
+		for item_code in {row.item_code for row in receipt_rows}:
+			by_qty = sorted(
+				(row for row in receipt_rows if row.item_code == item_code), key=lambda row: row.qty
+			)
+			bom_by_qty = sorted(
+				(row for row in bom_rows if row.item_code == item_code), key=lambda row: row.stock_qty
+			)
+			for receipt_row, bom_row in zip(by_qty, bom_by_qty, strict=False):
+				pairs[(fg_row.subcontracting_receipt_item, bom_row.name)] = receipt_row.name
+
+		return pairs
+
+	def set_remaining_secondary_qty(self, original_rows):
+		"""A return of a receipt row's last finished goods takes the secondary qty left on it,
+		so rounding leaves nothing behind."""
+		last_fg_rows = [
+			row.name for row in self.items if self.returns_last_finished_goods(row, original_rows)
+		]
+		if not last_fg_rows:
+			return
+
+		already_returned = get_already_returned_items(self)
+		for row in self.items:
+			if not (row.subcontracting_receipt_item and row.reference_name in last_fg_rows):
+				continue
+
+			original_row = original_rows[row.subcontracting_receipt_item]
+			returned = already_returned.get((row.item_code, row.subcontracting_receipt_item), {})
+			row.received_qty = flt(
+				flt(returned.get("received_qty")) - original_row.received_qty, row.precision("received_qty")
+			)
+			row.qty = flt(flt(returned.get("qty")) - original_row.qty, row.precision("qty"))
+			row.process_loss_qty = flt(row.received_qty - row.qty, row.precision("process_loss_qty"))
+
+	@staticmethod
+	def returns_last_finished_goods(row, original_rows):
+		original_row = original_rows.get(row.subcontracting_receipt_item)
+		if not (row.bom and original_row):
+			return False
+
+		precision = row.precision("received_qty")
+		return flt(original_row.returned_qty - flt(row.received_qty), precision) >= flt(
+			original_row.received_qty, precision
+		)
+
+	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
+		allocation_map = {}
+		names = [row.bom_secondary_item for row in percentage_rows if row.bom_secondary_item]
+		if names:
+			allocation_map = dict(
+				frappe.get_all(
+					"BOM Secondary Item",
+					filters={"name": ("in", names)},
+					fields=["name", "cost_allocation_per"],
+					as_list=True,
+				)
+			)
+
+		fg_rows = {row.name: row for row in self.get("items") if row.bom}
+		for item in percentage_rows:
+			qty = flt(item.received_qty) - flt(item.process_loss_qty)
+			fg_row = fg_rows.get(item.reference_name)
+			if qty and fg_row and item.bom_secondary_item in allocation_map:
+				item.rate = self.get_percentage_secondary_rate(
+					fg_row,
+					flt(allocation_map[item.bom_secondary_item]),
+					qty,
+					secondary_items_cost_map.get(item.reference_name, 0),
+				)
+			item.amount = qty * flt(item.rate)
+
+	def get_secondary_item_valuation_rate(self, item):
+		"""Valuation at the row's warehouse; keeps the stored rate when none is found."""
+		return (
+			self.get_valuation_rate_at_posting(item.item_code, item.warehouse or self.set_warehouse)
+			or item.rate
+		)
+
+	def get_valuation_rate_at_posting(self, item_code, warehouse):
+		return get_valuation_rate(
+			item_code,
+			warehouse,
+			self.doctype,
+			self.name,
+			currency=erpnext.get_company_currency(self.company),
+			company=self.company,
+			posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
+			creation=self.first_sle_creation,
+		)
+
+	def add_secondary_items_of_fg_row(self, item, fg_qty_before=0.0):
+		"""Own-cost rows first: the percentage rows allocate from the cost net of them."""
+		bom = frappe.get_doc("BOM", item.bom)
+		warehouse = self.set_warehouse or item.warehouse
+
+		own_cost = 0.0
+		percentage_rows = []
+		for secondary_item in bom.secondary_items:
+			if secondary_item.valuation_type in ("Valuation Rate", "Manual"):
+				if row := self.append_secondary_item(
+					item, bom, secondary_item, warehouse, 0.0, fg_qty_before
+				):
+					own_cost += flt(row.qty) * flt(row.rate)
+			else:
+				percentage_rows.append(secondary_item)
+
+		for secondary_item in percentage_rows:
+			self.append_secondary_item(item, bom, secondary_item, warehouse, own_cost, fg_qty_before)
+
+	def append_secondary_item(self, item, bom, secondary_item, warehouse, own_cost=0.0, fg_qty_before=0.0):
+		per_unit = secondary_item.stock_qty / bom.quantity
+		received_qty = self.get_secondary_qty(item, per_unit, fg_qty_before, "received_qty")
+		qty = self.get_secondary_qty(
+			item, per_unit - (secondary_item.process_loss_qty / bom.quantity), fg_qty_before, "qty"
+		)
+		if self.is_return and not qty:
+			# rounds to nothing this time; the running total returns it with a later return
+			return
+
+		rate = self.get_secondary_item_rate(item, secondary_item, warehouse, qty, own_cost)
+
+		return self.append(
+			"items",
+			{
+				"secondary_item_type": secondary_item.secondary_item_type,
+				"valuation_type": secondary_item.valuation_type,
+				"bom_secondary_item": secondary_item.name,
+				"reference_name": item.name,
+				"item_code": secondary_item.item_code,
+				"item_name": secondary_item.item_name,
+				"qty": received_qty
+				if secondary_item.valuation_type not in ("Valuation Rate", "Manual")
+				else flt(item.qty) * (flt(secondary_item.stock_qty) / flt(bom.quantity)),
+				"received_qty": received_qty,
+				"process_loss_qty": received_qty - qty,
+				"stock_uom": secondary_item.stock_uom,
+				"conversion_factor": 1,
+				"rate": rate,
+				"rm_cost_per_qty": 0,
+				"service_cost_per_qty": 0,
+				"additional_cost_per_qty": 0,
+				"secondary_items_cost_per_qty": 0,
+				"amount": qty * rate,
+				"warehouse": warehouse,
+				"rejected_warehouse": self.rejected_warehouse,
+			},
+		)
+
+	@staticmethod
+	def get_secondary_qty(item, per_unit, fg_qty_before, fieldname):
+		"""Rounded on the running finished good total, so a receipt's returns add up to its secondary qty."""
+		precision = item.precision(fieldname)
+		fg_qty_after = fg_qty_before + flt(item.received_qty)
+		return flt(
+			flt(fg_qty_after * per_unit, precision) - flt(fg_qty_before * per_unit, precision), precision
+		)
+
+	def get_secondary_item_rate(self, item, secondary_item, warehouse, qty, own_cost):
+		if secondary_item.valuation_type == "Manual":
+			if not flt(secondary_item.stock_qty):
+				return 0
+			return flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
+
+		if secondary_item.valuation_type == "Valuation Rate":
+			rate = self.get_valuation_rate_at_posting(secondary_item.item_code, warehouse)
+			if not rate and secondary_item.stock_qty:
+				rate = flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
+			return rate
+
+		return self.get_percentage_secondary_rate(item, secondary_item.cost_allocation_per, qty, own_cost)
+
+	def get_percentage_secondary_rate(self, fg_row, cost_allocation_per, qty, own_cost):
+		received_qty = flt(fg_row.received_qty) or flt(fg_row.qty)
+		lcv_cost_per_qty = flt(fg_row.landed_cost_voucher_amount) / received_qty if received_qty else 0.0
+		fg_item_cost = (
+			flt(fg_row.rm_cost_per_qty)
+			+ flt(fg_row.additional_cost_per_qty)
+			+ flt(lcv_cost_per_qty)
+			+ flt(fg_row.service_cost_per_qty)
+		) * flt(fg_row.received_qty) - flt(own_cost)
+		return (fg_item_cost * (cost_allocation_per / 100)) / qty
+
+	def remove_secondary_items(self):
+		for item in list(self.items):
+			if item.secondary_item_type or item.valuation_type:
+				self.remove(item)
+			else:
+				item.secondary_items_cost_per_qty = 0
+
+	@frappe.whitelist()
+	def set_missing_values(self):
+		self.set_available_qty_for_consumption()
+		self.set_additional_costs()
+		self.calculate_items_qty_and_amount()
+
+	def set_additional_costs(self):
+		if self.is_return and self.return_against:
+			self.set_additional_costs_for_return()
+		else:
+			self.set_additional_costs_base_amount()
+			self.calculate_additional_costs()
+
+	def set_additional_costs_for_return(self):
+		"""Take back the original receipt's additional costs allocated to the accepted qty returned."""
+		original = frappe.get_doc("Subcontracting Receipt", self.return_against, check_permission="read")
+		original_rows = {row.name: row for row in original.items if row.bom}
+		basis = "amount" if original.distribute_additional_costs_based_on == "Amount" else "qty"
+		total_basis = sum(flt(row.get(basis)) for row in original_rows.values())
+		total_cost = sum(
+			self.get_qty_for_costing(row) * flt(row.additional_cost_per_qty) for row in original_rows.values()
+		)
+		returned_basis = returned_cost = 0.0
+		for row in self.items:
+			original_row = original_rows.get(row.subcontracting_receipt_item)
+			if not original_row:
+				continue
+
+			row.additional_cost_per_qty = 0.0
+			if flt(original_row.qty) and row.warehouse and row.warehouse != original_row.rejected_warehouse:
+				row_returned_cost = (
+					flt(row.qty)
+					* flt(original_row.additional_cost_per_qty)
+					* self.get_qty_for_costing(original_row)
+					/ flt(original_row.qty)
+				)
+				costing_qty = self.get_qty_for_costing(row)
+				row.additional_cost_per_qty = row_returned_cost / costing_qty if costing_qty else 0.0
+				returned_cost += row_returned_cost
+				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
+
+		if total_cost:
+			ratio = returned_cost / total_cost
+		else:
+			ratio = returned_basis / total_basis if total_basis else 0.0
+
+		self.set("additional_costs", [])
+		for row in original.additional_costs:
+			self.append(
+				"additional_costs",
+				{
+					"expense_account": row.expense_account,
+					"account_currency": row.account_currency,
+					"exchange_rate": row.exchange_rate,
+					"description": row.description,
+					"amount": flt(row.amount * ratio, row.precision("amount")),
+					"base_amount": flt(row.base_amount * ratio, row.precision("base_amount")),
+				},
+			)
+		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
+
+	def set_additional_costs_base_amount(self):
+		for row in self.get("additional_costs"):
+			row.base_amount = flt(
+				flt(row.amount) * (flt(row.exchange_rate) or 1), row.precision("base_amount")
+			)
+
+	def set_available_qty_for_consumption(self):
+		supplied_items_details = {}
+
+		sco_supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
+		for item in self.get("items"):
+			supplied_items = (
+				frappe.qb.from_(sco_supplied_item)
+				.select(
+					sco_supplied_item.rm_item_code,
+					sco_supplied_item.reference_name,
+					(sco_supplied_item.total_supplied_qty - sco_supplied_item.consumed_qty).as_(
+						"available_qty"
+					),
+				)
+				.where(
+					(sco_supplied_item.parent == item.subcontracting_order)
+					& (sco_supplied_item.main_item_code == item.item_code)
+					& (sco_supplied_item.reference_name == item.subcontracting_order_item)
+				)
+			).run(as_dict=True)
+
+			if supplied_items:
+				supplied_items_details[item.name] = {}
+
+				for supplied_item in supplied_items:
+					if supplied_item.rm_item_code not in supplied_items_details[item.name]:
+						supplied_items_details[item.name][supplied_item.rm_item_code] = 0.0
+
+					supplied_items_details[item.name][
+						supplied_item.rm_item_code
+					] += supplied_item.available_qty
+		for item in self.get("supplied_items"):
+			item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
+				item.rm_item_code, 0
+			)
+
+	def calculate_items_qty_and_amount(self):
+		rm_cost_map = {}
+		for item in self.get("supplied_items") or []:
+			item.amount = flt(item.consumed_qty) * flt(item.rate)
+
+			if item.reference_name in rm_cost_map:
+				rm_cost_map[item.reference_name] += item.amount
+			else:
+				rm_cost_map[item.reference_name] = item.amount
+
+		# before the percentage rows, which are priced from it
+		for item in self.get("items") or []:
+			if item.qty and item.name in rm_cost_map:
+				item.rm_supp_cost = rm_cost_map[item.name]
+				item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
+
+		# own-cost rows first: they are deducted from the finished good, and the
+		# percentage rows reprice from the basis net of them
+		secondary_items_cost_map = {}
+		percentage_rows = []
+		is_return = self.is_return and self.return_against
+		for item in self.get("items") or []:
+			if not (item.secondary_item_type or item.valuation_type):
+				continue
+
+			if is_return:
+				# the stock ledger returns the secondary item at its receipt rate
+				item.rate = get_rate_for_return(
+					self.doctype, self.name, item.item_code, self.return_against, item_row=item
+				)
+			elif item.valuation_type == "Valuation Rate":
+				# Recomputed every time: a rate fetched against another warehouse
+				# must not stick to the row when the warehouse changes.
+				item.rate = self.get_secondary_item_valuation_rate(item)
+
+			if item.valuation_type in ("Valuation Rate", "Manual"):
+				item.amount = flt(item.qty) * flt(item.rate)
+				secondary_items_cost_map[item.reference_name] = (
+					secondary_items_cost_map.get(item.reference_name, 0) + item.amount
+				)
+			elif not is_return:
+				percentage_rows.append(item)
+
+		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
+
+		rejected_return_rows = self.get_rejected_return_rows()
+		received_qty_ratios = self.get_received_qty_ratios_for_return(rejected_return_rows)
+		returned_costs = self.get_returned_costs()
+		total_qty = total_amount = 0
+		for item in self.get("items") or []:
+			if not item.secondary_item_type and not item.valuation_type:
+				returned = returned_costs.get(item.name)
+				# rejected qty is received without service cost
+				if returned:
+					item.service_cost_per_qty = (
+						0.0 if item.name in rejected_return_rows else returned.service_cost_per_qty
+					)
+
+				if item.qty:
+					# the stock ledger returns the finished good at its receipt rate
+					if returned and item.name not in rejected_return_rows:
+						item.secondary_items_cost_per_qty = returned.secondary_items_cost_per_qty
+					elif item.name in secondary_items_cost_map:
+						item.secondary_items_cost_per_qty = secondary_items_cost_map[item.name] / (
+							item.received_qty or item.qty
+						)
+						secondary_items_cost_map.pop(item.name)
+					else:
+						item.secondary_items_cost_per_qty = 0
+
+				lcv_cost_per_qty = 0.0
+				if item.landed_cost_voucher_amount:
+					lcv_cost_per_qty = item.landed_cost_voucher_amount / (item.received_qty or item.qty)
+
+				item.rate = (
+					flt(item.rm_cost_per_qty)
+					+ flt(item.service_cost_per_qty)
+					+ flt(item.additional_cost_per_qty)
+					+ flt(lcv_cost_per_qty)
+					- flt(item.secondary_items_cost_per_qty)
+				)
+
+			if item.bom:
+				item.received_qty = self.get_qty_for_costing(item)
+				if item.name in received_qty_ratios:
+					additional_cost = flt(item.received_qty) * flt(item.additional_cost_per_qty)
+					amount = (
+						flt(item.qty)
+						* received_qty_ratios[item.name]
+						* (flt(item.rate) - flt(item.additional_cost_per_qty))
+						+ additional_cost
+					)
+				else:
+					amount = flt(item.received_qty) * flt(item.rate)
+				item.amount = amount * (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
+				item.rate = item.amount / (item.qty or item.rejected_qty)
+			else:
+				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
+				item.amount = flt(item.qty) * flt(item.rate)
+
+			total_qty += flt(item.qty) + flt(item.rejected_qty)
+			total_amount += item.amount
+		self.total_qty = total_qty
+		self.total = total_amount
+
+	def get_returned_costs(self) -> dict[str, frappe._dict]:
+		"""Service and secondary items cost per qty of the returned receipt row, for each return row."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		received_rows = {
+			row.name: row
+			for row in frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
+				fields=["name", "service_cost_per_qty", "secondary_items_cost_per_qty"],
+			)
+		}
+		return {
+			item.name: received_rows[item.subcontracting_receipt_item]
+			for item in self.items
+			if item.subcontracting_receipt_item in received_rows
+		}
+
+	def get_received_qty_ratios_for_return(self, rejected_return_rows: set[str]) -> dict[str, float]:
+		"""Received qty per accepted qty of the original row, for each return row of accepted qty."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		original_rows = {
+			row.name: row
+			for row in frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
+				fields=["name", "qty", "received_qty"],
+			)
+		}
+
+		ratios = {}
+		for item in self.items:
+			original_row = original_rows.get(item.subcontracting_receipt_item)
+			if original_row and flt(original_row.qty) and item.name not in rejected_return_rows:
+				ratios[item.name] = flt(original_row.received_qty) / flt(original_row.qty)
+
+		return ratios
+
+	def validate_secondary_items(self):
+		for item in self.items:
+			if item.secondary_item_type or item.valuation_type:
+				if not item.qty:
+					frappe.throw(
+						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),
+					)
+
+				if item.rejected_qty:
+					frappe.throw(
+						_("Row #{0}: Rejected Qty cannot be set for Secondary Item {1}.").format(
+							item.idx, frappe.bold(item.item_code)
+						),
+					)
+
+				if not item.reference_name:
+					frappe.throw(
+						_("Row #{0}: Finished Good reference is mandatory for Secondary Item {1}.").format(
+							item.idx, frappe.bold(item.item_code)
+						),
+					)
+
+	def validate_accepted_warehouse(self):
+		for item in self.get("items"):
+			if flt(item.qty) and not item.warehouse:
+				if self.set_warehouse:
+					item.warehouse = self.set_warehouse
+				else:
+					frappe.throw(
+						_("Row #{0}: Accepted Warehouse is mandatory for the accepted Item {1}").format(
+							item.idx, item.item_code
+						)
+					)
+
+			if item.get("warehouse") and (item.get("warehouse") == item.get("rejected_warehouse")):
+				frappe.throw(
+					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
+				)
+
+	def validate_bom_required_qty(self):
+		# a return takes back what the receipt consumed, not what the BOM needs
+		if self.is_return or (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			== "Material Transferred for Subcontract"
+			and not frappe.db.get_single_value("Buying Settings", "validate_consumed_qty")
+		):
+			return
+
+		rm_consumed_dict = self.get_rm_wise_consumed_qty()
+		precision = frappe.get_precision("Subcontracting Receipt Item", "qty")
+
+		for rm_item_code, required in self.get_rm_wise_required_qty().items():
+			consumed_qty = rm_consumed_dict.get(rm_item_code, 0)
+			diff = flt(consumed_qty - required.qty, precision)
+
+			if diff < 0:
+				msg = _(
+					"""Additional {0} {1} of item {2} required as per BOM to complete this transaction"""
+				).format(
+					frappe.bold(abs(diff)),
+					frappe.bold(required.stock_uom),
+					frappe.bold(rm_item_code),
+				)
+
+				frappe.throw(
+					msg,
+					exc=BOMQuantityError,
+				)
+
+	def get_rm_wise_required_qty(self):
+		"""BOM required qty per raw material over all rows; rows whose BOM allows alternative items are skipped."""
+		rm_dict = {}
+
+		for row in self.items:
+			if frappe.db.get_value("BOM", row.bom, "allow_alternative_item"):
+				continue
+
+			for bom_item in self._get_materials_from_bom(
+				row.item_code, row.bom, row.get("include_exploded_items")
+			):
+				required = rm_dict.setdefault(
+					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
+				)
+				required.qty += flt(
+					bom_item.qty_consumed_per_unit * self.get_qty_for_costing(row) * row.conversion_factor,
+					row.precision("qty"),
+				)
+
+		return rm_dict
+
+	def get_rm_wise_consumed_qty(self):
+		rm_dict = defaultdict(float)
+
+		for row in self.supplied_items:
+			rm_dict[row.rm_item_code] += row.consumed_qty
+
+		return rm_dict
+
+	def update_status_updater_args(self):
+		if cint(self.is_return):
+			self.status_updater.extend(
+				[
+					{
+						"source_dt": "Subcontracting Receipt Item",
+						"target_dt": "Subcontracting Order Item",
+						"join_field": "subcontracting_order_item",
+						"target_field": "returned_qty",
+						"source_field": "-1 * qty",
+						"extra_cond": """ and exists (select name from `tabSubcontracting Receipt`
+						where name=`tabSubcontracting Receipt Item`.parent and is_return=1)""",
+					},
+					{
+						"source_dt": "Subcontracting Receipt Item",
+						"target_dt": "Subcontracting Receipt Item",
+						"join_field": "subcontracting_receipt_item",
+						"target_field": "returned_qty",
+						"target_parent_dt": "Subcontracting Receipt",
+						"target_parent_field": "per_returned",
+						"target_ref_field": "received_qty",
+						"source_field": "-1 * received_qty",
+						"percent_join_field_parent": "return_against",
+					},
+				]
+			)
+
+	def update_status(self, status=None, update_modified=False):
+		if not status:
+			if self.docstatus == 0:
+				status = "Draft"
+			elif self.docstatus == 1:
+				status = "Completed"
+
+				if self.is_return:
+					status = "Return"
+				elif self.per_returned == 100:
+					status = "Return Issued"
+
+			elif self.docstatus == 2:
+				status = "Cancelled"
+
+			if self.is_return:
+				frappe.get_doc("Subcontracting Receipt", self.return_against).update_status(
+					update_modified=update_modified
+				)
+
+		if status:
+			frappe.db.set_value(
+				"Subcontracting Receipt", self.name, "status", status, update_modified=update_modified
+			)
+
+	def get_gl_entries(self, inventory_account_map=None):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.services.gl_composer import (
+			SubcontractingReceiptGLComposer,
+		)
+
+		return SubcontractingReceiptGLComposer(self).compose(inventory_account_map)
+
+	def auto_create_purchase_receipt(self):
+		if frappe.db.get_single_value("Buying Settings", "auto_create_purchase_receipt"):
+			make_purchase_receipt(self, save=True, notify=True)
+
+	def has_reserved_stock(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_details_for_voucher,
+		)
+
+		for item in self.supplied_items:
+			if get_sre_details_for_voucher("Subcontracting Order", item.subcontracting_order):
+				return True
+
+		return False
