@@ -888,31 +888,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 <<<<<<< HEAD
 =======
 	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
-		make_subcontracted_item(
-			item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
-		)
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 7",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item SA7",
-				"fg_item_qty": 10,
-			},
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 8",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item Shared RM",
-				"fg_item_qty": 10,
-			},
-		]
-		sco = get_subcontracting_order(service_items=service_items)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
-		)
+		sco = get_subcontracting_order_sharing_a_raw_material()
 
 		def transfer_20_for(fg_item):
 			ste = frappe.get_doc(make_rm_stock_entry(sco.name))
@@ -947,7 +923,26 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		self.assertRaisesRegex(frappe.ValidationError, "is not a finished good", ste.insert)
 
+<<<<<<< HEAD
 >>>>>>> b417b17 (test: Material to Supplier refuses a Subcontracted Item not on the order)
+=======
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_relinks_a_row_moved_to_another_finished_good(self):
+		sco = get_subcontracting_order_sharing_a_raw_material()
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.items = [row for row in ste.items if row.subcontracted_item == "Subcontracted Item SA7"]
+		ste.items[0].subcontracted_item = "Subcontracted Item Shared RM"
+		ste.insert()
+		ste.submit()
+
+		sco.reload()
+		supplied_qty = {row.main_item_code: row.supplied_qty for row in sco.supplied_items}
+		self.assertEqual(supplied_qty, {"Subcontracted Item SA7": 0, "Subcontracted Item Shared RM": 10})
+
+>>>>>>> d89be4d (test: Material to Supplier relinks a row moved to another finished good of the order)
 	def test_get_materials_from_supplier(self):
 		# Create SCO
 		sco = get_subcontracting_order()
@@ -1322,6 +1317,123 @@ def make_supplied_item_transfer(sco, row, link=True):
 	return frappe.get_doc(make_rm_stock_entry(sco.name, [rm_item]))
 
 
+<<<<<<< HEAD
+=======
+def make_foreign_currency_subcontracting_order():
+	from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 500,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+	]
+	po = create_purchase_order(
+		rm_items=service_items,
+		is_subcontracted=1,
+		supplier="_Test Supplier USD",
+		currency="USD",
+		supplier_warehouse="_Test Warehouse 1 - _TC",
+		do_not_submit=1,
+	)
+	po.conversion_rate = 80
+	po.submit()
+
+	return create_subcontracting_order(po_name=po.name)
+
+
+def set_unconverted_service_cost(sco):
+	frappe.db.set_value("Subcontracting Order", sco.name, {"conversion_rate": 1, "total": 0})
+	frappe.db.set_value(
+		"Subcontracting Order Service Item", sco.service_items[0].name, {"base_rate": 0, "base_amount": 0}
+	)
+	frappe.db.set_value(
+		"Subcontracting Order Item", sco.items[0].name, {"service_cost_per_qty": 500, "rate": 0, "amount": 0}
+	)
+
+
+def make_reserved_production_plan():
+	"""Production Plan that reserves the raw materials of one subcontracted sub-assembly."""
+	from erpnext.manufacturing.doctype.production_plan.production_plan import (
+		get_items_for_material_requests,
+	)
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import create_production_plan
+
+	parent_fg = make_item()
+	make_bom(
+		item=parent_fg.name, raw_materials=["Subcontracted Item SA10"], rate=100, rm_qty=1, currency="INR"
+	)
+	plan = create_production_plan(
+		item_code=parent_fg.name,
+		planned_qty=10,
+		do_not_submit=True,
+		reserve_stock=True,
+		skip_available_sub_assembly_item=True,
+		for_warehouse="_Test Warehouse - _TC",
+		sub_assembly_warehouse="_Test Warehouse - _TC",
+		skip_getting_mr_items=True,
+	)
+	plan.get_sub_assembly_items()
+	plan.sub_assembly_items[0].supplier = "_Test Supplier"
+	for d in get_items_for_material_requests(plan.as_dict()):
+		plan.append("mr_items", d)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=d["item_code"], qty=10, basic_rate=100)
+	plan.submit()
+	return plan
+
+
+def make_subcontracting_order_from_plan(plan):
+	"""Subcontracting Order whose raw material reservations are taken from the plan's."""
+	plan.make_work_order()
+	po = frappe.get_doc(
+		"Purchase Order",
+		frappe.get_value("Purchase Order Item", {"production_plan": plan.name}, "parent"),
+	)
+	po.items[0].item_code = "Subcontracted Service Item 4"
+	po.items[0].qty = 10
+	po.submit()
+	sco = create_subcontracting_order(po_name=po.name, do_not_save=1)
+	sco.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	sco.reserve_stock = True
+	sco.submit()
+	sco.reload()
+	return sco
+
+
+def get_subcontracting_order_sharing_a_raw_material():
+	make_subcontracted_item(
+		item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
+	)
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 8",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item Shared RM",
+			"fg_item_qty": 10,
+		},
+	]
+	sco = get_subcontracting_order(service_items=service_items)
+	make_stock_entry(
+		target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+	)
+	return sco
+
+
+>>>>>>> d89be4d (test: Material to Supplier relinks a row moved to another finished good of the order)
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)
 	sco = get_mapped_subcontracting_order(source_name=args.po_name)
