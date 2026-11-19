@@ -1094,6 +1094,23 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		supplied_qty = {row.main_item_code: row.supplied_qty for row in sco.supplied_items}
 		self.assertEqual(supplied_qty, {"Subcontracted Item SA7": 0, "Subcontracted Item Shared RM": 10})
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_accepts_a_finished_good_without_supplied_items(self):
+		fg_item = make_item("Subcontracted Item Supplier Sourced", {"is_sub_contracted_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=["Subcontracted SRM Item 1"], do_not_submit=True)
+		bom.items[0].sourced_by_supplier = 1
+		bom.submit()
+
+		sco = get_subcontracting_order_with_sa7_and(fg_item, "Subcontracted Service Item 9")
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.items[0].subcontracted_item = fg_item
+
+		ste.insert()
+
 	def test_get_materials_from_supplier(self):
 		# Create SCO
 		sco = get_subcontracting_order()
@@ -1895,6 +1912,16 @@ def get_subcontracting_order_sharing_a_raw_material():
 	make_subcontracted_item(
 		item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
 	)
+	sco = get_subcontracting_order_with_sa7_and(
+		"Subcontracted Item Shared RM", "Subcontracted Service Item 8"
+	)
+	make_stock_entry(
+		target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+	)
+	return sco
+
+
+def get_subcontracting_order_with_sa7_and(fg_item, service_item):
 	service_items = [
 		{
 			"warehouse": "_Test Warehouse - _TC",
@@ -1906,18 +1933,14 @@ def get_subcontracting_order_sharing_a_raw_material():
 		},
 		{
 			"warehouse": "_Test Warehouse - _TC",
-			"item_code": "Subcontracted Service Item 8",
+			"item_code": service_item,
 			"qty": 10,
 			"rate": 100,
-			"fg_item": "Subcontracted Item Shared RM",
+			"fg_item": fg_item,
 			"fg_item_qty": 10,
 		},
 	]
-	sco = get_subcontracting_order(service_items=service_items)
-	make_stock_entry(
-		target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
-	)
-	return sco
+	return get_subcontracting_order(service_items=service_items)
 
 
 def create_subcontracting_order(**args):
