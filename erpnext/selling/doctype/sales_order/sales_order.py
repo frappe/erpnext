@@ -2221,10 +2221,11 @@ def get_potentially_billable_sales_orders(
 	if txt:
 		query = query.where(get_text_search_criterion(so, txt))
 
+	if not query.is_joined(so_item):
+		query = query.inner_join(so_item).on(so_item.parent == so.name)
+
 	return (
-		query.inner_join(so_item)
-		.on(so_item.parent == so.name)
-		.left_join(item)
+		query.left_join(item)
 		.on(item.name == so_item.item_code)
 		.where(get_potentially_billable_item_criterion(so, so_item, item))
 		.where(Criterion.all(build_qb_match_conditions("Sales Order")))
