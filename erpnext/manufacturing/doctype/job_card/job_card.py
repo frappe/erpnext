@@ -175,7 +175,9 @@ class JobCard(Document):
 		self.set_operation_id()
 		self.reset_required_items()
 		self.set_hour_rate()
-		self.validate_sequence_id()
+		# A draft without time logs or loss can be edited. Start, progress and submit follow the sequence.
+		if self.docstatus == 1 or self.time_logs or flt(self.process_loss_qty):
+			self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
 		if self.sub_operations:
