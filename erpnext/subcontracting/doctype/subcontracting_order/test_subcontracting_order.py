@@ -1875,6 +1875,33 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(status, "Partially Delivered")
 		self.assertEqual(get_bin(rm_item["item_code"], rm_item["warehouse"]).reserved_stock, reserved_qty - 4)
 
+	def test_raw_material_cost_is_converted_from_bom_currency(self):
+		service_item = make_item("Subcontracted Service Item USD BOM", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item USD BOM", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item("Subcontracted RM Item USD BOM", {"is_stock_item": 1, "valuation_rate": 800}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], currency="USD", do_not_submit=True)
+		bom.conversion_rate = 80
+		bom.save()
+		bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0)
+
+		self.assertEqual(sco.items[0].rm_cost_per_qty, 800)
+		self.assertEqual(sco.supplied_items[0].rate, 800)
+		self.assertEqual(sco.supplied_items[0].amount, 4000)
+
 	def test_service_cost_is_converted_to_company_currency(self):
 		sco = make_foreign_currency_subcontracting_order()
 
