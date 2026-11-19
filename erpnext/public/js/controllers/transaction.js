@@ -1055,8 +1055,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (fetch_valuation_rate) {
 			this.get_incoming_rate(
 				item,
-				this.frm.doc.posting_date,
-				this.frm.doc.posting_time,
+				this.frm.doc.posting_date || this.frm.doc.transaction_date,
+				this.frm.doc.posting_time || this.frm.doc.transaction_time,
 				this.frm.doc.doctype,
 				this.frm.doc.company
 			);
@@ -1088,6 +1088,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				args: item_args,
 			},
 			callback: function (r) {
+				// skip the answer for a qty that has since changed
+				if (item.qty * item.conversion_factor !== stock_qty) return;
 				frappe.model.set_value(item.doctype, item.name, "rate", r.message * item.conversion_factor);
 			},
 		});
