@@ -229,6 +229,25 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		journal.accounts[1].credit_in_account_currency *= exchange_rate
 		return journal
 
+	def create_foreign_currency_journal_payment(self, debtors_account, exchange_rate):
+		je = self.create_journal_entry(self.bank, debtors_account, 100, nowdate())
+		je.multi_currency = 1
+		je.accounts[0].exchange_rate = 1
+		je.accounts[0].credit_in_account_currency = 0
+		je.accounts[0].credit = 0
+		je.accounts[0].debit_in_account_currency = 100 * exchange_rate
+		je.accounts[0].debit = 100 * exchange_rate
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer_usd
+		je.accounts[1].exchange_rate = exchange_rate
+		je.accounts[1].credit_in_account_currency = 100
+		je.accounts[1].credit = 100 * exchange_rate
+		je.accounts[1].debit_in_account_currency = 0
+		je.accounts[1].debit = 0
+		je.save()
+		je.submit()
+		return je
+
 	def test_filter_min_max(self):
 		# check filter condition minimum and maximum amount
 		self.create_sales_invoice(qty=1, rate=300)
@@ -830,7 +849,6 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 	def test_foreign_currency_journal_reconciliation_updates_payment_schedule(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 
-		self.setup_split_exchange_accounts()
 		create_payment_terms_template()
 		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
 		si.customer, si.currency, si.conversion_rate = self.customer_usd, "USD", 80
@@ -854,6 +872,16 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		)
 		pr.reconcile()
 
+		# the rate difference (80 -> 85) is booked to the exchange gain/loss account against the invoice
+		gain_loss_account = frappe.get_cached_value("Company", self.company, "exchange_gain_loss_account")
+		invoice_journals = frappe.get_all(
+			"Journal Entry Account", filters={"reference_name": si.name, "docstatus": 1}, pluck="parent"
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Journal Entry Account", {"parent": ["in", invoice_journals], "account": gain_loss_account}
+			)
+		)
 		self.assert_schedule_matches_outstanding(si)
 		self.assertEqual(si.outstanding_amount, 0)
 
