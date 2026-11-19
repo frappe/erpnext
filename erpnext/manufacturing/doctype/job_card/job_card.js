@@ -110,8 +110,11 @@ frappe.ui.form.on("Job Card", {
 
 		if (!can_make_stock_entry) return;
 
-		frm.add_custom_button(__("Record Output"), () => frm.events.confirm_record_output(frm)).addClass(
-			"btn-primary"
+		frm.add_custom_button(
+			__("Record Output"),
+			() => frm.events.confirm_record_output(frm),
+			null,
+			"primary"
 		);
 	},
 
@@ -586,12 +589,17 @@ frappe.ui.form.on("Job Card", {
 
 	make_subcontracting_po(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
-			frm.add_custom_button(__("Make Subcontracting PO"), () => {
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
-					frm: frm,
-				});
-			}).addClass("btn-primary");
+			frm.add_custom_button(
+				__("Make Subcontracting PO"),
+				() => {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
+						frm: frm,
+					});
+				},
+				null,
+				"primary"
+			);
 		}
 	},
 
