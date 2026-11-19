@@ -110,6 +110,16 @@ def is_costed_out_of_finished_item(row) -> bool:
 	)
 
 
+@frappe.request_cache
+def get_sub_assembly_secondary_qty(bom_no) -> dict:
+	"""Qty of each sub-assembly secondary row per finished good of the BOM."""
+	qty = defaultdict(float)
+	for d in get_secondary_items_from_sub_assemblies(bom_no):
+		qty[d.name] += flt(d.qty)
+
+	return qty
+
+
 class StockEntry(StockController, SubcontractingInwardController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -699,11 +709,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
 
 		zero_valuation_items = []
-		# Own-cost rows first: their value is deducted from the basis the percentage
-		# allocated rows and the finished good split, so it must be known before those.
+		# Own-cost rows first, then sub-assembly percentage rows: their value is deducted from
+		# the basis the other percentage rows and the finished good split.
 		finished_items_last = sorted(
 			self.get("items"),
-			key=lambda row: (cint(row.is_finished_item), cint(not self.is_costed_out(row))),
+			key=lambda row: (
+				cint(row.is_finished_item),
+				cint(not self.is_costed_out(row)),
+				cint(not is_costed_out_of_finished_item(row)),
+			),
 		)
 		for d in finished_items_last:
 			if d.s_warehouse or d.set_basic_rate_manually:
@@ -1019,17 +1033,45 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not flt(qty_per_bom):
 			return 0.0
 
-		qty_per_finished_good = sum(
-			flt(d.qty)
-			for d in get_secondary_items_from_sub_assemblies(self.bom_no)
-			if d.name == row.bom_secondary_item
-		)
+		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no).get(row.bom_secondary_item, 0)
 		boms_made = qty_per_finished_good * flt(self.fg_completed_qty) / flt(qty_per_bom)
-		consumed_rates = {d.item_code: flt(d.basic_rate) for d in self.get("items") if d.s_warehouse}
+		consumed_rates = self.get_consumed_rates()
 		components = frappe.get_all(
 			"BOM Explosion Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
 		)
-		return sum(flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components)
+		component_cost = sum(
+			flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components
+		)
+		return component_cost - self.get_own_cost_secondary_items_cost(bom_no)
+
+	def get_consumed_rates(self) -> dict:
+		"""Average consumed rate of each component, keyed by the BOM item it was consumed for."""
+		rows = self.get("items")
+		if self.is_rm_cost_from_consumption_entries():
+			rows = frappe.get_all(
+				"Stock Entry Detail",
+				filters={"parent": ("in", self.get_consumption_entries())},
+				fields=["item_code", "original_item", "s_warehouse", "transfer_qty", "basic_amount"],
+			)
+
+		qty, value = defaultdict(float), defaultdict(float)
+		for d in rows:
+			if d.s_warehouse:
+				item_code = d.original_item or d.item_code
+				qty[item_code] += flt(d.transfer_qty)
+				value[item_code] += flt(d.basic_amount)
+
+		return {item_code: value[item_code] / qty[item_code] for item_code in qty if qty[item_code]}
+
+	def get_own_cost_secondary_items_cost(self, bom_no) -> float:
+		"""Value of the BOM's Valuation Rate and Manual secondary rows, which its percentages exclude."""
+		return sum(
+			flt(d.basic_amount)
+			for d in self.get("items")
+			if d.bom_secondary_item
+			and is_costed_out_of_finished_item(d)
+			and frappe.get_cached_value("BOM Secondary Item", d.bom_secondary_item, "parent") == bom_no
+		)
 
 	def get_basic_rate_for_manufactured_item(
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
