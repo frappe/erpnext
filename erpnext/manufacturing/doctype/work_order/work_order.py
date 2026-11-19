@@ -867,7 +867,11 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if flt(self.material_transferred_for_manufacturing) > 0 or self._has_transferred_material():
+				if (
+					flt(self.material_transferred_for_manufacturing) > 0
+					or self._has_transferred_material()
+					or self._has_consumed_material()
+				):
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -946,6 +950,19 @@ class WorkOrder(Document):
 			.where(common_filters & (ste.is_return == 1))
 		).run()[0][0]
 		return flt(transferred_qty) - flt(returned_qty) > 0
+
+	def _has_consumed_material(self):
+		"""True if a submitted Material Consumption entry exists, e.g. on a skip-transfer order."""
+		return bool(
+			frappe.db.exists(
+				"Stock Entry",
+				{
+					"work_order": self.name,
+					"docstatus": 1,
+					"purpose": "Material Consumption for Manufacture",
+				},
+			)
+		)
 
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
