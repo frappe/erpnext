@@ -396,6 +396,7 @@ def add_total_row_account(
 		f"{name_key}_name": label_str,
 		name_key: label_str,
 		"currency": currency,
+		"is_total_row": 1,
 	}
 
 	# from consolidated financial statement
@@ -430,11 +431,13 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 		"section_name": "Opening",
 		"section": "Opening",
 		"currency": currency,
+		"is_total_row": 1,
 	}
 	closing_balance = {
 		"section_name": "Closing (Opening + Total)",
 		"section": "Closing (Opening + Total)",
 		"currency": currency,
+		"is_total_row": 1,
 	}
 
 	opening = closing = get_opening_balance(filters.company, period_list, filters) or 0.0
