@@ -429,16 +429,7 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
 				else:
-					total_required_qty = total_supplied_qty = 0
-					for item in self.supplied_items:
-						total_required_qty += item.required_qty
-						total_supplied_qty += flt(item.total_supplied_qty)
-					if total_supplied_qty:
-						status = "Partial Material Transferred"
-						if total_supplied_qty >= total_required_qty:
-							status = "Material Transferred"
-					else:
-						status = "Open"
+					status = self.get_transfer_status()
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
@@ -453,6 +444,23 @@ class SubcontractingOrder(SubcontractingController):
 			self.update_ordered_qty_for_subcontracting()
 			self.update_reserved_qty_for_subcontracting()
 			self.update_subcontracted_qty_in_work_orders()
+
+	def get_transfer_status(self):
+		"""Material Transferred only when each raw material is fully supplied, counted across rows."""
+		required_qty, supplied_qty = defaultdict(float), defaultdict(float)
+		for item in self.supplied_items:
+			required_qty[item.rm_item_code] += flt(item.required_qty)
+			supplied_qty[item.rm_item_code] += flt(item.total_supplied_qty)
+
+		if not any(supplied_qty.values()):
+			return "Open"
+
+		precision = frappe.get_precision("Subcontracting Order Supplied Item", "total_supplied_qty")
+		for rm_item_code, qty in required_qty.items():
+			if flt(supplied_qty[rm_item_code], precision) < flt(qty, precision):
+				return "Partial Material Transferred"
+
+		return "Material Transferred"
 
 	def update_subcontracted_quantity_in_po(self):
 		po_items = [d.purchase_order_item for d in self.service_items if d.purchase_order_item]
