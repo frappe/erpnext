@@ -135,6 +135,39 @@ class TestProjectCosting(ERPNextTestSuite):
 		)
 		self.assertIn(item_invoice, {page[0]["name"] for page in pages[:2]})
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_order_list_follows_row_projects(self) -> None:
+		"""The Billing card lists each order with the amount it adds to the project, as the contract
+		counts it, and links to the order list by the order's project or by the items' project."""
+		header = make_project({"project_name": f"_Test Order Header {frappe.generate_hash(length=6)}"}).name
+		row = make_project({"project_name": f"_Test Order Row {frappe.generate_hash(length=6)}"}).name
+		order = make_sales_order(qty=1, rate=3000, do_not_save=True)
+		order.project = header
+		order.append(
+			"items", {**order.items[0].as_dict(no_default_fields=True), "rate": 2000, "project": row}
+		)
+		order.insert()
+		order.submit()
+
+		billing = billing_of(header)
+		self.assertEqual([o["amount"] for o in billing["sales_orders"]], [3000])
+		self.assertEqual(billing["order_filter"], {"project": header})
+
+		billing = billing_of(row)
+		self.assertEqual([(o["name"], o["amount"]) for o in billing["sales_orders"]], [(order.name, 2000)])
+		self.assertEqual(billing["order_filter"], {"Sales Order Item.project": row})
+
+		# a mix of the two has no list filter, so every order is listed
+		with patch("erpnext.projects.doctype.project.costing.billing.LIST_LIMIT", 1):
+			header_order = make_sales_order(qty=1, rate=500, do_not_save=True)
+			header_order.project = row
+			header_order.insert()
+			header_order.submit()
+			billing = billing_of(row)
+		self.assertIsNone(billing["order_filter"])
+		self.assertEqual(sorted(o["amount"] for o in billing["sales_orders"]), [500, 2000])
+		self.assertEqual(billing["sales_order_count"], 2)
+
 	def test_viewers_see_the_totals_and_only_what_they_may_read(self) -> None:
 		"""A Projects User sees the same totals, without costing rates or the invoices behind them. A
 		Sales User the project is shared with cannot read timesheets: the labour lists are left out,
