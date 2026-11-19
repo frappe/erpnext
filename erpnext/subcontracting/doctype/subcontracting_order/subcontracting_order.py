@@ -663,16 +663,15 @@ def make_subcontracting_receipt(source_name: str, target_doc: str | dict | Docum
 
 
 def get_mapped_process_loss_qty(row, received_before: float, process_loss_per: float) -> float:
-	"""Rounded on the order row's running received qty, in whole units for a whole-number UOM,
+	"""For a whole-number UOM, whole units rounded on the order row's running received qty,
 	so that the receipts together lose the BOM's process loss."""
-	precision = row.precision("process_loss_qty")
-	if frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"):
-		precision = 0
+	if not frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"):
+		return flt(row.qty * (process_loss_per / 100), row.precision("process_loss_qty"))
 
-	def loss_on(received_qty):
-		return flt(received_qty * process_loss_per / 100, precision)
+	def whole_loss_on(received_qty):
+		return flt(received_qty * process_loss_per / 100, 0)
 
-	return flt(loss_on(received_before + flt(row.qty)) - loss_on(received_before), precision)
+	return whole_loss_on(received_before + flt(row.qty)) - whole_loss_on(received_before)
 
 
 def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
