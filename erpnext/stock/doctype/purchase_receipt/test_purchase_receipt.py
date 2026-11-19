@@ -6804,7 +6804,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		make_uom_conversion_factor("Box", "Nos", 12)
 
-		pr, *_ = self.make_transfer_receipt(item, 24, 0)
+		pr, *_ = self.make_transfer_receipt("Box Qty Change", item, 24, 0)
 		pr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2, "received_qty": 2})
 		pr.save()
 
@@ -6824,7 +6824,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		make_uom_conversion_factor("Box", "Nos", 12)
 
-		pr, *_ = self.make_transfer_receipt(item, 24, 0)
+		pr, *_ = self.make_transfer_receipt("Box UOM Change", item, 24, 0)
 		pr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2, "received_qty": 2})
 		pr.save()
 
