@@ -854,14 +854,8 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 	def get_serial_no_wise_incoming_rate(self, serial_nos):
 		latest_inward = {}
 		for serial_nos_batch in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
-			entries = self.get_inward_serial_no_entries(serial_nos_batch)
-			bundles = self.get_inward_bundles({entry.parent for entry in entries})
-			for entry in entries:
-				bundle = bundles.get(entry.parent)
-				if not bundle:
-					continue
-
-				key = (bundle.posting_datetime, bundle.creation)
+			for entry in self.get_inward_serial_no_entries(serial_nos_batch):
+				key = (entry.posting_datetime, entry.creation)
 				if entry.serial_no not in latest_inward or key > latest_inward[entry.serial_no][0]:
 					latest_inward[entry.serial_no] = (key, entry.incoming_rate)
 
@@ -869,47 +863,33 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 	def get_inward_serial_no_entries(self, serial_nos):
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
-		return (
+		query = (
 			frappe.qb.from_(bundle_child)
-			.select(bundle_child.serial_no, bundle_child.incoming_rate, bundle_child.parent)
+			.select(
+				bundle_child.serial_no,
+				bundle_child.incoming_rate,
+				bundle_child.posting_datetime,
+				bundle_child.creation,
+			)
 			.where(
 				(bundle_child.serial_no.isin(serial_nos))
 				& (bundle_child.warehouse == self.sle.warehouse)
 				& (bundle_child.qty > 0)
 				& (bundle_child.docstatus == 1)
-			)
-		).run(as_dict=True)
-
-	def get_inward_bundles(self, bundle_names):
-		bundles = {}
-		for bundle_names_batch in create_batch(list(bundle_names), SERIAL_NO_QUERY_BATCH_SIZE):
-			for bundle in self.get_inward_bundle_query(bundle_names_batch).run(as_dict=True):
-				bundles[bundle.name] = bundle
-
-		return bundles
-
-	def get_inward_bundle_query(self, bundle_names):
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
-		query = (
-			frappe.qb.from_(bundle)
-			.select(bundle.name, bundle.posting_datetime, bundle.creation)
-			.where(
-				(bundle.name.isin(bundle_names))
-				& (bundle.item_code == self.sle.item_code)
-				& (bundle.is_cancelled == 0)
-				& (bundle.docstatus == 1)
-				& (bundle.type_of_transaction == "Inward")
-				& (bundle.posting_datetime.isnotnull())
+				& (bundle_child.item_code == self.sle.item_code)
+				& (bundle_child.is_cancelled == 0)
+				& (bundle_child.type_of_transaction == "Inward")
+				& (bundle_child.posting_datetime.isnotnull())
 			)
 		)
 
 		if self.sle.voucher_no:
-			query = query.where(bundle.voucher_no != self.sle.voucher_no)
+			query = query.where(bundle_child.voucher_no != self.sle.voucher_no)
 
 		if self.sle.posting_datetime:
-			query = query.where(get_posted_before_sle_condition(self.sle, bundle))
+			query = query.where(get_posted_before_sle_condition(self.sle, bundle_child))
 
-		return query
+		return query.run(as_dict=True)
 
 	def get_serial_nos(self):
 		if self.sle.get("serial_nos"):
@@ -955,8 +935,8 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		return self.serial_no_incoming_rate.get(serial_no, 0.0)
 
 
-def get_posted_before_sle_condition(sle, bundle):
-	"""Bundles posted before the SLE; on the same posting datetime, those whose own SLE was created earlier."""
+def get_posted_before_sle_condition(sle, entry):
+	"""Entries posted before the SLE; on the same posting datetime, those whose bundle's SLE was created earlier."""
 	sle_creation = sle.creation if sle.get("name") else None
 	if not sle.get("name") and sle.get("serial_and_batch_bundle"):
 		sle_creation = frappe.db.get_value(
@@ -966,7 +946,7 @@ def get_posted_before_sle_condition(sle, bundle):
 		)
 
 	sle_table = frappe.qb.DocType("Stock Ledger Entry")
-	bundle_sle_exists = (sle_table.serial_and_batch_bundle == bundle.name) & (sle_table.is_cancelled == 0)
+	bundle_sle_exists = (sle_table.serial_and_batch_bundle == entry.parent) & (sle_table.is_cancelled == 0)
 	if sle_creation:
 		bundle_sle_exists &= sle_table.creation < sle_creation
 
@@ -974,8 +954,8 @@ def get_posted_before_sle_condition(sle, bundle):
 		frappe.qb.from_(sle_table).select(sle_table.name).where(bundle_sle_exists)
 	)
 
-	return (bundle.posting_datetime < sle.posting_datetime) | (
-		(bundle.posting_datetime == sle.posting_datetime) & tie_condition
+	return (entry.posting_datetime < sle.posting_datetime) | (
+		(entry.posting_datetime == sle.posting_datetime) & tie_condition
 	)
 
 
@@ -1025,29 +1005,26 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		if not self.batchwise_valuation_batches:
 			return []
 
-		parent = frappe.qb.DocType("Serial and Batch Bundle")
 		child = frappe.qb.DocType("Serial and Batch Entry")
 
 		timestamp_condition = ""
 		if self.sle.posting_datetime:
-			timestamp_condition = get_posted_before_sle_condition(self.sle, parent)
+			timestamp_condition = get_posted_before_sle_condition(self.sle, child)
 
 		query = (
-			frappe.qb.from_(parent)
-			.inner_join(child)
-			.on(parent.name == child.parent)
+			frappe.qb.from_(child)
 			.select(
 				child.batch_no,
 				Sum(child.stock_value_difference).as_("incoming_rate"),
 				Sum(child.qty).as_("qty"),
 			)
 			.where(
-				(parent.warehouse == self.sle.warehouse)
-				& (parent.item_code == self.sle.item_code)
+				(child.warehouse == self.sle.warehouse)
+				& (child.item_code == self.sle.item_code)
 				& (child.batch_no.isin(self.batchwise_valuation_batches))
-				& (parent.docstatus == 1)
-				& (parent.is_cancelled == 0)
-				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
+				& (child.docstatus == 1)
+				& (child.is_cancelled == 0)
+				& (child.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.for_update()
 			.groupby(child.batch_no)
@@ -1055,11 +1032,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
 		if self.sle.voucher_detail_no:
-			query = query.where(parent.voucher_detail_no != self.sle.voucher_detail_no)
+			query = query.where(child.voucher_detail_no != self.sle.voucher_detail_no)
 		elif self.sle.voucher_no:
-			query = query.where(parent.voucher_no != self.sle.voucher_no)
+			query = query.where(child.voucher_no != self.sle.voucher_no)
 
-		query = query.where(parent.voucher_type != "Pick List")
+		query = query.where(child.voucher_type != "Pick List")
 		if timestamp_condition:
 			query = query.where(timestamp_condition)
 
