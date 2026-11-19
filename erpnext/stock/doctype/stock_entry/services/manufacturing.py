@@ -1155,8 +1155,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def get_bom_secondary_items(self):
 		"""Skip the BOM estimate of a secondary item whose actual qty the Job Cards recorded."""
-		recorded = {row.bom_secondary_item for row in self.get_job_card_secondary_items()}
-		return [row for row in super().get_bom_secondary_items() if row.name not in recorded]
+		recorded = {get_secondary_item_key(row) for row in self.get_job_card_secondary_items()}
+		return [
+			row
+			for row in super().get_bom_secondary_items()
+			if row.name not in recorded and get_secondary_item_key(row) not in recorded
+		]
 
 	def get_job_card_secondary_items(self):
 		if not self.wo_doc or not self.wo_doc.operations:
@@ -1166,11 +1170,15 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return merge_secondary_items(secondary_items)
 
 	def link_bom_secondary_items(self, secondary_items):
-		"""Link rows without a BOM row, such as Job Card rows added by hand, to the BOM row of their item and type."""
-		bom_rows = {get_secondary_item_key(row): row.name for row in super().get_bom_secondary_items()}
+		"""Link rows without a BOM row, such as Job Card rows added by hand, to the only BOM row of their item and type."""
+		bom_rows = defaultdict(list)
+		for row in super().get_bom_secondary_items():
+			bom_rows[get_secondary_item_key(row)].append(row.name)
+
 		for row in secondary_items:
-			if not row.bom_secondary_item:
-				row.bom_secondary_item = bom_rows.get(get_secondary_item_key(row))
+			names = bom_rows.get(get_secondary_item_key(row), [])
+			if not row.bom_secondary_item and len(names) == 1:
+				row.bom_secondary_item = names[0]
 
 	def get_secondary_items_from_job_card(self):
 		secondary_items = self.get_job_card_secondary_items()
