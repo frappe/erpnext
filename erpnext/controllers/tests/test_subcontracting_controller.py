@@ -130,8 +130,6 @@ class TestSubcontractingController(FrappeTestCase):
 					self.assertEqual(transfer, consumed)
 
 	def test_additional_cost_shares_add_up_to_the_cost(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
 		service_items = []
 		for _ in range(3):
 			fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
