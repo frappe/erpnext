@@ -736,9 +736,9 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value(original.doctype, original.name, "consumed_qty"), original.required_qty
 		)
 
-	def test_shared_alternative_item_counts_on_each_original_row_up_to_its_sent_qty(self):
+	def test_alternative_item_counts_on_the_order_row_it_was_sent_on_net_of_returns(self):
 		set_backflush_based_on("Material Transferred for Subcontract")
-		suffix = "Shared Alt"
+		suffix = "Row Alt"
 		service_item = make_item(f"Subcontracted Service Item {suffix}", {"is_stock_item": 0}).name
 		fg_item = make_item(
 			f"Subcontracted FG Item {suffix}", {"is_stock_item": 1, "is_sub_contracted_item": 1}
@@ -762,21 +762,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		]
 		sco = get_subcontracting_order(service_items=service_items)
 		first_row, second_row = sco.supplied_items
-		for item_code, qty in ((shared, 6), (other, 4)):
+		for item_code, qty in ((shared, 10), (other, 5)):
 			make_stock_entry(item_code=item_code, target=first_row.reserve_warehouse, qty=qty, basic_rate=100)
 
-		for row, alternative, qty in ((first_row, shared, 1), (first_row, other, 4), (second_row, shared, 5)):
+		def send(row, alternative):
 			transfer = make_supplied_item_transfer(sco, row)
 			transfer.items[0].update(
-				{
-					"item_code": alternative,
-					"original_item": row.rm_item_code,
-					"allow_alternative_item": 1,
-					"qty": qty,
-				}
+				{"item_code": alternative, "original_item": row.rm_item_code, "allow_alternative_item": 1}
 			)
 			transfer.insert()
 			transfer.submit()
+
+		send(first_row, shared)
+		frappe.flags.args = {"rm_details": [first_row.name]}
+		returned = get_materials_from_supplier(sco.name)
+		frappe.flags.args = None
+		returned.submit()
+		send(first_row, other)
+		send(second_row, shared)
 		make_subcontracting_receipt(sco.name).submit()
 
 		self.assertEqual(
