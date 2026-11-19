@@ -748,6 +748,40 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(sales_amount(header), 0)
 		self.assertEqual(sales_amount(row), 0)
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"sales_update_frequency": "Each Transaction", "allow_multiple_items": 1}
+	)
+	def test_sales_amount_moves_with_row_project_changed_after_submit(self):
+		"""A row's project can change on a submitted order, and Update Items can remove a row. The
+		projects the order no longer names drop the amount."""
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		header, before, after = (
+			make_project({"project_name": f"_Test SO Row Move {frappe.generate_hash(length=6)}"})
+			for _ in range(3)
+		)
+		order = make_sales_order(qty=1, rate=3000, do_not_save=True)
+		order.project = header.name
+		order.append(
+			"items", {**order.items[0].as_dict(no_default_fields=True), "rate": 2000, "project": before.name}
+		)
+		order.insert()
+		order.submit()
+
+		def sales_amount(project):
+			return frappe.db.get_value("Project", project.name, "total_sales_amount")
+
+		order.items[1].project = after.name
+		order.save()
+		self.assertEqual((sales_amount(before), sales_amount(after)), (0, 2000))
+
+		first = order.items[0]
+		trans_items = [
+			{"item_code": first.item_code, "rate": first.rate, "qty": first.qty, "docname": first.name}
+		]
+		update_child_qty_rate("Sales Order", frappe.as_json(trans_items), order.name)
+		self.assertEqual((sales_amount(header), sales_amount(after)), (3000, 0))
+
 	def test_consumed_material_cost_from_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
