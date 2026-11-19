@@ -250,19 +250,18 @@ class MaterialTransferStockEntry(BaseMaterialTransferStockEntry):
 		if not (self.doc.is_return and self.doc.get("subcontracting_order")):
 			return
 
-		from .subcontracting import SendToSubcontractorStockEntry
-
 		order = frappe.get_doc("Subcontracting Order", self.doc.subcontracting_order)
 		qty_at_supplier = order.get_raw_material_qty_at_supplier()
 		returned_qty = defaultdict(float)
 		for row in self.doc.items:
-			returned_qty[row.item_code] += SendToSubcontractorStockEntry(self.doc).get_stock_qty(row)
+			returned_qty[row.item_code] += self.get_stock_qty(row)
 			precision = row.precision("transfer_qty")
-			if flt(returned_qty[row.item_code], precision) > flt(qty_at_supplier[row.item_code], precision):
+			allowed_qty = flt(qty_at_supplier[row.item_code], precision)
+			if flt(returned_qty[row.item_code], precision) > allowed_qty:
 				frappe.throw(
 					_(
 						"Row #{0}: Only {1} of Item {2} can be returned against Subcontracting Order {3}"
-					).format(row.idx, qty_at_supplier[row.item_code], row.item_code, order.name)
+					).format(row.idx, allowed_qty, row.item_code, order.name)
 				)
 
 	def on_submit(self):
