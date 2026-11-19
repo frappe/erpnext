@@ -1959,6 +1959,16 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(consumed_value, -1000)
 		self.assertEqual(gl_value, consumed_value)
 
+	def test_landed_cost_voucher_gets_only_the_finished_goods_of_a_receipt(self):
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_pr_items
+
+		scr = make_receipt_with_scrap(co_product_allocation=20)
+
+		items = get_pr_items(
+			frappe._dict(receipt_document_type="Subcontracting Receipt", receipt_document=scr.name)
+		)
+		self.assertEqual([row.name for row in items], [scr.items[0].name])
+
 	def test_additional_and_landed_costs_with_rejected_qty(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
