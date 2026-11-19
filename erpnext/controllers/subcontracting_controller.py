@@ -1898,6 +1898,7 @@ def make_rm_stock_entry(
 				target_doc.set_stock_entry_type()
 
 				pending_qty = get_pending_qty_by_material(rm_items)
+				precision = target_doc.precision("qty", "items")
 				for fg_item_code in fg_item_code_list:
 					for rm_item in rm_items:
 						if (
@@ -1910,7 +1911,7 @@ def make_rm_stock_entry(
 								row_pending_qty = flt(rm_item.get("required_qty")) - flt(
 									rm_item.get("total_supplied_qty")
 								)
-								qty = max(min(row_pending_qty, pending_qty[rm_item_code]), 0)
+								qty = max(flt(min(row_pending_qty, pending_qty[rm_item_code]), precision), 0)
 								pending_qty[rm_item_code] -= qty
 
 							if qty <= 0:
