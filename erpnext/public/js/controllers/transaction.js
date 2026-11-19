@@ -1087,9 +1087,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			args: {
 				args: item_args,
 			},
-			callback: function (r) {
-				// skip the answer for a qty that has since changed
-				if (item.qty * item.conversion_factor !== stock_qty) return;
+			callback: (r) => {
+				// the qty handler refetches an internal customer's rate, so skip the answer for an older qty
+				if (this.frm.doc.is_internal_customer && item.qty * item.conversion_factor !== stock_qty)
+					return;
 				frappe.model.set_value(item.doctype, item.name, "rate", r.message * item.conversion_factor);
 			},
 		});
