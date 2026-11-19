@@ -4373,7 +4373,10 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		first_return.items[0].qty = -4
 		first_return.save().submit()
 
-		self.assertEqual(first_return.items[0].received_qty, -10)
+		self.assertEqual(first_return.items[0].received_qty, 0)
+
+		# received_qty left on rows saved before it was reset without Update Stock
+		frappe.db.set_value("Purchase Invoice Item", first_return.items[0].name, "received_qty", -10)
 
 		second_return = make_return_doc(invoice.doctype, invoice.name)
 		second_return.items[0].qty = -6
