@@ -1043,31 +1043,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		set_backflush_based_on("BOM")
 
 	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
-		make_subcontracted_item(
-			item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
-		)
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 7",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item SA7",
-				"fg_item_qty": 10,
-			},
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 8",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item Shared RM",
-				"fg_item_qty": 10,
-			},
-		]
-		sco = get_subcontracting_order(service_items=service_items)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
-		)
+		sco = get_subcontracting_order_sharing_a_raw_material()
 
 		def transfer_20_for(fg_item):
 			ste = frappe.get_doc(make_rm_stock_entry(sco.name))
@@ -1101,6 +1077,22 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			row.subcontracted_item = "Subcontracted Item SA1"
 
 		self.assertRaisesRegex(frappe.ValidationError, "is not a finished good", ste.insert)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_relinks_a_row_moved_to_another_finished_good(self):
+		sco = get_subcontracting_order_sharing_a_raw_material()
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.items = [row for row in ste.items if row.subcontracted_item == "Subcontracted Item SA7"]
+		ste.items[0].subcontracted_item = "Subcontracted Item Shared RM"
+		ste.insert()
+		ste.submit()
+
+		sco.reload()
+		supplied_qty = {row.main_item_code: row.supplied_qty for row in sco.supplied_items}
+		self.assertEqual(supplied_qty, {"Subcontracted Item SA7": 0, "Subcontracted Item Shared RM": 10})
 
 	def test_get_materials_from_supplier(self):
 		# Create SCO
@@ -1896,6 +1888,35 @@ def make_subcontracting_order_from_plan(plan):
 	sco.reserve_stock = True
 	sco.submit()
 	sco.reload()
+	return sco
+
+
+def get_subcontracting_order_sharing_a_raw_material():
+	make_subcontracted_item(
+		item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
+	)
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 8",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item Shared RM",
+			"fg_item_qty": 10,
+		},
+	]
+	sco = get_subcontracting_order(service_items=service_items)
+	make_stock_entry(
+		target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+	)
 	return sco
 
 
