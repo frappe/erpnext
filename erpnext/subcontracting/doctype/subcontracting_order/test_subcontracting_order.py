@@ -161,6 +161,41 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		update_subcontracting_order_status(sco.name, "Closed")
 		update_closed_status("Purchase Order", sco.purchase_order, [sco.items[0].purchase_order_item], 1)
 
+	def test_closed_purchase_order_row_cannot_go_back_on_an_open_subcontracting_order(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": item_code,
+				"qty": 5,
+				"rate": 10,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+			for item_code, fg_item in [
+				("Subcontracted Service Item 7", "Subcontracted Item SA7"),
+				("Subcontracted Service Item 1", "Subcontracted Item SA1"),
+			]
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		po_item = sco.items[0].purchase_order_item
+
+		update_closed_status("Purchase Order", sco.purchase_order, [po_item], 1)
+		self.assertRaisesRegex(frappe.ValidationError, "is closed in Purchase Order", sco.submit)
+
+		update_closed_status("Purchase Order", sco.purchase_order, [po_item], 0)
+		sco.reload()
+		sco.submit()
+		update_subcontracting_order_status(sco.name, "Closed")
+		update_closed_status("Purchase Order", sco.purchase_order, [po_item], 1)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is closed in Purchase Order",
+			update_subcontracting_order_status,
+			sco.name,
+		)
+
 	def test_holding_purchase_order_keeps_a_closed_subcontracting_order_closed(self):
 		sco = get_subcontracting_order(do_not_save=1)
 		sco.items[0].qty = 4
