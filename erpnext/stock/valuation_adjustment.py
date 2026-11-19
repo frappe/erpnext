@@ -922,7 +922,7 @@ def validate_no_later_adjustment_entry(sle) -> None:
 			& (reconciliation.name != sle.voucher_no)
 			& (ledger.is_cancelled == 0)
 			& (ledger.item_code == sle.item_code)
-			& (ledger.posting_datetime > get_datetime(sle.posting_datetime))
+			& get_later_than(ledger, sle)
 			& of_item
 		)
 		.orderby(ledger.posting_datetime, order=frappe.qb.desc)
@@ -942,6 +942,29 @@ def validate_no_later_adjustment_entry(sle) -> None:
 			title=_("Backdated Entry Before Adjustment Entry"),
 			exc=BackdatedEntryBeforeAdjustmentError,
 		)
+
+
+def get_later_than(ledger, sle):
+	"""Ledger rows after `sle`. A cancellation sits where the entry it reverses was made, so an
+	Adjustment Entry at the same time but made after that entry is later too."""
+	posting_datetime = get_datetime(sle.posting_datetime)
+	later = ledger.posting_datetime > posting_datetime
+	if not sle.is_cancelled:
+		return later
+
+	created = frappe.db.get_value(
+		"Stock Ledger Entry",
+		{
+			"voucher_type": sle.voucher_type,
+			"voucher_no": sle.voucher_no,
+			"item_code": sle.item_code,
+			"warehouse": sle.warehouse,
+			"is_cancelled": 1,
+		},
+		"creation",
+		order_by="creation asc",
+	)
+	return later | ((ledger.posting_datetime == posting_datetime) & (ledger.creation > created))
 
 
 def get_serial_and_batch_nos(sle) -> tuple[list[str], list[str]]:
