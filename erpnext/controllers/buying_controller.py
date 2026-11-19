@@ -265,9 +265,6 @@ class BuyingController(SubcontractingController):
 		A receipt of an internal transfer builds no package for it on its own, so rejected material
 		of a tracked item would have nothing to say where it came from.
 		"""
-		if not self.is_internal_receipt() or self.is_return:
-			return
-
 		if not self.has_rejected_stock(row):
 			self.remove_package(row, "rejected_serial_and_batch_bundle")
 			return
