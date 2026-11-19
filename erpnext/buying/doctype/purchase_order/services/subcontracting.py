@@ -101,7 +101,7 @@ class SubcontractingService:
 		return result
 
 	def validate_item_close(self, items) -> None:
-		"""A row still being subcontracted has to be closed on its Subcontracting Order first."""
+		"""Refuse to close rows that are still on an open Subcontracting Order."""
 		if not self.doc.is_subcontracted:
 			return
 
