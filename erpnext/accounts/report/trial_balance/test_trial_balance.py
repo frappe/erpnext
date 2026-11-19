@@ -2,9 +2,11 @@
 # MIT License. See license.txt
 
 import frappe
+from frappe.desk.query_report import run
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.report.trial_balance.trial_balance import execute
 
 
@@ -27,6 +29,36 @@ class TestTrialBalance(FrappeTestCase):
 		)
 		self.fiscal_year = get_fiscal_year(today(), company="Trial Balance Company")[0]
 		create_accounting_dimension()
+
+	def test_auditor_can_run_report_without_currency_read_permission(self):
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": f"trial-balance-{frappe.generate_hash(length=10)}@example.com",
+				"first_name": "Trial Balance Auditor",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Auditor"}],
+			}
+		).insert()
+		journal = make_journal_entry(
+			"Cash - TBC",
+			"Sales - TBC",
+			125,
+			company=self.company,
+			cost_center="Test Cost Center - TBC",
+			submit=True,
+		)
+		filters = {"company": self.company, "fiscal_year": self.fiscal_year, "show_zero_values": 1}
+		try:
+			expected = run("Trial Balance", filters=filters.copy(), ignore_prepared_report=True)
+			self.assertTrue(expected["result"])
+			with self.set_user(user.name):
+				self.assertFalse(frappe.has_permission("Currency", "read"))
+				result = run("Trial Balance", filters=filters.copy(), ignore_prepared_report=True)
+				self.assertEqual(result["result"], expected["result"])
+				self.assertEqual(result["columns"], expected["columns"])
+		finally:
+			journal.cancel()
 
 	def test_opening_balances_follow_user_permissions(self):
 		from frappe.utils import add_days
