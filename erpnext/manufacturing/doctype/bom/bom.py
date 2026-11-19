@@ -1449,6 +1449,15 @@ class BOM(WebsiteGenerator):
 				if act_pbom and act_pbom[0][0]:
 					frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 
+			if subcontracting_bom := frappe.db.exists(
+				"Subcontracting BOM", {"finished_good_bom": self.name, "is_active": 1}
+			):
+				frappe.throw(
+					_(
+						"Cannot deactivate or cancel BOM as it is used in the active Subcontracting BOM {0}"
+					).format(get_link_to_form("Subcontracting BOM", subcontracting_bom))
+				)
+
 	def validate_transfer_against(self):
 		if not self.with_operations:
 			self.transfer_material_against = "Work Order"
