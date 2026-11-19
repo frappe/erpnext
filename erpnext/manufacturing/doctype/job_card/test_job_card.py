@@ -3576,6 +3576,18 @@ class TestJobCard(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
 	def test_job_card_secondary_items_with_process_loss(self):
+		stock_entry = self.make_job_card_scrap_entry(completed_qty=8)
+		self.assertEqual(stock_entry.process_loss_qty, 2)
+		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == "JC Loss Scrap"], [3])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_secondary_items_with_bom_process_loss(self):
+		stock_entry = self.make_job_card_scrap_entry(completed_qty=10, process_loss_percentage=20)
+		self.assertEqual(stock_entry.process_loss_qty, 2)
+		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == "JC Loss Scrap"], [3])
+
+	def make_job_card_scrap_entry(self, completed_qty, process_loss_percentage=0):
+		"""Manufacture entry for 10 after a Job Card records 3 scrap."""
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -3587,8 +3599,15 @@ class TestJobCard(ERPNextTestSuite):
 		make_workstation(operation)
 		make_operation(operation)
 
-		bom = frappe.new_doc("BOM", company="_Test Company", item=fg, quantity=1, with_operations=1)
-		bom.append("items", {"item_code": rm, "qty": 1})
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=10,
+			with_operations=1,
+			process_loss_percentage=process_loss_percentage,
+		)
+		bom.append("items", {"item_code": rm, "qty": 10})
 		bom.append("operations", operation)
 		bom.insert()
 		bom.submit()
@@ -3603,15 +3622,16 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		job_card.append(
 			"time_logs",
-			{"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 09:00:00", "completed_qty": 8},
+			{
+				"from_time": "2024-03-01 08:00:00",
+				"to_time": "2024-03-01 09:00:00",
+				"completed_qty": completed_qty,
+			},
 		)
 		job_card.save()
 		job_card.submit()
-		self.assertEqual(job_card.process_loss_qty, 2)
 
-		stock_entry = frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 10))
-		self.assertEqual(stock_entry.process_loss_qty, 2)
-		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == scrap], [3])
+		return frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 10))
 
 	def test_secondary_items_from_multiple_boms_stay_separate(self):
 		"""Rows linked to different BOM rows keep their own quantity and valuation mode."""
