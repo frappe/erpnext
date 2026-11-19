@@ -1626,11 +1626,13 @@ class SubcontractingController(StockController):
 		# alternative items sent on a row count for it once their own rows are filled
 		alternatives = self.get_alternatives_sent_for_original_items()
 		for row in rows:
-			for alternative in alternatives.get((row.rm_item_code, row.main_item_code, row.parent), []):
+			sent = alternatives.get((row.rm_item_code, row.main_item_code, row.parent), {})
+			for alternative, sent_qty in sent.items():
 				key = (alternative, row.main_item_code, row.parent)
-				qty = min(itemwise_consumed_qty.get(key, 0), row.supplied_qty - row.consumed_qty)
+				qty = min(itemwise_consumed_qty.get(key, 0), sent_qty, row.supplied_qty - row.consumed_qty)
 				row.consumed_qty += qty
 				itemwise_consumed_qty[key] -= qty
+				sent[alternative] -= qty
 
 		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
 		for row in rows:
@@ -1642,7 +1644,7 @@ class SubcontractingController(StockController):
 			)
 
 	def get_alternatives_sent_for_original_items(self):
-		"""Alternative items sent for the orders, by the BOM raw material they stand in for."""
+		"""Qty of each alternative item sent for the orders, by the BOM raw material it stands in for."""
 		se = frappe.qb.DocType("Stock Entry")
 		se_detail = frappe.qb.DocType("Stock Entry Detail")
 		order_field = self.subcontract_data.order_field
@@ -1651,20 +1653,26 @@ class SubcontractingController(StockController):
 			.inner_join(se_detail)
 			.on(se.name == se_detail.parent)
 			.select(
-				se_detail.original_item, se_detail.subcontracted_item, se[order_field], se_detail.item_code
+				se_detail.original_item,
+				se_detail.subcontracted_item,
+				se[order_field],
+				se_detail.item_code,
+				Sum(se_detail.transfer_qty),
 			)
-			.distinct()
 			.where(
 				(se.docstatus == 1)
 				& (se.purpose == "Send to Subcontractor")
 				& se[order_field].isin(self.subcontract_orders)
 				& (Coalesce(se_detail.original_item, "") != "")
 			)
+			.groupby(
+				se_detail.original_item, se_detail.subcontracted_item, se[order_field], se_detail.item_code
+			)
 		).run()
 
-		alternatives = defaultdict(list)
-		for original_item, main_item_code, order, item_code in rows:
-			alternatives[(original_item, main_item_code, order)].append(item_code)
+		alternatives = defaultdict(dict)
+		for original_item, main_item_code, order, item_code, qty in rows:
+			alternatives[(original_item, main_item_code, order)][item_code] = qty
 
 		return alternatives
 
