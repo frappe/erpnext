@@ -67,9 +67,9 @@ class TestSubcontractingBOM(FrappeTestCase):
 
 	def test_bom_of_active_subcontracting_bom_cannot_be_deactivated(self):
 		finished_good = make_item(
-			"Subcontracted BOM Check Item", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+			"Subcontracted BOM Deactivation Item", {"is_stock_item": 1, "is_sub_contracted_item": 1}
 		)
-		service_item = make_item("Subcontracted BOM Check Service Item", {"is_stock_item": 0})
+		service_item = make_item("Subcontracted BOM Deactivation Service Item", {"is_stock_item": 0})
 		bom = make_bom(item=finished_good.name, raw_materials=["_Test Item"])
 		create_subcontracting_bom(
 			finished_good=finished_good.name, finished_good_bom=bom.name, service_item=service_item.name
