@@ -345,6 +345,25 @@ class TestPaymentReconciliation(FrappeTestCase):
 		journal.accounts[1].credit_in_account_currency *= exchange_rate
 		return journal
 
+	def create_foreign_currency_journal_payment(self, debtors_account, exchange_rate):
+		je = self.create_journal_entry(self.bank, debtors_account, 100, nowdate())
+		je.multi_currency = 1
+		je.accounts[0].exchange_rate = 1
+		je.accounts[0].credit_in_account_currency = 0
+		je.accounts[0].credit = 0
+		je.accounts[0].debit_in_account_currency = 100 * exchange_rate
+		je.accounts[0].debit = 100 * exchange_rate
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer3
+		je.accounts[1].exchange_rate = exchange_rate
+		je.accounts[1].credit_in_account_currency = 100
+		je.accounts[1].credit = 100 * exchange_rate
+		je.accounts[1].debit_in_account_currency = 0
+		je.accounts[1].debit = 0
+		je.save()
+		je.submit()
+		return je
+
 	def create_cost_center(self):
 		# Setup cost center
 		cc_name = "Sub"
@@ -834,7 +853,8 @@ class TestPaymentReconciliation(FrappeTestCase):
 					],
 				}
 			).insert()
-		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+		write_off_account = frappe.get_cached_value("Company", self.company, "write_off_account")
+		frappe.db.set_value("Company", self.company, "default_discount_account", write_off_account)
 
 		si = self.create_sales_invoice(rate=200, do_not_submit=True)
 		si.payment_terms_template = "_Test Template With Discount On Second Term"
@@ -922,24 +942,24 @@ class TestPaymentReconciliation(FrappeTestCase):
 
 		create_payment_terms_template()
 		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
-		si.customer, si.currency, si.conversion_rate = self.customer_usd, "USD", 80
-		si.debit_to = self.debtors_usd
+		si.customer, si.currency, si.conversion_rate = self.customer3, "EUR", 80
+		si.debit_to = self.debtors_eur
 		si.payment_terms_template = "Test Receivable Template"
 		si.set("payment_schedule", [])
 		si.save().submit()
 
 		schedule_before = [frappe._dict(t.as_dict()) for t in si.payment_schedule]
-		je = self.create_journal_entry(self.bank, self.debtors_usd, 100, nowdate())
+		je = self.create_journal_entry(self.bank, self.debtors_eur, 100, nowdate())
 		je.multi_currency = 1
 		je.accounts[0].update({"exchange_rate": 1, "debit_in_account_currency": 7200, "debit": 7200})
 		je.accounts[0].update({"credit_in_account_currency": 0, "credit": 0})
-		je.accounts[1].update({"party_type": "Customer", "party": self.customer_usd, "exchange_rate": 80})
+		je.accounts[1].update({"party_type": "Customer", "party": self.customer3, "exchange_rate": 80})
 		je.accounts[1].update({"credit_in_account_currency": 90, "credit": 7200, "debit": 0})
 		je.accounts[1].debit_in_account_currency = 0
 		je.save().submit()
 
 		pr = self.create_payment_reconciliation()
-		pr.party, pr.receivable_payable_account = self.customer_usd, self.debtors_usd
+		pr.party, pr.receivable_payable_account = self.customer3, self.debtors_eur
 		pr.get_unreconciled_entries()
 		pr.allocate_entries(
 			frappe._dict(
@@ -962,19 +982,18 @@ class TestPaymentReconciliation(FrappeTestCase):
 	def test_foreign_currency_journal_reconciliation_updates_payment_schedule(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 
-		self.setup_split_exchange_accounts()
 		create_payment_terms_template()
 		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
-		si.customer, si.currency, si.conversion_rate = self.customer_usd, "USD", 80
-		si.debit_to = self.debtors_usd
+		si.customer, si.currency, si.conversion_rate = self.customer3, "EUR", 80
+		si.debit_to = self.debtors_eur
 		si.payment_terms_template = "Test Receivable Template"
 		si.set("payment_schedule", [])
 		si.save().submit()
-		self.create_foreign_currency_journal_payment(self.debtors_usd, 85)
+		self.create_foreign_currency_journal_payment(self.debtors_eur, 85)
 
 		pr = self.create_payment_reconciliation()
-		pr.party = self.customer_usd
-		pr.receivable_payable_account = self.debtors_usd
+		pr.party = self.customer3
+		pr.receivable_payable_account = self.debtors_eur
 		pr.get_unreconciled_entries()
 		pr.allocate_entries(
 			frappe._dict(
@@ -986,6 +1005,16 @@ class TestPaymentReconciliation(FrappeTestCase):
 		)
 		pr.reconcile()
 
+		# the rate difference (80 -> 85) is booked to the exchange gain/loss account against the invoice
+		gain_loss_account = frappe.get_cached_value("Company", self.company, "exchange_gain_loss_account")
+		invoice_journals = frappe.get_all(
+			"Journal Entry Account", filters={"reference_name": si.name, "docstatus": 1}, pluck="parent"
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Journal Entry Account", {"parent": ["in", invoice_journals], "account": gain_loss_account}
+			)
+		)
 		self.assert_schedule_matches_outstanding(si)
 		self.assertEqual(si.outstanding_amount, 0)
 
