@@ -1048,7 +1048,13 @@ class SubcontractingController(StockController):
 
 		if self.doctype == self.subcontract_data.order_doctype:
 			rm_obj.required_qty = flt(qty, rm_obj.precision("required_qty"))
+<<<<<<< HEAD
 			rm_obj.amount = flt(rm_obj.required_qty * rm_obj.rate, rm_obj.precision("amount"))
+=======
+			if self.doctype != "Subcontracting Inward Order":
+				rm_obj.amount = flt(rm_obj.required_qty * rm_obj.rate, rm_obj.precision("amount"))
+				rm_obj.rate = flt(rm_obj.rate, rm_obj.precision("rate"))
+>>>>>>> eb6aecb (fix(subcontracting): round a supplied item's rate to its precision)
 		else:
 			rm_obj.consumed_qty = flt(qty, rm_obj.precision("consumed_qty"))
 			rm_obj.required_qty = flt(bom_item.required_qty or qty, rm_obj.precision("required_qty"))
