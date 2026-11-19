@@ -174,11 +174,10 @@ class StockEntryGLComposer(BaseStockGLComposer):
 	def _build_additional_cost_per_item_account(self) -> dict:
 		item_account_wise_additional_cost = {}
 		for d, account, amount, base_amount in self.doc.get_additional_cost_split():
-			entry = item_account_wise_additional_cost.setdefault((d.item_code, d.name), {}).setdefault(
-				account, {"amount": 0.0, "base_amount": 0.0}
-			)
-			entry["amount"] += amount
-			entry["base_amount"] += base_amount
+			item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})[account] = {
+				"amount": amount,
+				"base_amount": base_amount,
+			}
 
 		return item_account_wise_additional_cost
 
