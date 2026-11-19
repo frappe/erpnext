@@ -2670,7 +2670,8 @@ class StockEntry(StockController):
 			pro_doc.status == "Closed"
 			and self.docstatus == 1
 			and not self.is_return
-			and self.purpose in ("Material Transfer for Manufacture", "Manufacture")
+			and self.purpose
+			in ("Material Transfer for Manufacture", "Manufacture", "Material Consumption for Manufacture")
 		)
 
 	def update_work_order(self):
