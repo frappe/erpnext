@@ -299,7 +299,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def is_raw_material_share_consumed(self):
 		"""Earlier entries of the Work Order may have consumed this entry's whole-number share."""
-		required_items = self.wo_doc.required_items if self.wo_doc else []
+		if not self.wo_doc or (self.backflush_based_on != "BOM" and not self.wo_doc.skip_transfer):
+			return False
+
+		required_items = self.wo_doc.required_items
 		return bool(required_items) and not any(self.get_wo_raw_material_qty(row) for row in required_items)
 
 	def validate_finished_good_serial_batch_for_work_order(self):
