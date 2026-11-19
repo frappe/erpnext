@@ -1113,7 +1113,6 @@ frappe.ui.form.on("Stock Entry", {
 
 	subcontracting_order: (frm) => {
 		if (frm.doc.subcontracting_order) {
-			frm.set_value("purchase_order", "");
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.subcontracting_order,

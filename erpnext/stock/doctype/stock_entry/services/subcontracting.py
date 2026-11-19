@@ -271,6 +271,7 @@ def get_items_from_subcontract_order(source_name: str, target_doc: str | dict | 
 	from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
 	target_doc = frappe.get_doc(frappe.parse_json(target_doc))
+	target_doc.purchase_order = None
 	target_doc = make_rm_stock_entry(subcontract_order=source_name, target_doc=target_doc)
 
 	return target_doc
