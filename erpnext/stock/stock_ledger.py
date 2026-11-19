@@ -2869,8 +2869,7 @@ def get_buying_price_per_stock_uom(item_code, currency):
 	if not price:
 		return 0.0
 
-	conversion_factor = get_conversion_factor(item_code, price.uom)["conversion_factor"] if price.uom else 1
-	return flt(price.price_list_rate) / flt(conversion_factor)
+	return flt(price.price_list_rate) / get_conversion_factor(item_code, price.uom)["conversion_factor"]
 
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
