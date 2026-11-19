@@ -637,7 +637,7 @@ class SubcontractingReceipt(SubcontractingController):
 			currency=erpnext.get_company_currency(self.company),
 			company=self.company,
 			posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
-			creation=self.creation,
+			creation=self.first_sle_creation,
 		)
 
 	def add_secondary_items_of_fg_row(self, item, fg_qty_before=0.0):
