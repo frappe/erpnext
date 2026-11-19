@@ -64,8 +64,12 @@ const more = computed(() => {
 	const invoice_count = billing.value.invoice_count;
 	return {
 		orders:
-			order_count > orders.value.length
-				? more_link("Sales Order", __("View all {0} sales orders", [order_count]))
+			order_count > orders.value.length && billing.value.order_filter
+				? more_link(
+						"Sales Order",
+						__("View all {0} sales orders", [order_count]),
+						billing.value.order_filter
+				  )
 				: null,
 		invoices:
 			invoice_count > invoices.value.length && billing.value.invoice_filter
@@ -78,9 +82,8 @@ const more = computed(() => {
 	};
 });
 
-// Orders name the project on themselves; invoices may name it only on their items, so the server
-// says how to find them.
-const more_link = (doctype, label, filter = { project: props.view.project }) => ({
+// Orders and invoices may name the project only on their items, so the server says how to find them.
+const more_link = (doctype, label, filter) => ({
 	label,
 	route: list_route(doctype, { ...filter, docstatus: 1 }),
 });
@@ -267,7 +270,7 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 							<ListCell class="justify-end">
 								<div class="text-right">
 									<p class="text-sm tabular-nums text-ink-gray-8">
-										{{ format.money(order.base_net_total) }}
+										{{ format.money(order.amount) }}
 									</p>
 									<p class="text-xs tabular-nums text-ink-gray-5">
 										{{ __("{0} billed", [format.percent(order.per_billed)]) }}
