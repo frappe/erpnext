@@ -5,7 +5,7 @@ import copy
 from collections import defaultdict
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
@@ -906,7 +906,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
 
-	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 20})
+	@change_settings("Buying Settings", {"over_transfer_allowance": 20})
 	def test_status_stays_partial_while_one_raw_material_is_short(self):
 		make_subcontracted_item(item_code="Subcontracted Item Two RM")
 		service_items = [
