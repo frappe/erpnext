@@ -107,7 +107,7 @@ class SubcontractingService:
 			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
 				make_subcontracting_order(self.doc.name, save=True, notify=True)
 
-	def update_subcontracting_order_status(self) -> None:
+	def close_subcontracting_orders(self) -> None:
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			set_subcontracting_order_status as update_sco_status,
 		)
@@ -117,4 +117,4 @@ class SubcontractingService:
 			for sco in frappe.get_all(
 				"Subcontracting Order", {"purchase_order": doc.name, "docstatus": 1}, pluck="name"
 			):
-				update_sco_status(sco, "Closed" if doc.status == "Closed" else None)
+				update_sco_status(sco, "Closed")
