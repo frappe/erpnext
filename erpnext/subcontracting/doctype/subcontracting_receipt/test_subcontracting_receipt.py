@@ -3397,6 +3397,12 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.run_method("onload")
 		self.assertTrue(scr.get_onload().get("allow_to_make_qc_after_submission"))
 
+	def test_secondary_item_without_its_finished_good_row_cannot_be_submitted(self):
+		scr = make_receipt_with_scrap(do_not_submit=True)
+		scr.items[1].reference_name = "not-a-row-of-this-receipt"
+
+		self.assertRaises(frappe.ValidationError, scr.submit)
+
 	def test_secondary_items_for_subcontracting_receipt(self):
 		set_backflush_based_on("BOM")
 
@@ -6078,7 +6084,9 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	return scr
 
 
-def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None):
+def make_receipt_with_scrap(
+	valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None, do_not_submit=False
+):
 	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate, and an optional co-product."""
 	set_backflush_based_on("BOM")
 	rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
@@ -6131,5 +6139,6 @@ def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None, co
 	if scrap_rate:
 		scr.items[1].rate = scrap_rate
 	scr.save()
-	scr.submit()
+	if not do_not_submit:
+		scr.submit()
 	return scr
