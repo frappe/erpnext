@@ -150,7 +150,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		po = frappe.get_doc("Purchase Order", sco.purchase_order)
 		po.update_status("Closed")
 		po.reload()
-		po.update_status("Re-open")
+		po.update_status("Submitted")
 
 		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
 
