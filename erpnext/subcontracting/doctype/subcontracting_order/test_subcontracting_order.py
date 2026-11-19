@@ -736,6 +736,53 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value(original.doctype, original.name, "consumed_qty"), original.required_qty
 		)
 
+	def test_shared_alternative_item_counts_on_each_original_row_up_to_its_sent_qty(self):
+		set_backflush_based_on("Material Transferred for Subcontract")
+		suffix = "Shared Alt"
+		service_item = make_item(f"Subcontracted Service Item {suffix}", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			f"Subcontracted FG Item {suffix}", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		first, second, shared, other = (
+			make_item(f"Subcontracted RM Item {suffix} {code}", {"is_stock_item": 1}).name for code in "ABXY"
+		)
+		make_bom(item=fg_item, raw_materials=[first, second], rate=100, currency="INR")
+		set_alternative_item(first, shared)
+		set_alternative_item(first, other)
+		set_alternative_item(second, shared)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		first_row, second_row = sco.supplied_items
+		for item_code, qty in ((shared, 6), (other, 4)):
+			make_stock_entry(item_code=item_code, target=first_row.reserve_warehouse, qty=qty, basic_rate=100)
+
+		for row, alternative, qty in ((first_row, shared, 1), (first_row, other, 4), (second_row, shared, 5)):
+			transfer = make_supplied_item_transfer(sco, row)
+			transfer.items[0].update(
+				{
+					"item_code": alternative,
+					"original_item": row.rm_item_code,
+					"allow_alternative_item": 1,
+					"qty": qty,
+				}
+			)
+			transfer.insert()
+			transfer.submit()
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertEqual(
+			[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items], [5, 5]
+		)
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
