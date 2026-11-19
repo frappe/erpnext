@@ -376,6 +376,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_secondary_items()
 			self.set_bomless_secondary_valuation_types()
+			if self.purpose == "Repack":
+				# reads is_finished_item, so it must run after the rows are marked
+				self.purpose_cls(self).validate_repack_entry()
+
 			if not self.job_card:
 				self.validate_finished_goods()
 			else:
