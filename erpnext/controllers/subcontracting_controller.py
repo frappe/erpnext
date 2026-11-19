@@ -1862,7 +1862,8 @@ def make_rm_stock_entry(
 =======
 =======
 				per_finished_good = (
-					frappe.db.get_single_value(
+					order_doctype != "Subcontracting Order"
+					or frappe.db.get_single_value(
 						"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
 					)
 					!= "BOM"
