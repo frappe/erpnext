@@ -1367,6 +1367,8 @@ def make_regional_gl_entries(gl_entries, doc):
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment: str, company: str) -> dict:
+	frappe.has_permission("Company", "select", company, throw=True)
+	frappe.has_permission("Mode of Payment", "select", mode_of_payment, throw=True)
 	return _get_bank_cash_account(mode_of_payment, company)
 
 

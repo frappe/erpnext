@@ -3,6 +3,8 @@
 
 import frappe
 
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -113,6 +115,30 @@ class TestModeofPayment(ERPNextTestSuite):
 		doc = self.make_mop(accounts=[(COMPANY, "Cash - _TC")], enabled=0)
 		doc.insert()
 		self.assertEqual(doc.enabled, 0)
+
+	def test_default_account_lookup_needs_mode_of_payment_access(self):
+		mop = self.make_mop(accounts=[(COMPANY, "Cash - _TC")]).insert()
+
+		# both roles can select the company (and Auditor can read accounts) but not the mode of payment
+		with self.set_user(self.make_user("mop-desk-user@example.com", "Desk User")):
+			with self.assertRaises(frappe.PermissionError):
+				get_bank_cash_account(mop.name, COMPANY)
+
+		with self.set_user(self.make_user("mop-auditor@example.com", "Auditor")):
+			with self.assertRaises(frappe.PermissionError):
+				get_default_bank_cash_account(COMPANY, "Cash", mode_of_payment=mop.name)
+
+		with self.set_user(self.make_user("mop-sales-user@example.com", "Sales User")):
+			self.assertEqual(get_bank_cash_account(mop.name, COMPANY), {"account": "Cash - _TC"})
+
+	def make_user(self, email, role=None):
+		user = frappe.new_doc("User")
+		user.email = email
+		user.first_name = email.split("@")[0]
+		user.send_welcome_email = 0
+		if role:
+			user.append("roles", {"role": role})
+		return user.insert().name
 
 
 def set_default_account_for_mode_of_payment(mode_of_payment, company, account):
