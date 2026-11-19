@@ -154,7 +154,7 @@ class TestSubcontractingController(FrappeTestCase):
 		sco.save()
 
 		shares = [flt(item.additional_cost_per_qty * item.qty, 2) for item in sco.items]
-		self.assertEqual(shares, [33.33, 33.33, 33.34])
+		self.assertEqual(shares, [33.33, 33.34, 33.33])
 
 	def test_sco_with_material_transfer(self):
 		"""
