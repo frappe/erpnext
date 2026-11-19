@@ -200,7 +200,7 @@ class POSService:
 		"""Validate payment modes and the amount paid on POS returns."""
 		doc = self.doc
 		# Consolidation posts payments already accepted on submitted POS invoices.
-		if not doc.get("is_consolidated"):
+		if not doc.flags.is_consolidated:
 			for payment in doc.get("payments") or []:
 				validate_enabled_mode_of_payment(payment.mode_of_payment)
 
