@@ -678,7 +678,6 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 
 	def update_additional_cost(source, target, source_parent):
 		target.amount = flt(source.amount * additional_cost_share, target.precision("amount"))
-		target.base_amount = flt(source.base_amount * additional_cost_share, target.precision("base_amount"))
 
 	items = {item["name"]: item["qty"] for item in items} if items else {}
 	additional_cost_share = get_additional_cost_share(
@@ -717,6 +716,7 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 		},
 		target_doc,
 	)
+	target_doc.set_additional_costs()
 
 	return target_doc
 
