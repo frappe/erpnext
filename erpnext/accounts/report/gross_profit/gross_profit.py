@@ -233,6 +233,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 				if total_base_amount
 				else 0,
 				"currency": filters.currency,
+				"is_total_row": 1,
 			}
 		)
 	)

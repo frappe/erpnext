@@ -458,6 +458,7 @@ def calculate_total_row(data, company_currency, show_group_accounts=True):
 		"indent": 0,
 		"has_value": True,
 		"currency": company_currency,
+		"is_total_row": 1,
 	}
 
 	def sum_value_fields(row):
