@@ -74,7 +74,7 @@ class TestSubcontractingBOM(FrappeTestCase):
 		)
 
 		bom.is_active = 0
-		self.assertRaises(frappe.ValidationError, bom.save)
+		self.assertRaisesRegex(frappe.ValidationError, "active Subcontracting BOM", bom.save)
 
 	def test_quantities_must_be_greater_than_zero(self):
 		finished_good = make_item(
