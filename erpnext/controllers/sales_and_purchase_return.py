@@ -970,7 +970,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 		if not doclist.items:
 			frappe.throw(
-				_("All rejected qty of {0} {1} is already returned.").format(doctype, source_name)
+				_("All rejected qty of {0} {1} is already returned.").format(_(doctype), source_name)
 			)
 
 	return doclist
