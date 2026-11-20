@@ -1641,33 +1641,7 @@ class SubcontractingController(StockController):
 	def calculate_additional_costs(self):
 		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
 
-<<<<<<< HEAD
-		if self.total_additional_costs:
-			if self.distribute_additional_costs_based_on == "Amount":
-				total_amt = sum(
-					flt(item.amount) for item in self.get("items") if not item.get("is_scrap_item")
-				)
-				for item in self.items:
-					if not item.get("is_scrap_item"):
-						item.additional_cost_per_qty = (
-							(item.amount * self.total_additional_costs) / total_amt
-						) / item.qty
-			else:
-				total_qty = sum(flt(item.qty) for item in self.get("items") if not item.get("is_scrap_item"))
-				additional_cost_per_qty = self.total_additional_costs / total_qty
-				for item in self.items:
-					if not item.get("is_scrap_item"):
-						item.additional_cost_per_qty = additional_cost_per_qty
-		else:
-			for item in self.items:
-				if not item.get("is_scrap_item"):
-					item.additional_cost_per_qty = 0
-=======
-		fg_rows = [
-			item
-			for item in self.get("items")
-			if not item.get("secondary_item_type") and not item.get("valuation_type")
-		]
+		fg_rows = [item for item in self.get("items") if not item.get("is_scrap_item")]
 		for item in fg_rows:
 			item.additional_cost_per_qty = 0
 
@@ -1675,9 +1649,7 @@ class SubcontractingController(StockController):
 			return
 
 		based_on_amount = self.distribute_additional_costs_based_on == "Amount"
-		weights = [
-			flt(item.amount) if based_on_amount else self.get_qty_for_costing(item) for item in fg_rows
-		]
+		weights = [flt(item.amount) if based_on_amount else flt(item.qty) for item in fg_rows]
 		total_weight = sum(weights)
 		if not total_weight:
 			frappe.throw(
@@ -1695,9 +1667,8 @@ class SubcontractingController(StockController):
 			share = flt(cumulative_share - allocated, precision)
 			allocated = cumulative_share
 
-			if qty := self.get_qty_for_costing(item):
+			if qty := flt(item.qty):
 				item.additional_cost_per_qty = share / qty
->>>>>>> 4884d5e (fix(subcontracting): round each row's share of the additional costs so the shares add up)
 
 	@frappe.whitelist()
 	def get_current_stock(self):

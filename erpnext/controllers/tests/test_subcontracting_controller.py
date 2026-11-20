@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import cint
+from frappe.utils import cint, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.controllers.subcontracting_controller import (
