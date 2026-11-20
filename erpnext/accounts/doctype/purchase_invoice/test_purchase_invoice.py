@@ -4444,6 +4444,30 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		receipt = make_purchase_receipt_from_pi(pi.name)
 		self.assertEqual((receipt.items[0].qty, receipt.items[0].received_qty), (7, 7))
 
+	def test_purchase_receipt_maps_qty_left_after_receipt_and_debit_note(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+
+		item = create_item("_Test Over Received Item Purchase Receipt", is_stock_item=1)
+		pi = make_purchase_invoice(item_code=item.name, qty=10, rate=100)
+
+		pr = make_purchase_receipt_from_pi(pi.name)
+		pr.items[0].qty = pr.items[0].received_qty = 3
+		pr.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = debit_note.items[0].received_qty = -4
+		debit_note.submit()
+
+		pr = make_purchase_receipt_from_pi(pi.name)
+		self.assertEqual((pr.items[0].qty, pr.items[0].received_qty), (3, 3))
+
+		pr.items[0].qty = pr.items[0].received_qty = 4
+		pr.submit()
+		self.assertFalse(make_purchase_receipt_from_pi(pi.name).items)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (

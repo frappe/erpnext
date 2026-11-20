@@ -91,11 +91,11 @@ def make_purchase_receipt(
 		return flt(returned_stock_qty) / flt(obj.conversion_factor or 1)
 
 	def update_item(obj, target, source_parent):
-		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj)
+		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj) - get_returned_qty(obj, source_parent)
+		pending_qty = max(flt(pending_qty, target.precision("qty")), 0)
 
-		target.qty = flt(pending_qty - get_returned_qty(obj, source_parent), target.precision("qty"))
-		target.received_qty = target.qty
-		target.stock_qty = target.qty * flt(obj.conversion_factor)
+		target.qty = target.received_qty = pending_qty
+		target.stock_qty = pending_qty * flt(obj.conversion_factor)
 		target.amount = pending_qty * flt(obj.rate)
 		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 
