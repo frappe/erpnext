@@ -550,6 +550,18 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		self.assertEqual([(row.qty, row.valuation_rate) for row in adjustment.items], [(49, 33.3333)])
 		self.assertEqual(adjustment.items[0].amount, 1633.33)
 
+	def test_layers_at_fractional_rates_fixed_by_adjustment_entry(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		for days, rate in ((60, 1.004), (59, 2.004), (58, 3.004)):
+			make_stock_entry(item_code=item, target=WAREHOUSE, qty=1, rate=rate, posting_date=last_year(days))
+		receipt = make_stock_entry(
+			item_code=item, target=WAREHOUSE, qty=1, rate=10, posting_date=last_year(50)
+		)
+		self.corrupt_entry(receipt.name, stock_value_difference=15, stock_value=21)
+
+		# the ledger rounds the value after every counted-in row: 16, not 16.01
+		self.fix_by_adjustment_entry(item)
+
 	def test_serial_no_counted_twice_fixed_by_adjustment_entry(self):
 		# a repost cannot take out an entry that should not be there; an adjustment can
 		item = self.make_serial_no_counted_twice()
