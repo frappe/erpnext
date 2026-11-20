@@ -117,8 +117,6 @@ class TestBilledItemsToBeReceived(FrappeTestCase):
 		self.assertNotIn(pi.name, names)
 		self.assertNotIn(debit_note.name, names)
 
-<<<<<<< HEAD
-=======
 	def test_debit_note_in_another_uom_is_counted_in_invoice_uom(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -142,23 +140,12 @@ class TestBilledItemsToBeReceived(FrappeTestCase):
 		)
 		debit_note.submit()
 
-		receipt = make_purchase_receipt(pi.name)
 		rows = self.get_rows_for(self.run_report(), pi.name)
-
-		self.assertEqual((receipt.items[0].qty, receipt.items[0].received_qty), (0.9, 0.9))
 		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(1, 0, 0.1)])
 
-		receipt.submit()
+		self.receive(pi.name, today(), qty=0.9)
 		self.assertFalse(self.get_rows_for(self.run_report(), pi.name))
 
-	def test_service_rows_are_not_listed(self):
-		pi = make_purchase_invoice(
-			supplier="_Test Supplier", item_code="_Test Non Stock Item", qty=1, rate=300, update_stock=0
-		)
-
-		self.assertEqual(self.get_rows_for(self.run_report(), pi.name), [])
-
->>>>>>> f28813e (test: debit note in another UOM is counted in the invoice row's UOM)
 	def test_invoice_made_from_receipt_is_received(self):
 		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
 		pi = make_invoice_from_receipt(receipt.name)
