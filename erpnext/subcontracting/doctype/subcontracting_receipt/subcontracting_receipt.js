@@ -429,6 +429,13 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
+	before_items_remove(frm, cdt, cdn) {
+		// scrap rows of the removed finished good row go with it
+		frm.doc.items
+			.filter((item) => item.reference_name === cdn)
+			.forEach((item) => frappe.model.clear_doc(item.doctype, item.name));
+	},
+
 	items_delete: (frm) => {
 		set_missing_values(frm);
 	},
