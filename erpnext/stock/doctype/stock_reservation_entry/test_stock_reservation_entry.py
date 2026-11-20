@@ -726,6 +726,25 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"use_serial_batch_fields": 0,
 		},
 	)
+	def test_cancelling_a_fractional_delivery_across_batches_leaves_no_float_residue(self) -> None:
+		so = self.make_fractionally_reserved_sales_order(batch_qtys=(0.2, 0.2))
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		dn.submit()
+		self.assertEqual(self.get_reservation_status(so), "Delivered")
+
+		dn.cancel()
+		self.assertEqual(self.get_reservation_status(so), "Reserved")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+		},
+	)
 	def test_reservation_summed_with_float_noise_across_batches_is_reserved(self) -> None:
 		item = make_item(
 			properties={
