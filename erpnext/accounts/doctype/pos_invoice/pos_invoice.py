@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import set_bundle_header_values
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 from erpnext.stock.utils import get_bin_qty_map
 
@@ -340,10 +341,8 @@ class POSInvoice(SalesInvoice):
 		for row in self.items:
 			if row.serial_and_batch_bundle:
 				if not self.consolidated_invoice:
-					frappe.db.set_value(
-						"Serial and Batch Bundle",
-						row.serial_and_batch_bundle,
-						{"is_cancelled": 1, "voucher_no": ""},
+					set_bundle_header_values(
+						row.serial_and_batch_bundle, {"is_cancelled": 1, "voucher_no": ""}
 					)
 
 				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
