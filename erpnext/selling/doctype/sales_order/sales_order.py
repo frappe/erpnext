@@ -1449,6 +1449,9 @@ def get_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	from frappe.desk.reportview import get_match_cond
 
+	if frappe.only_has_select_perm("Sales Order"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
 	conditions = get_event_conditions("Sales Order", filters)
 	match_conditions = get_match_cond("Sales Order")
 
