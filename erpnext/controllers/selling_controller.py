@@ -6,8 +6,14 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, throw
+<<<<<<< HEAD
 from frappe.query_builder.functions import Min
 from frappe.utils import cint, flt, get_link_to_form, nowtime
+=======
+from frappe.query_builder import Order
+from frappe.query_builder.functions import Min, Sum
+from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
+>>>>>>> 873de51 (refactor: order a row's reservations in the query, as stock_controller does)
 
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges
@@ -1232,7 +1238,7 @@ class SellingController(StockController):
 				table = frappe.qb.DocType("Stock Reservation Entry")
 				query = (
 					frappe.qb.from_(table)
-					.select(table.name, table.reservation_based_on)
+					.select(table.name)
 					.where(
 						(table.docstatus == 1)
 						& (table.voucher_type == "Sales Order")
@@ -1241,9 +1247,11 @@ class SellingController(StockController):
 						& (table.warehouse == item.warehouse)
 						& (table.delivered_qty < table.reserved_qty)
 					)
+					# serial and batch reservations first, so a qty one only takes what they did not match
+					.orderby(table.reservation_based_on, order=Order.desc)
 					.orderby(table.creation)
 				)
-				sre_list = get_serial_and_batch_reservations_first(query.run(as_dict=True))
+				sre_list = query.run(pluck="name")
 
 				# Skip if no Stock Reservation Entries.
 				if not sre_list:
@@ -1305,7 +1313,7 @@ class SellingController(StockController):
 
 				sre_list = frappe.db.get_all(
 					"Stock Reservation Entry",
-					filters={
+					{
 						"docstatus": 1,
 						"voucher_type": "Sales Order",
 						"voucher_no": item.get(so_field),
@@ -1313,10 +1321,8 @@ class SellingController(StockController):
 						"warehouse": item.warehouse,
 						"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
 					},
-					fields=["name", "reservation_based_on"],
-					order_by="creation",
+					order_by="reservation_based_on desc, creation",
 				)
-				sre_list = get_serial_and_batch_reservations_first(sre_list)
 
 				# Skip if no Stock Reservation Entries.
 				if not sre_list:
@@ -1522,11 +1528,6 @@ def get_serial_and_batch_bundle(
 		add_picked_batches(picked_batches, doc.get("entries") or [])
 
 	return doc.name
-
-
-def get_serial_and_batch_reservations_first(sre_list: list[dict]) -> list[str]:
-	"""Reservation names, Serial and Batch ones first so they claim their serial / batch nos before Qty ones."""
-	return [sre.name for sre in sorted(sre_list, key=lambda sre: sre.reservation_based_on == "Qty")]
 
 
 def get_delivered_serial_batch_for_reservation(item):
