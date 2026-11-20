@@ -240,14 +240,14 @@ class BOMCostingService:
 		base_total_rm_cost = 0
 
 		for d in self.doc.get("items"):
-			old_rate = d.rate
+			old_rate, old_base_amount = d.rate, d.base_amount
 			if d.is_stock_item or d.is_phantom_item:
 				d.rate = self.get_rm_rate(self._rm_rate_args(d), notify=False)
 
 			self._set_item_amounts(d)
 			total_rm_cost += d.amount
 			base_total_rm_cost += d.base_amount
-			if save and (old_rate != d.rate):
+			if save and (old_rate != d.rate or old_base_amount != d.base_amount):
 				d.db_update()
 
 		self.doc.raw_material_cost = total_rm_cost
