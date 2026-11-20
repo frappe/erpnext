@@ -4503,10 +4503,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertFalse(pr.items)
 
 	def test_receipt_is_net_of_debit_notes_at_a_fractional_conversion_factor(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
 		)
+		from erpnext.stock.doctype.item.test_item import make_item
 
 		conversion_factor = 0.083333333
 		item_code = make_item(
