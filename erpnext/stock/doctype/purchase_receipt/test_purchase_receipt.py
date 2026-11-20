@@ -9935,7 +9935,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_internal_receipt_return_takes_back_the_lot_it_received(self):
 		"""A return of an internal receipt with no delivery row link still takes back the lot it received."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
