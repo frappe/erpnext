@@ -45,12 +45,7 @@ How an entry is valued
   or last rate. If the warehouse never had a rate, the ledger's own rate is taken,
   as there is nothing to check it against.
 * Like the ledger, the stock value is rounded to the currency precision after
-<<<<<<< HEAD
-  every entry, and a reconciled rate is rounded before it is applied.
-=======
   every entry.
-* Standard Cost items are carried at the standard rate on the posting date.
->>>>>>> c96dc60 (refactor(stock): drop no-op flt calls and the stale reconciled rate rounding note)
 * An Adjustment Entry (erpnext.stock.valuation_adjustment) resets the stock to its rows. Its
   entries count out whatever the ledger holds, right or wrong, so they are taken as they are, up
   to the last one of each item-warehouse, after which the stock must be what the rows count in.
@@ -527,30 +522,12 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 
 	for row in details.data.adjustment_rows.get((entry.voucher_no, entry.item_code, entry.warehouse), []):
 		value_before = stock.value
-<<<<<<< HEAD
-		rate = flt(row.valuation_rate)
-		if row.serial_no:
-			for serial_no in get_serial_nos(row.serial_no):
-				if details.values_everything_in_pool:
-					stock.receive_into_pool(1, rate)
-				else:
-					stock.receive_serial(serial_no, rate)
-		elif row.batch_no and details.is_valued_batch_wise(row.batch_no):
-			stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
-		elif flt(row.qty):
-			stock.receive_into_pool(flt(row.qty), rate)
-=======
 		count_in_adjustment_row(stock, row, details)
->>>>>>> 55d0f68 (fix(stock): value a Standard Cost item's whole balance after each counted-in row)
 
-		# the ledger counts in every row as an entry of its own, and values a Standard Cost item's
-		# whole balance at the standard rate
-		if details.valuation_method == "Standard Cost":
-			stock.carried_value = flt(stock.value, details.currency_precision)
-		else:
-			stock.carried_value = flt(
-				stock.carried_value + stock.value - value_before, details.currency_precision
-			)
+		# the ledger counts in every row as an entry of its own
+		stock.carried_value = flt(
+			stock.carried_value + stock.value - value_before, details.currency_precision
+		)
 
 	carry_moving_average_rate_from_rounded_value(stock)
 
@@ -561,15 +538,11 @@ def count_in_adjustment_row(stock: ItemWarehouseStock, row, details: "ValuationD
 	rate = flt(row.valuation_rate)
 	if row.serial_no:
 		for serial_no in get_serial_nos(row.serial_no):
-			if details.values_everything_in_pool or details.valuation_method == "Standard Cost":
+			if details.values_everything_in_pool:
 				stock.receive_into_pool(1, rate)
 			else:
 				stock.receive_serial(serial_no, rate)
-	elif (
-		row.batch_no
-		and details.valuation_method != "Standard Cost"
-		and details.is_valued_batch_wise(row.batch_no)
-	):
+	elif row.batch_no and details.is_valued_batch_wise(row.batch_no):
 		stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
 	elif flt(row.qty):
 		stock.receive_into_pool(flt(row.qty), rate)

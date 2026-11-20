@@ -168,27 +168,11 @@ def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, 
 
 def get_pool_layers(stock, details, posting_datetime) -> list[tuple[float, float]]:
 	"""The [qty, rate] layers the pool should hold, oldest first: counted in in this order, they
-<<<<<<< HEAD
 	give a FIFO queue or a LIFO stack back as it should be. A moving average pool is one layer."""
-	precision = details.currency_precision
 	pool = stock.pool
 
 	if isinstance(pool, QueuePool):
-		layers = [(qty, flt(rate, precision)) for qty, rate in pool.layers]
-=======
-	give a FIFO queue or a LIFO stack back as it should be. A moving average pool is one layer, and
-	so is a Standard Cost item's stock, at the standard rate on the date."""
-	pool = stock.pool
-
-	if details.valuation_method == "Standard Cost":
-		layers = [(pool.qty, details.get_standard_rate(getdate(posting_datetime)))]
-	elif isinstance(pool, QueuePool):
-<<<<<<< HEAD
-		layers = [(qty, flt(rate)) for qty, rate in pool.layers]
->>>>>>> 3bf0644 (fix(stock): keep a reconciliation or pool rate unrounded in the expected valuation)
-=======
 		layers = pool.layers
->>>>>>> c96dc60 (refactor(stock): drop no-op flt calls and the stale reconciled rate rounding note)
 	else:
 		layers = [(pool.qty, pool.rate)]
 
