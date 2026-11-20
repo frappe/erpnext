@@ -2235,7 +2235,8 @@ class update_entries_after:
 						actual_qty * sle.outgoing_rate
 					)
 
-					self.wh_data.valuation_rate = new_stock_value / new_stock_qty
+					# an outflow at a set rate, like a purchase return, takes out at most the stock value
+					self.wh_data.valuation_rate = max(new_stock_value, 0) / new_stock_qty
 				else:
 					self.wh_data.valuation_rate = sle.outgoing_rate
 		else:
