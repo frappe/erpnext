@@ -585,9 +585,11 @@ class StatusService:
 		pbi = frappe.qb.DocType("Product Bundle Item")
 		so_item = frappe.qb.DocType("Sales Order Item")
 		bom = frappe.qb.DocType("BOM")
-		# only components with an active BOM get Work Orders
+		# only components with an active, submitted BOM get Work Orders
 		has_active_bom = ExistsCriterion(
-			frappe.qb.from_(bom).select(bom.name).where((bom.item == pbi.item_code) & (bom.is_active == 1))
+			frappe.qb.from_(bom)
+			.select(bom.name)
+			.where((bom.item == pbi.item_code) & (bom.is_active == 1) & (bom.docstatus == 1))
 		)
 		return dict(
 			frappe.qb.from_(pbi)
