@@ -2248,11 +2248,12 @@ def get_status(sre) -> str:
 		return "Partially Used" if sre.transferred_qty < sre.reserved_qty else "Closed"
 	if flt(sre.delivered_qty) + flt(sre.consumed_qty) >= flt(sre.reserved_qty):
 		return "Delivered"
-	if sre.delivered_qty:
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	# float residue of serial / batch qty arithmetic is not a delivery
+	if flt(sre.delivered_qty, precision):
 		return "Partially Delivered"
 	if sre.consumed_qty:
 		return "Partially Used"
-	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 	if flt(sre.reserved_qty, precision) >= flt(sre.voucher_qty, precision):
 		return "Reserved"
 	return "Partially Reserved"
