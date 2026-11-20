@@ -299,7 +299,10 @@ def validate_single_purchase_receipt(subcontracting_receipt, purchase_receipt=No
 
 
 def add_po_items_to_pr(scr_doc, target_doc):
-	fg_items = {(item.item_code, item.purchase_order): item.qty for item in scr_doc.items}
+	fg_items = {
+		(item.item_code, item.purchase_order): flt(item.qty) + flt(item.process_loss_qty)
+		for item in scr_doc.items
+	}
 
 	for (item_code, po_name), fg_qty in fg_items.items():
 		po_doc = frappe.get_doc("Purchase Order", po_name)
