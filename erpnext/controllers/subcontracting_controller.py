@@ -1772,32 +1772,40 @@ class SubcontractingController(StockController):
 	def calculate_additional_costs(self):
 		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
 
-		if self.total_additional_costs:
-			if self.distribute_additional_costs_based_on == "Amount":
-				total_amt = sum(
-					flt(item.amount)
-					for item in self.get("items")
-					if not item.get("secondary_item_type") and not item.get("valuation_type")
-				)
-				for item in self.items:
-					if not item.get("secondary_item_type") and not item.get("valuation_type"):
-						item.additional_cost_per_qty = (
-							(item.amount * self.total_additional_costs) / total_amt
-						) / self.get_qty_for_costing(item)
-			else:
-				total_qty = sum(
-					self.get_qty_for_costing(item)
-					for item in self.get("items")
-					if not item.get("secondary_item_type") and not item.get("valuation_type")
-				)
-				additional_cost_per_qty = self.total_additional_costs / total_qty
-				for item in self.items:
-					if not item.get("secondary_item_type") and not item.get("valuation_type"):
-						item.additional_cost_per_qty = additional_cost_per_qty
-		else:
-			for item in self.items:
-				if not item.get("secondary_item_type") and not item.get("valuation_type"):
-					item.additional_cost_per_qty = 0
+		fg_rows = [
+			item
+			for item in self.get("items")
+			if not item.get("secondary_item_type") and not item.get("valuation_type")
+		]
+		for item in fg_rows:
+			item.additional_cost_per_qty = 0
+
+		if not self.total_additional_costs:
+			return
+
+		based_on_amount = self.distribute_additional_costs_based_on == "Amount"
+		weights = [
+			flt(item.amount) if based_on_amount else self.get_qty_for_costing(item) for item in fg_rows
+		]
+		total_weight = sum(weights)
+		if not total_weight:
+			frappe.throw(
+				_(
+					"Cannot distribute Additional Costs based on {0}, as the finished goods have zero {0}."
+				).format(_(self.distribute_additional_costs_based_on))
+			)
+
+		# round the running total, so no share goes negative and the shares add up to the cost
+		precision = self.precision("total_additional_costs")
+		allocated = cumulative_weight = 0.0
+		for item, weight in zip(fg_rows, weights, strict=True):
+			cumulative_weight += weight
+			cumulative_share = flt(self.total_additional_costs * cumulative_weight / total_weight, precision)
+			share = flt(cumulative_share - allocated, precision)
+			allocated = cumulative_share
+
+			if qty := self.get_qty_for_costing(item):
+				item.additional_cost_per_qty = share / qty
 
 	def get_qty_for_costing(self, item):
 		"""Qty a row's cost is spread over: accepted, rejected and process loss qty."""
