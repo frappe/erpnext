@@ -511,13 +511,13 @@ class StatusService:
 		) or self.doc.production_plan_sub_assembly_item:
 			return
 
-		total_bundle_qty = self._total_bundle_qty()
-		work_order_qty = self._sales_order_work_order_qty()
+		bundle_qty = self._bundle_qty_by_line([self.doc.sales_order_item]).get(self.doc.sales_order_item)
+		work_order_qty = self._sales_order_work_order_qty() / (bundle_qty or 1)
 		frappe.db.set_value(
 			"Sales Order Item",
 			self.doc.sales_order_item,
 			"work_order_qty",
-			flt(work_order_qty / total_bundle_qty, 2),
+			flt(work_order_qty, frappe.get_precision("Sales Order Item", "work_order_qty")),
 		)
 
 	def _sales_order_work_order_qty(self):
@@ -542,11 +542,13 @@ class StatusService:
 		return qty[0][0] if qty and qty[0][0] else 0
 
 	def update_work_order_qty_in_combined_so(self):
-		total_bundle_qty = self._total_bundle_qty()
 		prod_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
 		item_reference = frappe.get_value(
 			"Production Plan Item", self.doc.production_plan_item, "sales_order_item"
 		)
+		references = [row for row in prod_plan.prod_plan_references if row.item_reference == item_reference]
+		if not references:
+			return
 
 		work_order = frappe.qb.DocType("Work Order")
 		plan_item = frappe.qb.DocType("Production Plan Item")
@@ -564,23 +566,21 @@ class StatusService:
 			).run()[0][0]
 		)
 
-		for plan_reference in prod_plan.prod_plan_references:
-			if plan_reference.item_reference != item_reference:
-				continue
-
+		bundle_qty = self._bundle_qty_by_line([row.sales_order_item for row in references])
+		precision = frappe.get_precision("Sales Order Item", "work_order_qty")
+		for plan_reference in references:
 			allocated_qty = min(flt(plan_reference.qty), ordered_qty)
 			ordered_qty -= allocated_qty
 			frappe.db.set_value(
 				"Sales Order Item",
 				plan_reference.sales_order_item,
 				"work_order_qty",
-				allocated_qty / total_bundle_qty,
+				flt(allocated_qty / (bundle_qty.get(plan_reference.sales_order_item) or 1), precision),
 			)
 
-	def _total_bundle_qty(self):
-		if not self.doc.product_bundle_item:
-			return 1
-
+	@staticmethod
+	def _bundle_qty_by_line(sales_order_items):
+		"""Per-bundle qty of the components that get Work Orders, by Product Bundle Sales Order line."""
 		pbi = frappe.qb.DocType("Product Bundle Item")
 		so_item = frappe.qb.DocType("Sales Order Item")
 		bom = frappe.qb.DocType("BOM")
@@ -588,15 +588,15 @@ class StatusService:
 		has_active_bom = ExistsCriterion(
 			frappe.qb.from_(bom).select(bom.name).where((bom.item == pbi.item_code) & (bom.is_active == 1))
 		)
-		total_bundle_qty = (
+		return dict(
 			frappe.qb.from_(pbi)
 			.join(so_item)
 			.on(pbi.parent == so_item.product_bundle)
-			.select(Sum(pbi.qty))
-			.where((so_item.name == self.doc.sales_order_item) & has_active_bom)
-		).run()[0][0]
-		# product bundle is 0 (product bundle allows 0 qty for items)
-		return total_bundle_qty or 1
+			.select(so_item.name, Sum(pbi.qty))
+			.where(so_item.name.isin(sales_order_items) & has_active_bom)
+			.groupby(so_item.name)
+			.run()
+		)
 
 	def update_completed_qty_in_material_request(self):
 		if self.doc.material_request and self.doc.material_request_item:
