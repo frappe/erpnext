@@ -97,10 +97,10 @@ def _add_operation_workstation_costs(stock_entry, work_order, row, op_expense_ac
 		return False
 
 	amount, qty = _get_operation_cost_and_qty(stock_entry, work_order, row)
-	if flt(amount, frappe.get_precision("Landed Cost Taxes and Charges", "amount")) <= 0:
+	if amount <= 0:
 		return False
 
-	# A row per component, even a zero share, so each records the qty consumed
+	# A row per component, even a zero amount, so each records the qty consumed
 	component_amounts = _split_by_component_rate(amount, workstation_cost, total_component_rate)
 	for wc, component_amount in zip(workstation_cost, component_amounts, strict=True):
 		expense_account = get_component_account(wc.operating_component, stock_entry.company)
