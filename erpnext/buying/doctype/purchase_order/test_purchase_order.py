@@ -2279,7 +2279,13 @@ class TestPurchaseOrder(FrappeTestCase):
 				"doctype": "Item Group",
 				"item_group_name": "_Test Default Supplier Group",
 				"parent_item_group": "All Item Groups",
-				"item_group_defaults": [{"company": "_Test Company", "default_supplier": "_Test Supplier 1"}],
+				"item_group_defaults": [
+					{
+						"company": "_Test Company",
+						"default_supplier": "_Test Supplier 1",
+						"default_warehouse": "_Test Warehouse - _TC",
+					}
+				],
 			}
 		).insert()
 		item_with_default = make_item(
