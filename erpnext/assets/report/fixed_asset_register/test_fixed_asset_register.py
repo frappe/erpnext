@@ -32,6 +32,7 @@ class TestFixedAssetRegister(AssetSetup):
 			frappe.get_doc(
 				{
 					"doctype": "User",
+					"send_welcome_email": 0,
 					"email": user,
 					"first_name": "Asset Register",
 					"roles": [{"role": "Accounts User"}],
