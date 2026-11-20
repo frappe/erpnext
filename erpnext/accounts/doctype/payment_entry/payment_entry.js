@@ -1156,11 +1156,17 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	get_outstanding_invoices_or_orders: function (frm, get_outstanding_invoices, get_orders_to_be_billed) {
+		const today = frappe.datetime.get_today();
 		let fields = [
 			{ fieldtype: "Section Break", label: __("Posting Date") },
-			{ fieldtype: "Date", label: __("From Date"), fieldname: "from_posting_date" },
+			{
+				fieldtype: "Date",
+				label: __("From Date"),
+				fieldname: "from_posting_date",
+				default: frappe.datetime.add_days(today, -30),
+			},
 			{ fieldtype: "Column Break" },
-			{ fieldtype: "Date", label: __("To Date"), fieldname: "to_posting_date" },
+			{ fieldtype: "Date", label: __("To Date"), fieldname: "to_posting_date", default: today },
 			{ fieldtype: "Section Break", label: __("Due Date") },
 			{ fieldtype: "Date", label: __("From Date"), fieldname: "from_due_date" },
 			{ fieldtype: "Column Break" },
@@ -1203,27 +1209,6 @@ frappe.ui.form.on("Payment Entry", {
 			},
 		]);
 
-		if (get_outstanding_invoices) {
-			fields = fields.concat([
-				{ fieldtype: "Column Break" },
-				{
-					fieldtype: "Int",
-					label: __("Maximum Invoices to Fetch"),
-					fieldname: "limit",
-					default: 100,
-					non_negative: 1,
-					description: __("Oldest invoices are fetched first. Set 0 to fetch all."),
-				},
-			]);
-		}
-
-		const last_filters = frm.__last_outstanding_filters || {};
-		fields.forEach((field) => {
-			if (field.fieldname && field.fieldname in last_filters) {
-				field.default = last_filters[field.fieldname];
-			}
-		});
-
 		let btn_text = "";
 
 		if (get_outstanding_invoices) {
@@ -1237,7 +1222,6 @@ frappe.ui.form.on("Payment Entry", {
 			function (filters) {
 				frappe.flags.allocate_payment_amount = true;
 				frm.events.validate_filters_data(frm, filters);
-				frm.__last_outstanding_filters = { ...filters };
 				frm.doc.cost_center = filters.cost_center;
 				frm.events.get_outstanding_documents(
 					frm,
