@@ -4299,6 +4299,22 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.save()
 		self.assertEqual(so.items[0].valuation_rate, 100)
 
+	def test_product_bundle_valuation_rate_in_component_stock_uom(self):
+		bundle = make_item("_Test Bundle Valued In Stock UOM", {"is_stock_item": 0}).name
+		component = make_item(
+			"_Test Component Valued In Stock UOM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Gram", "conversion_factor": 0.001}],
+			},
+		).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_bundle_version(bundle, [{"item_code": component, "qty": 100, "uom": "Gram"}])
+
+		so = make_sales_order(item_code=bundle, qty=1, rate=20, do_not_submit=True)
+		self.assertEqual(so.items[0].valuation_rate, 10)
+
 	@change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_selling_price_validation_for_manufactured_item(self):
 		"""
