@@ -127,6 +127,7 @@ class TestSalesInvoiceTrends(FrappeTestCase):
 			frappe.get_doc(
 				{
 					"doctype": "User",
+					"send_welcome_email": 0,
 					"email": user,
 					"first_name": "Trends",
 					"roles": [{"role": "Accounts User"}],

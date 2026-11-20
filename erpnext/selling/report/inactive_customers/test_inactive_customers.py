@@ -125,6 +125,7 @@ class TestInactiveCustomers(FrappeTestCase):
 		user = "_test_inactive_territory@example.com"
 		if not frappe.db.exists("User", user):
 			restricted = frappe.new_doc("User")
+			restricted.send_welcome_email = 0
 			restricted.email = user
 			restricted.first_name = "Inactive Territory"
 			restricted.append("roles", {"role": "Sales User"})
@@ -158,6 +159,7 @@ class TestInactiveCustomers(FrappeTestCase):
 		user = "_test_inactive_so_territory@example.com"
 		if not frappe.db.exists("User", user):
 			restricted = frappe.new_doc("User")
+			restricted.send_welcome_email = 0
 			restricted.email = user
 			restricted.first_name = "Inactive SO Territory"
 			restricted.append("roles", {"role": "Sales User"})
@@ -182,6 +184,7 @@ class TestInactiveCustomers(FrappeTestCase):
 		user = "_test_inactive_si_denied@example.com"
 		if not frappe.db.exists("User", user):
 			restricted = frappe.new_doc("User")
+			restricted.send_welcome_email = 0
 			restricted.email = user
 			restricted.first_name = "Inactive SI Denied"
 			restricted.append("roles", {"role": "Sales User"})
