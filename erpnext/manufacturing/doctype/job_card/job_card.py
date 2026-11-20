@@ -792,8 +792,10 @@ class JobCard(Document):
 					_("Workstation Type {0} has no enabled Workstation").format(bold(self.workstation_type))
 				)
 
-			# all are busy: wait on the workstation whose booking ends first
-			self.workstation = data.get("workstation") or workstations[0]
+			if data:
+				return self.schedule_on_workstation_that_frees_first(workstations, args, row)
+
+			self.workstation = workstations[0]
 
 		if not data:
 			row.planned_start_time = args.from_time
@@ -805,6 +807,18 @@ class JobCard(Document):
 			args.to_time = add_to_date(args.planned_start_time, minutes=row.remaining_time_in_mins)
 
 			self.validate_overlap_for_workstation(args, row)
+
+	def schedule_on_workstation_that_frees_first(self, workstations, args, row):
+		"""All workstations are busy: start on the one where the card can start first."""
+		starts = {}
+		for workstation in workstations:
+			self.workstation = workstation
+			trial_row = frappe._dict(remaining_time_in_mins=row.remaining_time_in_mins)
+			self.validate_overlap_for_workstation(frappe._dict(args), trial_row)
+			starts[workstation] = get_datetime(trial_row.planned_start_time)
+
+		self.workstation = min(workstations, key=starts.get)
+		row.planned_start_time = starts[self.workstation]
 
 	def schedule_without_working_hours(self, row):
 		if get_datetime(row.planned_end_time) <= get_datetime(row.planned_start_time):
