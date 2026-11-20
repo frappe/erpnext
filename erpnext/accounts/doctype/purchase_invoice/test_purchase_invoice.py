@@ -3442,6 +3442,52 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			)
 		)
 
+	def test_return_of_an_internal_transfer_invoice_takes_back_the_lot_it_received(self):
+		"""A return takes back the stock at the rate it came in at, not another lot of the warehouse."""
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(item_code=item, qty=3, rate=100, to_warehouse="Stores - TCP1", company=company)
+		make_stock_entry(
+			item_code=item, qty=10, rate=300, to_warehouse="Finished Goods - TCP1", company=company
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item,
+			qty=3,
+			rate=100,
+			warehouse="Stores - TCP1",
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].target_warehouse = "Goods In Transit - TCP1"
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": returned.name, "warehouse": "Finished Goods - TCP1", "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -300)
+
 	def test_stock_updating_invoice_rejects_every_unit_of_a_row(self):
 		"""A row of a stock updating invoice may be rejected in full."""
 		from erpnext.stock.doctype.item.test_item import make_item
