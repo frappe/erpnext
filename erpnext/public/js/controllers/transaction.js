@@ -777,6 +777,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 				precision("rate", item));
 
+		// the rate trigger does not run when the rate is unchanged
+		this.set_gross_profit(item);
 		this.calculate_taxes_and_totals();
 	}
 
