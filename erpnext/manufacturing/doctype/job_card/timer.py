@@ -186,7 +186,7 @@ class JobCardTimer:
 		# union of the intervals, so parallel operators count once
 		now = now_datetime()
 		time_logs = [frappe._dict(log, to_time=log.to_time or now) for log in self.job_card.time_logs]
-		return int(get_workstation_minutes(time_logs) * 60)
+		return round(get_workstation_minutes(time_logs) * 60)
 
 	def is_running(self) -> bool:
 		return self.job_card.last_log_open and not self.job_card.is_paused
