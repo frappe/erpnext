@@ -3708,6 +3708,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.pick_list:
 			return
 
+		if self.job_card and self.purpose == "Manufacture":
+			frappe.throw(
+				_(
+					"Items of this Stock Entry come from Job Card {0}. Use Record Output on the Job Card instead of Get Items."
+				).format(frappe.bold(self.job_card))
+			)
+
 		self.check_source_documents_permission()
 		self.set("items", [])
 		self.validate_work_order()
