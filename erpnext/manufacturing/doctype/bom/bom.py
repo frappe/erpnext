@@ -2144,6 +2144,9 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 				_append_operating_cost(
 					stock_entry, expense_account, remaining_operating_cost * flt(stock_entry.fg_completed_qty)
 				)
+		else:
+			for operation in work_order.get("operations", {"name": job_card.operation_id}):
+				_add_operation_cost(stock_entry, work_order, operation, expense_account)
 
 	_add_additional_operating_cost(stock_entry, work_order, expense_account, job_card)
 
