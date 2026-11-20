@@ -52,6 +52,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		)
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(doc)
+		rows_at_invoice_rate = get_rows_at_invoice_rate(doc, net_rate_map)
 		stock_items = doc.get_stock_items()
 		perpetual_inventory = erpnext.is_perpetual_inventory_enabled(doc.company)
 		warehouse_with_no_account = []
@@ -142,7 +143,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					if (
 						exchange_rate_map[item.purchase_invoice]
 						and doc.conversion_rate != exchange_rate_map[item.purchase_invoice]
-						and item.net_rate == net_rate_map[item.purchase_invoice_item]
+						and item.name in rows_at_invoice_rate
 					):
 						discrepancy_caused_by_exchange_rate_difference = flt(
 							item.qty
@@ -482,3 +483,22 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					)
 
 					i += 1
+
+
+def get_rows_at_invoice_rate(doc, net_rate_map: dict) -> set:
+	"""Rows received at the Purchase Invoice net rate; a return row follows its original row."""
+	if not doc.is_return:
+		return {row.name for row in doc.items if row.net_rate == net_rate_map.get(row.purchase_invoice_item)}
+
+	receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+	original_rows = (
+		frappe.qb.from_(receipt_item)
+		.join(invoice_item)
+		.on(invoice_item.name == receipt_item.purchase_invoice_item)
+		.select(receipt_item.name)
+		.where(receipt_item.name.isin([row.purchase_receipt_item for row in doc.items]))
+		.where(receipt_item.net_rate == invoice_item.net_rate)
+		.run(pluck=True)
+	)
+	return {row.name for row in doc.items if row.purchase_receipt_item in original_rows}
