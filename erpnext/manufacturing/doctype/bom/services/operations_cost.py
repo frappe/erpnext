@@ -33,7 +33,11 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 	if cost:
 		stock_entry.append(
 			"additional_costs",
-			{"expense_account": expense_account, "description": _("Non stock items"), "amount": cost},
+			{
+				"expense_account": expense_account,
+				"description": _("Non stock items"),
+				"amount": flt(cost, frappe.get_precision("Landed Cost Taxes and Charges", "amount")),
+			},
 		)
 
 
