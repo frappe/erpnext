@@ -28,6 +28,17 @@ from erpnext.tests.permission_test_utils import as_user, assert_refused, insert_
 
 
 class TestSerialandBatchBundle(FrappeTestCase):
+	def test_item_code_warehouse_posting_datetime_index_is_dropped(self):
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("MariaDB index names")
+
+		self.assertTrue(frappe.db.has_index("tabSerial and Batch Bundle", "voucher_no_voucher_type_index"))
+		self.assertFalse(
+			frappe.db.has_index(
+				"tabSerial and Batch Bundle", "item_code_warehouse_posting_datetime_creation_index"
+			)
+		)
+
 	def test_return_row_loads_the_returned_voucher_batches(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -2370,6 +2381,77 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		first, second = receipts
 		second.items[0].serial_and_batch_bundle = first.items[0].serial_and_batch_bundle
 		self.assertRaisesRegex(frappe.ValidationError, "belongs to Purchase Receipt", second.save)
+
+	def test_entries_keep_the_bundle_header_values(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBEH-.#####",
+			}
+		).name
+		receipt = make_purchase_receipt(item_code=item_code, qty=3, rate=10)
+		bundle = receipt.items[0].serial_and_batch_bundle
+		self.assert_entries_match_bundle(bundle)
+		self.assertEqual(frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "is_cancelled"), 0)
+
+		receipt.cancel()
+		self.assert_entries_match_bundle(bundle)
+		self.assertEqual(frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "is_cancelled"), 1)
+
+	def test_backdated_batch_entry_before_a_batch_reconciliation(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+		from erpnext.stock.utils import get_stock_balance
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBER-.#####",
+			}
+		).name
+		warehouse = "_Test Warehouse - _TC"
+		receipt = make_stock_entry(
+			item_code=item_code, target=warehouse, qty=10, basic_rate=100, posting_date=add_days(today(), -5)
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		reco = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=20,
+			rate=100,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -1),
+		)
+		self.assert_entries_match_bundle(reco.items[0].current_serial_and_batch_bundle)
+
+		make_stock_entry(
+			item_code=item_code, target=warehouse, qty=5, basic_rate=100, posting_date=add_days(today(), -3)
+		)
+
+		self.assertEqual(get_stock_balance(item_code, warehouse), 25)
+
+	def assert_entries_match_bundle(self, bundle):
+		fields = [
+			"posting_datetime",
+			"voucher_type",
+			"voucher_no",
+			"voucher_detail_no",
+			"type_of_transaction",
+			"is_cancelled",
+			"item_code",
+			"creation",
+			"docstatus",
+		]
+		expected = frappe.db.get_value("Serial and Batch Bundle", bundle, fields, as_dict=True)
+		for entry in frappe.get_all("Serial and Batch Entry", filters={"parent": bundle}, fields=fields):
+			self.assertEqual(entry, expected)
 
 
 def get_batch_from_bundle(bundle):
