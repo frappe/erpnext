@@ -527,30 +527,38 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 
 	for row in details.data.adjustment_rows.get((entry.voucher_no, entry.item_code, entry.warehouse), []):
 		value_before = stock.value
-		rate = flt(row.valuation_rate)
-		if row.serial_no:
-			for serial_no in get_serial_nos(row.serial_no):
-				if details.values_everything_in_pool or details.valuation_method == "Standard Cost":
-					stock.receive_into_pool(1, rate)
-				else:
-					stock.receive_serial(serial_no, rate)
-		elif (
-			row.batch_no
-			and details.valuation_method != "Standard Cost"
-			and details.is_valued_batch_wise(row.batch_no)
-		):
-			stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
-		elif flt(row.qty):
-			stock.receive_into_pool(flt(row.qty), rate)
+		count_in_adjustment_row(stock, row, details)
 
-		# the ledger counts in every row as an entry of its own
-		stock.carried_value = flt(
-			stock.carried_value + stock.value - value_before, details.currency_precision
-		)
+		# the ledger counts in every row as an entry of its own, and values a Standard Cost item's
+		# whole balance at the standard rate
+		if details.valuation_method == "Standard Cost":
+			stock.carried_value = flt(stock.value, details.currency_precision)
+		else:
+			stock.carried_value = flt(
+				stock.carried_value + stock.value - value_before, details.currency_precision
+			)
 
 	carry_moving_average_rate_from_rounded_value(stock)
 
 	return make_expected_values(stock, carried_value_before, BASIS_ADJUSTED)
+
+
+def count_in_adjustment_row(stock: ItemWarehouseStock, row, details: "ValuationDetails") -> None:
+	rate = flt(row.valuation_rate)
+	if row.serial_no:
+		for serial_no in get_serial_nos(row.serial_no):
+			if details.values_everything_in_pool or details.valuation_method == "Standard Cost":
+				stock.receive_into_pool(1, rate)
+			else:
+				stock.receive_serial(serial_no, rate)
+	elif (
+		row.batch_no
+		and details.valuation_method != "Standard Cost"
+		and details.is_valued_batch_wise(row.batch_no)
+	):
+		stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
+	elif flt(row.qty):
+		stock.receive_into_pool(flt(row.qty), rate)
 
 
 def carry_moving_average_rate_from_rounded_value(stock: ItemWarehouseStock) -> None:
