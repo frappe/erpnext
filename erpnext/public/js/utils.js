@@ -1616,7 +1616,10 @@ erpnext.utils.get_time_logs_seconds = function (time_logs) {
 		.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
 		.sort((a, b) => a[0] - b[0]);
 
-	let seconds = 0;
+	// rows with only minutes count as they are, as in get_workstation_minutes
+	let seconds = time_logs
+		.filter((d) => !d.from_time)
+		.reduce((total, d) => total + flt(d.time_in_mins) * 60, 0);
 	let current_start = null;
 	let current_end = null;
 	intervals.forEach(([start, end]) => {
