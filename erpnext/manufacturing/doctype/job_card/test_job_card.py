@@ -2333,6 +2333,19 @@ class TestJobCard(ERPNextTestSuite):
 			8,
 		)
 
+	def test_get_items_is_refused_on_record_output_entry(self):
+		work_order = self.make_semi_fg_work_order("Record Output Get Items")
+
+		job_card = self.get_semi_fg_job_card(work_order, "Record Output Get Items Op A")
+		job_card.append(
+			"time_logs",
+			{"from_time": "2024-02-01 08:00:00", "to_time": "2024-02-01 09:00:00", "completed_qty": 5},
+		)
+		job_card.submit()
+
+		entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		self.assertRaises(frappe.ValidationError, entry.get_items)
+
 	def test_semi_fg_secondary_items_across_split_job_cards(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
