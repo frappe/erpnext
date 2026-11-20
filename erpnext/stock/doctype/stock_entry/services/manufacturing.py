@@ -1375,7 +1375,7 @@ def get_production_item_details(work_order=None, bom_no=None):
 
 def _check_bom_component_qty(doc, bom_items):
 	"""Validate that stock entry items match BOM quantities."""
-	precision = frappe.get_precision("Stock Entry Detail", "qty")
+	precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 	for row in bom_items:
 		# Get Items rounds a whole number qty up
 		row.qty = ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
