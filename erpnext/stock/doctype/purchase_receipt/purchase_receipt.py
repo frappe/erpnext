@@ -9,10 +9,14 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Abs, CombineDatetime, IfNull, Sum
 from frappe.utils import cint, flt, get_datetime, getdate, now, nowdate
 from pypika import functions as fn
+=======
+from frappe.utils import cint, flt, getdate, nowdate
+>>>>>>> 957943c (refactor(stock): drop the Purchase Receipt's plan sub-assembly received qty update)
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -414,6 +418,7 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
+<<<<<<< HEAD
 		self.reserve_stock()
 		self.update_received_qty_if_from_pp()
 
@@ -468,6 +473,9 @@ class PurchaseReceipt(BuyingController):
 						{"modified": now(), "modified_by": frappe.session.user},
 						update_modified=False,
 					)
+=======
+		PurchaseReceiptStockReservation(self).reserve_stock()
+>>>>>>> 957943c (refactor(stock): drop the Purchase Receipt's plan sub-assembly received qty update)
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -491,7 +499,6 @@ class PurchaseReceipt(BuyingController):
 		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
-		self.update_received_qty_if_from_pp()
 
 	def before_cancel(self):
 		super().before_cancel()
