@@ -55,7 +55,9 @@ frappe.ui.form.on("Loyalty Program", {
 			};
 		});
 
-		frm.set_value("company", frappe.defaults.get_user_default("Company"));
+		if (frm.is_new() && !frm.doc.company) {
+			frm.set_value("company", frappe.defaults.get_user_default("Company"));
+		}
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
