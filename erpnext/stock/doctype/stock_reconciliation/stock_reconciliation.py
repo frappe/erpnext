@@ -11,7 +11,7 @@ from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 
 import erpnext
 from erpnext import _refuse
-from erpnext.accounts.utils import get_company_default
+from erpnext.accounts.utils import _get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -1656,7 +1656,7 @@ def get_difference_account(purpose, company):
 	_require_reconciliation_permission("Company", company)
 
 	if purpose == "Stock Reconciliation":
-		account = get_company_default(company, "stock_adjustment_account")
+		account = _get_company_default(company, "stock_adjustment_account")
 	else:
 		account = frappe.db.get_value(
 			"Account", {"is_group": 0, "company": company, "account_type": "Temporary"}, "name"
