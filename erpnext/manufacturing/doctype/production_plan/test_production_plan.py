@@ -20,6 +20,7 @@ from erpnext.manufacturing.doctype.production_plan.services.work_order_quantitie
 )
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_se_from_wo
 from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
@@ -2477,7 +2478,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import (
 			make_wo_order_test_record,
 		)
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		# 1. Create required items
@@ -2573,29 +2573,36 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(pln.po_items[0].planned_qty, 10)
 
 	def test_work_order_qty_of_product_bundle_line_in_bundle_units(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-
 		component = make_item("_Test PP Bundle WO Qty Component", {"is_stock_item": 1}).name
 		make_bom(item=component, raw_materials=["_Test Item"], currency="INR")
+		# gets no Work Order, so it must not count towards the bundle qty
+		purchased = make_item("_Test PP Bundle WO Qty Purchased", {"is_stock_item": 1}).name
 		bundle_item = make_item("_Test PP Bundle WO Qty", {"is_stock_item": 0}).name
-		make_product_bundle(parent=bundle_item, items=[component], qty=2)
-		sales_order = make_sales_order(item_code=bundle_item, qty=5)
+		make_product_bundle(parent=bundle_item, items=[component, purchased], qty=2)
+		row = {"item_code": bundle_item, "warehouse": "_Test Warehouse - _TC", "qty": 5, "rate": 100}
+		sales_order = make_sales_order(item_list=[row, dict(row)])
 
-		pln = frappe.new_doc("Production Plan")
-		pln.company = sales_order.company
-		pln.get_items_from = "Sales Order"
-		pln.append("sales_orders", {"sales_order": sales_order.name})
-		pln.get_items()
-		pln.submit()
-		pln.make_work_order()
+		submit_work_orders_for_sales_orders([sales_order])
 
-		work_order = frappe.get_doc("Work Order", {"production_plan": pln.name})
-		work_order.wip_warehouse = "Work In Progress - _TC"
-		work_order.submit()
-		self.assertEqual(work_order.qty, 10)
-		self.assertEqual(
-			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "work_order_qty"), 5
-		)
+		for item in sales_order.items:
+			self.assertEqual(frappe.db.get_value("Sales Order Item", item.name, "work_order_qty"), 5)
+
+	def test_work_order_qty_of_combined_product_bundle_lines(self):
+		component = make_item("_Test PP Combined Bundle Component", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=["_Test Item"], currency="INR")
+		sales_orders = []
+		for bundle_item, qty in (("_Test PP Combined Bundle A", 2), ("_Test PP Combined Bundle B", 1)):
+			make_item(bundle_item, {"is_stock_item": 0})
+			make_product_bundle(parent=bundle_item, items=[component], qty=qty)
+			sales_orders.append(make_sales_order(item_code=bundle_item, qty=5))
+		sales_orders.append(make_sales_order(item_code=component, qty=5))
+
+		submit_work_orders_for_sales_orders(sales_orders, combine_items=1)
+
+		for sales_order in sales_orders:
+			self.assertEqual(
+				frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "work_order_qty"), 5
+			)
 
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
@@ -6342,6 +6349,22 @@ def submit_work_order_from_plan(plan, qty, source_warehouse):
 		item.source_warehouse = source_warehouse
 	work_order.submit()
 	return work_order
+
+
+def submit_work_orders_for_sales_orders(sales_orders, combine_items=0):
+	plan = frappe.new_doc("Production Plan")
+	plan.company = "_Test Company"
+	plan.get_items_from = "Sales Order"
+	plan.combine_items = combine_items
+	for sales_order in sales_orders:
+		plan.append("sales_orders", {"sales_order": sales_order.name})
+	plan.get_items()
+	plan.submit()
+	plan.make_work_order()
+	for name in frappe.get_all("Work Order", {"production_plan": plan.name}, pluck="name"):
+		work_order = frappe.get_doc("Work Order", name)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.submit()
 
 
 def make_plan_with_sub_assembly():
