@@ -1110,7 +1110,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	transaction_date() {
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
-			frappe.ui.form.trigger(this.frm.doc.doctype, "currency");
+			this.update_rates_for_new_date();
 			this.recalculate_terms();
 		}
 	}
@@ -1135,14 +1135,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						if(r.message) {
 							me.frm.doc.due_date = r.message;
 							refresh_field("due_date");
-							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
+							me.update_rates_for_new_date();
 							me.recalculate_terms();
 						}
 					}
 				})
 			} else {
-				frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
+				me.update_rates_for_new_date();
 			}
+		}
+	}
+
+	async update_rates_for_new_date() {
+		const previous_rate = flt(this.frm.doc.conversion_rate);
+		await this.frm.script_manager.trigger("currency");
+
+		// A changed rate re-prices via the conversion_rate trigger; an unchanged one fires nothing
+		if (flt(this.frm.doc.conversion_rate) === previous_rate) {
+			this.apply_pricing_rule();
 		}
 	}
 
