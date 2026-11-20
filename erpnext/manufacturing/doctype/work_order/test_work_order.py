@@ -3075,36 +3075,16 @@ class TestWorkOrder(FrappeTestCase):
 
 		stock_entry.submit()
 
-<<<<<<< HEAD
-=======
-	def test_disassembled_qty_sums_without_float_noise(self):
-		wo = frappe.new_doc("Work Order")
-		wo.update({"docstatus": 1, "produced_qty": 0.3, "disassembled_qty": 0.1})
-		with patch.object(wo, "db_set"):
-			wo.update_disassembled_qty(0.2)
-
-		self.assertEqual(wo.disassembled_qty, 0.3)
-
-	def test_disassembly_available_qty_has_no_float_noise(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import get_disassembly_available_qty
-
-		real_get_value = frappe.db.get_value
-
-		def get_value(doctype, filters=None, *args, **kwargs):
-			if doctype != "Stock Entry":
-				return real_get_value(doctype, filters, *args, **kwargs)
-			return frappe._dict(fg_completed_qty=0.3) if isinstance(filters, str) else 0.1
-
-		with patch.object(frappe.db, "get_value", side_effect=get_value):
-			self.assertEqual(get_disassembly_available_qty("Manufacture Entry"), 0.2)
-
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	@change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
 	def test_disassembly_after_process_loss_uses_the_finished_good_qty(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_disassembly_available_qty
 
 		rm_item = make_item("Test Loss Disassembly RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
 		fg_item = make_item("Test Loss Disassembly FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=10)
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=1)
+		bom.process_loss_percentage = 10
+		bom.insert()
+		bom.submit()
 		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=40)
 
 		def make_work_order(manufacture_qtys):
@@ -3134,7 +3114,6 @@ class TestWorkOrder(FrappeTestCase):
 		work_order, _ = make_work_order([5, 5])
 		self.assertEqual(disassembled_rm_qty(work_order), 10)
 
->>>>>>> 952ac66 (test: disassembly after process loss uses the finished good qty)
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
 		raw_item = make_item("Test Raw for Disassembly", {"is_stock_item": 1}).name
