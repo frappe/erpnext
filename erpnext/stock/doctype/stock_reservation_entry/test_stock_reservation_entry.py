@@ -1891,7 +1891,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		},
 	)
 	def test_receipt_reserves_stock_after_picked_qty_is_delivered(self):
-		from erpnext.stock.doctype.pick_list.mapper import create_delivery_note
+		from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=4, basic_rate=100)
