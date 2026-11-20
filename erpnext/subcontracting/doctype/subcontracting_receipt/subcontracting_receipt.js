@@ -429,22 +429,14 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
-<<<<<<< HEAD
-	items_delete: (frm) => {
-=======
 	before_items_remove(frm, cdt, cdn) {
-		const filtered_rows = frm.doc.supplied_items.filter((item) => item.reference_name !== cdn);
-		frm.doc.supplied_items = filtered_rows;
-		frm.refresh_field("supplied_items");
-
-		// secondary rows of the removed finished good row go with it
+		// scrap rows of the removed finished good row go with it
 		frm.doc.items
 			.filter((item) => item.reference_name === cdn)
 			.forEach((item) => frappe.model.clear_doc(item.doctype, item.name));
 	},
 
-	items_delete(frm) {
->>>>>>> 3c35578 (fix(subcontracting): remove a finished good row's secondary rows with it)
+	items_delete: (frm) => {
 		set_missing_values(frm);
 	},
 

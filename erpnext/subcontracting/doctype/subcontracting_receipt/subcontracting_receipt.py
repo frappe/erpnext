@@ -663,21 +663,9 @@ class SubcontractingReceipt(SubcontractingController):
 		}
 
 	def validate_scrap_items(self):
+		fg_rows = {item.name for item in self.items if not item.is_scrap_item}
 		for item in self.items:
-<<<<<<< HEAD
 			if item.is_scrap_item:
-=======
-			original_row = original_rows.get(item.subcontracting_receipt_item)
-			if original_row and flt(original_row.qty) and item.name not in rejected_return_rows:
-				ratios[item.name] = flt(original_row.received_qty) / flt(original_row.qty)
-
-		return ratios
-
-	def validate_secondary_items(self):
-		fg_rows = {item.name for item in self.items if not (item.secondary_item_type or item.valuation_type)}
-		for item in self.items:
-			if item.secondary_item_type or item.valuation_type:
->>>>>>> 3c35578 (fix(subcontracting): remove a finished good row's secondary rows with it)
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Scrap Item Qty cannot be zero").format(item.idx),
@@ -700,7 +688,7 @@ class SubcontractingReceipt(SubcontractingController):
 				if item.reference_name not in fg_rows:
 					frappe.throw(
 						_(
-							"Row #{0}: The Finished Good row of Secondary Item {1} is not on this receipt. Remove the Secondary Item row."
+							"Row #{0}: The Finished Good row of Scrap Item {1} is not on this receipt. Remove the Scrap Item row."
 						).format(item.idx, frappe.bold(item.item_code)),
 					)
 

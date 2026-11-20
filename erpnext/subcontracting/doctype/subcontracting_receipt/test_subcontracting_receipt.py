@@ -3011,7 +3011,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scrap_row.qty = -2
 		self.assertRaises(StockOverReturnError, scr_return.insert)
 
-<<<<<<< HEAD
 		scrap_row.qty = -1
 		scr_return.insert()
 		scr_return.submit()
@@ -3077,16 +3076,13 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			[row.subcontracting_receipt_item for row in scr_return.items], [row.name for row in scr.items]
 		)
 
-	def test_scrap_items_for_subcontracting_receipt(self):
-=======
-	def test_secondary_item_without_its_finished_good_row_cannot_be_submitted(self):
-		scr = make_receipt_with_scrap(do_not_submit=True)
+	def test_scrap_item_without_its_finished_good_row_cannot_be_submitted(self):
+		scr = make_receipt_with_scrap_item()
 		scr.items[1].reference_name = "not-a-row-of-this-receipt"
 
 		self.assertRaises(frappe.ValidationError, scr.submit)
 
-	def test_secondary_items_for_subcontracting_receipt(self):
->>>>>>> 31d2158 (test: a secondary row without its finished good row cannot be submitted)
+	def test_scrap_items_for_subcontracting_receipt(self):
 		set_backflush_based_on("BOM")
 
 		fg_item = "Subcontracted Item SA1"
@@ -4931,66 +4927,3 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	scr = make_subcontracting_receipt(sco.name)
 	scr.submit()
 	return scr
-<<<<<<< HEAD
-=======
-
-
-def make_receipt_with_scrap(
-	valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None, do_not_submit=False
-):
-	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate, and an optional co-product."""
-	set_backflush_based_on("BOM")
-	rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
-	secondary_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
-	fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
-	bom = make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR", do_not_submit=True)
-	bom.append(
-		"secondary_items",
-		{
-			"item_code": secondary_item,
-			"secondary_item_type": "Scrap",
-			"qty": 1,
-			"stock_qty": 1,
-			"valuation_type": valuation_type,
-		},
-	)
-	if co_product_allocation:
-		bom.append(
-			"secondary_items",
-			{
-				"item_code": make_item(properties={"is_stock_item": 1}).name,
-				"secondary_item_type": "Co-Product",
-				"qty": 1,
-				"stock_qty": 1,
-				"valuation_type": "% of Component Cost",
-				"cost_allocation_per": co_product_allocation,
-			},
-		)
-	bom.save()
-	bom.submit()
-	service_items = [
-		{
-			"warehouse": "_Test Warehouse - _TC",
-			"item_code": "Subcontracted Service Item 1",
-			"qty": 2,
-			"rate": 100,
-			"fg_item": fg_item,
-			"fg_item_qty": 2,
-		}
-	]
-	sco = get_subcontracting_order(service_items=service_items)
-	rm_items = get_rm_items(sco.supplied_items)
-	itemwise_details = make_stock_in_entry(rm_items=rm_items)
-	make_stock_transfer_entry(
-		sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
-	)
-	scr = make_subcontracting_receipt(sco.name)
-	scr.save()
-	scr.get_secondary_items(recalculate_rate=True)
-	if scrap_rate:
-		scr.items[1].rate = scrap_rate
-	scr.save()
-	if not do_not_submit:
-		scr.submit()
-	return scr
->>>>>>> 31d2158 (test: a secondary row without its finished good row cannot be submitted)
