@@ -8,6 +8,8 @@ Extracted from work_order.py. ``StatusService`` wraps a Work Order document
 callers (job cards, sales orders, production plans, patches) keep working.
 """
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder import Case
@@ -543,41 +545,48 @@ class StatusService:
 		return qty[0][0] if qty and qty[0][0] else 0
 
 	def update_work_order_qty_in_combined_so(self):
+		"""Spread each combined row's Work Order qty over its Sales Order lines, summed per line,
+		as a bundle line takes from one row per component."""
 		prod_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
-		item_reference = frappe.get_value(
-			"Production Plan Item", self.doc.production_plan_item, "sales_order_item"
-		)
-		references = [row for row in prod_plan.prod_plan_references if row.item_reference == item_reference]
-		if not references:
-			return
+		ordered_qty = self._ordered_qty_by_item_reference(prod_plan)
+		allocated_qty = defaultdict(float)
+		for reference in prod_plan.prod_plan_references:
+			qty = min(flt(reference.qty), ordered_qty[reference.item_reference])
+			ordered_qty[reference.item_reference] -= qty
+			allocated_qty[reference.sales_order_item] += qty
 
-		work_order = frappe.qb.DocType("Work Order")
-		plan_item = frappe.qb.DocType("Production Plan Item")
-		ordered_qty = flt(
-			(
-				frappe.qb.from_(work_order)
-				.left_join(plan_item)
-				.on(plan_item.name == work_order.production_plan_item)
-				.select(Sum(qty_against_sales_order(work_order, plan_item)))
-				.where(
-					(work_order.production_plan_item == self.doc.production_plan_item)
-					& (work_order.docstatus == 1)
-					& (work_order.status != "Closed")
-				)
-			).run()[0][0]
-		)
-
-		bundle_qty = self._bundle_qty_by_line([row.sales_order_item for row in references])
+		bundle_qty = self._bundle_qty_by_line(list(allocated_qty))
 		precision = frappe.get_precision("Sales Order Item", "work_order_qty")
-		for plan_reference in references:
-			allocated_qty = min(flt(plan_reference.qty), ordered_qty)
-			ordered_qty -= allocated_qty
+		for sales_order_item, qty in allocated_qty.items():
 			frappe.db.set_value(
 				"Sales Order Item",
-				plan_reference.sales_order_item,
+				sales_order_item,
 				"work_order_qty",
-				flt(allocated_qty / (bundle_qty.get(plan_reference.sales_order_item) or 1), precision),
+				flt(qty / (bundle_qty.get(sales_order_item) or 1), precision),
 			)
+
+	@staticmethod
+	def _ordered_qty_by_item_reference(prod_plan):
+		item_reference = {row.name: row.sales_order_item for row in prod_plan.po_items}
+		work_order = frappe.qb.DocType("Work Order")
+		plan_item = frappe.qb.DocType("Production Plan Item")
+		rows = (
+			frappe.qb.from_(work_order)
+			.left_join(plan_item)
+			.on(plan_item.name == work_order.production_plan_item)
+			.select(work_order.production_plan_item, Sum(qty_against_sales_order(work_order, plan_item)))
+			.where(
+				(work_order.production_plan == prod_plan.name)
+				& (work_order.docstatus == 1)
+				& (work_order.status != "Closed")
+			)
+			.groupby(work_order.production_plan_item)
+		).run()
+
+		ordered_qty = defaultdict(float)
+		for production_plan_item, qty in rows:
+			ordered_qty[item_reference.get(production_plan_item)] += flt(qty)
+		return ordered_qty
 
 	@staticmethod
 	def _bundle_qty_by_line(sales_order_items):
