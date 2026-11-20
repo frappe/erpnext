@@ -932,6 +932,106 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(project.reload().total_purchase_cost, 20)
 
+	def test_landed_cost_claim_comes_first_from_valuation_rows(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Valuation Claim {frappe.generate_hash(length=6)}"})
+		receipt = make_purchase_receipt(item_code=make_item(properties={"is_stock_item": 1}).name, qty=10)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=50,
+			project=project.name,
+			expense_account="Expenses Included In Valuation - _TC",
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		service = invoice.append("items", invoice.items[0].as_dict(no_default_fields=True))
+		service.rate = 100
+		service.expense_account = "Cost of Goods Sold - _TC"
+		invoice.submit()
+		self.assertEqual(project.reload().total_purchase_cost, 100)
+
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=80,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 80})
+		voucher.insert()
+		voucher.submit()
+
+		# 50 of the claim is the valuation row; only the other 30 comes off the service row.
+		self.assertEqual(project.reload().total_purchase_cost, 70)
+
+	def test_return_takes_the_landed_cost_claim_of_its_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Claimed Return {frappe.generate_hash(length=6)}"})
+		receipt = make_purchase_receipt(item_code=make_item(properties={"is_stock_item": 1}).name, qty=10)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item", qty=2, rate=50, project=project.name
+		)
+		debit_note = make_return_doc("Purchase Invoice", invoice.name)
+		debit_note.items[0].qty = -1
+		debit_note.submit()
+		self.assertEqual(project.reload().total_purchase_cost, 50)
+
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=40,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 40})
+		voucher.insert()
+		voucher.submit()
+		# 60% of the invoice stays an expense: 100 x 0.6 less the returned 50 x 0.6.
+		self.assertEqual(project.reload().total_purchase_cost, 30)
+
+		voucher.cancel()
+		self.assertEqual(project.reload().total_purchase_cost, 50)
+
+	def test_return_of_a_fully_claimed_invoice_adds_no_purchase_cost(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Full Claim Return {frappe.generate_hash(length=6)}"})
+		receipt = make_purchase_receipt(item_code=make_item(properties={"is_stock_item": 1}).name, qty=10)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item", qty=1, rate=100, project=project.name
+		)
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 100})
+		voucher.insert()
+		voucher.submit()
+		self.assertEqual(project.reload().total_purchase_cost, 0)
+
+		make_return_doc("Purchase Invoice", invoice.name).submit()
+		self.assertEqual(project.reload().total_purchase_cost, 0)
+
 	def test_drop_shipped_stock_is_purchase_cost(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 

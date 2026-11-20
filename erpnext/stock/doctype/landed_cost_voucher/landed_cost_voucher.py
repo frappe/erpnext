@@ -485,7 +485,8 @@ class LandedCostVoucher(Document):
 			.join(invoice)
 			.on(invoice.name == item.parent)
 			.select(Coalesce(NullIf(item.project, ""), invoice.project))
-			.where(invoice.name.isin(invoices))
+			# A return takes the claim of the invoice it returns, so its project changes too.
+			.where(invoice.name.isin(invoices) | invoice.return_against.isin(invoices))
 			.distinct()
 			.run(pluck=True)
 		)

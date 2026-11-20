@@ -11,6 +11,9 @@ from pypika.queries import QueryBuilder, Table
 from pypika.terms import Term
 
 CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
+VALUATION_ACCOUNT_TYPE = "Expenses Included In Valuation"
+# The invoice whose landed cost claim applies to a purchase row: its own, or the one a return returns.
+CLAIMED_INVOICE = "claimed_invoice"
 
 MonthlyAmounts = dict[str, float]
 
@@ -98,13 +101,16 @@ class ProjectCostQueries:
 		)
 
 	def non_stock_purchase_items(self) -> QueryBuilder:
-		"""Non-stock and drop-shipped purchases outside subcontracting and stock valuation."""
+		"""Non-stock and drop-shipped purchases outside subcontracting and stock valuation.
+
+		A return takes the landed cost claim of the invoice it returns."""
 		invoice = qb.DocType("Purchase Invoice")
 		invoice_item = qb.DocType("Purchase Invoice Item")
 		item = qb.DocType("Item")
 		purchase_order = qb.DocType("Purchase Order")
 		account = qb.DocType("Account")
-		claimed = Coalesce(invoice.claimed_landed_cost_amount, 0)
+		claimed_invoice = qb.DocType("Purchase Invoice").as_(CLAIMED_INVOICE)
+		claimed = Coalesce(claimed_invoice.claimed_landed_cost_amount, 0)
 		never_stocked = (
 			item.is_stock_item.isnull()
 			| (item.is_stock_item == 0)
@@ -115,6 +121,8 @@ class ProjectCostQueries:
 			qb.from_(invoice_item)
 			.join(invoice)
 			.on(invoice.name == invoice_item.parent)
+			.join(claimed_invoice)
+			.on(claimed_invoice.name == Coalesce(NullIf(invoice.return_against, ""), invoice.name))
 			.left_join(account)
 			.on(account.name == invoice_item.expense_account)
 			.left_join(item)
@@ -124,8 +132,8 @@ class ProjectCostQueries:
 			.where((invoice_item.project == self.project) & (invoice_item.docstatus == 1))
 			.where(never_stocked & not_subcontracted)
 		)
-		query = query.where(Coalesce(account.account_type, "") != "Expenses Included In Valuation").where(
-			(claimed <= 0) | (claimed < invoice.base_net_total)
+		query = query.where(Coalesce(account.account_type, "") != VALUATION_ACCOUNT_TYPE).where(
+			(claimed <= 0) | (claimed < claimed_invoice.base_net_total)
 		)
 		return self.keep_readable(query, invoice.name, "Purchase Invoice")
 
@@ -206,18 +214,42 @@ class ProjectCostQueries:
 
 
 def non_stock_purchase_amount() -> Term:
-	invoice = qb.DocType("Purchase Invoice")
+	"""Row amount less its part of the landed cost a Landed Cost Voucher claimed from the invoice."""
 	item = qb.DocType("Purchase Invoice Item")
-	claimed = invoice.claimed_landed_cost_amount
-	# Allocate partial claims across the discounted row amounts used for purchase cost.
+	return item.base_net_amount * expensed_share()
+
+
+def expensed_share() -> Term:
+	"""Share of the invoice's other rows that stays an expense after its landed cost claim.
+
+	The claim comes first out of the rows booked to a stock valuation account, which purchase cost
+	leaves out already. Only the rest of the claim is taken from the other rows."""
+	invoice = qb.DocType("Purchase Invoice").as_(CLAIMED_INVOICE)
+	claimed = Coalesce(invoice.claimed_landed_cost_amount, 0)
+	valuation = valuation_amount(invoice)
 	return (
 		Case()
+		.when(claimed <= 0, 1)
 		.when(
-			claimed > 0,
-			item.base_net_amount * (invoice.base_net_total - claimed) / NullIf(invoice.base_net_total, 0),
+			claimed > valuation,
+			(invoice.base_net_total - claimed) / NullIf(invoice.base_net_total - valuation, 0),
 		)
-		.else_(item.base_net_amount)
+		.else_(1)
 	)
+
+
+def valuation_amount(invoice: Table) -> Term:
+	"""Net amount of the invoice's rows booked to a stock valuation account."""
+	row = qb.DocType("Purchase Invoice Item").as_("valuation_row")
+	account = qb.DocType("Account").as_("valuation_account")
+	rows = (
+		qb.from_(row)
+		.join(account)
+		.on(account.name == row.expense_account)
+		.select(Sum(row.base_net_amount))
+		.where((row.parent == invoice.name) & (account.account_type == VALUATION_ACCOUNT_TYPE))
+	)
+	return Coalesce(rows, 0)
 
 
 def sum_by(query: QueryBuilder, group: Term, amount: Term) -> dict[str, float]:
