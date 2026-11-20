@@ -2692,7 +2692,8 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
 		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
-		party_balance = get_balance_on(date=date, party_type=party_type, party=party, company=company)
+		if frappe.has_permission(party_type, "read", party):
+			party_balance = get_balance_on(date=date, party_type=party_type, party=party, company=company)
 
 	return {
 		"party_account": party_account,
