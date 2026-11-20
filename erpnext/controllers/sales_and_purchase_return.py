@@ -643,8 +643,9 @@ def set_qty_left_to_return(source_row, target_row, returned_in_stock_uom: dict) 
 		field: flt(source_row.get(field)) * conversion_factor - flt(returned_qty)
 		for field, returned_qty in returned_in_stock_uom.items()
 	}
-	# a row in stock UOM holds any stock qty; Subcontracting Receipt Item has no uom field
-	if conversion_factor != 1 and not all(
+	# Subcontracting Receipt Item has no uom field: it is always in stock UOM
+	row_uom = source_row.get("uom") or source_row.stock_uom
+	if row_uom != source_row.stock_uom and not all(
 		is_exact_in_row_uom(source_row, qty) for qty in stock_qty_left.values()
 	):
 		set_row_in_stock_uom(target_row)
