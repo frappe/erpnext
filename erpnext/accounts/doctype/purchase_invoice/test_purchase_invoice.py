@@ -4502,13 +4502,12 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
 
-<<<<<<< HEAD
-=======
 	def test_receipt_is_net_of_debit_notes_at_a_fractional_conversion_factor(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
 		)
+		from erpnext.stock.doctype.item.test_item import make_item
 
 		conversion_factor = 0.083333333
 		item_code = make_item(
@@ -4529,8 +4528,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual((receipt.items[0].qty, receipt.items[0].received_qty), (7, 7))
 
 	def test_purchase_receipt_maps_qty_left_after_receipt_and_debit_note(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
 		)
 
@@ -4552,7 +4551,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pr.submit()
 		self.assertFalse(make_purchase_receipt_from_pi(pi.name).items)
 
->>>>>>> e5d679b (test: purchase receipt from an invoice maps only the qty left after a debit note)
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (

@@ -299,6 +299,14 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		self.assertEqual(reconciliation.stock_value, 6 * 130)
 		self.assertEqual(issue.stock_value_difference, -2 * 130)
 
+	def test_stock_reconciliation_rate_below_currency_precision(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+
+		create_stock_reconciliation(item_code=item, warehouse=WAREHOUSE, qty=50000, rate=0.0001)
+
+		self.assertNoDifferences(item)
+		self.assertEqual(get_expected_valuation(item, WAREHOUSE)[-1][1].stock_value, 5)
+
 	def test_queries_do_not_grow_with_item_warehouses(self):
 		items = [
 			make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name for _i in range(6)

@@ -484,6 +484,36 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		)
 		self.assertEqual(adjustment.difference_amount, 50)
 
+	def test_serial_nos_counted_in_at_their_unrounded_rate(self):
+		item = self.make_serial_item("SVA-SRR-.#####")
+		receipt = make_stock_entry(
+			item_code=item, target=WAREHOUSE, qty=50, rate=33.3333, posting_date=last_year(60)
+		)
+		serial_no = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": receipt.items[0].serial_and_batch_bundle}, "serial_no"
+		)
+		issue = make_stock_entry(
+			item_code=item, source=WAREHOUSE, qty=1, serial_no=[serial_no], posting_date=last_year(50)
+		)
+		self.corrupt_entry(issue.name, bundle_value=-50, stock_value_difference=-50, stock_value=1616.66)
+
+		adjustment = self.fix_by_adjustment_entry(item)
+
+		self.assertEqual([(row.qty, row.valuation_rate) for row in adjustment.items], [(49, 33.3333)])
+		self.assertEqual(adjustment.items[0].amount, 1633.33)
+
+	def test_layers_at_fractional_rates_fixed_by_adjustment_entry(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		for days, rate in ((60, 1.004), (59, 2.004), (58, 3.004)):
+			make_stock_entry(item_code=item, target=WAREHOUSE, qty=1, rate=rate, posting_date=last_year(days))
+		receipt = make_stock_entry(
+			item_code=item, target=WAREHOUSE, qty=1, rate=10, posting_date=last_year(50)
+		)
+		self.corrupt_entry(receipt.name, stock_value_difference=15, stock_value=21)
+
+		# the ledger rounds the value after every counted-in row: 16, not 16.01
+		self.fix_by_adjustment_entry(item)
+
 	def test_serial_no_counted_twice_fixed_by_adjustment_entry(self):
 		# a repost cannot take out an entry that should not be there; an adjustment can
 		item = self.make_serial_no_counted_twice()
