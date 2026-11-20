@@ -1602,10 +1602,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
-		if (
-			this.frm.doc.currency === this.frm.doc.price_list_currency &&
-			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate
-		) {
+		const plc_follows_currency = this.frm.doc.currency === this.frm.doc.price_list_currency;
+		if (plc_follows_currency && this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
 
@@ -1613,7 +1611,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if (this.frm.doc.__onload?.load_after_mapping) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list) {
-				this.apply_price_list();
+				// keep the price list exchange rate just synced above, else the server refetches the market rate
+				this.apply_price_list(null, plc_follows_currency);
 			}
 		}
 		// Make read only if Accounts Settings doesn't allow stale rates
