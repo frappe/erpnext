@@ -1205,7 +1205,7 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		# Consolidation posts payments already accepted on submitted POS invoices.
-		if not self.get("is_consolidated"):
+		if not self.flags.is_consolidated:
 			for payment in self.get("payments") or []:
 				validate_enabled_mode_of_payment(payment.mode_of_payment)
 
@@ -2167,7 +2167,6 @@ class SalesInvoice(SellingController):
 			if entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
-<<<<<<< HEAD
 	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):
 		returned_amount = self.get_returned_amount()
@@ -2180,61 +2179,6 @@ class SalesInvoice(SellingController):
 			loyalty_program=self.loyalty_program,
 			expiry_date=self.posting_date,
 			include_expired_entry=True,
-=======
-	def get_scio_self_rm_stock_qty(self):
-		stock_qty = defaultdict(float)
-		for item in self.items:
-			if item.scio_detail:
-				stock_qty[item.scio_detail] += flt(item.stock_qty)
-		return stock_qty
-
-	def on_update_after_submit(self):
-		fields_to_check = [
-			"additional_discount_account",
-			"cash_bank_account",
-			"account_for_change_amount",
-			"write_off_account",
-			"loyalty_redemption_account",
-			"unrealized_profit_loss_account",
-			"is_opening",
-		]
-		child_tables = {
-			"items": ("income_account", "expense_account", "discount_account"),
-			"taxes": ("account_head",),
-			"payments": ("account",),
-		}
-		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if needs_repost:
-			self.validate_for_repost()
-			self.repost_accounting_entries()
-
-	def counts_coupon_use(self):
-		# Returns and POS consolidation do not redeem the coupon again.
-		if self.is_return or (self.doctype == "Sales Invoice" and self.is_consolidated):
-			return False
-
-		if not self.items or any(
-			not item.get("sales_order") or not item.get("so_detail") for item in self.items
-		):
-			return True
-
-		# Match each detail to the order that already consumed this coupon.
-		order = frappe.qb.DocType("Sales Order")
-		order_item = frappe.qb.DocType("Sales Order Item")
-		coupon_order_items = dict(
-			frappe.qb.from_(order_item)
-			.join(order)
-			.on(order.name == order_item.parent)
-			.select(order_item.name, order_item.parent)
-			.where(
-				(order_item.name.isin([item.so_detail for item in self.items]))
-				& (order.coupon_code == self.coupon_code)
-				& (order.customer == self.customer)
-				& (order.company == self.company)
-				& (order.docstatus == 1)
-			)
-			.run()
->>>>>>> b81f5e5 (fix(selling): trust only the merge log's consolidation flag in selling validations)
 		)
 		if (
 			lp_details

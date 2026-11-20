@@ -252,59 +252,6 @@ class TestCustomer(FrappeTestCase):
 
 		so.save()
 
-<<<<<<< HEAD
-=======
-	def test_blocked_customer(self):
-		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
-		customer = frappe.get_doc("Customer", "_Test Customer")
-		customer.on_hold = 1
-		customer.release_date = add_days(nowdate(), 1)
-		customer.save()
-
-		make_quotation(do_not_save=True).save()
-
-		sales_order = make_sales_order(do_not_save=True)
-		self.assertRaisesRegex(frappe.ValidationError, "is blocked", sales_order.save)
-
-		customer.release_date = add_days(nowdate(), -1)
-		customer.save()
-		sales_order.save()
-
-	def test_customer_hold_ends_on_release_date(self):
-		from erpnext.selling.doctype.customer.customer import is_customer_blocked
-
-		frappe.db.set_value("Customer", "_Test Customer", {"on_hold": 1, "release_date": nowdate()})
-		self.assertFalse(is_customer_blocked("_Test Customer"))
-
-	def test_blocked_customer_can_make_returns(self):
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		sales_invoice = create_sales_invoice()
-		frappe.db.set_value("Customer", sales_invoice.customer, "on_hold", 1)
-
-		make_sales_return(sales_invoice.name).submit()
-
-	def test_is_consolidated_key_does_not_skip_blocked_customer_check(self):
-		"""Only POS consolidation may skip the blocked customer check."""
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
-		frappe.db.set_value("Customer", "_Test Customer", "on_hold", 1)
-
-		sales_order = make_sales_order(do_not_save=True)
-		sales_order.is_consolidated = 1
-		self.assertRaisesRegex(
-			frappe.ValidationError, "is blocked", sales_order.ensure_customer_is_not_blocked
-		)
-
-		sales_invoice = create_sales_invoice(do_not_save=True)
-		sales_invoice.is_consolidated = 1
-		self.assertRaisesRegex(frappe.ValidationError, "is blocked", sales_invoice.insert)
-
->>>>>>> 6b608e0 (test: is_consolidated key does not skip the blocked customer check)
 	def test_duplicate_customer(self):
 		frappe.db.sql("delete from `tabCustomer` where customer_name='_Test Customer 1'")
 

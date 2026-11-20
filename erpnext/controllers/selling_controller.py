@@ -585,17 +585,6 @@ class SellingController(StockController):
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 
-<<<<<<< HEAD
-=======
-	def ensure_customer_is_not_blocked(self):
-		# Consolidated POS invoices only merge POS invoices that already passed this check
-		if self.doctype == "Quotation" or self.flags.is_consolidated or self.get("is_return"):
-			return
-
-		if self.customer and is_customer_blocked(self.customer):
-			frappe.throw(_("{0} is blocked so this transaction cannot proceed").format(self.customer))
-
->>>>>>> b81f5e5 (fix(selling): trust only the merge log's consolidation flag in selling validations)
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):
 		if self.is_return:
 			return
