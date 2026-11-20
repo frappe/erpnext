@@ -483,3 +483,4 @@ erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
 erpnext.patches.v16_0.packed_item_inv_dimen
 erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion
 erpnext.patches.v16_0.update_serial_batch_entries #11-01-2026 10:00:00
+erpnext.patches.v16_0.drop_item_code_warehouse_posting_datetime_index_from_sabb

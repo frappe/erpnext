@@ -28,6 +28,17 @@ from erpnext.tests.permission_test_utils import as_user, assert_refused, insert_
 
 
 class TestSerialandBatchBundle(FrappeTestCase):
+	def test_item_code_warehouse_posting_datetime_index_is_dropped(self):
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("MariaDB index names")
+
+		self.assertTrue(frappe.db.has_index("tabSerial and Batch Bundle", "voucher_no_voucher_type_index"))
+		self.assertFalse(
+			frappe.db.has_index(
+				"tabSerial and Batch Bundle", "item_code_warehouse_posting_datetime_creation_index"
+			)
+		)
+
 	def test_return_row_loads_the_returned_voucher_batches(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
