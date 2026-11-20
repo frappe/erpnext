@@ -9992,10 +9992,26 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 	def test_return_of_receipt_from_invoice_at_another_rate_reverses_exchange_difference(self):
+		self.assert_return_reverses_exchange_difference()
+
+	def test_return_in_another_uom_reverses_exchange_difference(self):
+		self.assert_return_reverses_exchange_difference(
+			{"uom": "Box", "conversion_factor": 3, "qty": -1, "received_qty": -1, "rate": 30.99}
+		)
+
+	def assert_return_reverses_exchange_difference(self, return_row=None):
+		"""Full return of a receipt made at 83.11 from a USD invoice at 85.37 reverses its 70.04."""
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
 		pr = self.make_receipt_from_usd_invoice(83.11)
 		pr_return = make_purchase_return(pr.name)
+		if return_row:
+			item = frappe.get_doc("Item", pr.items[0].item_code)
+			item.append(
+				"uoms", {"uom": return_row["uom"], "conversion_factor": return_row["conversion_factor"]}
+			)
+			item.save()
+			pr_return.items[0].update(return_row)
 		pr_return.submit()
 
 		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
