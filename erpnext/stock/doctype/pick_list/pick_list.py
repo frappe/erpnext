@@ -1011,7 +1011,13 @@ class PickList(TransactionBase):
 
 		items_data = self._get_pick_list_items(items)
 		moved_entries = get_moved_entries(
-			[row.name for row in items_data if row.delivered_qty or row.transferred_qty]
+			[
+				row.name
+				for row in items_data
+				if row.serial_and_batch_bundle
+				and not row.batch_no
+				and (row.delivered_qty or row.transferred_qty)
+			]
 		)
 
 		for item_data in items_data:
