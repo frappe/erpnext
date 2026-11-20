@@ -3611,10 +3611,10 @@ class TestPickList(ERPNextTestSuite):
 
 	def test_stock_entry_from_work_order_pick_list_moves_an_alternative_item(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.mapper import (
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
 			create_pick_list as create_pick_list_from_wo,
 		)
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		warehouse = "Stores - _TC"
 		picked_item = make_item(properties={"is_stock_item": 1, "allow_alternative_item": 1}).name
