@@ -3361,6 +3361,47 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
 		self.assertEqual(pick_list.status, "Partially Transferred")
 
+	def test_stock_entry_transfers_the_picked_qty_in_a_fractional_uom(self):
+		"""0.1 + 0.2 is 0.30000000000000004 in float, which must still match the 0.3 picked."""
+		frappe.db.set_value("UOM", "Kg", "must_be_whole_number", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Nos", "conversion_factor": 0.1}],
+			}
+		).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 0.3,
+						"stock_qty": 0.3,
+						"picked_qty": 0.3,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		for qty in (1, 2):
+			stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+			row = stock_entry.items[0]
+			row.uom, row.conversion_factor, row.qty = "Nos", 0.1, qty
+			row.t_warehouse = "_Test Warehouse 1 - _TC"
+			stock_entry.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", pick_list.locations[0].name, "transferred_qty"), 0.3
+		)
+
 	def test_get_items_keeps_pick_list_rows_on_stock_entry(self):
 		"""Entering fg_completed_qty on a Stock Entry mapped from a Pick List triggers get_items();
 		it must not refetch from the BOM, or the pick_list_item links transferred_qty rides on are

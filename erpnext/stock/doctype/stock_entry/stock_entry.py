@@ -4934,6 +4934,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				fields=["name", "warehouse", "picked_qty", "transferred_qty"],
 			)
 		}
+		precision = frappe.get_precision("Pick List Item", "transferred_qty")
 		transfer_qty = defaultdict(float)
 		for d in self.items:
 			picked_row = picked_rows.get(d.pick_list_item)
@@ -4950,8 +4951,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 					)
 				)
 
-			transfer_qty[d.pick_list_item] += flt(d.qty) * flt(d.conversion_factor or 1)
-			if flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item] > flt(picked_row.picked_qty):
+			transfer_qty[d.pick_list_item] += flt(d.transfer_qty)
+			transferred_qty = flt(flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item], precision)
+			if transferred_qty > flt(picked_row.picked_qty):
 				frappe.throw(
 					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
 						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
