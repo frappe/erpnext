@@ -380,6 +380,7 @@ class ItemWarehouseStock:
 		self.batch_lots = {}
 		self.serial_rates = {}
 		self.serials_issued_before_receipt = {}
+		self.carried_value = 0.0
 
 	def write_off_leftover_value(self) -> None:
 		"""With no stock left in the warehouse, no value should be left either."""
@@ -525,6 +526,7 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 	stock.clear()
 
 	for row in details.data.adjustment_rows.get((entry.voucher_no, entry.item_code, entry.warehouse), []):
+		value_before = stock.value
 		rate = flt(row.valuation_rate)
 		if row.serial_no:
 			for serial_no in get_serial_nos(row.serial_no):
@@ -537,7 +539,11 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 		elif flt(row.qty):
 			stock.receive_into_pool(flt(row.qty), rate)
 
-	stock.carried_value = flt(stock.value, details.currency_precision)
+		# the ledger counts in every row as an entry of its own
+		stock.carried_value = flt(
+			stock.carried_value + stock.value - value_before, details.currency_precision
+		)
+
 	carry_moving_average_rate_from_rounded_value(stock)
 
 	return make_expected_values(stock, carried_value_before, BASIS_ADJUSTED)
