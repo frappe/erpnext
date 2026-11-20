@@ -37,8 +37,11 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_st
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_item_wh_first_reposted_from_reposting_data,
+	get_item_wh_reposted_till_from_reposting_data,
 	get_items_to_be_repost,
+	get_reposted_till_condition,
 	get_reposting_data,
+	is_covered_till,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -75,6 +78,7 @@ class RepostItemValuation(Document):
 		repost_only_accounting_ledgers: DF.Check
 		reposting_data_file: DF.Attach | None
 		reposting_reference: DF.Data | None
+		skip_unchanged_entries: DF.Check
 		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed", "Cancelled"]
 		total_reposting_count: DF.Int
 		total_vouchers: DF.Int
@@ -463,7 +467,7 @@ class RepostItemValuation(Document):
 			return
 
 		riv = frappe.qb.DocType("Repost Item Valuation")
-		(
+		query = (
 			frappe.qb.update(riv)
 			.set(riv.status, "Skipped")
 			.where(
@@ -482,7 +486,15 @@ class RepostItemValuation(Document):
 				& (riv.based_on == "Item and Warehouse")
 				& (riv.creation <= self.get_repost_started_at())
 			)
-		).run()
+		)
+
+		if reposted_till := self.get_item_wh_reposted_till().get((self.item_code, self.warehouse)):
+			query = query.where(get_reposted_till_condition(riv, reposted_till))
+
+		query.run()
+
+	def get_item_wh_reposted_till(self):
+		return self.flags.item_wh_reposted_till or {}
 
 	def get_repost_started_at(self):
 		return self.flags.repost_started_at or now()
@@ -547,11 +559,16 @@ class RepostItemValuation(Document):
 			return
 
 		source_datetime = get_combine_datetime(self.posting_date, self.posting_time)
-		mark_covered_item_reposts(self.name, coverage, source_datetime, self.get_repost_started_at())
+		reposted_till = self.get_item_wh_reposted_till()
+		mark_covered_item_reposts(
+			self.name, coverage, source_datetime, self.get_repost_started_at(), reposted_till
+		)
 
 		affected = get_affected_transactions(self)
 		if affected:
-			mark_covered_transaction_reposts(self, coverage, affected, self.get_repost_started_at())
+			mark_covered_transaction_reposts(
+				self, coverage, affected, self.get_repost_started_at(), reposted_till
+			)
 
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
@@ -626,6 +643,7 @@ def get_mergeable_item_reposts(doc):
 			& (riv.creation <= doc.get_repost_started_at())
 			& (riv.allow_negative_stock == doc.allow_negative_stock)
 			& (riv.allow_zero_rate == doc.allow_zero_rate)
+			& (riv.skip_unchanged_entries == doc.skip_unchanged_entries)
 			& (riv.via_landed_cost_voucher == 0)
 			& (riv.recalculate_valuation_rate == 0)
 			& (riv.recreate_stock_ledgers == 0)
@@ -662,11 +680,11 @@ def get_queued_item_reposts(source_name, item_codes, started_at=None):
 			"via_landed_cost_voucher": 0,
 			"item_code": ("in", item_codes),
 		},
-		fields=["name", "item_code", "warehouse", "posting_date", "posting_time"],
+		fields=["name", "item_code", "warehouse", "posting_date", "posting_time", "skip_unchanged_entries"],
 	)
 
 
-def mark_covered_item_reposts(source_name, coverage, source_datetime, started_at=None):
+def mark_covered_item_reposts(source_name, coverage, source_datetime, started_at=None, reposted_till=None):
 	item_codes = {item_code for item_code, _ in coverage}
 
 	for row in get_queued_item_reposts(source_name, list(item_codes), started_at):
@@ -678,7 +696,9 @@ def mark_covered_item_reposts(source_name, coverage, source_datetime, started_at
 		if get_datetime(row_datetime) < get_datetime(source_datetime):
 			continue
 
-		if get_datetime(from_datetime) <= get_datetime(row_datetime):
+		if get_datetime(from_datetime) <= get_datetime(row_datetime) and is_covered_till(
+			row, row_datetime, (reposted_till or {}).get((row.item_code, row.warehouse))
+		):
 			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
 
 
@@ -697,7 +717,14 @@ def get_queued_transaction_reposts(source_name, voucher_nos, started_at=None):
 			"via_landed_cost_voucher": 0,
 			"voucher_no": ("in", list(voucher_nos)),
 		},
-		fields=["name", "voucher_type", "voucher_no", "posting_date", "posting_time"],
+		fields=[
+			"name",
+			"voucher_type",
+			"voucher_no",
+			"posting_date",
+			"posting_time",
+			"skip_unchanged_entries",
+		],
 	)
 
 
@@ -748,7 +775,7 @@ def is_transaction_repost_covered(items, acc, row_datetime):
 	return True
 
 
-def mark_covered_transaction_reposts(source, coverage, affected, started_at=None):
+def mark_covered_transaction_reposts(source, coverage, affected, started_at=None, reposted_till=None):
 	source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
 	voucher_nos = {voucher_no for _, voucher_no in affected}
 
@@ -763,7 +790,12 @@ def mark_covered_transaction_reposts(source, coverage, affected, started_at=None
 		if get_datetime(row_datetime) < get_datetime(source_datetime):
 			continue
 
-		acc = accumulate_repost_coverage(row.name, coverage, row_datetime)
+		covered = {
+			key: from_datetime
+			for key, from_datetime in coverage.items()
+			if is_covered_till(row, row_datetime, (reposted_till or {}).get(key))
+		}
+		acc = accumulate_repost_coverage(row.name, covered, row_datetime)
 		items = items_by_voucher.get((row.voucher_type, row.voucher_no))
 		if is_transaction_repost_covered(items, acc, row_datetime):
 			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
@@ -802,6 +834,7 @@ def repost(doc):
 			repost_gl_entries(doc)
 		else:
 			repost_sl_entries(doc)
+			doc.flags.item_wh_reposted_till = get_item_wh_reposted_till_from_reposting_data(doc)
 			vouchers = get_reposted_vouchers(doc)
 			repost_gl_entries(doc, vouchers)
 			update_consumed_material_cost_for_vouchers(vouchers)
@@ -951,15 +984,12 @@ def _get_directly_dependent_vouchers(doc):
 		items.update(doc_items)
 		warehouses.update(doc_warehouses)
 
-		sles = get_items_to_be_repost(doc.voucher_type, doc.voucher_no)
-		sle_items = {sle.item_code for sle in sles}
-		sle_warehouses = {sle.warehouse for sle in sles}
-		items.update(sle_items)
-		warehouses.update(sle_warehouses)
+		repost_items = get_items_to_be_repost(doc.voucher_type, doc.voucher_no)
 	else:
-		for row in doc.get_item_reposts():
-			items.add(row.item_code)
-			warehouses.add(row.warehouse)
+		repost_items = doc.get_item_reposts()
+
+	items.update(row.item_code for row in repost_items)
+	warehouses.update(row.warehouse for row in repost_items)
 
 	affected_vouchers = get_future_stock_vouchers(
 		posting_date=doc.posting_date,
@@ -967,8 +997,20 @@ def _get_directly_dependent_vouchers(doc):
 		for_warehouses=list(warehouses),
 		for_items=list(items),
 		company=doc.company,
+		to_datetime=get_reposted_till(doc, repost_items),
 	)
 	return affected_vouchers
+
+
+def get_reposted_till(doc, repost_items):
+	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
+		return
+
+	reposted_till = [
+		doc.get_item_wh_reposted_till().get((row.item_code, row.warehouse)) for row in repost_items
+	]
+	if reposted_till and all(reposted_till):
+		return max(get_datetime(till) for till in reposted_till)
 
 
 def _update_post_delivery_billed_vouchers(transactions: list) -> None:
