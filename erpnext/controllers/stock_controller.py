@@ -33,6 +33,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_type_of_transaction,
 )
+from erpnext.stock.serial_batch_bundle import set_bundle_header_values
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
@@ -1052,17 +1053,13 @@ class StockController(AccountsController):
 
 				if row.get("serial_and_batch_bundle"):
 					update_values["serial_and_batch_bundle"] = None
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
-					)
+					set_bundle_header_values(row.serial_and_batch_bundle, {"is_cancelled": 1})
 
 				if update_values:
 					row.db_set(update_values)
 
 				if table_name == "items" and row.get("rejected_serial_and_batch_bundle"):
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, {"is_cancelled": 1}
-					)
+					set_bundle_header_values(row.rejected_serial_and_batch_bundle, {"is_cancelled": 1})
 
 					row.db_set("rejected_serial_and_batch_bundle", None)
 
@@ -2254,6 +2251,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 		row.warehouse = kwargs.warehouse
 
+	bundle_doc.set_child_details()
 	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()
 	bundle_doc.flags.ignore_permissions = True
