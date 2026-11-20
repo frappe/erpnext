@@ -1013,6 +1013,27 @@ def get_sre_reserved_qty_details_for_voucher(voucher_type: str, voucher_no: str)
 	return frappe._dict(data)
 
 
+def get_undelivered_picked_qty_details(sales_order: str) -> dict:
+	"""Returns the undelivered picked qty per Sales Order Item from submitted Pick Lists."""
+
+	pick_list_item = frappe.qb.DocType("Pick List Item")
+	data = (
+		frappe.qb.from_(pick_list_item)
+		.select(
+			pick_list_item.sales_order_item,
+			Sum(pick_list_item.picked_qty - pick_list_item.delivered_qty),
+		)
+		.where(
+			(pick_list_item.docstatus == 1)
+			& (pick_list_item.sales_order == sales_order)
+			& (pick_list_item.picked_qty > pick_list_item.delivered_qty)
+		)
+		.groupby(pick_list_item.sales_order_item)
+	).run(as_list=True)
+
+	return frappe._dict(data)
+
+
 def get_sre_reserved_warehouses_for_voucher(
 	voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None
 ) -> list:
@@ -1884,14 +1905,17 @@ def create_stock_reservation_entries_for_so_items(
 
 	sre_count = 0
 	reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", sales_order.name)
+	undelivered_picked_qty = (
+		{} if from_voucher_type == "Pick List" else get_undelivered_picked_qty_details(sales_order.name)
+	)
 
 	for item in items if items_details else sales_order.get("items"):
 		# Skip if `Reserved Stock` is not checked for the item.
 		if not item.get("reserve_stock"):
 			continue
 
-		# Stock should be reserved from the Pick List if has Picked Qty.
-		if from_voucher_type != "Pick List" and flt(item.picked_qty) > 0:
+		# Stock should be reserved from the Pick List while it has undelivered Picked Qty.
+		if flt(undelivered_picked_qty.get(item.name), item.precision("picked_qty")) > 0:
 			frappe.throw(
 				_("Row #{0}: Item {1} has been picked, please reserve stock from the Pick List.").format(
 					item.idx, frappe.bold(item.item_code)

@@ -1586,6 +1586,26 @@ def cancel_all_stock_reservation_entries() -> None:
 		frappe.get_doc("Stock Reservation Entry", sre).cancel()
 
 
+def make_receipt_against_sales_order(sales_order, qty: float):
+	return frappe.get_doc(
+		{
+			"doctype": "Purchase Receipt",
+			"company": "_Test Company",
+			"supplier": "_Test Supplier",
+			"items": [
+				{
+					"item_code": sales_order.items[0].item_code,
+					"qty": qty,
+					"rate": 100,
+					"warehouse": sales_order.items[0].warehouse,
+					"sales_order": sales_order.name,
+					"sales_order_item": sales_order.items[0].name,
+				}
+			],
+		}
+	).insert()
+
+
 def make_stock_reservation_entry(**args):
 	doc = frappe.new_doc("Stock Reservation Entry")
 	args = frappe._dict(args)
@@ -1880,6 +1900,56 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		self.assertFalse(
 			frappe.db.exists("Stock Reservation Entry", {"from_voucher_no": receipt.name, "docstatus": 1})
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_stock_for_sales_order_on_purchase": 1,
+		},
+	)
+	def test_receipt_reserves_stock_after_picked_qty_is_delivered(self):
+		from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=4, basic_rate=100)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=10)
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.locations[0].update({"qty": 4, "stock_qty": 4, "picked_qty": 4})
+		pick_list.submit()
+		create_delivery_note(pick_list.name).submit()
+
+		make_receipt_against_sales_order(sales_order, qty=6).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "stock_reserved_qty"), 6
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_stock_for_sales_order_on_purchase": 1,
+		},
+	)
+	def test_receipt_cannot_reserve_stock_while_picked_qty_is_undelivered(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=8, basic_rate=100)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=10)
+
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.items[0].qty = 4
+		delivery_note.submit()
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.locations[0].update({"qty": 4, "stock_qty": 4, "picked_qty": 4})
+		pick_list.submit()
+
+		receipt = make_receipt_against_sales_order(sales_order, qty=2)
+		self.assertRaisesRegex(frappe.ValidationError, "has been picked", receipt.submit)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
