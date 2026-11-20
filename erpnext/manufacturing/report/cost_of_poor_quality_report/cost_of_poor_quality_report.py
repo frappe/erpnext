@@ -114,7 +114,12 @@ def clip_to_date_range(data, report_filters):
 	time_logs = defaultdict(list)
 	for log in frappe.get_all(
 		"Job Card Time Log",
-		filters={"parent": ["in", [row.name for row in data]], "parenttype": "Job Card"},
+		filters={
+			"parent": ["in", [row.name for row in data]],
+			"parenttype": "Job Card",
+			"from_time": ["is", "set"],
+			"to_time": ["is", "set"],
+		},
 		fields=["parent", "from_time", "to_time"],
 	):
 		if clipped_log := clip_time_log(log, start, end):
