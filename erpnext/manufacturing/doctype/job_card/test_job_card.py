@@ -4004,15 +4004,6 @@ class TestJobCard(ERPNextTestSuite):
 			stock_entry.submit()
 			self.assertEqual(sum(row.amount for row in stock_entry.additional_costs), 300)
 
-<<<<<<< HEAD
-	def test_semi_fg_job_card_is_exempt_from_transfer_qty_check(self):
-		jc = frappe.new_doc("Job Card")
-		jc.track_semi_finished_goods = 1
-		jc.skip_material_transfer = 1
-		jc.for_quantity = 10
-		jc.transferred_qty = 0
-		jc.append("items", {"item_code": "_Test Item"})
-=======
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_semi_fg_entry_adds_operating_cost_without_workstation_costs(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
@@ -4105,12 +4096,13 @@ class TestJobCard(ERPNextTestSuite):
 		]
 		self.assertEqual(operating_costs, [(operation_id, 600)])
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
-	def test_stock_entry_needs_a_job_card_item_reference(self):
-		create_bom_with_multiple_operations()
-		work_order = make_wo_with_transfer_against_jc()
-		job_card = frappe.db.get_value("Job Card", {"work_order": work_order.name})
->>>>>>> a23516f (test: semi-finished good entry adds operating cost without workstation costs)
+	def test_semi_fg_job_card_is_exempt_from_transfer_qty_check(self):
+		jc = frappe.new_doc("Job Card")
+		jc.track_semi_finished_goods = 1
+		jc.skip_material_transfer = 1
+		jc.for_quantity = 10
+		jc.transferred_qty = 0
+		jc.append("items", {"item_code": "_Test Item"})
 
 		jc.validate_transfer_qty()
 
