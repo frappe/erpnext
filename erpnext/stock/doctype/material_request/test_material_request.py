@@ -1726,6 +1726,37 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(row.amount, 1250)
 		self.assertEqual(row.material_request_item, mr.items[0].name)
 
+	def test_item_rates_refresh_only_on_price_list_change(self):
+		item_code = create_item("_Test MR Typed Rate Item").name
+		for price_list, rate in (("Standard Buying", 0.16), ("_Test Buying Price List", 9)):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": price_list,
+					"price_list_rate": rate,
+				}
+			).insert()
+
+		mr = frappe.new_doc("Material Request")
+		mr.update({"company": "_Test Company", "buying_price_list": "Standard Buying"})
+		mr.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": 1,
+				"rate": 6,
+				"schedule_date": today(),
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		)
+		mr.insert()
+		self.assertEqual(mr.items[0].rate, 6)
+
+		mr.buying_price_list = "_Test Buying Price List"
+		mr.save()
+		self.assertEqual(mr.items[0].rate, 9)
+
 	def test_make_purchase_orders_by_supplier_invalid_rows(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_orders_by_supplier
 
