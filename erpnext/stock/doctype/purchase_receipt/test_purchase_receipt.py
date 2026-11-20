@@ -8783,8 +8783,7 @@ def prepare_data_for_internal_transfer():
 		)
 
 	def test_internal_receipt_return_takes_back_the_lot_it_received(self):
-		"""A return of an internal receipt takes back the stock at the rate it came in at, so its two
-		stock legs cancel out instead of FIFO taking another lot of the receiving warehouse."""
+		"""A return of an internal receipt with no delivery row link still takes back the lot it received."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -8812,6 +8811,8 @@ def prepare_data_for_internal_transfer():
 		pr.submit()
 
 		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		# as on a return made before the delivery row link was copied onto it
+		purchase_return.items[0].delivery_note_item = None
 		purchase_return.submit()
 
 		stock_value_difference = frappe.db.get_value(
