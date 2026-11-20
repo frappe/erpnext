@@ -555,7 +555,7 @@ erpnext.buying.link_to_mrs = function (frm) {
 						item.material_request_item = d.mr_item;
 						let linked_stock_qty = Math.min(stock_qty, d.stock_qty);
 						stock_qty = flt(stock_qty - linked_stock_qty, precision("stock_qty", item));
-						d.stock_qty = d.stock_qty - linked_stock_qty;
+						d.stock_qty = flt(d.stock_qty - linked_stock_qty, precision("stock_qty", item));
 						item.stock_qty = linked_stock_qty;
 						item.qty = flt(linked_stock_qty / item.conversion_factor, precision("qty", item));
 
