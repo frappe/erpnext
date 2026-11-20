@@ -283,7 +283,7 @@ def get_bundle_version_for_row(item_row, doc=None):
 	"""
 	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 
-	chosen = item_row.get("product_bundle") if item_row.meta.has_field("product_bundle") else None
+	chosen = item_row.get("product_bundle")
 	if chosen:
 		bundle = frappe.db.get_value(
 			"Product Bundle", chosen, ["new_item_code", "docstatus", "disabled"], as_dict=True
