@@ -3,6 +3,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, flt, today
 
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.repost_item_valuation import repost_item_valuation
@@ -18,6 +19,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 COMPANY = "_Test Company with perpetual inventory"
 WAREHOUSE = "Stores - TCP1"
 TARGET_WAREHOUSE = "Finished Goods - TCP1"
+WAREHOUSE_WITHOUT_PERPETUAL_INVENTORY = "_Test Warehouse - _TC"
 
 
 class TestRepostSkipUnchangedEntries(ERPNextTestSuite, StockTestMixin):
@@ -70,6 +72,32 @@ class TestRepostSkipUnchangedEntries(ERPNextTestSuite, StockTestMixin):
 		self.assertSLEValues(sales_return, incoming_rate=50, stock_value_difference=100, stock_value=3100)
 		self.assertSLEValues(later_issue, stock_value_difference=-750, stock_value=2350)
 		self.assertEqual(self.get_stock_account_balance(sales_return), 100)
+
+	def test_project_cost_is_updated_after_the_return_without_perpetual_inventory(self):
+		warehouse = WAREHOUSE_WITHOUT_PERPETUAL_INVENTORY
+		item = self.make_item(properties={"valuation_method": "FIFO"}).name
+		project = make_project({"project_name": f"_Test Repost Project {frappe.generate_hash(length=6)}"})
+		self.receive(item, 10, 100, days_ago=10, warehouse=warehouse)
+		delivery = create_delivery_note(
+			item_code=item, qty=5, warehouse=warehouse, posting_date=add_days(today(), -8)
+		)
+		create_stock_reconciliation(
+			item_code=item, warehouse=warehouse, qty=20, rate=150, posting_date=add_days(today(), -6)
+		)
+		create_delivery_note(
+			item_code=item,
+			qty=-2,
+			warehouse=warehouse,
+			is_return=1,
+			return_against=delivery.name,
+			posting_date=add_days(today(), -4),
+		)
+		project_issue = self.issue(item, 22, days_ago=2, warehouse=warehouse, project=project.name)
+
+		self.receive(item, 10, 50, days_ago=11, warehouse=warehouse)
+
+		self.assertSLEValues(project_issue, warehouse=warehouse, stock_value_difference=-3100)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_consumed_material_cost"), 3100)
 
 	def test_unchanged_transfer_target_stops_after_the_transfer(self):
 		item = self.make_item(properties={"valuation_method": "FIFO"}).name
@@ -158,10 +186,18 @@ class TestRepostSkipUnchangedEntries(ERPNextTestSuite, StockTestMixin):
 			item_code=item, target=warehouse, qty=qty, rate=rate, posting_date=add_days(today(), -days_ago)
 		)
 
-	def issue(self, item, qty, days_ago, warehouse=WAREHOUSE):
-		return make_stock_entry(
-			item_code=item, source=warehouse, qty=qty, posting_date=add_days(today(), -days_ago)
+	def issue(self, item, qty, days_ago, warehouse=WAREHOUSE, project=None):
+		issue = make_stock_entry(
+			item_code=item,
+			source=warehouse,
+			qty=qty,
+			posting_date=add_days(today(), -days_ago),
+			do_not_save=True,
 		)
+		issue.project = project
+		issue.insert()
+		issue.submit()
+		return issue
 
 	def transfer(self, item, qty, days_ago):
 		return make_stock_entry(
