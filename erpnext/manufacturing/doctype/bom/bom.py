@@ -1060,24 +1060,15 @@ class BOM(WebsiteGenerator):
 
 		bom_items = get_bom_items(bom_no, self.company, qty=qty, fetch_exploded=0)
 		for row in bom_items:
+			# get_bom_items returns the qty in stock UOM
 			row.uom = row.stock_uom
+			row.conversion_factor = 1
 			row.operation_row_id = operation_row_id
 			row.idx = None
 			row.do_not_explode = 1
 			row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
 
-<<<<<<< HEAD
 			self.append("items", row)
-=======
-	def _append_bom_material_row(self, row, operation_row_id):
-		# get_bom_items returns the qty in stock UOM
-		row.uom = row.stock_uom
-		row.conversion_factor = 1
-		row.operation_row_id = operation_row_id
-		row.idx = None
-		row.do_not_explode = 1
-		row.is_sub_assembly_item = self.is_sub_assembly_item(row.item_code)
->>>>>>> 17cbca8 (fix(manufacturing): reset the conversion factor of materials taken from an operation BOM)
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
