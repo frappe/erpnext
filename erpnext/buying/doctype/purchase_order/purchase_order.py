@@ -496,6 +496,8 @@ class PurchaseOrder(BuyingController):
 					d.price_list_rate = d.base_price_list_rate / conversion_rate
 					d.rate = d.base_rate / conversion_rate
 					d.last_purchase_rate = d.rate
+					d.margin_type = None
+					d.margin_rate_or_amount = 0.0
 				else:
 					item_last_purchase_rate = frappe.get_cached_value(
 						"Item", d.item_code, "last_purchase_rate"
@@ -505,6 +507,8 @@ class PurchaseOrder(BuyingController):
 							flt(d.conversion_factor) or 1.0
 						)
 						d.price_list_rate = d.rate = d.last_purchase_rate = d.base_rate / conversion_rate
+						d.margin_type = None
+						d.margin_rate_or_amount = 0.0
 
 	# Check for Closed status
 	def check_on_hold_or_closed_status(self):
