@@ -7602,12 +7602,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo = self.make_car_with_four_wheels_work_order("Stores - _TC", service_rate=100)
 		wheel_entry, assembly_entry = self.complete_semi_fg_work_order(wo)
 
-		# Work Order is for 1 car: the wheel step charges the BOM amount once, not 4 times
-		service_amount = frappe.db.get_value(
-			"BOM Item", {"parent": wo.bom_no, "item_code": "Test JCO Service"}, "base_amount"
-		)
-		self.assertEqual(self.get_additional_cost(wheel_entry, "Non stock items"), service_amount)
-		self.assertEqual(self.get_additional_cost(assembly_entry, "Non stock items"), 0)
+		# 1 car: the wheel step's 4 services once, not per wheel; the service of no step on the car
+		self.assertEqual(self.get_additional_cost(wheel_entry, "Non stock items"), 400)
+		self.assertEqual(self.get_additional_cost(assembly_entry, "Non stock items"), 100)
 
 	def test_bom_from_semi_fg_work_order_keeps_operation_time(self):
 		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
@@ -7736,6 +7733,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		if items.get("Service"):
 			for name in ("Rubber", "Rim", "Service"):
 				car_bom.append("items", {"item_code": items[name], "qty": wheel_qty, "operation_row_id": 1})
+			car_bom.append("items", {"item_code": items["Service"], "qty": 1})
 		car_bom.insert()
 		car_bom.submit()
 		return car_bom
