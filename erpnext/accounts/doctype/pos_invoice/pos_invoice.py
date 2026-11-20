@@ -1223,7 +1223,7 @@ def get_item_group(pos_profile):
 
 
 def create_payments_on_invoice(doc, idx, payment_details):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_mode_of_payment_account
 
 	payment = frappe.new_doc("Sales Invoice Payment")
 	payment.idx = idx
@@ -1233,6 +1233,6 @@ def create_payments_on_invoice(doc, idx, payment_details):
 	payment.parent = doc.name
 	payment.parentfield = "payments"
 	payment.parenttype = doc.doctype
-	payment.account = get_bank_cash_account(payment.mode_of_payment, doc.company).get("account")
+	payment.account = get_mode_of_payment_account(payment.mode_of_payment, doc.company).get("account")
 
 	return payment

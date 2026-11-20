@@ -1028,7 +1028,9 @@ class SalesInvoice(SellingController):
 	@frappe.whitelist()
 	def set_account_for_mode_of_payment(self):
 		for payment in self.payments:
-			payment.account = get_bank_cash_account(payment.mode_of_payment, self.company).get("account")
+			payment.account = get_mode_of_payment_account(payment.mode_of_payment, self.company).get(
+				"account"
+			)
 
 	def validate_time_sheets_are_submitted(self):
 		# Note: This validation is skipped for return invoices
@@ -2871,6 +2873,12 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment, company):
+	frappe.has_permission("Company", "select", company, throw=True)
+	frappe.has_permission("Mode of Payment", "select", mode_of_payment, throw=True)
+	return get_mode_of_payment_account(mode_of_payment, company)
+
+
+def get_mode_of_payment_account(mode_of_payment, company):
 	account = frappe.db.get_value(
 		"Mode of Payment Account", {"parent": mode_of_payment, "company": company}, "default_account"
 	)
