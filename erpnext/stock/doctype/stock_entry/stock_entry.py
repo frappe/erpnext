@@ -5598,11 +5598,9 @@ def get_pending_fg_qty(work_order, purpose):
 		transferred_qty = (
 			0 if work_order.skip_transfer else flt(work_order.material_transferred_for_manufacturing)
 		)
-		qty = (
-			(transferred_qty or flt(work_order.qty))
-			- flt(work_order.produced_qty)
-			- flt(work_order.process_loss_qty)
-		)
+		# extra material transferred is no allowance to produce more
+		planned_qty = min(transferred_qty or flt(work_order.qty), flt(work_order.qty))
+		qty = planned_qty - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
 	else:
 		qty = flt(work_order.qty) - flt(work_order.produced_qty)
 
