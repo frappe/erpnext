@@ -852,11 +852,9 @@ class JobCard(Document):
 	def complete_open_time_logs(self, args, last_row):
 		for row in self.time_logs:
 			if not row.to_time:
-				to_time = get_datetime(args.get("complete_time"))
 				row.update(
 					{
-						"to_time": to_time,
-						"time_in_mins": time_diff_in_minutes(to_time, row.from_time),
+						"to_time": get_datetime(args.get("complete_time")),
 						"operation": args.get("sub_operation"),
 						"completed_qty": (args.get("completed_qty") if last_row.idx == row.idx else 0.0),
 					}
@@ -874,6 +872,7 @@ class JobCard(Document):
 		if employees:
 			for name in employees:
 				new_args.employee = name.get("employee")
+<<<<<<< HEAD
 >>>>>>> 51bf79c (fix(manufacturing): validate time logs added through make_time_log)
 				self.add_start_time_log(new_args)
 
@@ -882,6 +881,11 @@ class JobCard(Document):
 			args.time_in_mins = time_diff_in_minutes(args.to_time, args.from_time)
 
 		self.append("time_logs", args)
+=======
+				self.append("time_logs", new_args)
+		else:
+			self.append("time_logs", new_args)
+>>>>>>> 984d19e (refactor(manufacturing): drop make_time_log steps that save already runs)
 
 	def update_sub_operation_status(self):
 		if not self.sub_operations:
@@ -2431,9 +2435,8 @@ def make_time_log(kwargs: str | dict):
 	doc = frappe.get_doc("Job Card", kwargs.job_card_id)
 	frappe.has_permission("Job Card", "write", doc=doc, throw=True)
 	doc.validate_docstatus()
-	doc.validate_sequence_id()
 	doc.add_time_log(kwargs)
-	# save runs the time log validations: overlaps and From/To order
+	# save runs the time log validations: sequence, overlaps and From/To order
 	doc.save()
 
 
