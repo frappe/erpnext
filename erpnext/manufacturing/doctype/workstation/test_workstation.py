@@ -286,22 +286,24 @@ class TestWorkstation(ERPNextTestSuite):
 
 	def test_later_manufacture_splits_only_the_remaining_operating_cost(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import make_job_card
-		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
 
 		workstation = make_workstation_with_equal_components("_Test WS Remaining Cost")
 		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=20, qty=20)
-		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
-		for item in entry.items:
-			item.allow_zero_valuation_rate = 1
-		entry.submit()
+		submit_manufacture(work_order, 10)
 
 		operation = work_order.reload().operations[0].as_dict()
 		make_job_card(work_order.name, [{**operation, "qty": 10, "pending_qty": 10}])
 		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name, "docstatus": 0})
 		complete_job_card(job_card, minutes=0.2, days=2)
 
-		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
-		self.assertEqual([row.amount for row in entry.additional_costs if row.has_operating_cost], [0.01])
+		self.assertEqual(submit_manufacture(work_order, 10), [0, 0.01, 0])
+
+	def test_partial_manufactures_add_up_to_the_actual_operating_cost(self):
+		workstation = make_workstation_with_equal_components("_Test WS Partial Cost")
+		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=2)
+
+		amounts = [amount for qty in (1, 2, 7) for amount in submit_manufacture(work_order, qty)]
+		self.assertEqual(round(sum(amounts), 2), 0.1)
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
 	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
@@ -480,6 +482,17 @@ def make_work_order_with_completed_job_card(workstation, job_card_workstation=No
 	job_card.workstation = job_card_workstation or workstation
 	complete_job_card(job_card, minutes)
 	return work_order
+
+
+def submit_manufacture(work_order, qty):
+	"""Submit a Manufacture entry for the qty and return its operating cost amounts."""
+	from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+
+	entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", qty))
+	for item in entry.items:
+		item.allow_zero_valuation_rate = 1
+	entry.submit()
+	return [row.amount for row in entry.additional_costs if row.has_operating_cost]
 
 
 def complete_job_card(job_card, minutes, days=1):
