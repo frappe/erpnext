@@ -7,7 +7,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Extract, NullIf, Sum
 from frappe.utils import flt
 from pypika.enums import DatePart
-from pypika.queries import QueryBuilder, Table
+from pypika.queries import QueryBuilder, Selectable, Table
 from pypika.terms import Term
 
 CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
@@ -117,11 +117,11 @@ class ProjectCostQueries:
 			| (invoice_item.delivered_by_supplier == 1)
 		)
 		not_subcontracted = purchase_order.is_subcontracted.isnull() | (purchase_order.is_subcontracted == 0)
-		project_from_header = (invoice.project == self.project) & (
-			invoice_item.project.isnull() | (invoice_item.project == "")
-		)
+		project_rows = self.purchase_invoice_rows()
 		query = (
-			qb.from_(invoice_item)
+			qb.from_(project_rows)
+			.join(invoice_item)
+			.on(invoice_item.name == project_rows.name)
 			.join(invoice)
 			.on(invoice.name == invoice_item.parent)
 			.join(claimed_invoice)
@@ -132,7 +132,6 @@ class ProjectCostQueries:
 			.on(item.name == invoice_item.item_code)
 			.left_join(purchase_order)
 			.on(purchase_order.name == invoice_item.purchase_order)
-			.where((invoice_item.project == self.project) | project_from_header)
 			.where(invoice_item.docstatus == 1)
 			.where(never_stocked & not_subcontracted)
 		)
@@ -140,6 +139,24 @@ class ProjectCostQueries:
 			(claimed <= 0) | (claimed < claimed_invoice.base_net_total)
 		)
 		return self.keep_readable(query, invoice.name, "Purchase Invoice")
+
+	def purchase_invoice_rows(self) -> Selectable:
+		"""Names of the Purchase Invoice items for the project, in two parts: items that leave the
+		project empty and take their invoice's, and items that name the project themselves.
+
+		A cleared project cell is saved as an empty string, so it is empty too. Two parts, not one
+		condition, so each part can use the project index."""
+		invoice = qb.DocType("Purchase Invoice")
+		item = qb.DocType("Purchase Invoice Item")
+		from_invoice = (
+			qb.from_(item)
+			.join(invoice)
+			.on(invoice.name == item.parent)
+			.select(item.name)
+			.where(NullIf(item.project, "").isnull() & (invoice.project == self.project))
+		)
+		from_item = qb.from_(item).select(item.name).where(item.project == self.project)
+		return (from_invoice * from_item).as_("project_rows")
 
 	def stock_value_consumed(self, by_month: bool) -> float | MonthlyAmounts:
 		ledger = qb.DocType("Stock Ledger Entry")
