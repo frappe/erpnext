@@ -2909,7 +2909,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			const rate =
 				(flt(item.rate) * flt(this.frm.doc.conversion_rate || 1)) /
 				(flt(item.conversion_factor) || 1);
-			item.gross_profit = flt((rate - item.valuation_rate) * item.stock_qty, precision("amount", item));
+			item.gross_profit = flt(
+				(rate - item.valuation_rate) * item.stock_qty,
+				precision("gross_profit", item)
+			);
 		}
 	}
 
