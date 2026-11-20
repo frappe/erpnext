@@ -27,7 +27,7 @@ def add_additional_cost(stock_entry, work_order, job_card=None):
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=None):
 	bom = frappe.get_doc("BOM", work_order.bom_no)
-	item_amounts = _non_phantom_item_amounts(bom, _bom_items_table(work_order, job_card))
+	item_amounts = _non_phantom_item_amounts(bom, _bom_items_table(work_order, job_card), job_card)
 	cost = _non_stock_items_cost(item_amounts, _finished_good_qty(stock_entry, work_order, job_card), bom)
 
 	if cost:
@@ -43,11 +43,11 @@ def _bom_items_table(work_order, job_card):
 	return "items"
 
 
-def _non_phantom_item_amounts(bom, table):
+def _non_phantom_item_amounts(bom, table, job_card=None):
 	items = frappe._dict()
 	for d in bom.get(table):
 		# Phantom item is exploded, so its cost is considered via its components
-		if d.get("is_phantom_item"):
+		if d.get("is_phantom_item") or (job_card and not job_card.is_own_material(d)):
 			continue
 
 		items.setdefault(d.item_code, 0)
