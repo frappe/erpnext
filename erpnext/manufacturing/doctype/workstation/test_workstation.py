@@ -233,19 +233,9 @@ class TestWorkstation(ERPNextTestSuite):
 			self.assertEqual(operating_cost, expected_operating_cost)
 
 	def test_manufacture_uses_operating_cost_recorded_on_the_work_order(self):
-<<<<<<< HEAD
-		from frappe.utils import add_to_date, now
-
-		from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as make_wo_stock_entry,
 		)
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry as make_test_entry
-=======
-		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
->>>>>>> 0701a46 (test: no component-wise operating cost for an operation without actual cost)
 
 		workstation = make_workstation(workstation_name="_Test WS Recorded Cost", hour_rate_rent=600)
 		work_order = make_work_order_with_completed_job_card(workstation.name)
@@ -265,7 +255,9 @@ class TestWorkstation(ERPNextTestSuite):
 		)
 
 	def test_manufacture_skips_component_cost_of_an_operation_without_actual_cost(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
 
 		workstation = make_workstation(workstation_name="_Test WS Planned Cost", hour_rate_rent=600)
 		idle_workstation = make_workstation(workstation_name="_Test WS Without Cost")
@@ -275,7 +267,9 @@ class TestWorkstation(ERPNextTestSuite):
 		self.assertFalse([row for row in entry.additional_costs if row.has_operating_cost])
 
 	def test_component_wise_operating_cost_adds_up_to_the_actual_cost(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
 
 		workstation = make_workstation_with_equal_components("_Test WS Split Cost")
 		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=20)
@@ -285,7 +279,7 @@ class TestWorkstation(ERPNextTestSuite):
 		self.assertEqual(sorted(amounts), [0.33, 0.33, 0.34])
 
 	def test_later_manufacture_splits_only_the_remaining_operating_cost(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import make_job_card
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
 
 		workstation = make_workstation_with_equal_components("_Test WS Remaining Cost")
 		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=20, qty=20)
@@ -486,7 +480,9 @@ def make_work_order_with_completed_job_card(workstation, job_card_workstation=No
 
 def submit_manufacture(work_order, qty):
 	"""Submit a Manufacture entry for the qty and return its operating cost amounts."""
-	from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+	from erpnext.manufacturing.doctype.work_order.work_order import (
+		make_stock_entry as make_wo_stock_entry,
+	)
 
 	entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", qty))
 	for item in entry.items:
