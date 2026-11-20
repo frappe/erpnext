@@ -2276,7 +2276,7 @@ def get_pending_fg_qty(work_order, purpose):
 	else:
 		qty = flt(work_order.qty) - flt(work_order.produced_qty)
 
-	return max(flt(qty, work_order.precision("qty")), 0)
+	return max(flt(qty, frappe.get_precision("Stock Entry", "fg_completed_qty")), 0)
 
 
 def get_consumed_operating_cost(wo_name, bom_no, operation_id):
