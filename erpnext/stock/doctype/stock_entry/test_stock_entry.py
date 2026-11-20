@@ -5984,6 +5984,14 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		self.assertEqual(ceil_qty_if_uom_has_whole_number(2.3, "Nos"), 3)
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
 
+	def test_ceil_qty_ignores_float_noise(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			ceil_qty_if_uom_has_whole_number,
+		)
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(0.07 * 100, "Nos"), 7)
+
 	def test_ceil_qty_no_rounding_for_decimal_uom(self):
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			ceil_qty_if_uom_has_whole_number,
