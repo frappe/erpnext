@@ -813,8 +813,10 @@ class JobCard(Document):
 		starts = {}
 		for workstation in workstations:
 			self.workstation = workstation
-			trial_row = frappe._dict(remaining_time_in_mins=row.remaining_time_in_mins)
-			self.validate_overlap_for_workstation(frappe._dict(args), trial_row)
+			trial_row = frappe._dict(
+				planned_start_time=args.from_time, remaining_time_in_mins=row.remaining_time_in_mins
+			)
+			self.place_row_start(trial_row)
 			starts[workstation] = get_datetime(trial_row.planned_start_time)
 
 		self.workstation = min(workstations, key=starts.get)
