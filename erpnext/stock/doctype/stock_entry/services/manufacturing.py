@@ -803,10 +803,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			item_args["original_item"] = row.original_item
 		is_return = self.doc.get("is_return")
 		qty = row.qty if is_return else (flt(row.qty) * flt(self.doc.fg_completed_qty)) / pending_qty_to_mfg
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
-		item_args["qty"] = ceil_qty_if_uom_has_whole_number(flt(qty, precision), row.uom)
+		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.uom)
 		item_args["transfer_qty"] = item_args["qty"]
-		if not item_args["qty"]:
+		if not flt(item_args["qty"], frappe.get_precision("Stock Entry Detail", "qty")):
 			return
 		if is_return:
 			item_args["s_warehouse"], item_args["t_warehouse"] = row.s_warehouse, row.t_warehouse
