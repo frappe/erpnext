@@ -1892,12 +1892,16 @@ def sort_stock_vouchers_by_posting_date(
 	return sorted_vouchers
 
 
-def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
+def get_future_stock_vouchers(
+	posting_date, posting_time, for_warehouses=None, for_items=None, company=None, to_datetime=None
+):
 	posting_datetime = get_combine_datetime(posting_date, posting_time)
 
 	SLE = DocType("Stock Ledger Entry")
 
 	conditions = (SLE.posting_datetime >= posting_datetime) & (SLE.is_cancelled == 0)
+	if to_datetime:
+		conditions &= SLE.posting_datetime <= to_datetime
 	if for_items:
 		conditions &= SLE.item_code.isin(for_items)
 	if for_warehouses:
