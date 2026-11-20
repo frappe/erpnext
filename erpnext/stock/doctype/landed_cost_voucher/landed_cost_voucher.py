@@ -7,6 +7,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, flt
 
 import erpnext
@@ -644,6 +645,10 @@ def get_pr_items(purchase_receipt):
 			pr_item.rate.as_("base_rate"),
 			pr_item.amount.as_("base_amount"),
 		)
+
+		# secondary items take their share of the cost from the finished good
+		query = query.where(IfNull(pr_item.secondary_item_type, "") == "")
+		query = query.where(IfNull(pr_item.valuation_type, "") == "")
 
 	elif purchase_receipt.receipt_document_type == "Stock Entry":
 		query = query.select(
