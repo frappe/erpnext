@@ -129,6 +129,7 @@ frappe.ui.form.on("Asset Repair", {
 
 	completion_date: (frm) => {
 		frm.events.set_downtime(frm);
+		frm.events.refresh_consumed_item_rates(frm);
 	},
 
 	set_downtime: (frm) => {
@@ -160,6 +161,14 @@ frappe.ui.form.on("Asset Repair", {
 			frm.clear_table("stock_items");
 			frm.refresh_field("stock_items");
 		}
+	},
+
+	refresh_consumed_item_rates: function (frm) {
+		(frm.doc.stock_items || []).forEach((row) => {
+			if (row.item_code && row.warehouse && !row.serial_and_batch_bundle) {
+				frm.events.set_consumed_item_rate(frm, row.doctype, row.name);
+			}
+		});
 	},
 
 	set_consumed_item_rate: function (frm, cdt, cdn) {
@@ -236,6 +245,13 @@ frappe.ui.form.on("Asset Repair Purchase Invoice", {
 });
 
 frappe.ui.form.on("Asset Repair Consumed Item", {
+	item_code: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.item_code && row.warehouse) {
+			frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		}
+	},
+
 	warehouse: function (frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 
