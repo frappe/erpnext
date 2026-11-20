@@ -2613,7 +2613,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "returned_qty"), 3)
 
-<<<<<<< HEAD
 	def test_second_partial_internal_order_links_to_its_own_source(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -2708,7 +2707,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 			orders[1].cancel()
 			self.assertFalse(source.get_db_value("inter_company_order_reference"))
-=======
+
 	def test_supplier_from_first_item_default_found(self):
 		item_group = frappe.get_doc(
 			{
@@ -2734,7 +2733,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.set_supplier_from_item_default()
 
 		self.assertEqual(po.supplier, "_Test Supplier")
->>>>>>> 1625973 (test: supplier from the first row's item default)
 
 
 def create_po_for_sc_testing():
