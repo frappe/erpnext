@@ -93,15 +93,10 @@ def make_packing_list(doc):
 				if item_row.get("against_pick_list"):
 					update_packed_item_with_pick_list_info(item_row, pi_row, so_packed_item)
 
-<<<<<<< HEAD
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
-=======
-					# a zero qty row has no component amount to price it from
-					if set_price_from_children and item_row.qty:
-						update_product_bundle_rate(parent_items_price, pi_row, item_row)
->>>>>>> e83c487 (fix(stock): skip pricing a zero qty bundle row from its components)
 
-				if set_price_from_children:  # create/update bundle item wise price dict
+				# a zero qty row has no component amount to price it from
+				if set_price_from_children and item_row.qty:
 					update_product_bundle_rate(parent_items_price, pi_row, item_row)
 
 	if parent_items_price:
