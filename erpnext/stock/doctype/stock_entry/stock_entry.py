@@ -4940,7 +4940,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if not picked_row:
 				continue
 
-			if (d.original_item or d.item_code) != picked_row.item_code:
+			if picked_row.item_code not in (d.item_code, d.original_item):
 				frappe.throw(
 					_("Row #{0}: Item {1} is not the item {2} picked in {3}.").format(
 						d.idx, frappe.bold(d.item_code), frappe.bold(picked_row.item_code), self.pick_list
