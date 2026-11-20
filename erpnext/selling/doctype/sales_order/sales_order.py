@@ -1904,8 +1904,10 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	from frappe.desk.calendar import get_event_conditions
+	from frappe.desk.reportview import get_match_cond
 
 	conditions = get_event_conditions("Sales Order", filters)
+	match_conditions = get_match_cond("Sales Order")
 
 	data = frappe.db.sql(
 		f"""
@@ -1921,6 +1923,7 @@ def get_events(start, end, filters=None):
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
 			{conditions}
+			{match_conditions}
 		""",
 		{"start": start, "end": end},
 		as_dict=True,
