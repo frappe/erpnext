@@ -157,7 +157,7 @@ def get_items_for_reorder() -> dict[str, list]:
 	return itemwise_reorder
 
 
-def get_reorder_levels_for_variants(itemwise_reorder):
+def get_reorder_levels_for_variants(itemwise_reorder, item_code=None):
 	item_table = frappe.qb.DocType("Item")
 
 	query = (
@@ -170,6 +170,9 @@ def get_reorder_levels_for_variants(itemwise_reorder):
 			& (item_table.variant_of.notnull())
 		)
 	)
+
+	if item_code:
+		query = query.where(item_table.name == item_code)
 
 	variants_item = query.run(as_dict=True)
 	for row in variants_item:

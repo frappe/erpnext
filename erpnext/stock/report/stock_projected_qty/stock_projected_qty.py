@@ -355,7 +355,7 @@ def get_item_map(item_code, include_uom):
 
 		reorder_levels[d.parent].append(d)
 
-	reorder_levels = get_reorder_levels_for_variants(reorder_levels)
+	reorder_levels = get_reorder_levels_for_variants(reorder_levels, item_code)
 
 	item_map = frappe._dict()
 	for item in items:
