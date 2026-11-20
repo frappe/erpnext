@@ -1610,16 +1610,9 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 
 	item_price_data = 0
 	price_list_rate = get_item_price(pctx, item_code, limit=None)
-	has_party = pctx.customer or pctx.supplier
-	if has_party and ctx.get("uom") != ctx.get("stock_uom") and not is_party_price(price_list_rate):
-		# a party's own price in the stock UOM comes before a general price in the row UOM
-		party_price_list_rate = get_item_price(
-			frappe._dict(pctx, uom=ctx.get("stock_uom")), item_code, limit=None
-		)
-		if is_party_price(party_price_list_rate):
-			price_list_rate = party_price_list_rate
-
-	if price_list_rate:
+	if party_price := get_party_price_in_stock_uom(ctx, pctx, item_code, price_list_rate):
+		item_price_data = party_price
+	elif price_list_rate:
 		if desired_qty := ctx.get("qty"):
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
 	else:
@@ -1642,6 +1635,19 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 			return flt(item_price_data[0].price_list_rate * flt(ctx.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0].price_list_rate
+
+
+def get_party_price_in_stock_uom(ctx, pctx, item_code, row_uom_prices):
+	"""A party's own price in the stock UOM comes before a general price in the row UOM."""
+	if not (pctx.customer or pctx.supplier) or ctx.get("uom") == ctx.get("stock_uom"):
+		return None
+
+	# without a row UOM price, the stock UOM fallback already puts party prices first
+	if not row_uom_prices or is_party_price(row_uom_prices):
+		return None
+
+	prices = get_item_price(frappe._dict(pctx, uom=ctx.get("stock_uom")), item_code)
+	return prices if is_party_price(prices) else None
 
 
 def is_party_price(item_prices):
