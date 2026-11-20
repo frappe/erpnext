@@ -703,7 +703,11 @@ def get_undelivered_picked_qty_details(sales_order: str) -> dict:
 			pick_list_item.sales_order_item,
 			Sum(pick_list_item.picked_qty - pick_list_item.delivered_qty),
 		)
-		.where((pick_list_item.docstatus == 1) & (pick_list_item.sales_order == sales_order))
+		.where(
+			(pick_list_item.docstatus == 1)
+			& (pick_list_item.sales_order == sales_order)
+			& (pick_list_item.picked_qty > pick_list_item.delivered_qty)
+		)
 		.groupby(pick_list_item.sales_order_item)
 	).run(as_list=True)
 
