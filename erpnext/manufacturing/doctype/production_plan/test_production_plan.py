@@ -563,14 +563,15 @@ class TestProductionPlan(FrappeTestCase):
 		pln.reload()
 		pln.cancel()
 
-	def test_combined_plan_skips_references_of_items_without_bom(self):
+	def test_combined_plan_skips_references_of_items_without_default_bom(self):
 		item = "Test Production Item 1"
-		item_without_bom = make_item("_Test PP Combine Item Without BOM", {"is_stock_item": 1}).name
+		item_with_draft_bom = make_item("_Test PP Combine Item With Draft BOM", {"is_stock_item": 1}).name
+		make_bom(item=item_with_draft_bom, raw_materials=["Raw Material Item 1"], do_not_submit=True)
 		sales_order = make_sales_order(item_code=item, qty=5, do_not_submit=1)
 		sales_order.append(
 			"items",
 			{
-				"item_code": item_without_bom,
+				"item_code": item_with_draft_bom,
 				"qty": 2,
 				"rate": 100,
 				"warehouse": sales_order.items[0].warehouse,
