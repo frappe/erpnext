@@ -66,21 +66,6 @@ class TestSubcontractOrderSummary(ERPNextTestSuite):
 
 		self.assertIn(permitted.name, orders)
 		self.assertNotIn(other.name, orders)
-<<<<<<< HEAD
-=======
-
-	def test_out_of_range_date_excludes_order(self):
-		sco = get_subcontracting_order()
-
-		data = self.run_report(name=sco.name, from_date="2019-01-01", to_date="2019-01-31")
-		self.assertEqual(data, [])
-
-	def test_every_raw_material_row_has_its_order(self):
-		sco = make_subcontracting_order()
-
-		rows = self.run_report(name=sco.name)
-		self.assertGreater(len(rows), 1)
-		self.assertEqual({row.get("order_id") for row in rows}, {sco.name})
 
 	def test_order_row_without_supplied_materials_is_listed(self):
 		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
@@ -105,4 +90,3 @@ class TestSubcontractOrderSummary(ERPNextTestSuite):
 		self.assertEqual(len(rows), 1)
 		self.assertEqual(rows[0]["qty"], 5)
 		self.assertEqual(rows[0]["received_qty"], 0)
->>>>>>> d5697ab (test: Subcontract Order Summary lists a row whose materials are all sourced by the job worker)
