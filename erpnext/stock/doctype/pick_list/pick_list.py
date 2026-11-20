@@ -1014,9 +1014,7 @@ class PickList(TransactionBase):
 			[
 				row.name
 				for row in items_data
-				if row.serial_and_batch_bundle
-				and not row.batch_no
-				and (row.delivered_qty or row.transferred_qty)
+				if row.serial_and_batch_bundle and (row.delivered_qty or row.transferred_qty)
 			]
 		)
 
