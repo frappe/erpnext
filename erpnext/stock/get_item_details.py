@@ -268,7 +268,10 @@ def set_valuation_rate(out, args):
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 =======
 def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
-	from erpnext.stock.doctype.packed_item.packed_item import get_bundle_version_for_row
+	from erpnext.stock.doctype.packed_item.packed_item import (
+		get_bundle_version_for_row,
+		get_component_stock_qty_per_unit,
+	)
 
 	bundle = get_bundle_version_for_row(ctx)
 	if bundle:
@@ -281,7 +284,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 				_get_valuation_rate(bundle_item.item_code, args.company, out.get("warehouse")).get(
 					"valuation_rate"
 				)
-				* bundle_item.qty
+				* get_component_stock_qty_per_unit(bundle_item, None)
 			)
 
 		out.update({"valuation_rate": valuation_rate})
