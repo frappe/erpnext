@@ -317,11 +317,12 @@ class PaymentRequest(Document):
 				payment_gateway = frappe.db.get_value(
 					"Subscription Plan", subscription_plan.plan, "payment_gateway"
 				)
-				if payment_gateway != self.payment_gateway_account:
+				# a plan without a gateway can be paid through any gateway
+				if payment_gateway and payment_gateway != self.payment_gateway_account:
 					frappe.throw(
 						_(
 							"The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
-						).format(subscription_plan.name)
+						).format(frappe.bold(subscription_plan.plan))
 					)
 
 				rate = get_plan_rate(subscription_plan.plan, quantity=subscription_plan.qty)
@@ -866,6 +867,13 @@ def make_payment_request(**args):
 	if not args.get("company"):
 		args.company = ref_doc.company
 
+	subscription_plans = get_subscription_plans(ref_doc.doctype, ref_doc.name)
+
+	# the gateway set on the subscription plans wins over the company default
+	if not args.get("payment_gateway_account") and subscription_plans:
+		if plan_gateway_account := get_subscription_payment_gateway_account(subscription_plans, args.company):
+			args.payment_gateway_account = plan_gateway_account
+
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
@@ -988,7 +996,6 @@ def make_payment_request(**args):
 			party_account = find_account(party_type, party, ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
 
-		subscription_plans = get_subscription_plans(ref_doc.doctype, ref_doc.name)
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -1339,6 +1346,29 @@ def get_gateway_details(args):  # nosemgrep
 	"""
 	gateway_account = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
 	return get_payment_gateway_account(gateway_account)
+
+
+def get_subscription_payment_gateway_account(subscription_plans: list[dict], company: str) -> str | None:
+	"""Return the Payment Gateway Account shared by the subscription plans, if they set exactly one."""
+	gateway_accounts = frappe.get_all(
+		"Subscription Plan",
+		filters={
+			"name": ["in", list({row.plan for row in subscription_plans})],
+			"payment_gateway": ["is", "set"],
+		},
+		pluck="payment_gateway",
+		distinct=True,
+	)
+
+	# plans with different gateways cannot share one payment request; validation reports it
+	if len(gateway_accounts) != 1:
+		return None
+
+	# a plan is not tied to a company, so never take another company's gateway account
+	if frappe.db.get_value("Payment Gateway Account", gateway_accounts[0], "company") != company:
+		return None
+
+	return gateway_accounts[0]
 
 
 def get_payment_gateway_account(filter):
