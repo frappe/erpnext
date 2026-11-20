@@ -1377,10 +1377,24 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 	}
 };
 
+// child handlers run on every parent form, the total is only on Stock Entry
+const update_total_additional_costs = (frm) => {
+	if (frm.doctype === "Stock Entry") {
+		frm.events.calculate_total_additional_costs(frm);
+	}
+};
+
 frappe.ui.form.on("Landed Cost Taxes and Charges", {
 	amount: function (frm, cdt, cdn) {
 		frm.events.set_base_amount(frm, cdt, cdn);
 	},
+
+	base_amount: update_total_additional_costs,
+	// duplicated rows keep their amounts
+	additional_costs_add: update_total_additional_costs,
+	additional_costs_remove: update_total_additional_costs,
+	// "Delete all rows" only fires this
+	additional_costs_delete: update_total_additional_costs,
 
 	expense_account: function (frm, cdt, cdn) {
 		frm.events.set_account_currency(frm, cdt, cdn);
