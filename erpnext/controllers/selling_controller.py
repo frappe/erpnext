@@ -1331,6 +1331,29 @@ class SellingController(StockController):
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
+	def validate_against_pick_list_items(self):
+		"""Refuse a row whose item is not the item picked on its Pick List row."""
+		pick_list_items = {row.pick_list_item for row in self.items if row.pick_list_item}
+		if not pick_list_items:
+			return
+
+		picked_items = dict(
+			frappe.get_all(
+				"Pick List Item",
+				filters={"name": ("in", list(pick_list_items))},
+				fields=["name", "item_code"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			picked_item = picked_items.get(row.pick_list_item)
+			if picked_item and row.item_code != picked_item:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not the item {2} picked in {3}.").format(
+						row.idx, frappe.bold(row.item_code), frappe.bold(picked_item), row.against_pick_list
+					)
+				)
+
 	def set_serial_and_batch_bundle_from_pick_list(self):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
