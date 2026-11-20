@@ -5,7 +5,7 @@
 
 import frappe
 from frappe.query_builder.functions import Count, IfNull, Max, Sum
-from frappe.utils import flt
+from frappe.utils import flt, now
 from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
@@ -367,7 +367,7 @@ def update_subcontracted_received_qty(subcontracting_order_items: list[str]):
 	po_items = frappe.get_all(
 		"Purchase Order Item",
 		filters={"production_plan_sub_assembly_item": ("in", sub_assembly_items), "docstatus": 1},
-		fields=["name", "production_plan_sub_assembly_item"],
+		fields=["name", "production_plan_sub_assembly_item", "production_plan"],
 	)
 	received_qty = get_subcontracted_received_qty([row.name for row in po_items])
 
@@ -377,3 +377,11 @@ def update_subcontracted_received_qty(subcontracting_order_items: list[str]):
 
 	for name, qty in sub_assembly_received_qty.items():
 		frappe.db.set_value("Production Plan Sub Assembly Item", name, "received_qty", qty)
+
+	# so an open plan form can't save its stale received qty back
+	frappe.db.set_value(
+		"Production Plan",
+		{"name": ("in", list({row.production_plan for row in po_items}))},
+		{"modified": now(), "modified_by": frappe.session.user},
+		update_modified=False,
+	)
