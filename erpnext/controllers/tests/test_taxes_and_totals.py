@@ -363,6 +363,15 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(so.taxes[0].tax_amount, 50)
 		self.assertEqual(so.grand_total, 140)
 
+	def test_is_consolidated_in_payload_does_not_skip_item_amounts(self):
+		"""Only the POS Invoice Merge Log may skip computing item amounts."""
+		so = make_sales_order(qty=3, rate=100, do_not_save=True)
+		so.is_consolidated = 1
+
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.items[0].amount, 300)
+
 	def make_sales_order_with_shipping_rule(self, rate):
 		so = make_sales_order(qty=1, rate=rate, do_not_save=True)
 		so.set("taxes", [])
