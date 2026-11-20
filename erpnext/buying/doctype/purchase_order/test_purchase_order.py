@@ -2290,11 +2290,22 @@ class TestPurchaseOrder(FrappeTestCase):
 		).insert()
 		item_with_default = make_item(
 			"_Test Item With Default Supplier",
-			{"item_defaults": [{"company": "_Test Company", "default_supplier": "_Test Supplier"}]},
+			{
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"default_supplier": "_Test Supplier",
+						"default_warehouse": "_Test Warehouse - _TC",
+					}
+				]
+			},
 		)
 		item_from_group = make_item(
 			"_Test Item With Group Default Supplier",
-			{"item_group": item_group.name, "item_defaults": [{"company": "_Test Company"}]},
+			{
+				"item_group": item_group.name,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			},
 		)
 
 		po = frappe.new_doc("Purchase Order")
