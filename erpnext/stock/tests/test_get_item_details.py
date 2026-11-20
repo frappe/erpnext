@@ -1056,7 +1056,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		self.assertEqual(details.price_list_rate, 80)
 
-	def test_party_price_in_stock_uom_skips_row_uom_packing_unit(self):
+	def test_party_price_in_stock_uom_fits_packing_unit_in_stock_qty(self):
 		item_code = self.make_multi_uom_item()
 		price_list = self.make_selling_price_list("_Test UOM Price List")
 		self.make_item_price(item_code, price_list.name, 9, uom="_Test UOM")
@@ -1065,9 +1065,11 @@ class TestGetItemDetail(ERPNextTestSuite):
 			item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer", packing_unit=10
 		)
 
-		details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
-
-		self.assertEqual(details.price_list_rate, 80)
+		for qty, expected_rate in ((1, 80), (1.5, 100)):
+			with self.subTest(qty=qty):
+				ctx = self.get_uom_rate_context(item_code, price_list.name)
+				ctx.qty = qty
+				self.assertEqual(get_item_details(ctx).price_list_rate, expected_rate)
 
 	def test_fallback_price_list_uses_its_own_uom_setting(self):
 		item_code = self.make_multi_uom_item()
