@@ -1630,7 +1630,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 
-			if (!this.frm.doc.__onload?.load_after_mapping) {
+			if (!this.frm.doc.__onload?.load_after_mapping && frappe.model.can_read("Company")) {
 				this.set_default_account("cost_center", "cost_center");
 			}
 
