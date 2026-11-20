@@ -1852,8 +1852,17 @@ def _apply_price_list(args, as_doc=False, doc=None):
 		return {"parent": parent, "children": children}
 
 
+<<<<<<< HEAD
 def apply_price_list_on_item(args, doc=None):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
+=======
+def apply_price_list_on_item(ctx, doc=None):
+	item_doc = frappe.get_cached_doc("Item", ctx.item_code)
+	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
+		"conversion_factor", 1
+	)
+	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
+>>>>>>> eedcb42 (fix(stock): resolve the conversion factor before applying the price list)
 
 	source_row = get_rate_locked_source_row(args, doc)
 	if source_row:
@@ -1862,11 +1871,14 @@ def apply_price_list_on_item(args, doc=None):
 	else:
 		item_details = get_price_list_rate(args, item_doc)
 
+<<<<<<< HEAD
 	args.conversion_factor = flt(args.conversion_factor) or get_conversion_factor(
 		args.item_code, args.uom
 	).get("conversion_factor", 1)
 	args.stock_qty = flt(args.qty) * flt(args.conversion_factor)
 
+=======
+>>>>>>> eedcb42 (fix(stock): resolve the conversion factor before applying the price list)
 	if not source_row:
 		item_details.update(get_pricing_rule_for_item(args, doc=doc))
 
