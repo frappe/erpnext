@@ -142,10 +142,9 @@ def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, 
 		plan.reason = _("Its stock should be negative on this date, which cannot be counted in.")
 		return
 
-	precision = details.currency_precision
 	serial_nos_by_rate = defaultdict(list)
 	for serial_no, rate in stock.serial_rates.items():
-		serial_nos_by_rate[flt(rate, precision)].append(serial_no)
+		serial_nos_by_rate[rate].append(serial_no)
 
 	for rate, serial_nos in sorted(serial_nos_by_rate.items()):
 		plan.rows.append(
