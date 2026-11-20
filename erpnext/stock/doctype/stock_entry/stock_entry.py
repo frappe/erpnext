@@ -366,6 +366,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		validate_item_uoms(self.get("items"))
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
+		# compares the rows' transfer_qty, so it runs after set_transfer_qty
+		if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
+			self.purpose_cls(self).validate_component_and_quantities()
+
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		sbb.validate_warehouse_of_sabb()

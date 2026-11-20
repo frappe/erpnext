@@ -270,7 +270,6 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_job_card_for_semi_finished_goods()
 		self.validate_work_order_status_for_return()
 		self.validate_returned_qty_within_work_order()
-		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
 		self.validate_alternative_items()
 
