@@ -95,7 +95,8 @@ def make_packing_list(doc):
 
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
-				if set_price_from_children:  # create/update bundle item wise price dict
+				# a zero qty row has no component amount to price it from
+				if set_price_from_children and item_row.qty:
 					update_product_bundle_rate(parent_items_price, pi_row, item_row)
 
 	if parent_items_price:
