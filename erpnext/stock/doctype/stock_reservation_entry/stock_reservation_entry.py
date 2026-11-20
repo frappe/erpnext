@@ -1033,8 +1033,6 @@ def create_stock_reservation_entries_for_so_items(
 		if not item.get("reserve_stock"):
 			continue
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 		# Skip on submit, the produced Serial Nos are reserved from the Sales Order after manufacture.
 		if not items_details and item.get("ensure_delivery_based_on_produced_serial_no"):
 			frappe.msgprint(
@@ -1046,20 +1044,8 @@ def create_stock_reservation_entries_for_so_items(
 			)
 			continue
 
-		# Stock should be reserved from the Pick List if has Picked Qty.
-		if not from_voucher_type == "Pick List" and flt(item.picked_qty) > 0:
-=======
-		# Stock should be reserved from the Pick List if it has undelivered Picked Qty.
-		undelivered_picked_qty = flt(
-			flt(item.picked_qty) - flt(item.delivered_qty) * flt(item.conversion_factor),
-			item.precision("picked_qty"),
-		)
-		if from_voucher_type != "Pick List" and undelivered_picked_qty > 0:
->>>>>>> e7ee625 (fix(stock): allow reservation when picked stock is already delivered)
-=======
 		# Stock should be reserved from the Pick List while it has undelivered Picked Qty.
 		if flt(undelivered_picked_qty.get(item.name), item.precision("picked_qty")) > 0:
->>>>>>> e4e0d9c (fix(stock): use pick list delivered qty for the undelivered pick check)
 			frappe.throw(
 				_("Row #{0}: Item {1} has been picked, please reserve stock from the Pick List.").format(
 					item.idx, frappe.bold(item.item_code)
