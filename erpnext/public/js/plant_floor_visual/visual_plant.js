@@ -158,6 +158,11 @@ class VisualPlantFloor {
 		});
 
 		$(template).appendTo(this.wrapper.find(".plant-floor-container"));
+
+		this.wrapper.find(".workstation-image").on("click", (e) => {
+			let workstation = $(e.currentTarget).closest(".workstation-wrapper").attr("data-workstation");
+			frappe.set_route("Form", "Workstation", workstation);
+		});
 	}
 
 	prepare_menu() {
