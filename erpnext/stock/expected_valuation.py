@@ -45,7 +45,12 @@ How an entry is valued
   or last rate. If the warehouse never had a rate, the ledger's own rate is taken,
   as there is nothing to check it against.
 * Like the ledger, the stock value is rounded to the currency precision after
+<<<<<<< HEAD
   every entry, and a reconciled rate is rounded before it is applied.
+=======
+  every entry.
+* Standard Cost items are carried at the standard rate on the posting date.
+>>>>>>> c96dc60 (refactor(stock): drop no-op flt calls and the stale reconciled rate rounding note)
 * An Adjustment Entry (erpnext.stock.valuation_adjustment) resets the stock to its rows. Its
   entries count out whatever the ledger holds, right or wrong, so they are taken as they are, up
   to the last one of each item-warehouse, after which the stock must be what the rows count in.
