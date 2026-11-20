@@ -3533,6 +3533,8 @@ class StockEntry(StockController):
 		return item_dict
 
 	def get_scrap_items_from_job_card(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
+
 		if not getattr(self, "pro_doc", None):
 			self.set_work_order_details()
 
@@ -3561,7 +3563,12 @@ class StockEntry(StockController):
 			.groupby(job_card_scrap_item.item_code)
 		).run(as_dict=1)
 
-		pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
+		# completed qty leaves out the unbooked job card loss that For Quantity includes
+		pending_qty = (
+			flt(self.get_completed_job_card_qty())
+			- flt(self.pro_doc.produced_qty)
+			+ max(get_upstream_process_loss(self.pro_doc) - flt(self.pro_doc.process_loss_qty), 0)
+		)
 
 		used_scrap_items = self.get_used_scrap_items()
 		for row in scrap_items:

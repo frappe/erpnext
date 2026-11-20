@@ -2330,6 +2330,63 @@ class TestJobCard(FrappeTestCase):
 		material_request.cancel()
 		self.assertEqual(frappe.db.get_value("Job Card", job_card.name, "requested_qty"), 0)
 
+	@change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_scrap_items_with_process_loss(self):
+		stock_entry = self.make_job_card_scrap_entry(completed_qty=8)
+		self.assertEqual(stock_entry.process_loss_qty, 2)
+		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == "JC Loss Scrap"], [3])
+
+	@change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_scrap_items_with_bom_process_loss(self):
+		stock_entry = self.make_job_card_scrap_entry(completed_qty=10, process_loss_percentage=20)
+		self.assertEqual(stock_entry.process_loss_qty, 2)
+		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == "JC Loss Scrap"], [3])
+
+	def make_job_card_scrap_entry(self, completed_qty, process_loss_percentage=0):
+		"""Manufacture entry for 10 after a Job Card records 3 scrap."""
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("JC Loss Scrap RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		fg = make_item("JC Loss Scrap FG", {"is_stock_item": 1}).name
+		scrap = make_item("JC Loss Scrap", {"is_stock_item": 1, "valuation_rate": 5}).name
+		operation = {"operation": "JC Loss Scrap Op", "workstation": "JC Loss Scrap WS", "time_in_mins": 60}
+		make_workstation(operation)
+		make_operation(operation)
+
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=10,
+			with_operations=1,
+			process_loss_percentage=process_loss_percentage,
+		)
+		bom.append("items", {"item_code": rm, "qty": 10})
+		bom.append("operations", operation)
+		bom.insert()
+		bom.submit()
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			item=fg, qty=10, bom_no=bom.name, skip_transfer=1, source_warehouse=warehouse
+		)
+		job_card = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
+		job_card.append("scrap_items", {"item_code": scrap, "stock_qty": 3})
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2024-03-01 08:00:00",
+				"to_time": "2024-03-01 09:00:00",
+				"completed_qty": completed_qty,
+			},
+		)
+		job_card.save()
+		job_card.submit()
+
+		return frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 10))
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
