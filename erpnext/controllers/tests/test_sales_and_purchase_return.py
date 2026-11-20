@@ -340,6 +340,32 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		# such returns store a stock qty of 0
 		self.test_returns_below_stock_qty_precision_are_held_to_the_sold_qty()
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_full_bundle_return_with_editable_stock_qty(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		component = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bundle = make_item(
+			properties={
+				"is_stock_item": 0,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3334}],
+			}
+		).name
+		make_product_bundle(bundle, [component], qty=100)
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=100, basic_rate=100)
+		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3334})
+		dn.submit()
+
+		# 1 Box is stored as 0.33 Kg, so 33 Kg of the component is packed
+		self.assertEqual(dn.packed_items[0].qty, 33)
+		make_sales_return(dn.name).submit()
+
 	def test_full_returns_of_a_receipt_whose_stock_qty_is_rounded(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.item.test_item import make_item
