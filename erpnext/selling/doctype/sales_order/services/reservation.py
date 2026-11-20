@@ -173,6 +173,7 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
 			- existing_reserved_qty
 		)
+		precision = item.precision("stock_qty")
 	else:
 		stock_qty, delivered_qty, conversion_factor = frappe.get_value(
 			"Sales Order Item",
@@ -184,6 +185,7 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 		)  # ratio of packed item qty to main item qty in product bundle
 		delivered_qty = delivered_qty * conversion_factor * bundle_conversion_factor
 		unreserved_qty = item.qty - delivered_qty - existing_reserved_qty
+		precision = item.precision("qty")
 
-	# a residue below qty precision, as a fractional conversion factor leaves, is not unreserved
-	return unreserved_qty if flt(unreserved_qty, item.precision("qty")) > 0 else 0
+	# a residue below stock qty precision, as a fractional conversion factor leaves, is not unreserved
+	return unreserved_qty if flt(unreserved_qty, precision) > 0 else 0
