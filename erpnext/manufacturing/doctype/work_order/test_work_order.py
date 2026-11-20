@@ -6415,6 +6415,11 @@ class TestWorkOrder(ERPNextTestSuite):
 		row.update({"uom": "Gram", "conversion_factor": 0.001, "qty": 1000})
 		manufacture.save()
 
+		# a stale conversion factor on a stock UOM row is reset to 1 before the check
+		manufacture, row = make_manufacture({"stock_uom": "Kg"}, "Kg", 1, 2)
+		row.update({"qty": 2, "conversion_factor": 0.5})
+		self.assertRaises(frappe.ValidationError, manufacture.save)
+
 		manufacture, row = make_manufacture({"stock_uom": "Nos"}, "Nos", 2, 4)
 		self.assertEqual(row.qty, 1)
 		manufacture.save()
