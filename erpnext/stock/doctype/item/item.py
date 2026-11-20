@@ -1385,12 +1385,12 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0, con
 
 	purchase_date, last_purchase = max(last_purchases, key=lambda purchase: purchase[0])
 
-	conversion_factor = (flt(conversion_factor) or 1.0) / flt(last_purchase.conversion_factor)
+	uom_factor = (flt(conversion_factor) or 1.0) / flt(last_purchase.conversion_factor)
 	out = frappe._dict(
 		{
-			"base_price_list_rate": flt(last_purchase.base_price_list_rate) * conversion_factor,
-			"base_rate": flt(last_purchase.base_rate) * conversion_factor,
-			"base_net_rate": flt(last_purchase.base_net_rate) * conversion_factor,
+			"base_price_list_rate": flt(last_purchase.base_price_list_rate) * uom_factor,
+			"base_rate": flt(last_purchase.base_rate) * uom_factor,
+			"base_net_rate": flt(last_purchase.base_net_rate) * uom_factor,
 			"discount_percentage": flt(last_purchase.discount_percentage),
 			"purchase_date": purchase_date,
 		}
