@@ -174,11 +174,11 @@ def get_pool_layers(stock, details, posting_datetime) -> list[tuple[float, float
 	pool = stock.pool
 
 	if details.valuation_method == "Standard Cost":
-		layers = [(pool.qty, flt(details.get_standard_rate(getdate(posting_datetime))))]
+		layers = [(pool.qty, details.get_standard_rate(getdate(posting_datetime)))]
 	elif isinstance(pool, QueuePool):
-		layers = [(qty, flt(rate)) for qty, rate in pool.layers]
+		layers = pool.layers
 	else:
-		layers = [(pool.qty, flt(pool.rate))]
+		layers = [(pool.qty, pool.rate)]
 
 	return [(qty, rate) for qty, rate in layers if abs(qty) >= details.qty_tolerance]
 
