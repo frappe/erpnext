@@ -863,6 +863,8 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
+	if frappe.only_has_select_perm("Sales Order"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	SalesOrder = frappe.qb.DocType("Sales Order")
 	SalesOrderItem = frappe.qb.DocType("Sales Order Item")
