@@ -13,6 +13,8 @@ from erpnext.buying.report.subcontracted_item_to_be_received.test_subcontracted_
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_subcontracting_order,
 )
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 FG_ITEM = "Subcontracted Item SA7"
@@ -64,9 +66,6 @@ class TestSubcontractOrderSummary(ERPNextTestSuite):
 		self.assertEqual({row.get("order_id") for row in rows}, {sco.name})
 
 	def test_order_row_without_supplied_materials_is_listed(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
 		raw_material = make_item(properties={"is_stock_item": 1}).name
 		bom = make_bom(item=fg_item, raw_materials=[raw_material], currency="INR", do_not_submit=True)
