@@ -3169,9 +3169,7 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 		)
 
 	# add lcv amount in incoming_rate
-	lcv_amount = frappe.db.get_value(
-		f"{sle.voucher_type} Item", sle.voucher_detail_no, "landed_cost_voucher_amount"
-	)
+	lcv_amount = frappe.db.get_value(child_doctype, sle.voucher_detail_no, "landed_cost_voucher_amount")
 
 	if lcv_amount:
 		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
