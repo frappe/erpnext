@@ -1867,7 +1867,9 @@ def sort_stock_vouchers_by_posting_date(
 	return sorted_vouchers
 
 
-def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
+def get_future_stock_vouchers(
+	posting_date, posting_time, for_warehouses=None, for_items=None, company=None, to_datetime=None
+):
 	posting_datetime = get_combine_datetime(posting_date, posting_time)
 
 	SLE = DocType("Stock Ledger Entry")
@@ -1891,6 +1893,9 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 
 	if company:
 		query = query.where(SLE.company == company)
+
+	if to_datetime:
+		query = query.where(SLE.posting_datetime <= to_datetime)
 
 	future_stock_vouchers = query.run(as_dict=True)
 
