@@ -2684,6 +2684,37 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.reload()
 		self.assertEqual((pick_list.locations[0].delivered_qty, pick_list.status), (10, "Completed"))
 
+	def test_delivery_from_pick_list_refuses_another_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		picked_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item in (picked_item, other_item):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"purpose": "Delivery",
+				"locations": [
+					{
+						"item_code": picked_item,
+						"qty": 10,
+						"stock_qty": 10,
+						"picked_qty": 10,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		for target in ("Delivery Note", "Sales Invoice"):
+			target_doc = frappe.new_doc(target, company="_Test Company", currency="INR")
+			delivery = create_delivery(pick_list.name, target_doc=target_doc, target=target)
+			delivery.items[0].update({"item_code": other_item, "item_name": other_item})
+			self.assertRaisesRegex(frappe.ValidationError, "is not the item", delivery.save)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_sales_invoice_from_pick_list_copies_old_batch_serial_fields(self):
 		warehouse = "_Test Warehouse - _TC"
