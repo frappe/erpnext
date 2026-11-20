@@ -6000,7 +6000,9 @@ def make_bom_with_secondary_item(
 	return bom
 
 
-def make_receipt_with_secondary_items(fg_item, qty, process_loss_qty=0, rejected_qty=0, secondary_warehouse=None):
+def make_receipt_with_secondary_items(
+	fg_item, qty, process_loss_qty=0, rejected_qty=0, secondary_warehouse=None
+):
 	"""Submitted receipt for qty of fg_item, with its secondary rows."""
 	set_backflush_based_on("BOM")
 	service_items = [
