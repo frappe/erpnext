@@ -2722,7 +2722,10 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			"_Test Item With Default Supplier",
 			{"item_defaults": [{"company": "_Test Company", "default_supplier": "_Test Supplier"}]},
 		)
-		item_from_group = make_item("_Test Item With Group Default Supplier", {"item_group": item_group.name})
+		item_from_group = make_item(
+			"_Test Item With Group Default Supplier",
+			{"item_group": item_group.name, "item_defaults": [{"company": "_Test Company"}]},
+		)
 
 		po = frappe.new_doc("Purchase Order")
 		po.company = "_Test Company"
