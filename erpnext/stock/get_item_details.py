@@ -1445,6 +1445,7 @@ def get_price_list_rate_for(args, item_code):
 =======
 	price_list_rate = get_item_price(pctx, item_code, limit=None)
 <<<<<<< HEAD
+<<<<<<< HEAD
 	has_party = pctx.customer or pctx.supplier
 	if has_party and ctx.get("uom") != ctx.get("stock_uom") and not is_party_price(price_list_rate):
 		# a party's own price in the stock UOM comes before a general price in the row UOM
@@ -1461,9 +1462,14 @@ def get_price_list_rate_for(args, item_code):
 	if party_price := get_party_price_in_stock_uom(ctx, pctx, item_code, price_list_rate):
 		item_price_data = party_price
 	elif price_list_rate:
+=======
+	if price_list_rate:
+>>>>>>> fa00a30 (fix(stock): check a party's stock UOM price against the stock qty packing unit)
 		if desired_qty := ctx.get("qty"):
 >>>>>>> ada41a9 (fix(stock): skip the packing unit check for a party's price in the stock UOM)
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
+		if not is_party_price(item_price_data):
+			item_price_data = get_party_price_in_stock_uom(ctx, pctx, item_code) or item_price_data
 	else:
 		# Without ignore_party this repeats the query above, which found nothing
 		general_price_list_rate = args.get("ignore_party") and get_item_price(
@@ -1488,16 +1494,17 @@ def get_price_list_rate_for(args, item_code):
 			return item_price_data[0][1]
 
 
-def get_party_price_in_stock_uom(ctx, pctx, item_code, row_uom_prices):
+def get_party_price_in_stock_uom(ctx, pctx, item_code):
 	"""A party's own price in the stock UOM comes before a general price in the row UOM."""
 	if not (pctx.customer or pctx.supplier) or ctx.get("uom") == ctx.get("stock_uom"):
 		return None
 
-	# without a row UOM price, the stock UOM fallback already puts party prices first
-	if not row_uom_prices or is_party_price(row_uom_prices):
-		return None
-
-	prices = get_item_price(frappe._dict(pctx, uom=ctx.get("stock_uom")), item_code)
+	prices = get_item_price(frappe._dict(pctx, uom=ctx.get("stock_uom")), item_code, limit=None)
+	stock_qty = flt(
+		flt(ctx.get("qty")) * flt(ctx.get("conversion_factor", 1)),
+		frappe.get_precision("Item Price", "packing_unit"),
+	)
+	prices = get_prices_fitting_packing_unit(prices, stock_qty)
 	return prices if is_party_price(prices) else None
 
 
