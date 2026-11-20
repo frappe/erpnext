@@ -1102,7 +1102,7 @@ def create_stock_reservation_entries_for_so_items(
 				qty_to_be_reserved = min(qty_to_be_reserved, item.qty_to_reserve)
 
 		# Partial Reservation
-		if qty_to_be_reserved < unreserved_qty:
+		if flt(unreserved_qty - qty_to_be_reserved, item.precision("stock_qty")) > 0:
 			if not from_voucher_type and (
 				not item.get("qty_to_reserve") or qty_to_be_reserved < flt(item.get("qty_to_reserve"))
 			):
