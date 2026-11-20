@@ -4940,8 +4940,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if not picked_row:
 				continue
 
-			# validate_alternative_items checks original_item only against a Work Order
-			is_work_order_alternative = self.work_order and d.original_item == picked_row.item_code
+			# validate_alternative_items checks original_item only for these entries
+			is_work_order_alternative = (
+				self.work_order
+				and self.purpose in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES
+				and d.original_item == picked_row.item_code
+			)
 			if d.item_code != picked_row.item_code and not is_work_order_alternative:
 				frappe.throw(
 					_("Row #{0}: Item {1} is not the item {2} picked in {3}.").format(
