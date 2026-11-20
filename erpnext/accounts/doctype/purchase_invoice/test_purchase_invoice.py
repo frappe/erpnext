@@ -4548,6 +4548,31 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
 
+	def test_receipt_is_net_of_debit_notes_at_a_fractional_conversion_factor(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		conversion_factor = 0.083333333
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "_Test UOM 1",
+				"uoms": [{"uom": "Nos", "conversion_factor": conversion_factor}],
+			}
+		).name
+		pi = make_purchase_invoice(item_code=item_code, update_stock=0, do_not_submit=True)
+		pi.items[0].update({"uom": "Nos", "conversion_factor": conversion_factor, "qty": 12})
+		pi.submit()
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -5
+		debit_note.submit()
+
+		receipt = make_purchase_receipt_from_pi(pi.name)
+		self.assertEqual((receipt.items[0].qty, receipt.items[0].received_qty), (7, 7))
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
