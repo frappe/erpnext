@@ -3297,8 +3297,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_return_of_an_internal_transfer_invoice_takes_back_the_lot_it_received(self):
 		"""A return takes back the stock at the rate it came in at, not another lot of the warehouse."""
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		company = "_Test Company with perpetual inventory"
