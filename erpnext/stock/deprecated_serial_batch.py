@@ -77,8 +77,15 @@ class DeprecatedSerialNoValuation:
 			"Stock Reposting Settings", "do_not_fetch_incoming_rate_from_serial_no"
 		)
 
+		serial_no_details = {
+			d.name.lower(): d
+			for d in frappe.get_all(
+				"Serial No", filters={"name": ("in", serial_nos)}, fields=["name", "purchase_rate", "company"]
+			)
+		}
+
 		for serial_no in serial_nos:
-			sn_details = frappe.db.get_value("Serial No", serial_no, ["purchase_rate", "company"], as_dict=1)
+			sn_details = serial_no_details.get(serial_no.lower())
 			if (
 				sn_details
 				and sn_details.purchase_rate
