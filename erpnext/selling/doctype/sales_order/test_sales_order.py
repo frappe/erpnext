@@ -301,63 +301,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(dn.doctype, "Delivery Note")
 		self.assertEqual(len(dn.get("items")), len(so.get("items")))
 
-<<<<<<< HEAD
-=======
-	def test_over_delivery_of_fully_delivered_rows(self):
-		item_list = []
-		for item_name in ("_Test Over Delivery Item A", "_Test Over Delivery Item B"):
-			item = make_item(item_name, {"is_stock_item": 1, "over_delivery_receipt_allowance": 50}).name
-			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=20, rate=100)
-			item_list.append(
-				{"item_code": item, "qty": 10, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
-			)
-
-		so = make_sales_order(item_list=item_list)
-		first_row, second_row = (row.name for row in so.items)
-
-		def deliver(*selected_rows):
-			return make_delivery_note(so.name, kwargs={"filtered_children": list(selected_rows)})
-
-		def get_mapped_rows(*selected_rows):
-			return [(row.so_detail, row.qty) for row in deliver(*selected_rows).items]
-
-		def has_over_deliverable_rows():
-			so.load_from_db()
-			so.run_method("onload")
-			return so.get_onload("has_over_deliverable_rows")
-
-		self.assertFalse(has_over_deliverable_rows())
-
-		deliver(first_row).submit()
-		self.assertTrue(has_over_deliverable_rows())
-		self.assertEqual(get_mapped_rows(), [(second_row, 10)])
-		self.assertEqual(get_mapped_rows(first_row, second_row), [(first_row, 5), (second_row, 10)])
-
-		deliver(second_row).submit()
-		self.assertEqual(get_mapped_rows(), [(first_row, 5), (second_row, 5)])
-
-		deliver(first_row).submit()
-		self.assertTrue(has_over_deliverable_rows())
-		self.assertEqual(get_mapped_rows(), [(second_row, 5)])
-
-		deliver(second_row).submit()
-		self.assertFalse(has_over_deliverable_rows())
-		self.assertEqual(get_mapped_rows(), [])
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
-	def test_over_delivery_of_bundle_is_blocked(self):
-		# a bundle parent is non-stock, but its components move real stock, so it must obey the limit
-		component = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=50, rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component], qty=2)
-
-		so = make_sales_order(item_code=bundle, qty=2, warehouse="_Test Warehouse - _TC")
-
-		dn = make_delivery_note(so.name)
-		dn.items[0].qty = 5
-		self.assertRaises(frappe.ValidationError, dn.submit)
-
 	def test_cancel_releases_components_of_a_disabled_bundle(self):
 		component = make_item(properties={"is_stock_item": 1}).name
 		bundle = make_item(properties={"is_stock_item": 0}).name
@@ -376,38 +319,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		frappe.get_doc("Sales Order", so.name).cancel()
 		self.assertEqual(reserved_qty(), 0)
 
-	def test_over_delivery_keeps_whole_number_uom_qty(self):
-		item = make_item(
-			"_Test Over Delivery Whole Item",
-			{"is_stock_item": 1, "stock_uom": "_Test UOM", "over_delivery_receipt_allowance": 50},
-		).name
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, rate=100)
-		so = make_sales_order(item_code=item, qty=3)
-		make_delivery_note(so.name).submit()
-
-		self.assertEqual([row.qty for row in make_delivery_note(so.name).items], [1])
-
-	def test_make_production_plan(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		fg_item = make_item("Test PP FG Item", {"is_stock_item": 1}).name
-		make_bom(item=fg_item, rate=100, raw_materials=["_Test Item"])
-
-		so = make_sales_order(item_code=fg_item, do_not_submit=True)
-		self.assertRaises(frappe.ValidationError, make_production_plan, so.name)
-
-		so.submit()
-		pp = make_production_plan(so.name)
-
-		self.assertEqual(pp.doctype, "Production Plan")
-		self.assertGreater(len(pp.get("po_items")), 0)
-		self.assertEqual(pp.get("po_items")[0].sales_order, so.name)
-		self.assertEqual(pp.get("sales_orders")[0].sales_order, so.name)
-		self.assertEqual(getdate(pp.get("sales_orders")[0].sales_order_date), getdate(so.transaction_date))
-		self.assertEqual(pp.get("sales_orders")[0].customer, so.customer)
-		self.assertEqual(pp.get("sales_orders")[0].grand_total, so.base_grand_total)
-
->>>>>>> fd71f59 (test: cancelling an order releases the components of a disabled bundle)
 	def test_make_sales_invoice(self):
 		so = make_sales_order(do_not_submit=True)
 
