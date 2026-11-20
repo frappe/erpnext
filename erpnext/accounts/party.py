@@ -998,6 +998,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 				filters={
 					"customer": party,
 					"expiry_date": (">=", getdate()),
+					"is_cancelled": 0,
 				},
 				group_by="company",
 				fields=["company", {"SUM": "loyalty_points", "as": "loyalty_points"}],

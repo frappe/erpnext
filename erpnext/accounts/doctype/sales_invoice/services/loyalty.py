@@ -46,10 +46,13 @@ class LoyaltyService:
 					"loyalty_program": lp_details.loyalty_program,
 					"loyalty_program_tier": lp_details.tier_name,
 					"customer": doc.customer,
+					"entry_type": "Earn",
 					"invoice_type": doc.doctype,
 					"invoice": doc.name,
 					"loyalty_points": points_earned,
 					"purchase_amount": eligible_amount,
+					"amount": flt(points_earned * lp_details.conversion_factor),
+					"earn_rate": collection_factor,
 					"expiry_date": add_days(doc.posting_date, lp_details.expiry_duration)
 					if lp_details.expiry_duration
 					else NO_EXPIRY_DATE,
@@ -98,6 +101,9 @@ class LoyaltyService:
 			doc.customer, doc.loyalty_program, doc.company, doc.posting_date
 		)
 		redemption_details = get_redemption_details(doc.customer, doc.loyalty_program, doc.company)
+		conversion_factor = flt(
+			frappe.get_cached_value("Loyalty Program", doc.loyalty_program, "conversion_factor")
+		)
 
 		points_to_redeem = doc.loyalty_points
 		for lp_entry in loyalty_point_entries:
@@ -112,11 +118,14 @@ class LoyaltyService:
 					"loyalty_program": doc.loyalty_program,
 					"loyalty_program_tier": lp_entry.loyalty_program_tier,
 					"customer": doc.customer,
+					"entry_type": "Redeem",
 					"invoice_type": doc.doctype,
 					"invoice": doc.name,
 					"redeem_against": lp_entry.name,
 					"loyalty_points": -1 * redeemed_points,
-					"purchase_amount": doc.grand_total,
+					# a redemption is not spend, so it must not move the customer's tier
+					"purchase_amount": 0,
+					"amount": flt(-1 * redeemed_points * conversion_factor),
 					"expiry_date": lp_entry.expiry_date,
 					"posting_date": doc.posting_date,
 				}

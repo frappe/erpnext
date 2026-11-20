@@ -69,6 +69,7 @@ def get_loyalty_details(
 			(LoyaltyPointEntry.customer == customer)
 			& (LoyaltyPointEntry.loyalty_program == loyalty_program)
 			& (LoyaltyPointEntry.posting_date <= expiry_date)
+			& (LoyaltyPointEntry.is_cancelled == 0)
 		)
 		.groupby(LoyaltyPointEntry.customer)
 	)
