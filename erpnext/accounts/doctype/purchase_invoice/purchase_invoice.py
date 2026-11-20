@@ -511,6 +511,7 @@ class PurchaseInvoice(BuyingController):
 			if not for_validate:
 				if tax_withholding_category or tax_withholding_group:
 					self.apply_tds = 1
+					self.set_onload("apply_tds", 1)
 
 		super().set_missing_values(for_validate)
 
