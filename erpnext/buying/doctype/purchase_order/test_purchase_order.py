@@ -593,6 +593,25 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(po.items[0].last_purchase_rate, 120)
 
+	def test_last_purchase_rate_from_a_newer_purchase_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		item = make_item("_Test Last Purchase Rate From Invoice", {"is_stock_item": 1}).name
+		create_purchase_order(
+			item_code=item,
+			rate=100,
+			transaction_date=add_days(nowdate(), -10),
+			schedule_date=add_days(nowdate(), 1),
+		)
+		for days, rate in ((-1, 150), (-5, 120)):
+			invoice = make_purchase_invoice(
+				item_code=item, rate=rate, posting_date=add_days(nowdate(), days), do_not_save=True
+			)
+			invoice.set_posting_time = 1
+			invoice.submit()
+
+		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 150)
+
 	@change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
 		po = make_purchase_order(make_material_request(qty=5).name)
