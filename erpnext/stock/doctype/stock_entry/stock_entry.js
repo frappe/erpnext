@@ -1117,7 +1117,6 @@ frappe.ui.form.on("Stock Entry", {
 			});
 		}
 	},
-<<<<<<< HEAD
 
 	process_loss_qty(frm) {
 		if (frm.doc.process_loss_qty) {
@@ -1138,20 +1137,6 @@ frappe.ui.form.on("Stock Entry", {
 			refresh_field("process_loss_qty");
 		}
 	},
-
-	set_fg_completed_qty(frm) {
-		let fg_completed_qty = 0;
-
-		frm.doc.items.forEach((item) => {
-			if (item.is_finished_item) {
-				fg_completed_qty += flt(item.transfer_qty + frm.doc.process_loss_qty);
-			}
-		});
-
-		frm.set_value("fg_completed_qty", fg_completed_qty);
-	},
-=======
->>>>>>> a4f4ba6 (fix(stock): keep the rows and Finished Good Quantity when a finished good row is duplicated)
 });
 
 frappe.ui.form.on("Stock Entry Detail", {
