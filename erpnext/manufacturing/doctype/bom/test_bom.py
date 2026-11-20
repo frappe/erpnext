@@ -1896,6 +1896,36 @@ class TestBOM(ERPNextTestSuite):
 		sub_bom.is_active = 0
 		self.assertRaisesRegex(frappe.ValidationError, "linked with other BOMs", sub_bom.save)
 
+	def test_materials_imported_for_a_step_bom_are_in_stock_uom(self):
+		fg_item, sfg_item, _ = make_stage_items()
+		raw_material = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		step_bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"company": "_Test Company",
+				"item": sfg_item,
+				"quantity": 1,
+				"items": [{"item_code": raw_material, "qty": 1, "uom": "Box"}],
+			}
+		)
+		step_bom.insert()
+		step_bom.submit()
+
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "bom_no": step_bom.name},
+				{"operation": "_Test SFG Final Operation", "is_final_finished_good": 1},
+			],
+		)
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+
+		row = next(row for row in bom.items if row.item_code == raw_material)
+		self.assertEqual((row.qty, row.conversion_factor, row.stock_qty), (12, 1, 12))
+
 	def test_sub_bom_that_only_consumes_the_row_item_is_rejected(self):
 		raw_material = make_item(properties={"is_stock_item": 1}).name
 		sub_assembly = make_item(properties={"is_stock_item": 1}).name
