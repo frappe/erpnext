@@ -15,7 +15,9 @@ frappe.ui.form.on("Stock Entry", {
 			if (!doc.s_warehouse) {
 				return "blue";
 			} else {
-				return doc.qty <= doc.actual_qty ? "green" : "orange";
+				return flt(doc.transfer_qty, precision("transfer_qty", doc)) <= doc.actual_qty
+					? "green"
+					: "orange";
 			}
 		});
 
