@@ -2409,8 +2409,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			const rate =
 				(flt(item.rate) * flt(this.frm.doc.conversion_rate || 1)) /
 				(flt(item.conversion_factor) || 1);
+<<<<<<< HEAD
 			item.gross_profit = flt((rate - item.valuation_rate) * item.stock_qty, precision("amount", item));
 >>>>>>> b09add1 (fix(selling): compare the rate per stock UOM with the valuation rate in the form's gross profit)
+=======
+			item.gross_profit = flt(
+				(rate - item.valuation_rate) * item.stock_qty,
+				precision("gross_profit", item)
+			);
+>>>>>>> 5a4920d (fix(selling): round the form's gross profit to its own precision)
 		}
 	}
 
