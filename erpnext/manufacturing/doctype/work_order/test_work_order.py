@@ -6581,6 +6581,30 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture.submit()
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_backflush_rounds_the_rm_share_before_rounding_it_up(self):
+		rm_item = make_item("_Test Share Precision RM", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item("_Test Share Precision FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=10)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=3, basic_rate=100
+		)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=0.3,
+			source_warehouse="_Test Warehouse - _TC",
+			stock_uom="Kg",
+		)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0.3)).submit()
+
+		# 3 x 0.1 / 0.3 is 1.0000000000000002 in floats
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 0.1))
+		row = next(row for row in manufacture.items if row.item_code == rm_item)
+		self.assertEqual(row.qty, 1)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
 	)
