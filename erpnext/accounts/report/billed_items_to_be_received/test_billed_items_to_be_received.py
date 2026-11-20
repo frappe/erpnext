@@ -148,6 +148,9 @@ class TestBilledItemsToBeReceived(FrappeTestCase):
 		self.assertEqual((receipt.items[0].qty, receipt.items[0].received_qty), (0.9, 0.9))
 		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(1, 0, 0.1)])
 
+		receipt.submit()
+		self.assertFalse(self.get_rows_for(self.run_report(), pi.name))
+
 	def test_service_rows_are_not_listed(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier", item_code="_Test Non Stock Item", qty=1, rate=300, update_stock=0
