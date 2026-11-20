@@ -565,8 +565,10 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 
 			if doc.sender:
 				sender_email = frappe.db.get_value("Email Account", doc.sender, "email_id")
-			else:
+			elif frappe.session.user not in frappe.STANDARD_USERS:
 				sender_email = get_email_address()
+			else:
+				sender_email = None
 
 			frappe.enqueue(
 				queue="short",

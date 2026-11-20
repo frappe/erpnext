@@ -301,6 +301,24 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 
 			self.assertEqual(enqueue.call_args.kwargs["sender"], user.email)
 
+	def test_statements_sent_as_administrator_go_out_from_the_outgoing_account(self):
+		process_soa = create_process_soa(
+			name="_Test Statement Admin Sender",
+			customers=[{"customer": "_Test Customer", "billing_email": "billing@example.com"}],
+		)
+		with (
+			patch(
+				"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.get_report_pdf",
+				return_value={"_Test Customer": b"%PDF"},
+			),
+			patch("frappe.enqueue") as enqueue,
+			self.set_user("Administrator"),
+		):
+			send_emails(process_soa.name)
+
+			# scheduled runs are Administrator; frappe picks the default outgoing account for None
+			self.assertIsNone(enqueue.call_args.kwargs["sender"])
+
 
 def create_process_soa(**args):
 	args = frappe._dict(args)
