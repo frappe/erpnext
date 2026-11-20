@@ -92,6 +92,7 @@ def _add_operation_workstation_costs(stock_entry, work_order, row, op_expense_ac
 		"Workstation Cost",
 		fields=["operating_component", "operating_cost"],
 		filters={"parent": row.workstation, "parenttype": "Workstation"},
+		order_by="idx",
 	)
 	total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
 	if not (flt(row.actual_operating_cost) and total_component_rate):
