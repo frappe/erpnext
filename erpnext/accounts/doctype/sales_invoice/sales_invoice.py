@@ -291,6 +291,10 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def validate(self):
+		# Only POS consolidation may mark an invoice as consolidated.
+		if not self.flags.is_consolidated:
+			self.is_consolidated = 0
+
 		self.validate_auto_set_posting_time()
 		super().validate()
 
@@ -1201,7 +1205,7 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		# Consolidation posts payments already accepted on submitted POS invoices.
-		if not self.get("is_consolidated"):
+		if not self.flags.is_consolidated:
 			for payment in self.get("payments") or []:
 				validate_enabled_mode_of_payment(payment.mode_of_payment)
 
