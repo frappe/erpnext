@@ -135,10 +135,10 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		)
 		self.assertEqual(True, lpe is not None)
 
-		# cancelling sales invoice
+		# cancelling sales invoice keeps the row and flags it
 		si.cancel()
-		lpe = frappe.db.exists("Loyalty Point Entry", lpe.name)
-		self.assertEqual(True, (lpe is None))
+		self.assertEqual(frappe.db.get_value("Loyalty Point Entry", lpe.name, "is_cancelled"), 1)
+		self.assertTrue(frappe.db.exists("Loyalty Point Entry", {"reversal_of": lpe.name}))
 
 	def test_sales_invoice_return(self):
 		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")

@@ -11,6 +11,12 @@ exclude_from_linked_with = True
 # Only these rows count towards the spend that decides a customer's tier.
 SPEND_ENTRY_TYPES = ("Earn", "Earn Reversal")
 
+# Type of the row that cancels a row of this type. Other types keep their own type.
+REVERSE_ENTRY_TYPES = {"Earn": "Earn Reversal", "Redeem": "Redeem Reversal"}
+
+# Fields a reverse row takes from the row it cancels, with the opposite sign.
+SIGNED_FIELDS = ("loyalty_points", "purchase_amount", "amount")
+
 
 class LoyaltyPointEntry(Document):
 	# begin: auto-generated types
@@ -55,6 +61,67 @@ class LoyaltyPointEntry(Document):
 			return "Redeem"
 
 		return "Earn" if self.invoice else "Adjustment"
+
+
+def add_loyalty_point_entry(values: dict) -> LoyaltyPointEntry:
+	"""Add one row to the points ledger. Rows are never changed or deleted after this."""
+	entry = frappe.get_doc({"doctype": "Loyalty Point Entry", **values})
+	entry.flags.ignore_permissions = True
+	entry.insert()
+	return entry
+
+
+def make_reverse_entries(voucher_type: str, voucher_no: str) -> int:
+	"""Cancel the live rows of a voucher the way GL Entry does.
+
+	Flag each row as cancelled and add a flagged row with the opposite points. Readers that skip
+	cancelled rows see neither row, and a raw sum of all rows stays correct.
+	Return the number of rows cancelled.
+	"""
+	entries = frappe.get_all(
+		"Loyalty Point Entry",
+		filters={"invoice_type": voucher_type, "invoice": voucher_no, "is_cancelled": 0},
+		fields=["*"],
+	)
+	if not entries:
+		return 0
+
+	lpe = frappe.qb.DocType("Loyalty Point Entry")
+	(
+		frappe.qb.update(lpe).set(lpe.is_cancelled, 1).where(lpe.name.isin([entry.name for entry in entries]))
+	).run()
+
+	for entry in entries:
+		add_loyalty_point_entry(get_reverse_entry(entry))
+
+	return len(entries)
+
+
+def get_reverse_entry(entry: dict) -> dict:
+	values = {
+		field: entry[field]
+		for field in (
+			"company",
+			"customer",
+			"loyalty_program",
+			"loyalty_program_tier",
+			"invoice_type",
+			"invoice",
+			"redeem_against",
+			"earn_rate",
+			"expiry_date",
+			"posting_date",
+		)
+	}
+	values.update({field: -1 * (entry[field] or 0) for field in SIGNED_FIELDS})
+	values.update(
+		{
+			"entry_type": REVERSE_ENTRY_TYPES.get(entry.entry_type, entry.entry_type),
+			"reversal_of": entry.name,
+			"is_cancelled": 1,
+		}
+	)
+	return values
 
 
 def get_loyalty_point_entries(customer, loyalty_program, company, expiry_date=None):

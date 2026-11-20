@@ -7,6 +7,10 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, getdate
 
+from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry import (
+	add_loyalty_point_entry,
+	make_reverse_entries,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 )
@@ -39,9 +43,8 @@ class LoyaltyService:
 			collection_factor = lp_details.collection_factor if lp_details.collection_factor else 1.0
 			points_earned = cint(eligible_amount / collection_factor)
 
-			entry = frappe.get_doc(
+			add_loyalty_point_entry(
 				{
-					"doctype": "Loyalty Point Entry",
 					"company": doc.company,
 					"loyalty_program": lp_details.loyalty_program,
 					"loyalty_program_tier": lp_details.tier_name,
@@ -59,35 +62,37 @@ class LoyaltyService:
 					"posting_date": doc.posting_date,
 				}
 			)
-			entry.flags.ignore_permissions = 1
-			entry.save()
 			self._set_loyalty_program_tier()
 
-	def delete_loyalty_point_entry(self) -> None:
+	def reverse_loyalty_point_entries(self) -> None:
+		"""Cancel the invoice's points rows with reverse rows. No row is deleted."""
 		doc = self.doc
-		lp_entry = frappe.db.get_all(
-			"Loyalty Point Entry", filters={"invoice": doc.name, "loyalty_points": (">", 0)}, fields=["name"]
-		)
-
-		if not lp_entry:
-			return
-
-		against_lp_entry = frappe.db.get_all(
+		earned_entries = frappe.get_all(
 			"Loyalty Point Entry",
-			filters={"redeem_against": lp_entry[0].name},
-			fields=["name", "invoice"],
+			filters={
+				"invoice_type": doc.doctype,
+				"invoice": doc.name,
+				"loyalty_points": (">", 0),
+				"is_cancelled": 0,
+			},
+			pluck="name",
 		)
 
-		if against_lp_entry:
-			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
-			frappe.throw(
-				_(
-					"{0} cannot be cancelled since the Loyalty Points earned has been redeemed. "
-					"First cancel the {1} No {2}"
-				).format(doc.doctype, doc.doctype, invoice_list)
+		if earned_entries:
+			redeemed_by = frappe.get_all(
+				"Loyalty Point Entry",
+				filters={"redeem_against": ("in", earned_entries), "is_cancelled": 0},
+				pluck="invoice",
 			)
-		else:
-			frappe.db.delete("Loyalty Point Entry", filters={"invoice": doc.name})
+			if redeemed_by:
+				frappe.throw(
+					_(
+						"{0} cannot be cancelled since the Loyalty Points earned has been redeemed. "
+						"First cancel the {1} No {2}"
+					).format(doc.doctype, doc.doctype, ", ".join(redeemed_by))
+				)
+
+		if make_reverse_entries(doc.doctype, doc.name):
 			self._set_loyalty_program_tier()
 
 	def apply_loyalty_points(self) -> None:
@@ -111,9 +116,8 @@ class LoyaltyService:
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			redeemed_points = min(available_points, points_to_redeem)
-			entry = frappe.get_doc(
+			add_loyalty_point_entry(
 				{
-					"doctype": "Loyalty Point Entry",
 					"company": doc.company,
 					"loyalty_program": doc.loyalty_program,
 					"loyalty_program_tier": lp_entry.loyalty_program_tier,
@@ -130,8 +134,6 @@ class LoyaltyService:
 					"posting_date": doc.posting_date,
 				}
 			)
-			entry.flags.ignore_permissions = 1
-			entry.save()
 			points_to_redeem -= redeemed_points
 			if points_to_redeem < 1:
 				break

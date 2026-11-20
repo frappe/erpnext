@@ -254,7 +254,7 @@ class POSInvoice(SalesInvoice):
 			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			LoyaltyService(self).apply_loyalty_points()
@@ -306,10 +306,10 @@ class POSInvoice(SalesInvoice):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
 		if not self.is_return and self.loyalty_program:
-			LoyaltyService(self).delete_loyalty_point_entry()
+			LoyaltyService(self).reverse_loyalty_point_entries()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
 
 		self.db_set("status", "Cancelled")

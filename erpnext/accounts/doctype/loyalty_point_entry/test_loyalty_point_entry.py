@@ -152,6 +152,47 @@ class TestLoyaltyPointEntry(ERPNextTestSuite):
 			[{"entry_type": "Earn", "purchase_amount": 93}, {"entry_type": "Redeem", "purchase_amount": 0}],
 		)
 
+	def test_cancel_keeps_rows_and_adds_reverse_rows(self):
+		self.create_test_invoice()
+		redeem_invoice = self.create_test_invoice(redeem=7)
+		rows = frappe.get_all("Loyalty Point Entry", filters={"invoice": redeem_invoice.name}, pluck="name")
+
+		redeem_invoice.cancel()
+
+		for name in rows:
+			self.assertEqual(frappe.db.get_value("Loyalty Point Entry", name, "is_cancelled"), 1)
+			reverse = frappe.get_doc("Loyalty Point Entry", {"reversal_of": name})
+			self.assertEqual(reverse.is_cancelled, 1)
+			self.assertEqual(
+				reverse.loyalty_points, -frappe.db.get_value("Loyalty Point Entry", name, "loyalty_points")
+			)
+
+		self.assertEqual(
+			frappe.get_all(
+				"Loyalty Point Entry",
+				filters={"invoice": redeem_invoice.name},
+				fields=[{"SUM": "loyalty_points", "as": "points"}],
+			)[0].points,
+			0,
+		)
+		self.assertEqual(self.get_balance(), 10)
+
+	def test_cancel_invoice_paid_with_points_restores_them(self):
+		self.create_test_invoice()
+		# 100 - 7 earns 0 points, so the invoice has only a redemption to undo
+		redeem_invoice = self.create_test_invoice(redeem=7)
+
+		redeem_invoice.cancel()
+
+		details = get_loyalty_details(self.customer_name, self.loyalty_program_name, company="_Test Company")
+		self.assertEqual(details.loyalty_points, 10)
+
+	def test_cancel_of_redeemed_earning_is_refused(self):
+		earn_invoice = self.create_test_invoice()
+		self.create_test_invoice(redeem=7)
+
+		self.assertRaisesRegex(frappe.ValidationError, "has been redeemed", earn_invoice.cancel)
+
 	def get_balance(self):
 		lpe = frappe.qb.DocType("Loyalty Point Entry")
 		return (

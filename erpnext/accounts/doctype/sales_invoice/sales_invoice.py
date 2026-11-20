@@ -530,7 +530,7 @@ class SalesInvoice(SellingController):
 			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
-			LoyaltyService(against_si_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_si_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_si_doc).make_loyalty_point_entry()
 		if self.redeem_loyalty_points and not self.is_consolidated and self.loyalty_points:
 			LoyaltyService(self).apply_loyalty_points()
@@ -596,10 +596,10 @@ class SalesInvoice(SellingController):
 			self.update_project()
 
 		if not self.is_return and not self.is_consolidated and self.loyalty_program:
-			LoyaltyService(self).delete_loyalty_point_entry()
+			LoyaltyService(self).reverse_loyalty_point_entries()
 		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
-			LoyaltyService(against_si_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_si_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_si_doc).make_loyalty_point_entry()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
