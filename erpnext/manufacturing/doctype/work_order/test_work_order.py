@@ -3683,7 +3683,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		bom = make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=10)
 		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=40)
 
-		def disassembled_rm_qty(manufacture_qtys, source_stock_entry=None):
+		def make_work_order(manufacture_qtys):
 			work_order = make_wo_order_test_record(
 				production_item=fg_item,
 				bom_no=bom.name,
@@ -3695,18 +3695,20 @@ class TestWorkOrder(ERPNextTestSuite):
 			for qty in manufacture_qtys:
 				manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", qty))
 				manufacture.submit()
+			return work_order.name, manufacture.name
 
-			if source_stock_entry:
-				source_stock_entry = manufacture.name
-				self.assertEqual(get_disassembly_available_qty(manufacture.name), 9)
-
+		def disassembled_rm_qty(work_order, source_stock_entry=None):
 			disassembly = frappe.get_doc(
-				make_stock_entry(work_order.name, "Disassemble", 9, source_stock_entry=source_stock_entry)
+				make_stock_entry(work_order, "Disassemble", 9, source_stock_entry=source_stock_entry)
 			)
 			return sum(row.qty for row in disassembly.items if row.item_code == rm_item)
 
-		self.assertEqual(disassembled_rm_qty([10], source_stock_entry=True), 10)
-		self.assertEqual(disassembled_rm_qty([5, 5]), 10)
+		work_order, manufacture = make_work_order([10])
+		self.assertEqual(get_disassembly_available_qty(manufacture), 9)
+		self.assertEqual(disassembled_rm_qty(work_order, manufacture), 10)
+
+		work_order, _ = make_work_order([5, 5])
+		self.assertEqual(disassembled_rm_qty(work_order), 10)
 
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
