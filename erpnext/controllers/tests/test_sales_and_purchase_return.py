@@ -400,18 +400,18 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 			properties={
 				"is_stock_item": 1,
 				"stock_uom": "Nos",
-				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
 			}
 		).name
 		pi = make_purchase_invoice(item_code=item_code, update_stock=1, do_not_submit=True)
 		pi.items[0].update(
 			{
 				"uom": "Box",
-				"conversion_factor": 10,
+				"conversion_factor": 12,
 				"qty": 1,
 				"received_qty": 1,
-				"rate": 1000,
-				"price_list_rate": 1000,
+				"rate": 1200,
+				"price_list_rate": 1200,
 			}
 		)
 		pi.submit()
@@ -430,7 +430,8 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		debit_note.submit()
 
 		row = make_return_doc(pi.doctype, pi.name).items[0]
-		self.assertEqual((row.uom, row.qty, row.received_qty, row.rate), ("Nos", -5, -5, 100))
+		# the 7 Nos left are no whole Box, so they are mapped in stock UOM
+		self.assertEqual((row.uom, row.qty, row.received_qty, row.rate), ("Nos", -7, -7, 100))
 
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
