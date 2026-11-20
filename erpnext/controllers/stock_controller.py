@@ -303,7 +303,7 @@ class StockController(AccountsController):
 
 		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
-			return flt(self.get_posted_return_qty(row, warehouse)) or stock_qty
+			return flt(self.get_posted_return_qty(row, warehouse))
 
 		left = self.get_row_left_to_return(row, warehouse)
 		if flt(left.stock_qty) <= 0:
