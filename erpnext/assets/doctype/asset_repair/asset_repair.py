@@ -26,6 +26,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.stock.serial_batch_bundle import set_bundle_header_values
 
 
 class AssetRepair(AccountsController):
@@ -360,9 +361,7 @@ class AssetRepair(AccountsController):
 				"voucher_type": "Stock Entry",
 			}
 
-			frappe.db.set_value(
-				"Serial and Batch Bundle", stock_item.serial_and_batch_bundle, values_to_update
-			)
+			set_bundle_header_values(stock_item.serial_and_batch_bundle, values_to_update)
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_repair_cost) > 0:

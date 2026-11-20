@@ -55,6 +55,7 @@ from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_empty_batches_based_work_order,
 	get_serial_or_batch_items,
+	set_entry_header_values,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import _get_incoming_rate, get_bin, get_combine_datetime
@@ -745,13 +746,13 @@ class StockEntry(StockController):
 				)
 
 				doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-				doc.db_set(
-					{
-						"voucher_type": "Asset Repair",
-						"voucher_no": self.asset_repair,
-						"voucher_detail_no": voucher_detail_no,
-					}
-				)
+				values = {
+					"voucher_type": "Asset Repair",
+					"voucher_no": self.asset_repair,
+					"voucher_detail_no": voucher_detail_no,
+				}
+				doc.db_set(values)
+				set_entry_header_values(doc.name, values)
 
 	def set_transfer_qty(self):
 		self.validate_qty_is_not_zero()

@@ -294,7 +294,9 @@ def cancel_serial_and_batch_bundles(voucher_type, voucher_no):
 	).run()
 
 	sabb_entry = frappe.qb.DocType("Serial and Batch Entry")
-	frappe.qb.update(sabb_entry).set(sabb_entry.docstatus, 2).where(sabb_entry.parent.isin(bundles)).run()
+	frappe.qb.update(sabb_entry).set(sabb_entry.is_cancelled, 1).set(sabb_entry.docstatus, 2).where(
+		sabb_entry.parent.isin(bundles)
+	).run()
 
 	# same as SerialandBatchBundle.before_cancel
 	sle = frappe.qb.DocType("Stock Ledger Entry")
