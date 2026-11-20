@@ -370,14 +370,14 @@ class ValuationFixTestCase(ERPNextTestSuite):
 
 		return item
 
-	def make_standard_cost_item(self, **properties) -> str:
+	def make_standard_cost_item(self, rate=100, **properties) -> str:
 		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
 			create_item_standard_cost,
 			create_standard_cost_item,
 		)
 
 		item = create_standard_cost_item(**properties).name
-		create_item_standard_cost(item, rate=100, company=COMPANY, effective_date=last_year(70))
+		create_item_standard_cost(item, rate=rate, company=COMPANY, effective_date=last_year(70))
 		return item
 
 	def make_standard_cost_balance_qty_wrong(self) -> str:
@@ -560,6 +560,23 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		self.corrupt_entry(receipt.name, stock_value_difference=15, stock_value=21)
 
 		# the ledger rounds the value after every counted-in row: 16, not 16.01
+		self.fix_by_adjustment_entry(item)
+
+	def test_standard_cost_batches_fixed_by_adjustment_entry(self):
+		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import ensure_ppv_account
+
+		ensure_ppv_account(COMPANY)
+		item = self.make_standard_cost_item(
+			rate=1.001, has_batch_no=1, create_new_batch=1, batch_number_series="SVA-SCB-.#####"
+		)
+		for days in range(60, 50, -1):
+			make_stock_entry(
+				item_code=item, target=WAREHOUSE, qty=3, basic_rate=1.001, posting_date=last_year(days)
+			)
+		issue = make_stock_entry(item_code=item, source=WAREHOUSE, qty=1, posting_date=last_year(50))
+		self.corrupt_entry(issue.name, stock_value_difference=-6, stock_value=24.03)
+
+		# a row per batch, but the ledger values the whole balance at the standard rate: 29.03, not 29
 		self.fix_by_adjustment_entry(item)
 
 	def test_serial_no_counted_twice_fixed_by_adjustment_entry(self):
