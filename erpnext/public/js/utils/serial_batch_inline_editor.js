@@ -1458,6 +1458,7 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 		);
 
 		row[bundle_field] = summary.bundle;
+		delete pending_map[key];
 		let qty_field = cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty";
 		let return_cap = await erpnext.stock.get_sbie_return_cap(frm.doc, row, qty_field);
 		row[qty_field] = erpnext.stock.get_sbie_row_qty(
@@ -1470,7 +1471,6 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 		if (row.received_qty != null) {
 			row.received_qty = flt(row.qty) + flt(row.rejected_qty);
 		}
-		delete pending_map[key];
 	}
 };
 
