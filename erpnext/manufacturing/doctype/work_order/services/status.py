@@ -546,23 +546,32 @@ class StatusService:
 
 	def update_work_order_qty_in_combined_so(self):
 		"""Spread each combined row's Work Order qty over its Sales Order lines, summed per line,
-		as a bundle line takes from one row per component."""
+		as a bundle line takes from one row per component. Only this Work Order's lines are written."""
 		prod_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
+		item_reference = frappe.get_value(
+			"Production Plan Item", self.doc.production_plan_item, "sales_order_item"
+		)
 		ordered_qty = self._ordered_qty_by_item_reference(prod_plan)
 		allocated_qty = defaultdict(float)
+		lines = set()
 		for reference in prod_plan.prod_plan_references:
 			qty = min(flt(reference.qty), ordered_qty[reference.item_reference])
 			ordered_qty[reference.item_reference] -= qty
 			allocated_qty[reference.sales_order_item] += qty
+			if reference.item_reference == item_reference:
+				lines.add(reference.sales_order_item)
 
-		bundle_qty = self._bundle_qty_by_line(list(allocated_qty))
+		if not lines:
+			return
+
+		bundle_qty = self._bundle_qty_by_line(list(lines))
 		precision = frappe.get_precision("Sales Order Item", "work_order_qty")
-		for sales_order_item, qty in allocated_qty.items():
+		for sales_order_item in lines:
 			frappe.db.set_value(
 				"Sales Order Item",
 				sales_order_item,
 				"work_order_qty",
-				flt(qty / (bundle_qty.get(sales_order_item) or 1), precision),
+				flt(allocated_qty[sales_order_item] / (bundle_qty.get(sales_order_item) or 1), precision),
 			)
 
 	@staticmethod
