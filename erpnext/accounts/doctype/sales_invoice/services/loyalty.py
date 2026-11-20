@@ -37,6 +37,8 @@ class LoyaltyService:
 		)
 		if (
 			lp_details
+			# points of another company's program can never be redeemed
+			and lp_details.company == doc.company
 			and getdate(lp_details.from_date) <= getdate(doc.posting_date)
 			and (not lp_details.to_date or getdate(lp_details.to_date) >= getdate(doc.posting_date))
 		):
@@ -63,6 +65,16 @@ class LoyaltyService:
 				}
 			)
 			self._set_loyalty_program_tier()
+
+	def set_loyalty_program(self) -> None:
+		"""Enrol the customer in the single auto opt-in program of the invoice's company.
+
+		The customer has no company, so this is the first point where the company is known.
+		"""
+		doc = self.doc
+		programs = get_loyalty_programs(doc.customer, company=doc.company)
+		if len(programs) == 1:
+			doc.loyalty_program = programs[0]
 
 	def reverse_loyalty_point_entries(self) -> None:
 		"""Cancel the invoice's points rows with reverse rows. No row is deleted."""
@@ -162,7 +174,7 @@ class LoyaltyService:
 		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
 
 
-def get_loyalty_programs(customer: str, set_single_program: bool = True) -> list:
+def get_loyalty_programs(customer: str, set_single_program: bool = True, company: str | None = None) -> list:
 	"""Return applicable loyalty programs for the customer."""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs as _get
 
@@ -170,7 +182,7 @@ def get_loyalty_programs(customer: str, set_single_program: bool = True) -> list
 	if customer_doc.loyalty_program:
 		return [customer_doc.loyalty_program]
 
-	lp_details = _get(customer_doc)
+	lp_details = _get(customer_doc, company=company)
 
 	if set_single_program and len(lp_details) == 1:
 		customer_doc.db_set("loyalty_program", lp_details[0])

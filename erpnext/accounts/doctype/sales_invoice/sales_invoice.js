@@ -515,6 +515,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_loyalty_programs",
 				args: {
 					customer: this.frm.doc.customer,
+					company: this.frm.doc.company,
 				},
 				callback: function (r) {
 					if (r.message && r.message.length > 1) {

@@ -398,6 +398,9 @@ class SalesInvoice(SellingController):
 		if self.is_pos and self.is_return:
 			POSService(self).verify_payment_amount_is_negative()
 
+		if self.customer and not (self.loyalty_program or self.is_return or self.is_consolidated):
+			LoyaltyService(self).set_loyalty_program()
+
 		if self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
@@ -1375,11 +1378,13 @@ def get_bank_cash_account(mode_of_payment: str, company: str) -> dict:
 
 
 @frappe.whitelist()
-def get_loyalty_programs(customer: str) -> list:
+def get_loyalty_programs(customer: str, company: str | None = None) -> list:
 	from .services.loyalty import get_loyalty_programs as _get
 
 	frappe.has_permission("Customer", "read", customer, throw=True)
-	return _get(customer, set_single_program=frappe.has_permission("Customer", "write", customer))
+	return _get(
+		customer, set_single_program=frappe.has_permission("Customer", "write", customer), company=company
+	)
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

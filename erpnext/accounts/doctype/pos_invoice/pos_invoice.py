@@ -625,6 +625,9 @@ class POSInvoice(SalesInvoice):
 		self.outstanding_amount = flt(total - paid_amount, precision) if total > paid_amount else 0
 
 	def validate_loyalty_transaction(self):
+		if self.customer and not (self.loyalty_program or self.is_return):
+			LoyaltyService(self).set_loyalty_program()
+
 		if self.redeem_loyalty_points and (
 			not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center
 		):

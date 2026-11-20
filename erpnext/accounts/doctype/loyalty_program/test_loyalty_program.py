@@ -309,6 +309,67 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		program = make_loyalty_program(expiry_duration=0, to_date=today(), conversion_factor=0).insert()
 		self.assertTrue(program.name)
 
+	@patch("erpnext.selling.doctype.customer.customer.get_default_company", return_value="_Test Company")
+	def test_auto_opt_in_skips_other_company_program(self, _):
+		frappe.db.set_value("Loyalty Program", {"company": "_Test Company"}, "auto_opt_in", 0)
+		make_loyalty_program(
+			loyalty_program_name="_Test Other Company Rewards",
+			company="_Test Company 1",
+			auto_opt_in=1,
+			cost_center="Main - _TC1",
+			expense_account=None,
+		).insert()
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Loyalty Other Company Customer",
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+			}
+		).insert()
+
+		self.assertFalse(customer.loyalty_program)
+
+	@patch("erpnext.selling.doctype.customer.customer.get_default_company", return_value="_Test Company 1")
+	def test_invoice_enrols_customer_in_program_of_its_company(self, _):
+		frappe.db.set_value("Loyalty Program", "Test Multiple Loyalty", "auto_opt_in", 0)
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Loyalty Invoice Opt In Customer",
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+			}
+		).insert()
+		# saved by a user of another company, so not enrolled yet
+		self.assertFalse(customer.loyalty_program)
+
+		si = create_sales_invoice_record()
+		si.customer = customer.name
+		si.insert()
+		si.submit()
+
+		self.assertEqual(si.loyalty_program, "Test Single Loyalty")
+		self.assertEqual(frappe.db.get_value("Customer", customer.name, "loyalty_program"), "Test Single Loyalty")
+		self.assertEqual(frappe.db.get_value("Loyalty Point Entry", {"invoice": si.name}, "loyalty_points"), 10)
+
+	def test_invoice_of_other_company_earns_no_points(self):
+		program = make_loyalty_program(
+			loyalty_program_name="_Test Other Company Rewards",
+			company="_Test Company 1",
+			cost_center="Main - _TC1",
+			expense_account=None,
+		).insert()
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", program.name)
+
+		si = create_sales_invoice_record()
+		si.insert()
+		si.submit()
+
+		self.assertEqual(si.loyalty_program, program.name)
+		self.assertFalse(frappe.db.exists("Loyalty Point Entry", {"invoice": si.name}))
+
 
 def get_points_earned(self):
 	def get_returned_amount():
