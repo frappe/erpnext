@@ -2628,11 +2628,24 @@ class TestProductionPlan(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reserved_work_order_output_is_not_counted_twice(self):
+		sales_order = self.make_sales_order_with_reserved_work_order_output(
+			"_Test FG For Reserved WO Output", link_sales_order_item=True
+		)
+		self.assert_plan_pulls_the_unmade_qty(sales_order)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_output_of_work_order_without_sales_order_item_still_counts(self):
+		sales_order = self.make_sales_order_with_reserved_work_order_output(
+			"_Test FG For Unlinked WO Output", link_sales_order_item=False
+		)
+		self.assert_plan_pulls_the_unmade_qty(sales_order)
+
+	def make_sales_order_with_reserved_work_order_output(self, fg_item, link_sales_order_item):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		warehouse = "_Test Warehouse - _TC"
-		fg_item = make_item("_Test FG For Reserved WO Output", {"is_stock_item": 1}).name
-		raw_material = make_item("_Test RM For Reserved WO Output", {"is_stock_item": 1}).name
+		fg_item = make_item(fg_item, {"is_stock_item": 1}).name
+		raw_material = make_item(f"{fg_item} RM", {"is_stock_item": 1}).name
 		bom = make_bom(item=fg_item, raw_materials=[raw_material])
 		make_stock_entry(item_code=raw_material, target=warehouse, qty=6, basic_rate=100)
 		sales_order = make_sales_order(item_code=fg_item, qty=10, warehouse=warehouse)
@@ -2649,13 +2662,16 @@ class TestProductionPlan(ERPNextTestSuite):
 			reserve_stock=1,
 			do_not_save=1,
 		)
-		work_order.sales_order_item = sales_order.items[0].name
+		if link_sales_order_item:
+			work_order.sales_order_item = sales_order.items[0].name
 		work_order.submit()
 		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 6)).submit()
 		self.assertEqual(
 			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "stock_reserved_qty"), 6
 		)
+		return sales_order
 
+	def assert_plan_pulls_the_unmade_qty(self, sales_order):
 		plan = create_production_plan(
 			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
 		)
