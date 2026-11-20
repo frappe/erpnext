@@ -3114,7 +3114,10 @@ class TestWorkOrder(FrappeTestCase):
 		work_order, _ = make_work_order([5, 5])
 		self.assertEqual(disassembled_rm_qty(work_order), 10)
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "BOM", "transfer_extra_materials_percentage": 50},
+	)
 	def test_work_order_details_propose_the_qty_for_the_purpose(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry import get_work_order_details
 
@@ -3144,6 +3147,10 @@ class TestWorkOrder(FrappeTestCase):
 		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5)).submit()
 		self.assertEqual(proposed_qty(work_order, "Manufacture"), 5)
 		self.assertEqual(proposed_qty(work_order, "Disassemble"), 4.5)
+
+		work_order = new_work_order()
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 15)).submit()
+		self.assertEqual(proposed_qty(work_order, "Manufacture"), 10)
 
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
