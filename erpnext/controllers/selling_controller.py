@@ -989,9 +989,10 @@ class SellingController(StockController):
 	def set_gross_profit(self):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
+				# stock_uom_rate is not reset yet when an item is selected
+				rate = flt(item.rate) * flt(self.conversion_rate) / (flt(item.conversion_factor) or 1)
 				item.gross_profit = flt(
-					(flt(item.stock_uom_rate) * flt(self.conversion_rate) - flt(item.valuation_rate))
-					* item.stock_qty,
+					(rate - flt(item.valuation_rate)) * item.stock_qty,
 					self.precision("gross_profit", item),
 				)
 
