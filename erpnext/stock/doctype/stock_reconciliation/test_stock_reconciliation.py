@@ -2465,7 +2465,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			),
 		).name
 
-	def test_zero_rate_kept_on_a_row_with_a_selected_batch_bundle(self):
+	def _save_zero_rate_reco_with_batch_bundle(self, allow_zero_valuation_rate):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item_code = self._make_batch_item("Test Stock Reco Zero Rate Batch Bundle", "TSRZRBB-.#####")
@@ -2481,11 +2481,22 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			reconcile_all_serial_batch=0,
 			do_not_save=1,
 		)
-		sr.items[0].allow_zero_valuation_rate = 1
+		sr.items[0].allow_zero_valuation_rate = allow_zero_valuation_rate
 		sr.save()
+		return sr.items[0]
 
-		self.assertEqual(sr.items[0].valuation_rate, 0)
-		self.assertEqual(sr.items[0].amount_difference, -250)
+	def test_zero_rate_kept_on_a_row_with_a_selected_batch_bundle(self):
+		row = self._save_zero_rate_reco_with_batch_bundle(allow_zero_valuation_rate=1)
+
+		self.assertEqual(row.valuation_rate, 0)
+		self.assertEqual(row.amount_difference, -250)
+
+	def test_form_filled_zero_rate_takes_the_bundle_rate(self):
+		"""The form fills a zero rate for batch items; without Allow Zero Valuation Rate it is not a write-down."""
+		row = self._save_zero_rate_reco_with_batch_bundle(allow_zero_valuation_rate=0)
+
+		self.assertEqual(row.valuation_rate, 50)
+		self.assertEqual(row.amount_difference, 0)
 
 	def test_zeroing_a_batch_does_not_make_an_adjustment_entry(self):
 		"""Emptying a batch that holds stock is an ordinary outward entry, not a value write-off."""
