@@ -1621,7 +1621,6 @@ def make_purchase_order_for_default_supplier(
 
 		set_delivery_date(doc.items, source_name)
 		doc.insert()
-		frappe.db.commit()
 		purchase_orders.append(doc)
 
 	return purchase_orders
