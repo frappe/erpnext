@@ -13,6 +13,7 @@ from frappe import _
 from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
+from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
@@ -582,12 +583,17 @@ class StatusService:
 
 		pbi = frappe.qb.DocType("Product Bundle Item")
 		so_item = frappe.qb.DocType("Sales Order Item")
+		bom = frappe.qb.DocType("BOM")
+		# only components with an active BOM get Work Orders
+		has_active_bom = ExistsCriterion(
+			frappe.qb.from_(bom).select(bom.name).where((bom.item == pbi.item_code) & (bom.is_active == 1))
+		)
 		total_bundle_qty = (
 			frappe.qb.from_(pbi)
 			.join(so_item)
 			.on(pbi.parent == so_item.product_bundle)
 			.select(Sum(pbi.qty))
-			.where(so_item.name == self.doc.sales_order_item)
+			.where((so_item.name == self.doc.sales_order_item) & has_active_bom)
 		).run()[0][0]
 		# product bundle is 0 (product bundle allows 0 qty for items)
 		return total_bundle_qty or 1
