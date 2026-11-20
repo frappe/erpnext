@@ -23,14 +23,7 @@ frappe.ui.form.on("Delivery Note", {
 			Shipment: "Shipment",
 		}),
 			frm.set_indicator_formatter("item_code", function (doc) {
-<<<<<<< HEAD
-				return doc.docstatus == 1 || doc.qty <= doc.actual_qty ? "green" : "orange";
-=======
-				if (doc.closed) {
-					return "gray";
-				}
 				return doc.docstatus == 1 || doc.stock_qty <= doc.actual_qty ? "green" : "orange";
->>>>>>> 0941319 (fix(stock): compare stock qty with the warehouse stock in the Delivery Note item indicator)
 			});
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
