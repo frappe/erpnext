@@ -101,6 +101,26 @@ def stock_entry_row_requires_inspection(purpose, row):
 	return False
 
 
+STOCK_ITEM_TABLES = ("items", "packed_items", "supplied_items", "stock_items")
+STOCK_WAREHOUSE_FIELDS = (
+	"warehouse",
+	"s_warehouse",
+	"t_warehouse",
+	"rejected_warehouse",
+	"target_warehouse",
+	"from_warehouse",
+)
+PARENT_WAREHOUSE_FIELDS = (
+	"set_warehouse",
+	"set_target_warehouse",
+	"set_from_warehouse",
+	"rejected_warehouse",
+	"supplier_warehouse",
+	"from_warehouse",
+	"to_warehouse",
+)
+
+
 class StockController(AccountsController):
 	#: Vouchers whose stock value change should also be booked to the Expenses Added To Stock
 	#: account pair (Stock Entry, Stock Reconciliation). Purchase Receipt books its own, against
@@ -2181,6 +2201,34 @@ class StockController(AccountsController):
 		rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
 		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
+
+	def run_before_save_methods(self):
+		from erpnext.stock.utils import lock_bins
+
+		if self._action in ("submit", "cancel") and self.has_stock_update:
+			lock_bins(self.get_item_warehouses())
+
+		super().run_before_save_methods()
+
+	@property
+	def has_stock_update(self):
+		if self.doctype == "POS Invoice":
+			return False
+
+		return not self.meta.has_field("update_stock") or bool(self.update_stock)
+
+	def get_item_warehouses(self):
+		parent_warehouses = {self.get(fieldname) for fieldname in PARENT_WAREHOUSE_FIELDS}
+		item_warehouses = set()
+		for table_name in STOCK_ITEM_TABLES:
+			for row in self.get(table_name) or []:
+				item_code = row.get("rm_item_code") or row.get("item_code")
+				warehouses = parent_warehouses | {row.get(fieldname) for fieldname in STOCK_WAREHOUSE_FIELDS}
+				item_warehouses.update(
+					(item_code, warehouse) for warehouse in warehouses if item_code and warehouse
+				)
+
+		return item_warehouses
 
 	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		args = frappe._dict(
