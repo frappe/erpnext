@@ -348,6 +348,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
+<<<<<<< HEAD
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_work_order_status_for_return()
@@ -355,6 +356,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_returned_qty_within_work_order()
 		self.validate_returned_qty_within_subcontracting_order()
 		self.validate_alternative_items()
+=======
+		# compares the rows' transfer_qty, so it runs after set_transfer_qty
+		if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
+			self.purpose_cls(self).validate_component_and_quantities()
+
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "transfer_qty")
+		sbb.validate_warehouse_of_sabb()
+>>>>>>> c8b9186 (fix(manufacturing): run the BOM component check on the rows' transfer qty)
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.set_process_loss_qty()
