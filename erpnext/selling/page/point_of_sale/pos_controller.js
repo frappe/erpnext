@@ -39,7 +39,13 @@ erpnext.PointOfSale.Controller = class {
 				fieldtype: "Currency",
 				in_list_view: 1,
 				label: __("Opening Amount"),
-				options: "company:company_currency",
+				options: "currency",
+			},
+			{
+				fieldname: "currency",
+				fieldtype: "Link",
+				options: "Currency",
+				hidden: 1,
 			},
 		];
 		const fetch_pos_payment_methods = () => {
@@ -48,13 +54,17 @@ erpnext.PointOfSale.Controller = class {
 			frappe.db.get_doc("POS Profile", pos_profile).then(({ currency, payments }) => {
 				dialog.fields_dict.balance_details.df.data = [];
 				dialog.fields_dict.balance_details.grid.update_docfield_property(
-					"opening_amount",
-					"options",
+					"currency",
+					"default",
 					currency
 				);
 				const modes_of_payment = new Set(payments.map((pay) => pay.mode_of_payment));
 				modes_of_payment.forEach((mode_of_payment) => {
-					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: "0" });
+					dialog.fields_dict.balance_details.df.data.push({
+						mode_of_payment,
+						opening_amount: "0",
+						currency,
+					});
 				});
 				dialog.fields_dict.balance_details.grid.refresh();
 			});
