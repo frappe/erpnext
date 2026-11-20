@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, today
+from frappe.utils import flt, getdate, today
 
 
 class LoyaltyProgram(Document):
@@ -25,7 +25,7 @@ class LoyaltyProgram(Document):
 
 		auto_opt_in: DF.Check
 		collection_rules: DF.Table[LoyaltyProgramCollection]
-		company: DF.Link | None
+		company: DF.Link
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
 		customer_group: DF.Link | None
@@ -39,7 +39,34 @@ class LoyaltyProgram(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_dates()
+		self.validate_program_type()
+		self.validate_factors()
 		self.validate_lowest_tier()
+
+	def validate_dates(self):
+		if self.to_date and getdate(self.to_date) < getdate(self.from_date):
+			frappe.throw(_("To Date cannot be before From Date."))
+
+		if self.expiry_duration and self.expiry_duration < 0:
+			frappe.throw(_("Expiry Duration cannot be negative. Set it to 0 for points that never expire."))
+
+	def validate_program_type(self):
+		if self.loyalty_program_type == "Single Tier Program" and len(self.collection_rules) > 1:
+			frappe.throw(_("Please select the Multiple Tier Program type for more than one collection rule."))
+
+	def validate_factors(self):
+		# 0 is allowed: points that only count towards a tier have no money value
+		if flt(self.conversion_factor) < 0:
+			frappe.throw(_("Conversion Factor cannot be negative."))
+
+		for rule in self.collection_rules:
+			if flt(rule.collection_factor) <= 0:
+				frappe.throw(
+					_("Row #{0}: Collection Factor for tier {1} must be greater than 0.").format(
+						rule.idx, frappe.bold(rule.tier_name)
+					)
+				)
 
 	def validate_lowest_tier(self):
 		tiers = sorted(self.collection_rules, key=lambda x: flt(x.min_spent))

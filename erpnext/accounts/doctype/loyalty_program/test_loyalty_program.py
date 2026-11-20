@@ -286,6 +286,29 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 			getdate("9999-12-31"),
 		)
 
+	def test_invalid_settings_are_rejected(self):
+		cases = {
+			"Collection Factor": {"collection_rules": [{"tier_name": "Bronze", "collection_factor": -100}]},
+			"Conversion Factor": {"conversion_factor": -1},
+			"Expiry Duration": {"expiry_duration": -30},
+			"To Date": {"from_date": today(), "to_date": add_days(today(), -1)},
+			"Company": {"company": None},
+			"Multiple Tier Program": {
+				"collection_rules": [
+					{"tier_name": "Bronze", "collection_factor": 1000, "min_spent": 0},
+					{"tier_name": "Silver", "collection_factor": 500, "min_spent": 10000},
+				]
+			},
+		}
+		for field, values in cases.items():
+			with self.subTest(field=field):
+				program = make_loyalty_program(**values)
+				self.assertRaisesRegex(frappe.ValidationError, f"(?i){field}", program.insert)
+
+	def test_valid_settings_are_saved(self):
+		program = make_loyalty_program(expiry_duration=0, to_date=today(), conversion_factor=0).insert()
+		self.assertTrue(program.name)
+
 
 def get_points_earned(self):
 	def get_returned_amount():
@@ -342,3 +365,22 @@ def create_sales_invoice_record(qty=1):
 			],
 		}
 	)
+
+
+def make_loyalty_program(**values):
+	program = frappe.get_doc(
+		{
+			"doctype": "Loyalty Program",
+			"loyalty_program_name": "_Test Validation Loyalty",
+			"loyalty_program_type": "Single Tier Program",
+			"from_date": today(),
+			"conversion_factor": 1,
+			"expiry_duration": 10,
+			"company": "_Test Company",
+			"cost_center": "Main - _TC",
+			"expense_account": "Loyalty - _TC",
+			"collection_rules": [{"tier_name": "Bronze", "collection_factor": 1000, "min_spent": 0}],
+		}
+	)
+	program.update(values)
+	return program
