@@ -2213,6 +2213,86 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_transfer.items[0].serial_no), picked_serial_nos[2:])
 		second_transfer.save().submit()
 
+	def test_stock_entry_moves_only_the_picked_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		picked_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item in (picked_item, other_item):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [
+					{
+						"item_code": picked_item,
+						"qty": 10,
+						"stock_qty": 10,
+						"picked_qty": 10,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		def transfer(item_code, original_item=None):
+			stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+			row = stock_entry.items[0]
+			row.item_code, row.item_name, row.original_item = item_code, item_code, original_item
+			row.t_warehouse = "_Test Warehouse 1 - _TC"
+			return stock_entry.submit()
+
+		for original_item in (None, picked_item):
+			self.assertRaisesRegex(
+				frappe.ValidationError, "is not the item", transfer, other_item, original_item
+			)
+
+		transfer(picked_item, original_item=other_item)
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", pick_list.locations[0].name, "transferred_qty"), 10
+		)
+
+	def test_stock_entry_from_work_order_pick_list_moves_an_alternative_item(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			create_pick_list as create_pick_list_from_wo,
+		)
+
+		warehouse = "Stores - _TC"
+		picked_item = make_item(properties={"is_stock_item": 1, "allow_alternative_item": 1}).name
+		alternative_item = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Alternative",
+				"item_code": picked_item,
+				"alternative_item_code": alternative_item,
+			}
+		).insert()
+		bom = make_bom(item=finished_good, raw_materials=[picked_item])
+		for item in (picked_item, alternative_item):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=2, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=2,
+			source_warehouse=warehouse,
+			allow_alternative_item=1,
+		)
+		pick_list = create_pick_list_from_wo(work_order.name, None, 2).submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		row = stock_entry.items[0]
+		row.item_code, row.item_name, row.original_item = alternative_item, alternative_item, picked_item
+		stock_entry.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", pick_list.locations[0].name, "transferred_qty"), 2
+		)
+
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item("Test Non Serialized Pick List Item", properties={"is_stock_item": 1}).name
