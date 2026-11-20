@@ -1723,7 +1723,8 @@ def set_previous_operation_serial_batch(parent_doc, row):
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
 	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
-		qty = ceil(qty)
+		# rounding to 9 decimals first keeps float noise (0.07 * 100) from adding a unit
+		qty = ceil(flt(qty, 9))
 
 	return qty
 
