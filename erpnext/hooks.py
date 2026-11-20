@@ -422,7 +422,6 @@ doc_events = {
 		"validate": "erpnext.stock.doctype.company_restriction.company_restriction.validate_allowed_companies",
 	},
 	"User": {
-		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
 		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",
 		"on_update": "erpnext.portal.utils.set_default_role",
 	},
