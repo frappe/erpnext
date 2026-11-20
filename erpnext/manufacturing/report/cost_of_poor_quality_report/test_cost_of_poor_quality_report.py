@@ -154,13 +154,10 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 	def test_date_filter_counts_parallel_operators_once(self):
 		day = get_datetime(add_days(today(), -10))
 		start = add_to_date(day, hours=10)
+		# two operators over the same hour
 		corrective_jc, _operation, _workstation = self.create_corrective_job_card(
-			hour_rate=600, time_logs=[(start, 60, 2)]
+			hour_rate=600, time_logs=[(start, 60, 1), (start, 60, 1)]
 		)
-		# a second operator over the same hour
-		corrective_jc.append(
-			"time_logs", {"from_time": start, "to_time": add_to_date(start, hours=1)}
-		).db_insert()
 
 		rows = self.run_report(
 			company="_Test Company",
