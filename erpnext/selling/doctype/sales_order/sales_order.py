@@ -635,14 +635,20 @@ class SalesOrder(SellingController):
 	def on_trash(self):
 		DeliveryScheduleService(self).delete_delivery_schedule_items()
 
-	def update_project(self):
+	def update_project(self, previous_projects: set[str] | None = None):
+		"""Refresh the sales amount of every project the order names, and of `previous_projects`: the
+		ones it named before an update after submit."""
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") != "Each Transaction":
 			return
 
-		if self.project:
-			project = frappe.get_lazy_doc("Project", self.project)
+		for name in self.get_projects() | (previous_projects or set()):
+			project = frappe.get_lazy_doc("Project", name)
 			project.update_sales_amount()
 			project.db_update()
+
+	def get_projects(self) -> set[str]:
+		"""The order's project and the projects its rows name."""
+		return {project for project in (self.project, *(row.project for row in self.items)) if project}
 
 	def check_credit_limit(self):
 		if not is_sales_order_credit_check_bypassed(self.customer, self.company):
@@ -687,6 +693,9 @@ class SalesOrder(SellingController):
 
 	def on_update_after_submit(self):
 		self.check_credit_limit()
+		# a row's project can change after submit
+		doc_before_save = self.get_doc_before_save()
+		self.update_project(doc_before_save.get_projects() if doc_before_save else None)
 
 	def before_update_after_submit(self):
 		super().before_update_after_submit()

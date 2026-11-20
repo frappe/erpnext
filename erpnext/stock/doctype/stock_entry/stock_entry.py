@@ -376,6 +376,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_secondary_items()
 			self.set_bomless_secondary_valuation_types()
+			if self.purpose == "Repack":
+				# reads is_finished_item, so it must run after the rows are marked
+				self.purpose_cls(self).validate_repack_entry()
+
 			if not self.job_card:
 				self.validate_finished_goods()
 			else:
@@ -480,6 +484,22 @@ class StockEntry(StockController, SubcontractingInwardController):
 				references["Stock Entry"].add(row.against_stock_entry)
 
 		return references
+
+	def get_item_warehouses(self):
+		item_warehouses = super().get_item_warehouses()
+		if not self.subcontracting_order:
+			return item_warehouses
+
+		item_codes = {row.original_item or row.item_code for row in self.items}
+		supplied_items = frappe.get_all(
+			"Subcontracting Order Supplied Item",
+			filters={"parent": self.subcontracting_order, "rm_item_code": ("in", item_codes)},
+			fields=["rm_item_code", "reserve_warehouse"],
+		)
+		item_warehouses.update(
+			(row.rm_item_code, row.reserve_warehouse) for row in supplied_items if row.reserve_warehouse
+		)
+		return item_warehouses
 
 	def before_submit(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_submit"):

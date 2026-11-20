@@ -678,6 +678,20 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(stock_bin.reserved_qty_for_sub_contract, reserved_qty_before_transfer)
 
+	def test_transfer_locks_bin_of_reserve_warehouse(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.set_reserve_warehouse = "_Test Warehouse 2 - _TC"
+		sco.insert()
+		sco.submit()
+
+		row = sco.supplied_items[0]
+		transfer = make_supplied_item_transfer(sco, row)
+		transfer.items[0].s_warehouse = "_Test Warehouse - _TC"
+
+		item_warehouses = transfer.get_item_warehouses()
+		self.assertIn((row.rm_item_code, "_Test Warehouse - _TC"), item_warehouses)
+		self.assertIn((row.rm_item_code, "_Test Warehouse 2 - _TC"), item_warehouses)
+
 	def test_alternative_item_transfer_without_supplied_row_releases_reserved_qty(self):
 		sco = get_subcontracting_order()
 		row = sco.supplied_items[0]
@@ -1168,6 +1182,30 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
 		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).get_unreserved_qty())
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 20})
+	def test_status_stays_partial_while_one_raw_material_is_short(self):
+		make_subcontracted_item(item_code="Subcontracted Item Two RM")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Two RM",
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] += 1
+		rm_items[1]["qty"] -= 1
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+		self.assertEqual(
+			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
+		)
 
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [

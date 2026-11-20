@@ -78,10 +78,25 @@ class ProjectCostQueries:
 		return sum_amount(self.expense_claim_rows(), detail.sanctioned_amount, claim.posting_date, by_month)
 
 	def sales_order_amount(self) -> float:
-		"""Net total of the submitted Sales Orders that name the project."""
+		"""Net amount of submitted Sales Order items for the project, split by item as billing is."""
+		item = qb.DocType("Sales Order Item")
+		from_order, from_item = self.ordered_items()
+		return sum_amount(from_order, item.base_net_amount) + sum_amount(from_item, item.base_net_amount)
+
+	def ordered_items(self) -> tuple[QueryBuilder, QueryBuilder]:
+		"""Submitted Sales Order items for the project, in two parts: items that leave the project
+		empty and take their order's, and items that name the project themselves.
+
+		A cleared project cell is saved as an empty string, so it is empty too. Two parts, not one
+		condition, so each part can use the project index."""
 		order = qb.DocType("Sales Order")
-		query = qb.from_(order).where((order.project == self.project) & (order.docstatus == 1))
-		return sum_amount(query, order.base_net_total)
+		item = qb.DocType("Sales Order Item")
+		items = qb.from_(item).join(order).on(order.name == item.parent)
+		from_order = items.where(
+			NullIf(item.project, "").isnull() & (order.project == self.project) & (order.docstatus == 1)
+		)
+		from_item = items.where((item.project == self.project) & (item.docstatus == 1))
+		return from_order, from_item
 
 	def time_logs(self) -> QueryBuilder:
 		detail = qb.DocType("Timesheet Detail")
@@ -176,12 +191,14 @@ class ProjectCostQueries:
 
 	def billed_items(self) -> tuple[QueryBuilder, QueryBuilder]:
 		"""Submitted Sales Invoice items billed to the project, in two parts: items that leave the
-		project empty and take their invoice's, and items that name the project themselves."""
+		project empty and take their invoice's, and items that name the project themselves.
+
+		A cleared project cell is saved as an empty string, so it is empty too."""
 		invoice = qb.DocType("Sales Invoice")
 		item = qb.DocType("Sales Invoice Item")
 		items = qb.from_(item).join(invoice).on(invoice.name == item.parent)
 		from_invoice = items.where(
-			item.project.isnull() & (invoice.project == self.project) & (invoice.docstatus == 1)
+			NullIf(item.project, "").isnull() & (invoice.project == self.project) & (invoice.docstatus == 1)
 		)
 		from_item = items.where((item.project == self.project) & (item.docstatus == 1))
 		return from_invoice, from_item

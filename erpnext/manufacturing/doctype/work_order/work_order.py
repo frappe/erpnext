@@ -1356,7 +1356,9 @@ def set_work_order_ops(name: str):
 @frappe.whitelist()
 def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | None = None) -> float:
 	frappe.has_permission("Stock Entry", "read", doc=stock_entry_name, throw=True)
-	se = frappe.db.get_value("Stock Entry", stock_entry_name, ["fg_completed_qty"], as_dict=True)
+	se = frappe.db.get_value(
+		"Stock Entry", stock_entry_name, ["fg_completed_qty", "process_loss_qty"], as_dict=True
+	)
 	if not se:
 		return 0.0
 
@@ -1372,7 +1374,7 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 	already_disassembled = flt(frappe.db.get_value("Stock Entry", filters, [{"SUM": "fg_completed_qty"}]))
 
 	return flt(
-		flt(se.fg_completed_qty) - already_disassembled,
+		flt(se.fg_completed_qty) - flt(se.process_loss_qty) - already_disassembled,
 		frappe.get_precision("Stock Entry", "fg_completed_qty"),
 	)
 

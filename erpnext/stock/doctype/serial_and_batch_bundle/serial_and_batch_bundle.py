@@ -1150,6 +1150,31 @@ class SerialandBatchBundle(Document):
 				_("The {0} # {1} should be submitted first.").format(self.voucher_type, self.voucher_no)
 			)
 
+	def get_future_reconciliation_entries(self, future_entries):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		bundles = (
+			frappe.qb.from_(sle)
+			.select(sle.serial_and_batch_bundle)
+			.where(
+				(sle.item_code == self.item_code)
+				& (sle.warehouse == self.warehouse)
+				& (sle.posting_datetime > self.posting_datetime)
+				& (sle.voucher_type == "Stock Reconciliation")
+				& (sle.is_cancelled == 0)
+				& (sle.serial_and_batch_bundle.isnotnull())
+			)
+			.run(pluck=True)
+		)
+		if not bundles:
+			return []
+
+		child = frappe.qb.DocType("Serial and Batch Entry")
+		return future_entries.where(
+			(child.parent.isin(bundles))
+			& (child.warehouse == self.warehouse)
+			& (child.voucher_type == "Stock Reconciliation")
+		).run(as_dict=True)
+
 	def check_future_entries_exists(self, is_cancelled=False):
 		from erpnext.stock.valuation_adjustment import is_adjustment_voucher
 
@@ -1206,20 +1231,17 @@ class SerialandBatchBundle(Document):
 			future_entries = future_entries.where(child.voucher_type == "Stock Reconciliation")
 
 		if serial_nos:
-			future_entries = future_entries.where(
-				(child.serial_no.isin(serial_nos))
-				| ((child.warehouse == self.warehouse) & (child.voucher_type == "Stock Reconciliation"))
-			)
+			future_reconciliation_entries = self.get_future_reconciliation_entries(future_entries)
+			future_entries = future_entries.where(child.serial_no.isin(serial_nos)).run(as_dict=True)
+			future_entries.extend(future_reconciliation_entries)
 		elif self.has_serial_no:
-			future_entries = future_entries.where(
-				(child.warehouse == self.warehouse) & (child.voucher_type == "Stock Reconciliation")
-			)
+			future_entries = self.get_future_reconciliation_entries(future_entries)
 		elif batches:
 			future_entries = future_entries.where(
 				(child.batch_no.isin(batches)) & (child.warehouse == self.warehouse)
-			)
-
-		future_entries = future_entries.run(as_dict=True)
+			).run(as_dict=True)
+		else:
+			future_entries = future_entries.run(as_dict=True)
 
 		if future_entries:
 			if self.has_serial_no:

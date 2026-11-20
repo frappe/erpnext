@@ -3124,6 +3124,82 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertEqual(jc_c.docstatus, 1)
 
+	def test_unstarted_job_card_saves_before_previous_operations_produce(self):
+		"""Allow preparation edits before the prior operation starts."""
+		from erpnext.manufacturing.doctype.job_card.job_card import make_time_log
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("Unstarted Prep RM", {"is_stock_item": 1}).name
+		fg = make_item("Unstarted Prep FG", {"is_stock_item": 1}).name
+
+		bom = frappe.new_doc("BOM", company="_Test Company", item=fg, quantity=1, with_operations=1)
+		bom.append("items", {"item_code": rm, "qty": 1})
+		for row in (
+			{"operation": "Unstarted Prep Op A", "sequence_id": 1},
+			{"operation": "Unstarted Prep Op B", "sequence_id": 2},
+		):
+			row.update({"workstation": "_Test Workstation A", "time_in_mins": 60})
+			make_workstation(row)
+			make_operation(row)
+			bom.append("operations", row)
+		bom.insert()
+		bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg,
+			qty=5,
+			source_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			bom_no=bom.name,
+			skip_transfer=1,
+			do_not_save=True,
+		)
+		work_order.save()
+		work_order.submit()
+
+		jc_b = frappe.get_doc(
+			"Job Card",
+			frappe.db.get_value(
+				"Job Card",
+				{"work_order": work_order.name, "operation": "Unstarted Prep Op B", "docstatus": 0},
+				"name",
+			),
+		)
+
+		self.assertFalse(jc_b.time_logs)
+		self.assertEqual(jc_b.total_completed_qty, 0)
+
+		jc_b.source_warehouse = "_Test Warehouse - _TC"
+		jc_b.save()
+		self.assertEqual(jc_b.docstatus, 0)
+		self.assertEqual(jc_b.source_warehouse, "_Test Warehouse - _TC")
+
+		# Submit still follows the sequence, also for cards that skip the time log check.
+		self.assertRaises(OperationSequenceError, jc_b.submit)
+		jc_b.reload()
+
+		employee = make_employee("prep_test@example.com", company="_Test Company")
+		self.assertRaises(
+			OperationSequenceError,
+			make_time_log,
+			{
+				"job_card_id": jc_b.name,
+				"from_time": "2024-01-01 08:00:00",
+				"employees": [{"employee": employee}],
+			},
+		)
+
+		# Start Job adds a time log and saves, so the sequence check runs.
+		self.assertRaises(
+			OperationSequenceError,
+			jc_b.start_timer,
+			start_time="2024-01-01 08:00:00",
+			employees=[{"employee": employee}],
+		)
+
 	def test_semi_fg_batch_auto_pull_on_manufacture(self):
 		"""Batch produced by an operation should auto-pull into the next operation's
 		semi-finished consumption row (skip-transfer Manufacture entry)."""
@@ -3751,6 +3827,65 @@ class TestJobCard(ERPNextTestSuite):
 		stock_entry = frappe.get_doc({"doctype": "Stock Entry", "work_order": self.work_order.name})
 		used_secondary_items = ManufactureStockEntry(stock_entry).get_used_secondary_items()
 		self.assertEqual(used_secondary_items[("_Test Item", "Scrap")], 2)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_secondary_items_with_process_loss(self):
+		stock_entry = self.make_job_card_scrap_entry(completed_qty=8)
+		self.assertEqual(stock_entry.process_loss_qty, 2)
+		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == "JC Loss Scrap"], [3])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_secondary_items_with_bom_process_loss(self):
+		stock_entry = self.make_job_card_scrap_entry(completed_qty=10, process_loss_percentage=20)
+		self.assertEqual(stock_entry.process_loss_qty, 2)
+		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == "JC Loss Scrap"], [3])
+
+	def make_job_card_scrap_entry(self, completed_qty, process_loss_percentage=0):
+		"""Manufacture entry for 10 after a Job Card records 3 scrap."""
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("JC Loss Scrap RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		fg = make_item("JC Loss Scrap FG", {"is_stock_item": 1}).name
+		scrap = make_item("JC Loss Scrap", {"is_stock_item": 1, "valuation_rate": 5}).name
+		operation = {"operation": "JC Loss Scrap Op", "workstation": "JC Loss Scrap WS", "time_in_mins": 60}
+		make_workstation(operation)
+		make_operation(operation)
+
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=10,
+			with_operations=1,
+			process_loss_percentage=process_loss_percentage,
+		)
+		bom.append("items", {"item_code": rm, "qty": 10})
+		bom.append("operations", operation)
+		bom.insert()
+		bom.submit()
+
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			item=fg, qty=10, bom_no=bom.name, skip_transfer=1, source_warehouse=warehouse
+		)
+		job_card = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
+		job_card.append(
+			"secondary_items", {"item_code": scrap, "stock_qty": 3, "secondary_item_type": "Scrap"}
+		)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2024-03-01 08:00:00",
+				"to_time": "2024-03-01 09:00:00",
+				"completed_qty": completed_qty,
+			},
+		)
+		job_card.save()
+		job_card.submit()
+
+		return frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 10))
 
 	def test_secondary_items_from_multiple_boms_stay_separate(self):
 		"""Rows linked to different BOM rows keep their own quantity and valuation mode."""
