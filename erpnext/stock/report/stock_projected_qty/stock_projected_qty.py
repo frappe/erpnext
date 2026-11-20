@@ -304,6 +304,7 @@ def get_item_map(item_code, include_uom):
 	alive = (item.end_of_life > today()) | item.end_of_life.isnull()
 	if frappe.db.db_type != "postgres":
 		alive |= item.end_of_life == "0000-00-00"
+	is_live_stock_item = (item.is_stock_item == 1) & (item.disabled == 0) & alive
 
 	query = (
 		frappe.qb.from_(item)
@@ -317,9 +318,7 @@ def get_item_map(item_code, include_uom):
 			item.variant_of,
 		)
 		.where(
-			(item.is_stock_item == 1)
-			& (item.disabled == 0)
-			& alive
+			is_live_stock_item
 			& (ExistsCriterion(frappe.qb.from_(bin).select(bin.name).where(bin.item_code == item.name)))
 		)
 	)
@@ -335,7 +334,14 @@ def get_item_map(item_code, include_uom):
 	items = query.run(as_dict=True)
 
 	ir = frappe.qb.DocType("Item Reorder")
-	query = frappe.qb.from_(ir).select("*")
+	# same items as the re-order job
+	query = (
+		frappe.qb.from_(ir)
+		.inner_join(item)
+		.on(ir.parent == item.name)
+		.select(ir.star)
+		.where(is_live_stock_item)
+	)
 
 	if item_code:
 		# a variant without re-order levels uses its template's
