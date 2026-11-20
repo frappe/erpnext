@@ -2640,7 +2640,23 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assert_plan_pulls_the_unmade_qty(sales_order)
 
-	def make_sales_order_with_reserved_work_order_output(self, fg_item, link_sales_order_item):
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_delivery_of_other_reserved_stock_adds_to_reserved_work_order_output(self):
+		sales_order = self.make_sales_order_with_reserved_work_order_output(
+			"_Test FG For WO Output And Reserved Stock", link_sales_order_item=True, reserved_stock_qty=4
+		)
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.items[0].qty = 4
+		delivery_note.submit()
+
+		plan = create_production_plan(
+			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
+		)
+		self.assertEqual(plan.po_items, [])
+
+	def make_sales_order_with_reserved_work_order_output(
+		self, fg_item, link_sales_order_item, reserved_stock_qty=0
+	):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		warehouse = "_Test Warehouse - _TC"
@@ -2649,6 +2665,18 @@ class TestProductionPlan(ERPNextTestSuite):
 		bom = make_bom(item=fg_item, raw_materials=[raw_material])
 		make_stock_entry(item_code=raw_material, target=warehouse, qty=6, basic_rate=100)
 		sales_order = make_sales_order(item_code=fg_item, qty=10, warehouse=warehouse)
+		if reserved_stock_qty:
+			make_stock_entry(item_code=fg_item, target=warehouse, qty=reserved_stock_qty, basic_rate=100)
+			sales_order.create_stock_reservation_entries(
+				items_details=[
+					{
+						"sales_order_item": sales_order.items[0].name,
+						"qty_to_reserve": reserved_stock_qty,
+						"warehouse": warehouse,
+					}
+				],
+				notify=False,
+			)
 
 		work_order = make_wo_order_test_record(
 			production_item=fg_item,
@@ -2667,7 +2695,8 @@ class TestProductionPlan(ERPNextTestSuite):
 		work_order.submit()
 		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 6)).submit()
 		self.assertEqual(
-			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "stock_reserved_qty"), 6
+			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "stock_reserved_qty"),
+			6 + reserved_stock_qty,
 		)
 		return sales_order
 
