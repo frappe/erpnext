@@ -4060,13 +4060,30 @@ class TestJobCard(ERPNextTestSuite):
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		warehouse = "Stores - _TC"
-		operation = {
+		sfg_operation = {
 			"operation": "_Test Operation Without Costs",
 			"workstation": "_Test Workstation Without Costs",
 		}
-		setup_operations([operation])
+		final_operation = {
+			"operation": "_Test Final Operation Without Costs",
+			"workstation": "_Test Workstation Without Costs",
+		}
+		setup_operations([sfg_operation, final_operation])
 		rm_item = make_item("_Test RM Semi FG Without Workstation Costs", {"is_stock_item": 1}).name
+		sfg_item = make_item("_Test SFG Without Workstation Costs", {"is_stock_item": 1}).name
 		fg_item = make_item("_Test FG Semi FG Without Workstation Costs", {"is_stock_item": 1}).name
+		sfg_bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": sfg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"quantity": 1,
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100}],
+			}
+		)
+		sfg_bom.insert()
+		sfg_bom.submit()
 		bom = frappe.get_doc(
 			{
 				"doctype": "BOM",
@@ -4076,17 +4093,29 @@ class TestJobCard(ERPNextTestSuite):
 				"quantity": 1,
 				"with_operations": 1,
 				"track_semi_finished_goods": 1,
-				"items": [{"item_code": rm_item, "qty": 1, "rate": 100, "operation_row_id": 1}],
+				"items": [
+					{"item_code": rm_item, "qty": 1, "rate": 100, "operation_row_id": 1},
+					{"item_code": sfg_item, "qty": 1, "operation_row_id": 2},
+				],
 				"operations": [
 					dict(
-						operation,
+						sfg_operation,
 						time_in_mins=6,
 						hour_rate=600,
+						finished_good=sfg_item,
+						bom_no=sfg_bom.name,
+						finished_good_qty=1,
+						sequence_id=1,
+					),
+					dict(
+						final_operation,
+						time_in_mins=6,
+						hour_rate=300,
 						finished_good=fg_item,
 						finished_good_qty=1,
 						is_final_finished_good=1,
-						sequence_id=1,
-					)
+						sequence_id=2,
+					),
 				],
 			}
 		)
@@ -4103,7 +4132,8 @@ class TestJobCard(ERPNextTestSuite):
 			wip_warehouse=warehouse,
 			fg_warehouse=warehouse,
 		)
-		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		operation_id = work_order.operations[0].name
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name, "operation_id": operation_id})
 		job_card.append(
 			"time_logs",
 			{"from_time": "2024-02-01 08:00:00", "to_time": "2024-02-01 09:00:00", "completed_qty": 10},
@@ -4111,7 +4141,10 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.submit()
 
 		entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
-		self.assertEqual(sum(row.amount for row in entry.additional_costs if row.has_operating_cost), 600)
+		operating_costs = [
+			(row.operation_id, row.amount) for row in entry.additional_costs if row.has_operating_cost
+		]
+		self.assertEqual(operating_costs, [(operation_id, 600)])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_stock_entry_needs_a_job_card_item_reference(self):
