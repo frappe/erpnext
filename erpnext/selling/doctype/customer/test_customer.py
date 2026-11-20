@@ -312,6 +312,23 @@ class TestCustomer(ERPNextTestSuite):
 
 		make_sales_return(sales_invoice.name).submit()
 
+	def test_is_consolidated_key_does_not_skip_blocked_customer_check(self):
+		"""Only POS consolidation may skip the blocked customer check."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		frappe.db.set_value("Customer", "_Test Customer", "on_hold", 1)
+
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.is_consolidated = 1
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is blocked", sales_order.ensure_customer_is_not_blocked
+		)
+
+		sales_invoice = create_sales_invoice(do_not_save=True)
+		sales_invoice.is_consolidated = 1
+		self.assertRaisesRegex(frappe.ValidationError, "is blocked", sales_invoice.insert)
+
 	def test_duplicate_customer(self):
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
 			test_customer_1 = frappe.get_doc(get_customer_dict("_Test Customer 1")).insert(
