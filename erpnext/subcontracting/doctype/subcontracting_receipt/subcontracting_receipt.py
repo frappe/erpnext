@@ -512,6 +512,7 @@ class SubcontractingReceipt(SubcontractingController):
 					"item_code",
 					"qty",
 					"received_qty",
+					"process_loss_qty",
 					"reference_name",
 					"bom_secondary_item",
 					"secondary_item_type",
@@ -604,7 +605,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		precision = row.precision("received_qty")
 		return flt(original_row.returned_qty - flt(row.received_qty), precision) >= flt(
-			original_row.received_qty, precision
+			original_row.received_qty - original_row.process_loss_qty, precision
 		)
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
@@ -1126,9 +1127,15 @@ class SubcontractingReceipt(SubcontractingController):
 						"target_field": "returned_qty",
 						"target_parent_dt": "Subcontracting Receipt",
 						"target_parent_field": "per_returned",
-						"target_ref_field": "received_qty",
+						# a return sends back no process loss
+						"target_ref_field": {
+							"SUB": ["received_qty", "process_loss_qty"],
+							"as": "returnable_qty",
+						},
 						"source_field": "-1 * received_qty",
 						"percent_join_field_parent": "return_against",
+						# validate_return checks over-returns
+						"validate_qty": False,
 					},
 				]
 			)
