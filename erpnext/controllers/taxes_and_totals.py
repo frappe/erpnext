@@ -228,11 +228,7 @@ class calculate_taxes_and_totals:
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
 	def calculate_item_values(self):
-<<<<<<< HEAD
-		if self.doc.get("is_consolidated"):
-=======
-		if self.doc.flags.is_consolidated or self.discount_amount_applied:
->>>>>>> 2a8c739 (fix(selling): trust only the merge log's consolidation flag in totals)
+		if self.doc.flags.is_consolidated:
 			return
 
 		if not self.discount_amount_applied:
