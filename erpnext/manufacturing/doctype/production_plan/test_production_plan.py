@@ -2588,14 +2588,20 @@ class TestProductionPlan(ERPNextTestSuite):
 			self.assertEqual(frappe.db.get_value("Sales Order Item", item.name, "work_order_qty"), 5)
 
 	def test_work_order_qty_of_combined_product_bundle_lines(self):
-		component = make_item("_Test PP Combined Bundle Component", {"is_stock_item": 1}).name
-		make_bom(item=component, raw_materials=["_Test Item"], currency="INR")
-		sales_orders = []
-		for bundle_item, qty in (("_Test PP Combined Bundle A", 2), ("_Test PP Combined Bundle B", 1)):
+		components = []
+		for item_code in ("_Test PP Combined Bundle Component", "_Test PP Combined Bundle Component 2"):
+			components.append(make_item(item_code, {"is_stock_item": 1}).name)
+			make_bom(item=item_code, raw_materials=["_Test Item"], currency="INR")
+
+		sales_orders = [make_sales_order(item_code=components[0], qty=5)]
+		# bundle A takes from both components' combined rows, bundle B shares the first one
+		for bundle_item, items, qty in (
+			("_Test PP Combined Bundle A", components, 2),
+			("_Test PP Combined Bundle B", components[:1], 1),
+		):
 			make_item(bundle_item, {"is_stock_item": 0})
-			make_product_bundle(parent=bundle_item, items=[component], qty=qty)
+			make_product_bundle(parent=bundle_item, items=items, qty=qty)
 			sales_orders.append(make_sales_order(item_code=bundle_item, qty=5))
-		sales_orders.append(make_sales_order(item_code=component, qty=5))
 
 		submit_work_orders_for_sales_orders(sales_orders, combine_items=1)
 
