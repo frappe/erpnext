@@ -460,8 +460,10 @@ class AdjustmentEntry:
 				if index == 0 and plan.ledger_qty
 				else 0
 			)
-			row.quantity_difference = flt(row.qty) - flt(row.current_qty)
-			row.amount_difference = flt(row.amount) - flt(row.current_amount)
+			row.quantity_difference = flt(flt(row.qty) - flt(row.current_qty), row.precision("qty"))
+			row.amount_difference = flt(
+				flt(row.amount) - flt(row.current_amount), row.precision("amount_difference")
+			)
 
 	def post(self) -> None:
 		from erpnext.stock.serial_batch_bundle import update_batch_qty
