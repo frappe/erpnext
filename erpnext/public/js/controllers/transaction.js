@@ -1038,6 +1038,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				precision("rate", item)
 			);
 
+		// the rate trigger does not run when the rate is unchanged
+		this.set_gross_profit(item);
 		this.calculate_taxes_and_totals();
 	}
 
