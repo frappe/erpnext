@@ -335,6 +335,38 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_si.items[0].update({"uom": "Kg", "conversion_factor": 1000, "qty": -0.01})
 		self.assertRaises(StockOverReturnError, return_si.insert)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_returns_below_stock_qty_precision_with_editable_stock_qty(self):
+		# such returns store a stock qty of 0
+		self.test_returns_below_stock_qty_precision_are_held_to_the_sold_qty()
+
+	def test_full_returns_of_a_receipt_whose_stock_qty_is_rounded(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Gram", "conversion_factor": 0.001}],
+			}
+		).name
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=1004,
+			rejected_qty=1006,
+			rejected_warehouse="_Test Rejected Warehouse - _TC",
+			uom="Gram",
+			stock_uom="Kg",
+			conversion_factor=0.001,
+		)
+
+		# 1,004 Gram is stored as 1 Kg and the rejected return's 1,006 Gram as 1.01 Kg
+		self.assertEqual(pr.items[0].stock_qty, 1)
+		make_return_doc(pr.doctype, pr.name, return_against_rejected_qty=True).submit()
+		make_return_doc(pr.doctype, pr.name).submit()
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_sales_invoice_return_rows_share_the_original_row_qty(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
