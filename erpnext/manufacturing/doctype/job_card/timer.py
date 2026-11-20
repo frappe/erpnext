@@ -106,7 +106,7 @@ def attach_timer_summary(job_cards: list[dict]) -> None:
 		job_card.update(
 			has_time_logs=bool(card_time_logs),
 			time_logs=card_time_logs,
-			open_log_starts=[log.from_time for log in open_logs],
+			open_log_count=len(open_logs),
 			# matches the Job Card form, which goes by the last log
 			last_log_open=bool(open_logs) and open_logs[-1] is card_time_logs[-1],
 			employees=employees.get(job_card.name, []),
@@ -176,7 +176,7 @@ class JobCardTimer:
 		row.update(
 			elapsed_seconds=self.get_elapsed_seconds(),
 			is_running=self.is_running(),
-			open_log_count=len(self.job_card.open_log_starts),
+			open_log_count=self.job_card.open_log_count,
 			timer_action=self.get_action() if can_write else None,
 			employees=self.job_card.employees,
 		)

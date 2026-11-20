@@ -445,7 +445,7 @@ class TestJobCard(ERPNextTestSuite):
 				total_completed_qty=0,
 				has_time_logs=False,
 				time_logs=[],
-				open_log_starts=[],
+				open_log_count=0,
 				last_log_open=False,
 				employees=[],
 			)
@@ -468,12 +468,10 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(timer(**closed_cycle, pending_qty=1).get_action(), "start")
 		self.assertEqual(timer(**closed_cycle).get_action(), "pause")
 		self.assertEqual(timer(**closed_cycle).get_elapsed_seconds(), 3600)
-		earlier_log_open = {"has_time_logs": True, "open_log_starts": [now()], "last_log_open": False}
+		earlier_log_open = {"has_time_logs": True, "open_log_count": 1, "last_log_open": False}
 		self.assertEqual(timer(**earlier_log_open, pending_qty=1).get_action(), "start")
 		self.assertFalse(timer(**earlier_log_open).is_running())
-		paused_with_open_log = timer(
-			has_time_logs=True, open_log_starts=[now()], last_log_open=True, is_paused=1
-		)
+		paused_with_open_log = timer(has_time_logs=True, open_log_count=1, last_log_open=True, is_paused=1)
 		self.assertFalse(paused_with_open_log.is_running())
 		self.assertEqual(paused_with_open_log.get_action(), "resume")
 
