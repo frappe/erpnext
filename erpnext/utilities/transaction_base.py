@@ -482,6 +482,7 @@ class TransactionBase(StatusUpdater):
 					child = frappe.new_doc(child_doctype, parent_doc=self, parentfield="taxes")
 					child.charge_type = "On Net Total"
 					child.account_head = tax_head
+					child.description = frappe.get_cached_value("Account", tax_head, "account_name")
 					child.rate = 0
 					self.append("taxes", child)
 
