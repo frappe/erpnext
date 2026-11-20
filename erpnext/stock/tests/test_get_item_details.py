@@ -1049,17 +1049,21 @@ class TestGetItemDetail(ERPNextTestSuite):
 	def test_party_price_in_stock_uom_comes_before_general_price_in_row_uom(self):
 		item_code = self.make_multi_uom_item()
 		price_list = self.make_selling_price_list("_Test UOM Price List")
-		for uom, rate, customer in (("_Test UOM 1", 100, None), ("_Test UOM", 8, "_Test Customer")):
-			frappe.get_doc(
-				{
-					"doctype": "Item Price",
-					"item_code": item_code,
-					"price_list": price_list.name,
-					"uom": uom,
-					"price_list_rate": rate,
-					"customer": customer,
-				}
-			).insert()
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer")
+
+		details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
+
+		self.assertEqual(details.price_list_rate, 80)
+
+	def test_party_price_in_stock_uom_skips_row_uom_packing_unit(self):
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 9, uom="_Test UOM")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(
+			item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer", packing_unit=10
+		)
 
 		details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
 
@@ -1127,13 +1131,14 @@ class TestGetItemDetail(ERPNextTestSuite):
 		price_list.price_not_uom_dependent = not_uom_dependent
 		return price_list.save()
 
-	def make_item_price(self, item_code: str, price_list: str, rate: float) -> None:
+	def make_item_price(self, item_code: str, price_list: str, rate: float, **fields) -> None:
 		frappe.get_doc(
 			{
 				"doctype": "Item Price",
 				"item_code": item_code,
 				"price_list": price_list,
 				"price_list_rate": rate,
+				**fields,
 			}
 		).insert()
 
