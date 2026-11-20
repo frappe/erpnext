@@ -4727,7 +4727,8 @@ class TestJobCard(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
-		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "mins_between_operations": 10, "allow_overtime": 0},
 	)
 	def test_workstation_type_card_skips_a_workstation_whose_shift_ends(self):
 		workstation_type, (first, second) = make_jc_review_type_workstations(2)
