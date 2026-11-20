@@ -458,6 +458,8 @@ class SellingController(StockController):
 			return
 
 		is_internal_customer = self.get("is_internal_customer")
+		# bundle rows priced from their components get their final rate only once packed
+		check_bundles = not frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 		for item in self.items:
 			if not item.item_code or item.is_free_item:
@@ -474,7 +476,8 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			if is_internal_customer or not (is_stock_item or self.has_product_bundle(item.item_code)):
+			is_bundle = check_bundles and self.has_product_bundle(item.item_code)
+			if is_internal_customer or not (is_stock_item or is_bundle):
 				continue
 
 			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
