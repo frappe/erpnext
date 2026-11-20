@@ -233,6 +233,16 @@ class TestPackedItem(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, 700)
 		self.assertEqual(so.items[0].amount, 1400)
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"editable_bundle_item_rates": 1, "allow_zero_qty_in_sales_order": 1}
+	)
+	def test_zero_qty_bundle_row_keeps_its_rate(self):
+		so = make_sales_order(item_code=self.bundle, qty=1, rate=100, do_not_save=True)
+		so.items[0].qty = 0
+		so.save()
+
+		self.assertEqual(so.items[0].rate, 100)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_newly_mapped_doc_packed_items(self):
 		"Test impact on packed items in newly mapped DN from SO."
