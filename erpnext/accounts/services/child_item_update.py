@@ -673,22 +673,26 @@ def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 		frappe.throw(_("Cannot delete an item which has been ordered"))
 
 
-def update_bin_on_delete(row, parent) -> None:
-	"""Update bin quantities after a child item row is deleted."""
+def update_bin_on_delete(rows, parent) -> None:
+	"""Update bin quantities after child item rows are deleted."""
 	from erpnext.stock.stock_balance import get_indented_qty, get_ordered_qty, update_bin_qty
 
-	if parent.doctype == "Sales Order":
-		# The deleted row is still on parent, so its Packed Items are refreshed too
-		parent.update_reserved_qty([row.name])
+	if not rows:
 		return
 
-	qty_dict = {}
-	if row.material_request_item:
-		qty_dict["indented_qty"] = get_indented_qty(row.item_code, row.warehouse)
-	qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
+	if parent.doctype == "Sales Order":
+		# The deleted rows are still on parent, so their Packed Items are refreshed too
+		parent.update_reserved_qty([row.name for row in rows])
+		return
 
-	if row.warehouse:
-		update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	for row in rows:
+		qty_dict = {}
+		if row.material_request_item:
+			qty_dict["indented_qty"] = get_indented_qty(row.item_code, row.warehouse)
+		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
+
+		if row.warehouse:
+			update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
 def validate_no_issued_proforma(rows) -> None:
@@ -828,8 +832,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	if parent.doctype not in ("Quotation", "Supplier Quotation"):
 		parent.update_prevdoc_status()
-		for d in deleted_children:
-			update_bin_on_delete(d, parent)
+		update_bin_on_delete(deleted_children, parent)
 
 	return bool(deleted_children)
 
