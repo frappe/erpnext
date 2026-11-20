@@ -1003,6 +1003,9 @@ def _get_directly_dependent_vouchers(doc):
 
 
 def get_reposted_till(doc, repost_items):
+	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
+		return
+
 	reposted_till = [
 		doc.get_item_wh_reposted_till().get((row.item_code, row.warehouse)) for row in repost_items
 	]
