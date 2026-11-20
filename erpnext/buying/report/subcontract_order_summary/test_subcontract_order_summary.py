@@ -85,6 +85,8 @@ class TestSubcontractOrderSummary(FrappeTestCase):
 			}
 		]
 		sco = get_subcontracting_order(service_items=service_items)
+		# keep this order out of other reports' "_Test Supplier" tests
+		frappe.db.set_value("Subcontracting Order", sco.name, "supplier", "_Test Supplier 1")
 
 		rows = [row for row in self.run_report(name=sco.name) if row.get("item_code") == fg_item]
 		self.assertEqual(len(rows), 1)
