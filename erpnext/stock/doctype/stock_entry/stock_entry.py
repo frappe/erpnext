@@ -4386,7 +4386,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.job_card:
 			pending_qty = flt(self.fg_completed_qty)
 		else:
-			pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
+			# completed qty leaves out the unbooked job card loss that For Quantity includes
+			pending_qty = (
+				flt(self.get_completed_job_card_qty())
+				- flt(self.pro_doc.produced_qty)
+				+ flt(self.get_pending_process_loss_qty())
+			)
 
 		used_secondary_items = self.get_used_secondary_items()
 		for row in other:
