@@ -109,13 +109,13 @@ def get_returned_as_on(as_on_date):
 	debit_note_item = frappe.qb.DocType("Purchase Invoice Item")
 	original_item = frappe.qb.DocType("Purchase Invoice Item").as_("original_item")
 
-	def returned_in_invoice_uom(qty):
-		return -qty * debit_note_item.conversion_factor / original_item.conversion_factor
+	def in_invoice_uom(stock_qty):
+		return Sum(stock_qty) / original_item.conversion_factor
 
-	qty = returned_in_invoice_uom(debit_note_item.qty)
+	qty = -debit_note_item.qty * debit_note_item.conversion_factor
 	stock_returned_qty = (
 		Case()
-		.when(debit_note.update_stock == 1, returned_in_invoice_uom(debit_note_item.received_qty))
+		.when(debit_note.update_stock == 1, -debit_note_item.received_qty * debit_note_item.conversion_factor)
 		.else_(0)
 	)
 	billing_only_qty = Case().when(debit_note.update_stock == 0, qty).else_(0)
@@ -127,16 +127,16 @@ def get_returned_as_on(as_on_date):
 		.on(original_item.name == debit_note_item.purchase_invoice_item)
 		.select(
 			debit_note_item.purchase_invoice_item.as_("detail"),
-			Sum(qty).as_("qty"),
-			Sum(stock_returned_qty).as_("stock_qty"),
-			Sum(billing_only_qty).as_("billing_only_qty"),
+			in_invoice_uom(qty).as_("qty"),
+			in_invoice_uom(stock_returned_qty).as_("stock_qty"),
+			in_invoice_uom(billing_only_qty).as_("billing_only_qty"),
 		)
 		.where(
 			(debit_note.docstatus == 1)
 			& (debit_note.is_return == 1)
 			& (debit_note.posting_date <= as_on_date)
 		)
-		.groupby(debit_note_item.purchase_invoice_item)
+		.groupby(debit_note_item.purchase_invoice_item, original_item.conversion_factor)
 	).as_("returned")
 
 
