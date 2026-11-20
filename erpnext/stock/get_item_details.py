@@ -1468,8 +1468,8 @@ def get_price_list_rate_for(args, item_code):
 		if desired_qty := ctx.get("qty"):
 >>>>>>> ada41a9 (fix(stock): skip the packing unit check for a party's price in the stock UOM)
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
-		if not is_party_price(item_price_data):
-			item_price_data = get_party_price_in_stock_uom(ctx, pctx, item_code) or item_price_data
+			if not is_party_price(item_price_data):
+				item_price_data = get_party_price_in_stock_uom(ctx, pctx, item_code) or item_price_data
 	else:
 		# Without ignore_party this repeats the query above, which found nothing
 		general_price_list_rate = args.get("ignore_party") and get_item_price(
