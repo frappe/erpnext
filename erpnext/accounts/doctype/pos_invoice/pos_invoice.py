@@ -874,11 +874,20 @@ def get_stock_availability(item_code, warehouse):
 	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
 	frappe.has_permission("POS Profile", ptype, throw=True)
 
-	# the caller picks the warehouse when allow_warehouse_change is set; costs nobody who has no
-	# Warehouse User Permission
+	# and keep a company-restricted caller inside their own companies, which costs nobody who has
+	# no Company User Permission
 	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 
-	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+	user_permissions = get_user_permissions(frappe.session.user)
+	allowed_companies = get_allowed_docs_for_doctype(user_permissions.get("Company", []), "POS Profile")
+	if allowed_companies:
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+	# the caller picks the warehouse when allow_warehouse_change is set, and the company check above
+	# does not narrow within a company; costs nobody who has no Warehouse User Permission
+	if warehouse_permissions := user_permissions.get("Warehouse"):
 		allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "POS Invoice")
 		if allowed_warehouses and warehouse not in allowed_warehouses:
 			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
