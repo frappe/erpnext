@@ -1655,35 +1655,57 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 			24,
 		)
 
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
-		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "allow_negative_stock": 0},
-	)
-	def test_row_covered_with_a_fractional_conversion_factor_has_no_unreserved_stock(self):
+	def make_partly_delivered_order(self, conversion_factor: float, qty: float, delivered_qty: float):
+		"""Submitted Sales Order in a fractional sales UOM, with `delivered_qty` delivered."""
 		for uom in ("Kg", "Gram"):
 			frappe.db.set_value("UOM", uom, "must_be_whole_number", 0)
 		item_code = make_item(
 			properties={
 				"is_stock_item": 1,
 				"stock_uom": "Kg",
-				"uoms": [{"uom": "Gram", "conversion_factor": 0.1}],
+				"uoms": [{"uom": "Gram", "conversion_factor": conversion_factor}],
 			}
 		).name
 		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		sales_order = make_sales_order(
-			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=4, uom="Gram", do_not_submit=1
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=qty, uom="Gram", do_not_submit=1
 		)
-		sales_order.items[0].update({"conversion_factor": 0.1, "reserve_stock": 1})
+		sales_order.items[0].update({"conversion_factor": conversion_factor, "reserve_stock": 1})
 		sales_order.submit()
 
 		delivery_note = make_delivery_note(sales_order.name)
-		delivery_note.items[0].qty = 1
+		delivery_note.items[0].qty = delivered_qty
 		delivery_note.submit()
 		sales_order.reload()
+		return sales_order
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "allow_negative_stock": 0},
+	)
+	def test_row_covered_with_a_fractional_conversion_factor_has_no_unreserved_stock(self):
+		sales_order = self.make_partly_delivered_order(conversion_factor=0.1, qty=4, delivered_qty=1)
 		sales_order.create_stock_reservation_entries(notify=False)
 
 		sales_order.reload()
 		self.assertFalse(sales_order.has_unreserved_stock())
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 0, "allow_negative_stock": 0},
+	)
+	def test_reserving_the_rest_of_a_row_in_sales_uom_is_not_partial(self):
+		sales_order = self.make_partly_delivered_order(conversion_factor=3, qty=1.5, delivered_qty=0.3)
+		item = sales_order.items[0]
+		sales_order.create_stock_reservation_entries(
+			items_details=[
+				{"sales_order_item": item.name, "warehouse": item.warehouse, "qty_to_reserve": 1.2}
+			],
+			notify=False,
+		)
+
+		item.reload()
+		self.assertEqual(item.stock_reserved_qty, 3.6)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
