@@ -294,8 +294,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 			customer_group: frm.doc.customer_group,
 			supplier_group: frm.doc.supplier_group,
 			tax_category: frm.doc.tax_category,
-			billing_address:
-				frm.doc.customer || frm.doc.lead ? frm.doc.customer_address : frm.doc.supplier_address,
+			billing_address: party_type === "Supplier" ? frm.doc.supplier_address : frm.doc.customer_address,
 			shipping_address: frm.doc.shipping_address_name,
 		},
 		callback: function (r) {
