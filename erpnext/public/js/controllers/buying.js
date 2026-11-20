@@ -551,19 +551,26 @@ erpnext.buying.link_to_mrs = function (frm) {
 						item.item_code == d.item_code &&
 						!item.material_request_item
 					) {
+						let linked_stock_qty = Math.min(stock_qty, d.stock_qty);
+						let linked_qty = flt(
+							linked_stock_qty / item.conversion_factor,
+							precision("qty", item)
+						);
+						// skip what the row's UOM cannot show
+						if (!linked_qty) return;
+
 						item.material_request = d.mr_name;
 						item.material_request_item = d.mr_item;
-						let linked_stock_qty = Math.min(stock_qty, d.stock_qty);
 						stock_qty = flt(stock_qty - linked_stock_qty, precision("stock_qty", item));
 						d.stock_qty = flt(d.stock_qty - linked_stock_qty, precision("stock_qty", item));
 						item.stock_qty = linked_stock_qty;
-						item.qty = flt(linked_stock_qty / item.conversion_factor, precision("qty", item));
+						item.qty = linked_qty;
 
 						frappe.msgprint(
 							__("Assigning {0} to {1} (row {2})", [d.mr_name, d.item_code, item.idx])
 						);
-						if (stock_qty > 0) {
-							let qty = flt(stock_qty / item.conversion_factor, precision("qty", item));
+						let qty = flt(stock_qty / item.conversion_factor, precision("qty", item));
+						if (qty > 0) {
 							frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 							var newrow = frappe.model.add_child(frm.doc, item.doctype, "items");
 							item_length++;
