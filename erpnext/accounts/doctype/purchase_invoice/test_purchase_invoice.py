@@ -3447,8 +3447,12 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			prepare_data_for_internal_transfer,
+		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
+		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		make_stock_entry(item_code=item, qty=3, rate=100, to_warehouse="Stores - TCP1", company=company)
