@@ -199,7 +199,7 @@ class BOMCostingService:
 	def _set_fg_based_operating_cost(self):
 		total = flt(self.doc.get("quantity")) * flt(self.doc.get("operating_cost_per_bom_quantity"))
 		self.doc.operating_cost = total
-		self.doc.base_operating_cost = flt(total * self.doc.conversion_rate, 2)
+		self.doc.base_operating_cost = total * self.doc.conversion_rate
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		if not row.hour_rate or update_hour_rate:
