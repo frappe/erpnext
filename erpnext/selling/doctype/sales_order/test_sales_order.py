@@ -37,6 +37,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	get_potentially_billable_sales_orders,
 	has_potentially_billable_items,
 )
+from erpnext.stock.doctype.item.item import make_item_price
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
@@ -4275,6 +4276,17 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertRaises(
 			frappe.ValidationError, make_sales_order, item_code=bundle, qty=1, rate=1, do_not_submit=True
 		)
+
+	@change_settings("Selling Settings", {"validate_selling_price": 1, "editable_bundle_item_rates": 1})
+	def test_selling_price_validation_for_bundle_priced_from_components(self):
+		bundle = make_item("_Test Bundle Priced From Components", {"is_stock_item": 0}).name
+		component = make_item("_Test Component Priced For Bundle", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_item_price(component, "Standard Selling", 400)
+		make_product_bundle(bundle, [component])
+
+		so = make_sales_order(item_code=bundle, qty=1, rate=1, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 400)
 
 	@change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_selling_price_validation_for_manufactured_item(self):
