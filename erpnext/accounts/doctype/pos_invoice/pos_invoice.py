@@ -13,7 +13,10 @@ from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form, getdate
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext import _refuse
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+	is_loyalty_program_enabled,
+	validate_loyalty_points,
+)
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -250,7 +253,7 @@ class POSInvoice(SalesInvoice):
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
-		if not self.is_return and self.loyalty_program:
+		if not self.is_return and self.loyalty_program and is_loyalty_program_enabled():
 			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)

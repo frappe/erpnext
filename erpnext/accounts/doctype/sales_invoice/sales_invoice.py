@@ -16,7 +16,10 @@ from erpnext.accounts.deferred_revenue import (
 	validate_deferred_revenue_return_cancellation,
 	validate_service_stop_date,
 )
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+	is_loyalty_program_enabled,
+	validate_loyalty_points,
+)
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
 	validate_coupon_code,
@@ -529,6 +532,7 @@ class SalesInvoice(SellingController):
 			and not self.is_consolidated
 			and self.loyalty_program
 			and not self.dont_create_loyalty_points
+			and is_loyalty_program_enabled()
 		):
 			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:

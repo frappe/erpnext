@@ -10,8 +10,14 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_details,
 	get_loyalty_program_details_with_points,
 )
+from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
+	toggle_loyalty_point_program_section,
+)
 from erpnext.accounts.party import get_dashboard_info
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.patches.v16_0.enable_loyalty_point_program_if_in_use import (
+	execute as enable_loyalty_point_program,
+)
+from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
 class TestLoyaltyProgram(ERPNextTestSuite):
@@ -370,6 +376,63 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		self.assertEqual(si.loyalty_program, program.name)
 		self.assertFalse(frappe.db.exists("Loyalty Point Entry", {"invoice": si.name}))
 
+	def test_disabled_program_earns_and_redeems_nothing(self):
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
+		si = create_sales_invoice_record()
+		si.insert()
+		si.submit()
+		balance = get_loyalty_details("Test Loyalty Customer", "Test Single Loyalty").loyalty_points
+
+		with change_settings("Accounts Settings", enable_loyalty_point_program=0):
+			si_disabled = create_sales_invoice_record()
+			si_disabled.insert()
+			si_disabled.submit()
+			self.assertFalse(frappe.db.exists("Loyalty Point Entry", {"invoice": si_disabled.name}))
+
+			si_redeem = create_sales_invoice_record()
+			si_redeem.redeem_loyalty_points = 1
+			si_redeem.loyalty_points = 5
+			self.assertRaisesRegex(frappe.ValidationError, "disabled", si_redeem.insert)
+
+		self.assertEqual(
+			get_loyalty_details("Test Loyalty Customer", "Test Single Loyalty").loyalty_points, balance
+		)
+
+	def test_patch_enables_program_setting_when_programs_exist(self):
+		# property setters change cached meta, which the rollback does not undo
+		self.addCleanup(frappe.clear_cache)
+		frappe.db.set_single_value("Accounts Settings", "enable_loyalty_point_program", 0)
+		toggle_loyalty_point_program_section(True)
+
+		enable_loyalty_point_program()
+
+		self.assertTrue(is_loyalty_program_setting_on())
+
+	def test_patch_enables_program_setting_when_fields_are_shown(self):
+		# property setters change cached meta, which the rollback does not undo
+		self.addCleanup(frappe.clear_cache)
+		frappe.db.set_single_value("Accounts Settings", "enable_loyalty_point_program", 0)
+		frappe.db.delete("Loyalty Point Entry")
+		frappe.db.delete("Loyalty Program")
+		frappe.db.delete("Property Setter", {"field_name": "loyalty_points_redemption"})
+
+		enable_loyalty_point_program()
+
+		# a site set up before the setting existed still shows the loyalty fields
+		self.assertTrue(is_loyalty_program_setting_on())
+
+	def test_patch_keeps_program_setting_off_when_unused_and_hidden(self):
+		# property setters change cached meta, which the rollback does not undo
+		self.addCleanup(frappe.clear_cache)
+		frappe.db.set_single_value("Accounts Settings", "enable_loyalty_point_program", 0)
+		frappe.db.delete("Loyalty Point Entry")
+		frappe.db.delete("Loyalty Program")
+		toggle_loyalty_point_program_section(True)
+
+		enable_loyalty_point_program()
+
+		self.assertFalse(is_loyalty_program_setting_on())
+
 
 def get_points_earned(self):
 	def get_returned_amount():
@@ -445,3 +508,7 @@ def make_loyalty_program(**values):
 	)
 	program.update(values)
 	return program
+
+
+def is_loyalty_program_setting_on():
+	return frappe.db.get_single_value("Accounts Settings", "enable_loyalty_point_program", cache=False)

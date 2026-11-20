@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, getdate, today
+from frappe.utils import cint, flt, get_link_to_form, getdate, today
 
 
 class LoyaltyProgram(Document):
@@ -76,6 +76,10 @@ class LoyaltyProgram(Document):
 					"The lowest tier must have a minimum spent amount of 0. Customers need to be part of a tier as soon as they are enrolled in the program."
 				)
 			)
+
+
+def is_loyalty_program_enabled() -> bool:
+	return bool(cint(frappe.db.get_single_value("Accounts Settings", "enable_loyalty_point_program")))
 
 
 def get_loyalty_details(
@@ -203,6 +207,13 @@ def get_redeemption_factor(loyalty_program: str | None = None, customer: str | N
 def validate_loyalty_points(ref_doc, points_to_redeem):
 	loyalty_program = None
 	posting_date = None
+
+	if points_to_redeem and not is_loyalty_program_enabled():
+		frappe.throw(
+			_(
+				"Loyalty Points cannot be redeemed because the Loyalty Point Program is disabled in {0}."
+			).format(get_link_to_form("Accounts Settings", "Accounts Settings"))
+		)
 
 	if ref_doc.doctype == "Sales Invoice":
 		posting_date = ref_doc.posting_date
