@@ -3786,6 +3786,42 @@ class TestWorkOrder(ERPNextTestSuite):
 		with patch.object(frappe.db, "get_value", side_effect=get_value):
 			self.assertEqual(get_disassembly_available_qty("Manufacture Entry"), 0.2)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_disassembly_after_process_loss_uses_the_finished_good_qty(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_disassembly_available_qty
+
+		rm_item = make_item("Test Loss Disassembly RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item("Test Loss Disassembly FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=10)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=40)
+
+		def make_work_order(manufacture_qtys):
+			work_order = make_wo_order_test_record(
+				production_item=fg_item,
+				bom_no=bom.name,
+				qty=10,
+				skip_transfer=1,
+				source_warehouse="_Test Warehouse - _TC",
+				stock_uom="Kg",
+			)
+			for qty in manufacture_qtys:
+				manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", qty))
+				manufacture.submit()
+			return work_order.name, manufacture.name
+
+		def disassembled_rm_qty(work_order, source_stock_entry=None):
+			disassembly = frappe.get_doc(
+				make_stock_entry(work_order, "Disassemble", 9, source_stock_entry=source_stock_entry)
+			)
+			return sum(row.qty for row in disassembly.items if row.item_code == rm_item)
+
+		work_order, manufacture = make_work_order([10])
+		self.assertEqual(get_disassembly_available_qty(manufacture), 9)
+		self.assertEqual(disassembled_rm_qty(work_order, manufacture), 10)
+
+		work_order, _ = make_work_order([5, 5])
+		self.assertEqual(disassembled_rm_qty(work_order), 10)
+
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
 		raw_item = make_item("Test Raw for Disassembly", {"is_stock_item": 1}).name
