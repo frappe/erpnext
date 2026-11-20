@@ -2906,13 +2906,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	set_gross_profit(item) {
-		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype) && item.valuation_rate) {
+		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype)) {
 			// valuation rate is per stock UOM, so compare it with the company currency rate per stock UOM
 			const rate =
 				(flt(item.rate) * flt(this.frm.doc.conversion_rate || 1)) /
 				(flt(item.conversion_factor) || 1);
 			item.gross_profit = flt(
-				(rate - item.valuation_rate) * item.stock_qty,
+				(rate - flt(item.valuation_rate)) * flt(item.stock_qty),
 				precision("gross_profit", item)
 			);
 		}
