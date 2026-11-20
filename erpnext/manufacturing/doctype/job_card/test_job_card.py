@@ -5070,6 +5070,13 @@ class TestJobCard(ERPNextTestSuite):
 			{"job_card_id": second_card.name, "complete_time": "2031-03-10 09:30:00"},
 		)
 
+		make_time_log(
+			{"job_card_id": second_card.name, "complete_time": "2031-03-10 11:00:00", "completed_qty": 1}
+		)
+		second_card.reload()
+		self.assertEqual(second_card.time_logs[0].time_in_mins, 60)
+		self.assertEqual(second_card.total_completed_qty, 1)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_job_card_lookups_follow_work_order_user_permissions(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
