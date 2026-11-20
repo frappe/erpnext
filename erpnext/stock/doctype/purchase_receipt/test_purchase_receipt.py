@@ -8119,6 +8119,51 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(entry.debit, entry.debit_in_account_currency)
 			self.assertEqual(entry.credit, entry.credit_in_account_currency)
 
+	def test_internal_receipt_return_takes_back_the_lot_it_received(self):
+		"""A return of an internal receipt with no delivery row link still takes back the lot it received."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(item_code=item_code, qty=3, rate=100, to_warehouse="Stores - TCP1", company=company)
+		make_stock_entry(
+			item_code=item_code, qty=10, rate=300, to_warehouse="Finished Goods - TCP1", company=company
+		)
+		dn = create_delivery_note(
+			item_code=item_code,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=3,
+			rate=100,
+			warehouse="Stores - TCP1",
+			target_warehouse="Goods In Transit - TCP1",
+		)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		# as on a return made before the delivery row link was copied onto it
+		purchase_return.items[0].delivery_note_item = None
+		purchase_return.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": purchase_return.name, "warehouse": "Finished Goods - TCP1", "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -300)
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry", {"voucher_no": purchase_return.name, "account": "Cost of Goods Sold - TCP1"}
+			)
+		)
+
 
 def create_company_without_ledger_entries():
 	return (
