@@ -367,11 +367,6 @@ erpnext.sales_common = {
 				if (this.frm.doc.commission_rate < 0 || this.frm.doc.commission_rate > 100) {
 					this.frm.set_value("commission_rate", this.frm.doc.commission_rate < 0 ? 0 : 100);
 					frappe.throw(
-<<<<<<< HEAD
-						`${__(
-							frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)
-						)} ${__("cannot be greater than 100")}`
-=======
 						__("{0} must be between 0 and 100", [
 							frappe.meta.get_translated_label(
 								this.frm.doc.doctype,
@@ -379,7 +374,6 @@ erpnext.sales_common = {
 								this.frm.doc.name
 							),
 						])
->>>>>>> bd5cac7 (fix(selling): refuse a negative commission rate in the form)
 					);
 				}
 
