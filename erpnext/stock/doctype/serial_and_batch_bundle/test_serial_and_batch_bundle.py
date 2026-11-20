@@ -419,7 +419,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		receipt = make_stock_entry(
 			item_code=item_code, qty=1, rate=100, target=warehouse, posting_date=add_days(today(), -10)
 		)
-		serial_nos = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_numbers_from_bundle(receipt.items[0].serial_and_batch_bundle)
 		same_time = {
 			"item_code": item_code,
 			"qty": 1,
@@ -453,7 +453,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			item_code=item_code,
 			qty=1,
 			source=warehouse,
-			serial_no=get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			serial_no=get_serial_numbers_from_bundle(receipt.items[0].serial_and_batch_bundle),
 			use_serial_batch_fields=1,
 			**posting,
 		)
@@ -2049,7 +2049,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 
 	def test_repost_keeps_zero_rate_of_returned_serial(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		item_code = make_item(
@@ -2072,8 +2072,8 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		paid_receipt = make_stock_entry(
 			item_code=item_code, qty=1, rate=100, target=warehouse, posting_date=add_days(today(), -10)
 		)
-		free_serial_no = get_serial_nos_from_bundle(free_receipt.items[0].serial_and_batch_bundle)[0]
-		paid_serial_no = get_serial_nos_from_bundle(paid_receipt.items[0].serial_and_batch_bundle)[0]
+		free_serial_no = get_serial_numbers_from_bundle(free_receipt.items[0].serial_and_batch_bundle)[0]
+		paid_serial_no = get_serial_numbers_from_bundle(paid_receipt.items[0].serial_and_batch_bundle)[0]
 
 		delivery_note = create_delivery_note(
 			item_code=item_code,
