@@ -9922,6 +9922,16 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(stock_value, 0)
 		self.assertEqual(valuation_rate, 0)
 
+		gl_entries = get_gl_entries("Purchase Receipt", purchase_return.name, skip_cancelled=True)
+		self.assertEqual(
+			{gle.account: (gle.debit, gle.credit) for gle in gl_entries},
+			{
+				"Stock In Hand - TCP1": (0, 1000),
+				"Stock Received But Not Billed - TCP1": (1200, 0),
+				"Cost of Goods Sold - TCP1": (0, 200),
+			},
+		)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
