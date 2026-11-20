@@ -1,6 +1,9 @@
 from collections import defaultdict
 
 import frappe
+from frappe.utils import now_datetime
+
+from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import build_invoice_query
 
 
 def execute():
@@ -11,11 +14,15 @@ def execute():
 	}
 	update_currency("POS Closing Entry", closing_currency)
 
-	opening_entries = get_entries_without_currency("POS Opening Entry", "pos_closing_entry")
+	opening_entries = get_entries_without_currency(
+		"POS Opening Entry", "pos_closing_entry", "status", "pos_profile", "user", "period_start_date"
+	)
 	stored_closing_currency = get_closing_entry_currency({d[2] for d in opening_entries if d[2]})
 	opening_currency = {
-		name: stored_closing_currency.get(closing_entry) or profile_currency
-		for name, profile_currency, closing_entry in opening_entries
+		name: stored_closing_currency.get(closing_entry)
+		or (status == "Open" and get_open_session_currency(pos_profile, user, start))
+		or profile_currency
+		for name, profile_currency, closing_entry, status, pos_profile, user, start in opening_entries
 	}
 	update_currency("POS Opening Entry", opening_currency)
 
@@ -55,6 +62,16 @@ def get_invoice_currency_by_closing_entry():
 			currency_by_closing_entry.setdefault(closing_entry, currency)
 
 	return currency_by_closing_entry
+
+
+def get_open_session_currency(pos_profile, user, start):
+	"""Currency of the invoices an open session has made so far, as its closing entry would collect them."""
+	for invoice_doctype in ("POS Invoice", "Sales Invoice"):
+		invoice = frappe.qb.DocType(invoice_doctype)
+		query = build_invoice_query(invoice_doctype, user, pos_profile, start, now_datetime())
+		rows = query.select(invoice.currency.as_("session_currency")).limit(1).run(as_dict=True)
+		if rows:
+			return rows[0].session_currency
 
 
 def get_closing_entry_currency(closing_entries):
