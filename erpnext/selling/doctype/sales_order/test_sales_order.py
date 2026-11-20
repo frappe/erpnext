@@ -4288,6 +4288,17 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code=bundle, qty=1, rate=1, do_not_submit=True)
 		self.assertEqual(so.items[0].rate, 400)
 
+	def test_product_bundle_valuation_rate_from_row_version(self):
+		bundle = make_item("_Test Bundle Valued From Its Version", {"is_stock_item": 0}).name
+		component = make_item("_Test Component Valued From Its Version", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_bundle_version(bundle, [{"item_code": component, "qty": 1}])
+		so = make_sales_order(item_code=bundle, qty=1, rate=150, do_not_submit=True)
+
+		make_bundle_version(bundle, [{"item_code": component, "qty": 10}])
+		so.save()
+		self.assertEqual(so.items[0].valuation_rate, 100)
+
 	@change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_selling_price_validation_for_manufactured_item(self):
 		"""
@@ -4844,3 +4855,10 @@ def make_sales_order_edit_perm_workflow():
 	workflow.insert(ignore_permissions=True)
 
 	return workflow
+
+
+def make_bundle_version(parent, items):
+	bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": parent, "items": items})
+	bundle.insert()
+	bundle.submit()
+	return bundle
