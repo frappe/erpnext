@@ -289,12 +289,12 @@ class TestWorkstation(ERPNextTestSuite):
 
 		self.assertEqual(submit_manufacture(work_order, 10), [0, 0.01, 0])
 
-	def test_partial_manufactures_add_up_to_the_actual_operating_cost(self):
+	def test_each_partial_manufacture_records_every_component(self):
 		workstation = make_workstation_with_equal_components("_Test WS Partial Cost")
-		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=2)
+		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=0.6)
 
-		amounts = [amount for qty in (1, 2, 7) for amount in submit_manufacture(work_order, qty)]
-		self.assertEqual(round(sum(amounts), 2), 0.1)
+		entries = [submit_manufacture(work_order, qty) for qty in (2, 2, 6)]
+		self.assertEqual(entries, [[0, 0, 0.01], [0, 0, 0], [0.01, 0, 0.01]])
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
 	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
