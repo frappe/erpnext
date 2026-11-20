@@ -183,8 +183,8 @@ def upsert_bundle_entries(
 
 @frappe.whitelist()
 def get_return_stock_qty(doc: dict | str, row_name: str, qty_field: str) -> float:
-	"""Stock qty a draft receipt return row moves for the qty field, as the server caps returns of parts
-	at what the original row has left."""
+	"""Stock qty the package of a draft receipt return row must hold for the qty field, as the server caps
+	some returns of parts at what the original row has left."""
 	from erpnext.controllers.sales_and_purchase_return import get_return_reference_field
 
 	doc = parse_json(doc)
@@ -200,10 +200,7 @@ def get_return_stock_qty(doc: dict | str, row_name: str, qty_field: str) -> floa
 	)
 	frappe.has_permission(doc.doctype, "read", doc=original_parent, throw=True)
 
-	stock_qty = (
-		doc.get_rejected_stock_qty(row) if qty_field == "rejected_qty" else doc.get_accepted_stock_qty(row)
-	)
-	return abs(flt(stock_qty))
+	return abs(flt(frappe.new_doc("Serial and Batch Bundle").get_row_qty(doc, row, qty_field)))
 
 
 def validate_parent_document(child_row, doc):

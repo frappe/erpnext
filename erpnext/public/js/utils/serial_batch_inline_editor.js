@@ -1349,7 +1349,7 @@ erpnext.stock.get_sbie_stock_qty = function (doc, row, qty_field, row_qty) {
 	);
 };
 
-// Stock qty the server takes back for a receipt return row, capped at what its original row has left.
+// Stock qty a receipt return row's package must hold, as the server caps some returns of parts.
 erpnext.stock.get_sbie_return_cap = async function (doc, row, qty_field) {
 	if (!doc.is_return || !["Purchase Receipt", "Purchase Invoice"].includes(doc.doctype)) return;
 
