@@ -433,6 +433,15 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 
 		self.assertFalse(is_loyalty_program_setting_on())
 
+	def test_redeem_without_program_is_refused(self):
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", None)
+
+		si = create_sales_invoice_record()
+		si.redeem_loyalty_points = 1
+		si.loyalty_points = 10
+
+		self.assertRaisesRegex(frappe.ValidationError, "not enrolled in a Loyalty Program", si.insert)
+
 
 def get_points_earned(self):
 	def get_returned_amount():
