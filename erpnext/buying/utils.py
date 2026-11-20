@@ -176,7 +176,7 @@ def get_linked_material_requests(items: str | list):
 	mr = frappe.qb.DocType("Material Request")
 	mr_item = frappe.qb.DocType("Material Request Item")
 
-	for item in items:
+	for item in set(items):
 		query = (
 			frappe.qb.from_(mr)
 			.join(mr_item)
