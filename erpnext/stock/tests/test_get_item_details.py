@@ -1047,6 +1047,8 @@ class TestGetItemDetail(ERPNextTestSuite):
 				self.assertEqual(details.price_list_rate, expected_rate)
 
 	def test_party_price_in_stock_uom_comes_before_general_price_in_row_uom(self):
+		from erpnext.stock.get_item_details import apply_price_list
+
 		item_code = self.make_multi_uom_item()
 		price_list = self.make_selling_price_list("_Test UOM Price List")
 		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
@@ -1055,6 +1057,15 @@ class TestGetItemDetail(ERPNextTestSuite):
 		details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
 
 		self.assertEqual(details.price_list_rate, 80)
+
+		# the bulk path must resolve a missing conversion factor before pricing
+		row = frappe._dict(
+			doctype="Sales Order Item", item_code=item_code, uom="_Test UOM 1", stock_uom="_Test UOM", qty=1
+		)
+		ctx = self.get_uom_rate_context(item_code, price_list.name)
+		ctx.pop("conversion_factor")
+		ctx.items = [row]
+		self.assertEqual(apply_price_list(ctx)["children"][0].price_list_rate, 80)
 
 	def test_party_price_in_stock_uom_fits_packing_unit_in_stock_qty(self):
 		item_code = self.make_multi_uom_item()
