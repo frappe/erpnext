@@ -746,7 +746,10 @@ class SellingController(StockController):
 				and not item_details.has_batch_no
 			):
 				# Get incoming rate based on original item cost based on valuation method
-				qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
+				if d.doctype == "Packed Item":
+					qty = flt(d.qty)
+				else:
+					qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
 
 				if old_doc:
 					reset_incoming_rate()
@@ -803,14 +806,7 @@ class SellingController(StockController):
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
 					if self.doctype == "Delivery Note" or self.get("update_stock"):
-						if d.doctype == "Packed Item":
-							incoming_rate = flt(
-								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
-								d.precision("incoming_rate"),
-							)
-							if d.incoming_rate != incoming_rate:
-								d.incoming_rate = incoming_rate
-						else:
+						if d.doctype != "Packed Item":
 							if allow_at_arms_length_price:
 								continue
 

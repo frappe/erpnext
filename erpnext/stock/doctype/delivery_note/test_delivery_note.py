@@ -2810,6 +2810,48 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(sorted(received), [5, 10])
 		self.assertEqual(frappe.db.count("Batch", {"item": component}), 1)
 
+	def test_internal_transfer_of_a_bundle_moves_component_value_into_transit(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		company = "_Test Company"
+		warehouse = "_Test Warehouse - _TC"
+		transit_warehouse = "Stores - _TC"
+		component = make_item(properties={"valuation_method": "FIFO"}).name
+		bundle_item = make_item(
+			properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		make_product_bundle(bundle_item, [component], qty=1)
+		customer = create_internal_customer(represents_company=company)
+
+		make_stock_entry(target=warehouse, qty=12, basic_rate=10, item_code=component)
+		make_stock_entry(target=warehouse, qty=88, basic_rate=20, item_code=component)
+
+		dn = create_delivery_note(
+			item_code=bundle_item,
+			company=company,
+			customer=customer,
+			qty=1,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+			do_not_submit=True,
+		)
+		dn.items[0].uom = "Box"
+		dn.items[0].conversion_factor = 12
+		dn.save()
+		dn.submit()
+
+		stock_value_difference = {
+			d.warehouse: d.stock_value_difference
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": dn.name, "is_cancelled": 0},
+				fields=["warehouse", "stock_value_difference"],
+			)
+		}
+		self.assertEqual(stock_value_difference[warehouse], -120)
+		self.assertEqual(stock_value_difference[transit_warehouse], 120)
+
 	def test_internal_transfer_return_carries_the_batch_back(self):
 		"""Material coming back from an in-transit warehouse returns under the batch it left with."""
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
