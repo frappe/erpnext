@@ -1228,8 +1228,8 @@ class StockReconciliation(StockController):
 				flt(d.current_qty) * flt(d.current_valuation_rate), d.precision("current_amount")
 			)
 
-			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
-			d.amount_difference = flt(d.amount) - flt(d.current_amount)
+			d.quantity_difference = flt(flt(d.qty) - flt(d.current_qty), d.precision("qty"))
+			d.amount_difference = flt(flt(d.amount) - flt(d.current_amount), d.precision("amount_difference"))
 
 	def recalculate_difference_amount_from_ledger(self, voucher_detail_no: str | None = None):
 		"""Sync the displayed current qty/rate and difference amount with the (reposted) ledger.
@@ -1279,7 +1279,7 @@ class StockReconciliation(StockController):
 				"current_qty": current_qty,
 				"current_valuation_rate": current_valuation_rate,
 				"current_amount": current_amount,
-				"quantity_difference": flt(row.qty) - current_qty,
+				"quantity_difference": flt(flt(row.qty) - current_qty, row.precision("qty")),
 				"amount_difference": amount_difference,
 			},
 			update_modified=False,
