@@ -7595,23 +7595,19 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.db_set("additional_operating_cost", 100)
 
 		wheel_entry, assembly_entry = self.complete_semi_fg_work_order(wo)
-		self.assertEqual(self.get_additional_operating_cost(wheel_entry), 0)
-		self.assertEqual(self.get_additional_operating_cost(assembly_entry), 100)
+		self.assertEqual(self.get_additional_cost(wheel_entry, "Additional Operating Cost"), 0)
+		self.assertEqual(self.get_additional_cost(assembly_entry, "Additional Operating Cost"), 100)
 
 	def test_semi_fg_entry_charges_non_stock_items_per_finished_good(self):
 		wo = self.make_car_with_four_wheels_work_order("Stores - _TC", service_rate=100)
-		wheel_jc = self.get_semi_fg_job_card(wo, wo.operations[0])
-		self.complete_semi_fg_job_card(wheel_jc, wheel_jc.for_quantity, "2024-03-01")
+		wheel_entry, assembly_entry = self.complete_semi_fg_work_order(wo)
 
-		wheel_entry = frappe.get_doc(wheel_jc.make_stock_entry_for_semi_fg_item())
-		non_stock_cost = sum(
-			flt(row.amount) for row in wheel_entry.additional_costs if row.description == "Non stock items"
-		)
-		# Work Order is for 1 car: the cost is the BOM amount, not 4 times it
+		# Work Order is for 1 car: the wheel step charges the BOM amount once, not 4 times
 		service_amount = frappe.db.get_value(
 			"BOM Item", {"parent": wo.bom_no, "item_code": "Test JCO Service"}, "base_amount"
 		)
-		self.assertEqual(non_stock_cost, service_amount)
+		self.assertEqual(self.get_additional_cost(wheel_entry, "Non stock items"), service_amount)
+		self.assertEqual(self.get_additional_cost(assembly_entry, "Non stock items"), 0)
 
 	def test_bom_from_semi_fg_work_order_keeps_operation_time(self):
 		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
@@ -7647,12 +7643,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.complete_semi_fg_work_order(wo)
 		self.assertEqual(wo.reload().produced_qty, 1)
 
-	def get_additional_operating_cost(self, stock_entry):
-		return sum(
-			flt(row.amount)
-			for row in stock_entry.additional_costs
-			if row.description == "Additional Operating Cost"
-		)
+	def get_additional_cost(self, stock_entry, description):
+		return sum(flt(row.amount) for row in stock_entry.additional_costs if row.description == description)
 
 	def complete_semi_fg_work_order(self, wo):
 		entries = []
