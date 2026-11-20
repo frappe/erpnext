@@ -442,6 +442,42 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "not enrolled in a Loyalty Program", si.insert)
 
+	def test_dashboard_shows_points_without_sales_invoice(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Loyalty POS Customer",
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+				"loyalty_program": "Test Single Loyalty",
+			}
+		).insert()
+		make_points_entry(customer.name, "Test Single Loyalty", 30, invoice_type="POS Invoice")
+		# not yet usable today, so not shown
+		make_points_entry(customer.name, "Test Single Loyalty", 40, posting_date=add_days(today(), 3))
+
+		info = get_dashboard_info("Customer", customer.name, customer.loyalty_program)
+
+		self.assertEqual(len(info), 1)
+		self.assertEqual(info[0]["company"], "_Test Company")
+		self.assertEqual(info[0]["loyalty_points"], 30)
+
+	def test_dashboard_shows_points_per_program(self):
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
+		make_points_entry("Test Loyalty Customer", "Test Multiple Loyalty", 200)
+		si = create_sales_invoice_record()
+		si.insert()
+		si.submit()
+
+		info = get_dashboard_info("Customer", "Test Loyalty Customer", "Test Single Loyalty")
+		company = next(d for d in info if d["company"] == "_Test Company")
+
+		self.assertEqual(company["loyalty_points"], 10)
+		self.assertEqual(
+			{d.loyalty_program: d.loyalty_points for d in company["loyalty_programs"]},
+			{"Test Single Loyalty": 10, "Test Multiple Loyalty": 200},
+		)
+
 
 def get_points_earned(self):
 	def get_returned_amount():
@@ -521,3 +557,19 @@ def make_loyalty_program(**values):
 
 def is_loyalty_program_setting_on():
 	return frappe.db.get_single_value("Accounts Settings", "enable_loyalty_point_program", cache=False)
+
+
+def make_points_entry(customer, loyalty_program, points, invoice_type="Sales Invoice", posting_date=None):
+	return frappe.get_doc(
+		{
+			"doctype": "Loyalty Point Entry",
+			"loyalty_program": loyalty_program,
+			"customer": customer,
+			"entry_type": "Earn",
+			"invoice_type": invoice_type,
+			"loyalty_points": points,
+			"expiry_date": add_days(today(), 10),
+			"posting_date": posting_date or today(),
+			"company": "_Test Company",
+		}
+	).insert(ignore_permissions=True)
