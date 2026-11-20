@@ -73,6 +73,13 @@ class TestGetLinkedMaterialRequests(ERPNextTestSuite):
 
 		self.assertEqual([(row.mr_name, row.stock_qty) for row in rows], [(material_request.name, 12)])
 
+	def test_repeated_item_code_returns_each_request_row_once(self):
+		rows = get_linked_material_requests(["_Test Item", "_Test Item"])
+
+		mr_items = [row.mr_item for row in rows]
+		self.assertIn(self.material_request.items[0].name, mr_items)
+		self.assertEqual(len(mr_items), len(set(mr_items)))
+
 	def test_empty_result_is_a_flat_empty_list(self):
 		item_without_request = make_item("_Test Item Without Material Request").name
 		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
