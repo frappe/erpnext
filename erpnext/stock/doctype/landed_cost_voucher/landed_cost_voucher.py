@@ -7,10 +7,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
-<<<<<<< HEAD
-=======
-from frappe.query_builder.functions import IfNull, Max, Sum
->>>>>>> 42258d5 (fix(stock): spread a landed cost on a Subcontracting Receipt over its finished goods only)
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, flt
 
 import erpnext
