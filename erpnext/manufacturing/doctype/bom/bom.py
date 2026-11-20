@@ -1060,7 +1060,9 @@ class BOM(WebsiteGenerator):
 
 		bom_items = get_bom_items(bom_no, self.company, qty=qty, fetch_exploded=0)
 		for row in bom_items:
+			# get_bom_items returns the qty in stock UOM
 			row.uom = row.stock_uom
+			row.conversion_factor = 1
 			row.operation_row_id = operation_row_id
 			row.idx = None
 			row.do_not_explode = 1
