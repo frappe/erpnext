@@ -2036,7 +2036,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			for row in frappe.get_all(
 				"Pick List Item",
 				filters={"name": ("in", list(pick_list_items))},
-				fields=["name", "warehouse", "picked_qty", "transferred_qty"],
+				fields=["name", "item_code", "warehouse", "picked_qty", "transferred_qty"],
 			)
 		}
 		precision = frappe.get_precision("Pick List Item", "transferred_qty")
@@ -2045,6 +2045,19 @@ class StockEntry(StockController, SubcontractingInwardController):
 			picked_row = picked_rows.get(d.pick_list_item)
 			if not picked_row:
 				continue
+
+			# validate_alternative_items checks original_item only for these entries
+			is_work_order_alternative = (
+				self.work_order
+				and self.purpose in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES
+				and d.original_item == picked_row.item_code
+			)
+			if d.item_code != picked_row.item_code and not is_work_order_alternative:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not the item {2} picked in {3}.").format(
+						d.idx, frappe.bold(d.item_code), frappe.bold(picked_row.item_code), self.pick_list
+					)
+				)
 
 			if d.s_warehouse and d.s_warehouse != picked_row.warehouse:
 				frappe.throw(
