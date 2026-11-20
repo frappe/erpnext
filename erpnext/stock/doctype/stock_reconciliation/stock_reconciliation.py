@@ -296,7 +296,9 @@ class StockReconciliation(StockController):
 						}
 					)
 
-				if not item.valuation_rate:
+				# the form fills a zero rate for batch items, so keep zero only when it is allowed
+				keep_zero_rate = item.valuation_rate == 0 and item.allow_zero_valuation_rate
+				if not item.valuation_rate and not keep_zero_rate:
 					item.valuation_rate = item.current_valuation_rate
 				continue
 
