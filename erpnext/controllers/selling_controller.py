@@ -979,6 +979,13 @@ class SellingController(StockController):
 				if d.get("po_no")
 			]
 
+	@frappe.whitelist()
+	def process_item_selection(
+		self, item_idx: int, reset_item_details: bool = False, parentfield: str = "items"
+	):
+		super().process_item_selection(item_idx, reset_item_details, parentfield)
+		self.set_gross_profit()
+
 	def set_gross_profit(self):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
