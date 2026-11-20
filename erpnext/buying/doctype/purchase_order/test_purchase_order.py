@@ -613,9 +613,6 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 150)
 
-<<<<<<< HEAD
-	@change_settings("Buying Settings", {"allow_multiple_items": 0})
-=======
 	def test_last_purchase_details_carry_discount_amount(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_discounted_purchase_order(item)
