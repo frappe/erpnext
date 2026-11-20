@@ -375,8 +375,9 @@ def update_subcontracted_received_qty(subcontracting_order_items: list[str]):
 	for row in po_items:
 		sub_assembly_received_qty[row.production_plan_sub_assembly_item] += flt(received_qty.get(row.name))
 
+	precision = frappe.get_precision("Production Plan Sub Assembly Item", "received_qty")
 	for name, qty in sub_assembly_received_qty.items():
-		frappe.db.set_value("Production Plan Sub Assembly Item", name, "received_qty", qty)
+		frappe.db.set_value("Production Plan Sub Assembly Item", name, "received_qty", flt(qty, precision))
 
 	# so an open plan form can't save its stale received qty back
 	frappe.db.set_value(
