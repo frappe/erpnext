@@ -956,7 +956,8 @@ class PurchaseInvoice(BuyingController):
 		self.refresh_subscription_status()
 
 	def update_project(self):
-		update_purchase_cost({d.project for d in self.items if d.project})
+		projects = {row.project or self.project for row in self.items}
+		update_purchase_cost(projects - {None, ""})
 
 	def validate_supplier_invoice(self):
 		if self.bill_no:
