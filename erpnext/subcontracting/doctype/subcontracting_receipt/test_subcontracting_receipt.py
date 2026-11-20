@@ -631,6 +631,21 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_full_return_of_receipt_with_process_loss_returns_its_secondary_items(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10, process_loss_qty=2)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items()
+		scr_return.save()
+		scr_return.submit()
+
+		scr.load_from_db()
+		self.assertEqual(scr.items[1].returned_qty, 5)
+		self.assertEqual(scr.status, "Return Issued")
+
 	def test_batch_return_value_matches_receipt(self):
 		fg_item = make_item(
 			properties={
@@ -5819,7 +5834,7 @@ def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, seconda
 	return bom
 
 
-def make_receipt_with_secondary_items(fg_item, qty):
+def make_receipt_with_secondary_items(fg_item, qty, process_loss_qty=0):
 	"""Submitted receipt for qty of fg_item, with its secondary rows."""
 	set_backflush_based_on("BOM")
 	service_items = [
@@ -5841,6 +5856,8 @@ def make_receipt_with_secondary_items(fg_item, qty):
 		itemwise_details=copy.deepcopy(itemwise_details),
 	)
 	scr = make_subcontracting_receipt(sco.name)
+	scr.items[0].qty = qty - process_loss_qty
+	scr.items[0].process_loss_qty = process_loss_qty
 	scr.save()
 	scr.get_secondary_items()
 	scr.save()
