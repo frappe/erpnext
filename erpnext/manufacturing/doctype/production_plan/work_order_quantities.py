@@ -38,8 +38,13 @@ class ProductionPlanWorkOrderQuantities:
 			round_up_to_whole_unit(row.order_qty * (1 + allowance / 100) - committed, row.stock_uom),
 			precision,
 		)
+		# the stored status, as the one on the document is not trusted before submit
+		is_closed = frappe.db.get_value("Work Order", work_order.name, "status") == "Closed"
 		committed_qty = flt(
-			self._get_committed_qty(work_order, process_loss_qty, row.process_loss_percentage), precision
+			self._get_committed_qty(
+				work_order, process_loss_qty, row.process_loss_percentage, is_closed=is_closed
+			),
+			precision,
 		)
 		if committed_qty > maximum_qty:
 			frappe.throw(
@@ -104,7 +109,12 @@ class ProductionPlanWorkOrderQuantities:
 		)
 
 	def get_pending_quantities(self, plan):
+<<<<<<< HEAD:erpnext/manufacturing/doctype/production_plan/work_order_quantities.py
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+=======
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			get_qty_before_process_loss,
+>>>>>>> d614a33 (fix(manufacturing): count a closed Work Order as its made qty in the Production Plan):erpnext/manufacturing/doctype/production_plan/services/work_order_quantities.py
 			round_up_to_whole_unit,
 		)
 
@@ -115,12 +125,15 @@ class ProductionPlanWorkOrderQuantities:
 			("po_items", "production_plan_item"),
 			("sub_assembly_items", "production_plan_sub_assembly_item"),
 		):
+			# round up only the rest, so output already made is not ordered again for rounding
 			pending[reference_field] = {
 				row.name: max(
 					0,
 					flt(
 						round_up_to_whole_unit(
-							self.get_order_qty(row, reference_field)
+							get_qty_before_process_loss(
+								row.get(QTY_FIELDS[reference_field]), row.process_loss_percentage, uom=None
+							)
 							- committed[reference_field].get(row.name, 0),
 							row.stock_uom,
 						),
@@ -158,11 +171,31 @@ class ProductionPlanWorkOrderQuantities:
 		if exclude_work_order:
 			query = query.where(table.name != exclude_work_order)
 		if reference_field:
+<<<<<<< HEAD:erpnext/manufacturing/doctype/production_plan/work_order_quantities.py
 			query = query.where(table[reference_field] == reference_name)
 		# Use a current locking read so concurrent submissions see committed quantities.
 		if for_update:
 			query = query.for_update()
 		work_orders = query.run(as_dict=True)
+=======
+			filters[reference_field] = reference_name
+
+		# Read rows instead of an aggregate so MariaDB uses a current locking read on submit.
+		work_orders = frappe.qb.get_query(
+			"Work Order",
+			fields=[
+				"production_plan_item",
+				"production_plan_sub_assembly_item",
+				"qty",
+				"produced_qty",
+				"process_loss_qty",
+				"status",
+			],
+			filters=filters,
+			for_update=for_update,
+			order_by="name",
+		).run(as_dict=True)
+>>>>>>> d614a33 (fix(manufacturing): count a closed Work Order as its made qty in the Production Plan):erpnext/manufacturing/doctype/production_plan/services/work_order_quantities.py
 		loss_percentages = self.get_planned_loss_percentages()
 		quantities = {
 			"production_plan_item": defaultdict(float),
@@ -180,6 +213,7 @@ class ProductionPlanWorkOrderQuantities:
 					work_order.process_loss_qty,
 					loss_percentages.get(work_order[field]),
 					credit_produced_qty,
+					is_closed=work_order.status == "Closed",
 				)
 		return quantities
 
@@ -198,7 +232,12 @@ class ProductionPlanWorkOrderQuantities:
 		return loss_percentages
 
 	def _get_committed_qty(
-		self, work_order, process_loss_qty, planned_loss_percentage, credit_produced_qty=False
+		self,
+		work_order,
+		process_loss_qty,
+		planned_loss_percentage,
+		credit_produced_qty=False,
+		is_closed=False,
 	):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_planned_loss_percentage,
@@ -208,10 +247,14 @@ class ProductionPlanWorkOrderQuantities:
 		good_qty = flt(work_order.qty) - max(
 			flt(process_loss_qty), flt(work_order.qty) * loss_percentage / 100
 		)
-		committed_qty = good_qty / (1 - loss_percentage / 100)
 		produced_qty = flt(work_order.produced_qty)
 		if credit_produced_qty:
 			# Output above the planned loss offsets another Work Order's excess loss.
 			produced_qty /= 1 - loss_percentage / 100
 		# Excess loss in existing records must not erase finished goods already produced.
-		return max(0, produced_qty, committed_qty)
+		committed_qty = max(0, produced_qty, good_qty / (1 - loss_percentage / 100))
+		if is_closed:
+			# A closed Work Order makes nothing more, so its unmade qty and loss are ordered again.
+			# Closing never raises its count, so it cannot push other Work Orders over the plan.
+			return min(committed_qty, flt(work_order.produced_qty) / (1 - loss_percentage / 100))
+		return committed_qty
