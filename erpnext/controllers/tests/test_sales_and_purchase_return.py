@@ -341,8 +341,10 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, return_in_nos(dn, -5, 2400).insert)
 		return_in_nos(dn, -5, 200).submit()
 		# the 7 Nos left are no whole Box, so they are mapped in stock UOM
-		next_return = make_return_doc(dn.doctype, dn.name).items[0]
-		self.assertEqual((next_return.uom, next_return.qty, next_return.rate), ("Nos", -7, 200))
+		next_return = make_return_doc(dn.doctype, dn.name)
+		row = next_return.items[0]
+		self.assertEqual((row.uom, row.qty, row.rate), ("Nos", -7, 200))
+		next_return.insert()
 
 		si = submit_one_box(create_sales_invoice(item_code=item_code, do_not_submit=True))
 		return_in_nos(si, -5, 200).insert()
@@ -429,9 +431,11 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		)
 		debit_note.submit()
 
-		row = make_return_doc(pi.doctype, pi.name).items[0]
+		next_return = make_return_doc(pi.doctype, pi.name)
+		row = next_return.items[0]
 		# the 7 Nos left are no whole Box, so they are mapped in stock UOM
 		self.assertEqual((row.uom, row.qty, row.received_qty, row.rate), ("Nos", -7, -7, 100))
+		next_return.insert()
 
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
