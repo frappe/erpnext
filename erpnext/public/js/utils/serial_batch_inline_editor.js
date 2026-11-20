@@ -1353,11 +1353,12 @@ erpnext.stock.get_sbie_stock_qty = function (doc, row, qty_field, row_qty) {
 erpnext.stock.get_sbie_return_cap = async function (doc, row, qty_field) {
 	if (!doc.is_return || !["Purchase Receipt", "Purchase Invoice"].includes(doc.doctype)) return;
 
+	const qty = row[qty_field];
 	const stock_qty = await frappe.xcall(
 		"erpnext.stock.doctype.serial_and_batch_bundle.inline_editor.get_return_stock_qty",
 		{ doc: doc, row_name: row.name, qty_field: qty_field }
 	);
-	return { qty: row[qty_field], stock_qty: stock_qty };
+	return { qty: qty, stock_qty: stock_qty };
 };
 
 // Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
