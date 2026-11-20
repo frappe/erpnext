@@ -2402,11 +2402,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	set_gross_profit(item) {
+<<<<<<< HEAD
 		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype) && item.valuation_rate) {
 <<<<<<< HEAD
 			var rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
 			item.gross_profit = flt(((rate - item.valuation_rate) * item.stock_qty), precision("amount", item));
 =======
+=======
+		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype)) {
+>>>>>>> 418ab20 (fix(selling): set gross profit in the form for a zero valuation rate)
 			// valuation rate is per stock UOM, so compare it with the company currency rate per stock UOM
 			const rate =
 				(flt(item.rate) * flt(this.frm.doc.conversion_rate || 1)) /
@@ -2416,7 +2420,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 >>>>>>> b09add1 (fix(selling): compare the rate per stock UOM with the valuation rate in the form's gross profit)
 =======
 			item.gross_profit = flt(
-				(rate - item.valuation_rate) * item.stock_qty,
+				(rate - flt(item.valuation_rate)) * flt(item.stock_qty),
 				precision("gross_profit", item)
 			);
 >>>>>>> 5a4920d (fix(selling): round the form's gross profit to its own precision)
