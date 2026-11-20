@@ -1831,8 +1831,12 @@ class TestProductionPlan(ERPNextTestSuite):
 				row.type_of_manufacturing = "Material Request"
 		plan.save()
 
-		items = get_items_for_material_requests(plan.as_dict())
-		self.assertEqual([(row.get("item_code"), row.get("quantity")) for row in items], [(sub_assembly, 2)])
+		for include_subcontracted_items in (0, 1):
+			plan.include_subcontracted_items = include_subcontracted_items
+			items = get_items_for_material_requests(plan.as_dict())
+			self.assertEqual(
+				[(row.get("item_code"), row.get("quantity")) for row in items], [(sub_assembly, 2)]
+			)
 
 	def test_sub_assembly_bought_for_one_row_is_still_made_for_another(self):
 		for item in (
