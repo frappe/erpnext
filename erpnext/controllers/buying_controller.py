@@ -1127,7 +1127,7 @@ class BuyingController(SubcontractingController):
 
 		for d in self.get("items"):
 			if not flt(d.received_qty) and (flt(d.qty) or flt(d.rejected_qty)):
-				d.received_qty = flt(d.qty) + flt(d.rejected_qty)
+				d.received_qty = flt(flt(d.qty) + flt(d.rejected_qty), d.precision("received_qty"))
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
