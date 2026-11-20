@@ -37,7 +37,7 @@ def get_data(filters):
 			"`tabSerial and Batch Entry`.`qty`",
 		],
 		filters=filter_conditions,
-		order_by="posting_datetime",
+		order_by="`tabSerial and Batch Bundle`.`posting_datetime`",
 	)
 
 
