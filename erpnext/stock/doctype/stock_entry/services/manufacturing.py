@@ -100,8 +100,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		return item_args
 
 	def add_secondary_items(self):
-		secondary_items = get_secondary_items(self.doc.bom_no, self.doc.work_order)
-		for row in secondary_items:
+		for row in self.get_bom_secondary_items():
 			item_args = self.get_item_dict(row)
 			item_args["valuation_type"] = row.get("valuation_type")
 			item_args["secondary_item_type"] = row.secondary_item_type
@@ -129,6 +128,9 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
 			item_args["transfer_qty"] = item_args["qty"]
 			self.doc.append("items", item_args)
+
+	def get_bom_secondary_items(self):
+		return get_secondary_items(self.doc.bom_no, self.doc.work_order)
 
 	def set_process_loss_qty(self):
 		process_loss_qty = self.doc.get_pending_process_loss_qty()
@@ -1103,10 +1105,24 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			)
 		}
 
-	def get_secondary_items_from_job_card(self):
-		if not self.wo_doc.operations:
+	def get_bom_secondary_items(self):
+		"""Skip the BOM estimate of a secondary item whose actual qty the Job Cards recorded."""
+		recorded = {(row.item_code, row.secondary_item_type) for row in self.get_job_card_secondary_items()}
+		return [
+			row
+			for row in super().get_bom_secondary_items()
+			if (row.item_code, row.secondary_item_type) not in recorded
+		]
+
+	def get_job_card_secondary_items(self):
+		if not self.wo_doc or not self.wo_doc.operations:
 			return []
-		secondary_items = get_secondary_items_from_job_card(self.doc.work_order, self.doc.job_card)
+		return get_secondary_items_from_job_card(self.doc.work_order, self.doc.job_card)
+
+	def get_secondary_items_from_job_card(self):
+		secondary_items = self.get_job_card_secondary_items()
+		if not secondary_items:
+			return []
 		pending_qty = self._get_pending_secondary_qty()
 		used_secondary_items = self.get_used_secondary_items()
 		self._adjust_secondary_item_qtys(secondary_items, used_secondary_items, pending_qty)
