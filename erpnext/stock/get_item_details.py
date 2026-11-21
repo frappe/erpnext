@@ -1562,8 +1562,11 @@ def apply_item_price_order(query, ip):
 
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
-def get_batch_based_item_price(ctx: ItemDetailsCtx, item_code: str):
+def get_batch_based_item_price(ctx: ItemDetailsCtx, item_code: str, doc: Document | str | dict | None = None):
 	validate_pricing_context(ctx)
+	if get_rate_locked_source_row(ctx, doc):
+		return 0.0
+
 	return _get_batch_based_item_price(ctx, item_code)
 
 
