@@ -552,6 +552,97 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 			)
 		)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_unreconcile_advance_in_separate_account_with_immutable_ledger(self):
+		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", 1)
+		advance_account = "Advance Received - _TC"
+		frappe.db.set_value("Company", self.company, "default_advance_received_account", advance_account)
+
+		pe = self.create_payment_entry()
+		pe.paid_amount = 100
+		pe.save().submit()
+		self.assertTrue(pe.book_advance_payments_in_separate_party_account)
+		self.assertEqual(pe.paid_from, advance_account)
+		si = self.create_sales_invoice()
+
+		pr = frappe.get_doc(
+			{
+				"doctype": "Payment Reconciliation",
+				"company": self.company,
+				"party_type": "Customer",
+				"party": self.customer,
+				"receivable_payable_account": self.debit_to,
+				"default_advance_account": advance_account,
+			}
+		)
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.get("invoices") if x.invoice_number == si.name]
+		payments = [x.as_dict() for x in pr.get("payments") if x.reference_name == pe.name]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		reconciled_gl = self.get_ledger_snapshot("GL Entry", pe.name)
+		reconciled_ple = self.get_ledger_snapshot("Payment Ledger Entry", pe.name)
+		# reconciliation moves the advance from the advance account to the receivable
+		self.assertEqual(self.get_gl_balance(pe.name, advance_account), 0)
+		self.assertEqual(self.get_gl_balance(pe.name, self.debit_to), -100)
+
+		self.unreconcile_payment(pe)
+
+		# reverse entries are posted, and the original entries are left untouched
+		unreconciled_gl = self.get_ledger_snapshot("GL Entry", pe.name)
+		self.assertEqual(len(unreconciled_gl), len(reconciled_gl) + 2)
+		self.assertTrue(reconciled_gl.items() <= unreconciled_gl.items())
+		self.assertTrue(
+			reconciled_ple.items() <= self.get_ledger_snapshot("Payment Ledger Entry", pe.name).items()
+		)
+		self.assertEqual(self.get_gl_balance(pe.name, advance_account), -100)
+		self.assertEqual(self.get_gl_balance(pe.name, self.debit_to), 0)
+
+		si.reload()
+		pe.reload()
+		self.assertEqual(si.outstanding_amount, 100)
+		self.assertEqual(pe.unallocated_amount, 100)
+		self.assert_no_references_left(pe)
+
+		self.disable_advance_as_liability()
+
+	def unreconcile_payment(self, payment):
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": payment.doctype,
+				"voucher_no": payment.name,
+			}
+		)
+		unreconcile.add_references()
+		unreconcile.save().submit()
+
+	def get_ledger_snapshot(self, doctype, voucher_no):
+		return dict(
+			frappe.get_all(
+				doctype, filters={"voucher_no": voucher_no}, fields=["name", "modified"], as_list=1
+			)
+		)
+
+	def get_gl_balance(self, voucher_no, account):
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": voucher_no, "account": account, "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+		return sum(x.debit - x.credit for x in gl_entries)
+
+	def assert_no_references_left(self, payment):
+		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
+			doc_has_references,
+			get_linked_payments_for_doc,
+		)
+
+		self.assertEqual(get_linked_payments_for_doc(self.company, payment.doctype, payment.name), [])
+		self.assertEqual(doc_has_references(payment.doctype, payment.name), 0)
+
 	def test_unreconcile_advance_from_journal_entry(self):
 		po = create_purchase_order(
 			company=self.company,
