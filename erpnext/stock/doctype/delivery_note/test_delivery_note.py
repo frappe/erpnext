@@ -483,6 +483,27 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertTrue(serial_no in serial_nos)
 			self.assertFalse(serial_no in returned_serial_nos1)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_returns_of_parts_of_a_delivery_add_up_to_its_stock_qty(self):
+		"""Returns of parts of a row whose stock qty rounds unevenly can return all of it."""
+		item = make_item(
+			"_Test Item For Returns Of Parts",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		dn = create_delivery_note(item_code=item, qty=6, rate=100, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		dn.submit()
+
+		first_return = make_sales_return(dn.name)
+		first_return.items[0].qty = -3
+		first_return.submit()
+		make_sales_return(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.items[0].returned_qty, dn.items[0].stock_qty)
+		self.assertEqual(dn.per_returned, 100)
+
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
