@@ -2068,15 +2068,21 @@ def future_sle_exists(args, sl_entries=None, for_update=False):
 
 	or_conditions = get_conditions_to_validate_future_sle(sl_entries)
 
-	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
+	posting_datetime = get_combine_datetime(args["posting_date"], args["posting_time"])
+	args["posting_datetime"] = posting_datetime
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
+	# same-time entries sort by creation, so only those created after this voucher's come later
+	is_later = sle.posting_datetime > posting_datetime
+	if creation := get_voucher_sle_creation(args):
+		is_later |= (sle.posting_datetime == posting_datetime) & (sle.creation > creation)
+
 	query = (
 		frappe.qb.from_(sle)
 		.select(sle.item_code, sle.warehouse, Count(sle.name).as_("total_row"))
 		.where(
 			Criterion.any(or_conditions)
-			& (sle.posting_datetime >= args["posting_datetime"])
+			& is_later
 			& (sle.voucher_no != args["voucher_no"])
 			& (sle.is_cancelled == 0)
 		)
@@ -2126,6 +2132,16 @@ def get_cached_data(args, key):
 		return True if (count or count == 0) else False
 	else:
 		return frappe.local.future_sle[key]
+
+
+def get_voucher_sle_creation(args):
+	"""Creation of the voucher's first SLE, cancelled ones included."""
+	return frappe.db.get_value(
+		"Stock Ledger Entry",
+		{"voucher_type": args.voucher_type, "voucher_no": args.voucher_no},
+		"creation",
+		order_by="creation asc",
+	)
 
 
 def get_sle_entries_against_voucher(args):
