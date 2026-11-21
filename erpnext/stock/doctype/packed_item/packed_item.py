@@ -19,6 +19,7 @@ from erpnext.stock.get_item_details import (
 	get_item_details,
 	get_price_list_rate,
 )
+from erpnext.stock.utils import is_serial_no_wise_valuation_disabled
 
 
 class PackedItem(Document):
@@ -284,6 +285,13 @@ def get_stale_row_idx(stale_rows, location=None):
 	if not location:
 		return 0
 	return next((idx for idx, row in enumerate(stale_rows) if is_packed_from(row, location)), 0)
+
+
+def set_incoming_rate_from_bundle(row, bundle):
+	"""Rate of the serial or batch nos picked on submit; validate looked it up before they were picked."""
+	# serial nos valued as one pool carry no rate of their own
+	if not is_serial_no_wise_valuation_disabled(row.item_code):
+		row.db_set("incoming_rate", flt(bundle.avg_rate, row.precision("incoming_rate")))
 
 
 def get_location_filters(row) -> dict:
