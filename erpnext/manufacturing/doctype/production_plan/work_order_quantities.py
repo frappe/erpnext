@@ -108,7 +108,7 @@ class ProductionPlanWorkOrderQuantities:
 			round_up_to_whole_unit,
 		)
 
-		committed = self.get_committed_quantities(include_drafts=True)
+		committed = self.get_committed_quantities(include_drafts=True, credit_produced_qty=True)
 		precision = frappe.get_precision("Work Order", "qty")
 		pending = {}
 		for table, reference_field in (
@@ -139,6 +139,7 @@ class ProductionPlanWorkOrderQuantities:
 		reference_name=None,
 		for_update=False,
 		include_drafts=False,
+		credit_produced_qty=False,
 	):
 		table = frappe.qb.DocType("Work Order")
 		query = (
@@ -178,6 +179,7 @@ class ProductionPlanWorkOrderQuantities:
 					work_order,
 					work_order.process_loss_qty,
 					loss_percentages.get(work_order[field]),
+					credit_produced_qty,
 				)
 		return quantities
 
@@ -195,7 +197,9 @@ class ProductionPlanWorkOrderQuantities:
 			)
 		return loss_percentages
 
-	def _get_committed_qty(self, work_order, process_loss_qty, planned_loss_percentage):
+	def _get_committed_qty(
+		self, work_order, process_loss_qty, planned_loss_percentage, credit_produced_qty=False
+	):
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_planned_loss_percentage,
 		)
@@ -205,5 +209,9 @@ class ProductionPlanWorkOrderQuantities:
 			flt(process_loss_qty), flt(work_order.qty) * loss_percentage / 100
 		)
 		committed_qty = good_qty / (1 - loss_percentage / 100)
+		produced_qty = flt(work_order.produced_qty)
+		if credit_produced_qty:
+			# Output above the planned loss offsets another Work Order's excess loss.
+			produced_qty /= 1 - loss_percentage / 100
 		# Excess loss in existing records must not erase finished goods already produced.
-		return max(0, flt(work_order.produced_qty), committed_qty)
+		return max(0, produced_qty, committed_qty)
