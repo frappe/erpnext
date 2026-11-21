@@ -27,6 +27,7 @@
   "allow_zero_rate",
   "recreate_stock_ledgers",
   "recalculate_valuation_rate",
+  "skip_unchanged_entries",
   "error_section",
   "error_log",
   "reposting_info_section",
@@ -267,6 +268,13 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Recalculate Valuation Rate"
+  },
+  {
+   "default": "0",
+   "description": "Stop reposting an item and warehouse at a later Stock Reconciliation, or when its balance is the same as the saved ledger. Reposts made by stock transactions set this.",
+   "fieldname": "skip_unchanged_entries",
+   "fieldtype": "Check",
+   "label": "Skip Unchanged Entries"
   }
  ],
  "grid_page_length": 50,
@@ -274,7 +282,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-13 12:00:00.000000",
+ "modified": "2026-11-20 08:25:48.465846",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
