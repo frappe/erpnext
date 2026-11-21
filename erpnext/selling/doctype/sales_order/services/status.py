@@ -44,7 +44,9 @@ class StatusService:
 		if status == "Draft" and doc.docstatus == 1:
 			doc.check_credit_limit()
 		doc.update_reserved_qty()
-		SubcontractingService(doc).update_subcontracting_order_status()
+		# hold and reopen leave the inward orders as they are: a user may have closed them on purpose
+		if status == "Closed":
+			SubcontractingService(doc).update_subcontracting_order_status()
 		doc.notify_update()
 		clear_doctype_notifications(doc)
 		doc.update_blanket_order()
