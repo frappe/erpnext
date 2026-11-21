@@ -1255,6 +1255,44 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			)
 		)
 
+	def test_debit_note_without_stock_does_not_count_towards_the_last_stock_return(self):
+		pi = make_purchase_invoice(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			update_stock=1,
+			qty=3,
+			rate=100,
+			do_not_save=True,
+		)
+		pi.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"charge_type": "Actual",
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 100,
+			},
+		)
+		pi.insert().submit()
+
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.update_stock = 0
+		debit_note.items[0].update({"qty": -1, "received_qty": -1})
+		debit_note.submit()
+
+		stock_returns = []
+		for _ in range(2):
+			return_pi = make_return_doc(pi.doctype, pi.name)
+			return_pi.items[0].update({"qty": -1, "received_qty": -1})
+			return_pi.submit()
+			stock_returns.append(return_pi)
+
+		self.assertEqual([return_pi.taxes[0].tax_amount for return_pi in stock_returns], [-33.33, -33.33])
+
 	def test_multi_currency_gle(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",

@@ -4372,6 +4372,83 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
+	def test_return_reverses_the_charge_it_was_mapped_from(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_receipt_with_freight_charges(10, 30)
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.remove(pr_return.taxes[0])
+		pr_return.submit()
+
+		self.assertEqual([tax.tax_amount for tax in pr_return.taxes], [-30])
+
+	def test_return_reverses_each_charge_once_when_a_mapped_charge_is_duplicated(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_receipt_with_freight_charges(10, 30)
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.remove(pr_return.taxes[0])
+		pr_return.append("taxes", {**pr_return.taxes[0].as_dict(), "name": None, "idx": None})
+		pr_return.submit()
+
+		self.assertEqual([tax.tax_amount for tax in pr_return.taxes], [-30, -10])
+
+	def test_returns_in_parts_reverse_the_whole_actual_valuation_charge(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		company = "_Test Company with perpetual inventory"
+		for currency, conversion_rate, charge, expected in (
+			("INR", 1, 100, [-33.33, -33.33, -33.34]),
+			("INR", 1, -100, [33.33, 33.33, 33.34]),
+			# the rest is taken in company currency: 100.50 - 33.50 - 33.50 is 33.50, which is 33.33 USD
+			("USD", 1.005, 100, [-33.33, -33.33, -33.33]),
+		):
+			with self.subTest(currency=currency, charge=charge):
+				pr = make_purchase_receipt(
+					company=company,
+					currency=currency,
+					conversion_rate=conversion_rate,
+					warehouse="Stores - TCP1",
+					supplier_warehouse="Work In Progress - TCP1",
+					item_code=make_item(properties={"is_stock_item": 1}).name,
+					qty=3,
+					rate=100,
+					do_not_submit=True,
+				)
+				pr.append(
+					"taxes",
+					{
+						"category": "Valuation",
+						"charge_type": "Actual",
+						"account_head": "Expenses Included In Valuation - TCP1",
+						"description": "Freight",
+						"tax_amount": charge,
+					},
+				)
+				pr.submit()
+
+				returns = []
+				for _ in range(3):
+					pr_return = make_purchase_return(pr.name)
+					pr_return.items[0].update({"qty": -1, "received_qty": -1})
+					pr_return.submit()
+					returns.append(pr_return)
+
+				# the last return takes the rest of the charge, as the stock ledger takes the rest of the stock value
+				self.assertEqual([pr_return.taxes[0].tax_amount for pr_return in returns], expected)
+				self.assertFalse(
+					frappe.db.exists(
+						"GL Entry",
+						{
+							"voucher_no": ["in", [pr_return.name for pr_return in returns]],
+							"account": "Cost of Goods Sold - TCP1",
+							"is_cancelled": 0,
+						},
+					)
+				)
+
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
@@ -10380,6 +10457,31 @@ def get_items(**args):
 			"cost_center": args.cost_center or "Main - _TC",
 		},
 	]
+
+
+def make_receipt_with_freight_charges(*tax_amounts):
+	"""Submitted receipt for Qty 1 at Rate 100 with an Actual valuation charge on one account and
+	description for each amount."""
+	pr = make_purchase_receipt(
+		company="_Test Company with perpetual inventory",
+		warehouse="Stores - TCP1",
+		supplier_warehouse="Work In Progress - TCP1",
+		qty=1,
+		rate=100,
+		do_not_submit=True,
+	)
+	for tax_amount in tax_amounts:
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"description": "Freight",
+				"tax_amount": tax_amount,
+			},
+		)
+	return pr.submit()
 
 
 def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:

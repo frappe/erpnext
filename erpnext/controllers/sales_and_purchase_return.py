@@ -439,7 +439,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	return valid_items
 
 
-def get_already_returned_items(doc):
+def get_already_returned_items(doc, stock_returns_only=False):
 	child = DocType(f"{doc.doctype} Item")
 	par = DocType(doc.doctype)
 
@@ -468,6 +468,8 @@ def get_already_returned_items(doc):
 		.where((par.docstatus == 1) & (par.is_return == 1) & (par.return_against == doc.return_against))
 		.groupby(child.item_code, child[field])
 	)
+	if stock_returns_only and doc.doctype == "Purchase Invoice":
+		query = query.where(par.update_stock == 1)
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		query = query.select(
 			Sum(rejected_qty).as_("rejected_qty"),
@@ -952,6 +954,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				"condition": item_condition,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
+			"Purchase Taxes and Charges": {
+				"doctype": "Purchase Taxes and Charges",
+				"field_map": {"name": "original_tax_row"},
+			},
 			"Packed Item": {
 				"doctype": "Packed Item",
 				"field_map": {

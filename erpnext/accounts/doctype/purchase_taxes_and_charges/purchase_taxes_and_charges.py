@@ -38,6 +38,7 @@ class PurchaseTaxesandCharges(Document):
 		included_in_print_rate: DF.Check
 		is_tax_withholding_account: DF.Check
 		net_amount: DF.Currency
+		original_tax_row: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
