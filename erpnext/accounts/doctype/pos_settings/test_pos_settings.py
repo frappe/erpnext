@@ -1,10 +1,16 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import unittest
+from unittest.mock import patch
 
 import frappe
 
+from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.patches.v16_0.append_fieldname_to_pos_search_fields import execute as append_fieldname
+from erpnext.tests.permission_test_utils import make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -13,6 +19,70 @@ class TestPOSSettings(ERPNextTestSuite):
 		self.settings = frappe.get_single("POS Settings")
 		self.settings.invoice_fields = []
 		self.settings.pos_search_fields = []
+
+	def test_pos_settings_write_access_is_limited_to_managers(self):
+		for role in ("Sales User", "Accounts User", "Accounts Manager", "System Manager"):
+			with self.subTest(role=role):
+				user = make_fenced_user(f"pos-settings-{frappe.scrub(role)}@example.com", [role])
+				with self.set_user(user):
+					settings = frappe.get_doc("POS Settings")
+					settings.check_permission("read")
+					settings.post_change_gl_entries = not settings.post_change_gl_entries
+					if role in ("Sales User", "Accounts User"):
+						with self.assertRaises(frappe.PermissionError):
+							settings.save()
+					else:
+						settings.save()
+
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.PermissionError):
+				frappe.get_doc("POS Settings").check_permission("read")
+
+	def test_required_invoice_field_cannot_be_empty(self):
+		for invoice_type, create_invoice in (
+			("Sales Invoice", create_sales_invoice),
+			("POS Invoice", create_pos_invoice),
+		):
+			with self.subTest(invoice_type=invoice_type):
+				self.settings.reload()
+				self.settings.invoice_type = invoice_type
+				self.settings.set("invoice_fields", [])
+				for fieldname in ("po_no", "terms", "discount_amount", "ignore_pricing_rule"):
+					self.settings.append("invoice_fields", {"fieldname": fieldname, "reqd": 1})
+				self.settings.save()
+
+				test_user, pos_profile = init_user_and_profile()
+				opening_entry = create_opening_entry(pos_profile, test_user.name)
+				invoice = create_invoice(
+					item_code="_Test Non Stock Item",
+					qty=1,
+					rate=100,
+					is_created_using_pos=1,
+					pos_profile=pos_profile.name,
+					do_not_save=1,
+				)
+				invoice.append(
+					"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100}
+				)
+				invoice.insert()
+				with self.assertRaisesRegex(frappe.MandatoryError, "Purchase Order"):
+					invoice.submit()
+
+				invoice.reload()
+				invoice.po_no = "PO-2026-001"
+				invoice.terms = "<p><br></p>"
+				invoice.save()
+				with self.assertRaisesRegex(frappe.MandatoryError, "Terms"):
+					invoice.submit()
+
+				invoice.reload()
+				invoice.terms = '<p><img src="/files/payment-terms.png"></p>'
+				invoice.discount_amount = 0
+				invoice.ignore_pricing_rule = 0
+				invoice.submit()
+				self.assertEqual(invoice.docstatus, 1)
+				invoice.cancel()
+				frappe.get_doc("POS Opening Entry", opening_entry.name).cancel()
 
 	def assertInvalid(self, message):
 		with self.assertRaises(frappe.ValidationError) as context:
@@ -134,3 +204,89 @@ class TestPOSSettings(ERPNextTestSuite):
 		self.settings.save()
 
 		self.assertEqual(self.settings.invoice_fields[0].fieldname, "customer")
+
+	def test_invoice_type_cannot_switch_to_sales_invoice_with_unconsolidated_pos_invoices(self):
+		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		sale = create_pos_invoice(rate=100, do_not_save=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		sale.insert().submit()
+		frappe.db.set_value("POS Opening Entry", opening_entry.name, "status", "Closed")
+		frappe.set_user("Administrator")
+
+		settings = frappe.get_single("POS Settings")
+		settings.invoice_type = "Sales Invoice"
+		with self.assertRaises(frappe.ValidationError) as context:
+			settings.save()
+
+		self.assertIn(sale.name, str(context.exception))
+
+	def test_only_managers_can_change_pos_settings(self):
+		for role, can_write in (
+			("Sales User", False),
+			("Accounts User", False),
+			("Accounts Manager", True),
+			("System Manager", True),
+		):
+			user = make_user_with_role(role)
+			self.assertTrue(frappe.has_permission("POS Settings", "read", user=user), role)
+			self.assertEqual(frappe.has_permission("POS Settings", "write", user=user), can_write, role)
+
+	def test_mandatory_pos_field_is_required_on_submit(self):
+		self.settings.invoice_type = "POS Invoice"
+		self.settings.append("invoice_fields", {"fieldname": "po_no", "reqd": 1})
+		self.settings.save()
+
+		test_user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, test_user.name)
+		sale = create_pos_invoice(rate=100, do_not_save=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		sale.insert()
+		with self.assertRaises(frappe.MandatoryError) as context:
+			sale.submit()
+		self.assertIn("is mandatory in POS Settings", str(context.exception))
+
+		sale.reload()
+		sale.po_no = "Counter 1"
+		sale.submit()
+		self.assertEqual(sale.docstatus, 1)
+
+	def test_mandatory_pos_field_is_required_on_pos_sales_invoice(self):
+		self.settings.invoice_type = "Sales Invoice"
+		self.settings.append("invoice_fields", {"fieldname": "po_no", "reqd": 1})
+		self.settings.save()
+
+		test_user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, test_user.name)
+		sale = create_sales_invoice(is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		sale.insert()
+		self.assertRaises(frappe.MandatoryError, sale.submit)
+
+	def test_mandatory_pos_field_check_does_not_load_pos_settings_document(self):
+		self.settings.invoice_type = "POS Invoice"
+		self.settings.append("invoice_fields", {"fieldname": "po_no", "reqd": 1})
+		self.settings.save()
+
+		sale = frappe.new_doc("POS Invoice")
+		get_cached_doc = frappe.get_cached_doc
+
+		def refuse_pos_settings(doctype, *args, **kwargs):
+			if doctype == "POS Settings":
+				raise frappe.DoesNotExistError
+			return get_cached_doc(doctype, *args, **kwargs)
+
+		with patch.object(frappe, "get_cached_doc", side_effect=refuse_pos_settings):
+			self.assertRaises(frappe.MandatoryError, sale.validate_mandatory_pos_fields)
+			sale.po_no = "Counter 1"
+			sale.validate_mandatory_pos_fields()
+
+
+def make_user_with_role(role):
+	email = f"pos-settings-{frappe.scrub(role)}@example.com"
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": role, "roles": [{"role": role}]}
+		).insert(ignore_permissions=True)
+	return email

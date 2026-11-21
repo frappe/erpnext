@@ -130,6 +130,33 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 					self.assertEqual(transfer, consumed)
 
+	def test_additional_cost_shares_add_up_to_the_cost(self):
+		service_items = []
+		for _ in range(3):
+			fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+			raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+			make_bom(item=fg_item, raw_materials=[raw_material], currency="INR")
+			service_items.append(
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": make_item(properties={"is_stock_item": 0}).name,
+					"qty": 1,
+					"rate": 10,
+					"fg_item": fg_item,
+					"fg_item_qty": 1,
+				}
+			)
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.distribute_additional_costs_based_on = "Qty"
+		sco.append(
+			"additional_costs",
+			{"expense_account": "Cost of Goods Sold - _TC", "description": "Test", "amount": 100},
+		)
+		sco.save()
+
+		shares = [flt(item.additional_cost_per_qty * item.qty, 2) for item in sco.items]
+		self.assertEqual(shares, [33.33, 33.34, 33.33])
+
 	def test_sco_with_material_transfer(self):
 		"""
 		- Set backflush based on Material Transfer.

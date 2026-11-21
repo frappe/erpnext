@@ -11,6 +11,7 @@
   "bill_no",
   "payment_term",
   "payment_term_outstanding",
+  "payment_term_discount",
   "account_type",
   "payment_type",
   "reconcile_effect_on",
@@ -171,12 +172,20 @@
    "label": "Advance Voucher No",
    "options": "advance_voucher_type",
    "read_only": 1
+  },
+  {
+   "description": "Discount applied in the reference document currency.",
+   "fieldname": "payment_term_discount",
+   "fieldtype": "Currency",
+   "label": "Payment Term Discount",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-05 14:18:03.286224",
+ "modified": "2026-10-30 11:26:43.949841",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

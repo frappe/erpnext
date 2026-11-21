@@ -110,8 +110,11 @@ frappe.ui.form.on("Job Card", {
 
 		if (!can_make_stock_entry) return;
 
-		frm.add_custom_button(__("Record Output"), () => frm.events.confirm_record_output(frm)).addClass(
-			"btn-primary"
+		frm.add_custom_button(
+			__("Record Output"),
+			() => frm.events.confirm_record_output(frm),
+			null,
+			"primary"
 		);
 	},
 
@@ -401,7 +404,10 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	complete_job_card(frm) {
-		let pending_qty = frm.doc.for_quantity - frm.doc.total_completed_qty;
+		let pending_qty = flt(
+			frm.doc.for_quantity - frm.doc.total_completed_qty - frm.doc.process_loss_qty,
+			precision("for_quantity", frm.doc)
+		);
 		if (frm.doc.pending_qty > 0) {
 			pending_qty = frm.doc.pending_qty;
 		}
@@ -525,9 +531,13 @@ frappe.ui.form.on("Job Card", {
 				fieldname: "sub_operation",
 				options: "Operation",
 				get_query() {
-					const non_completed = frm.doc.sub_operations.filter((d) => d.status === "Pending");
+					const target_qty = flt(
+						frm.doc.for_quantity - frm.doc.process_loss_qty,
+						precision("for_quantity", frm.doc)
+					);
+					const pending = frm.doc.sub_operations.filter((d) => flt(d.completed_qty) < target_qty);
 					return {
-						filters: { name: ["in", non_completed.map((d) => d.sub_operation)] },
+						filters: { name: ["in", pending.map((d) => d.sub_operation)] },
 					};
 				},
 				reqd: 1,
@@ -545,7 +555,7 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Datetime",
 				label: __("End Time"),
 				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
+				default: frappe.datetime.system_datetime(),
 			});
 		}
 
@@ -579,12 +589,17 @@ frappe.ui.form.on("Job Card", {
 
 	make_subcontracting_po(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
-			frm.add_custom_button(__("Make Subcontracting PO"), () => {
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
-					frm: frm,
-				});
-			}).addClass("btn-primary");
+			frm.add_custom_button(
+				__("Make Subcontracting PO"),
+				() => {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
+						frm: frm,
+					});
+				},
+				null,
+				"primary"
+			);
 		}
 	},
 
@@ -759,7 +774,11 @@ frappe.ui.form.on("Job Card", {
 		const { time_logs, status } = doc;
 
 		// ── Determine which action buttons to show ────────────────────────
-		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const accounted_qty = flt(
+			doc.total_completed_qty + doc.process_loss_qty,
+			precision("for_quantity", doc)
+		);
+		const has_remaining_qty = doc.for_quantity > accounted_qty;
 		const pending_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
 		const materials_ready = doc.skip_material_transfer || doc.is_corrective_job_card || !pending_transfer;
@@ -890,11 +909,11 @@ frappe.ui.form.on("Job Card", {
 							reqd: 1,
 							filters: { status: "Active" },
 						},
-						(d) => frm.events.start_timer(frm, frappe.datetime.now_datetime(), d.employees),
+						(d) => frm.events.start_timer(frm, frappe.datetime.system_datetime(), d.employees),
 						__("Assign Job to Employee")
 					);
 				} else {
-					frm.events.start_timer(frm, frappe.datetime.now_datetime(), frm.doc.employee);
+					frm.events.start_timer(frm, frappe.datetime.system_datetime(), frm.doc.employee);
 				}
 			});
 		}
@@ -904,7 +923,7 @@ frappe.ui.form.on("Job Card", {
 				frm.call({
 					method: "resume_job",
 					doc: frm.doc,
-					args: { start_time: frappe.datetime.now_datetime() },
+					args: { start_time: frappe.datetime.system_datetime() },
 					callback() {
 						frm.reload_doc();
 					},
@@ -917,7 +936,7 @@ frappe.ui.form.on("Job Card", {
 				frm.call({
 					method: "pause_job",
 					doc: frm.doc,
-					args: { end_time: frappe.datetime.now_datetime() },
+					args: { end_time: frappe.datetime.system_datetime() },
 					callback() {
 						frm.reload_doc();
 					},
@@ -941,14 +960,11 @@ frappe.ui.form.on("Job Card", {
 			timer_el.text(`${pad(h)}:${pad(m)}:${pad(s)}`);
 		};
 
-		let current_increment = frm.events.get_current_time(frm);
-		update_stopwatch(current_increment);
+		const tick = () => update_stopwatch(frm.events.get_current_time(frm));
+		tick();
 
 		if (is_actively_running) {
-			frm._jcd_timer_interval = setInterval(() => {
-				current_increment += 1;
-				update_stopwatch(current_increment);
-			}, 1000);
+			frm._jcd_timer_interval = setInterval(tick, 1000);
 		}
 
 		// Demote Submit to btn-default when an action button is already primary.
@@ -963,20 +979,30 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	get_current_time(frm) {
-		let current_time = 0;
+		// union of the intervals, so parallel operators count once; UTC gives wall-clock diffs, as on the server
+		const now = frappe.datetime.system_datetime();
+		const intervals = frm.doc.time_logs
+			.filter((d) => d.from_time)
+			.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
+			.sort((a, b) => a[0] - b[0]);
 
-		frm.doc.time_logs.forEach((d) => {
-			if (d.to_time) {
-				if (d.time_in_mins) {
-					current_time += flt(d.time_in_mins, 2) * 60;
-				} else {
-					current_time += get_seconds_diff(d.to_time, d.from_time);
-				}
-			} else {
-				current_time += get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+		let current_time = 0;
+		let current_start = null;
+		let current_end = null;
+		intervals.forEach(([start, end]) => {
+			if (current_end && start <= current_end) {
+				current_end = moment.max(current_end, end);
+				return;
 			}
+			if (current_end) {
+				current_time += current_end.diff(current_start, "seconds", true);
+			}
+			[current_start, current_end] = [start, end];
 		});
 
+		if (current_end) {
+			current_time += current_end.diff(current_start, "seconds", true);
+		}
 		return current_time;
 	},
 
@@ -1056,10 +1082,6 @@ frappe.ui.form.on("Job Card Time Log", {
 		frm.events.set_total_completed_qty(frm);
 	},
 });
-
-function get_seconds_diff(d1, d2) {
-	return moment(d1).diff(d2, "seconds");
-}
 
 function get_last_completed_row(time_logs) {
 	const completed_rows = time_logs.filter((d) => d.to_time);

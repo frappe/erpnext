@@ -652,6 +652,220 @@ class TestPutawayRule(ERPNextTestSuite):
 
 		self.assertEqual(sum(row.qty for row in rows if row.t_warehouse == self.warehouse_1), 10)
 
+	def make_item_with_two_batches(self):
+		"""Receive batch 1 before batch 2 so a FIFO auto-pick would take batch 1."""
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batches = []
+		for suffix, rate in (("B1", 10), ("B2", 20)):
+			batch_no = make_new_batch(batch_id=f"{item}-{suffix}", item_code=item).name
+			make_stock_entry(
+				item_code=item, qty=10, rate=rate, target="_Test Warehouse - _TC", batch_no=batch_no
+			)
+			batches.append(batch_no)
+
+		return item, batches
+
+	def test_putaway_rule_splits_the_picked_batch_bundle(self):
+		"""Each split row keeps the batch the user picked instead of an auto-picked one."""
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		item, (batch_1, batch_2) = self.make_item_with_two_batches()
+		rule_1 = create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=3)
+		rule_2 = create_putaway_rule(item_code=item, warehouse=self.warehouse_2, capacity=2)
+
+		stock_entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			target="Finished Goods - _TC",
+			batch_no=batch_2,
+			purpose="Material Transfer",
+			apply_putaway_rule=1,
+			do_not_save=1,
+		)
+		picked_bundle = stock_entry.items[0].serial_and_batch_bundle
+		stock_entry.submit()
+		stock_entry.load_from_db()
+
+		self.assertEqual(
+			[(row.t_warehouse, row.qty, row.putaway_rule) for row in stock_entry.items],
+			[(self.warehouse_1, 3, rule_1.name), (self.warehouse_2, 2, rule_2.name)],
+		)
+		self.assertEqual(stock_entry.items[0].serial_and_batch_bundle, picked_bundle)
+		for row in stock_entry.items:
+			self.assertEqual(get_batch_from_bundle(row.serial_and_batch_bundle), batch_2)
+
+		self.assertEqual(get_batch_qty(batch_1, "_Test Warehouse - _TC", item), 10)
+		self.assertEqual(get_batch_qty(batch_2, "_Test Warehouse - _TC", item), 5)
+		self.assertEqual(get_batch_qty(batch_2, self.warehouse_1, item), 3)
+		self.assertEqual(get_batch_qty(batch_2, self.warehouse_2, item), 2)
+
+		self.assertUnchangedItemsOnResave(stock_entry)
+
+	def test_putaway_rule_keeps_the_picked_bundle_when_only_the_target_changes(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		item, (_batch_1, batch_2) = self.make_item_with_two_batches()
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=100)
+
+		stock_entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			target="Finished Goods - _TC",
+			batch_no=batch_2,
+			purpose="Material Transfer",
+			apply_putaway_rule=1,
+			do_not_save=1,
+		)
+		picked_bundle = stock_entry.items[0].serial_and_batch_bundle
+		stock_entry.submit()
+		stock_entry.load_from_db()
+
+		self.assertEqual(stock_entry.items[0].t_warehouse, self.warehouse_1)
+		self.assertEqual(stock_entry.items[0].serial_and_batch_bundle, picked_bundle)
+		self.assertEqual(get_batch_qty(batch_2, self.warehouse_1, item), 5)
+
+	def test_putaway_rule_preview_leaves_the_saved_bundle_alone(self):
+		"""The form's checkbox previews the split; the saved row must keep its full bundle."""
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+
+		item, (_batch_1, batch_2) = self.make_item_with_two_batches()
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=3)
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_2, capacity=2)
+
+		stock_entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			target="Finished Goods - _TC",
+			batch_no=batch_2,
+			purpose="Material Transfer",
+			do_not_submit=1,
+		)
+		picked_bundle = stock_entry.items[0].serial_and_batch_bundle
+
+		rows = apply_putaway_rule(
+			"Stock Entry",
+			frappe.as_json([row.as_dict() for row in stock_entry.items]),
+			stock_entry.company,
+			sync=True,
+			purpose="Material Transfer",
+		)
+
+		self.assertEqual(
+			[(row.t_warehouse, row.qty) for row in rows], [(self.warehouse_1, 3), (self.warehouse_2, 2)]
+		)
+		bundles = [row.serial_and_batch_bundle for row in rows]
+		self.assertNotIn(picked_bundle, bundles)
+		self.assertEqual([get_batch_from_bundle(bundle) for bundle in bundles], [batch_2, batch_2])
+		self.assertEqual([self.bundle_qty(bundle) for bundle in bundles], [3, 2])
+		self.assertEqual(self.bundle_qty(picked_bundle), 5)
+
+		stock_entry.reload()
+		stock_entry.submit()
+		self.assertEqual(stock_entry.items[0].serial_and_batch_bundle, picked_bundle)
+		self.assertEqual(get_batch_qty(batch_2, "Finished Goods - _TC", item), 5)
+
+	def bundle_qty(self, bundle):
+		return abs(frappe.db.get_value("Serial and Batch Bundle", bundle, "total_qty"))
+
+	def test_putaway_rule_preview_refuses_a_bundle_the_user_cannot_read(self):
+		"""The preview copies the bundle for the caller, so it must not copy one they cannot read."""
+		from frappe.core.doctype.user.test_user import test_user
+		from frappe.permissions import add_permission, update_permission_property
+
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+
+		role = "_Test Putaway Bundle Owner"
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
+
+		for doctype in ("Stock Entry", "Item", "Serial and Batch Bundle"):
+			add_permission(doctype, role)
+			for right in ("read", "write", "create"):
+				update_permission_property(doctype, role, 0, right, 1)
+		update_permission_property("Serial and Batch Bundle", role, 0, "if_owner", 1)
+		frappe.clear_cache()
+
+		item, (_batch_1, batch_2) = self.make_item_with_two_batches()
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=3)
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_2, capacity=2)
+		stock_entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			target="Finished Goods - _TC",
+			batch_no=batch_2,
+			purpose="Material Transfer",
+			do_not_submit=1,
+		)
+
+		with test_user(first_name="putaway-bundle-owner", roles=[role]) as user, self.set_user(user.name):
+			self.assertRaises(
+				frappe.PermissionError,
+				apply_putaway_rule,
+				"Stock Entry",
+				frappe.as_json([row.as_dict() for row in stock_entry.items]),
+				stock_entry.company,
+				sync=True,
+				purpose="Material Transfer",
+			)
+
+	def test_putaway_rule_moves_the_receipt_bundle_to_the_rule_warehouse(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		item, (_batch_1, batch_2) = self.make_item_with_two_batches()
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=100)
+
+		stock_entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			rate=20,
+			target="_Test Warehouse - _TC",
+			batch_no=batch_2,
+			purpose="Material Receipt",
+			apply_putaway_rule=1,
+			do_not_save=1,
+		)
+		picked_bundle = stock_entry.items[0].serial_and_batch_bundle
+		stock_entry.submit()
+		stock_entry.load_from_db()
+
+		self.assertEqual(stock_entry.items[0].t_warehouse, self.warehouse_1)
+		self.assertEqual(stock_entry.items[0].serial_and_batch_bundle, picked_bundle)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", picked_bundle, "warehouse"), self.warehouse_1
+		)
+		self.assertEqual(get_batch_qty(batch_2, self.warehouse_1, item), 5)
+
+	def test_putaway_rule_keeps_the_rejected_bundle_on_the_first_row_only(self):
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=3)
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_2, capacity=10, priority=2)
+
+		rows = [
+			{
+				"doctype": "Purchase Receipt Item",
+				"item_code": item,
+				"qty": 5,
+				"conversion_factor": 1,
+				"warehouse": "_Test Warehouse - _TC",
+				"rejected_qty": 2,
+				"rejected_warehouse": "_Test Rejected Warehouse - _TC",
+				"rejected_serial_and_batch_bundle": "REJECTED-BUNDLE",
+			}
+		]
+		_apply_putaway_rule("Purchase Receipt", rows, "_Test Company")
+
+		self.assertEqual(
+			[(row.qty, row.rejected_qty, row.rejected_serial_and_batch_bundle) for row in rows],
+			[(3, 2, "REJECTED-BUNDLE"), (2, 0, "")],
+		)
+
 
 def create_putaway_rule(**args):
 	args = frappe._dict(args)

@@ -1237,11 +1237,16 @@ class SubcontractingInwardController:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_fg_reference_names(doctype, txt, searchfield, start, page_len, filters):
+	parent = filters.get("parent")
+	if not parent or not isinstance(parent, str):
+		return []
+
+	frappe.has_permission("Subcontracting Inward Order", "read", parent, throw=True)
 	return frappe.get_all(
 		"Subcontracting Inward Order Item",
 		limit_start=start,
 		limit_page_length=page_len,
-		filters={"parent": filters.get("parent"), "docstatus": 1},
+		filters={"parent": parent, "docstatus": 1},
 		or_filters=[
 			["name", "like", "%%%s%%" % txt],
 			["item_code", "like", "%%%s%%" % txt],

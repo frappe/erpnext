@@ -485,10 +485,12 @@ class BOM(WebsiteGenerator):
 				own_cost += flt(item.cost)
 			total_secondary_items_per += flt(item.cost_allocation_per)
 
-		if self.cost_allocation_per == 100 and total_secondary_items_per:
-			self.cost_allocation_per -= total_secondary_items_per
+		self.cost_allocation_per = flt(100 - total_secondary_items_per, self.precision("cost_allocation_per"))
 
-		self.cost_allocation = (self.raw_material_cost - own_cost) * (self.cost_allocation_per / 100)
+		self.cost_allocation = flt(
+			(self.raw_material_cost - own_cost) * self.cost_allocation_per / 100,
+			self.precision("cost_allocation"),
+		)
 
 	def validate_secondary_items_cost(self):
 		if flt(self.secondary_items_cost) > flt(self.raw_material_cost):
@@ -503,7 +505,7 @@ class BOM(WebsiteGenerator):
 		for item in self.secondary_items:
 			total_cost_allocation_per += flt(item.cost_allocation_per)
 
-		if total_cost_allocation_per != 100:
+		if flt(total_cost_allocation_per, self.precision("cost_allocation_per")) != 100:
 			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
 
 	def on_update_after_submit(self):
@@ -520,6 +522,12 @@ class BOM(WebsiteGenerator):
 
 	@frappe.whitelist()
 	def get_routing(self):
+		if self.routing:
+			frappe.has_permission("Routing", "read", self.routing, throw=True)
+
+		self.set_operations_from_routing()
+
+	def set_operations_from_routing(self):
 		if self.routing:
 			self.set("operations", [])
 			fields = [
@@ -711,7 +719,7 @@ class BOM(WebsiteGenerator):
 			return
 
 		self.flags.cost_updated = False
-		existing_bom_cost = self.total_cost
+		existing_costs = (self.total_cost, self.base_total_cost)
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
@@ -722,7 +730,7 @@ class BOM(WebsiteGenerator):
 		if save:
 			self.db_update()
 
-		if self.total_cost != existing_bom_cost and update_parent:
+		if update_parent and (self.total_cost, self.base_total_cost) != existing_costs:
 			self.update_parent_boms()
 
 		if not from_child_bom:
@@ -895,7 +903,7 @@ class BOM(WebsiteGenerator):
 		items = []
 		for m in self.get("items"):
 			if m.bom_no:
-				validate_bom_no(m.item_code, m.bom_no)
+				validate_production_bom(m.item_code, m.bom_no)
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
@@ -1052,7 +1060,9 @@ class BOM(WebsiteGenerator):
 
 		bom_items = get_bom_items(bom_no, self.company, qty=qty, fetch_exploded=0)
 		for row in bom_items:
+			# get_bom_items returns the qty in stock UOM
 			row.uom = row.stock_uom
+			row.conversion_factor = 1
 			row.operation_row_id = operation_row_id
 			row.idx = None
 			row.do_not_explode = 1
@@ -1100,8 +1110,9 @@ class BOM(WebsiteGenerator):
 		old_cost = self.total_cost
 
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.secondary_items_cost
-		self.base_total_cost = (
-			self.base_operating_cost + self.base_raw_material_cost - self.base_secondary_items_cost
+		self.base_total_cost = flt(
+			self.base_operating_cost + self.base_raw_material_cost - self.base_secondary_items_cost,
+			self.precision("base_total_cost"),
 		)
 
 		if self.total_cost != old_cost:
@@ -1130,7 +1141,9 @@ class BOM(WebsiteGenerator):
 				self.get("operating_cost_per_bom_quantity")
 			)
 			self.operating_cost = total_operating_cost
-			self.base_operating_cost = flt(total_operating_cost * self.conversion_rate, 2)
+			self.base_operating_cost = total_operating_cost * self.conversion_rate
+
+		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		if not row.hour_rate or update_hour_rate:
@@ -1148,13 +1161,16 @@ class BOM(WebsiteGenerator):
 				)
 
 		if row.hour_rate:
-			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
+			row.base_hour_rate = flt(
+				flt(row.hour_rate) * flt(self.conversion_rate), row.precision("base_hour_rate")
+			)
 
 			if row.time_in_mins:
 				row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
-				row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+				base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+				row.base_operating_cost = flt(base_operating_cost, row.precision("base_operating_cost"))
 				row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
-				row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
+				row.base_cost_per_unit = base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate and save:
 			row.db_update()
@@ -1166,7 +1182,7 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
-			old_rate = d.rate
+			old_rate, old_base_amount = d.rate, d.base_amount
 			if d.is_stock_item or d.is_phantom_item:
 				d.rate = self.get_rm_rate(
 					{
@@ -1188,18 +1204,18 @@ class BOM(WebsiteGenerator):
 			d.amount = flt(
 				flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty")), d.precision("amount")
 			)
-			d.base_amount = d.amount * flt(self.conversion_rate)
+			d.base_amount = flt(d.amount * flt(self.conversion_rate), d.precision("base_amount"))
 			d.qty_consumed_per_unit = flt(d.stock_qty, d.precision("stock_qty")) / flt(
 				self.quantity, self.precision("quantity")
 			)
 
 			total_rm_cost += d.amount
 			base_total_rm_cost += d.base_amount
-			if save and (old_rate != d.rate):
+			if save and (old_rate != d.rate or old_base_amount != d.base_amount):
 				d.db_update()
 
 		self.raw_material_cost = total_rm_cost
-		self.base_raw_material_cost = base_total_rm_cost
+		self.base_raw_material_cost = flt(base_total_rm_cost, self.precision("base_raw_material_cost"))
 
 	def calculate_secondary_items_costs(self, save=False):
 		"""Valuation Rate and Manual rows carry their own cost, deducted from the raw
@@ -1344,7 +1360,9 @@ class BOM(WebsiteGenerator):
 				bom_item.rate,
 				bom_item.include_item_in_manufacturing,
 				bom_item.sourced_by_supplier,
-				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
+				bom.quantity,
+				bom.process_loss_qty,
+				bom.is_phantom_bom
 			FROM `tabBOM Explosion Item` bom_item, `tabBOM` bom
 			WHERE
 				bom_item.parent = bom.name
@@ -1356,6 +1374,8 @@ class BOM(WebsiteGenerator):
 		)
 
 		for d in child_fb_items:
+			good_qty = (flt(d.quantity) or 1) if d.is_phantom_bom else get_good_qty(d)
+			d.qty_consumed_per_unit = flt(d.stock_qty) / good_qty
 			self.add_to_cur_exploded_items(
 				frappe._dict(
 					{
@@ -1437,6 +1457,15 @@ class BOM(WebsiteGenerator):
 				if act_pbom and act_pbom[0][0]:
 					frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 
+			if subcontracting_bom := frappe.db.exists(
+				"Subcontracting BOM", {"finished_good_bom": self.name, "is_active": 1}
+			):
+				frappe.throw(
+					_(
+						"Cannot deactivate or cancel BOM as it is used in the active Subcontracting BOM {0}"
+					).format(get_link_to_form("Subcontracting BOM", subcontracting_bom))
+				)
+
 	def validate_transfer_against(self):
 		if not self.with_operations:
 			self.transfer_material_against = "Work Order"
@@ -1449,7 +1478,7 @@ class BOM(WebsiteGenerator):
 	def set_routing_operations(self):
 		self.validate_routing()
 		if self.routing and self.with_operations and not self.operations:
-			self.get_routing()
+			self.set_operations_from_routing()
 
 	def validate_routing(self):
 		if not self.routing or not self.has_value_changed("routing"):
@@ -1538,6 +1567,7 @@ def get_bom_item_rate(args, bom_doc):
 				"transaction_type": "buying",
 				"company": bom_doc.company,
 				"currency": bom_doc.currency,
+				"transaction_date": today(),
 				"conversion_rate": 1,  # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 				"conversion_factor": args.get("conversion_factor") or 1,
 				"plc_conversion_rate": 1,
@@ -1555,7 +1585,7 @@ def get_bom_item_rate(args, bom_doc):
 def get_valuation_rate(data):
 	"""
 	1) Get average valuation rate from all warehouses
-	2) If no value, get last valuation rate from SLE
+	2) If no value, get last valuation rate from the company's SLE
 	3) If no value, get valuation rate from Item
 	"""
 	from pypika import Case
@@ -1591,13 +1621,18 @@ def get_valuation_rate(data):
 
 	valuation_rate = item_valuation.get("valuation_rate")
 
-	if (valuation_rate is not None) and valuation_rate <= 0:
-		# Explicit null value check. If None, Bins don't exist, neither does SLE
+	# None: no Bin, e.g. a source warehouse that never held the item
+	if flt(valuation_rate) <= 0:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		last_val_rate = (
 			frappe.qb.from_(sle)
 			.select(sle.valuation_rate)
-			.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
+			.where(
+				(sle.item_code == item_code)
+				& (sle.company == company)
+				& (sle.valuation_rate > 0)
+				& (sle.is_cancelled == 0)
+			)
 			.orderby(sle.posting_datetime, order=frappe.qb.desc)
 			.orderby(sle.creation, order=frappe.qb.desc)
 			.limit(1)
@@ -1695,7 +1730,7 @@ def get_bom_items_as_dict(
 		query = query.format(  # nosemgrep
 			table="BOM Secondary Item",
 			where_conditions=")",
-			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.secondary_item_type, bom_item.name, bom_item.valuation_type, bom_item.cost / nullif(bom_item.stock_qty, 0) as manual_rate",
+			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.secondary_item_type, bom_item.name, bom_item.valuation_type, bom_item.base_cost / nullif(bom_item.stock_qty, 0) as manual_rate",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			group_by_cond=group_by_cond,
@@ -1703,15 +1738,19 @@ def get_bom_items_as_dict(
 
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 	else:
+		rate_col = "bom_item.base_rate"
+		if fetch_qty_in_stock_uom:
+			rate_col += " / ifnull(nullif(bom_item.conversion_factor, 0), 1)"
+
 		query = query.format(
 			table="BOM Item",
 			where_conditions="or bom_item.is_phantom_item)",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
-			select_columns=""", bom_item.rate, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
+			select_columns=f""", bom_item.rate, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
 				sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
-				bom_item.description, bom_item.base_rate as rate, bom_item.operation_row_id, bom_item.is_phantom_item , bom_item.bom_no """,
+				bom_item.description, {rate_col} as rate, bom_item.operation_row_id, bom_item.is_phantom_item , bom_item.bom_no """,
 			group_by_cond=group_by_cond,
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
@@ -1794,12 +1833,7 @@ def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 
 def validate_bom_no(item, bom_no):
 	"""Validate BOM No of sub-contracted items"""
-	bom = frappe.get_doc("BOM", bom_no)
-	if not bom.is_active:
-		frappe.throw(_("BOM {0} must be active").format(bom_no))
-	if bom.docstatus != 1:
-		if not frappe.in_test:
-			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	bom = get_usable_bom(bom_no)
 	if item:
 		rm_item_exists = False
 		for d in bom.items:
@@ -1808,13 +1842,34 @@ def validate_bom_no(item, bom_no):
 		for d in bom.secondary_items:
 			if d.item_code.lower() == item.lower():
 				rm_item_exists = True
-		if (
-			bom.item.lower() == item.lower()
-			or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
-		):
+		if _bom_produces_item(bom, item):
 			rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def validate_production_bom(item, bom_no):
+	"""Validate that the BOM manufactures the item or its template."""
+	bom = get_usable_bom(bom_no)
+	if not _bom_produces_item(bom, item):
+		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def get_usable_bom(bom_no):
+	bom = frappe.get_doc("BOM", bom_no)
+	if not bom.is_active:
+		frappe.throw(_("BOM {0} must be active").format(bom_no))
+	if bom.docstatus != 1:
+		if not frappe.in_test:
+			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	return bom
+
+
+def _bom_produces_item(bom, item):
+	return (
+		bom.item.lower() == item.lower()
+		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
+	)
 
 
 @frappe.whitelist()
@@ -1854,7 +1909,6 @@ def get_children(doctype=None, parent=None, is_root=False, **filters):
 
 			bom_item.parent_bom_qty = bom_doc.quantity
 			bom_item.expandable = 0 if bom_item.value in ("", None) else 1
-			bom_item.image = frappe.db.escape(bom_item.image)
 
 		return bom_items
 
@@ -1885,7 +1939,7 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 			continue
 
 		items.setdefault(d.item_code, 0)
-		items[d.item_code] += flt(d.amount)
+		items[d.item_code] += flt(d.base_amount if table == "items" else d.amount)
 
 	non_stock_items = frappe.get_all(
 		"Item",
@@ -1915,11 +1969,7 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 
 
 def get_component_operating_cost(wc, row, consumed_op_cost, total_component_rate):
-	if flt(row.actual_operating_cost) and total_component_rate:
-		cost = flt(row.actual_operating_cost) * flt(wc.operating_cost) / total_component_rate
-	else:
-		cost = flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0)
-
+	cost = flt(row.actual_operating_cost) * flt(wc.operating_cost) / total_component_rate
 	return flt(cost - flt(consumed_op_cost.get("consumed_cost")), row.precision("actual_operating_cost"))
 
 
@@ -1946,10 +1996,13 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 			},
 		)
 
+		total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
+		if not (flt(row.actual_operating_cost) and total_component_rate):
+			continue
+
 		consumed_operating_cost = (
 			get_consumed_operating_cost(work_order.name, stock_entry.bom_no, row.name) or []
 		)
-		total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
 		for wc in workstation_cost:
 			expense_account = (
 				get_component_account(wc.operating_component, stock_entry.company) or op_expense_account
@@ -2031,6 +2084,16 @@ def _append_operating_cost(stock_entry, expense_account, amount, **operation_fie
 	)
 
 
+def _add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card=None):
+	"""FG-based costs of the multi-level BOM tree, next to the costs of its operations."""
+	if job_card or not work_order.use_multi_level_bom:
+		return
+
+	unit_cost = get_op_cost_from_sub_assemblies(work_order.bom_no, skip_boms_with_operations=True)
+	if unit_cost:
+		_append_operating_cost(stock_entry, expense_account, unit_cost * flt(stock_entry.fg_completed_qty))
+
+
 @frappe.request_cache
 def get_component_account(parent, company):
 	return frappe.db.get_value(
@@ -2075,14 +2138,20 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 			job_card=job_card,
 		)
 
-		if not cost_added and not job_card:
+		if cost_added:
+			_add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card)
+		elif not job_card:
 			if work_order.operations and not uses_sub_assembly_operating_cost(work_order, stock_entry.bom_no):
 				for operation in work_order.operations:
 					_add_operation_cost(stock_entry, work_order, operation, expense_account)
+				_add_fg_based_operating_cost(stock_entry, work_order, expense_account)
 			else:
 				_append_operating_cost(
 					stock_entry, expense_account, remaining_operating_cost * flt(stock_entry.fg_completed_qty)
 				)
+		else:
+			for operation in work_order.get("operations", {"name": job_card.operation_id}):
+				_add_operation_cost(stock_entry, work_order, operation, expense_account)
 
 	_add_additional_operating_cost(stock_entry, work_order, expense_account, job_card)
 
@@ -2298,6 +2367,7 @@ def make_variant_bom(
 		add_variant_item(variant_items, doc, source_name)
 		for row in doc.items[mapped_rows:]:
 			row.qty = flt(row.qty) * (flt(source.quantity) or 1)
+			row.stock_qty = flt(row.qty * row.conversion_factor, row.precision("stock_qty"))
 
 	doc = get_mapped_doc(
 		"BOM",
@@ -2318,25 +2388,30 @@ def make_variant_bom(
 	return doc
 
 
-def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
+def get_op_cost_from_sub_assemblies(bom_no, op_cost=0, skip_boms_with_operations=False):
+	"""Per unit operating cost of the BOM tree. Skipped BOMs are costed by Work Order operations."""
 	conversion_rate = flt(frappe.get_cached_value("BOM", bom_no, "conversion_rate")) or 1
-	return flt(op_cost) + _get_unit_operating_cost(bom_no, {}) * conversion_rate
+	unit_cost = _get_unit_operating_cost(bom_no, {}, skip_boms_with_operations)
+	return flt(op_cost) + unit_cost * conversion_rate
 
 
-def _get_unit_operating_cost(bom_no, unit_costs):
+def _get_unit_operating_cost(bom_no, unit_costs, skip_boms_with_operations=False):
 	if bom_no in unit_costs:
 		return unit_costs[bom_no]
 
-	bom = frappe.get_cached_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=True)
+	bom = frappe.get_cached_value(
+		"BOM", bom_no, ["operating_cost", "quantity", "with_operations"], as_dict=True
+	)
 	quantity = flt(bom.quantity) or 1
-	cost = flt(bom.operating_cost) / quantity
+	cost = 0 if skip_boms_with_operations and bom.with_operations else flt(bom.operating_cost) / quantity
 
 	for row in frappe.get_all(
 		"BOM Item",
 		filters={"parent": bom_no, "parenttype": "BOM", "docstatus": 1, "bom_no": ("is", "set")},
 		fields=["bom_no", "stock_qty"],
 	):
-		cost += flt(row.stock_qty) / quantity * _get_unit_operating_cost(row.bom_no, unit_costs)
+		child_cost = _get_unit_operating_cost(row.bom_no, unit_costs, skip_boms_with_operations)
+		cost += flt(row.stock_qty) / quantity * child_cost
 
 	unit_costs[bom_no] = cost
 	return cost

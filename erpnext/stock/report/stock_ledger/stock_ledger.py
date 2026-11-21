@@ -14,6 +14,7 @@ from frappe.utils import cint, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import (
@@ -23,6 +24,7 @@ from erpnext.stock.utils import (
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
@@ -475,7 +477,7 @@ def get_columns(filters):
 
 def get_stock_ledger_entries(filters, items):
 	from_date = get_datetime(filters.from_date + " 00:00:00")
-	to_date = get_datetime(filters.to_date + " 23:59:59")
+	to_date = get_datetime(filters.to_date + " 23:59:59.999999")
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (

@@ -8,8 +8,11 @@ from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import Bracket, LiteralValue
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	filters = frappe._dict(filters or {})
 	if filters.from_date and filters.to_date and filters.from_date > filters.to_date:
 		frappe.throw(_("From Date cannot be greater than To Date"))

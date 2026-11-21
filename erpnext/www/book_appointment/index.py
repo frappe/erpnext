@@ -5,6 +5,7 @@ import zoneinfo
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
+from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 
 SLOT_REQUESTS_PER_MINUTE = 60
@@ -30,6 +31,7 @@ def handle_appointment_booking_disabled():
 		raise frappe.Redirect
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
 	handle_appointment_booking_disabled()
@@ -41,6 +43,7 @@ def get_appointment_settings():
 	return settings
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
 	handle_appointment_booking_disabled()
@@ -182,6 +185,10 @@ def get_booked_slot_times_for(timeslots, appointment_duration):
 
 
 def is_slot_available(timeslot, booked_times, settings):
+	# no agents means unlimited capacity, as in Appointment.validate_available_time_slot
+	if not cint(settings.number_of_agents):
+		return True
+
 	# mirror the server capacity check: count non-Closed appointments whose
 	# duration window overlaps this slot, without a per-slot query
 	duration = datetime.timedelta(minutes=settings.appointment_duration)

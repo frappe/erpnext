@@ -43,19 +43,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	async calculate_taxes_and_totals(update_paid_amount) {
-		this.discount_amount_applied = false;
-		this._calculate_taxes_and_totals();
-		this.calculate_discount_amount();
-
-		// # Update grand total as per cash and non trade discount
-		if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
-			this.frm.doc.grand_total -= this.frm.doc.discount_amount;
-			this.frm.doc.base_grand_total -= this.frm.doc.base_discount_amount;
-			this.frm.doc.rounding_adjustment = 0;
-			this.frm.doc.base_rounding_adjustment = 0;
-			this.set_rounded_total();
-		}
-
+		this.calculate_discounted_totals();
 		await this.calculate_shipping_charges();
 
 		// Advance calculation applicable to Sales/Purchase Invoice
@@ -93,6 +81,21 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		this.frm.refresh_fields();
+	}
+
+	calculate_discounted_totals() {
+		this.discount_amount_applied = false;
+		this._calculate_taxes_and_totals();
+		this.calculate_discount_amount();
+
+		// # Update grand total as per cash and non trade discount
+		if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
+			this.frm.doc.grand_total -= this.frm.doc.discount_amount;
+			this.frm.doc.base_grand_total -= this.frm.doc.base_discount_amount;
+			this.frm.doc.rounding_adjustment = 0;
+			this.frm.doc.base_rounding_adjustment = 0;
+			this.set_rounded_total();
+		}
 	}
 
 	calculate_discount_amount() {
@@ -220,6 +223,24 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			.filter((fieldname) => !do_not_round_fields.includes(fieldname));
 	}
 
+	get_billed_qty(item) {
+		const settings = frappe.boot.sysdefaults || {};
+		const is_internal_transfer =
+			this.frm.doc.is_internal_supplier && this.frm.doc.represents_company === this.frm.doc.company;
+		const bills_rejected_quantity =
+			this.frm.doc.doctype === "Purchase Invoice" &&
+			this.frm.doc.update_stock &&
+			!is_internal_transfer &&
+			cint(settings.set_valuation_rate_for_rejected_materials) &&
+			cint(settings.bill_for_rejected_quantity_in_purchase_invoice);
+
+		if (!flt(item.rejected_qty) || !bills_rejected_quantity) {
+			return flt(item.qty);
+		}
+
+		return flt(item.qty) + flt(item.rejected_qty);
+	}
+
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
@@ -231,7 +252,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
 				if (!(me.frm.doc.is_return || me.frm.doc.is_debit_note)) {
-					item.net_amount = item.amount = flt(item.rate * item.qty, precision("amount", item));
+					item.net_amount = item.amount = flt(
+						item.rate * me.get_billed_qty(item),
+						precision("amount", item)
+					);
 				} else {
 					// allow for '0' qty on Credit/Debit notes
 					let qty = flt(item.qty);
@@ -298,9 +322,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				tax[fieldname] = 0.0;
 			});
 
-			if (!this.discount_amount_applied) {
+			if (!me.discount_amount_applied) {
 				erpnext.accounts.taxes.validate_taxes_and_charges(tax.doctype, tax.name);
-				erpnext.accounts.taxes.validate_inclusive_tax(tax, this.frm);
+				erpnext.accounts.taxes.validate_inclusive_tax(tax, me.frm);
 			}
 			frappe.model.round_floats_in(tax);
 		});
@@ -344,8 +368,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		});
 		if (has_inclusive_tax == false) return;
 
+		const net_totals = {};
 		$.each(this.frm.doc.items || [], function (n, item) {
-			item._unrounded_net_amount = null;
+			if (!me.discount_amount_applied) item._unrounded_net_amount = null;
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var total_tax_slope = 0.0;
 			var total_tax_intercept = 0;
@@ -379,6 +404,21 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				var amount = flt(item.amount) - total_tax_intercept;
 				item._unrounded_net_amount = amount / (1 + total_tax_slope);
 				item.net_amount = flt(item._unrounded_net_amount, precision("net_amount", item));
+				if (
+					!frappe.flags.round_row_wise_tax &&
+					!(me.frm.doc.doctype === "Quotation" && item.is_alternative)
+				) {
+					// Carry rounding between items with the same taxes, without mixing tax groups.
+					const tax_key = JSON.stringify(Object.entries(item_tax_map).sort());
+					const net_total = (net_totals[tax_key] ||= { unrounded: 0, rounded: 0 });
+					net_total.unrounded += item._unrounded_net_amount;
+					item.net_amount = flt(
+						flt(net_total.unrounded, precision("net_amount", item)) - net_total.rounded,
+						precision("net_amount", item)
+					);
+					net_total.rounded += item.net_amount;
+				}
+
 				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -707,9 +747,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 			// Use unrounded net for inclusive taxes to avoid double rounding
 			var net_for_tax =
-				cint(tax.included_in_print_rate) &&
-				!this.discount_amount_applied &&
-				item._unrounded_net_amount !== null
+				cint(tax.included_in_print_rate) && item._unrounded_net_amount !== null
 					? item._unrounded_net_amount
 					: item.net_amount;
 			current_tax_amount = (tax_rate / 100.0) * net_for_tax;
@@ -906,6 +944,20 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
+
+			if (this.frm.doc.rounding_adjustment) {
+				// Preserve the converted payable/receivable when the transaction currency rounds.
+				this.frm.doc.base_rounding_adjustment = flt(
+					this.frm.doc.base_rounded_total - this.frm.doc.base_grand_total,
+					precision("base_rounding_adjustment")
+				);
+			} else if (this.frm.doc.rounded_total) {
+				// keep the base rounded total tied to the base totals the ledger is posted with
+				this.frm.doc.base_rounded_total = flt(
+					this.frm.doc.base_grand_total + this.frm.doc.base_rounding_adjustment,
+					precision("base_rounded_total")
+				);
+			}
 		}
 	}
 
@@ -960,7 +1012,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	apply_discount_amount() {
 		var me = this;
-		var distributed_amount = 0.0;
 		this.frm.doc.base_discount_amount = 0.0;
 
 		if (this.frm.doc.discount_amount) {
@@ -979,29 +1030,43 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			const total_for_discount_amount = this.get_total_for_discount_amount();
-			let net_total = 0;
-			let expected_net_total = 0;
+			const net_totals = {};
+			const use_unrounded_net =
+				this.frm.doc.apply_discount_on == "Grand Total" &&
+				!frappe.flags.round_row_wise_tax &&
+				(this.frm.doc.taxes || []).some((tax) => cint(tax.included_in_print_rate));
 
 			// calculate item amount after Discount Amount
 			if (total_for_discount_amount) {
 				$.each(this.frm._items || [], function (i, item) {
-					distributed_amount =
-						(flt(me.frm.doc.discount_amount) * item.net_amount) / total_for_discount_amount;
-
-					const adjusted_net_amount = item.net_amount - distributed_amount;
-					expected_net_total += adjusted_net_amount;
+					const tax_key = use_unrounded_net
+						? JSON.stringify(Object.entries(me._load_item_tax_rate(item.item_tax_rate)).sort())
+						: "";
+					const net_total = (net_totals[tax_key] ||= { unrounded: 0, rounded: 0 });
+					const net_amount =
+						use_unrounded_net && item._unrounded_net_amount != null
+							? item._unrounded_net_amount
+							: item.net_amount;
+					const adjusted_net_amount =
+						net_amount -
+						(flt(me.frm.doc.discount_amount) * net_amount) / total_for_discount_amount;
+					item._unrounded_net_amount = use_unrounded_net ? adjusted_net_amount : null;
+					net_total.unrounded += adjusted_net_amount;
 					item.net_amount = flt(adjusted_net_amount, precision("net_amount", item));
-					net_total += item.net_amount;
+					net_total.rounded += item.net_amount;
 
 					// discount amount rounding adjustment
 					// assignment to rounding_difference is intentional
-					const rounding_difference = flt(expected_net_total - net_total, precision("net_total"));
+					const rounding_difference = flt(
+						net_total.unrounded - net_total.rounded,
+						precision("net_total")
+					);
 					if (rounding_difference) {
 						item.net_amount = flt(
 							item.net_amount + rounding_difference,
 							precision("net_amount", item)
 						);
-						net_total += rounding_difference;
+						net_total.rounded += rounding_difference;
 					}
 					item.net_rate = item.qty
 						? flt(item.net_amount / item.qty, precision("net_rate", item))
@@ -1147,19 +1212,21 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	async set_total_amount_to_default_mop() {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
-		let total_amount_to_pay;
+		let total_amount_to_pay, amount_precision;
 
 		if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
+			amount_precision = precision("grand_total");
 			total_amount_to_pay = flt(
 				grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
-				precision("grand_total")
+				amount_precision
 			);
 		} else {
+			amount_precision = precision("base_grand_total");
 			total_amount_to_pay = flt(
-				flt(base_grand_total, precision("base_grand_total")) -
+				flt(base_grand_total, amount_precision) -
 					this.frm.doc.total_advance -
 					this.frm.doc.base_write_off_amount,
-				precision("base_grand_total")
+				amount_precision
 			);
 		}
 
@@ -1174,7 +1241,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			payment_amount += payment.amount;
 		});
 
-		if (payment_amount == total_amount_to_pay) {
+		if (flt(payment_amount, amount_precision) == total_amount_to_pay) {
 			return;
 		}
 
@@ -1286,18 +1353,18 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	calculate_change_amount() {
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
+		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+		var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
+
 		if (
 			["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype) &&
-			this.frm.doc.paid_amount > this.frm.doc.grand_total &&
+			this.frm.doc.paid_amount > grand_total &&
 			!this.frm.doc.is_return
 		) {
 			var payment_types = $.map(this.frm.doc.payments, function (d) {
 				return d.type;
 			});
 			if (payment_types.includes("Cash")) {
-				var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
-				var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
-
 				this.frm.doc.change_amount = flt(
 					this.frm.doc.paid_amount - grand_total,
 					precision("change_amount")

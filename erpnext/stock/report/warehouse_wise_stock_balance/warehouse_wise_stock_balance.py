@@ -5,6 +5,8 @@ from typing import Any, TypedDict
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Sum
 
 
@@ -43,10 +45,14 @@ def get_warehouse_wise_balance(filters: StockBalanceFilter) -> list[SLEntry]:
 
 
 def get_warehouses(report_filters: StockBalanceFilter):
+	filters = [["company", "=", report_filters.company]]
+	if companies := get_allowed_docs_for_doctype(get_user_permissions().get("Company", []), "Warehouse"):
+		filters.append(["company", "in", companies])
+
 	return frappe.get_all(
 		"Warehouse",
 		fields=["name", "parent_warehouse", "is_group", "disabled"],
-		filters={"company": report_filters.company},
+		filters=filters,
 		order_by="lft",
 	)
 

@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe import qb
+from frappe.cache_manager import clear_doctype_map
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, getdate, nowdate
 from frappe.utils.data import getdate as convert_to_date
@@ -2479,6 +2480,7 @@ class TestAccountsController(ERPNextTestSuite):
 		frappe.new_doc(
 			"Document Naming Rule", document_type="Sales Invoice", prefix="SI-.MM.-.YYYY.-"
 		).submit()
+		self.addCleanup(clear_doctype_map, "Document Naming Rule", "Sales Invoice")
 
 		si = create_sales_invoice(do_not_save=True)
 		si.set_posting_time = 1

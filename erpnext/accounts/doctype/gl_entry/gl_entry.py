@@ -490,7 +490,9 @@ def rename_temporarily_named_docs(doctype):
 
 			for hook_type in ("on_gle_rename", "on_sle_rename"):
 				for hook in frappe.get_hooks(hook_type):
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval -- hook paths come from hooks.py
 					frappe.call(hook, newname=newname, oldname=oldname)
 
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()

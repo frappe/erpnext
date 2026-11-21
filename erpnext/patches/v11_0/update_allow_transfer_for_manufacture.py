@@ -15,6 +15,7 @@ def execute():
 	for doctype in ["BOM Item", "Work Order Item", "BOM Explosion Item"]:
 		frappe.reload_doc("manufacturing", "doctype", frappe.scrub(doctype))
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			f""" update `tab{doctype}` child, tabItem item
 			set

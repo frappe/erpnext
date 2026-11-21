@@ -12,9 +12,11 @@ from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, get_url
+from frappe.utils.html_utils import sanitize_html
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.accounts.party import (
 	_get_party_details,
 	get_party_account_currency,
@@ -87,7 +89,10 @@ class RequestforQuotation(BuyingController):
 		validate_for_items(self)
 		self.set_missing_item_names()
 		super().set_qty_as_per_stock_uom()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.update_email_id()
+		self.validate_with_previous_doc()
 
 		if self.docstatus < 1:
 			# after amend and save, status still shows as cancelled, until submit
@@ -130,6 +135,22 @@ class RequestforQuotation(BuyingController):
 
 			if not self.subject:
 				self.subject = data.subject
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Material Request": {
+					"ref_dn_field": "material_request",
+					"compare_fields": [["company", "="]],
+				},
+				"Material Request Item": {
+					"ref_dn_field": "material_request_item",
+					"compare_fields": [["item_code", "="], ["uom", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
 
 	def validate_duplicate_supplier(self):
 		supplier_list = [d.supplier for d in self.suppliers]
@@ -200,6 +221,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_email_id(rfq_supplier)
 
 		message = self.supplier_rfq_mail(rfq_supplier, "", self.get_link(), True)
+		message["message"] = sanitize_html(message["message"])
 
 		return message
 
@@ -422,10 +444,10 @@ class RequestforQuotation(BuyingController):
 				supplier.quote_status = quote_status
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_supplier_emails(rfq_name):
 	check_portal_enabled("Request for Quotation")
-	rfq = frappe.get_doc("Request for Quotation", rfq_name)
+	rfq = frappe.get_doc("Request for Quotation", rfq_name, check_permission="write")
 	if rfq.docstatus == 1:
 		rfq.send_to_supplier()
 
@@ -484,6 +506,7 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 					"name": "request_for_quotation_item",
 					"parent": "request_for_quotation",
 					"project_name": "project",
+					"cost_center": "cost_center",
 				},
 			},
 		},
@@ -569,6 +592,7 @@ def validate_existing_supplier_quotation(supplier, request_for_quotation):
 
 def add_items(sq_doc, supplier, rfq, items):
 	rfq_rows = {row.name: row for row in rfq.items}
+	dimension_fields = get_accounting_dimensions()
 	for data in items:
 		if isinstance(data, dict):
 			data = frappe._dict(data)
@@ -576,10 +600,10 @@ def add_items(sq_doc, supplier, rfq, items):
 		if data.name not in rfq_rows:
 			frappe.throw(_("Row {0} is not part of Request for Quotation {1}.").format(data.idx, rfq.name))
 
-		create_rfq_items(sq_doc, supplier, rfq_rows[data.name], data)
+		create_rfq_items(sq_doc, supplier, rfq_rows[data.name], data, dimension_fields)
 
 
-def create_rfq_items(sq_doc, supplier, rfq_row, data):
+def create_rfq_items(sq_doc, supplier, rfq_row, data, dimension_fields):
 	"""Take the item and its UOM from the RFQ row; only the qty and rate come from the supplier."""
 	args = {
 		field: rfq_row.get(field)
@@ -592,8 +616,10 @@ def create_rfq_items(sq_doc, supplier, rfq_row, data):
 			"material_request",
 			"material_request_item",
 			"uom",
+			"cost_center",
 		]
 	}
+	args.update({field: rfq_row.get(field) for field in dimension_fields})
 	rate = flt(data.get("rate"), sq_doc.precision("rate", "items"))
 	args.update(
 		{
@@ -684,6 +710,7 @@ def get_item_from_material_requests_based_on_supplier(source_name, target_doc=No
 						["name", "material_request_item"],
 						["parent", "material_request"],
 						["uom", "uom"],
+						["cost_center", "cost_center"],
 					],
 				},
 			},

@@ -1,0 +1,170 @@
+{% macro styles(orientation="landscape") -%}
+<style>
+	.rpf { font-size: 12px; line-height: 1.45; color: #171717; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+	.rpf table { width: 100%; border-collapse: collapse; margin: 0; }
+	.rpf .rpf-company { text-align: center; margin-bottom: 14px; }
+	.rpf .rpf-company-name { font-size: 16px; line-height: 1.3; font-weight: 600; color: #171717; }
+	.rpf .rpf-company-meta { margin-top: 2px; font-size: 10px; line-height: 1.5; color: #7c7c7c; }
+	.rpf .rpf-head { border-collapse: separate; border-spacing: 0; border: 1px solid #e2e2e2; border-radius: 6px; }
+	.rpf .rpf-head td { vertical-align: middle; padding: 8px 6px; border: none; }
+	.rpf .rpf-head td.rpf-head-side { width: 34%; text-align: right; }
+	.rpf .rpf-layout td { padding: 0; vertical-align: top; border: none; }
+	.rpf .rpf-layout td + td { padding-left: 24px; }
+	.rpf .rpf-subject { font-size: 14px; line-height: 1.3; font-weight: 600; color: #171717; }
+	.rpf .rpf-title { font-size: 12px; font-weight: 500; color: #383838; }
+	.rpf .rpf-meta { margin-top: 2px; font-size: 10px; line-height: 1.4; color: #7c7c7c; }
+	.rpf .rpf-grid { margin-top: 12px; font-size: 11px; table-layout: fixed; border-collapse: separate; border-spacing: 0; border: 1px solid #e2e2e2; border-radius: 6px; }
+	.rpf .rpf-grid thead { display: table-header-group; }
+	.rpf .rpf-grid th { font-size: 10.5px; line-height: 1.3; font-weight: 500; color: #383838; background: #f3f3f3; text-align: left; vertical-align: bottom; padding: 6px 6px; border: none; border-bottom: 1px solid #e2e2e2; white-space: nowrap; }
+	.rpf .rpf-grid th:first-child { border-top-left-radius: 6px; }
+	.rpf .rpf-grid th:last-child { border-top-right-radius: 6px; }
+	.rpf .rpf-grid td { padding: 4px 6px; vertical-align: top; border: none; border-top: 1px solid #e2e2e2; overflow-wrap: anywhere; }
+	.rpf .rpf-grid tbody tr:first-child td { border-top: none; }
+	.rpf .rpf-grid th + th, .rpf .rpf-grid td + td { border-left: 1px solid #e2e2e2; }
+	.rpf .rpf-grid tbody tr:last-child td:first-child { border-bottom-left-radius: 6px; }
+	.rpf .rpf-grid tbody tr:last-child td:last-child { border-bottom-right-radius: 6px; }
+	.rpf .rpf-grid tr { page-break-inside: avoid; }
+	.rpf .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; overflow-wrap: normal; }
+	.rpf .rpf-grid th.num { text-align: right; }
+	.rpf .nowrap { white-space: nowrap; overflow-wrap: normal; }
+	.rpf .rpf-grid td.clip { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.rpf .muted { color: #7c7c7c; }
+	.rpf .regular { font-weight: 400; }
+	.rpf b { font-weight: 600; }
+	.rpf .align-right { text-align: right; }
+	.rpf .rpf-caption { margin-top: 8px; padding: 0 7px; }
+	.rpf .note { font-size: 10px; line-height: 1.4; color: #7c7c7c; white-space: pre-line; }
+	.rpf .narration { font-style: italic; }
+	.rpf .rpf-grid tr.has-narration td { padding-bottom: 1px; }
+	.rpf .rpf-grid tr.narration-row td { border-top: none; padding-top: 0; padding-bottom: 6px; }
+	.rpf .strong td { font-weight: 500; }
+	.rpf .strong td.num { font-weight: 600; }
+	.rpf .rpf-grid tr.group td { padding-top: 7px; padding-bottom: 7px; font-weight: 500; color: #171717; background: #f3f3f3; border-top-color: #c7c7c7; border-bottom: 1px solid #e2e2e2; }
+	.rpf .rpf-grid tr.group + tr td { border-top: none; }
+	.rpf .rpf-grid tr.subtotal td { color: #383838; }
+	.rpf .rpf-grid tr.subtotal td.num { font-weight: 500; color: #171717; }
+	.rpf .rpf-grid tr.total td { padding-top: 6px; padding-bottom: 6px; font-weight: 500; background: #f3f3f3; border-top-color: #c7c7c7; }
+	.rpf .rpf-grid tr.total td.num { font-weight: 600; }
+	.rpf .rpf-grid tr.total + tr.total td { border-top-color: #e2e2e2; }
+	.rpf .danger { color: #ce2c2c; }
+	.rpf .rpf-box { border: 1px solid #e2e2e2; border-radius: 6px; padding: 10px 6px; margin-top: 14px; }
+	.rpf .rpf-buckets { margin-top: 14px; table-layout: fixed; border-collapse: separate; border-spacing: 0; border: 1px solid #e2e2e2; border-radius: 6px; }
+	.rpf .rpf-buckets td { padding: 8px 6px; border: none; vertical-align: top; }
+	.rpf .rpf-buckets td + td { border-left: 1px solid #e2e2e2; }
+	.rpf .rpf-label { font-size: 10px; line-height: 1.3; color: #7c7c7c; }
+	.rpf .rpf-address { margin-top: 18px; line-height: 1.6; }
+	.rpf .rpf-subject-line { margin-top: 18px; }
+	.rpf .rpf-sign { margin-top: 28px; }
+	.rpf .rpf-layout td.half { width: 50%; }
+	.rpf .rpf-box.rpf-reply { margin-top: 0; border-style: dashed; }
+	.rpf .rpf-reply-options { margin-top: 6px; line-height: 2; }
+	.rpf .rpf-sign-line { margin-top: 28px; padding-top: 4px; border-top: 1px solid #e2e2e2; }
+	.rpf .rpf-signatory { margin-top: 56px; }
+	.rpf .rpf-section-title { margin-top: 28px; }
+	.rpf .rpf-value { margin-top: 2px; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+	.rpf .rpf-value-lg { font-size: 15px; font-weight: 600; }
+	.rpf .rpf-vouchers tr.voucher td { padding-top: 7px; padding-bottom: 2px; color: #171717; }
+	.rpf .rpf-vouchers tr.leg td { padding-top: 2px; padding-bottom: 2px; border-top: none; color: #383838; }
+	.rpf .rpf-empty, .rpf .rpf-grid td.rpf-empty { padding: 24px 8px; text-align: center; color: #7c7c7c; }
+	.rpf .rpf-footnote { margin-top: 12px; padding: 0 7px; font-size: 10px; text-align: right; color: #7c7c7c; }
+	.rpf .rpf-page { page-break-after: always; }
+	.rpf .rpf-page:last-child { page-break-after: auto; }
+	.rpf .rpf-head, .rpf .rpf-box, .rpf .rpf-buckets { page-break-inside: avoid; }
+	.rpf .rpf-company, .rpf .rpf-head, .rpf .rpf-title,
+	.rpf .rpf-grid tr.group, .rpf .rpf-grid tr.voucher,
+	.rpf .rpf-grid tr.has-narration { page-break-after: avoid; }
+	@page { size: A4 {{ orientation }}; }
+	@media screen {
+		.rpf .rpf-page + .rpf-page { border-top: 1px dashed #c7c7c7; margin-top: 28px; padding-top: 28px; }
+	}
+</style>
+{%- endmacro %}
+
+{% macro company_header(company) -%}
+{%- if company -%}
+{%- set info = frappe.db.get_value("Company", company, ["company_name", "tax_id", "phone_no", "email"], as_dict=True) or {} -%}
+{%- set links = frappe.get_all("Address", filters=[["Dynamic Link", "link_doctype", "=", "Company"], ["Dynamic Link", "link_name", "=", company], ["Address", "disabled", "=", 0]], fields=["name"], order_by="is_primary_address desc") -%}
+{%- set address = frappe.get_doc("Address", links[0].name) if links else {} -%}
+<div class="rpf-company">
+	<div class="rpf-company-name">{{ (info.company_name or company) | e }}</div>
+	<div class="rpf-company-meta">
+		{%- if address -%}
+		<div>{{ [address.address_line1, address.address_line2, address.city, address.state, address.pincode] | select | join(", ") | e }}</div>
+		{%- endif -%}
+		{%- set tax_id = address.gstin or info.tax_id -%}
+		{%- set contact = [(_("GSTIN") ~ " " ~ tax_id) if tax_id else "", address.phone or info.phone_no, address.email_id or info.email] | select | join(" · ") -%}
+		{%- if contact %}<div>{{ contact | e }}</div>{% endif %}
+	</div>
+</div>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro head(title, period, subject=None, meta=None) -%}
+<table class="rpf-head">
+	<tr>
+		<td>
+			<div class="rpf-subject">{{ subject or title }}</div>
+			{%- if subject and meta %}<div class="rpf-meta">{{ meta }}</div>{% endif %}
+		</td>
+		<td class="rpf-head-side">
+			{%- if subject %}<div class="rpf-title">{{ title }}</div>{% endif %}
+			<div class="rpf-meta">{{ period }}</div>
+		</td>
+	</tr>
+</table>
+{%- endmacro %}
+
+{% macro party_meta(party_type, party) -%}
+{%- set doc = frappe.get_doc(party_type, party) if party_type and party else {} -%}
+{%- set address = ((doc.primary_address or "") | replace("<br>", ", ") | striptags | trim(", ")) -%}
+{%- set tax_id = doc.gstin or doc.tax_id -%}
+{{ [address, (_("GSTIN") ~ " " ~ tax_id) if tax_id else ""] | select | join(" · ") | e }}
+{%- endmacro %}
+
+{% macro party_name(party_type, party) -%}
+{{ (frappe.db.get_value(party_type, party, "supplier_name" if party_type == "Supplier" else ("customer_name" if party_type == "Customer" else "name")) or party) | e }}
+{%- endmacro %}
+
+{% macro date(value) -%}
+{{ frappe.utils.format_date(value) if value else "" }}
+{%- endmacro %}
+
+{% macro period(from_date, to_date) -%}
+{{ date(from_date) }} – {{ date(to_date) }}
+{%- endmacro %}
+
+{% macro money(value) -%}
+{{ frappe.utils.fmt_money(value) if value else "" }}
+{%- endmacro %}
+
+{% macro drcr(value) -%}
+{%- if value -%}{{ frappe.utils.fmt_money(value | abs) }} {{ _("Dr") if value > 0 else _("Cr") }}{%- endif -%}
+{%- endmacro %}
+
+{% macro qty(value) -%}
+{{ frappe.utils.fmt_money(value, precision=(0 if value == (value | int) else 2)) if value else "" }}
+{%- endmacro %}
+
+{% macro vch_type(row) -%}
+{%- set subtype = row.voucher_subtype or "" -%}
+{%- if row.voucher_type == "Payment Entry" -%}
+{{ _("Receipt") if subtype == "Receive" else (_("Contra") if subtype == "Internal Transfer" else _("Payment")) }}
+{%- elif row.voucher_type == "Sales Invoice" -%}
+{{ _("Credit Note") if subtype == "Credit Note" else _("Sales") }}
+{%- elif row.voucher_type == "Purchase Invoice" -%}
+{{ _("Debit Note") if subtype == "Debit Note" else _("Purchase") }}
+{%- elif row.voucher_type == "Journal Entry" -%}
+{{ _("Contra") if subtype == "Contra Entry" else _("Journal") }}
+{%- else -%}
+{{ _(row.voucher_type) | e }}
+{%- endif -%}
+{%- endmacro %}
+
+{% macro footnote() -%}
+<div class="rpf-footnote">{{ _("Computer-generated document · Printed on {0}").format(frappe.utils.format_datetime(frappe.utils.now_datetime())) }}</div>
+{%- endmacro %}
+
+{% macro short(name, company) -%}
+{%- set abbr = frappe.get_cached_doc("Company", company).abbr if company else None -%}
+{{ ((name or "") | replace(" - " ~ abbr, "") if abbr else (name or "")) | e }}
+{%- endmacro %}

@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from functools import partial
 from unittest.mock import patch
 
 import frappe
@@ -15,6 +16,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	delete_dimension,
 	get_evaluated_inventory_dimension,
 	get_inventory_dimensions,
+	get_parent_fields,
 )
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -133,6 +135,20 @@ class TestInventoryDimension(ERPNextTestSuite):
 			self.assertEqual(frappe.session.user, user.name)
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_parent_fields_need_inventory_dimension_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		projects_user = create_user("dimension-parent-fields-projects@example.com", "Projects User").name
+		stock_user = create_user("dimension-parent-fields-stock@example.com", "Stock User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(projects_user)
+		self.assertRaises(frappe.PermissionError, get_parent_fields, "Stock Entry Detail", "Warehouse")
+
+		frappe.set_user(stock_user)
+		fields = [field.value for field in get_parent_fields("Stock Entry Detail", "Warehouse")]
+		self.assertIn("from_warehouse", fields)
 
 	def test_inventory_dimension(self):
 		create_warehouse("Shelf Warehouse")
@@ -316,6 +332,30 @@ class TestInventoryDimension(ERPNextTestSuite):
 				self.assertEqual(
 					get_evaluated_inventory_dimension(row, frappe._dict(actual_qty=qty)), expected
 				)
+
+	def test_dimension_condition_reads_field_values_only(self):
+		stock_entry = make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=7, basic_rate=100, do_not_submit=True
+		)
+		row = stock_entry.items[0]
+		dimension = frappe._dict(
+			name="Pallet",
+			condition="parent.purpose == 'Material Receipt' and doc.qty == 7 and doc.doctype == 'Stock Entry Detail'",
+			type_of_transaction="Both",
+		)
+		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
+		with patch(f"{module}.get_document_wise_inventory_dimensions", return_value=[dimension]):
+			evaluate = partial(
+				get_evaluated_inventory_dimension, row, frappe._dict(actual_qty=7), stock_entry
+			)
+			self.assertEqual(evaluate(), [dimension])
+
+			dimension.condition = "parent.db_set('remarks', 'Changed by condition') or True"
+			self.assertRaises(TypeError, evaluate)
+
+		self.assertNotEqual(
+			frappe.db.get_value("Stock Entry", stock_entry.name, "remarks"), "Changed by condition"
+		)
 
 	def test_check_mandatory_depends_on_backend(self):
 		doc = create_inventory_dimension(
@@ -744,6 +784,102 @@ class TestInventoryDimension(ERPNextTestSuite):
 				{"voucher_no": issue.name, "is_cancelled": 0},
 			)
 		)
+
+	def test_end_transit_takes_serial_no_from_transit_inventory_dimension(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
+
+		item = make_item(
+			"Test Serialized Transit Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Transit Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Transit Dimension Source Warehouse")
+		transit_warehouse = create_warehouse(
+			"Serialized Transit Dimension Transit Warehouse", properties={"warehouse_type": "Transit"}
+		)
+		target_warehouse = create_warehouse("Serialized Transit Dimension Target Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		receipt = make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		receipt.items[0].to_serial_rack = "Rack 1"
+		receipt.save()
+		receipt.submit()
+
+		# the serial no reaches transit without a rack
+		transit_entry = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			to_warehouse=transit_warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			add_to_transit=1,
+			do_not_submit=True,
+		)
+		transit_entry.items[0].serial_rack = "Rack 1"
+		transit_entry.save()
+		transit_entry.submit()
+
+		end_transit_entry = make_stock_in_entry(transit_entry.name)
+		self.assertFalse(end_transit_entry.items[0].serial_rack)
+
+		end_transit_entry.items[0].t_warehouse = target_warehouse
+		end_transit_entry.save()
+		end_transit_entry.submit()
+
+		self.assertEqual(end_transit_entry.docstatus, 1)
+
+	def test_blank_inventory_dimension_matches_unset_dimension(self):
+		item = make_item(
+			"Test Serialized Blank Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Blank Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Blank Inventory Dimension Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+		)
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		issue.items[0].serial_rack = ""
+		issue.save()
+		issue.submit()
+
+		self.assertEqual(issue.docstatus, 1)
 
 	def test_serial_no_inventory_dimension_with_legacy_inward_sle(self):
 		item = make_item(

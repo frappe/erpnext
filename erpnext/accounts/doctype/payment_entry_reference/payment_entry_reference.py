@@ -29,6 +29,7 @@ class PaymentEntryReference(Document):
 		parenttype: DF.Data
 		payment_request: DF.Link | None
 		payment_term: DF.Link | None
+		payment_term_discount: DF.Currency
 		payment_term_outstanding: DF.Float
 		payment_type: DF.Data | None
 		reconcile_effect_on: DF.Date | None

@@ -27,6 +27,7 @@ def create_incoterms():
 	import os
 	from csv import DictReader
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 	with open(os.path.join(os.path.dirname(__file__), "incoterms.csv")) as f:
 		for incoterm in DictReader(f):
 			if frappe.db.exists("Incoterm", incoterm["code"]):

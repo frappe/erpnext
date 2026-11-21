@@ -16,8 +16,9 @@ from erpnext.accounts.doctype.account_closing_balance.account_closing_balance im
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.general_ledger import check_freezing_date, is_immutable_ledger_enabled
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year
+from erpnext.accounts.doctype.gl_entry.gl_entry import validate_frozen_account
+from erpnext.accounts.general_ledger import check_freezing_date
+from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import apply_unscoped_filters
 from erpnext.stock.utils import get_stock_value_on
@@ -49,18 +50,14 @@ class PeriodClosingVoucher(AccountsController):
 
 	def validate(self):
 		self.validate_start_and_end_date()
-		self.check_if_previous_year_closed()
+		self.check_if_previous_period_closed()
 		self.block_if_future_closing_voucher_exists()
-		self.check_closing_account_type()
+		self.check_closing_account()
 		self.check_closing_account_currency()
 		self.validate_accounts_not_frozen()
 
-	def validate_accounts_not_frozen(self, for_cancellation=False):
-		posting_date = self.period_end_date
-		if for_cancellation and is_immutable_ledger_enabled():
-			posting_date = getdate()
-
-		check_freezing_date(posting_date, self.company)
+	def validate_accounts_not_frozen(self):
+		check_freezing_date(self.period_end_date, self.company)
 
 	def validate_start_and_end_date(self):
 		self.fy_start_date, self.fy_end_date = frappe.db.get_value(
@@ -83,45 +80,65 @@ class PeriodClosingVoucher(AccountsController):
 		if getdate(self.period_end_date) > getdate(self.fy_end_date):
 			frappe.throw(_("Period End Date cannot be greater than Fiscal Year End Date"))
 
-	def check_if_previous_year_closed(self):
-		last_year_closing = add_days(self.fy_start_date, -1)
-		previous_fiscal_year = get_fiscal_year(last_year_closing, company=self.company, boolean=True)
-		if not previous_fiscal_year:
+	def check_if_previous_period_closed(self):
+		last_closing = self.get_last_closing()
+		if last_closing and last_closing.gle_processing_status != "Completed":
+			frappe.throw(
+				_(
+					"Period Closing Voucher {0} has GL Entry Processing Status {1}. Complete or cancel it before closing the next period."
+				).format(
+					get_link_to_form(self.doctype, last_closing.name), _(last_closing.gle_processing_status)
+				)
+			)
+
+		last_closed_date = last_closing.period_end_date if last_closing else None
+		if last_closed_date and getdate(add_days(last_closed_date, 1)) == getdate(self.period_start_date):
 			return
 
-		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
-		previous_fiscal_year_closed = frappe.db.exists(
+		first_unclosed_date = self.get_first_unclosed_date(last_closed_date)
+		if first_unclosed_date:
+			open_from = add_days(last_closed_date, 1) if last_closed_date else first_unclosed_date
+			frappe.throw(
+				_("Previous period is not closed. Close the period from {0} first.").format(
+					frappe.bold(formatdate(open_from))
+				)
+			)
+
+	def get_last_closing(self):
+		return frappe.db.get_value(
 			"Period Closing Voucher",
-			{
-				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
-				"docstatus": 1,
-				"company": self.company,
-			},
+			{"company": self.company, "docstatus": 1, "period_end_date": ("<", self.period_start_date)},
+			["name", "period_end_date", "gle_processing_status"],
+			order_by="period_end_date desc",
+			as_dict=True,
 		)
-		if previous_fiscal_year_closed:
-			return
 
-		gle_exists_in_previous_year = frappe.db.exists(
+	def get_first_unclosed_date(self, last_closed_date):
+		posting_date = ("<", self.period_start_date)
+		if last_closed_date:
+			posting_date = ("between", [add_days(last_closed_date, 1), add_days(self.period_start_date, -1)])
+
+		return frappe.db.get_value(
 			"GL Entry",
 			{
-				"posting_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
 				"company": self.company,
+				"posting_date": posting_date,
 				"is_cancelled": 0,
+				"is_opening": "No",
+				"voucher_type": ("!=", "Period Closing Voucher"),
 			},
+			"posting_date",
+			order_by="posting_date asc",
 		)
-		if not gle_exists_in_previous_year:
-			return
-
-		frappe.throw(_("Previous Year is not closed, please close it first"))
 
 	def block_if_future_closing_voucher_exists(self):
 		future_closing_voucher = self.get_future_closing_voucher()
-		if future_closing_voucher and future_closing_voucher[0][0]:
+		if future_closing_voucher:
 			action = "cancel" if self.docstatus == 2 else "create"
 			frappe.throw(
 				_(
 					"You cannot {0} this document because another Period Closing Entry {1} exists after {2}"
-				).format(action, future_closing_voucher[0][0], self.period_end_date)
+				).format(action, future_closing_voucher, self.period_end_date)
 			)
 
 	def get_future_closing_voucher(self):
@@ -131,13 +148,33 @@ class PeriodClosingVoucher(AccountsController):
 			"name",
 		)
 
-	def check_closing_account_type(self):
-		closing_account_type = frappe.get_cached_value("Account", self.closing_account_head, "root_type")
+	def check_closing_account(self):
+		account = frappe.get_cached_value(
+			"Account",
+			self.closing_account_head,
+			["root_type", "company", "is_group", "disabled"],
+			as_dict=True,
+		)
 
-		if closing_account_type not in ["Liability", "Equity"]:
+		if account.root_type not in ["Liability", "Equity"]:
 			frappe.throw(
 				_("Closing Account {0} must be of type Liability / Equity").format(self.closing_account_head)
 			)
+
+		if account.company != self.company:
+			frappe.throw(
+				_("Closing Account {0} does not belong to Company {1}").format(
+					self.closing_account_head, self.company
+				)
+			)
+
+		if account.is_group:
+			frappe.throw(_("Closing Account {0} cannot be a group account").format(self.closing_account_head))
+
+		if account.disabled:
+			frappe.throw(_("Closing Account {0} is disabled").format(self.closing_account_head))
+
+		validate_frozen_account(self.company, self.closing_account_head)
 
 	def check_closing_account_currency(self):
 		account_currency = get_account_currency(self.closing_account_head)
@@ -311,7 +348,7 @@ class PeriodClosingVoucher(AccountsController):
 			"Process Period Closing Voucher",
 		)
 		self.block_if_future_closing_voucher_exists()
-		self.validate_accounts_not_frozen(for_cancellation=True)
+		self.validate_accounts_not_frozen()
 
 		if not frappe.get_single_value("Accounts Settings", "use_legacy_controller_for_pcv"):
 			self.cancel_process_pcv_docs()
@@ -346,7 +383,27 @@ class PeriodClosingVoucher(AccountsController):
 				alert=True,
 			)
 		else:
-			process_gl_and_closing_entries(self)
+			self.post_closing_entries()
+
+	def post_closing_entries(self):
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		gl_entries = self.get_pcv_gl_entries()
+		if gl_entries:
+			make_gl_entries(gl_entries, merge_entries=False)
+
+		closing_entries = self.get_account_closing_balances()
+		make_closing_entries(closing_entries, self.name, self.company, self.period_end_date)
+		self.db_set("gle_processing_status", "Completed")
+
+	def reverse_closing_entries(self):
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
+		make_reverse_gl_entries(
+			voucher_type=self.doctype, voucher_no=self.name, posting_date=self.period_end_date
+		)
+		delete_closing_entries(self.name)
+		self.db_set("gle_processing_status", "Completed")
 
 	def get_pcv_gl_entries(self):
 		self.pl_accounts_reverse_gle = []
@@ -354,14 +411,15 @@ class PeriodClosingVoucher(AccountsController):
 
 		pl_account_balances = self.get_account_balances_based_on_dimensions(report_type="Profit and Loss")
 		for dimensions, account_balances in pl_account_balances.items():
-			for acc, balances in account_balances.items():
-				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
-				if balance_in_company_currency and acc != "balances":
-					self.pl_accounts_reverse_gle.append(
-						self.get_gle_for_pl_account(acc, balances, dimensions)
-					)
+			pl_entries = [
+				self.get_gle_for_pl_account(acc, balances, dimensions)
+				for acc, balances in account_balances.items()
+				if acc != "balances" and has_balance(balances)
+			]
+			if not pl_entries:
+				continue
 
-			# closing liability account
+			self.pl_accounts_reverse_gle.extend(pl_entries)
 			self.closing_account_gle.append(
 				self.get_gle_for_closing_account(account_balances["balances"], dimensions)
 			)
@@ -617,7 +675,7 @@ class PeriodClosingVoucher(AccountsController):
 				alert=True,
 			)
 		else:
-			process_cancellation(voucher_type="Period Closing Voucher", voucher_no=self.name)
+			self.reverse_closing_entries()
 
 	def get_gle_count_against_current_pcv(self):
 		return frappe.db.count(
@@ -627,49 +685,32 @@ class PeriodClosingVoucher(AccountsController):
 
 
 def process_gl_and_closing_entries(doc):
-	from erpnext.accounts.general_ledger import make_gl_entries
-
-	try:
-		gl_entries = doc.get_pcv_gl_entries()
-		if gl_entries:
-			make_gl_entries(gl_entries, merge_entries=False)
-
-		closing_entries = doc.get_account_closing_balances()
-		make_closing_entries(closing_entries, doc.name, doc.company, doc.period_end_date)
-
-		frappe.db.set_value(doc.doctype, doc.name, "gle_processing_status", "Completed")
-	except Exception as e:
-		frappe.db.rollback()
-		frappe.log_error(title=_("Period Closing Voucher {0} GL Entry Processing Failed").format(doc.name))
-		frappe.db.set_value(
-			doc.doctype,
-			doc.name,
-			{
-				"error_message": str(e),
-				"gle_processing_status": "Failed",
-			},
-		)
+	run_and_record_failure(
+		doc.name,
+		_("Period Closing Voucher {0} GL Entry Processing Failed").format(doc.name),
+		doc.post_closing_entries,
+	)
 
 
 def process_cancellation(voucher_type, voucher_no):
-	from erpnext.accounts.general_ledger import make_reverse_gl_entries
+	run_and_record_failure(
+		voucher_no,
+		_("Period Closing Voucher {0} GL Entry Cancellation Failed").format(voucher_no),
+		frappe.get_doc(voucher_type, voucher_no).reverse_closing_entries,
+	)
 
+
+def run_and_record_failure(pcv_name, title, method, *args):
+	frappe.db.savepoint("period_closing")
 	try:
-		make_reverse_gl_entries(voucher_type=voucher_type, voucher_no=voucher_no)
-		delete_closing_entries(voucher_no)
-		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Completed")
+		method(*args)
 	except Exception as e:
-		frappe.db.rollback()
-		frappe.log_error(
-			title=_("Period Closing Voucher {0} GL Entry Cancellation Failed").format(voucher_no)
-		)
+		frappe.db.rollback(save_point="period_closing")
+		frappe.log_error(title=title)
 		frappe.db.set_value(
-			voucher_type,
-			voucher_no,
-			{
-				"error_message": str(e),
-				"gle_processing_status": "Failed",
-			},
+			"Period Closing Voucher",
+			pcv_name,
+			{"error_message": str(e), "gle_processing_status": "Failed"},
 		)
 
 
@@ -682,6 +723,9 @@ def delete_closing_entries(voucher_no):
 
 @frappe.whitelist()
 def get_period_start_end_date(fiscal_year, company):
+	frappe.get_doc(
+		{"doctype": "Period Closing Voucher", "company": company, "fiscal_year": fiscal_year}
+	).check_permission("read")
 	fy_start_date, fy_end_date = frappe.db.get_value(
 		"Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"]
 	)
@@ -704,6 +748,13 @@ def get_previous_closed_period_in_current_year(fiscal_year, company):
 		order_by="period_end_date desc",
 	)
 	return prev_closed_period_end_date
+
+
+def has_balance(balances):
+	return bool(
+		flt(balances.debit) - flt(balances.credit)
+		or flt(balances.debit_in_account_currency) - flt(balances.credit_in_account_currency)
+	)
 
 
 def is_within_stock_value_tolerance(stock_value, difference):

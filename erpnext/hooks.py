@@ -63,6 +63,16 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
+	"Customer": [
+		"public/js/party_overview.js",
+		"public/js/customer_overview.js",
+		"public/js/party_items.js",
+	],
+	"Supplier": [
+		"public/js/party_overview.js",
+		"public/js/supplier_overview.js",
+		"public/js/party_items.js",
+	],
 	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
@@ -336,6 +346,7 @@ has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.ha
 permission_query_conditions = {
 	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
 	"Call Log": "erpnext.telephony.doctype.call_log.call_log.get_permission_query_conditions",
+	"Contract": "erpnext.crm.doctype.contract.contract.get_permission_query_conditions",
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
@@ -345,6 +356,7 @@ permission_query_conditions = {
 
 has_permission = {
 	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
+	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
 	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
@@ -364,7 +376,6 @@ has_website_permission = {
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
 
 
@@ -619,6 +630,7 @@ accounting_dimension_doctypes = [
 	"Journal Entry Account",
 	"Journal Entry Template Account",
 	"Material Request Item",
+	"Request for Quotation Item",
 	"Delivery Note Item",
 	"Purchase Receipt Item",
 	"Stock Entry Detail",
@@ -735,6 +747,7 @@ global_search_doctypes = {
 }
 
 ignore_links_on_delete = [
+	"Asset Activity",
 	"Tax Withholding Entry",
 ]
 

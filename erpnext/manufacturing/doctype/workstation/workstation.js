@@ -253,14 +253,14 @@ class WorkstationDashboard {
 		this.$wrapper.find(".btn-pause").on("click", (e) => {
 			let job_card = $(e.currentTarget).closest("div").attr("data-job-card");
 			me.update_job_card(job_card, "pause_job", {
-				end_time: frappe.datetime.now_datetime(),
+				end_time: frappe.datetime.system_datetime(),
 			});
 		});
 
 		this.$wrapper.find(".btn-resume").on("click", (e) => {
 			let job_card = $(e.currentTarget).closest("div").attr("data-job-card");
 			me.update_job_card(job_card, "resume_job", {
-				start_time: frappe.datetime.now_datetime(),
+				start_time: frappe.datetime.system_datetime(),
 			});
 		});
 
@@ -305,7 +305,7 @@ class WorkstationDashboard {
 
 				this.update_job_card(job_card, "complete_job_card", {
 					qty: flt(data.qty),
-					end_time: frappe.datetime.now_datetime(),
+					end_time: frappe.datetime.system_datetime(),
 					auto_submit: 1,
 				});
 			},
@@ -322,7 +322,7 @@ class WorkstationDashboard {
 				label: __("Start Time"),
 				fieldname: "start_time",
 				fieldtype: "Datetime",
-				default: frappe.datetime.now_datetime(),
+				default: frappe.datetime.system_datetime(),
 			},
 			{
 				label: __("Employee"),
@@ -599,7 +599,7 @@ class WorkstationDashboard {
 					current_time += this.get_seconds_diff(d.to_time, d.from_time);
 				}
 			} else {
-				current_time += this.get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+				current_time += this.get_seconds_diff(frappe.datetime.system_datetime(), d.from_time);
 			}
 		});
 

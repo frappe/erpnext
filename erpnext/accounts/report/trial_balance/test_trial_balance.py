@@ -54,6 +54,12 @@ class TestTrialBalance(ERPNextTestSuite):
 		user = make_fenced_user(
 			"tb-opening@example.com", ["Accounts User"], [("Account", "_Test Write Off - _TC")]
 		)
+		# a perpetual inventory company links an account the user is not permitted
+		inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
+		self.addCleanup(
+			frappe.db.set_value, "Company", "_Test Company", "default_inventory_account", inventory_account
+		)
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", "Stock In Hand - _TC")
 		with as_user(user):
 			total_row = execute(frappe._dict(filters))[1][-1]
 		self.assertEqual((total_row["opening_debit"], total_row["opening_credit"]), (0, 0))
@@ -67,6 +73,33 @@ class TestTrialBalance(ERPNextTestSuite):
 		with as_user(make_fenced_user("tb-auditor@example.com", ["Auditor"])):
 			total_row = execute(frappe._dict(filters))[1][-1]
 		self.assertEqual(total_row["opening_debit"], total_row["opening_credit"])
+
+	def test_company_permission_follows_applicable_for(self):
+		from erpnext.accounts.utils import get_fiscal_year
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		company = "_Test Company"
+		user = make_fenced_user("tb-company@example.com", ["Accounts User"])
+		# a permission for another company, limited to Sales Invoice
+		user_permission = frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Sales Invoice",
+			}
+		).insert(ignore_permissions=True)
+		filters = frappe._dict(company=company, fiscal_year=get_fiscal_year(today(), company=company)[0])
+
+		with as_user(user):
+			execute(frappe._dict(filters))
+
+		user_permission.update({"apply_to_all_doctypes": 1, "applicable_for": None})
+		user_permission.save(ignore_permissions=True)
+		with as_user(user), self.assertRaisesRegex(frappe.PermissionError, company):
+			execute(frappe._dict(filters))
 
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		"""

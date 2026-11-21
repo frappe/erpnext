@@ -24,6 +24,123 @@ class TestDunning(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
 	)
+	def test_opening_invoice_dunning_payment_lifecycle(self):
+		for currency, conversion_rate, debit_to in (
+			("INR", 1, "Debtors - _TC"),
+			("USD", 80, "Debtors - _TC"),
+			("USD", 80, "_Test Receivable USD - _TC"),
+		):
+			with self.subTest(currency=currency, debit_to=debit_to):
+				invoice = create_sales_invoice(
+					posting_date=add_days(today(), -15),
+					customer="_Test Customer USD"
+					if debit_to == "_Test Receivable USD - _TC"
+					else "_Test Customer",
+					currency=currency,
+					conversion_rate=conversion_rate,
+					debit_to=debit_to,
+					income_account="Temporary Opening - _TC",
+					rate=100,
+					do_not_save=True,
+				)
+				invoice.is_opening = "Yes"
+				invoice.due_date = add_days(today(), -10)
+				invoice.append("payment_schedule", {"due_date": invoice.due_date, "invoice_portion": 100})
+				invoice.insert().submit()
+				self.assertEqual(invoice.reload().payment_schedule, [])
+
+				manual = frappe.get_doc(
+					doctype="Dunning",
+					company=invoice.company,
+					customer=invoice.customer,
+					currency=invoice.currency,
+					conversion_rate=invoice.conversion_rate,
+					overdue_payments=[
+						{"sales_invoice": invoice.name, "due_date": invoice.due_date, "outstanding": 100}
+					],
+				)
+				manual.insert().submit()
+				self.assertEqual(manual.overdue_payments[0].dunning_level, 1)
+				mapped = create_dunning_from_sales_invoice(invoice.name)
+				mapped.insert().submit()
+				self.assertEqual(mapped.overdue_payments[0].dunning_level, 2)
+				self.assertEqual(mapped.total_outstanding, 100)
+				self.assertFalse(mapped.overdue_payments[0].payment_schedule)
+				stale = create_dunning_from_sales_invoice(invoice.name).insert()
+
+				partial_payment = get_payment_entry(
+					"Sales Invoice", invoice.name, bank_account="_Test Cash - _TC"
+				)
+				partial_payment.paid_amount /= 2
+				partial_payment.received_amount /= 2
+				partial_payment.references[0].allocated_amount /= 2
+				partial_payment.insert().submit()
+				for dunning in (manual, mapped):
+					self.assertEqual(dunning.reload().status, "Unresolved")
+					self.assertEqual(dunning.get_unpaid_overdue_payments()[0][1], 50)
+				self.assertEqual(create_dunning_from_sales_invoice(invoice.name).total_outstanding, 50)
+				with self.assertRaisesRegex(frappe.ValidationError, "cannot exceed the unpaid"):
+					stale.submit()
+
+				payment = get_payment_entry("Dunning", manual.name, bank_account="_Test Cash - _TC")
+				self.assertEqual(payment.references[0].allocated_amount, invoice.reload().outstanding_amount)
+				payment.insert().submit()
+				self.assertEqual(invoice.reload().outstanding_amount, 0)
+				for dunning in (manual, mapped):
+					self.assertEqual(dunning.reload().status, "Resolved")
+				with self.assertRaisesRegex(frappe.ValidationError, "There are no overdue payments"):
+					create_dunning_from_sales_invoice(invoice.name)
+				payment.cancel()
+				for dunning in (manual, mapped):
+					self.assertEqual(dunning.reload().status, "Unresolved")
+				partial_payment.cancel()
+				self.assertEqual(manual.get_unpaid_overdue_payments()[0][1], 100)
+
+	def test_opening_invoice_dunning_reference_validation(self):
+		invoice = create_sales_invoice(
+			posting_date=add_days(today(), -15), income_account="Temporary Opening - _TC", do_not_save=True
+		)
+		invoice.is_opening = "Yes"
+		invoice.due_date = add_days(today(), -10)
+		invoice.insert().submit()
+		regular_invoice = create_sales_invoice(posting_date=add_days(today(), -15))
+
+		for field, value, message in (
+			("due_date", add_days(invoice.due_date, -1), "Due Date"),
+			("outstanding", 0, "cannot exceed the unpaid"),
+			("outstanding", -1, "cannot exceed the unpaid"),
+			("outstanding", 101, "cannot exceed the unpaid"),
+			("payment_schedule", regular_invoice.payment_schedule[0].name, "Payment Schedule"),
+		):
+			with self.subTest(field=field, value=value):
+				dunning = create_dunning_from_sales_invoice(invoice.name)
+				dunning.overdue_payments[0].set(field, value)
+				with self.assertRaisesRegex(frappe.ValidationError, message):
+					dunning.insert()
+
+		dunning = create_dunning_from_sales_invoice(invoice.name)
+		dunning.append("overdue_payments", dunning.overdue_payments[0].as_dict())
+		with self.assertRaisesRegex(frappe.ValidationError, "already included"):
+			dunning.insert()
+		dunning = create_dunning_from_sales_invoice(regular_invoice.name)
+		dunning.overdue_payments[0].payment_schedule = None
+		with self.assertRaisesRegex(frappe.ValidationError, "Payment Schedule"):
+			dunning.insert()
+		dunning = create_dunning_from_sales_invoice(invoice.name)
+		dunning.posting_date = invoice.due_date
+		with self.assertRaisesRegex(frappe.ValidationError, "must be overdue"):
+			dunning.insert()
+		dunning = create_dunning_from_sales_invoice(invoice.name)
+		dunning.customer = "_Test Customer 2"
+		with self.assertRaisesRegex(frappe.ValidationError, "same Customer"):
+			dunning.insert()
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.PermissionError):
+				create_dunning_from_sales_invoice(invoice.name)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_document_api_defaults_converted_fee_and_preserves_overrides(self):
 		create_dunning_type("API Fee Notice", 100, 0, 0)
 		invoice = create_sales_invoice(
@@ -464,6 +581,49 @@ class TestDunning(ERPNextTestSuite):
 		dunning.reload()
 		self.assertEqual(sales_invoice.outstanding_amount, 0)
 		self.assertEqual(dunning.status, "Resolved")
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_dunning_uses_recalculated_foreign_currency_schedule_outstanding(self):
+		create_payment_terms_template_for_dunning()
+		template = frappe.get_doc("Payment Terms Template", "_Test 50-50 for Dunning")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+		self.addCleanup(template.db_set, "allocate_payment_based_on_payment_terms", 1)
+
+		for payment_terms_template in (None, template.name):
+			with self.subTest(payment_terms_template=payment_terms_template):
+				invoice = create_sales_invoice(
+					posting_date=add_days(today(), -60),
+					currency="USD",
+					conversion_rate=80,
+					rate=100,
+					debit_to="Debtors - _TC",
+					do_not_save=True,
+				)
+				invoice.payment_terms_template = payment_terms_template
+				invoice.insert().submit()
+
+				partial_payment = get_payment_entry(
+					"Sales Invoice", invoice.name, bank_account="_Test Cash - _TC"
+				)
+				partial_payment.paid_amount = partial_payment.received_amount = 4000
+				partial_payment.references[0].allocated_amount = 4000
+				partial_payment.submit()
+
+				invoice.reload()
+				self.assertEqual(invoice.outstanding_amount, 4000)
+				self.assertEqual(
+					[row.outstanding for row in invoice.payment_schedule],
+					[100] if not payment_terms_template else [50, 50],
+				)
+
+				dunning = create_dunning_from_sales_invoice(invoice.name)
+				self.assertEqual(len(dunning.overdue_payments), 1)
+				self.assertEqual(dunning.overdue_payments[0].outstanding, 50)
+				dunning.submit()
+				self.assertEqual(dunning.total_outstanding, 50)
 
 	def test_payment_after_partial_invoice_payment_without_term_allocation(self):
 		create_payment_terms_template_for_dunning()

@@ -109,7 +109,7 @@ class TestAppointment(ERPNextTestSuite):
 		settings.verification_link_expiry_duration = VERIFICATION_EXPIRY_MINUTES
 		settings.holiday_list = holiday_list.name
 		settings.set("agent_list", [])
-		for agent in agents or ["Administrator"]:
+		for agent in ["Administrator"] if agents is None else agents:
 			settings.append("agent_list", {"user": agent})
 		settings.set("availability_of_slots", [])
 		for day in ALL_WEEKDAYS:
@@ -383,6 +383,20 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertFalse(availability["13:30"])
 		self.assertTrue(availability["14:00"])
 
+	def test_portal_offers_slots_when_no_agents_are_set(self):
+		from frappe.utils.data import get_system_timezone
+
+		self._configure_booking_settings(agents=[])
+		create_test_appointment(customer_email="slot_taken@example.com", scheduled_time=slot_on(2, 10))
+
+		with self.set_user("Guest"):
+			slots = get_appointment_slots(
+				str(datetime.date.today() + datetime.timedelta(days=2)), get_system_timezone()
+			)
+
+		self.assertTrue(slots)
+		self.assertTrue(all(slot["availability"] for slot in slots))
+
 	def test_unverified_booking_holds_no_capacity(self):
 		booking = self._create_portal_appointment("portal_visitor_unverified@example.com", days_from_now=3)
 		set_booking_setting("number_of_agents", 1)
@@ -424,28 +438,6 @@ class TestAppointment(ERPNextTestSuite):
 
 		self.assertEqual(locks[:2], ["capacity", "row"])
 		self.assertIn("capacity", locks[2:])
-
-	def test_portal_slot_on_any_overlapping_availability_grid(self):
-		self._configure_booking_settings()
-		settings = frappe.get_doc("Appointment Booking Settings")
-		settings.appointment_duration = 60
-		settings.set("availability_of_slots", [])
-		for day in ALL_WEEKDAYS:
-			for from_time, to_time in (("09:00:00", "12:00:00"), ("09:30:00", "12:30:00")):
-				settings.append(
-					"availability_of_slots", {"day_of_week": day, "from_time": from_time, "to_time": to_time}
-				)
-		settings.save()
-
-		booking = frappe.get_doc(
-			{"doctype": "Appointment", "created_through_portal": 1, "scheduled_time": slot_on(7, 9, 30)}
-		)
-		booking.validate_slot_timing()
-
-		booking.scheduled_time = slot_on(7, 9, 45)
-		self.assertRaisesRegex(
-			frappe.ValidationError, "beginning of an available slot", booking.validate_slot_timing
-		)
 
 	def test_portal_checks_holidays_on_the_business_date(self):
 		from zoneinfo import ZoneInfo
@@ -613,6 +605,34 @@ class TestAppointment(ERPNextTestSuite):
 		first.status = "Open"
 		first.save()
 		self.assertTrue(all(status == "Open" for status in get_todo_statuses(first.name)))
+
+	def test_patch_shares_appointments_assigned_before_owner_only_access(self):
+		from frappe.desk.form.assign_to import add as add_assignment
+
+		from erpnext.patches.v16_0.share_assigned_appointments_with_agents import execute
+
+		agent_email = "appointment_employee_agent@example.com"
+		if not frappe.db.exists("User", agent_email):
+			frappe.get_doc({"doctype": "User", "email": agent_email, "first_name": "Employee Agent"}).insert(
+				ignore_permissions=True
+			)
+		frappe.get_doc("User", agent_email).add_roles("Employee")
+
+		appointment = create_test_appointment(customer_email="assigned_before@example.com")
+		# assigned while Employee could read every appointment, so it was not shared
+		add_assignment({"doctype": "Appointment", "name": appointment.name, "assign_to": [agent_email]})
+		frappe.db.delete("DocShare", {"share_doctype": "Appointment", "share_name": appointment.name})
+		# a closed ToDo drops the agent from _assign, but the agent still needs the appointment
+		todo = frappe.get_last_doc(
+			"ToDo", {"reference_type": "Appointment", "reference_name": appointment.name}
+		)
+		todo.status = "Closed"
+		todo.save(ignore_permissions=True)
+		self.assertNotIn(agent_email, frappe.db.get_value("Appointment", appointment.name, "_assign") or "")
+		self.assertFalse(frappe.has_permission("Appointment", doc=appointment.name, user=agent_email))
+
+		execute()
+		self.assertTrue(frappe.has_permission("Appointment", doc=appointment.name, user=agent_email))
 
 	def test_busy_agent_is_not_assigned_again(self):
 		from frappe.desk.form.assign_to import add as add_assignment

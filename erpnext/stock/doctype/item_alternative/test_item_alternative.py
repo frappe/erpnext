@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, random_string
 
 from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 from erpnext.controllers.tests.test_subcontracting_controller import (
@@ -17,6 +17,7 @@ from erpnext.manufacturing.doctype.work_order.test_work_order import (
 )
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.item_alternative.item_alternative import get_alternative_items
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
@@ -244,6 +245,29 @@ class TestItemAlternative(ERPNextTestSuite):
 		self.assertEqual(status, True)
 		ste1.submit()
 
+	def test_get_alternative_items_needs_item_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
+
+		suffix = random_string(8)
+		base = f"_Test IA Permission Base {suffix}"
+		alternative = f"_Test IA Permission Alternative {suffix}"
+		for item_code in (base, alternative):
+			create_item(item_code)
+			frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+		make_item_alternative(base, alternative, two_way=1)
+
+		for user, roles in (
+			("_test_ia_no_role@example.com", []),
+			("_test_ia_desk@example.com", ["Desk User"]),
+		):
+			with as_user(make_fenced_user(user, roles)):
+				assert_refused(self, get_alternative_items, "Item", "", "name", 0, 20, {"item_code": base})
+
+		with as_user(make_fenced_user("_test_ia_manufacturing@example.com", ["Manufacturing User"])):
+			for item_code, expected in ((base, alternative), (alternative, base)):
+				results = get_alternative_items("Item", "", "name", 0, 20, {"item_code": item_code})
+				self.assertEqual([list(row) for row in results], [[expected]])
+
 
 def substitute_item(stock_entry, original_item, alternative_item):
 	for row in stock_entry.items:
@@ -292,3 +316,16 @@ def make_items():
 				"company": "_Test Company",
 			}
 		).insert(ignore_permissions=True)
+
+
+def make_item_alternative(item_code, alternative_item_code, two_way=0):
+	doc = frappe.get_doc(
+		{
+			"doctype": "Item Alternative",
+			"item_code": item_code,
+			"alternative_item_code": alternative_item_code,
+			"two_way": two_way,
+		}
+	)
+	doc.insert()
+	return doc

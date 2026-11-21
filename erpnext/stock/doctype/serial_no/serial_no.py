@@ -10,6 +10,7 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
 
+from erpnext import require_permission
 from erpnext.controllers.stock_controller import StockController
 
 
@@ -135,18 +136,18 @@ class SerialNo(StockController):
 			)
 
 
-def get_available_serial_nos(serial_no_series, qty) -> list[str]:
+def get_available_serial_nos(serial_no_series, qty, doc=None) -> list[str]:
 	serial_nos = []
 	for _i in range(cint(qty)):
-		serial_nos.append(get_new_serial_number(serial_no_series))
+		serial_nos.append(get_new_serial_number(serial_no_series, doc))
 
 	return serial_nos
 
 
-def get_new_serial_number(series):
-	sr_no = make_autoname(series, "Serial No")
+def get_new_serial_number(series, doc=None):
+	sr_no = make_autoname(series, "Serial No", doc)
 	if frappe.db.exists("Serial No", sr_no):
-		sr_no = get_new_serial_number(series)
+		sr_no = get_new_serial_number(series, doc)
 	return sr_no
 
 
@@ -207,6 +208,7 @@ def auto_fetch_serial_number(
 	for_doctype: str | None = None,
 	exclude_sr_nos=None,
 ) -> list[str]:
+	require_permission("Warehouse", warehouse, "select")
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
@@ -238,6 +240,9 @@ def auto_fetch_serial_number(
 def get_pos_reserved_serial_nos(filters):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
+
+	frappe.has_permission("POS Invoice", "read", throw=True)
+	require_permission("Warehouse", filters.get("warehouse"), "select")
 
 	POSInvoice = frappe.qb.DocType("POS Invoice")
 	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")

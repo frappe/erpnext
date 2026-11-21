@@ -188,6 +188,7 @@ class MaterialRequest(BuyingController):
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
 		if not self.status:
 			self.status = "Draft"
@@ -237,7 +238,11 @@ class MaterialRequest(BuyingController):
 			self.buying_price_list = default_price_list
 
 	def on_update(self):
-		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
+		if (
+			self.get_doc_before_save()
+			and self.buying_price_list
+			and self.has_value_changed("buying_price_list")
+		):
 			self.update_item_rates()
 
 	def update_item_rates(self):
@@ -260,7 +265,13 @@ class MaterialRequest(BuyingController):
 				item.item_code,
 			)
 			if rate is not None:
-				item.db_set({"rate": rate, "amount": flt(rate * item.qty, item.precision("amount"))})
+				item.db_set(
+					{
+						"price_list_rate": rate,
+						"rate": rate,
+						"amount": flt(rate * item.qty, item.precision("amount")),
+					}
+				)
 
 		frappe.msgprint(
 			_("Item rates have been updated based on the selected Buying Price List {0}").format(
@@ -523,6 +534,10 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
+		self.update_per_ordered(update_modified)
+		self.update_requested_qty_in_work_order()
+
+	def update_per_ordered(self, update_modified=True):
 		self._update_percent_field(
 			{
 				"target_dt": "Material Request Item",
@@ -534,8 +549,6 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
-
-		self.update_requested_qty_in_work_order()
 
 	def update_requested_qty_in_work_order(self):
 		"""Refresh both counters: stop and cancel also flip pick list coverage."""
@@ -605,12 +618,15 @@ class MaterialRequest(BuyingController):
 			return
 
 		update_plan_item_requested_qty({d.material_request_plan_item for d in items_from_pp})
+		update_production_plan_status({d.production_plan for d in items_from_pp})
 
-		for production_plan in {d.production_plan for d in items_from_pp}:
-			doc = frappe.get_doc("Production Plan", production_plan)
-			doc.flags.ignore_permissions = True
-			doc.set_status()
-			doc.db_set("status", doc.status)
+
+def update_production_plan_status(production_plans):
+	for production_plan in production_plans:
+		doc = frappe.get_doc("Production Plan", production_plan)
+		doc.flags.ignore_permissions = True
+		doc.set_status()
+		doc.db_set("status", doc.status)
 
 
 def update_plan_item_requested_qty(plan_item_names):
@@ -795,6 +811,9 @@ def make_purchase_order(
 		if obj.name in requested_qty:
 			obj = get_source_item_for_qty(obj, requested_qty[obj.name])
 		update_item(obj, target, source_parent)
+		if not target.rate and not target.price_list_rate:
+			# unpriced rows fetch the price for the Purchase Order's supplier
+			target.rate = target.price_list_rate = None
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -990,6 +1009,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 					["name", "material_request_item"],
 					["parent", "material_request"],
 					["project", "project_name"],
+					["cost_center", "cost_center"],
 				],
 				"postprocess": update_item,
 				"condition": select_item,

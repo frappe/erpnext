@@ -6,6 +6,7 @@ from frappe import _
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
 
@@ -15,9 +16,9 @@ def execute(filters=None):
 	float_precision = frappe.db.get_default("float_precision")
 
 	avg_daily_outgoing = 0
-	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
-	if diff <= 0:
-		frappe.throw(_("From Date cannot be after To Date"))
+	from_date, to_date = getdate(filters.get("from_date")), getdate(filters.get("to_date"))
+	validate_date_range({"from_date": from_date, "to_date": to_date})
+	diff = (to_date - from_date).days + 1
 
 	columns = get_columns()
 	items = get_item_info(filters)
@@ -117,11 +118,16 @@ def get_consumed_items(filters):
 		.where(
 			(sle.actual_qty < 0)
 			& (sle.is_cancelled == 0)
-			# the stock an Adjustment Entry counts out comes back in, it is not consumed
-			& (sle.is_adjustment_entry == 0)
+			# a Stock Reconciliation recounts stock, it does not consume it
 			& (
 				sle.voucher_type.notin(
-					["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"]
+					[
+						"Delivery Note",
+						"Sales Invoice",
+						"Purchase Receipt",
+						"Purchase Invoice",
+						"Stock Reconciliation",
+					]
 				)
 			)
 			& ((se.purpose.isnull()) | (se.purpose.notin(purpose_to_exclude)))

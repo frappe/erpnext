@@ -622,7 +622,7 @@ msgstr ""
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:59
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
-msgstr "<b>Alkaen Aika</b> ei voi olla myöhemmin kuin <b>To To</b> {{}"
+msgstr "<b>Alkaen Aika</b> ei voi olla myöhemmin kuin <b>To To</b> {0}"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:433
 msgid "<b>Row #{0}:</b> Bundle {1} in warehouse {2} has insufficient packed items:<br><div style='margin-top: 15px;'><ul style='line-height: 0.8;'>{3}</ul></div>"
