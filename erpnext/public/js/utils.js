@@ -617,7 +617,7 @@ $.extend(erpnext.utils, {
 						update_values[warehouse_field] = r.warehouse;
 					}
 
-					frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+					return frappe.model.set_value(item_row.doctype, item_row.name, update_values);
 				}
 			});
 		});

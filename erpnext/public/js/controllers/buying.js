@@ -224,7 +224,7 @@ erpnext.buying = {
 				) {
 					this.calculate_received_qty(doc, cdt, cdn);
 				}
-				super.qty(doc, cdt, cdn);
+				return super.qty(doc, cdt, cdn);
 			}
 
 			rejected_qty(doc, cdt, cdn) {
@@ -473,7 +473,7 @@ erpnext.buying = {
 									update_values["warehouse"] = r.warehouse;
 								}
 
-								frappe.model.set_value(item.doctype, item.name, update_values);
+								return frappe.model.set_value(item.doctype, item.name, update_values);
 							}
 						});
 					}
@@ -516,7 +516,7 @@ erpnext.buying = {
 									update_values["rejected_warehouse"] = r.warehouse;
 								}
 
-								frappe.model.set_value(item.doctype, item.name, update_values);
+								return frappe.model.set_value(item.doctype, item.name, update_values);
 							}
 						});
 					}
