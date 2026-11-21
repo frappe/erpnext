@@ -798,6 +798,8 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 			"Dunning Type",
 			"Bank Transaction Rule",
 			"Payment Gateway Account",
+			"Email Account",
+			"Communication",
 			"Email Digest",
 			"UAE VAT Settings",
 			"South Africa VAT Settings",
