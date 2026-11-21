@@ -271,7 +271,9 @@ class BOMCostingService:
 		}
 
 	def _set_item_amounts(self, d):
-		d.base_rate = flt(d.rate) * flt(self.doc.conversion_rate)
+		d.base_rate = flt(
+			flt(d.rate) * flt(self.doc.conversion_rate), self.doc.precision("base_rate", "items")
+		)
 		d.amount = flt(
 			flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty")), d.precision("amount")
 		)
