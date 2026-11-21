@@ -21,7 +21,7 @@ from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 from erpnext.stock.doctype.delivery_note.services.billing_status import get_settled_return_qty
-from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
+from erpnext.stock.doctype.packed_item.packed_item import get_returned_packed_qty, is_product_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
@@ -665,7 +665,8 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		},
 	}
 	if doctype == "Delivery Note" and bundle_rows:
-		table_maps["Packed Item"] = get_component_receipt_map(bundle_rows, mapped_qty_by_packed_item)
+		returns = get_component_returns(bundle_rows, source_doc.packed_items)
+		table_maps["Packed Item"] = get_component_receipt_map(bundle_rows, returns, mapped_qty_by_packed_item)
 
 	# the receiving user may not see the sender's DN; then the mapped PR itself must be permitted
 	can_read_source = True
@@ -737,13 +738,13 @@ def get_pending_receipt_qty(item, mapped_stock_qty: float = 0.0) -> float:
 	return flt(item.qty) - returned_qty - flt(item.get("received_qty")) - mapped_qty
 
 
-def get_component_receipt_map(bundle_rows: dict, mapped_qty_map: dict | None = None) -> dict:
+def get_component_receipt_map(bundle_rows: dict, returns: dict, mapped_qty_map: dict | None = None) -> dict:
 	"""Receive the components of a product bundle row, which is what the delivery moved into transit."""
 	mapped_qty_map = mapped_qty_map or {}
 
 	def update_component(source, target, source_parent):
 		target.qty = get_pending_component_qty(
-			source, bundle_rows[source.parent_detail_docname], mapped_qty_map.get(source.name, 0.0)
+			source, bundle_rows[source.parent_detail_docname], returns, mapped_qty_map.get(source.name, 0.0)
 		)
 		target.rate = flt(source.incoming_rate)
 		if source.get("use_serial_batch_fields") or source.get("serial_no") or source.get("batch_no"):
@@ -756,17 +757,61 @@ def get_component_receipt_map(bundle_rows: dict, mapped_qty_map: dict | None = N
 		"condition": lambda packed: packed.parent_detail_docname in bundle_rows
 		and not bundle_rows[packed.parent_detail_docname].closed
 		and get_pending_component_qty(
-			packed, bundle_rows[packed.parent_detail_docname], mapped_qty_map.get(packed.name, 0.0)
+			packed, bundle_rows[packed.parent_detail_docname], returns, mapped_qty_map.get(packed.name, 0.0)
 		)
 		> 0,
 		"postprocess": update_component,
 	}
 
 
-def get_pending_component_qty(packed_item, bundle_row, mapped_stock_qty: float = 0.0) -> float:
+def get_component_returns(bundle_rows: dict, packed_items: list) -> frappe._dict:
+	"""Qty linked returns took back on each delivered packed row, and the stock qty of each
+	bundle row returned without that link (returns made before it existed)."""
+	packed_qty = get_returned_packed_qty([row.name for row in packed_items])
+	linked_bundle_qty = (
+		get_linked_returned_bundle_qty(list(bundle_rows), list(packed_qty)) if packed_qty else {}
+	)
+	return frappe._dict(
+		packed_qty=packed_qty,
+		unlinked_bundle_qty={
+			name: flt(row.returned_qty) - flt(linked_bundle_qty.get(name))
+			for name, row in bundle_rows.items()
+		},
+	)
+
+
+def get_linked_returned_bundle_qty(bundle_rows: list, returned_packed_items: list) -> dict:
+	"""Stock qty of each bundle row that returns linked to the given packed rows took back."""
+	return_item = DocType("Delivery Note Item")
+	return_packed_item = DocType("Packed Item")
+	return dict(
+		frappe.qb.from_(return_item)
+		.select(return_item.dn_detail, Abs(Sum(return_item.stock_qty)))
+		.where(
+			return_item.dn_detail.isin(bundle_rows)
+			& (return_item.docstatus == 1)
+			& return_item.name.isin(
+				frappe.qb.from_(return_packed_item)
+				.select(return_packed_item.parent_detail_docname)
+				.where(return_packed_item.return_against_packed_item.isin(returned_packed_items))
+			)
+		)
+		.groupby(return_item.dn_detail)
+		.run()
+	)
+
+
+def get_pending_component_qty(packed_item, bundle_row, returns: dict, mapped_stock_qty: float = 0.0) -> float:
+	"""A linked return takes back its own packed row's qty; an unlinked one a share of every row."""
 	bundle_qty = flt(bundle_row.stock_qty or bundle_row.qty)
 	if not bundle_qty:
 		return 0.0
 
-	kept_share = 1 - flt(bundle_row.returned_qty) / bundle_qty
-	return flt(packed_item.qty) * kept_share - flt(packed_item.get("received_qty")) - flt(mapped_stock_qty)
+	kept_share = 1 - flt(returns.unlinked_bundle_qty.get(bundle_row.name)) / bundle_qty
+	return flt(
+		flt(packed_item.qty) * kept_share
+		- flt(returns.packed_qty.get(packed_item.name))
+		- flt(packed_item.get("received_qty"))
+		- flt(mapped_stock_qty),
+		frappe.get_precision("Packed Item", "qty"),
+	)
