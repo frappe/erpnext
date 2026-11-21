@@ -164,6 +164,7 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		si_return.conversion_rate = flt(1)
 		si_return.is_return = 1
 		si_return.return_against = si_original.name
+		si_return.items[0].sales_invoice_item = si_original.items[0].name
 		si_return.insert()
 		si_return.submit()
 

@@ -1640,6 +1640,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		pi_return = create_purchase_invoice(supplier="Test LDC Supplier", is_return=1, qty=-1, rate=60000)
 		pi_return.return_against = pi.name
+		pi_return.items[0].purchase_invoice_item = pi.items[0].name
 		pi_return.save()
 		pi_return.submit()
 		self.assertEqual(pi_return.taxes_and_charges_deducted, -2000)
@@ -1679,6 +1680,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		pi_return = create_purchase_invoice(supplier="Test LDC Supplier", is_return=1, qty=-1, rate=1500)
 		pi_return.return_against = pi1.name
+		pi_return.items[0].purchase_invoice_item = pi1.items[0].name
 		pi_return.save()
 		pi_return.submit()
 		self.assertEqual(pi_return.taxes_and_charges_deducted, -30)
@@ -1742,6 +1744,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 			set_posting_time=True,
 		)
 		pi_return.return_against = pi.name
+		pi_return.items[0].purchase_invoice_item = pi.items[0].name
 		pi_return.save()
 		pi_return.submit()
 		self.assertEqual(pi_return.taxes_and_charges_deducted, -240)
@@ -2743,6 +2746,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		pi_return = create_purchase_invoice(supplier="Test TDS Supplier", is_return=1, qty=-1, rate=40000)
 		pi_return.return_against = pi.name
+		pi_return.items[0].purchase_invoice_item = pi.items[0].name
 		pi_return.save()
 		pi_return.submit()
 

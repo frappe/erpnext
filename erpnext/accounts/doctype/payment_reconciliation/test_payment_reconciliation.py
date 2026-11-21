@@ -1298,6 +1298,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		)
 		cr_note.is_return = 1
 		cr_note.return_against = si.name
+		cr_note.items[0].sales_invoice_item = si.items[0].name
 		cr_note = cr_note.save().submit()
 
 		pr = self.create_payment_reconciliation()
