@@ -7,6 +7,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
+	get_company_default,
 	get_currency_precision,
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
@@ -179,6 +180,25 @@ class TestUtils(unittest.TestCase):
 		finally:
 			frappe.db.set_default("currency_precision", currency_precision or "")
 			frappe.db.set_default("number_format", number_format or "#,###.##")
+
+	def test_get_company_default_requires_company_read(self):
+		user = frappe.new_doc("User")
+		user.email = "company-default-reader@example.com"
+		user.first_name = "Company Default Reader"
+		user.send_welcome_email = 0
+		user.append("roles", {"role": "Manufacturing User"})
+		user.insert()
+		frappe.set_user(user.name)
+		try:
+			with self.assertRaises(frappe.PermissionError):
+				get_company_default("_Test Company", "cost_center")
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			get_company_default("_Test Company", "cost_center"),
+			frappe.db.get_value("Company", "_Test Company", "cost_center"),
+		)
 
 
 ADDRESS_RECORDS = [
