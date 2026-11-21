@@ -8,7 +8,7 @@ from operator import itemgetter
 import frappe
 from frappe.utils import flt
 
-from erpnext.manufacturing.doctype.bom.services.costing import get_good_qty
+from erpnext.manufacturing.doctype.bom.services.costing import get_exploded_good_qty
 
 
 class BOMExplodedItemsService:
@@ -91,8 +91,7 @@ class BOMExplodedItemsService:
 			.where((bom.name == bom_no) & (bom.docstatus == 1))
 		).run(as_dict=1)
 		for d in items:
-			good_qty = (flt(d.quantity) or 1) if d.is_phantom_bom else get_good_qty(d)
-			d.qty_consumed_per_unit = flt(d.stock_qty) / good_qty
+			d.qty_consumed_per_unit = flt(d.stock_qty) / get_exploded_good_qty(d)
 		return items
 
 	@staticmethod
