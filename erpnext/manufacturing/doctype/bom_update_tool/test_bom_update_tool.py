@@ -70,6 +70,35 @@ class TestBOMUpdateTool(ERPNextTestSuite):
 		doc.load_from_db()
 		self.assertEqual(doc.total_cost, 200)
 
+	def test_bom_cost_refreshes_stale_price_list_exchange_rate(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import make_usd_bom, make_usd_buying_price_list
+		from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import update_cost_in_boms
+
+		price_list = make_usd_buying_price_list(83)
+		raw_material = create_item("_Test BOM Update USD Price List Item").name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": raw_material,
+				"price_list": price_list,
+				"price_list_rate": 10,
+			}
+		).insert()
+		bom = make_usd_bom(
+			create_item("_Test BOM Update USD Price List FG").name,
+			[{"item_code": raw_material, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+		)
+
+		# saved before the BOM conversion rate applied to a price list in its currency
+		bom.db_set("plc_conversion_rate", 83)
+		update_cost_in_boms([bom.name])
+
+		bom.load_from_db()
+		self.assertEqual(bom.plc_conversion_rate, 80)
+		self.assertEqual(bom.items[0].rate, 10)
+
 	def test_replace_bom_requires_every_rewritten_bom_to_be_writable(self):
 		current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
 		parent_bom = frappe.db.get_value("BOM Item", {"bom_no": current_bom, "parenttype": "BOM"}, "parent")
