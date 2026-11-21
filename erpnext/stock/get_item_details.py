@@ -434,7 +434,7 @@ def get_batch_qty_taken_by_rows(doc, item_code, warehouse):
 	# a later row without a warehouse yet may get this one from set_warehouse, item or POS defaults
 	rows = [
 		row
-		for row in [*doc.get("items"), *(doc.get("packed_items") or [])]
+		for row in [*doc.get("items"), *get_current_packed_items(doc)]
 		if row.get("warehouse") in (None, "", warehouse)
 	]
 	taken = [(row.get("batch_no"), get_row_stock_qty(row, item_code)) for row in rows if row.get("batch_no")]
@@ -453,6 +453,35 @@ def get_batch_qty_taken_by_rows(doc, item_code, warehouse):
 		taken.extend((entry.batch_no, abs(entry.qty)) for entry in entries)
 
 	return taken
+
+
+def get_current_packed_items(doc):
+	"""Packed rows at the qty this save gives them; the rows of a removed bundle row are left out."""
+	from erpnext.stock.doctype.packed_item.packed_item import get_kept_packed_items
+
+	if not doc.get("packed_items"):
+		return []
+
+	if not isinstance(doc, Document):
+		doc = frappe.get_doc(doc)
+
+	precision = frappe.get_precision("Packed Item", "qty")
+	return [
+		frappe._dict(
+			packed_row.as_dict(),
+			qty=flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision),
+		)
+		for packed_row, item_row, qty_per_unit in get_kept_packed_items(doc)
+	]
+
+
+def get_bundle_row_stock_qty(item_row):
+	"""The stock_qty set_qty_as_per_stock_uom gives a bundle row, which packing scales its components by."""
+	stock_qty = get_row_stock_qty(item_row, item_row.item_code)
+	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+		return flt(stock_qty, item_row.precision("stock_qty"))
+
+	return stock_qty
 
 
 def get_row_stock_qty(row, item_code):
@@ -481,7 +510,7 @@ def get_used_serial_nos(doc, table=None):
 	"""Serial nos held by the rows of ``table``, or of the items and packed items."""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	rows = doc.get(table) if table else [*doc.get("items"), *(doc.get("packed_items") or [])]
+	rows = doc.get(table) if table else [*doc.get("items"), *get_current_packed_items(doc)]
 	used = set()
 	for row in rows:
 		if row.get("serial_no"):
