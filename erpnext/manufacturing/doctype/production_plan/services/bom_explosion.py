@@ -78,7 +78,7 @@ def _representative_lines(doctype, bom_no, keys, include_non_stock_items):
 	# only BOM Item carries is_phantom_item, and only its query ORs the phantom flag into the stock
 	# filter; the explosion table has neither
 	filters_phantom = doctype == "BOM Item"
-	fields = ["item_code", "stock_uom", "description", "source_warehouse"]
+	fields = ["description", "source_warehouse", *keys]
 	if filters_phantom:
 		fields.append("is_phantom_item")
 
@@ -191,7 +191,9 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 		.orderby(Min(bom_item.idx))
 	).run(as_dict=True)
 
-	_apply_representative_lines(rows, "BOM Item", bom_no, ("item_code",), include_non_stock_items)
+	_apply_representative_lines(
+		rows, "BOM Item", bom_no, ("item_code", "do_not_explode"), include_non_stock_items
+	)
 	return rows
 
 
