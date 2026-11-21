@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe.utils import (
 	add_to_date,
 	get_datetime,
+	get_email_addresses,
 	get_link_to_form,
 	getdate,
 	time_diff_in_hours,
@@ -311,7 +312,7 @@ def notify_incorrect_stock_account(company, misconfigured):
 		+ f"<ul>{items}</ul>"
 	)
 
-	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+	frappe.sendmail(recipients=get_email_addresses(recipients), subject=subject, message=message)
 
 
 def has_pending_valuation_repost(company, item_code, warehouse):

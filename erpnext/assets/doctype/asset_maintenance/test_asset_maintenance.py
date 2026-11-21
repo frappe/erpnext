@@ -335,6 +335,24 @@ class TestAssetMaintenance(ERPNextTestSuite):
 			}
 		).insert()
 
+	def test_maintenance_log_gets_the_assignees_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Quality Manager"], generated_id=True) as user:
+			team = frappe.get_doc("Asset Maintenance Team", "Team Awesome")
+			team.append(
+				"maintenance_team_members", {"team_member": user.name, "maintenance_role": "Technician"}
+			)
+			team.save()
+			tasks = get_maintenance_tasks()[:1]
+			tasks[0]["assign_to"] = user.name
+			task = self.make_asset_maintenance(tasks).asset_maintenance_tasks[0]
+
+			self.assertEqual(
+				frappe.db.get_value("Asset Maintenance Log", {"task": task.name}, "task_assignee_email"),
+				user.email,
+			)
+
 
 def get_maintenance_tasks():
 	return [

@@ -23,6 +23,7 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	execute_reposting_entry,
 	in_configured_timeslot,
 	mark_covered_transaction_reposts,
+	notify_error_to_stock_managers,
 	repost,
 	run_parallel_reposting,
 )
@@ -1570,3 +1571,20 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(kwargs["job_id"], f"{REPOSTING_JOB_ID_PREFIX}RIV-X")
 		self.assertTrue(kwargs["deduplicate"])
 		self.assertTrue(kwargs["continue_reposting"])
+
+	def test_reposting_error_email_is_sent_to_user_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		doc = frappe._dict(doctype="Repost Item Valuation", name="RIV-X")
+		with (
+			self.change_settings(
+				"Stock Reposting Settings", {"notify_reposting_error_to_role": "Stock Manager"}
+			),
+			test_user(roles=["Stock Manager"], generated_id=True) as user,
+			patch("frappe.sendmail") as sendmail,
+		):
+			notify_error_to_stock_managers(doc, "traceback")
+
+		recipients = sendmail.call_args.kwargs["recipients"]
+		self.assertIn(user.email, recipients)
+		self.assertNotIn(user.name, recipients)

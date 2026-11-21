@@ -192,3 +192,17 @@ class TestStockRepostingSettingsNotification(ERPNextTestSuite):
 
 		users = get_recipients()
 		self.assertIn(user, users)
+
+	def test_incorrect_stock_account_email_is_sent_to_user_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		misconfigured = [("Purchase Receipt", "PR-BADACC", "WH-B", "Debtors - _TC")]
+		with (
+			test_user(roles=["System Manager"], generated_id=True) as user,
+			patch("frappe.sendmail") as sendmail,
+		):
+			srs.notify_incorrect_stock_account(TEST_COMPANY, misconfigured)
+
+		recipients = sendmail.call_args.kwargs["recipients"]
+		self.assertIn(user.email, recipients)
+		self.assertNotIn(user.name, recipients)

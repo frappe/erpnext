@@ -7,7 +7,11 @@ import frappe
 from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, getdate, nowdate
 
-from erpnext.projects.doctype.project.project import create_kanban_board_if_not_exists, get_cost_center_name
+from erpnext.projects.doctype.project.project import (
+	create_kanban_board_if_not_exists,
+	get_cost_center_name,
+	get_users_for_project,
+)
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.mapper import make_project as make_project_from_so
@@ -1327,6 +1331,14 @@ class TestProject(ERPNextTestSuite):
 			self.assertEqual(get_cost_center_name(project.name), "_Test Cost Center - _TC")
 		with self.set_user(website_user):
 			self.assertRaises(frappe.PermissionError, get_cost_center_name, project.name)
+
+	def test_project_user_search_matches_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Projects User"], generated_id=True) as user:
+			users = get_users_for_project("User", user.email, "name", 0, 20, {})
+
+			self.assertIn(user.name, [row[0] for row in users])
 
 
 def get_project(name, template):

@@ -10,7 +10,16 @@ from frappe.permissions import (
 	remove_user_permission,
 )
 from frappe.query_builder import Criterion
-from frappe.utils import cint, cstr, get_link_to_form, getdate, today, validate_email_address
+from frappe.utils import (
+	cint,
+	cstr,
+	get_email_address,
+	get_link_to_form,
+	get_user_by_email,
+	getdate,
+	today,
+	validate_email_address,
+)
 from frappe.utils.nestedset import NestedSet
 
 import erpnext
@@ -366,6 +375,8 @@ class Employee(NestedSet):
 	def set_preferred_email(self):
 		preferred_email_field = frappe.scrub(self.prefered_contact_email)
 		self.prefered_email = self.get(preferred_email_field) if preferred_email_field else None
+		if preferred_email_field == "user_id" and self.prefered_email:
+			self.prefered_email = get_email_address(self.prefered_email)
 
 	def validate_status(self):
 		if self.status != "Active" and self.has_value_changed("status"):
@@ -594,8 +605,11 @@ def has_employee_user_permission(user):
 
 
 def get_employee_email(employee_doc):
+	user = employee_doc.get("user_id")
 	return (
-		employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
+		(user and get_email_address(user))
+		or employee_doc.get("personal_email")
+		or employee_doc.get("company_email")
 	)
 
 
@@ -694,7 +708,7 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 		frappe.throw(_("Email is required to create a user"))
 
 	email = validate_email_address(email, True)
-	if frappe.db.exists("User", email):
+	if get_user_by_email(email, include_standard_users=True):
 		frappe.throw(
 			_("User {0} already exists. Link the existing user to the Employee instead.").format(
 				frappe.bold(email)
@@ -748,7 +762,7 @@ def get_all_employee_emails(company):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = user or company_email or personal_email
+		email = (user and get_email_address(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails
@@ -763,7 +777,7 @@ def get_employee_emails(employee_list):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = user or company_email or personal_email
+		email = (user and get_email_address(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails

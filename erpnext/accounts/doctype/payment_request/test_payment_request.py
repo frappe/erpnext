@@ -1543,7 +1543,8 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr = frappe.get_doc("Payment Request", {"reference_name": so.name})
 		self.assertEqual(pr.docstatus, 1)
 		self.assertEqual(pr.grand_total, so.grand_total)
-		self.assertEqual(pr.email_to, so.owner)
+		# the portal's recipient_id is ignored, and an Administrator owner isn't mailed
+		self.assertIsNone(pr.email_to)
 		self.assertEqual(pr.party, so.customer)
 		self.assertTrue(pr.make_sales_invoice)
 		self.assertEqual(
@@ -1875,6 +1876,16 @@ class TestPaymentRequest(ERPNextTestSuite):
 			mute_email=1,
 			submit_doc=1,
 		)
+
+	def test_payment_request_emails_reference_owner(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Accounts User"], generated_id=True) as user:
+			si = create_sales_invoice(qty=1, rate=1000)
+			si.db_set("owner", user.name)
+			pr = make_payment_request(dt="Sales Invoice", dn=si.name, mute_email=1, return_doc=1)
+
+			self.assertEqual(pr.email_to, user.email)
 
 
 def make_shopping_cart_order(customer, rate=1000):
@@ -3034,3 +3045,30 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 
 		with self.set_user(accounts_user):
 			self.assertEqual(get_subscription_details("Sales Invoice", si.name), [])
+
+	def test_get_payment_url_defaults_payer_email_to_session_user(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		so = make_sales_order(currency="INR")
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+		pr.email_to = None
+
+		with (
+			test_user(roles=["Accounts User"], generated_id=True) as user,
+			patch(
+				"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller"
+			) as get_controller,
+			self.set_user(user.name),
+		):
+			pr.get_payment_url()
+
+			payer_email = get_controller.return_value.get_payment_url.call_args.kwargs["payer_email"]
+			self.assertEqual(payer_email, user.email)

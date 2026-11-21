@@ -17,6 +17,7 @@ from frappe.query_builder.functions import Now
 from frappe.utils import (
 	date_diff,
 	get_datetime,
+	get_email_address,
 	getdate,
 	now_datetime,
 	parse_addr,
@@ -83,9 +84,9 @@ class Issue(Document):
 			self.restore_staff_only_fields()
 
 		if frappe.flags.in_web_form and self.is_new():
-			self.raised_by = frappe.session.user
+			self.raised_by = get_email_address()
 		elif not self.raised_by:
-			self.raised_by = frappe.session.user
+			self.raised_by = get_email_address()
 
 		self.set_lead_contact(self.raised_by)
 		self.set_opening_time()
@@ -297,7 +298,7 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 		if customers := get_parents_for_user("Customer"):
 			filters["customer"] = ["in", customers]
 		else:
-			filters["raised_by"] = user
+			filters["raised_by"] = get_email_address(user)
 
 		ignore_permissions = True
 
@@ -353,7 +354,7 @@ def auto_close_tickets():
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 
-	if doc.raised_by == user:
+	if doc.raised_by and doc.raised_by.lower() == (get_email_address(user) or "").lower():
 		return True
 
 	# other issues of the customer can be viewed, but only the user's own issues can be changed

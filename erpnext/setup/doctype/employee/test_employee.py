@@ -9,7 +9,11 @@ from frappe.query_builder import Criterion
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError, is_holiday
+from erpnext.setup.doctype.employee.employee import (
+	InactiveEmployeeStatusError,
+	get_employee_emails,
+	is_holiday,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -773,6 +777,41 @@ class TestEmployee(ERPNextTestSuite):
 			is_holiday("_T-Employee-00001", date="2026-01-01")
 
 		override.assert_called_once_with("_T-Employee-00001", True, "2026-01-01")
+
+	def test_get_employee_emails_returns_user_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Employee"], generated_id=True) as user:
+			employee = new_employee(user.email)
+			employee.user_id = None
+			employee.insert()
+			# linking through on_update re-saves the user, which a generated-ID user can't survive
+			employee.db_set("user_id", user.name)
+
+			self.assertEqual(get_employee_emails([employee.name]), [user.email])
+
+	def test_preferred_email_of_user_id_is_the_user_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Employee"], generated_id=True) as user:
+			employee = new_employee(user.name)
+			employee.prefered_contact_email = "User ID"
+			employee.set_preferred_email()
+
+			self.assertEqual(employee.prefered_email, user.email)
+
+	def test_create_user_refuses_email_of_user_with_generated_id(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		from erpnext.setup.doctype.employee.employee import create_user
+
+		with test_user(roles=["Employee"], generated_id=True) as user:
+			employee = new_employee(user.email)
+			employee.user_id = None
+			employee.insert()
+
+			with self.assertRaisesRegex(frappe.ValidationError, "Link the existing user"):
+				create_user(employee.name, user.email)
 
 
 def new_employee(user_id: str):
