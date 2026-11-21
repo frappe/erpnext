@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, nowdate
+from frappe.utils import add_days, date_diff, getdate, nowdate
 
 from erpnext.accounts.report.utils import validate_date_range
 
@@ -68,7 +68,8 @@ def get_conditions(filters):
 	if filters.get("from_date"):
 		conditions.exp_end_date = [">=", filters.get("from_date")]
 	if filters.get("to_date"):
-		conditions.exp_start_date = ["<=", filters.get("to_date")]
+		# exp_start_date is a Datetime, so compare with the start of the next day to keep the whole To Date
+		conditions.exp_start_date = ["<", add_days(getdate(filters.get("to_date")), 1)]
 	return conditions
 
 
