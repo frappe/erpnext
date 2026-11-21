@@ -723,14 +723,13 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
-				round_total = args.get("round_to_target_precision")
-				if callable(round_total):
-					round_total = round_total(d)
-
-				if round_total:
+				if args.get("round_to_target_precision"):
 					args["source_dt_value"] = flt(
 						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
 					)
+
+				if args.get("match_target_ref_qty"):
+					args["source_dt_value"] = get_total_matching_target_ref_qty(args)
 
 				target_value = args["source_dt_value"]
 				if args.get("target_conversion_factor"):
@@ -991,3 +990,21 @@ def get_allowance_for(
 		item_allowance.setdefault(item_code, frappe._dict()).setdefault("amount", over_billing_allowance)
 
 	return allowance, item_allowance, global_qty_allowance, global_amount_allowance
+
+
+def get_total_matching_target_ref_qty(args) -> float:
+	"""Total of the source rows, or the target row's ref qty when it was rounded and the total rounds to it, so parts
+	that add up to the target row within its rounding complete it."""
+	ref_qty, qty, conversion_factor = frappe.db.get_value(
+		args["target_dt"], args["detail_id"], [args["target_ref_field"], "qty", "conversion_factor"]
+	)
+	precision = frappe.get_precision(args["target_dt"], args["target_field"])
+	return match_target_qty(args["source_dt_value"], ref_qty, flt(qty) * flt(conversion_factor), precision)
+
+
+def match_target_qty(total, target_qty, unrounded_target_qty, precision) -> float:
+	"""``target_qty`` if it was rounded from ``unrounded_target_qty`` and ``total`` rounds to it, else ``total``."""
+	target_qty = flt(target_qty)
+	if target_qty and target_qty != flt(unrounded_target_qty, 9) and flt(total, precision) == target_qty:
+		return target_qty
+	return flt(total)

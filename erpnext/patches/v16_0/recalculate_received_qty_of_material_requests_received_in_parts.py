@@ -2,7 +2,7 @@ import frappe
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
-from erpnext.controllers.buying_controller import rounds_stock_qty
+from erpnext.controllers.status_updater import match_target_qty
 
 
 def execute():
@@ -14,10 +14,9 @@ def execute():
 	precision = frappe.get_precision("Material Request Item", "received_qty")
 	updates, requests = {}, set()
 	for name, row in rows.items():
-		qty = flt(received_qty[name])
-		if rounds_stock_qty(row):
-			qty = flt(qty, precision)
-
+		qty = match_target_qty(
+			received_qty[name], row.stock_qty, row.request_qty * row.conversion_factor, precision
+		)
 		if qty != flt(row.received_qty):
 			updates[name] = {"received_qty": qty}
 			requests.add(row.parent)
@@ -45,7 +44,9 @@ def get_received_rows(receipt_doctype):
 		.select(
 			request_item.name,
 			request_item.parent,
-			request_item.stock_uom,
+			request_item.stock_qty,
+			request_item.qty.as_("request_qty"),
+			request_item.conversion_factor,
 			request_item.received_qty,
 			Sum(receipt_item.qty * receipt_item.conversion_factor).as_("qty"),
 		)
@@ -55,7 +56,14 @@ def get_received_rows(receipt_doctype):
 			& (request.per_received < 100)
 			& (receipt.docstatus == 1)
 		)
-		.groupby(request_item.name, request_item.parent, request_item.stock_uom, request_item.received_qty)
+		.groupby(
+			request_item.name,
+			request_item.parent,
+			request_item.stock_qty,
+			request_item.qty,
+			request_item.conversion_factor,
+			request_item.received_qty,
+		)
 	)
 	if receipt_doctype == "Purchase Invoice":
 		query = query.where(receipt.update_stock == 1)
