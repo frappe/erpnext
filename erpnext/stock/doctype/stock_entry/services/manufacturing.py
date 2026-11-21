@@ -287,6 +287,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
 		self.validate_manufactured_qty()
+		self.validate_qty_against_transferred_qty()
 		self.check_if_operations_completed()
 		self.check_duplicate_entry_for_work_order()
 		self.validate_component_and_quantities()
@@ -427,6 +428,41 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 		if not self.doc.fg_completed_qty:
 			frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"), ManufacturedQtyMandatoryError)
+
+	def validate_qty_against_transferred_qty(self):
+		"""Once material is transferred to the Work Order, refuse to manufacture more than it covers,
+		so BOM backflush does not take other orders' stock from the shared WIP warehouse."""
+		wo = self.wo_doc
+		if (
+			not wo
+			or wo.skip_transfer
+			or wo.track_semi_finished_goods
+			or wo.transfer_material_against == "Job Card"
+			or not flt(wo.material_transferred_for_manufacturing)
+		):
+			return
+
+		allowance_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		precision = self.doc.precision("fg_completed_qty")
+		allowed_qty = flt(
+			flt(wo.material_transferred_for_manufacturing)
+			+ flt(wo.qty) * allowance_percentage / 100
+			- flt(wo.produced_qty)
+			- flt(wo.process_loss_qty),
+			precision,
+		)
+		if flt(self.doc.fg_completed_qty, precision) > allowed_qty:
+			frappe.throw(
+				_(
+					"For Quantity ({0}) cannot be more than {1}, the qty transferred to Work Order {2} that is not yet produced."
+				).format(
+					flt(self.doc.fg_completed_qty, precision),
+					allowed_qty,
+					get_link_to_form("Work Order", self.doc.work_order),
+				)
+			)
 
 	def check_if_operations_completed(self):
 		"""Require operation (job card) completion before manufacture, so operating costs are captured."""
