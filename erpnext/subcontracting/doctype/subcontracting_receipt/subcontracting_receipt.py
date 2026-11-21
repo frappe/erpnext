@@ -136,6 +136,8 @@ class SubcontractingReceipt(SubcontractingController):
 					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
 				),
 			)
+			if not self.is_return:
+				self.set_onload("has_rejected_qty_to_return", self.has_rejected_qty_to_return())
 
 	def before_validate(self):
 		self.save_inventory_dimensions()

@@ -224,6 +224,11 @@ class PurchaseReceipt(BuyingController):
 			},
 		]
 
+	def onload(self):
+		super().onload()
+		if self.docstatus == 1 and not self.is_return:
+			self.set_onload("has_rejected_qty_to_return", self.has_rejected_qty_to_return())
+
 	def update_prevdoc_status(self):
 		if cint(self.is_return):
 			self.status_updater.extend(self.get_return_status_updaters())
