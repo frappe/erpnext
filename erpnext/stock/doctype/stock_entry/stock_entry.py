@@ -656,7 +656,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				for_update=True,
 			)
 
-			item.validate_and_update_item_details(item_details, self.company, self.purpose)
+			item.validate_and_update_item_details(item_details)
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
@@ -1711,6 +1711,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.purpose == "Material Issue":
 			ret["expense_account"] = item.get("expense_account") or item_group_defaults.get("expense_account")
+		elif self.purpose in ("Subcontracting Delivery", "Subcontracting Return"):
+			ret["expense_account"] = frappe.get_cached_value(
+				"Company", self.company, "default_expense_account"
+			)
 
 		return ret
 
