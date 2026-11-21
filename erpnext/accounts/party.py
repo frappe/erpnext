@@ -520,18 +520,12 @@ def find_party_account(party_type: str, party: str | None, company: str | None) 
 
 		account = frappe.get_cached_value("Company", company, default_account_name)
 	else:
-		account = frappe.db.get_value(
-			"Party Account", {"parenttype": party_type, "parent": party, "company": company}, "account"
-		)
+		account = get_party_account_from_settings(party_type, party, company)
 
 		if not account and party_type in ["Customer", "Supplier"]:
 			party_group_doctype = "Customer Group" if party_type == "Customer" else "Supplier Group"
 			group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
-			account = frappe.db.get_value(
-				"Party Account",
-				{"parenttype": party_group_doctype, "parent": group, "company": company},
-				"account",
-			)
+			account = get_party_account_from_settings(party_group_doctype, group, company)
 
 		if not account and party_type in ["Customer", "Supplier"]:
 			default_account_name = (
@@ -565,20 +559,12 @@ def check_account_permission(account: str) -> None:
 
 
 def get_party_advance_account(party_type, party, company):
-	account = frappe.db.get_value(
-		"Party Account",
-		{"parenttype": party_type, "parent": party, "company": company},
-		"advance_account",
-	)
+	account = get_party_account_from_settings(party_type, party, company, "advance_account")
 
 	if not account:
 		party_group_doctype = "Customer Group" if party_type == "Customer" else "Supplier Group"
 		group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
-		account = frappe.db.get_value(
-			"Party Account",
-			{"parenttype": party_group_doctype, "parent": group, "company": company},
-			"advance_account",
-		)
+		account = get_party_account_from_settings(party_group_doctype, group, company, "advance_account")
 
 	if not account:
 		account_name = (
@@ -587,6 +573,23 @@ def get_party_advance_account(party_type, party, company):
 		account = frappe.get_cached_value("Company", company, account_name)
 
 	return account
+
+
+def get_party_account_from_settings(party_type, party, company, fieldname="account"):
+	cache = frappe.db.value_cache[party_type]
+	account_cache = frappe.db.value_cache["Party Account"]
+	cache_key = ("party_account", party_type, party, company)
+	# Parent saves and direct child updates must both invalidate the account mapping.
+	if cache_key not in cache or cache[cache_key] is not account_cache.get(cache_key):
+		cache[cache_key] = account_cache[cache_key] = frappe.db.get_values(
+			"Party Account",
+			{"parenttype": party_type, "parent": party, "company": company},
+			["account", "advance_account"],
+			as_dict=True,
+			limit=1,
+		)
+
+	return cache[cache_key][0].get(fieldname) if cache[cache_key] else None
 
 
 def get_party_account_currency(party_type, party, company):
