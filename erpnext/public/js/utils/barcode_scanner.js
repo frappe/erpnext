@@ -281,10 +281,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			this.remaining_qty =
 				flt(this.dialog.get_value("qty")) - flt(this.dialog.get_value("scanned_qty"));
-			frappe.model.set_value(row.doctype, row.name, item_data);
 
 			resolve(
 				frappe.run_serially([
+					() => frappe.model.set_value(row.doctype, row.name, item_data),
 					() => this.set_batch_no(row, this.dialog.get_value("batch_no")),
 					() => this.set_barcode(row, this.dialog.get_value("barcode")),
 					() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
