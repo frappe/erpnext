@@ -7696,8 +7696,16 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.db_set("additional_operating_cost", 100)
 
 		wheel_entry, assembly_entry = self.complete_semi_fg_work_order(wo)
-		self.assertEqual(self.get_additional_operating_cost(wheel_entry), 0)
-		self.assertEqual(self.get_additional_operating_cost(assembly_entry), 100)
+		self.assertEqual(self.get_additional_cost(wheel_entry, "Additional Operating Cost"), 0)
+		self.assertEqual(self.get_additional_cost(assembly_entry, "Additional Operating Cost"), 100)
+
+	def test_semi_fg_entry_charges_non_stock_items_per_finished_good(self):
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC", service_rate=100)
+		wheel_entry, assembly_entry = self.complete_semi_fg_work_order(wo)
+
+		# 1 car: the wheel step's 4 services once, not per wheel; the service of no step on the car
+		self.assertEqual(self.get_additional_cost(wheel_entry, "Non stock items"), 400)
+		self.assertEqual(self.get_additional_cost(assembly_entry, "Non stock items"), 100)
 
 	def test_bom_from_semi_fg_work_order_keeps_operation_time(self):
 		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
@@ -7758,12 +7766,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.complete_semi_fg_work_order(wo)
 		self.assertEqual(wo.reload().produced_qty, 1)
 
-	def get_additional_operating_cost(self, stock_entry):
-		return sum(
-			flt(row.amount)
-			for row in stock_entry.additional_costs
-			if row.description == "Additional Operating Cost"
-		)
+	def get_additional_cost(self, stock_entry, description):
+		return sum(flt(row.amount) for row in stock_entry.additional_costs if row.description == description)
 
 	def complete_semi_fg_work_order(self, wo):
 		entries = []
@@ -7777,7 +7781,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		return entries
 
 	def make_car_with_four_wheels_work_order(
-		self, warehouse, prefix="Test JCO", stock_uom=None, bom_qty=1, wheel_qty=4
+		self, warehouse, prefix="Test JCO", stock_uom=None, bom_qty=1, wheel_qty=4, service_rate=0
 	):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
@@ -7788,6 +7792,10 @@ class TestWorkOrder(ERPNextTestSuite):
 			name: make_item(f"{prefix} {name}", properties).name
 			for name in ("Rubber", "Rim", "Wheel", "Body", "Car")
 		}
+		if service_rate:
+			items["Service"] = make_item(
+				f"{prefix} Service", {"is_stock_item": 0, "valuation_rate": service_rate}
+			).name
 		if not frappe.db.exists("Workstation", "Test JCO Workstation"):
 			make_workstation(workstation="Test JCO Workstation", production_capacity=1)
 		for operation in ("Test JCO Wheel Making", "Test JCO Assembly"):
@@ -7848,6 +7856,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 		car_bom.append("items", {"item_code": items["Wheel"], "qty": wheel_qty, "operation_row_id": 2})
 		car_bom.append("items", {"item_code": items["Body"], "qty": 1, "operation_row_id": 2})
+		if items.get("Service"):
+			for name in ("Rubber", "Rim", "Service"):
+				car_bom.append("items", {"item_code": items[name], "qty": wheel_qty, "operation_row_id": 1})
+			car_bom.append("items", {"item_code": items["Service"], "qty": 1})
 		car_bom.insert()
 		car_bom.submit()
 		return car_bom

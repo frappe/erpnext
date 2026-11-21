@@ -27,13 +27,17 @@ def add_additional_cost(stock_entry, work_order, job_card=None):
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=None):
 	bom = frappe.get_doc("BOM", work_order.bom_no)
-	item_amounts = _non_phantom_item_amounts(bom, _bom_items_table(work_order, job_card))
-	cost = _non_stock_items_cost(item_amounts, stock_entry, bom)
+	item_amounts = _non_phantom_item_amounts(bom, _bom_items_table(work_order, job_card), job_card)
+	cost = _non_stock_items_cost(item_amounts, _finished_good_qty(stock_entry, work_order, job_card), bom)
 
 	if cost:
 		stock_entry.append(
 			"additional_costs",
-			{"expense_account": expense_account, "description": _("Non stock items"), "amount": cost},
+			{
+				"expense_account": expense_account,
+				"description": _("Non stock items"),
+				"amount": flt(cost, frappe.get_precision("Landed Cost Taxes and Charges", "amount")),
+			},
 		)
 
 
@@ -43,11 +47,11 @@ def _bom_items_table(work_order, job_card):
 	return "items"
 
 
-def _non_phantom_item_amounts(bom, table):
+def _non_phantom_item_amounts(bom, table, job_card=None):
 	items = frappe._dict()
 	for d in bom.get(table):
 		# Phantom item is exploded, so its cost is considered via its components
-		if d.get("is_phantom_item"):
+		if d.get("is_phantom_item") or (job_card and not _is_job_card_row(job_card, d, bom)):
 			continue
 
 		items.setdefault(d.item_code, 0)
@@ -55,7 +59,28 @@ def _non_phantom_item_amounts(bom, table):
 	return items
 
 
-def _non_stock_items_cost(item_amounts, stock_entry, bom):
+def _is_job_card_row(job_card, row, bom):
+	"""Rows of no operation go to the Job Card of the last step."""
+	if row.operation_row_id or row.operation:
+		return job_card.is_own_material(row)
+
+	step = bom.get("operations", {"idx": cint(job_card.operation_row_id)})
+	return bool(step and step[0].is_final_finished_good)
+
+
+def _finished_good_qty(stock_entry, work_order, job_card):
+	"""Entry qty in finished good units; a Job Card entry is in its operation's output item."""
+	from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty
+
+	qty = flt(stock_entry.fg_completed_qty)
+	if not job_card:
+		return qty
+
+	operation = work_order.get("operations", {"name": job_card.operation_id})[0]
+	return qty * flt(work_order.qty) / get_operation_qty(work_order, operation)
+
+
+def _non_stock_items_cost(item_amounts, fg_qty, bom):
 	non_stock_items = frappe.get_all(
 		"Item",
 		fields="name",
@@ -65,7 +90,7 @@ def _non_stock_items_cost(item_amounts, stock_entry, bom):
 
 	cost = 0.0
 	for name in non_stock_items:
-		cost += flt(item_amounts.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
+		cost += flt(item_amounts.get(name[0])) * fg_qty / flt(bom.quantity)
 	return cost
 
 
