@@ -2435,8 +2435,9 @@ def make_time_log(kwargs: str | dict):
 	doc = frappe.get_doc("Job Card", kwargs.job_card_id)
 	frappe.has_permission("Job Card", "write", doc=doc, throw=True)
 	doc.validate_docstatus()
+	doc.validate_sequence_id()
 	doc.add_time_log(kwargs)
-	# save runs the time log validations: sequence, overlaps and From/To order
+	# save runs the time log validations: overlaps and From/To order
 	doc.save()
 
 
