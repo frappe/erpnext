@@ -318,23 +318,49 @@ class StockController(AccountsController):
 
 	def get_return_stock_qty(self, row, qty, warehouse) -> float:
 		"""Stock qty a return row moves, signed as its qty: no more than its original row moved in the
-		warehouse, less the row's other returns, and all that is left once it returns the rest of the
-		row's qty."""
+		warehouse, less the row's other returns and the rows before it in this return, and all that is
+		left once it returns the rest of the row's qty."""
 		from erpnext.controllers.buying_controller import get_stock_qty
 
 		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
-			return flt(self.get_posted_return_qty(row, warehouse)) or stock_qty
+			return flt(self.get_posted_return_qty(row, warehouse))
 
 		left = self.get_row_left_to_return(row, warehouse)
 		if flt(left.stock_qty) <= 0:
 			return stock_qty
 
+		for earlier_row, earlier_qty in self.get_earlier_returns_of_row(row, warehouse):
+			earlier_stock_qty = self.get_capped_return_stock_qty(earlier_row, earlier_qty, left)
+			left.stock_qty = flt(left.stock_qty + earlier_stock_qty, row.precision("stock_qty"))
+			left.unrounded_stock_qty += flt(earlier_qty) * flt(earlier_row.conversion_factor)
+
+		return self.get_capped_return_stock_qty(row, qty, left)
+
+	def get_capped_return_stock_qty(self, row, qty, left) -> float:
+		"""Stock qty a return of qty moves out of what is left of its original row."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
 		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
 		if flt(unreturned_stock_qty, row.precision("stock_qty")) <= 0:
 			return -left.stock_qty
 
-		return max(stock_qty, -left.stock_qty)
+		return max(get_stock_qty(row, qty), -left.stock_qty)
+
+	def get_earlier_returns_of_row(self, row, warehouse) -> list[tuple]:
+		"""Rows before this one in the return that return the same original row, with the qty each moves
+		in the warehouse. A delivery return counts every warehouse, as get_row_left_to_return does."""
+		reference_field = get_return_reference_field(self.doctype)
+		earlier_returns = []
+		for d in self.get(row.parentfield):
+			if d.idx >= row.idx or d.get(reference_field) != row.get(reference_field):
+				continue
+			if d.warehouse == warehouse or not self.is_stock_receipt():
+				earlier_returns.append((d, d.qty))
+			elif d.get("rejected_warehouse") == warehouse:
+				earlier_returns.append((d, d.rejected_qty))
+
+		return [(d, qty) for d, qty in earlier_returns if flt(qty)]
 
 	def get_row_left_to_return(self, row, warehouse) -> frappe._dict:
 		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
