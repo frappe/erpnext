@@ -1015,14 +1015,6 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	for_quantity(frm) {
-<<<<<<< HEAD
-		frm.doc.items = [];
-=======
-		if (frm.doc.is_corrective_job_card) {
-			return;
-		}
-
->>>>>>> 28bfdc2 (fix(manufacturing): keep Job Card items when For Quantity changes in the form)
 		frm.call({
 			method: "get_required_items",
 			doc: frm.doc,
