@@ -282,6 +282,10 @@ def _max_operation_quantity(work_order):
 		)
 		.groupby(table.operation)
 	)
+	if work_order.track_semi_finished_goods:
+		# semi-finished good quantities are not finished good units
+		query = query.where(table.finished_good == work_order.production_item)
+
 	return min([d.qty for d in query.run(as_dict=True)], default=0)
 
 
