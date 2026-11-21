@@ -263,6 +263,12 @@ class TestLIFOValuation(ERPNextTestSuite):
 		self.assertEqual(consumed, [[5, 100]])
 		self.assertEqual(self.stack, [[10, 150], [5, 200]])
 
+	def test_lifo_purchase_return_matches_rate_at_database_precision(self):
+		self.stack = LIFOValuation([[3, 100 / 3], [10, 50]])
+		consumed = self.stack.remove_stock(3, outgoing_rate=33.333333333, is_return_purchase_entry=True)
+		self.assertEqual(consumed, [[3, 100 / 3]])
+		self.assertEqual(self.stack, [[10, 50]])
+
 	def test_lifo_consumption_going_negative(self):
 		self.stack.add_stock(10, 10)
 		self.stack.add_stock(10, 20)
