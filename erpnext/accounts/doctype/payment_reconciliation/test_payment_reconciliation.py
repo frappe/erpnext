@@ -1777,6 +1777,22 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 		self.assertEqual(pr.allocation[0].allocated_amount, 100)
 		self.assertEqual(pr.allocation[0].difference_amount, -500)
+		pr.allocation[0].exchange_rate = 800
+		pr.reconcile()
+
+		pe2.reload()
+		self.assertEqual(pe2.references[0].exchange_rate, 85)
+		self.assertEqual(pe2.references[0].exchange_gain_loss, -500)
+
+		journal_entry = frappe.db.get_value(
+			"Journal Entry Account",
+			{"reference_type": "Payment Entry", "reference_name": pe2.name, "docstatus": 1},
+			"parent",
+		)
+		self.assertEqual(
+			frappe.db.get_value("Journal Entry", journal_entry, "voucher_type"), "Exchange Gain Or Loss"
+		)
+		self.assertEqual(frappe.db.get_value("Journal Entry", journal_entry, "total_debit"), 500)
 
 	def test_differing_cost_center_on_invoice_and_payment(self):
 		"""
