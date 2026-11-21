@@ -618,11 +618,6 @@ class SubcontractingInwardController:
 			fg_item_name = frappe.get_cached_value(
 				"Work Order", self.work_order, "subcontracting_inward_order_item"
 			)
-			secondary_qty = defaultdict(float)
-			for item in self.items:
-				if item.secondary_item_type or item.valuation_type:
-					secondary_qty[(item.item_code, item.t_warehouse)] += item.transfer_qty
-
 			produced_qty, delivered_qty = frappe.get_value(
 				"Subcontracting Inward Order Item", fg_item_name, ["produced_qty", "delivered_qty"]
 			)
@@ -632,6 +627,11 @@ class SubcontractingInwardController:
 						"Cannot cancel this Manufacturing Stock Entry as quantity of Finished Good produced cannot be less than quantity delivered in the linked Subcontracting Inward Order."
 					)
 				)
+
+			secondary_qty = defaultdict(float)
+			for item in self.items:
+				if item.secondary_item_type or item.valuation_type:
+					secondary_qty[(item.item_code, item.t_warehouse)] += item.transfer_qty
 
 			for item in [item for item in self.items if not item.is_finished_item]:
 				if item.secondary_item_type or item.valuation_type:
