@@ -26,6 +26,7 @@ frappe.ui.form.on("Stock Entry", {
 				query: "erpnext.stock.doctype.stock_entry.stock_entry.get_pending_work_orders",
 				filters: {
 					company: frm.doc.company,
+					purpose: frm.doc.purpose,
 				},
 			};
 		});
@@ -1692,6 +1693,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			args: {
 				work_order: me.frm.doc.work_order,
 				company: me.frm.doc.company,
+				purpose: me.frm.doc.purpose,
 			},
 			callback: function (r) {
 				if (!r.exc) {
