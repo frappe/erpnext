@@ -554,6 +554,14 @@ class StatusService:
 		)
 		item_reference = po_item.item_reference or po_item.sales_order_item
 
+		so_items = {
+			row.sales_order_item
+			for row in prod_plan.prod_plan_references
+			if row.item_reference == item_reference
+		}
+		if not so_items:
+			return
+
 		# all component references of a bundle line add up to its qty
 		ordered_qty = self._combined_ordered_qty()
 		work_order_qty = {}
@@ -564,18 +572,14 @@ class StatusService:
 			so_item = plan_reference.sales_order_item
 			work_order_qty[so_item] = work_order_qty.get(so_item, 0) + allocated_qty
 
-		total_bundle_qty = self._total_bundle_qty()
+		bundle_qty = get_component_qty_per_bundle(so_items)
 		precision = frappe.get_precision("Sales Order Item", "work_order_qty")
-		for so_item in {
-			row.sales_order_item
-			for row in prod_plan.prod_plan_references
-			if row.item_reference == item_reference
-		}:
+		for so_item in so_items:
 			frappe.db.set_value(
 				"Sales Order Item",
 				so_item,
 				"work_order_qty",
-				flt(work_order_qty[so_item] / total_bundle_qty, precision),
+				flt(work_order_qty[so_item] / bundle_qty.get(so_item, 1), precision),
 			)
 
 	def _combined_ordered_qty(self):
@@ -621,6 +625,21 @@ class StatusService:
 			frappe.get_doc("Material Request", self.doc.material_request).update_completed_qty(
 				[self.doc.material_request_item]
 			)
+
+
+def get_component_qty_per_bundle(so_items):
+	"""Component qty in one bundle of each Product Bundle Sales Order line."""
+	so_item = frappe.qb.DocType("Sales Order Item")
+	packed_item = frappe.qb.DocType("Packed Item")
+	rows = (
+		frappe.qb.from_(packed_item)
+		.join(so_item)
+		.on(packed_item.parent_detail_docname == so_item.name)
+		.select(so_item.name, Sum(packed_item.qty) / so_item.stock_qty)
+		.where((packed_item.parenttype == "Sales Order") & so_item.name.isin(list(so_items)))
+		.groupby(so_item.name, so_item.stock_qty)
+	).run()
+	return {name: flt(qty) for name, qty in rows}
 
 
 def qty_against_sales_order(wo, plan_item):
