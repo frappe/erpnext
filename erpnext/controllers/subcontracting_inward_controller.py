@@ -940,7 +940,8 @@ class SubcontractingInwardController:
 				secondary_items[(item.item_code, item.t_warehouse)] += (
 					item.transfer_qty if self._action == "submit" else -item.transfer_qty
 				)
-			secondary_items = frappe._dict(secondary_items)
+			precision = frappe.get_precision("Subcontracting Inward Order Secondary Item", "produced_qty")
+			secondary_items = frappe._dict({key: flt(qty, precision) for key, qty in secondary_items.items()})
 
 			if secondary_items:
 				item_codes, warehouses = zip(*list(secondary_items.keys()), strict=True)
