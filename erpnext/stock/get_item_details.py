@@ -1362,7 +1362,9 @@ def get_price_list_rate(ctx: frappe._dict, item_doc, out: frappe._dict = None):
 		if not ctx.is_internal_supplier and not out.price_list_rate and ctx.transaction_type == "buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
-			out.update(get_last_purchase_details(item_doc.name, ctx.name, ctx.conversion_rate))
+			out.update(
+				get_last_purchase_details(item_doc.name, ctx.name, ctx.conversion_rate, ctx.conversion_factor)
+			)
 
 	return out
 
@@ -2001,6 +2003,10 @@ def _apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document |
 
 def apply_price_list_on_item(ctx, doc=None):
 	item_doc = frappe.get_cached_doc("Item", ctx.item_code)
+	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
+		"conversion_factor", 1
+	)
+	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
 
 	source_row = get_rate_locked_source_row(ctx, doc)
 	if source_row:
@@ -2008,11 +2014,6 @@ def apply_price_list_on_item(ctx, doc=None):
 		lock_source_rate(item_details, source_row)
 	else:
 		item_details = get_price_list_rate(ctx, item_doc)
-
-	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
-		"conversion_factor", 1
-	)
-	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
 
 	if not source_row:
 		item_details.update(get_pricing_rule_for_item(ctx, doc=doc))
