@@ -40,13 +40,22 @@ class MaterialCost:
 		design.price_list_currency = frappe.get_cached_value(
 			"Price List", design.buying_price_list, "currency"
 		)
+		previous = design.get_doc_before_save()
 		if design.price_list_currency == company_currency:
 			design.plc_conversion_rate = 1
+		elif design.price_list_currency == design.currency:
+			design.plc_conversion_rate = design.conversion_rate
 		elif flt(design.plc_conversion_rate) in (0, 1) or (
 			not design.is_new() and design.has_value_changed("price_list_currency")
 		):
 			design.plc_conversion_rate = get_exchange_rate(
 				design.price_list_currency, company_currency, args="for_buying"
+			)
+		elif previous and previous.currency == design.price_list_currency:
+			# the rate was the old creator conversion rate
+			design.plc_conversion_rate = (
+				get_exchange_rate(design.price_list_currency, company_currency, args="for_buying")
+				or design.plc_conversion_rate
 			)
 
 	def set_conversion_factors(self):
