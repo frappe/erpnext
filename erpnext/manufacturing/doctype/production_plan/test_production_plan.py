@@ -3024,6 +3024,26 @@ class TestProductionPlan(ERPNextTestSuite):
 			frappe.ValidationError, "Only 16.0 .* is left to plan", consolidated_plan.submit
 		)
 
+	def test_consolidated_bundle_component_next_to_its_own_line_cannot_exceed_sales_order_qty(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combine Mixed")
+		bundle_order = make_sales_order(item_code=bundle_item, qty=10)
+		sales_orders = [make_sales_order(item_code=components[0], qty=5), bundle_order]
+		consolidated_plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+		# only the row combining component A of both lines goes over
+		for row in consolidated_plan.po_items:
+			if row.item_code == components[1]:
+				row.planned_qty = 16
+		consolidated_plan.insert()
+
+		first_plan = make_plan_from_sales_orders([bundle_order])
+		for row in first_plan.po_items:
+			row.planned_qty = 4
+		first_plan.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Only 16.0 .* is left to plan", consolidated_plan.submit
+		)
+
 	def test_sub_assembly_work_order_of_combined_plan_submits(self):
 		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
 		sub_item = make_item("_Test PP Combined Sub SA", {"is_stock_item": 1}).name
