@@ -8125,7 +8125,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 4)
 
-	def test_closed_work_order_refuses_manufacture_marked_as_return(self):
+	def test_closed_work_order_refuses_entries_marked_as_return(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
@@ -8136,10 +8136,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 6)).submit()
 		close_work_order(wo.name, "Closed")
 
-		entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
-		entry.is_return = 1
-		entry.insert()
-		self.assertRaisesRegex(frappe.ValidationError, "closed Work Order", entry.submit)
+		for purpose in ("Manufacture", "Material Consumption for Manufacture"):
+			entry = frappe.get_doc(make_stock_entry(wo.name, purpose, 4))
+			entry.is_return = 1
+			entry.insert()
+			self.assertRaisesRegex(frappe.ValidationError, "closed Work Order", entry.submit)
+
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 6)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
