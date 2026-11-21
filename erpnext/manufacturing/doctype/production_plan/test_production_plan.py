@@ -2861,6 +2861,21 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertFalse(make_plan_from_sales_orders(sales_orders, combine_items=1).po_items)
 
+	def test_consolidated_bundle_components_cannot_exceed_sales_order_qty(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combine Exceed")
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+		consolidated_plan = make_plan_from_sales_orders([sales_order], combine_items=1)
+		consolidated_plan.insert()
+
+		first_plan = make_plan_from_sales_orders([sales_order])
+		for row in first_plan.po_items:
+			row.planned_qty = 4
+		first_plan.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Only 16.0 .* is left to plan", consolidated_plan.submit
+		)
+
 	def test_combined_bundle_work_orders_add_up_per_sales_order_line(self):
 		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combined WO")
 		sales_orders = [make_sales_order(item_code=components[0], qty=5)]
