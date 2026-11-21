@@ -2239,6 +2239,7 @@ class StockController(AccountsController):
 				"voucher_no": self.name,
 				"company": self.company,
 				"via_landed_cost_voucher": via_landed_cost_voucher,
+				"skip_unchanged_entries": 1,
 			}
 		)
 
@@ -2257,6 +2258,7 @@ class StockController(AccountsController):
 					voucher_type=self.doctype,
 					voucher_no=self.name,
 					via_landed_cost_voucher=via_landed_cost_voucher,
+					skip_unchanged_entries=True,
 				)
 			else:
 				create_repost_item_valuation_entry(args)
@@ -2992,12 +2994,17 @@ def create_repost_item_valuation_entry(args):
 	repost_entry.flags.ignore_links = True
 	repost_entry.flags.ignore_permissions = True
 	repost_entry.via_landed_cost_voucher = args.via_landed_cost_voucher
+	repost_entry.skip_unchanged_entries = args.skip_unchanged_entries
 	repost_entry.save()
 	repost_entry.submit()
 
 
 def create_item_wise_repost_entries(
-	voucher_type, voucher_no, allow_zero_rate=False, via_landed_cost_voucher=False
+	voucher_type,
+	voucher_no,
+	allow_zero_rate=False,
+	via_landed_cost_voucher=False,
+	skip_unchanged_entries=False,
 ):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
@@ -3023,6 +3030,7 @@ def create_item_wise_repost_entries(
 		repost_entry.flags.ignore_links = True
 		repost_entry.flags.ignore_permissions = True
 		repost_entry.via_landed_cost_voucher = via_landed_cost_voucher
+		repost_entry.skip_unchanged_entries = skip_unchanged_entries
 		repost_entry.submit()
 		repost_entries.append(repost_entry)
 
