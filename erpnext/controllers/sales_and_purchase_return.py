@@ -137,13 +137,24 @@ def get_receipt_warehouses_if_moved(doc, row, receipt_rows) -> list:
 		warehouse
 		for receipt_row in receipt_rows
 		if receipt_row.name == reference or (not reference and receipt_row.item_code == row.item_code)
-		for warehouse in (receipt_row.warehouse, receipt_row.rejected_warehouse)
+		for warehouse in get_receipt_row_warehouses(doc, row, receipt_row)
 		if warehouse
 	]
 	if not receipt_warehouses or row.warehouse in receipt_warehouses:
 		return []
 
 	return receipt_warehouses
+
+
+def get_receipt_row_warehouses(doc, row, receipt_row) -> tuple:
+	"""Warehouses of the receipt row whose own entry values a return from them."""
+	# a Subcontracting Receipt return of accepted qty goes back at the accepted warehouse rate
+	if doc.doctype == "Subcontracting Receipt" and not is_rejected_subcontracting_return(
+		row, receipt_row.rejected_warehouse
+	):
+		return (receipt_row.warehouse,)
+
+	return (receipt_row.warehouse, receipt_row.rejected_warehouse)
 
 
 def get_qty_held_at_rate(doc, row, rate) -> float:
