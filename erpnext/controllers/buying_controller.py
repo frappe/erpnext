@@ -279,8 +279,8 @@ class BuyingController(SubcontractingController):
 		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 		rows_by_reference = {}
 		for row in self.get("items"):
-			if row.get(field):
-				rows_by_reference.setdefault(row.get(field), []).append(row)
+			if reference := row.get(field) or row.get("delivery_note_packed_item"):
+				rows_by_reference.setdefault(reference, []).append(row)
 
 		for rows in rows_by_reference.values():
 			self.validate_batch_qty_left(rows)
