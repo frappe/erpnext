@@ -29,7 +29,7 @@ class ReturnChargesService:
 		original_charges = get_actual_valuation_charges(original)
 		returned_qty = self.get_returned_qty_by_original_row(doc.get("items"))
 		earlier_qty = self.get_earlier_returned_qty_by_return()
-		total_qty = add_returned_qty(*earlier_qty, returned_qty)
+		total_qty = add_returned_qty(*earlier_qty.values(), returned_qty)
 		# an earlier return's charge that matches none of the original's hides what that return reversed
 		earlier_charges = self.get_earlier_returned_charges(get_valuation_charges(original))
 		can_take_rest = earlier_charges is not None
@@ -38,11 +38,18 @@ class ReturnChargesService:
 				continue
 
 			if can_take_rest and is_fully_returned(original, original_charge, total_qty):
-				base_share = original_charge.base_tax_amount + earlier_charges[original_charge.name]
-			else:
-				base_share = self.get_returned_base_share(
-					original, original_charge, returned_qty, total_qty, earlier_qty
+				base_share = original_charge.base_tax_amount + sum(
+					reversed_charges[original_charge.name] for reversed_charges in earlier_charges.values()
 				)
+			else:
+				rest = (
+					get_rest_of_fully_returned_rows(
+						original, original_charge, total_qty, earlier_qty, earlier_charges
+					)
+					if can_take_rest
+					else {}
+				)
+				base_share = self.get_returned_base_share(original, original_charge, returned_qty, rest)
 
 			tax.tax_amount = -flt(base_share / doc.conversion_rate, original_charge.precision("tax_amount"))
 
@@ -59,10 +66,10 @@ class ReturnChargesService:
 
 		return frappe.get_all(self.doc.doctype, filters=filters, pluck="name")
 
-	def get_earlier_returned_qty_by_return(self) -> list:
+	def get_earlier_returned_qty_by_return(self) -> dict:
 		"""Accepted and rejected stock qty of each of the other submitted stock returns, by original row."""
 		if not self.earlier_returns:
-			return []
+			return {}
 
 		item_doctype = f"{self.doc.doctype} Item"
 		rows_by_return = defaultdict(list)
@@ -73,11 +80,11 @@ class ReturnChargesService:
 		):
 			rows_by_return[row.parent].append(frappe.get_doc({**row, "doctype": item_doctype}))
 
-		return [self.get_returned_qty_by_original_row(rows) for rows in rows_by_return.values()]
+		return {name: self.get_returned_qty_by_original_row(rows) for name, rows in rows_by_return.items()}
 
 	def get_earlier_returned_charges(self, original_charges) -> defaultdict | None:
-		"""Valuation charges of the other submitted stock returns in company currency, added up by the
-		original charge they were mapped from. None if one of them matches none of the original's."""
+		"""Valuation charges of each of the other submitted stock returns in company currency, added up by
+		the original charge they were mapped from. None if one of them matches none of the original's."""
 		taxes_by_return = defaultdict(list)
 		if self.earlier_returns:
 			for tax in frappe.get_all(
@@ -99,11 +106,11 @@ class ReturnChargesService:
 			):
 				taxes_by_return[tax.parent].append(tax)
 
-		charges = defaultdict(float)
-		for taxes in taxes_by_return.values():
+		charges = defaultdict(lambda: defaultdict(float))
+		for name, taxes in taxes_by_return.items():
 			for tax, original_charge in pair_with_original_charges(taxes, original_charges):
 				if original_charge and original_charge.charge_type == tax.charge_type:
-					charges[original_charge.name] += flt(tax.base_tax_amount)
+					charges[name][original_charge.name] += flt(tax.base_tax_amount)
 				elif flt(tax.base_tax_amount):
 					return None
 
@@ -125,10 +132,9 @@ class ReturnChargesService:
 		return returned_qty
 
 	@staticmethod
-	def get_returned_base_share(original, original_charge, returned_qty, total_qty, earlier_qty) -> float:
+	def get_returned_base_share(original, original_charge, returned_qty, rest) -> float:
 		"""Part of the charge, in company currency, that the returned stock carried. A row whose last stock
 		is returned takes the rest of its part, as its stock ledger entry takes the rest of its value."""
-		rest = get_rest_of_fully_returned_rows(original, original_charge, total_qty, earlier_qty)
 		return sum(
 			rest[row.name] if returned and row.name in rest else charge * returned / carried_qty
 			for row, charge, returned, carried_qty in get_carried_charges(
@@ -153,21 +159,29 @@ def is_row_fully_returned(row, returned, carried_qty) -> bool:
 	return flt(returned - carried_qty, row.precision("stock_qty")) >= 0
 
 
-def get_rest_of_fully_returned_rows(original, original_charge, total_qty, earlier_qty) -> dict:
+def get_rest_of_fully_returned_rows(
+	original, original_charge, total_qty, earlier_qty, earlier_charges
+) -> dict:
 	"""Part of the charge of each fully returned row that the other returns did not reverse.
-	Each of them reversed its own rounded share of the row's part."""
+	What each of them reversed of the charge is split over its rows by their shares."""
 	rest = {
 		row.name: charge
 		for row, charge, returned, carried_qty in get_carried_charges(original, original_charge, total_qty)
 		if is_row_fully_returned(row, returned, carried_qty)
 	}
-	precision = original_charge.precision("base_tax_amount")
-	for returned_qty in earlier_qty:
-		for row, charge, returned, carried_qty in get_carried_charges(
-			original, original_charge, returned_qty
-		):
-			if row.name in rest:
-				rest[row.name] -= flt(charge * returned / carried_qty, precision)
+	for name, returned_qty in earlier_qty.items():
+		shares = {
+			row.name: charge * returned / carried_qty
+			for row, charge, returned, carried_qty in get_carried_charges(
+				original, original_charge, returned_qty
+			)
+		}
+		total_share = sum(shares.values())
+		if not total_share:
+			continue
+
+		for row_name in rest.keys() & shares.keys():
+			rest[row_name] += earlier_charges[name][original_charge.name] * shares[row_name] / total_share
 
 	return rest
 
