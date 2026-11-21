@@ -8486,6 +8486,33 @@ class TestWorkOrder(ERPNextTestSuite):
 			[frappe.db.get_value("Sales Order Item", row.name, "work_order_qty") for row in so.items], [5, 3]
 		)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_product_bundle_row_work_order_qty_is_per_row(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		bom = make_review_bom(component, [{"item_code": rm_item, "qty": 1}])
+		make_product_bundle(parent=bundle_item, items=[component])
+		so = make_sales_order(item_code=bundle_item, qty=10, rate=100, do_not_submit=True)
+		so.append("items", {**so.items[0].as_dict(), "name": None, "idx": None, "qty": 5})
+		so.submit()
+
+		for row in so.items:
+			make_review_work_order(
+				component,
+				bom.name,
+				row.qty,
+				sales_order=so.name,
+				sales_order_item=row.name,
+				product_bundle_item=bundle_item,
+			)
+
+		self.assertEqual(
+			[frappe.db.get_value("Sales Order Item", row.name, "work_order_qty") for row in so.items], [10, 5]
+		)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_multi_level_operation_time_with_batch_size(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
