@@ -8,11 +8,8 @@ from erpnext.selling.doctype.sales_order.sales_order import make_subcontracting_
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-<<<<<<< HEAD
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-=======
 from erpnext.stock.serial_batch_bundle import get_batch_nos
->>>>>>> 02c5a8e (test: import get_batch_nos at module level)
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )

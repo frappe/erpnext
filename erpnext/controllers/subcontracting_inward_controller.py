@@ -3,12 +3,8 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.query_builder import Case, Order
-<<<<<<< HEAD
-from frappe.utils import flt, get_link_to_form
-=======
 from frappe.query_builder.functions import Sum
-from frappe.utils import escape_html, flt, get_link_to_form
->>>>>>> 9b5a834 (fix(subcontracting): don't return a batch beyond its delivered qty)
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_batch_list_from_item
 
