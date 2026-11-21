@@ -15,7 +15,6 @@ from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
-from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
@@ -667,30 +666,15 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	if not filters:
 		filters = {}
 
-	dt = "Account"
-
-	acc = qb.DocType(dt)
-	condition = [
-		(acc.report_type.eq("Profit and Loss") | acc.account_type.isin(["Income Account", "Temporary"])),
-		acc.is_group.eq(0),
-		acc.disabled.eq(0),
-	]
-	if txt:
-		condition.append(acc.name.like(f"%{txt}%"))
-
-	if filters.get("company"):
-		condition.append(acc.company.eq(filters.get("company")))
-
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
-	return (
-		qb.from_(acc)
-		.select(acc.name)
-		.where(Criterion.all(condition))
-		.orderby(acc.idx, order=Order.desc)
-		.orderby(acc.name)
-		.run()
+	return frappe.get_list(
+		"Account",
+		filters=get_account_query_filters(txt, filters),
+		or_filters={
+			"report_type": "Profit and Loss",
+			"account_type": ("in", ["Income Account", "Temporary"]),
+		},
+		order_by="idx desc, name asc",
+		as_list=True,
 	)
 
 
@@ -754,35 +738,35 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	if not filters:
 		filters = {}
 
-	dt = "Account"
-
-	acc = qb.DocType(dt)
-	condition = [
-		(
-			acc.report_type.eq("Profit and Loss")
-			| acc.account_type.isin(
+	return frappe.get_list(
+		"Account",
+		filters=get_account_query_filters(txt, filters),
+		or_filters={
+			"report_type": "Profit and Loss",
+			"account_type": (
+				"in",
 				[
 					"Expense Account",
 					"Fixed Asset",
 					"Temporary",
 					"Asset Received But Not Billed",
 					"Capital Work in Progress",
-				]
-			)
-		),
-		acc.is_group.eq(0),
-		acc.disabled.eq(0),
-	]
+				],
+			),
+		},
+		as_list=True,
+	)
+
+
+def get_account_query_filters(txt, filters):
+	account_filters = {"is_group": 0, "disabled": 0}
 	if txt:
-		condition.append(acc.name.like(f"%{txt}%"))
+		account_filters["name"] = ("like", f"%{txt}%")
 
 	if filters.get("company"):
-		condition.append(acc.company.eq(filters.get("company")))
+		account_filters["company"] = filters.get("company")
 
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
-	return qb.from_(acc).select(acc.name).where(Criterion.all(condition)).run()
+	return account_filters
 
 
 @frappe.whitelist()
