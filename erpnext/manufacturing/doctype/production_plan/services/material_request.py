@@ -345,15 +345,17 @@ def _collect_item_details(doc, po_items):
 
 
 def _get_exploded_sub_assembly_shares(doc):
-	"""Per plan row, the share of each sub-assembly (item, BOM) qty whose components are requested.
+	"""Per plan row, the share of each sub-assembly (parent, item, BOM) qty whose components are requested.
 
-	The rest is requested as it is (Material Request) or bought through subcontracting.
+	The rest is requested as it is (Material Request) or bought through subcontracting. Combined rows
+	have no single plan row or parent.
 	"""
+	combined = doc.get("combine_sub_items")
 	exploded_qty, total_qty = defaultdict(float), defaultdict(float)
 	for row in doc.get("sub_assembly_items") or []:
 		row = frappe._dict(row)
-		plan_row = None if doc.get("combine_sub_items") else row.production_plan_item
-		key = (plan_row, row.production_item, row.bom_no)
+		plan_row, parent = (None, None) if combined else (row.production_plan_item, row.parent_item_code)
+		key = (plan_row, parent, row.production_item, row.bom_no)
 		total_qty[key] += flt(row.qty)
 		if row.type_of_manufacturing == "In House" or (
 			row.type_of_manufacturing == "Subcontract" and doc.get("include_subcontracted_items")
@@ -361,9 +363,8 @@ def _get_exploded_sub_assembly_shares(doc):
 			exploded_qty[key] += flt(row.qty)
 
 	shares = defaultdict(dict)
-	for (plan_row, item_code, bom_no), qty in total_qty.items():
-		exploded = exploded_qty[(plan_row, item_code, bom_no)]
-		shares[plan_row][(item_code, bom_no)] = exploded / qty if qty else 0
+	for key, qty in total_qty.items():
+		shares[key[0]][key[1:]] = exploded_qty[key] / qty if qty else 0
 	return shares
 
 

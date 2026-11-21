@@ -243,7 +243,8 @@ def _process_subitem(
 	# a Do Not Explode line has no BOM, so it must not take the item's default BOM
 	child_bom = d.bom_no or (None if d.do_not_explode else d.default_bom)
 	# of a planned sub-assembly, only the share that is made (or subcontracted) adds its components
-	exploded_share = (data.get("exploded_sub_assembly_shares") or {}).get((d.item_code, d.bom_no))
+	parent = None if doc.get("combine_sub_items") else d.main_bom_item
+	exploded_share = (data.get("exploded_sub_assembly_shares") or {}).get((parent, d.item_code, d.bom_no))
 	if exploded_share == 0:
 		return
 
