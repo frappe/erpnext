@@ -719,7 +719,7 @@ class BOM(WebsiteGenerator):
 			return
 
 		self.flags.cost_updated = False
-		existing_bom_cost = self.total_cost
+		existing_costs = (self.total_cost, self.base_total_cost)
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
@@ -730,7 +730,7 @@ class BOM(WebsiteGenerator):
 		if save:
 			self.db_update()
 
-		if self.total_cost != existing_bom_cost and update_parent:
+		if update_parent and (self.total_cost, self.base_total_cost) != existing_costs:
 			self.update_parent_boms()
 
 		if not from_child_bom:
@@ -1110,8 +1110,9 @@ class BOM(WebsiteGenerator):
 		old_cost = self.total_cost
 
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.secondary_items_cost
-		self.base_total_cost = (
-			self.base_operating_cost + self.base_raw_material_cost - self.base_secondary_items_cost
+		self.base_total_cost = flt(
+			self.base_operating_cost + self.base_raw_material_cost - self.base_secondary_items_cost,
+			self.precision("base_total_cost"),
 		)
 
 		if self.total_cost != old_cost:
@@ -1140,7 +1141,9 @@ class BOM(WebsiteGenerator):
 				self.get("operating_cost_per_bom_quantity")
 			)
 			self.operating_cost = total_operating_cost
-			self.base_operating_cost = flt(total_operating_cost * self.conversion_rate, 2)
+			self.base_operating_cost = total_operating_cost * self.conversion_rate
+
+		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		if not row.hour_rate or update_hour_rate:
@@ -1158,13 +1161,16 @@ class BOM(WebsiteGenerator):
 				)
 
 		if row.hour_rate:
-			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
+			row.base_hour_rate = flt(
+				flt(row.hour_rate) * flt(self.conversion_rate), row.precision("base_hour_rate")
+			)
 
 			if row.time_in_mins:
 				row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
-				row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+				base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+				row.base_operating_cost = flt(base_operating_cost, row.precision("base_operating_cost"))
 				row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
-				row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
+				row.base_cost_per_unit = base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate and save:
 			row.db_update()
@@ -1176,7 +1182,7 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
-			old_rate = d.rate
+			old_rate, old_base_amount = d.rate, d.base_amount
 			if d.is_stock_item or d.is_phantom_item:
 				d.rate = self.get_rm_rate(
 					{
@@ -1198,18 +1204,18 @@ class BOM(WebsiteGenerator):
 			d.amount = flt(
 				flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty")), d.precision("amount")
 			)
-			d.base_amount = d.amount * flt(self.conversion_rate)
+			d.base_amount = flt(d.amount * flt(self.conversion_rate), d.precision("base_amount"))
 			d.qty_consumed_per_unit = flt(d.stock_qty, d.precision("stock_qty")) / flt(
 				self.quantity, self.precision("quantity")
 			)
 
 			total_rm_cost += d.amount
 			base_total_rm_cost += d.base_amount
-			if save and (old_rate != d.rate):
+			if save and (old_rate != d.rate or old_base_amount != d.base_amount):
 				d.db_update()
 
 		self.raw_material_cost = total_rm_cost
-		self.base_raw_material_cost = base_total_rm_cost
+		self.base_raw_material_cost = flt(base_total_rm_cost, self.precision("base_raw_material_cost"))
 
 	def calculate_secondary_items_costs(self, save=False):
 		"""Valuation Rate and Manual rows carry their own cost, deducted from the raw
