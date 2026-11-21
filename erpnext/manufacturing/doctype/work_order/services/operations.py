@@ -75,10 +75,11 @@ class OperationsService:
 			self.doc.actual_operating_cost += flt(d.actual_operating_cost)
 
 		variable_cost = self.doc.actual_operating_cost or self.doc.planned_operating_cost
-		self.doc.total_operating_cost = (
+		self.doc.total_operating_cost = flt(
 			flt(self.doc.additional_operating_cost)
 			+ flt(variable_cost)
-			+ flt(self.doc.corrective_operation_cost)
+			+ flt(self.doc.corrective_operation_cost),
+			self.doc.precision("total_operating_cost"),
 		)
 
 	@staticmethod
