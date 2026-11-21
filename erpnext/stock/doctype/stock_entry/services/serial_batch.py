@@ -91,8 +91,10 @@ class StockEntrySABB(BaseStockEntry):
 
 		return None
 
-	def get_serial_nos_and_batches_from_sres(self, scio_detail, qty, only_pending=True, taken=None):
-		"""Serial nos and batch qty reserved for scio_detail, taken in order up to qty, skipping what other rows `taken`."""
+	def get_serial_nos_and_batches_from_sres(
+		self, scio_detail, qty, only_pending=True, taken=None, batch_no=None
+	):
+		"""Serial nos and batch qty reserved for scio_detail (in batch_no if given), taken in order up to qty, skipping what other rows `taken`."""
 		serial_nos, batch_nos = [], frappe._dict()
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		taken_serial_nos = taken.serial_nos if taken else set()
@@ -112,6 +114,9 @@ class StockEntrySABB(BaseStockEntry):
 			query = query.where(child_table.qty != child_table.delivered_qty)
 		else:
 			query = query.where(child_table.delivered_qty > 0)
+
+		if batch_no:
+			query = query.where(child_table.batch_no == batch_no)
 
 		for d in query.run(as_dict=True):
 			if flt(qty, precision) <= 0:
@@ -153,6 +158,7 @@ class StockEntrySABB(BaseStockEntry):
 					row.transfer_qty,
 					only_pending=self.doc.purpose != "Subcontracting Return",
 					taken=taken[row.scio_detail],
+					batch_no=row.batch_no if row.use_serial_batch_fields else None,
 				)
 				add_taken(taken[row.scio_detail], serial_nos_list, batch_nos_list)
 
@@ -301,8 +307,14 @@ class StockEntrySABB(BaseStockEntry):
 
 
 def has_serial_batch_set(row):
+	"""A bundle, serial nos, or a batch of an item without serial nos."""
+	if row.serial_and_batch_bundle:
+		return True
+	if not row.use_serial_batch_fields:
+		return False
 	return bool(
-		row.serial_and_batch_bundle or (row.use_serial_batch_fields and (row.serial_no or row.batch_no))
+		row.serial_no
+		or (row.batch_no and not frappe.get_cached_value("Item", row.item_code, "has_serial_no"))
 	)
 
 
