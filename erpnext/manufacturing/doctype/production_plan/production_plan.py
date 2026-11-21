@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt
 
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
@@ -799,11 +799,12 @@ def get_plans_with_references(sales_orders):
 
 
 def get_planned_qty_by_order_row(plans):
+	"""Planned qty of consolidated rows, which have no Sales Order of their own."""
 	plan_item = frappe.qb.DocType("Production Plan Item")
 	rows = (
 		frappe.qb.from_(plan_item)
 		.select(plan_item.parent, plan_item.sales_order_item, Sum(plan_item.planned_qty).as_("qty"))
-		.where(plan_item.parent.isin(plans))
+		.where(plan_item.parent.isin(plans) & (IfNull(plan_item.sales_order, "") == ""))
 		.groupby(plan_item.parent, plan_item.sales_order_item)
 	).run(as_dict=True)
 	return {(row.parent, row.sales_order_item): flt(row.qty) for row in rows}
