@@ -322,10 +322,15 @@ def _get_unit_operating_cost(bom_no, unit_costs, skip_boms_with_operations=False
 		return unit_costs[bom_no]
 
 	bom = frappe.get_cached_value(
-		"BOM", bom_no, ["operating_cost", "quantity", "with_operations"], as_dict=True
+		"BOM",
+		bom_no,
+		["base_operating_cost", "conversion_rate", "quantity", "with_operations"],
+		as_dict=True,
 	)
 	quantity = flt(bom.quantity) or 1
-	cost = 0 if skip_boms_with_operations and bom.with_operations else flt(bom.operating_cost) / quantity
+	# from the base cost, as operating_cost is rounded in the BOM currency
+	operating_cost = flt(bom.base_operating_cost) / (flt(bom.conversion_rate) or 1)
+	cost = 0 if skip_boms_with_operations and bom.with_operations else operating_cost / quantity
 
 	for row in frappe.get_all(
 		"BOM Item",
