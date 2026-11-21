@@ -948,7 +948,6 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 			],
 		}
 	)
-	# left in draft: on_submit enqueues MRP Log creation in a background job
 	mps.insert()
 
 	_, data, _, _ = execute(
