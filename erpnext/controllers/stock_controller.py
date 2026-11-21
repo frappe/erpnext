@@ -1819,6 +1819,7 @@ class StockController(AccountsController):
 
 	def update_billing_percentage(self, update_modified=True):
 		target_ref_field = "amount"
+		billing_percentage = None
 		if self.doctype == "Delivery Note":
 			total_amount = total_returned = 0
 			for item in self.items:
@@ -1828,6 +1829,12 @@ class StockController(AccountsController):
 			if total_returned < total_amount:
 				target_ref_field = {"SUB": ["amount", {"MUL": ["returned_qty", "rate"]}], "as": "ref_amount"}
 
+			# A return deducted on the original's invoice counts as credited.
+			if self.is_return and self.return_against:
+				from erpnext.stock.doctype.delivery_note.delivery_note import get_return_billing_percentage
+
+				billing_percentage = get_return_billing_percentage(self)
+
 		self._update_percent_field(
 			{
 				"target_dt": self.doctype + " Item",
@@ -1836,6 +1843,7 @@ class StockController(AccountsController):
 				"target_ref_field": target_ref_field,
 				"target_field": "billed_amt",
 				"name": self.name,
+				"billing_percentage": billing_percentage,
 			},
 			update_modified,
 		)
