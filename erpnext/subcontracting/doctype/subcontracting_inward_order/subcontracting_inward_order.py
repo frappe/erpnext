@@ -108,18 +108,23 @@ class SubcontractingInwardOrder(SubcontractingController):
 				total_rm_returned += flt(rm.returned_qty)
 
 		total_to_be_produced = total_produced = total_process_loss = total_delivered = total_fg_returned = 0
+		# extra qty on one row must not make up for a short row
+		total_produced_up_to_qty = total_delivered_up_to_qty = 0
 		for item in self.get("items"):
-			total_to_be_produced += flt(item.qty)
+			qty = flt(item.qty)
+			total_to_be_produced += qty
 			total_produced += flt(item.produced_qty)
+			total_produced_up_to_qty += min(flt(item.produced_qty), qty)
 			total_process_loss += flt(item.process_loss_qty)
 			total_delivered += flt(item.delivered_qty)
+			total_delivered_up_to_qty += min(flt(item.delivered_qty), qty)
 			total_fg_returned += flt(item.returned_qty)
 
 		per_raw_material_received = flt(total_usable / total_to_be_received * 100, 2)
 		per_raw_material_returned = flt(total_rm_returned / total_received * 100, 2) if total_received else 0
-		per_produced = flt(total_produced / total_to_be_produced * 100, 2)
+		per_produced = flt(total_produced_up_to_qty / total_to_be_produced * 100, 2)
 		per_process_loss = flt(total_process_loss / total_produced * 100, 2) if total_produced else 0
-		per_delivered = flt(total_delivered / total_to_be_produced * 100, 2)
+		per_delivered = flt(total_delivered_up_to_qty / total_to_be_produced * 100, 2)
 		per_returned = flt(total_fg_returned / total_delivered * 100, 2) if total_delivered else 0
 
 		self.db_set("per_raw_material_received", per_raw_material_received, update_modified=update_modified)
@@ -133,11 +138,11 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if self.docstatus == 1:
 				if self.status == "Draft":
 					status = "Open"
-				elif self.per_returned == 100:
+				elif self.per_returned >= 100:
 					status = "Returned"
-				elif self.per_delivered == 100:
+				elif self.per_delivered >= 100:
 					status = "Delivered"
-				elif self.per_produced == 100:
+				elif self.per_produced >= 100:
 					status = "Produced"
 				elif total_received:
 					status = "Ongoing"
