@@ -3776,6 +3776,219 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.validate_tax_withholding_entries("Journal Entry", jv2.name, jv2_expected)
 		self.cleanup_invoices(invoices)
 
+	def test_return_with_tax_on_excess_gives_the_exemption_back(self):
+		invoices = []
+		# cumulative threshold 30000 with tax on excess amount
+		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=50000)
+		pi.submit()
+		invoices.append(pi)
+		self.assertEqual(pi.taxes_and_charges_deducted, 2000)
+
+		pi_return = create_purchase_invoice(supplier="Test TDS Supplier3", is_return=1, qty=-1, rate=50000)
+		pi_return.return_against = pi.name
+		pi_return.save()
+		pi_return.submit()
+		invoices.append(pi_return)
+
+		# only the TDS on the excess is reversed, the rest gives the exemption back
+		self.assertEqual(pi_return.taxes_and_charges_deducted, -2000)
+		common = {
+			"tax_withholding_category": "New TDS Category",
+			"party_type": "Supplier",
+			"party": "Test TDS Supplier3",
+			"tax_rate": 10.0,
+			"status": "Settled",
+			"taxable_doctype": "Purchase Invoice",
+			"taxable_name": pi_return.name,
+			"withholding_doctype": "Purchase Invoice",
+			"withholding_name": pi_return.name,
+		}
+		self.validate_tax_withholding_entries(
+			"Purchase Invoice",
+			pi_return.name,
+			[
+				self.get_tax_withholding_entry(
+					**common,
+					taxable_amount=-30000.0,
+					withholding_amount=0.0,
+					under_withheld_reason="Threshold Exemption",
+				),
+				self.get_tax_withholding_entry(**common, taxable_amount=-20000.0, withholding_amount=-2000.0),
+			],
+		)
+
+		# the net amount of the fiscal year is 30000, inside the threshold
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier3", rate=30000)
+		pi2.submit()
+		invoices.append(pi2)
+		self.validate_tax_deduction(pi2, 0)
+
+		self.cleanup_invoices(invoices)
+
+	def test_transaction_threshold_only_does_not_tax_earlier_invoices(self):
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		frappe.get_doc(
+			{
+				"doctype": "Tax Withholding Category",
+				"name": "Transaction Threshold TDS",
+				"category_name": "Transaction Threshold TDS",
+				"disable_cumulative_threshold": 1,
+				"rates": [
+					{
+						"from_date": fiscal_year[1],
+						"to_date": fiscal_year[2],
+						"tax_withholding_rate": 10,
+						"single_threshold": 10000,
+						"cumulative_threshold": 0,
+					}
+				],
+				"accounts": [{"company": "_Test Company", "account": "TDS - _TC"}],
+			}
+		).insert()
+		self.setup_party_with_category("Supplier", "Test TDS Supplier4", "Transaction Threshold TDS")
+
+		pi1 = create_purchase_invoice(supplier="Test TDS Supplier4", rate=5000)
+		pi1.submit()
+		self.validate_tax_deduction(pi1, 0)
+
+		# TDS only on this invoice, not on the earlier invoice below the threshold
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier4", rate=20000)
+		pi2.submit()
+		self.validate_tax_deduction(pi2, 2000)
+
+		# a return of the taxed invoice reverses its tax, also when it is below the threshold
+		pi2_return = create_purchase_invoice(supplier="Test TDS Supplier4", is_return=1, qty=-1, rate=5000)
+		pi2_return.return_against = pi2.name
+		pi2_return.save()
+		pi2_return.submit()
+		self.assertEqual(pi2_return.taxes_and_charges_deducted, -500)
+
+		# a return of the invoice that was not taxed reverses nothing
+		pi1_return = create_purchase_invoice(supplier="Test TDS Supplier4", is_return=1, qty=-1, rate=5000)
+		pi1_return.return_against = pi1.name
+		pi1_return.save()
+		pi1_return.submit()
+		self.assertEqual(pi1_return.taxes_and_charges_deducted, 0)
+
+		self.cleanup_invoices([pi1, pi2, pi2_return, pi1_return])
+
+	def test_threshold_left_at_zero_does_not_cancel_the_other(self):
+		# single threshold 20000, cumulative threshold 0
+		self.setup_party_with_category("Supplier", "Test TDS Supplier1", "Single Threshold TDS")
+		pi1 = create_purchase_invoice(supplier="Test TDS Supplier1", rate=5000)
+		pi1.submit()
+		self.validate_tax_deduction(pi1, 0)
+
+		# single threshold 0, cumulative threshold 30000
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		create_tax_withholding_category(
+			category_name="Cumulative Only TDS",
+			rate=10,
+			from_date=fiscal_year[1],
+			to_date=fiscal_year[2],
+			account="TDS - _TC",
+			cumulative_threshold=30000,
+		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier2", "Cumulative Only TDS")
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier2", rate=5000)
+		pi2.submit()
+		self.validate_tax_deduction(pi2, 0)
+
+		self.cleanup_invoices([pi1, pi2])
+
+	def test_cumulative_threshold_counts_the_fiscal_year_across_rate_rows(self):
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		mid_year = add_months(fiscal_year[1], 6)
+		rate_row = {"single_threshold": 0, "cumulative_threshold": 30000}
+		frappe.get_doc(
+			{
+				"doctype": "Tax Withholding Category",
+				"name": "Mid Year Rate TDS",
+				"category_name": "Mid Year Rate TDS",
+				"disable_transaction_threshold": 1,
+				"rates": [
+					{
+						**rate_row,
+						"from_date": fiscal_year[1],
+						"to_date": mid_year,
+						"tax_withholding_rate": 10,
+					},
+					{
+						**rate_row,
+						"from_date": add_days(mid_year, 1),
+						"to_date": fiscal_year[2],
+						"tax_withholding_rate": 5,
+					},
+				],
+				"accounts": [{"company": "_Test Company", "account": "TDS - _TC"}],
+			}
+		).insert()
+		self.setup_party_with_category("Supplier", "Test TDS Supplier4", "Mid Year Rate TDS")
+
+		pi1 = create_purchase_invoice(
+			supplier="Test TDS Supplier4",
+			rate=20000,
+			posting_date=add_days(fiscal_year[1], 1),
+			set_posting_time=True,
+		)
+		pi1.submit()
+		self.validate_tax_deduction(pi1, 0)
+
+		# a new rate row does not start a new threshold period: 5% on 20000 + 20000
+		pi2 = create_purchase_invoice(
+			supplier="Test TDS Supplier4",
+			rate=20000,
+			posting_date=add_days(mid_year, 2),
+			set_posting_time=True,
+		)
+		pi2.submit()
+		self.validate_tax_deduction(pi2, 2000)
+
+		self.cleanup_invoices([pi1, pi2])
+
+	def test_rate_row_of_one_day_is_allowed(self):
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		mid_year = add_months(fiscal_year[1], 6)
+
+		def category_with_rates(*periods):
+			return frappe.get_doc(
+				{
+					"doctype": "Tax Withholding Category",
+					"category_name": "Rate Rows TDS",
+					"rates": [
+						{"from_date": from_date, "to_date": to_date, "tax_withholding_rate": 10}
+						for from_date, to_date in periods
+					],
+				}
+			)
+
+		one_day = add_days(mid_year, 1)
+		doc = category_with_rates(
+			(fiscal_year[1], mid_year), (one_day, one_day), (add_days(one_day, 1), fiscal_year[2])
+		)
+		doc.validate_dates()
+
+	def test_edited_entry_with_a_reason_that_does_not_apply(self):
+		# no certificate and no tax on excess amount
+		self.setup_party_with_category("Supplier", "Test TDS Supplier6", "Test Multi Invoice Category")
+		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=20000, do_not_save=True)
+		pi.apply_tds = 1
+		pi.ignore_tax_withholding_threshold = 1
+		pi.save()
+
+		for reason, message in (
+			("Lower Deduction Certificate", "Lower Deduction Certificate is required"),
+			("Threshold Exemption", "Threshold Exemption is allowed only"),
+		):
+			pi.reload()
+			pi.override_tax_withholding_entries = 1
+			entry = pi.tax_withholding_entries[0]
+			entry.withholding_amount = 0
+			entry.under_withheld_reason = reason
+			self.assertRaisesRegex(frappe.ValidationError, message, pi.save)
+
 	def test_delete_draft_pi_with_tax_withholding_entries(self):
 		"""
 		Test that draft Purchase Invoice with Tax Withholding Entries can be deleted.
