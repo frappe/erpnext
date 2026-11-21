@@ -6522,11 +6522,8 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(by_bom_no[normal_bom.name].is_phantom_item, 0)
 
 	def test_subitems_query_keeps_real_rm_listed_alongside_phantom(self):
-		"""bom_explosion._subitems_query groups BOM lines by item_code, and get_subitems() drops any
-		grouped row whose is_phantom_item is truthy. When one item_code is listed in a BOM both as a
-		phantom sub-assembly and as a plain raw material, Max(is_phantom_item)=1 made get_subitems
-		silently drop the real material. Min(is_phantom_item) keeps it (phantom only when every line
-		is phantom) and is deterministic on MariaDB and Postgres.
+		"""An item listed in a BOM both as a phantom line and as a plain raw material keeps the plain line
+		in a row of its own, so the real material is not dropped with the phantom one.
 		"""
 		from erpnext.manufacturing.doctype.production_plan.services.bom_explosion import _subitems_query
 
@@ -6560,9 +6557,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		rows = _subitems_query("_Test Company", parent.name, 1, 1, 1)
 		component_rows = [r for r in rows if r.item_code == component]
-		self.assertEqual(len(component_rows), 1)
-		# Min() keeps the real material; the old Max() returned 1 and get_subitems dropped it.
-		self.assertEqual(component_rows[0].is_phantom_item, 0)
+		self.assertEqual(sorted(r.is_phantom_item for r in component_rows), [0, 1])
 
 	def test_sales_order_query_follows_company_user_permission(self):
 		from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
