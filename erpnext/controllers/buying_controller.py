@@ -237,27 +237,21 @@ class BuyingController(SubcontractingController):
 		)
 
 	def get_received_batch_qty(self, row) -> dict:
-		"""Qty of each batch that submitted receipts already took out of transit for the delivered row."""
-		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
-		reference = row.get(field) or row.get("delivery_note_packed_item")
-		item = frappe.qb.DocType(row.doctype)
+		"""Qty of each batch that submitted receipts, net of their returns, took out of transit for the delivered row."""
+		receipt_rows = self.get_receipt_rows(row)
+		if not receipt_rows:
+			return {}
+
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
-
-		condition = item[field] == reference
-		if self.doctype == "Purchase Receipt":
-			condition |= item.delivery_note_packed_item == reference
-
 		received = (
 			frappe.qb.from_(entry)
 			.join(bundle)
 			.on(entry.parent == bundle.name)
-			.join(item)
-			.on(bundle.voucher_detail_no == item.name)
 			.select(entry.batch_no, Sum(entry.qty))
 			.where(
-				condition
-				& (bundle.voucher_type == self.doctype)
+				(bundle.voucher_type == self.doctype)
+				& bundle.voucher_detail_no.isin(receipt_rows)
 				& (bundle.warehouse == row.from_warehouse)
 				& (bundle.docstatus == 1)
 				& (bundle.is_cancelled == 0)
@@ -266,6 +260,27 @@ class BuyingController(SubcontractingController):
 			.run()
 		)
 		return {batch_no: -flt(qty) for batch_no, qty in received if batch_no}
+
+	def get_receipt_rows(self, row) -> list:
+		"""Submitted rows that receive the same delivered row as `row`, and the rows that return them."""
+		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
+		reference = row.get(field) or row.get("delivery_note_packed_item")
+		fields = [field, "delivery_note_packed_item"] if self.doctype == "Purchase Receipt" else [field]
+		rows = frappe.get_all(
+			row.doctype,
+			filters={"docstatus": 1},
+			or_filters={fieldname: reference for fieldname in fields},
+			pluck="name",
+		)
+		if not rows:
+			return []
+
+		return_field = (
+			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
+		)
+		return rows + frappe.get_all(
+			row.doctype, filters={return_field: ("in", rows), "docstatus": 1}, pluck="name"
+		)
 
 	def get_delivered_package(self, row) -> str | None:
 		"""Package of the material the delivery note put in the in-transit warehouse."""
