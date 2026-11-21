@@ -1329,7 +1329,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(scio.items[0].qty, 18)
 
 	def test_draft_inward_order_follows_updated_sales_order_fg_qty(self):
-		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
 
 		item_list = [
 			{"item_code": "Service Item 1", "qty": 10, "fg_item": "Basic FG Item", "fg_item_qty": 10}
