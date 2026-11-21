@@ -4670,6 +4670,68 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertCountEqual(used_serials[rm_item], rm_serials)
 		self.assertCountEqual(used_serials[fg_item], fg_serials)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_round_whole_number_raw_material_once(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		bom = make_bom(item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=1)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=4, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=4,
+			skip_transfer=1,
+			source_warehouse="Stores - _TC",
+		)
+
+		consumed_qty = []
+		for _ in range(4):
+			manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+			manufacture.submit()
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+
+		self.assertEqual(consumed_qty, [1, 0, 0, 0])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_consume_the_rounded_transfer(self):
+		self.assert_rounded_entries_empty_wip(transfers=[3], manufactures=[2, 1])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_transfers_add_up_to_the_rounded_manufactures(self):
+		self.assert_rounded_entries_empty_wip(transfers=[1, 1, 1], manufactures=[2, 1])
+
+	def assert_rounded_entries_empty_wip(self, transfers, manufactures):
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2.1825)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=50, basic_rate=45)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=3, source_warehouse="Stores - _TC", stock_uom="Kg"
+		)
+
+		for qty in transfers:
+			frappe.get_doc(
+				make_stock_entry(work_order.name, "Material Transfer for Manufacture", qty)
+			).submit()
+		for qty in manufactures:
+			frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", qty)).submit()
+
+		self.assertEqual(
+			flt(
+				frappe.db.get_value(
+					"Bin", {"item_code": rm_item, "warehouse": work_order.wip_warehouse}, "actual_qty"
+				)
+			),
+			0,
+		)
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")

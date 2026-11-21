@@ -73,13 +73,21 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			if row.s_warehouse:
 				raw_materials.append(row.item_code)
 
-		if not raw_materials:
+		if not raw_materials and not self.is_raw_material_fully_consumed():
 			frappe.throw(
 				_(
 					"At least one raw material item must be present in the stock entry for the type {0}"
 				).format(bold(self.doc.purpose)),
 				title=_("Raw Materials Missing"),
 			)
+
+	def is_raw_material_fully_consumed(self):
+		"""Earlier entries of the Work Order may have consumed all of a whole-number raw material."""
+		required_items = self.wo_doc.required_items if self.wo_doc else []
+		precision = frappe.get_precision("Work Order Item", "consumed_qty")
+		return bool(required_items) and all(
+			flt(row.consumed_qty, precision) >= flt(row.required_qty, precision) for row in required_items
+		)
 
 	def get_item_dict(self, row):
 		item_args = {}
@@ -598,14 +606,29 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				"uom": row.stock_uom,
 			}
 		)
-		qty = (
-			(row.required_qty / self.wo_doc.qty) * flt(self.doc.fg_completed_qty)
+		item_args["qty"] = (
+			self.get_wo_raw_material_qty(row)
 			if self.wo_doc
-			else flt(row.qty) * flt(self.doc.fg_completed_qty)
+			else ceil_qty_if_uom_has_whole_number(
+				flt(row.qty) * flt(self.doc.fg_completed_qty), row.stock_uom
+			)
 		)
-		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
+		if not item_args["qty"]:
+			# earlier entries already consumed the whole unit
+			return
 		item_args["transfer_qty"] = item_args["qty"]
 		self.append_raw_material_with_alternatives(item_args, alternative_items.get(row.item_code))
+
+	def get_wo_raw_material_qty(self, row):
+		"""Round the running total of the order's Manufacture entries, not each entry, so partial
+		entries add up to the order's qty: up for a whole number UOM, else to the stock qty precision."""
+		qty_per_unit = row.required_qty / self.wo_doc.qty
+		fg_completed_qty = flt(self.doc.fg_completed_qty)
+		if self.doc.purpose != "Manufacture":
+			return ceil_qty_if_uom_has_whole_number(qty_per_unit * fg_completed_qty, row.stock_uom)
+
+		done_qty = flt(self.wo_doc.produced_qty) + flt(self.wo_doc.process_loss_qty)
+		return get_running_total_qty(qty_per_unit, done_qty, fg_completed_qty, row.stock_uom)
 
 	def _resolve_rm_warehouse(self, row):
 		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
@@ -1717,6 +1740,19 @@ def set_previous_operation_serial_batch(parent_doc, row):
 	if bundle and bundle.get("name"):
 		row.serial_and_batch_bundle = bundle.name
 		row.use_serial_batch_fields = 0
+
+
+def get_running_total_qty(qty_per_unit, done_qty, qty, stock_uom=None):
+	"""Qty for `qty` units after `done_qty` units, taken from the rounded running total so partial
+	entries add up: rounded up if `stock_uom` must be a whole number, else to the stock qty precision."""
+	precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+	is_whole_number = stock_uom and cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"))
+
+	def get_total_qty(units):
+		total_qty = flt(qty_per_unit * units, precision)
+		return ceil(total_qty) if is_whole_number else total_qty
+
+	return flt(get_total_qty(done_qty + qty) - get_total_qty(done_qty), precision)
 
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
