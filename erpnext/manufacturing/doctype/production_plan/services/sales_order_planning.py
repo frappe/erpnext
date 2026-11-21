@@ -398,7 +398,7 @@ def _so_packed_filter(bom, so_item, pi, so_list):
 	return (
 		(so_item.parent == pi.parent)
 		& (so_item.docstatus == 1)
-		& (pi.parent_item == so_item.item_code)
+		& (pi.parent_detail_docname == so_item.name)
 		& (so_item.closed == 0)
 		& (so_item.parent.isin(so_list))
 		& pending
