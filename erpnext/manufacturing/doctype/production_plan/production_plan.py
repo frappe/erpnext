@@ -497,7 +497,14 @@ class ProductionPlan(Document):
 
 	def get_consolidated_planned_qty(self, bundle_lines=False):
 		"""Planned qty of consolidated rows allotted to their Sales Order lines, of product bundle lines or of other lines."""
-		allotted = [row for row in self.get_allocated_references() if row.qty > 0]
+		# components of older plans share one item reference, so they cannot be told apart
+		rows = [
+			row for row in self.po_items if not row.sales_order and (row.item_reference or not bundle_lines)
+		]
+		allotted = allocate_reference_qty(
+			self.prod_plan_references, *group_planned_qty_by_item_reference(rows)
+		)
+		allotted = [row for row in allotted if row.qty > 0]
 		if not allotted:
 			return []
 
