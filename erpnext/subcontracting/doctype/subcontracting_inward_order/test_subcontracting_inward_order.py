@@ -1376,6 +1376,116 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			7,
 		)
 
+	def test_return_extra_customer_material_held_by_work_order(self):
+		scio, wo = make_work_order_with_extra_material()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		self.assertEqual([(row.item_code, row.qty) for row in rm_return.items], [("Basic RM", 2)])
+		rm_return.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Item", {"parent": wo.name, "item_code": "Basic RM"}, "stock_reserved_qty"
+			),
+			5,
+		)
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 5)).submit()
+
+	def test_return_customer_material_left_over_by_completed_work_order(self):
+		scio, wo = make_work_order_with_extra_material()
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 5)).submit()
+
+		scio.reload()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_return()).submit()
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Item", {"parent": wo.name, "item_code": "Basic RM"}, "stock_reserved_qty"
+			),
+			0,
+		)
+
+	def test_redo_cancelled_manufacture_using_extra_customer_material(self):
+		scio, wo = make_work_order_with_extra_material()
+		manufacture = frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Manufacture", 5)
+		)
+		manufacture.submit()
+		manufacture.cancel()
+
+		redo = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 5))
+		next(row for row in redo.items if row.item_code == "Basic RM").qty = 7
+		redo.submit()
+
+	def test_no_return_of_extra_customer_material_consumed_by_work_order(self):
+		scio, wo = make_work_order_with_extra_material()
+		manufacture = frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Manufacture", 5)
+		)
+		next(row for row in manufacture.items if row.item_code == "Basic RM").qty = 7
+		manufacture.submit()
+
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		self.assertFalse([row for row in rm_return.items if row.item_code == "Basic RM"])
+
+	def test_return_customer_material_a_completed_work_order_did_not_use(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Manufacture", 5)
+		)
+		next(row for row in manufacture.items if row.item_code == "Basic RM").qty = 4
+		manufacture.submit()
+
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		self.assertEqual([(row.item_code, row.qty) for row in rm_return.items], [("Basic RM", 1)])
+		rm_return.submit()
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Item", {"parent": wo.name, "item_code": "Basic RM"}, "stock_reserved_qty"
+			),
+			0,
+		)
+
+	def test_work_order_for_rest_of_order_takes_extra_after_completed_one_used_less(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		for row in rm_in.items:
+			row.qty = 3
+		rm_in.submit()
+		scio.reload()
+		first_wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		first_wo.skip_transfer = 1
+		first_wo.required_items[-1].source_warehouse = "Stores - _TC"
+		first_wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(first_wo.name, "Manufacture", 3)
+		)
+		next(row for row in manufacture.items if row.item_code == "Basic RM").qty = 2
+		manufacture.submit()
+
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		for row in rm_in.items:
+			row.qty = 4 if row.item_code == "Basic RM" else 2
+		rm_in.submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Item", {"parent": wo.name, "item_code": "Basic RM"}, "stock_reserved_qty"
+			),
+			4,
+		)
+
 	def test_cancelled_manufacture_of_closed_work_order_keeps_the_rest_consumed(self):
 		from erpnext.manufacturing.doctype.work_order.services.reservation import (
 			make_stock_reservation_entries,
@@ -1940,6 +2050,20 @@ def receive_customer_material(scio, rm_item, qty, rate):
 	rm_in.submit()
 	scio.reload()
 	return rm_in
+
+
+def make_work_order_with_extra_material():
+	"""Receive 7 Basic RM for an order that needs 5 and make one Work Order for all of it."""
+	so, scio = create_so_scio()
+	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+	next(row for row in rm_in.items if row.item_code == "Basic RM").qty = 7
+	rm_in.submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+	return scio, wo
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):

@@ -14,7 +14,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, parse_json
 from pypika import functions as fn
@@ -802,3 +802,89 @@ def _accumulate_serial_batch(row_wise_serial_batch, entry):
 		details.serial_nos.add(entry.serial_no)
 	if entry.batch_no:
 		details.batch_nos[entry.batch_no] += abs(entry.qty)
+
+
+def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -> None:
+	"""Give each inward order row back, up to its `short_qty`, the customer material Work Orders hold beyond their required or used qty."""
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	sres = get_inward_reservations(scio, list(short_qty))
+	unused_qty = get_unused_inward_qty(sres)
+	for sre in sres:
+		release_qty = flt(
+			min(
+				sre.reserved_qty - sre.used_qty,
+				unused_qty[sre.voucher_detail_no],
+				short_qty[sre.from_voucher_detail_no],
+			),
+			precision,
+		)
+		if release_qty <= 0:
+			continue
+
+		released_qty = release_inward_reservation(sre, release_qty)
+		unused_qty[sre.voucher_detail_no] -= released_qty
+		short_qty[sre.from_voucher_detail_no] -= released_qty
+
+
+def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
+	"""Reserved qty of each Work Order row beyond its need: what it used if completed, else its required or used qty."""
+	sres_by_row = defaultdict(list)
+	for sre in sres:
+		sres_by_row[sre.voucher_detail_no].append(sre)
+
+	unused_qty = {}
+	for voucher_detail_no, rows in sres_by_row.items():
+		used_qty = sum(row.used_qty for row in rows)
+		needed_qty = used_qty if rows[0].status == "Completed" else max(rows[0].required_qty, used_qty)
+		unused_qty[voucher_detail_no] = sum(row.reserved_qty for row in rows) - needed_qty
+
+	return unused_qty
+
+
+def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
+	"""Qty based Work Order reservations taken from these inward order rows, newest first."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	wo = frappe.qb.DocType("Work Order")
+	wo_item = frappe.qb.DocType("Work Order Item")
+	return (
+		frappe.qb.from_(sre)
+		.inner_join(wo)
+		.on(wo.name == sre.voucher_no)
+		.inner_join(wo_item)
+		.on(wo_item.name == sre.voucher_detail_no)
+		.select(
+			sre.name,
+			sre.voucher_detail_no,
+			sre.from_voucher_detail_no,
+			sre.reserved_qty,
+			(sre.delivered_qty + sre.transferred_qty + sre.consumed_qty).as_("used_qty"),
+			wo_item.required_qty,
+			wo.status,
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Work Order")
+			& (sre.from_voucher_type == "Subcontracting Inward Order")
+			& (sre.reservation_based_on == "Qty")
+			& (sre.from_voucher_no == scio)
+			& (sre.from_voucher_detail_no.isin(scio_details))
+		)
+		.orderby(sre.creation, order=Order.desc)
+	).run(as_dict=True)
+
+
+def release_inward_reservation(sre: dict, qty: float) -> float:
+	"""Lower a Work Order reservation by `qty`, not below what it used, and give it back to the inward order reservation it came from."""
+	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
+	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
+	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
+	released_qty = doc.reserved_qty - reserved_qty
+	doc.db_set(
+		{"reserved_qty": reserved_qty, "voucher_qty": max(sre.required_qty, reserved_qty)},
+		update_modified=False,
+	)
+	doc.update_status()
+	doc.update_reserved_qty_in_voucher()
+	doc.update_delivered_qty_in_from_voucher_reservations()
+	doc.update_reserved_stock_in_bin()
+	return released_qty
