@@ -78,7 +78,7 @@ def _representative_lines(doctype, bom_no, keys, include_non_stock_items):
 	# only BOM Item carries is_phantom_item, and only its query ORs the phantom flag into the stock
 	# filter; the explosion table has neither
 	filters_phantom = doctype == "BOM Item"
-	fields = ["description", "source_warehouse", *keys]
+	fields = [*keys, "description", "source_warehouse"]
 	if filters_phantom:
 		fields.append("is_phantom_item")
 
@@ -165,7 +165,7 @@ def get_subitems(
 		_process_subitem(
 			doc, data, item_details, d, company, include_non_stock_items, include_subcontracted_items
 		)
-	return {key: value for key, value in item_details.items() if not value.get("is_phantom_item")}
+	return item_details
 
 
 def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planned_qty):
@@ -186,26 +186,23 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 		.on((item.name == item_uom.parent) & (item_uom.uom == item.purchase_uom))
 		.select(*_subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty))
 		.where(_subitem_filter(bom_item, bom, item, bom_no, include_non_stock_items))
-		.groupby(bom_item.item_code, bom_item.do_not_explode)
+		# a line with a BOM, a Do Not Explode line and a plain line of one item are planned differently
+		.groupby(bom_item.item_code, bom_item.do_not_explode, bom_item.bom_no)
 		# idx is not grouped; Min() preserves the original ordering and is valid on postgres
 		.orderby(Min(bom_item.idx))
 	).run(as_dict=True)
 
 	_apply_representative_lines(
-		rows, "BOM Item", bom_no, ("item_code", "do_not_explode"), include_non_stock_items
+		rows, "BOM Item", bom_no, ("item_code", "do_not_explode", "bom_no"), include_non_stock_items
 	)
 	return rows
 
 
 def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty):
 	qty = IfNull(parent_qty * Sum(bom_item.stock_qty / IfNull(bom.quantity, 1)) * planned_qty, 0).as_("qty")
-	# item_code and do_not_explode are grouped, so a Do Not Explode line never shares a row with a line
-	# that explodes. The remaining item-attribute columns are functionally dependent on item_code,
-	# so Max() returns their single value on both engines. is_phantom_item is the exception: the same
-	# item_code can sit on a phantom line and a real-RM line in one BOM, and get_subitems() drops any
-	# row whose is_phantom_item is truthy. Max() would let a single phantom line mask the real material
-	# and silently drop it; Min() instead treats the item as phantom only when EVERY line is phantom, so
-	# a real raw material is never lost. Deterministic and identical on MariaDB and Postgres.
+	# item_code, do_not_explode and bom_no are grouped; the item columns depend on them, so Max()
+	# returns their single value on both engines. Min() treats a group as phantom only when every
+	# line in it is phantom.
 	return [
 		bom_item.item_code,
 		Max(item.default_material_request_type).as_("default_material_request_type"),
@@ -216,7 +213,7 @@ def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, pl
 		Max(bom_item.source_warehouse).as_("source_warehouse"),
 		Count(bom_item.name).distinct().as_("line_count"),
 		Max(item.default_bom).as_("default_bom"),
-		Max(bom_item.bom_no).as_("line_bom_no"),
+		bom_item.bom_no,
 		bom_item.do_not_explode,
 		Max(bom_item.stock_uom).as_("stock_uom"),
 		Max(item.min_order_qty).as_("min_order_qty"),
@@ -244,14 +241,26 @@ def _process_subitem(
 	doc, data, item_details, d, company, include_non_stock_items, include_subcontracted_items
 ):
 	# a Do Not Explode line has no BOM, so it must not take the item's default BOM
-	child_bom = d.line_bom_no or (None if d.do_not_explode else d.default_bom)
-	if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
+	child_bom = d.bom_no or (None if d.do_not_explode else d.default_bom)
+	# of a planned sub-assembly, only the share that is made (or subcontracted) adds its components
+	parent = None if doc.get("combine_sub_items") else d.main_bom_item
+	exploded_share = (data.get("exploded_sub_assembly_shares") or {}).get((parent, d.item_code, d.bom_no))
+	if exploded_share == 0:
 		return
 
+	if exploded_share:
+		d.qty *= exploded_share
+
 	explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
-	explode = explodable and _should_explode_subitem(d, include_subcontracted_items) and d.qty > 0
+	explode = (
+		explodable
+		and (exploded_share or _should_explode_subitem(d, include_subcontracted_items))
+		and d.qty > 0
+	)
+	# a phantom item is never requested, and merging it could hide a real line of the same item
 	if not explode:
-		_merge_subitem(item_details, d)
+		if not d.is_phantom_item:
+			_merge_subitem(item_details, d)
 	else:
 		qty = (
 			d.qty

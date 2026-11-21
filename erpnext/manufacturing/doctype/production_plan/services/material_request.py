@@ -331,28 +331,41 @@ def _collect_item_details(doc, po_items):
 	so_item_details = frappe._dict()
 	qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
-	requested_sub_assemblies = {}
-	for row in doc.get("sub_assembly_items") or []:
-		row = frappe._dict(row)
-		if row.type_of_manufacturing == "Material Request":
-			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
-				(row.production_item, row.bom_no)
-			)
-
-	all_requested = set().union(*requested_sub_assemblies.values())
+	exploded_shares = _get_exploded_sub_assembly_shares(doc)
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
-		data["requested_sub_assemblies"] = (
-			all_requested
-			if doc.get("combine_sub_items")
-			else requested_sub_assemblies.get(data.get("name"), set())
-		)
+		plan_row = None if doc.get("combine_sub_items") else data.get("name")
+		data["exploded_sub_assembly_shares"] = exploded_shares[plan_row]
 		item_details = _item_details_for_row(
 			doc, data, company, sub_assembly_items, existing_sub_assembly_items
 		)
 		_accumulate_so_items(so_item_details, data.get("sales_order"), item_details, qty_precision)
 	return so_item_details
+
+
+def _get_exploded_sub_assembly_shares(doc):
+	"""Per plan row, the share of each sub-assembly (parent, item, BOM) qty whose components are requested.
+
+	The rest is requested as it is (Material Request) or bought through subcontracting. Combined rows
+	have no single plan row or parent.
+	"""
+	combined = doc.get("combine_sub_items")
+	exploded_qty, total_qty = defaultdict(float), defaultdict(float)
+	for row in doc.get("sub_assembly_items") or []:
+		row = frappe._dict(row)
+		plan_row, parent = (None, None) if combined else (row.production_plan_item, row.parent_item_code)
+		key = (plan_row, parent, row.production_item, row.bom_no)
+		total_qty[key] += flt(row.qty)
+		if row.type_of_manufacturing == "In House" or (
+			row.type_of_manufacturing == "Subcontract" and doc.get("include_subcontracted_items")
+		):
+			exploded_qty[key] += flt(row.qty)
+
+	shares = defaultdict(dict)
+	for key, qty in total_qty.items():
+		shares[key[0]][key[1:]] = exploded_qty[key] / qty if qty else 0
+	return shares
 
 
 def _item_details_for_row(doc, data, company, sub_assembly_items, existing_sub_assembly_items):
@@ -424,7 +437,7 @@ def _explode_bom_items(
 	if (
 		data.get("include_exploded_items")
 		and include_subcontracted_items
-		and not data.get("requested_sub_assemblies")
+		and all(share == 1 for share in data.get("exploded_sub_assembly_shares", {}).values())
 	):
 		return get_exploded_items(
 			item_details, company, bom_no, include_non_stock_items, planned_qty=planned_qty, doc=doc
