@@ -977,6 +977,10 @@ class JobCard(Document):
 		for d in doc.required_items:
 			self.set_required_item(doc, d, operation_qty, other_job_cards_qty, unmatched_rows)
 
+		for row in unmatched_rows:
+			if not (flt(row.transferred_qty) or flt(row.consumed_qty)):
+				self.remove(row)
+
 	def get_other_job_cards_qty(self) -> frappe._dict:
 		"""For Quantity and Required Qty per item of the other job cards of this operation."""
 		job_card = frappe.qb.DocType("Job Card")
