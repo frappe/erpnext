@@ -3,8 +3,11 @@
 
 """Inter-company transaction helpers for Sales Invoice."""
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
+from frappe.utils import flt, get_link_to_form
 
 
 def validate_inter_company_party(
@@ -80,6 +83,86 @@ def update_linked_doc(doctype: str, name: str, inter_company_reference: str | No
 	ref_doc, ref_field = get_inter_company_counterpart(doctype)
 	if inter_company_reference:
 		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, name)
+
+
+def validate_purchase_invoice_is_free(doc) -> None:
+	"""Purchase Invoice rows link no Sales Invoice rows, so it can have only one Sales Invoice."""
+	purchase_invoice = doc.inter_company_invoice_reference
+	if doc.is_return or not purchase_invoice:
+		return
+
+	sales_invoice = frappe.db.get_value(
+		"Purchase Invoice", purchase_invoice, "inter_company_invoice_reference"
+	)
+	if sales_invoice and frappe.db.get_value("Sales Invoice", sales_invoice, "docstatus") == 1:
+		frappe.throw(
+			_("Purchase Invoice {0} already has Sales Invoice {1}.").format(
+				purchase_invoice, get_link_to_form("Sales Invoice", sales_invoice)
+			)
+		)
+
+
+def validate_inter_company_order_qty(doc) -> None:
+	"""A Sales Order and the other Sales Orders of its Purchase Order must not go over its stock qty."""
+	purchase_order = doc.inter_company_order_reference
+	if not purchase_order:
+		return
+
+	purchase_order_qty = dict(
+		frappe.get_all("Purchase Order Item", {"parent": purchase_order}, ["name", "stock_qty"], as_list=True)
+	)
+	ordered_qty = get_inter_company_qty(
+		"Sales Order",
+		{"inter_company_order_reference": purchase_order, "name": ("!=", doc.name)},
+		"purchase_order_item",
+	)
+
+	for row in doc.items:
+		if row.purchase_order_item not in purchase_order_qty:
+			continue
+
+		ordered_qty[row.purchase_order_item] += flt(row.stock_qty)
+		precision = row.precision("stock_qty")
+		if flt(ordered_qty[row.purchase_order_item], precision) > flt(
+			purchase_order_qty[row.purchase_order_item], precision
+		):
+			frappe.throw(
+				_("Row #{0}: Item {1} is already ordered in full against Purchase Order {2}.").format(
+					row.idx, frappe.bold(row.item_code), get_link_to_form("Purchase Order", purchase_order)
+				)
+			)
+
+
+def validate_inter_company_purchase_order_qty(doc) -> None:
+	"""A Purchase Order row must not go below the stock qty of its submitted Sales Orders."""
+	ordered_qty = get_inter_company_qty(
+		"Sales Order", {"inter_company_order_reference": doc.name}, "purchase_order_item"
+	)
+	for row in doc.items:
+		precision = row.precision("stock_qty")
+		if flt(ordered_qty.get(row.name), precision) > flt(row.stock_qty, precision):
+			frappe.throw(
+				_(
+					"Row #{0}: Qty of Item {1} cannot be less than the qty ordered on its Sales Orders."
+				).format(row.idx, frappe.bold(row.item_code))
+			)
+
+
+def get_inter_company_qty(doctype: str, filters: dict, row_field: str) -> defaultdict:
+	"""Stock qty of the submitted `doctype` documents matching `filters`, by the counterpart row they link."""
+	parents = frappe.get_all(doctype, filters={**filters, "docstatus": 1}, pluck="name")
+	qty = defaultdict(float)
+	if not parents:
+		return qty
+
+	for row in frappe.get_all(
+		doctype + " Item",
+		filters={"parent": ("in", parents), row_field: ("is", "set")},
+		fields=[row_field, "stock_qty"],
+	):
+		qty[row.get(row_field)] += flt(row.stock_qty)
+
+	return qty
 
 
 def unlink_inter_company_doc(doctype: str, name: str, inter_company_reference: str | None) -> None:

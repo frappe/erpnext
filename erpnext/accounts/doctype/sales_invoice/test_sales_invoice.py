@@ -3842,36 +3842,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
 	def test_no_inter_company_pi_from_si_made_from_pi(self):
-		pi = frappe.get_doc(
-			{
-				"doctype": "Purchase Invoice",
-				"company": "_Test Company 1",
-				"supplier": "_Test Internal Supplier",
-				"currency": "USD",
-				"buying_price_list": "_Test Price List Rest of the World",
-				"credit_to": "Creditors - _TC1",
-				"items": [
-					{
-						"item_code": "_Test Item",
-						"qty": 10,
-						"rate": 100,
-						"expense_account": "Cost of Goods Sold - _TC1",
-						"cost_center": "Main - _TC1",
-					}
-				],
-			}
-		).submit()
-
-		si = make_inter_company_transaction("Purchase Invoice", pi.name)
-		si.debit_to = "Debtors - WP"
-		si.items[0].update(
-			{
-				"income_account": "Sales - WP",
-				"expense_account": "Cost of Goods Sold - WP",
-				"cost_center": "Main - WP",
-			}
-		)
-		si.submit()
+		pi = create_inter_company_purchase_invoice()
+		si = make_inter_company_si_from_pi(pi).submit()
 
 		self.assertRaisesRegex(
 			frappe.ValidationError,
@@ -3880,6 +3852,13 @@ class TestSalesInvoice(ERPNextTestSuite):
 			"Sales Invoice",
 			si.name,
 		)
+
+	def test_two_inter_company_si_drafts_from_one_pi_cannot_both_submit(self):
+		pi = create_inter_company_purchase_invoice()
+		drafts = [make_inter_company_si_from_pi(pi).insert() for _i in range(2)]
+
+		drafts[0].submit()
+		self.assertRaisesRegex(frappe.ValidationError, "already has", drafts[1].submit)
 
 	def test_inter_company_purchase_invoice_drops_selling_only_terms(self):
 		frappe.get_doc(
@@ -3914,36 +3893,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertFalse(pi.terms)
 
 	def test_no_second_inter_company_si_from_pi(self):
-		pi = frappe.get_doc(
-			{
-				"doctype": "Purchase Invoice",
-				"company": "_Test Company 1",
-				"supplier": "_Test Internal Supplier",
-				"currency": "USD",
-				"buying_price_list": "_Test Price List Rest of the World",
-				"credit_to": "Creditors - _TC1",
-				"items": [
-					{
-						"item_code": "_Test Item",
-						"qty": 10,
-						"rate": 100,
-						"expense_account": "Cost of Goods Sold - _TC1",
-						"cost_center": "Main - _TC1",
-					}
-				],
-			}
-		).submit()
-
-		si = make_inter_company_transaction("Purchase Invoice", pi.name)
-		si.debit_to = "Debtors - WP"
-		si.items[0].update(
-			{
-				"income_account": "Sales - WP",
-				"expense_account": "Cost of Goods Sold - WP",
-				"cost_center": "Main - WP",
-			}
-		)
-		si.submit()
+		pi = create_inter_company_purchase_invoice()
+		make_inter_company_si_from_pi(pi).submit()
 
 		self.assertRaisesRegex(
 			frappe.ValidationError,
@@ -7096,6 +7047,41 @@ def create_internal_parties():
 		represents_company="_Test Company",
 		allowed_to_interact_with="_Test Company",
 	)
+
+
+def create_inter_company_purchase_invoice():
+	return frappe.get_doc(
+		{
+			"doctype": "Purchase Invoice",
+			"company": "_Test Company 1",
+			"supplier": "_Test Internal Supplier",
+			"currency": "USD",
+			"buying_price_list": "_Test Price List Rest of the World",
+			"credit_to": "Creditors - _TC1",
+			"items": [
+				{
+					"item_code": "_Test Item",
+					"qty": 10,
+					"rate": 100,
+					"expense_account": "Cost of Goods Sold - _TC1",
+					"cost_center": "Main - _TC1",
+				}
+			],
+		}
+	).submit()
+
+
+def make_inter_company_si_from_pi(pi):
+	si = make_inter_company_transaction("Purchase Invoice", pi.name)
+	si.debit_to = "Debtors - WP"
+	si.items[0].update(
+		{
+			"income_account": "Sales - WP",
+			"expense_account": "Cost of Goods Sold - WP",
+			"cost_center": "Main - WP",
+		}
+	)
+	return si
 
 
 def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):

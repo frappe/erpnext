@@ -12,6 +12,10 @@ from frappe.model.workflow import get_workflow_name
 from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.sales_invoice.services.inter_company import (
+	validate_inter_company_order_qty,
+	validate_inter_company_purchase_order_qty,
+)
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.packed_item.packed_item import (
@@ -218,12 +222,14 @@ class ChildItemUpdater:
 			PaymentScheduleService(parent).set_payment_schedule()
 
 		if self.parent_doctype == "Purchase Order":
+			validate_inter_company_purchase_order_qty(parent)
 			parent.set_last_purchase_rate()
 			parent.validate_minimum_order_qty()
 			parent.validate_budget()
 			if parent.is_against_so():
 				parent.update_status_updater()
 		elif self.parent_doctype == "Sales Order":
+			validate_inter_company_order_qty(parent)
 			parent.set_skip_delivery()
 			parent.check_credit_limit()
 

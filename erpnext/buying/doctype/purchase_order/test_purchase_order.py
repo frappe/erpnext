@@ -2556,6 +2556,32 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			po.name,
 		)
 
+	def test_two_internal_sales_order_drafts_cannot_both_take_the_full_qty(self):
+		po = make_internal_purchase_order()
+		drafts = []
+		for _i in range(2):
+			so = make_inter_company_sales_order(po.name)
+			so.items[0].delivery_date = today()
+			drafts.append(so.insert())
+
+		drafts[0].submit()
+		self.assertRaisesRegex(frappe.ValidationError, "already ordered in full", drafts[1].submit)
+
+	def test_update_items_keeps_internal_sales_order_within_purchase_order_qty(self):
+		po = make_internal_purchase_order()
+		so = make_inter_company_sales_order(po.name)
+		so.items[0].delivery_date = today()
+		so.submit()
+
+		for doc, qty, error in ((so, 5, "already ordered in full"), (po, 1, "cannot be less than the qty")):
+			row = doc.items[0]
+			trans_item = json.dumps(
+				[{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": row.rate}]
+			)
+			self.assertRaisesRegex(
+				frappe.ValidationError, error, update_child_qty_rate, doc.doctype, trans_item, doc.name
+			)
+
 	def test_internal_sales_order_drops_buying_only_terms(self):
 		frappe.get_doc(
 			doctype="Terms and Conditions", title="_Test Buy Only Terms", buying=1, selling=0, terms="FOB"

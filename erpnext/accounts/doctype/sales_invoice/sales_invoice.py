@@ -46,6 +46,7 @@ from .services.inter_company import (
 	unlink_inter_company_doc,
 	update_linked_doc,
 	validate_inter_company_party,
+	validate_purchase_invoice_is_free,
 )
 from .services.loyalty import LoyaltyService
 from .services.pos import (
@@ -446,6 +447,7 @@ class SalesInvoice(SellingController):
 
 	def before_submit(self):
 		self.add_remarks()
+		validate_purchase_invoice_is_free(self)
 		if cint(self.is_created_using_pos):
 			POSService(self).validate_mandatory_pos_fields()
 
