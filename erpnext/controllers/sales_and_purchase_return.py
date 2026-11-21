@@ -102,9 +102,7 @@ def validate_return_against(doc):
 def validate_returned_items(doc):
 	valid_items = frappe._dict()
 
-	select_fields = ["item_code", "qty", "stock_qty", "rate", "parenttype", "conversion_factor", "name"]
-	if doc.doctype == "Subcontracting Receipt":
-		select_fields.remove("stock_qty")
+	select_fields = ["item_code", "qty", "rate", "parenttype", "conversion_factor", "name"]
 
 	if doc.doctype != "Purchase Invoice":
 		select_fields += ["serial_no", "batch_no"]
@@ -118,8 +116,8 @@ def validate_returned_items(doc):
 		fields=select_fields,
 		limit_page_length=0,  # all item rows of the reference document are needed (no default 20 cap)
 	):
-		if doc.doctype == "Subcontracting Receipt":
-			d.stock_qty = flt(d.qty) * flt(d.conversion_factor or 1)
+		# not the stored stock qty, which may be rounded to nothing in a coarser stock UOM
+		d.stock_qty = flt(d.qty) * flt(d.conversion_factor or 1)
 
 		valid_items = get_ref_item_dict(valid_items, d)
 		if doc.doctype == "Delivery Note":
@@ -342,7 +340,11 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = flt(args.get(column)) * args.get("conversion_factor", 1.0)
 
-		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
+		# in the finer of the row and stock UOMs, so that neither UOM's precision can round a return away
+		max_returnable_qty = get_qty_in_finer_uom(
+			args, column, flt(reference_qty) - flt(already_returned_data.get(returned_column))
+		)
+		returning_qty = get_qty_in_finer_uom(args, column, abs(flt(current_stock_qty)))
 		label = column.replace("_", " ").title()
 
 		if reference_qty or flt(current_stock_qty):
@@ -352,13 +354,19 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
-			elif abs(flt(current_stock_qty, field_precision)) > max_returnable_qty:
+			elif returning_qty > max_returnable_qty:
 				frappe.throw(
 					_("Row # {0}: Cannot return more than {1} for Item {2}").format(
 						args.idx, max_returnable_qty, args.item_code
 					),
 					StockOverReturnError,
 				)
+
+
+def get_qty_in_finer_uom(row, column, qty) -> float:
+	"""Convert a stock UOM qty to the row's UOM when that is finer; `qty` is in the row's UOM already."""
+	conversion_factor = 1 if column == "qty" else min(flt(row.conversion_factor or 1), 1)
+	return flt(qty / conversion_factor, row.precision("qty"))
 
 
 def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
@@ -372,7 +380,7 @@ def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned
 def add_returned_row(doc, key, row, already_returned_items):
 	"""Count a validated row so that the next rows of the same return see it."""
 	conversion_factor = flt(row.conversion_factor or 1)
-	stock_qty = get_returned_stock_qty(doc, row)
+	stock_qty = abs(flt(row.qty)) * conversion_factor
 	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
 		rejected_qty += stock_qty
@@ -445,9 +453,7 @@ def get_already_returned_items(doc):
 
 	field = frappe.scrub(doc.doctype) + "_item" if doc.doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
 
-	stock_qty = Abs(child.stock_qty)
-	if doc.doctype == "Subcontracting Receipt":
-		stock_qty = Abs(child.qty) * child.conversion_factor
+	stock_qty = Abs(child.qty) * child.conversion_factor
 
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES:
