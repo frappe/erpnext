@@ -804,8 +804,13 @@ class BOM(WebsiteGenerator):
 		self.base_operating_cost = 0
 		if self.get("with_operations"):
 			for d in self.get("operations"):
-				if d.workstation:
-					self.update_rate_and_time(d, update_hour_rate, save)
+				# as in the Work Order, fixed time is never per batch and a batch based operation always is
+				if d.fixed_time:
+					d.set_cost_based_on_bom_qty = 0
+				elif frappe.get_cached_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+					d.set_cost_based_on_bom_qty = 1
+
+				self.update_rate_and_time(d, update_hour_rate, save)
 
 				operating_cost = d.operating_cost
 				base_operating_cost = d.base_operating_cost
@@ -826,7 +831,7 @@ class BOM(WebsiteGenerator):
 		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
-		if not row.hour_rate or update_hour_rate:
+		if row.workstation and (not row.hour_rate or update_hour_rate):
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
 
 			if hour_rate:
