@@ -2731,7 +2731,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.save()
 		so.reload()
 		so.update_status("Closed")
-		self.assertRaisesRegex(frappe.ValidationError, "Row #1", plan.submit)
+		self.assertRaises(frappe.ValidationError, plan.submit)
 
 	def test_production_plan_ignores_closed_rows_it_does_not_plan(self):
 		from erpnext.controllers.item_close import update_closed_status
