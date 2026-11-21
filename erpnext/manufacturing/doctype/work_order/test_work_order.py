@@ -7162,6 +7162,18 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(self.get_additional_cost(wheel_entry, "Corrective Operation Cost"), 0)
 		self.assertEqual(self.get_additional_cost(assembly_entry, "Corrective Operation Cost"), 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_semi_fg_corrective_operation_cost_is_spread_over_finished_good_qty(self):
+		wo = self.make_car_with_four_wheels_work_order(
+			"Stores - _TC", prefix="Test JCO Kg", stock_uom="Kg", bom_qty=3, wheel_qty=1
+		)
+		wo.db_set("corrective_operation_cost", 100)
+
+		assembly_entry = self.complete_semi_fg_work_order(wo)[-1]
+		self.assertEqual(self.get_additional_cost(assembly_entry, "Corrective Operation Cost"), 100)
+
 	def test_bom_from_semi_fg_work_order_keeps_operation_time(self):
 		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
 		self.complete_semi_fg_work_order(wo)
