@@ -951,6 +951,23 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(mr.per_ordered, 100)
 		self.assertEqual(mr.status, "Ordered")
 
+	def test_request_saved_before_stock_uom_qty_was_editable_is_fully_ordered(self):
+		"""A row saved with the setting off keeps its unrounded stock qty: 1 Box is 0.333333333 Kg."""
+		item = make_item(
+			properties={"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.333333333}]}
+		).name
+		mr = make_material_request(item_code=item, qty=1, uom="Box", conversion_factor=0.333333333)
+
+		with change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1}):
+			po = make_purchase_order(mr.name)
+			po.supplier = "_Test Supplier"
+			po.submit()
+
+		mr.reload()
+		self.assertEqual(mr.items[0].ordered_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.status, "Ordered")
+
 	def test_material_request_qty_over_sales_order_limit(self):
 		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
