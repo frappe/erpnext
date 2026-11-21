@@ -307,6 +307,26 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		self.assertRaises(StockOverReturnError, return_doc.insert)
 
+	def test_purchase_return_from_unused_rejected_warehouse_keeps_receipt_rate(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		warehouse = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code="_Test Item", target=warehouse, qty=5, basic_rate=100)
+		pr = make_purchase_receipt(qty=5, rate=300, do_not_submit=True)
+		pr.items[0].rejected_warehouse = warehouse
+		pr.submit()
+
+		return_pr = make_purchase_return(pr.name)
+		return_pr.items[0].warehouse = warehouse
+		return_pr.submit()
+
+		outgoing_rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": return_pr.name}, "outgoing_rate"
+		)
+		self.assertEqual(outgoing_rate, 300)
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
