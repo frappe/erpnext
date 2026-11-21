@@ -862,6 +862,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 					and not is_costed_out_of_finished_item(item)
 				)
 				allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
+				# the basis automatic finished goods split: manual ones take their value first, down to zero
+				if self.get_finished_items_qty() and allocation_basis > 0:
+					allocation_basis = max(allocation_basis - self.get_manually_rated_finished_items()[1], 0)
 				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
 				has_derived_rate = True
 
