@@ -152,7 +152,8 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.is_internal_transfer() and (
+		is_internal_transfer = self.is_internal_transfer()
+		if (is_internal_transfer or self.is_inter_company_receipt()) and (
 			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
 		):
 			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
@@ -183,7 +184,7 @@ class BuyingController(SubcontractingController):
 				elif item.serial_and_batch_bundle:
 					self.resize_package(item, "serial_and_batch_bundle", "qty")
 
-				if item.get(field) and bundle_ids.get(item.get(field)):
+				if is_internal_transfer and item.get(field) and bundle_ids.get(item.get(field)):
 					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
 
 	def has_stock_qty_changed(self, row, qty_field) -> bool:
@@ -205,15 +206,20 @@ class BuyingController(SubcontractingController):
 		):
 			self.remove_package(row, bundle_field)
 
+	def is_inter_company_receipt(self) -> bool:
+		"""A receipt from an internal supplier that represents another company."""
+		return bool(self.get("is_internal_supplier")) and not self.is_internal_transfer()
+
 	def make_accepted_package(self, row, package) -> str:
 		"""Package of the material the row accepts.
 
 		A row that rejects nothing keeps the package of the in-transit warehouse it came out of. A
 		row that rejects material needs a package of the accepted warehouse instead, since that is
 		the entry it belongs to; the material leaving the in-transit warehouse gets a package of its
-		own when the receipt is submitted.
+		own when the receipt is submitted. An inter-company receipt has no in-transit warehouse, so its
+		row gets a package of the accepted warehouse too.
 		"""
-		if not self.has_rejected_stock(row):
+		if not (self.has_rejected_stock(row) or self.is_inter_company_receipt()):
 			return self.make_package_for_transfer(
 				package,
 				row.from_warehouse,

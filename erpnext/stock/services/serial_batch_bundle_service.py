@@ -780,6 +780,7 @@ class SerialBatchBundleService:
 			docstatus=self.doc.docstatus,
 			voucher_type=self.doc.doctype,
 			voucher_no=self.doc.name,
+			company=self.doc.company,
 			serial_and_batch_bundle=serial_and_batch_bundle,
 			warehouse=warehouse,
 			type_of_transaction=type_of_transaction,
