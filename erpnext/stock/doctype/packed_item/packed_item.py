@@ -178,19 +178,19 @@ def get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_i
 	if not stale_rows:
 		return
 
-	precision = frappe.get_precision("Packed Item", "qty")
 	uom = stale_rows[0].uom
 	qty_per_unit = get_component_stock_qty_per_unit(bundle_item, uom, so_packed_item)
-	qty = flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision)
+	qty = flt(qty_per_unit * get_bundle_row_stock_qty(item_row), frappe.get_precision("Packed Item", "qty"))
 	locations = get_pick_list_locations(doc, item_row, bundle_item, qty, so_packed_item, packed_items_table)
 	for location in locations or [None]:
-		# a location with no stale row left gets a new row, as in add_packed_item_row
-		stale_row = stale_rows.pop(get_stale_row_idx(stale_rows, location)) if stale_rows else None
-		packed_row = frappe.get_doc(
-			stale_row.as_dict()
-			if stale_row
-			else {"doctype": "Packed Item", "item_code": bundle_item.item_code, "uom": uom}
-		)
+		if stale_rows:
+			packed_row = frappe.get_doc(stale_rows.pop(get_stale_row_idx(stale_rows, location)).as_dict())
+		else:
+			# a location with no stale row left gets a new row, as in add_packed_item_row
+			packed_row = frappe.get_doc(
+				{"doctype": "Packed Item", "item_code": bundle_item.item_code, "uom": uom}
+			)
+
 		packed_row.qty = qty
 		if location:
 			update_packed_item_with_pick_list_info(item_row, packed_row, location)
