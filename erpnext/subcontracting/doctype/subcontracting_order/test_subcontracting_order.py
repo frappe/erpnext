@@ -1207,6 +1207,26 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
 
+	def test_return_of_material_sent_in_another_uom_is_in_stock_uom(self):
+		sco = make_reserving_order_with_new_items(
+			"Box Return", rm_properties={"uoms": [{"uom": "Box", "conversion_factor": 2}]}
+		)
+		sco.reserve_stock = 0
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		sco.submit()
+		transfer = frappe.get_doc(make_rm_stock_entry(sco.name))
+		transfer.items[0].update({"uom": "Box", "conversion_factor": 2, "qty": 2})
+		transfer.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+
+		self.assertEqual((ste.items[0].qty, ste.items[0].uom), (4, ste.items[0].stock_uom))
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
