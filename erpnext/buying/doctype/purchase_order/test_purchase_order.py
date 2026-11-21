@@ -248,6 +248,78 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assert_orders_for_parts_add_up(mr.items[0], lambda: make_purchase_order(mr.name))
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_rest_of_a_material_request_maps_its_pending_qty(self):
+		from erpnext.stock.doctype.material_request.mapper import (
+			get_item_default_suppliers,
+			make_request_for_quotation,
+		)
+
+		item = make_item_with_fractional_box()
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 1
+		po.submit()
+
+		self.assertEqual(make_request_for_quotation(mr.name).items[0].qty, 2)
+		self.assertEqual(get_item_default_suppliers(mr.name)[0]["pending_qty"], 2)
+
+		po = make_purchase_order(mr.name)
+		self.assertEqual(po.items[0].qty, 2)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		mr.reload()
+		self.assertEqual(mr.per_ordered, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_rest_of_a_material_request_maps_once_into_a_draft_order(self):
+		"""The rest of 2 Box at 1/3 Kg is 1 Box (0.33 Kg); mapping it again into the draft adds no row."""
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.333333333}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=2, uom="Box", conversion_factor=0.333333333)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 1
+		po.submit()
+
+		draft = make_purchase_order(mr.name)
+		draft.supplier = "_Test Supplier"
+		draft.insert()
+
+		self.assertEqual(len(make_purchase_order(mr.name, target_doc=draft).items), 1)
+
+	def test_rest_of_a_row_saved_before_the_setting_maps_once_into_a_draft_order(self):
+		"""A row saved with the setting off keeps its unrounded stock qty: 2 Box is 1.333333334 Kg."""
+		item = make_item_with_fractional_box()
+		mr = make_material_request(item_code=item, qty=2, uom="Box", conversion_factor=0.666666667)
+
+		with self.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1}):
+			po = make_purchase_order(mr.name)
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = 1
+			po.submit()
+
+			draft = make_purchase_order(mr.name)
+			draft.supplier = "_Test Supplier"
+			draft.insert()
+
+			self.assertEqual(len(make_purchase_order(mr.name, target_doc=draft).items), 1)
+
+	def test_pending_qty_from_the_stored_ordered_qty_is_not_rounded(self):
+		"""The rest of a 3 Box (12 Kg) row with 1 Kg ordered is 35 Kg, not 2.92 Box (35.04 Kg)."""
+		from erpnext.stock.doctype.material_request.mapper import get_pending_qty
+
+		row = frappe.new_doc("Material Request Item")
+		row.update({"qty": 3, "stock_qty": 36, "conversion_factor": 12, "ordered_qty": 1})
+		self.assertEqual(get_pending_qty(row, None, 2) * row.conversion_factor, 35)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
 		mr = receive_material_request_in_parts()
 		self.assertEqual(

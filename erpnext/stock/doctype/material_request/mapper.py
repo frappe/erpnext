@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 from erpnext.controllers.mapper import get_qty_already_mapped
@@ -26,26 +27,60 @@ def set_missing_values(source, target_doc):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 
-def get_source_item_for_qty(item, qty):
-	"""Copy of the source row whose pending quantity is the requested quantity."""
-	source_item = frappe._dict(item.as_dict())
-	source_item.ordered_qty = 0
-	source_item.received_qty = 0
-	source_item.stock_qty = flt(qty) * flt(item.conversion_factor)
-
-	return source_item
-
-
 def validate_request_not_stopped(source_name):
 	if frappe.db.get_value("Material Request", source_name, "status") == "Stopped":
 		frappe.throw(_("Material Request {0} is stopped").format(source_name), frappe.InvalidStatusError)
 
 
-def update_item(obj, target, source_parent):
-	target.conversion_factor = obj.conversion_factor
+def get_ordered_stock_qty(material_request):
+	"""{row name: stock qty} on submitted Purchase Orders, from their rows' unrounded qty * conversion factor.
+	None unless purchase rows round their stock qty, as the stored ordered qty then falls a fraction short.
+	A subcontracting request is ordered by finished good qty, so it keeps its stored ordered qty."""
+	if not frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"):
+		return None
 
-	qty = obj.ordered_qty or obj.received_qty
-	target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
+	if frappe.db.get_value("Material Request", material_request, "material_request_type") == "Subcontracting":
+		return None
+
+	order = frappe.qb.DocType("Purchase Order")
+	order_item = frappe.qb.DocType("Purchase Order Item")
+	return frappe._dict(
+		frappe.qb.from_(order_item)
+		.join(order)
+		.on(order.name == order_item.parent)
+		.select(order_item.material_request_item, Sum(order_item.qty * order_item.conversion_factor))
+		.where(
+			(order_item.material_request == material_request)
+			& (order.docstatus == 1)
+			& (order.is_subcontracted == 0)
+		)
+		.groupby(order_item.material_request_item)
+		.run()
+	)
+
+
+def get_unrounded_ordered_qty(row, ordered_stock_qty):
+	"""Stock qty ordered for a row before rounding, or None when its stored ordered or received qty applies."""
+	if ordered_stock_qty is None or (row.received_qty and not row.ordered_qty):
+		return None
+
+	return ordered_stock_qty.get(row.name, None if row.ordered_qty else 0)
+
+
+def get_pending_qty(row, ordered_stock_qty, precision):
+	"""Qty of a row still to order, in its UOM, rounded to the ``precision`` of the qty it is mapped to."""
+	ordered_qty = get_unrounded_ordered_qty(row, ordered_stock_qty)
+	if ordered_qty is None:
+		stored_qty = row.ordered_qty or row.received_qty
+		return (flt(row.stock_qty) - flt(stored_qty)) / (flt(row.conversion_factor) or 1)
+
+	pending_qty = flt(row.qty) - flt(ordered_qty) / flt(row.conversion_factor)
+	return flt(pending_qty, precision)
+
+
+def update_item(obj, target, qty):
+	target.conversion_factor = obj.conversion_factor
+	target.qty = qty
 	target.stock_qty = target.qty * target.conversion_factor
 	if getdate(target.schedule_date) < getdate(nowdate()):
 		target.schedule_date = None
@@ -97,7 +132,13 @@ def make_purchase_order(
 	)
 
 	requested_qty = args.get("requested_qty") or {}
-	mapped_qty_by_item = get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
+	ordered_stock_qty = get_ordered_stock_qty(source_name)
+	# rows rounding their stock qty are added up as their order adds them up on submit
+	mapped_qty_by_item = (
+		get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
+		if ordered_stock_qty is None
+		else get_qty_already_mapped(target_doc, "material_request_item", "qty", "conversion_factor")
+	)
 
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
@@ -106,9 +147,8 @@ def make_purchase_order(
 		set_missing_values(source, target_doc)
 
 	def update_requested_item(obj, target, source_parent):
-		if obj.name in requested_qty:
-			obj = get_source_item_for_qty(obj, requested_qty[obj.name])
-		update_item(obj, target, source_parent)
+		qty = requested_qty.get(obj.name) or get_pending_qty(obj, ordered_stock_qty, target.precision("qty"))
+		update_item(obj, target, flt(qty))
 		if not target.rate and not target.price_list_rate:
 			# unpriced rows fetch the price for the Purchase Order's supplier
 			target.rate = target.price_list_rate = None
@@ -117,9 +157,20 @@ def make_purchase_order(
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		qty = (d.ordered_qty or d.received_qty) + flt(mapped_qty_by_item.get(d.name, 0))
+		return has_pending_qty(d) and child_filter
 
-		return qty < d.stock_qty and child_filter
+	def has_pending_qty(d):
+		"""Whether a row has stock qty left to order, rows already in ``target_doc`` included."""
+		stored_qty = d.ordered_qty or d.received_qty
+		mapped_qty = flt(mapped_qty_by_item.get(d.name))
+		if ordered_stock_qty is None:
+			return stored_qty + mapped_qty < d.stock_qty
+
+		ordered_qty = get_unrounded_ordered_qty(d, ordered_stock_qty)
+		ordered_qty = flt(stored_qty if ordered_qty is None else ordered_qty) + mapped_qty
+		# a row saved before purchase rows rounded their stock qty keeps it unrounded
+		precision = d.precision("stock_qty")
+		return flt(ordered_qty, precision) < flt(d.stock_qty, precision)
 
 	def generate_field_map():
 		field_map = [
@@ -170,15 +221,16 @@ def make_purchase_order(
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	validate_request_not_stopped(source_name)
+	ordered_stock_qty = get_ordered_stock_qty(source_name)
+	precision = frappe.get_precision("Request for Quotation Item", "qty")
 
 	def update_item(obj, target, source_parent):
-		qty = obj.ordered_qty or obj.received_qty
-		target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
+		target.qty = get_pending_qty(obj, ordered_stock_qty, precision)
 		target.stock_qty = target.qty * target.conversion_factor
 
 	def select_item(d):
 		qty = d.ordered_qty or d.received_qty
-		return qty < d.stock_qty
+		return qty < d.stock_qty and get_pending_qty(d, ordered_stock_qty, precision) > 0
 
 	doclist = get_mapped_doc(
 		"Material Request",
@@ -223,6 +275,8 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 	material_request = frappe.get_doc("Material Request", source_name)
 	material_request.check_permission("read")
 
+	ordered_stock_qty = get_ordered_stock_qty(source_name)
+	precision = frappe.get_precision("Purchase Order Item", "qty")
 	items = []
 	for item in material_request.items:
 		if filtered_children and item.name not in filtered_children:
@@ -232,12 +286,16 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 		if ordered_qty >= flt(item.stock_qty):
 			continue
 
+		pending_qty = get_pending_qty(item, ordered_stock_qty, precision)
+		if pending_qty <= 0:
+			continue
+
 		items.append(
 			{
 				"material_request_item": item.name,
 				"item_code": item.item_code,
 				"item_name": item.item_name,
-				"pending_qty": (flt(item.stock_qty) - ordered_qty) / (flt(item.conversion_factor) or 1),
+				"pending_qty": pending_qty,
 				"uom": item.uom,
 				"supplier": get_default_supplier_for_item(item.item_code, material_request.company),
 			}
