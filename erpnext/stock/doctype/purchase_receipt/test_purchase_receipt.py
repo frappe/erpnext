@@ -504,6 +504,30 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 0)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_return_of_a_receipt_row_with_no_stock_left_takes_back_nothing(self):
+		"""A return of the rest of a row whose earlier returns took all its stock takes back nothing, and
+		cancelling it puts nothing back."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = make_item(
+			"_Test Item For Return With No Stock Left",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.006}]},
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item, qty=2, uom="Box", conversion_factor=0.006, rate=100)
+		first_return = make_return_doc("Purchase Receipt", pr.name)
+		first_return.items[0].update({"qty": -1, "received_qty": -1})
+		first_return.submit()
+		last_return = make_return_doc("Purchase Receipt", pr.name)
+		last_return.submit()
+
+		stock_bin = {"item_code": item, "warehouse": pr.items[0].warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 5.0)
+		last_return.cancel()
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 5.0)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_return_in_another_uom_takes_back_only_its_stock_qty(self):
 		"""A return of part of a row in another UOM than the row is not the return of its rest."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -4896,6 +4920,26 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(
 			get_net_qty_by_warehouse([pr.name]),
 			{warehouses.transit: -0.34, warehouses.accepted: 0.33, warehouses.rejected: 0.01},
+		)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_return_takes_no_rejected_stock_its_receipt_did_not_post(self):
+		"""A return of a receipt whose rejected stock qty rounds to 0 in the split takes nothing from the
+		rejected warehouse."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item_doc = make_item(
+			"_Test Item For Zero Rejected Split Return",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.006}]},
+		)
+		pr, warehouses, *_ = self.make_transfer_receipt(item_doc, 1, 1, uom="Box", conversion_factor=0.006)
+		pr.submit()
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.submit()
+
+		self.assertEqual(
+			get_net_qty_by_warehouse([pr_return.name]),
+			{warehouses.transit: 0.01, warehouses.accepted: -0.01},
 		)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})

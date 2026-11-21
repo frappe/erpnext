@@ -536,6 +536,18 @@ class TestDeliveryNote(ERPNextTestSuite):
 			)
 			self.assertEqual(flt(sum(put_back), 2), 2.01)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_return_of_a_delivery_row_with_no_stock_left_puts_back_nothing(self):
+		"""A return of the rest of a row whose earlier returns put back all its stock puts back nothing."""
+		dn = self.deliver_in_boxes(0.0058)
+		first_return = make_sales_return(dn.name)
+		first_return.items[0].qty = -5
+		first_return.submit()
+		make_sales_return(dn.name).submit()
+
+		stock_bin = {"item_code": dn.items[0].item_code, "warehouse": dn.items[0].warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 10)
+
 	def return_delivery_in_parts(self, conversion_factor=0.3356):
 		"""Delivery of 6 Box, returned as two parts of 3 Box, whose stock qty rounds unevenly: at 0.3356 Kg
 		the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down (1.00 Kg each of 2.01 Kg)."""

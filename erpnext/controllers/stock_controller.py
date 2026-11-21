@@ -328,7 +328,7 @@ class StockController(AccountsController):
 
 		left = self.get_row_left_to_return(row, warehouse)
 		if flt(left.stock_qty) <= 0:
-			return stock_qty
+			return 0.0 if self.has_original_row_used_warehouse(row, warehouse) else stock_qty
 
 		for earlier_row, earlier_qty in self.get_earlier_returns_of_row(row, warehouse):
 			earlier_stock_qty = self.get_capped_return_stock_qty(earlier_row, earlier_qty, left)
@@ -336,6 +336,23 @@ class StockController(AccountsController):
 			left.unrounded_stock_qty += flt(earlier_qty) * flt(earlier_row.conversion_factor)
 
 		return self.get_capped_return_stock_qty(row, qty, left)
+
+	def has_original_row_used_warehouse(self, row, warehouse) -> bool:
+		"""Whether the returned original row moved stock and was to move some in the warehouse, even if
+		its stock qty there rounded to 0. A delivery counts every warehouse."""
+		original_row = row.get(get_return_reference_field(self.doctype))
+		if not original_row or not frappe.db.exists(
+			"Stock Ledger Entry", {"voucher_detail_no": original_row, "is_cancelled": 0}
+		):
+			return False
+
+		if not self.is_stock_receipt():
+			return True
+
+		original_warehouses = frappe.db.get_value(
+			row.doctype, original_row, ["warehouse", "rejected_warehouse"], as_dict=True
+		)
+		return warehouse in original_warehouses.values()
 
 	def get_capped_return_stock_qty(self, row, qty, left) -> float:
 		"""Stock qty a return of qty moves out of what is left of its original row."""
