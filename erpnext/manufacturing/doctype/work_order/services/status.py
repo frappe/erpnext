@@ -67,8 +67,7 @@ class StatusService:
 		)
 
 	def _ordered_qty_against_so(self):
-		# Sub-assembly Work Orders from a Production Plan carry the Sales Order of their parent assembly,
-		# but they produce input for that assembly, not the qty sold, so they do not count here.
+		# Sub-assembly Work Orders make input for the parent assembly, not the qty sold
 		wo = frappe.qb.DocType("Work Order")
 		plan_item = frappe.qb.DocType("Production Plan Item")
 		return (
