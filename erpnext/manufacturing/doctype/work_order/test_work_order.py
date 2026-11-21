@@ -20,6 +20,7 @@ from frappe.utils import (
 	today,
 )
 
+from erpnext.manufacturing.doctype.bom.services.operations_cost import add_additional_cost
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
@@ -7709,6 +7710,11 @@ class TestWorkOrder(ERPNextTestSuite):
 		wheel_entry, assembly_entry = self.complete_semi_fg_work_order(wo)
 		self.assertEqual(self.get_additional_cost(wheel_entry, "Corrective Operation Cost"), 0)
 		self.assertEqual(self.get_additional_cost(assembly_entry, "Corrective Operation Cost"), 100)
+
+		# semi-finished output recorded after the finished good is produced
+		later_wheel_entry = frappe.copy_doc(wheel_entry)
+		add_additional_cost(later_wheel_entry, wo.reload(), frappe.get_doc("Job Card", wheel_entry.job_card))
+		self.assertEqual(self.get_additional_cost(later_wheel_entry, "Corrective Operation Cost"), 0)
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
