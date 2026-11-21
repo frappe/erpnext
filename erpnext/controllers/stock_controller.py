@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder import Criterion, Order
+from frappe.query_builder import Criterion, Order, Tuple
 from frappe.query_builder.functions import Count, Min
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
@@ -571,6 +571,12 @@ class StockController(AccountsController):
 
 			return query.run(pluck="name")
 
+		def get_row_key(item):
+			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
+				return item.get(reference_field)
+			if item.get("subcontracting_order"):
+				return (item.subcontracting_order, item.rm_item_code)
+
 		def get_data_map():
 			return {
 				"Subcontracting Delivery": {
@@ -606,12 +612,16 @@ class StockController(AccountsController):
 		):
 			data_map = get_data_map()
 
-			if purpose == "Send to Subcontractor" and self._action == "cancel":
-				rows = {item.sco_rm_detail: item for item in self.items if item.sco_rm_detail}
-				self.rebuild_subcontracting_transfers({row: get_sre_list(item) for row, item in rows.items()})
+			field = data_map[purpose or self.doctype]["field"]
+			if self._action == "cancel" and purpose != "Subcontracting Delivery":
+				rows = {
+					get_row_key(item): item
+					for item in self.get(data_map[purpose or self.doctype]["table_name"])
+				}
+				rows.pop(None, None)
+				self.rebuild_reservation_usage(field, {key: get_sre_list(item) for key, item in rows.items()})
 				return
 
-			field = data_map[purpose or self.doctype]["field"]
 			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
 				sre_list = get_sre_list(item)
 
@@ -685,20 +695,20 @@ class StockController(AccountsController):
 
 					qty -= working_qty
 
-	def rebuild_subcontracting_transfers(self, sre_lists: dict[str, list[str]]):
-		"""Replay the remaining transfers oldest first, each on the reservations made before it, as on submit."""
-		transfers = self.get_subcontracting_transfers(list(sre_lists))
-		for sco_rm_detail, sre_list in sre_lists.items():
+	def rebuild_reservation_usage(self, field: str, sre_lists: dict):
+		"""Replay the remaining usage oldest first, each on the reservations made before it, as on submit."""
+		usages = group_reservation_usage(self.get_remaining_reservation_usage(list(sre_lists)))
+		for key, sre_list in sre_lists.items():
 			sre_docs = [frappe.get_doc("Stock Reservation Entry", sre) for sre in sre_list]
 			for sre_doc in sre_docs:
-				sre_doc.transferred_qty = 0
+				sre_doc.set(field, 0)
 				for entry in sre_doc.sb_entries:
 					entry.delivered_qty = 0
 
-			for transfer in transfers.get(sco_rm_detail, []):
+			for usage in usages.get(key, []):
 				for sre_doc in sre_docs:
-					if sre_doc.creation < transfer.submitted_at:
-						add_transfer_to_reservation(sre_doc, transfer)
+					if sre_doc.creation < usage.submitted_at:
+						add_usage_to_reservation(sre_doc, usage, field)
 
 			for sre_doc in sre_docs:
 				for entry in sre_doc.sb_entries:
@@ -708,19 +718,19 @@ class StockController(AccountsController):
 				sre_doc.update_status()
 				sre_doc.update_reserved_stock_in_bin()
 
-	def get_subcontracting_transfers(self, sco_rm_details: list[str]) -> dict[str, list]:
-		"""Remaining transfers of each supplied row, oldest first, timed by their first stock ledger entry."""
+	def get_remaining_reservation_usage(self, keys: list) -> list[dict]:
+		"""Rows of the remaining vouchers that used the reservations, oldest first."""
+		if self.doctype == "Subcontracting Receipt":
+			return self.get_remaining_consumption(keys)
+
+		return self.get_remaining_transfers(keys)
+
+	def get_remaining_transfers(self, sco_rm_details: list[str]) -> list[dict]:
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
-		ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
-		submitted_at = (
-			frappe.qb.from_(ledger_entry)
-			.select(Min(ledger_entry.creation))
-			.where(ledger_entry.voucher_detail_no == detail.name)
-			.as_("submitted_at")
-		)
-		rows = (
+		submitted_at = get_first_ledger_entry_time(detail.name)
+		return (
 			frappe.qb.from_(detail)
 			.join(stock_entry)
 			.on(stock_entry.name == detail.parent)
@@ -728,12 +738,12 @@ class StockController(AccountsController):
 			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
 			.select(
 				detail.name,
-				detail.sco_rm_detail,
-				detail.transfer_qty,
+				detail.sco_rm_detail.as_("key"),
+				detail.transfer_qty.as_("qty"),
 				submitted_at,
 				bundle_entry.serial_no,
 				bundle_entry.batch_no,
-				bundle_entry.qty,
+				bundle_entry.qty.as_("bundle_qty"),
 			)
 			.where(
 				(stock_entry.docstatus == 1)
@@ -744,18 +754,40 @@ class StockController(AccountsController):
 			.orderby(submitted_at)
 		).run(as_dict=True)
 
-		transfers = defaultdict(dict)
-		for row in rows:
-			transfer = transfers[row.sco_rm_detail].get(row.name)
-			if not transfer:
-				transfer = transfers[row.sco_rm_detail][row.name] = new_reservation_transfer()
-				transfer.qty, transfer.submitted_at = flt(row.transfer_qty), row.submitted_at
-			if row.serial_no:
-				transfer.serial_nos.add(row.serial_no)
-			if row.batch_no:
-				transfer.batch_qty[row.batch_no] += abs(flt(row.qty))
+	def get_remaining_consumption(self, keys: list[tuple[str, str]]) -> list[dict]:
+		receipt = frappe.qb.DocType("Subcontracting Receipt")
+		supplied = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		submitted_at = get_first_ledger_entry_time(supplied.name)
+		rows = (
+			frappe.qb.from_(supplied)
+			.join(receipt)
+			.on(receipt.name == supplied.parent)
+			.left_join(bundle_entry)
+			.on(bundle_entry.parent == supplied.serial_and_batch_bundle)
+			.select(
+				supplied.name,
+				supplied.subcontracting_order,
+				supplied.rm_item_code,
+				supplied.consumed_qty.as_("qty"),
+				submitted_at,
+				bundle_entry.serial_no,
+				bundle_entry.batch_no,
+				bundle_entry.qty.as_("bundle_qty"),
+			)
+			.where(
+				(receipt.docstatus == 1)
+				& (receipt.is_return == 0)
+				& (receipt.supplier_warehouse == self.supplier_warehouse)
+				& (supplied.consumed_qty > 0)
+				& Tuple(supplied.subcontracting_order, supplied.rm_item_code).isin(keys)
+			)
+			.orderby(submitted_at)
+		).run(as_dict=True)
 
-		return {row: list(row_transfers.values()) for row, row_transfers in transfers.items()}
+		for row in rows:
+			row.key = (row.subcontracting_order, row.rm_item_code)
+		return rows
 
 	def check_for_on_hold_or_closed_status(
 		self, ref_doctype: str, ref_fieldname: str, exclude_if_field: str | None = None
@@ -1222,31 +1254,58 @@ def make_bundle_for_material_transfer(**kwargs):
 	return bundle_doc.name
 
 
-def new_reservation_transfer():
-	return frappe._dict(qty=0, serial_nos=set(), batch_qty=defaultdict(float))
+def get_first_ledger_entry_time(voucher_detail_no):
+	"""Creation of a voucher row's first stock ledger entry, which recreating its ledgers does not move."""
+	ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+	return (
+		frappe.qb.from_(ledger_entry)
+		.select(Min(ledger_entry.creation))
+		.where(ledger_entry.voucher_detail_no == voucher_detail_no)
+		.as_("submitted_at")
+	)
 
 
-def add_transfer_to_reservation(sre_doc, transfer) -> None:
-	"""Count on `sre_doc` the part of `transfer` it has room for, and take it off `transfer`."""
+def group_reservation_usage(rows: list[dict]) -> dict[str, list]:
+	"""Usage of each reservation key, one per voucher row, in the order of `rows`."""
+	usages = defaultdict(dict)
+	for row in rows:
+		usage = usages[row.key].get(row.name)
+		if not usage:
+			usage = usages[row.key][row.name] = frappe._dict(
+				qty=flt(row.qty),
+				submitted_at=row.submitted_at,
+				serial_nos=set(),
+				batch_qty=defaultdict(float),
+			)
+		if row.serial_no:
+			usage.serial_nos.add(row.serial_no)
+		if row.batch_no:
+			usage.batch_qty[row.batch_no] += abs(flt(row.bundle_qty))
+
+	return {key: list(row_usages.values()) for key, row_usages in usages.items()}
+
+
+def add_usage_to_reservation(sre_doc, usage, field: str) -> None:
+	"""Count on `sre_doc` the part of `usage` it has room for, and take it off `usage`."""
 	if sre_doc.reservation_based_on != "Serial and Batch":
-		qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.transferred_qty), transfer.qty)
+		qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.get(field)), usage.qty)
 	else:
 		qty = 0
 		for entry in sre_doc.sb_entries:
 			if sre_doc.has_serial_no:
 				entry_qty = 0
-				if not flt(entry.delivered_qty) and entry.serial_no in transfer.serial_nos:
+				if not flt(entry.delivered_qty) and entry.serial_no in usage.serial_nos:
 					entry_qty = 1
-					transfer.serial_nos.discard(entry.serial_no)
+					usage.serial_nos.discard(entry.serial_no)
 			else:
-				entry_qty = min(flt(entry.qty) - flt(entry.delivered_qty), transfer.batch_qty[entry.batch_no])
-				transfer.batch_qty[entry.batch_no] -= entry_qty
+				entry_qty = min(flt(entry.qty) - flt(entry.delivered_qty), usage.batch_qty[entry.batch_no])
+				usage.batch_qty[entry.batch_no] -= entry_qty
 
 			entry.delivered_qty = flt(flt(entry.delivered_qty) + entry_qty, entry.precision("delivered_qty"))
 			qty += entry_qty
 
-	transfer.qty -= qty
-	sre_doc.transferred_qty = flt(flt(sre_doc.transferred_qty) + qty, sre_doc.precision("transferred_qty"))
+	usage.qty -= qty
+	sre_doc.set(field, flt(flt(sre_doc.get(field)) + qty, sre_doc.precision(field)))
 
 
 def set_entries_total_qty(entries, total_qty):
