@@ -343,7 +343,9 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_production_plan_without_multi_level(self):
 		"Test MR Planning table for non exploded BOM."
 		pln = create_production_plan(item_code="Test Production Item 1", use_multi_level_bom=0)
-		self.assertEqual(len(pln.mr_items), 2)
+		self.assertEqual(
+			sorted(row.item_code for row in pln.mr_items), ["Raw Material Item 1", "Subassembly Item 1"]
+		)
 		pln.cancel()
 
 	def test_production_plan_without_multi_level_for_existing_ordered_qty(self):
@@ -6469,7 +6471,7 @@ def create_production_plan(**args):
 		pln.append(
 			"po_items",
 			{
-				"use_multi_level_bom": args.use_multi_level_bom or 1,
+				"include_exploded_items": args.use_multi_level_bom,
 				"item_code": args.item_code,
 				"bom_no": frappe.db.get_value("Item", args.item_code, "default_bom"),
 				"planned_qty": args.planned_qty or 1,
