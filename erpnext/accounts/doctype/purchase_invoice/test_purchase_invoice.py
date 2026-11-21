@@ -3081,16 +3081,53 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		for invoice in (pi, returned):
 			self.assert_warehouse_accounts_match_stock(invoice)
 
+	def test_internal_transfer_invoice_that_rejects_material_into_transit(self):
+		"""Material rejected back into the in-transit warehouse stays there, so the invoice and its
+		return book transit with the net stock value that moved through it."""
+		pi = make_internal_transfer_invoice(rejected_qty=2)
+		row = pi.items[0]
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.update_stock = 1
+		returned.submit()
+
+		for invoice, accepted_value in ((pi, 134), (returned, -134)):
+			self.assert_warehouse_accounts_match_stock(invoice)
+
+			stock_value = self.get_stock_value_by_warehouse(invoice)
+			self.assertEqual(flt(stock_value[row.warehouse], 2), accepted_value)
+			self.assertEqual(flt(stock_value[row.from_warehouse], 2), -accepted_value)
+
 	def test_landed_cost_on_an_internal_transfer_invoice(self):
 		"""Landed cost on a stock updating internal transfer invoice goes into the accepted warehouse."""
+		pi = make_internal_transfer_invoice()
+		row = pi.items[0]
+
+		self.assertEqual(
+			self.get_stock_value_change_from_landed_cost(pi), {row.warehouse: 50, row.from_warehouse: 0}
+		)
+		self.assert_warehouse_accounts_match_stock(pi)
+
+	def test_landed_cost_on_an_internal_transfer_invoice_that_rejects_material_into_transit(self):
+		"""Landed cost goes into the accepted warehouse when the invoice rejects material into transit."""
+		pi = make_internal_transfer_invoice(rejected_qty=2)
+
+		# Transit takes the charge too, see #66896
+		self.assertEqual(self.get_stock_value_change_from_landed_cost(pi)[pi.items[0].warehouse], 50)
+		self.assert_warehouse_accounts_match_stock(pi)
+
+	def get_stock_value_change_from_landed_cost(self, pi):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
 		)
 
-		pi = make_internal_transfer_invoice()
+		value_before = self.get_stock_value_by_warehouse(pi)
 		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company, charges=50)
 
-		self.assert_warehouse_accounts_match_stock(pi)
+		return {
+			warehouse: flt(value - value_before[warehouse], 2)
+			for warehouse, value in self.get_stock_value_by_warehouse(pi).items()
+		}
 
 	def assert_warehouse_accounts_match_stock(self, invoice):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
@@ -3101,15 +3138,26 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
 
 		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
+
+		stock_value = self.get_stock_value_by_warehouse(invoice)
+		self.assertEqual(set(stock_value), {invoice.items[0].warehouse, invoice.items[0].from_warehouse})
+
+		for warehouse, value in stock_value.items():
+			self.assertEqual(
+				flt(booked_value[get_inventory_account(invoice.company, warehouse)], 2), flt(value, 2)
+			)
+
+	def get_stock_value_by_warehouse(self, invoice):
+		stock_value = {}
 		for stock_entry in frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_no": invoice.name, "is_cancelled": 0},
 			fields=["warehouse", "stock_value_difference"],
 		):
-			self.assertEqual(
-				flt(booked_value[get_inventory_account(invoice.company, stock_entry.warehouse)], 2),
-				flt(stock_entry.stock_value_difference, 2),
-			)
+			stock_value.setdefault(stock_entry.warehouse, 0)
+			stock_value[stock_entry.warehouse] += flt(stock_entry.stock_value_difference)
+
+		return stock_value
 
 	def test_internal_transfer_invoice_resizes_package_without_package_permission(self):
 		"""A user who may not write packages can still change the rejected qty of a draft transfer
@@ -4717,9 +4765,9 @@ def make_fully_rejected_stock_invoice():
 	return pi
 
 
-def make_internal_transfer_invoice():
+def make_internal_transfer_invoice(rejected_qty=0):
 	"""A stock updating internal transfer invoice of 6 Box (0.3356 Kg each, 100 per Kg), received
-	from an in-transit warehouse."""
+	from an in-transit warehouse, rejecting `rejected_qty` back into it."""
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -4761,6 +4809,17 @@ def make_internal_transfer_invoice():
 	pi.update_stock = 1
 	pi.items[0].warehouse = create_warehouse("_Test Invoice Transfer To", company=company)
 	pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+	if rejected_qty:
+		row = pi.items[0]
+		row.update(
+			{
+				"qty": row.qty - rejected_qty,
+				"rejected_qty": rejected_qty,
+				"received_qty": row.qty,
+				"rejected_warehouse": row.from_warehouse,
+			}
+		)
+
 	pi.submit()
 	return pi
 
