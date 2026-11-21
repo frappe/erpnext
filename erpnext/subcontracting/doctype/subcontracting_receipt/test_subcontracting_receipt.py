@@ -504,6 +504,22 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.load_from_db()
 		self.assertEqual(scr.per_returned, 100)
 
+	def test_returns_of_receipt_with_process_loss_mark_it_returned(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, secondary_qty=1)
+		scr = make_receipt_with_secondary_items(fg_item, 10, process_loss_qty=2)
+
+		# the last return takes the 6 scrap left, made from the finished goods lost too
+		returns = [make_partial_return(scr.name, 4) for _ in range(2)]
+
+		secondary_qty = [
+			row.qty for scr_return in returns for row in scr_return.items if row.bom_secondary_item
+		]
+		self.assertEqual(secondary_qty, [-4, -6])
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
