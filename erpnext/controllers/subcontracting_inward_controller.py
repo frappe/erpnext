@@ -949,20 +949,19 @@ class SubcontractingInwardController:
 			used_item_wh = [(d.rm_item_code, d.warehouse) for d in data if d.warehouse]
 			doc_updates = {}
 			for d in data:
+				keys = [(d.rm_item_code, d.warehouse)]
 				if not d.warehouse:
-					d.warehouse = next(
-						(
-							key[1]
-							for key in item_code_wh.keys()
-							if key[0] == d.rm_item_code and key not in used_item_wh
-						),
-						None,
-					)
-					if not d.warehouse:
+					keys = [
+						key for key in item_code_wh if key[0] == d.rm_item_code and key not in used_item_wh
+					]
+					if not keys:
 						continue
-					used_item_wh.append((d.rm_item_code, d.warehouse))
+					# cancel makes no extra rows, so the BOM row gives back every warehouse left
+					if self._action == "submit":
+						keys = keys[:1]
+					used_item_wh.extend(keys)
 
-				qty = d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)]
+				qty = d.consumed_qty + sum(item_code_wh[key] for key in keys)
 				if qty or d.is_customer_provided_item or not d.is_additional_item:
 					doc_updates[d.name] = {"consumed_qty": qty}
 				else:
@@ -990,8 +989,7 @@ class SubcontractingInwardController:
 				item
 				for item in items
 				if not frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
-				and (item.item_code, item.s_warehouse)
-				not in [(d.rm_item_code, d.warehouse) for d in data if not d.is_customer_provided_item]
+				and (item.item_code, item.s_warehouse) not in used_item_wh
 			]:
 				doc = frappe.new_doc(
 					"Subcontracting Inward Order Received Item",
