@@ -62,6 +62,13 @@ class UnreconcilePayment(Document):
 			self.append("allocations", alloc)
 
 	def on_submit(self):
+		from erpnext.accounts.services.exchange_gain_loss import validate_settlement_can_be_undone
+
+		for alloc in self.allocations:
+			validate_settlement_can_be_undone(
+				self.voucher_type, self.voucher_no, alloc.reference_doctype, alloc.reference_name
+			)
+
 		self.cancel_legacy_return_exchange_journal()
 		# todo: more granular unreconciliation
 		for alloc in self.allocations:
