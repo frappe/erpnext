@@ -197,15 +197,10 @@ class ProductionPlanWorkOrderQuantities:
 			)
 		return loss_percentages
 
-<<<<<<< HEAD:erpnext/manufacturing/doctype/production_plan/work_order_quantities.py
-	def _get_committed_qty(self, work_order, process_loss_qty, planned_loss_percentage):
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-=======
 	def _get_committed_qty(
 		self, work_order, process_loss_qty, planned_loss_percentage, credit_produced_qty=False
 	):
-		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
->>>>>>> 273db39 (fix(manufacturing): offset a Work Order's excess process loss with another's lower loss in plan pending qty):erpnext/manufacturing/doctype/production_plan/services/work_order_quantities.py
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_planned_loss_percentage,
 		)
 
