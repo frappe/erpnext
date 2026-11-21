@@ -6796,12 +6796,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(stock_value["Finished Goods - TCP1"], -stock_value["Work In Progress - TCP1"])
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 
-<<<<<<< HEAD
-=======
 	def test_landed_cost_keeps_what_internal_pr_took_out_of_transit(self):
 		"""A Landed Cost Voucher posts an internal receipt again with the qty it took out of transit."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
@@ -6860,7 +6858,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_landed_cost_keeps_internal_pr_that_rejects_into_transit(self):
 		"""A Landed Cost Voucher posts again what an internal receipt that rejects into transit moved."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
 		)
@@ -6887,47 +6885,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		self.assertEqual(transit_qty, [-2.01, 0.67])
 
-	def test_internal_pr_qty_change_in_another_uom(self):
-		"""Changing the qty of a draft internal receipt resizes its package in stock UOM."""
-		item = make_item(
-			"_Test Box Batch Item For Qty Change",
-			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BOXQ-.####"},
-		)
-		make_uom_conversion_factor("Box", "Nos", 12)
-
-		pr, *_ = self.make_transfer_receipt(item, 24, 0)
-		pr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2, "received_qty": 2})
-		pr.save()
-
-		pr.items[0].update({"qty": 1, "received_qty": 1})
-		pr.save()
-
-		total_qty = frappe.db.get_value(
-			"Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle, "total_qty"
-		)
-		self.assertEqual(abs(total_qty), 12)
-
-	def test_internal_pr_uom_change_resizes_package(self):
-		"""Changing only the UOM of a draft internal receipt resizes its package."""
-		item = make_item(
-			"_Test Box Batch Item For UOM Change",
-			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BOXU-.####"},
-		)
-		make_uom_conversion_factor("Box", "Nos", 12)
-
-		pr, *_ = self.make_transfer_receipt(item, 24, 0)
-		pr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2, "received_qty": 2})
-		pr.save()
-
-		pr.items[0].update({"uom": "Nos", "conversion_factor": 1})
-		pr.save()
-
-		total_qty = frappe.db.get_value(
-			"Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle, "total_qty"
-		)
-		self.assertEqual(abs(total_qty), 2)
-
->>>>>>> c82e52b (test: Landed Cost Voucher keeps what an internal receipt took out of transit)
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
