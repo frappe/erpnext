@@ -3810,6 +3810,29 @@ class TestProductionPlan(FrappeTestCase):
 			sorted([(sub_assembly, 1), (rm_item, 1)]),
 		)
 
+	def test_do_not_explode_line_is_not_merged_with_an_exploded_line(self):
+		properties = {"is_stock_item": 1, "default_material_request_type": "Purchase"}
+		sub_assembly_rm = make_item(properties=properties).name
+		sub_assembly = make_item(properties=properties).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=sub_assembly, raw_materials=[sub_assembly_rm], rm_qty=2, currency="INR")
+		fg_bom = make_bom(
+			item=fg_item, raw_materials=[sub_assembly, sub_assembly], currency="INR", do_not_save=1
+		)
+		fg_bom.items[0].do_not_explode = 1
+		fg_bom.insert()
+		fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual(
+			sorted((row.get("item_code"), row.get("quantity")) for row in items),
+			sorted([(sub_assembly, 1), (sub_assembly_rm, 2)]),
+		)
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
