@@ -2337,6 +2337,54 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
 		self.assertEqual(work_order.status, "In Process")
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
+	)
+	def test_transferred_qty_counts_direct_and_pick_list_transfers(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
+		)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 4)).submit()
+		pick_list = create_pick_list(work_order.name, for_qty=6)
+		pick_list.submit()
+		frappe.get_doc(create_stock_entry(pick_list.as_dict())).submit()
+		self.assertEqual(work_order.reload().material_transferred_for_manufacturing, 10)
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 4))
+		self.assertEqual([row.qty for row in manufacture.items if row.s_warehouse], [8])
+
+	def test_pick_list_transfer_first_covers_what_direct_transfer_left_out(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
+
+		rm_items = [make_item(properties={"is_stock_item": 1}).name for _ in range(2)]
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=rm_items, rm_qty=2)
+		for rm_item in rm_items:
+			test_stock_entry.make_stock_entry(
+				item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100
+			)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
+		)
+		transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 4))
+		transfer.items = [row for row in transfer.items if row.item_code == rm_items[0]]
+		transfer.submit()
+		pick_list = create_pick_list(work_order.name, for_qty=4)
+		pick_list.submit()
+		frappe.get_doc(create_stock_entry(pick_list.as_dict())).submit()
+
+		# the second item covers only 4 of the 10
+		self.assertEqual(work_order.reload().material_transferred_for_manufacturing, 4)
+
 	def test_material_request_qty_scales_with_requested_qty(self):
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
