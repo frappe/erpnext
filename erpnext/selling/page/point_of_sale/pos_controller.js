@@ -39,17 +39,32 @@ erpnext.PointOfSale.Controller = class {
 				fieldtype: "Currency",
 				in_list_view: 1,
 				label: __("Opening Amount"),
-				options: "company:company_currency",
+				options: "currency",
+			},
+			{
+				fieldname: "currency",
+				fieldtype: "Link",
+				options: "Currency",
+				hidden: 1,
 			},
 		];
 		const fetch_pos_payment_methods = () => {
 			const pos_profile = dialog.fields_dict.pos_profile.get_value();
 			if (!pos_profile) return;
-			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
+			frappe.db.get_doc("POS Profile", pos_profile).then(({ currency, payments }) => {
 				dialog.fields_dict.balance_details.df.data = [];
+				dialog.fields_dict.balance_details.grid.update_docfield_property(
+					"currency",
+					"default",
+					currency
+				);
 				const modes_of_payment = new Set(payments.map((pay) => pay.mode_of_payment));
 				modes_of_payment.forEach((mode_of_payment) => {
-					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: "0" });
+					dialog.fields_dict.balance_details.df.data.push({
+						mode_of_payment,
+						opening_amount: "0",
+						currency,
+					});
 				});
 				dialog.fields_dict.balance_details.grid.refresh();
 			});
@@ -309,6 +324,7 @@ erpnext.PointOfSale.Controller = class {
 		voucher.pos_profile = this.frm.doc.pos_profile;
 		voucher.user = frappe.session.user;
 		voucher.company = this.frm.doc.company;
+		voucher.currency = this.frm.doc.currency;
 		voucher.pos_opening_entry = this.pos_opening;
 		voucher.period_end_date = frappe.datetime.now_datetime();
 		voucher.posting_date = frappe.datetime.now_date();

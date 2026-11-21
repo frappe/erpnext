@@ -187,6 +187,44 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 				invoice.reload().cancel()
 				opening.cancel()
 
+	def test_amounts_use_pos_profile_currency(self):
+		from frappe.model.meta import get_field_currency
+
+		company_currency = frappe.get_cached_value("Company", self.pos_profile.company, "default_currency")
+		self.assertNotEqual(company_currency, "CDF")
+		self.pos_profile.db_set("currency", "CDF")
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=True)
+		self.assertEqual(opening_entry.currency, "CDF")
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		self.assertEqual(closing_entry.currency, "CDF")
+		closing_entry.append(
+			"payment_reconciliation", {"mode_of_payment": "Cash", "opening_amount": 0, "closing_amount": 0}
+		)
+		closing_entry.insert()
+
+		meta = frappe.get_meta("POS Closing Entry")
+		self.assertEqual(get_field_currency(meta.get_field("grand_total"), closing_entry), "CDF")
+		row = closing_entry.payment_reconciliation[0]
+		row_meta = frappe.get_meta("POS Closing Entry Detail")
+		self.assertEqual(get_field_currency(row_meta.get_field("closing_amount"), row), "CDF")
+
+	def test_currency_patch_uses_open_session_invoices(self):
+		from erpnext.patches.v16_0.set_currency_in_pos_opening_and_closing_entries import execute
+
+		company_currency = frappe.get_cached_value("Company", self.pos_profile.company, "default_currency")
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=True)
+		pos_inv = create_pos_invoice(rate=100, do_not_submit=1)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		pos_inv.submit()
+
+		# entry made before the currency field existed, profile currency changed while the session is open
+		opening_entry.db_set("currency", None)
+		self.pos_profile.db_set("currency", "CDF")
+		execute()
+
+		self.assertEqual(opening_entry.reload().currency, company_currency)
+
 	def test_pos_closing_without_item_code(self):
 		"""
 		Test if POS Closing Entry is created without item code
