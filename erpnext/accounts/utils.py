@@ -1330,9 +1330,17 @@ def get_held_invoices(party_type, party):
 	held_invoices = None
 
 	if party_type == "Supplier":
+<<<<<<< HEAD
 		held_invoices = frappe.db.sql(
 			"select name from `tabPurchase Invoice` where on_hold = 1 and release_date IS NOT NULL and release_date > CURDATE()",
 			as_dict=1,
+=======
+		held_invoices = frappe.get_all(
+			"Purchase Invoice",
+			filters={"on_hold": 1, "supplier": party},
+			or_filters=[["release_date", ">", nowdate()], ["release_date", "is", "not set"]],
+			pluck="name",
+>>>>>>> 49df5b1 (fix(accounts): correct payment tax and invoice hold handling)
 		)
 		held_invoices = set(d["name"] for d in held_invoices)
 
