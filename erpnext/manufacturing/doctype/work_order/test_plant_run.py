@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import add_to_date, now_datetime
+from frappe.utils import add_days, add_to_date, now_datetime, today
 
 from erpnext.manufacturing.doctype.bom_creator.test_process_design import (
 	FINISHED_GOODS,
@@ -16,6 +16,7 @@ from erpnext.manufacturing.doctype.bom_creator.test_process_design import (
 	make_process_work_order,
 	stock_ketchup_materials,
 )
+from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_transfer_entry
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import MachineBusyError, PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
 from erpnext.manufacturing.doctype.work_order.services.plant_run.picks import (
@@ -159,6 +160,15 @@ class TestPlantRun(ERPNextTestSuite):
 			job_card.name,
 			1251,
 		)
+
+	def test_transfer_posts_today_when_the_job_card_is_older_than_its_input(self):
+		stock_ketchup_materials()
+		work_order = make_ketchup_work_order()
+		run_stage(work_order, 180, 150, output_qty=1250)
+		job_card = PlantRun(work_order.name).get_open_job_card(2)
+		job_card.db_set("posting_date", add_days(today(), -1))
+
+		self.assertEqual(str(make_transfer_entry(job_card.name).posting_date), today())
 
 	def test_plant_builder_reads_the_run_from_the_work_order(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import get_run
