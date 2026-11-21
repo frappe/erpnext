@@ -812,7 +812,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		else:
 			item_args["t_warehouse"], item_args["s_warehouse"] = None, row.warehouse
 		if row.serial_nos or row.batches:
-			self.assign_serial_batches_to_materials(item_args, row, qty)
+			self.assign_serial_batches_to_materials(item_args, row, item_args["qty"])
 		else:
 			self.doc.append("items", item_args)
 

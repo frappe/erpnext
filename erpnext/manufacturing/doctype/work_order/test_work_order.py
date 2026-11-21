@@ -6424,6 +6424,55 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 50})
 		self.assertRaises(frappe.ValidationError, transfer.save)
 
+	def make_work_order_with_fractional_rm_share(self, rm_item, properties, receipts):
+		"""Work Order for 3 of a BOM that needs 5 Nos of `rm_item`, with all 5 transferred."""
+		rm_item = make_item(rm_item, {"is_stock_item": 1, "stock_uom": "Nos", **properties}).name
+		fg_item = make_item("_Test Fraction FG", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=5, quantity=3)
+		for qty in receipts:
+			test_stock_entry.make_stock_entry(
+				item_code=rm_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=100
+			)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=3,
+			source_warehouse="_Test Warehouse - _TC",
+			stock_uom="Nos",
+		)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 3)).submit()
+		return work_order, rm_item
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_backflush_takes_serial_nos_for_the_rounded_qty(self):
+		work_order, rm_item = self.make_work_order_with_fractional_rm_share(
+			"_Test Fraction Serial RM", {"has_serial_no": 1, "serial_no_series": "TFSRM-.####"}, [5]
+		)
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		row = next(row for row in manufacture.items if row.item_code == rm_item)
+		self.assertEqual(row.qty, 2)
+		self.assertEqual(len(get_serial_nos(row.serial_no)), 2)
+		manufacture.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_backflush_splits_batches_for_the_rounded_qty(self):
+		work_order, rm_item = self.make_work_order_with_fractional_rm_share(
+			"_Test Fraction Batch RM",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TFBRM-.####"},
+			[1, 4],
+		)
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		rows = [row for row in manufacture.items if row.item_code == rm_item]
+		self.assertEqual(len(rows), 2)
+		self.assertEqual(sum(row.qty for row in rows), 2)
+		manufacture.submit()
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
