@@ -331,28 +331,37 @@ def _collect_item_details(doc, po_items):
 	so_item_details = frappe._dict()
 	qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
-	requested_sub_assemblies = {}
-	for row in doc.get("sub_assembly_items") or []:
-		row = frappe._dict(row)
-		if row.type_of_manufacturing == "Material Request":
-			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
-				(row.production_item, row.bom_no)
-			)
-
+	requested_sub_assemblies, planned_sub_assemblies = _get_sub_assemblies_by_plan_row(doc)
 	all_requested = set().union(*requested_sub_assemblies.values())
+	all_planned = {key: value for rows in planned_sub_assemblies.values() for key, value in rows.items()}
+	combined = doc.get("combine_sub_items")
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
 		data["requested_sub_assemblies"] = (
-			all_requested
-			if doc.get("combine_sub_items")
-			else requested_sub_assemblies.get(data.get("name"), set())
+			all_requested if combined else requested_sub_assemblies.get(data.get("name"), set())
+		)
+		data["planned_sub_assemblies"] = (
+			all_planned if combined else planned_sub_assemblies.get(data.get("name"), {})
 		)
 		item_details = _item_details_for_row(
 			doc, data, company, sub_assembly_items, existing_sub_assembly_items
 		)
 		_accumulate_so_items(so_item_details, data.get("sales_order"), item_details, qty_precision)
 	return so_item_details
+
+
+def _get_sub_assemblies_by_plan_row(doc):
+	"""(item, BOM) of each plan row's sub-assemblies: the ones to request, and the type of the others."""
+	requested, planned = defaultdict(set), defaultdict(dict)
+	for row in doc.get("sub_assembly_items") or []:
+		row = frappe._dict(row)
+		key = (row.production_item, row.bom_no)
+		if row.type_of_manufacturing == "Material Request":
+			requested[row.production_plan_item].add(key)
+		else:
+			planned[row.production_plan_item][key] = row.type_of_manufacturing
+	return requested, planned
 
 
 def _item_details_for_row(doc, data, company, sub_assembly_items, existing_sub_assembly_items):

@@ -248,8 +248,17 @@ def _process_subitem(
 	if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
 		return
 
+	# a planned sub-assembly is made or subcontracted, so only its components are requested
+	sub_assembly_type = (data.get("planned_sub_assemblies") or {}).get((d.item_code, d.line_bom_no))
+	if sub_assembly_type == "Subcontract" and not include_subcontracted_items:
+		return
+
 	explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
-	explode = explodable and _should_explode_subitem(d, include_subcontracted_items) and d.qty > 0
+	explode = (
+		explodable
+		and (sub_assembly_type or _should_explode_subitem(d, include_subcontracted_items))
+		and d.qty > 0
+	)
 	if not explode:
 		_merge_subitem(item_details, d)
 	else:
