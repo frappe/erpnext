@@ -7192,19 +7192,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 		rejected_return.submit()
 
 		srbnb_account = frappe.get_cached_value("Company", company, "stock_received_but_not_billed")
-		rejected_value = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": pr.name, "warehouse": pr.items[0].rejected_warehouse, "is_cancelled": 0},
-			"stock_value_difference",
-		)
 		srbnb_debit = frappe.db.get_value(
 			"GL Entry",
 			{"voucher_no": rejected_return.name, "account": srbnb_account, "is_cancelled": 0},
 			"debit",
 		)
 
-		self.assertNotEqual(rejected_value, 200)
-		self.assertEqual(srbnb_debit, rejected_value)
+		# 0.67 Kg rejected at 100 per 0.3356 Kg, as the receipt credited it
+		self.assertEqual(srbnb_debit, 199.64)
 
 	def test_rejected_qty_return_after_accepted_qty_return(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
