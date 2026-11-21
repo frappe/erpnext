@@ -1255,7 +1255,12 @@ def repost_advance_payment_ledger(doc):
 
 
 @frappe.whitelist()
-def get_company_default(company, fieldname, ignore_validation=False):
+def get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
+	frappe.has_permission("Company", "read", doc=company, throw=True)
+	return _get_company_default(company, fieldname, ignore_validation)
+
+
+def _get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
 	value = frappe.get_cached_value("Company", company, fieldname)
 
 	if not ignore_validation and not value:
