@@ -316,7 +316,7 @@ def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehou
 def get_fg_conversion_details(work_order: str):
 	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 		get_alternative_finished_goods,
-		get_converted_fg_qty,
+		get_available_fg_qty,
 	)
 
 	if not work_order or not isinstance(work_order, str):
@@ -324,13 +324,11 @@ def get_fg_conversion_details(work_order: str):
 
 	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
 
-	wo_details = frappe.db.get_value(
-		"Work Order", work_order, ["production_item", "produced_qty"], as_dict=True
-	)
+	production_item = frappe.db.get_value("Work Order", work_order, "production_item")
 
 	return {
-		"alternative_items": get_alternative_finished_goods(wo_details.production_item),
-		"available_qty": flt(wo_details.produced_qty) - get_converted_fg_qty(work_order),
+		"alternative_items": get_alternative_finished_goods(production_item),
+		"available_qty": get_available_fg_qty(work_order),
 	}
 
 

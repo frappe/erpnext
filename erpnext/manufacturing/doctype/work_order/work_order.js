@@ -240,8 +240,7 @@ frappe.ui.form.on("Work Order", {
 		if (
 			frm.doc.docstatus === 1 &&
 			["Closed", "Completed"].includes(frm.doc.status) &&
-			frm.doc.produced_qty > 0 &&
-			frm.doc.produced_qty > frm.doc.disassembled_qty
+			erpnext.work_order.get_disassemblable_qty(frm) > 0
 		) {
 			frm.add_custom_button(
 				__("Disassemble Order"),
@@ -368,9 +367,10 @@ frappe.ui.form.on("Work Order", {
 
 				if (!flt(r.message.available_qty)) {
 					frappe.msgprint(
-						__("The produced qty of the item {0} has already been converted in full.", [
-							frm.doc.production_item.bold(),
-						])
+						__(
+							"The produced qty of the item {0} has already been converted or disassembled in full.",
+							[frm.doc.production_item.bold()]
+						)
 					);
 					return;
 				}
@@ -1188,7 +1188,7 @@ erpnext.work_order = {
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
 		if (purpose === "Disassemble") {
-			return flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
+			return erpnext.work_order.get_disassemblable_qty(frm);
 		}
 
 		if (frm.doc.skip_transfer) {
@@ -1235,8 +1235,16 @@ erpnext.work_order = {
 		return flt(Math.ceil(flt(max_fraction * flt(frm.doc.qty) * factor, 9)) / factor, precision("qty"));
 	},
 
+	get_disassemblable_qty: (frm) => {
+		// produced qty not yet disassembled or converted to an alternative item
+		return flt(
+			frm.doc.produced_qty - frm.doc.disassembled_qty - flt(frm.doc.__onload?.converted_fg_qty),
+			precision("qty")
+		);
+	},
+
 	show_disassembly_prompt: function (frm) {
-		let max_qty = flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
+		let max_qty = this.get_disassemblable_qty(frm);
 
 		let fields = [
 			{
@@ -1260,10 +1268,11 @@ erpnext.work_order = {
 					let se_name = this.value;
 					let qty = max_qty;
 					if (se_name) {
-						qty = await frappe.xcall(
+						const source_qty = await frappe.xcall(
 							"erpnext.manufacturing.doctype.work_order.work_order.get_disassembly_available_qty",
 							{ stock_entry_name: se_name }
 						);
+						qty = Math.min(max_qty, source_qty);
 					}
 
 					frm.disassembly_prompt.set_value("qty", qty);
