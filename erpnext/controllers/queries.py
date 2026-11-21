@@ -632,11 +632,7 @@ def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
 
 	bo_filters = [
 		["docstatus", "=", 1],
-<<<<<<< HEAD
-=======
-		["status", "!=", "Closed"],
 		["name", "like", f"%{txt}%"],
->>>>>>> 1f8513d (fix(manufacturing): filter the Blanket Order link by the typed text)
 		["blanket_order_type", "=", filters.get("blanket_order_type")],
 		["customer" if filters.get("blanket_order_type") == "Selling" else "supplier", "=", party],
 		["company", "=", filters.get("company")],
