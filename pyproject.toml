@@ -29,6 +29,9 @@ dependencies = [
     # Pulls pdfminer.six (parsing), Pillow, and pypdfium2 (render backend for
     # Page.to_image) - all pure-Python wheels, no system binaries required.
     "pdfplumber>=0.11.0",
+
+    # Bank Transaction Rule regex conditions (supports a match timeout)
+    "regex>=2024.11.6",
 ]
 
 [build-system]
