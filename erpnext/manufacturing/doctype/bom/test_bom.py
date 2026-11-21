@@ -2203,6 +2203,29 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertEqual(bom.items[0].rate, 5)
 
+	def test_price_list_in_bom_currency_uses_bom_conversion_rate(self):
+		price_list = make_usd_buying_price_list(83)
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		bom = make_usd_bom(
+			make_item(properties={"is_stock_item": 1}).name,
+			[{"item_code": rm_item, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+		)
+
+		# the BOM's own conversion rate (80) applies, not the exchange rate (83)
+		self.assertEqual(bom.plc_conversion_rate, 80)
+		self.assertEqual(bom.items[0].rate, 10)
+
+		# a row fetched on a form still holding the exchange rate
+		bom.plc_conversion_rate = 83
+		detail = bom.get_bom_material_detail({"item_code": rm_item, "qty": 1, "fetch_rate": True})
+		self.assertEqual(detail["rate"], 10)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
@@ -2245,6 +2268,44 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertEqual(bom.items[0].rate, 10)
 		self.assertEqual(bom.items[1].rate, 0)
+
+	def test_price_list_change_reprices_non_stock_row_valid_today(self):
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": frappe.generate_hash(length=10),
+				"currency": "INR",
+				"buying": 1,
+			}
+		).insert()
+		non_stock_item = make_item(properties={"is_stock_item": 0}).name
+		for rate, valid_from in ((10, -30), (12, 30)):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": non_stock_item,
+					"price_list": price_list.name,
+					"price_list_rate": rate,
+					"valid_from": add_days(today(), valid_from),
+				}
+			).insert()
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": make_item(properties={"is_stock_item": 1}).name,
+				"company": "_Test Company",
+				"currency": "INR",
+				"rm_cost_as_per": "Valuation Rate",
+				"items": [{"item_code": non_stock_item, "qty": 1, "rate": 5}],
+			}
+		).insert()
+		bom.update({"rm_cost_as_per": "Price List", "buying_price_list": price_list.name})
+		bom.append("items", {"qty": 1})  # a blank row on the form
+		bom.apply_price_list()
+
+		self.assertEqual(bom.items[0].rate, 10)
+		self.assertEqual(bom.raw_material_cost, 10)
 
 	def test_get_items_rate_in_stock_uom(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict

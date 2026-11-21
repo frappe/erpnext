@@ -680,6 +680,8 @@ class BOM(WebsiteGenerator):
 		)
 		args.update(item)
 
+		# the form may send a stale price list exchange rate
+		self.set_plc_conversion_rate()
 		rate = self.get_rm_rate(args) if args.get("fetch_rate") else 0
 		return self._build_rm_detail(args, item, rate)
 
@@ -913,9 +915,12 @@ class BOM(WebsiteGenerator):
 
 		if self.price_list_currency == self.company_currency():
 			self.plc_conversion_rate = 1
-		elif flt(self.plc_conversion_rate) in (0, 1) or self.has_value_changed("buying_price_list"):
-			self.plc_conversion_rate = get_exchange_rate(
-				self.price_list_currency, self.company_currency(), args="for_buying"
+		elif self.price_list_currency == self.currency:
+			self.plc_conversion_rate = self.conversion_rate
+		else:
+			self.plc_conversion_rate = (
+				get_exchange_rate(self.price_list_currency, self.company_currency(), args="for_buying")
+				or self.plc_conversion_rate
 			)
 
 	def validate_materials(self):
@@ -1276,6 +1281,10 @@ class BOM(WebsiteGenerator):
 
 	def get_rm_rate(self, arg, notify=True):
 		return BOMCostingService(self).get_rm_rate(arg, notify)
+
+	@frappe.whitelist()
+	def apply_price_list(self):
+		BOMCostingService(self).apply_price_list()
 
 	@frappe.whitelist()
 	def update_cost(
