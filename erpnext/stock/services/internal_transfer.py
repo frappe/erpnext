@@ -27,15 +27,17 @@ class StockInternalTransferService:
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
-
-				if (
-					self.doc.get("is_internal_supplier")
-					and self.doc.docstatus == 1
-					and not self.doc.get("is_return")
-				):
-					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
+
+			# the status updater checks an inter-company Purchase Receipt against its Delivery Note
+			if (
+				self.doc.get("is_internal_supplier")
+				and self.doc.docstatus == 1
+				and not self.doc.get("is_return")
+				and (self.doc.doctype == "Purchase Invoice" or self.doc.is_internal_transfer())
+			):
+				self.validate_internal_transfer_qty()
 
 	def validate_internal_transfer_warehouse(self):
 		for row in self.doc.items:
