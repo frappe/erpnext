@@ -415,7 +415,8 @@ class TestJobCard(ERPNextTestSuite):
 
 		row = get_job_card_timer(job_card.name)
 		self.assertEqual((row["timer_action"], row["is_running"]), ("start", False))
-		self.assertAlmostEqual(row["elapsed_seconds"], 3 * 3600, delta=60)
+		# the open log covers the closed one, so the hours count once
+		self.assertAlmostEqual(row["elapsed_seconds"], 2 * 3600, delta=60)
 		self.assertEqual(row["open_log_count"], 1)
 
 	def test_repeated_start_is_refused(self):
@@ -443,15 +444,18 @@ class TestJobCard(ERPNextTestSuite):
 				for_quantity=2,
 				total_completed_qty=0,
 				has_time_logs=False,
-				logged_minutes=0,
-				open_log_starts=[],
+				time_logs=[],
+				open_log_count=0,
 				last_log_open=False,
 				employees=[],
 			)
 			job_card.update(overrides)
 			return JobCardTimer(job_card)
 
-		closed_cycle = {"has_time_logs": True, "logged_minutes": 60}
+		closed_cycle = {
+			"has_time_logs": True,
+			"time_logs": [frappe._dict(from_time="2024-03-01 08:00:00", to_time="2024-03-01 09:00:00")],
+		}
 
 		self.assertIsNone(timer(has_pending_transfer=True).get_action())
 		self.assertEqual(timer(has_pending_transfer=True, skip_material_transfer=1).get_action(), "start")
@@ -464,12 +468,10 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(timer(**closed_cycle, pending_qty=1).get_action(), "start")
 		self.assertEqual(timer(**closed_cycle).get_action(), "pause")
 		self.assertEqual(timer(**closed_cycle).get_elapsed_seconds(), 3600)
-		earlier_log_open = {"has_time_logs": True, "open_log_starts": [now()], "last_log_open": False}
+		earlier_log_open = {"has_time_logs": True, "open_log_count": 1, "last_log_open": False}
 		self.assertEqual(timer(**earlier_log_open, pending_qty=1).get_action(), "start")
 		self.assertFalse(timer(**earlier_log_open).is_running())
-		paused_with_open_log = timer(
-			has_time_logs=True, open_log_starts=[now()], last_log_open=True, is_paused=1
-		)
+		paused_with_open_log = timer(has_time_logs=True, open_log_count=1, last_log_open=True, is_paused=1)
 		self.assertFalse(paused_with_open_log.is_running())
 		self.assertEqual(paused_with_open_log.get_action(), "resume")
 

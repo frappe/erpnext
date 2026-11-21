@@ -1911,7 +1911,8 @@ erpnext.work_order.get_persistent_job_cards = function (rows) {
 };
 
 erpnext.work_order.format_job_card_elapsed = function (row) {
-	const live_seconds = (row.open_log_count * (Date.now() - row.fetched_at)) / 1000;
+	// open logs all run until now, so parallel operators count once
+	const live_seconds = row.open_log_count ? (Date.now() - row.fetched_at) / 1000 : 0;
 	const total = Math.floor(row.elapsed_seconds + live_seconds);
 	const pad = (n) => String(n).padStart(2, "0");
 	return `${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
