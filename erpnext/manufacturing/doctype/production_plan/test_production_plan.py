@@ -3558,7 +3558,6 @@ class TestProductionPlan(FrappeTestCase):
 		plan = create_production_plan(
 			item_code=fg_item,
 			planned_qty=10,
-			ignore_existing_ordered_qty=1,
 			skip_getting_mr_items=True,
 			do_not_submit=1,
 		)
@@ -3587,7 +3586,6 @@ class TestProductionPlan(FrappeTestCase):
 		plan = create_production_plan(
 			item_code=fg_item,
 			planned_qty=10,
-			ignore_existing_ordered_qty=1,
 			skip_getting_mr_items=True,
 			do_not_submit=1,
 		)
@@ -3622,7 +3620,6 @@ class TestProductionPlan(FrappeTestCase):
 		plan = create_production_plan(
 			item_code=fg_item,
 			planned_qty=10,
-			ignore_existing_ordered_qty=1,
 			skip_getting_mr_items=True,
 			do_not_submit=1,
 		)
