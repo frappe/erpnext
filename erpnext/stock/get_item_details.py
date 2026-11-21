@@ -714,7 +714,9 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 		).get("conversion_factor")
 
 	ctx.conversion_factor = out.conversion_factor
-	out.stock_qty = out.qty * out.conversion_factor
+	out.stock_qty = flt(
+		out.qty * out.conversion_factor, frappe.get_precision(f"{ctx.doctype} Item", "stock_qty")
+	)
 	ctx.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
