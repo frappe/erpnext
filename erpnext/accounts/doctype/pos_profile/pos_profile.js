@@ -14,9 +14,14 @@ frappe.ui.form.on("POS Profile", {
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
+		// POS can create either POS Invoice or Sales Invoice; show print formats for the configured type
+		frappe.db.get_single_value("POS Settings", "invoice_type").then((invoice_type) => {
+			frm.pos_invoice_type = invoice_type;
+		});
+
 		frm.set_query("print_format", function () {
 			return {
-				filters: [["Print Format", "doc_type", "=", "POS Invoice"]],
+				filters: [["Print Format", "doc_type", "=", frm.pos_invoice_type || "POS Invoice"]],
 			};
 		});
 
