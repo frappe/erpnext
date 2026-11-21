@@ -7,7 +7,6 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, NullIf, Sum
 from frappe.utils import flt
 
-from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_bin
 
 from .stock_entry_base import BaseStockEntry
@@ -68,20 +67,6 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 				)
 			)
 		return required_qty
-
-	def get_stock_qty(self, child_row):
-		"""Row qty in stock UOM; transfer_qty is set only after this validation runs."""
-		if not child_row.uom or child_row.uom == frappe.get_cached_value(
-			"Item", child_row.item_code, "stock_uom"
-		):
-			return flt(child_row.qty)
-
-		conversion_factor = flt(child_row.conversion_factor)
-		if not conversion_factor:
-			conversion_factor = flt(
-				get_conversion_factor(child_row.item_code, child_row.uom).get("conversion_factor")
-			)
-		return flt(child_row.qty) * (conversion_factor or 1)
 
 	def _validate_transfer_qty(self, child_row, item_code, total_allowed, earlier_rows_qty, stock_qty):
 		total_supplied = self.get_total_supplied_qty(item_code)

@@ -1207,6 +1207,66 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
 
+	def test_return_cannot_take_back_more_than_the_order_has_at_the_supplier(self):
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty -= 5
+		scr.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+		row = next(
+			row
+			for row in ste.items
+			if not any(frappe.get_cached_value("Item", row.item_code, ["has_serial_no", "has_batch_no"]))
+		)
+		row.qty += 1
+
+		self.assertRaisesRegex(frappe.ValidationError, "can be returned against", ste.save)
+
+	def test_return_of_components_sent_in_another_uom(self):
+		rm_item = make_item(
+			"Subcontracted RM In Box", {"is_stock_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 10}]
+		).name
+		make_subcontracted_item(item_code="Subcontracted Item RM In Box", raw_materials=[rm_item])
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item RM In Box",
+					"fg_item_qty": 10,
+				}
+			]
+		)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=10, basic_rate=100)
+		send = frappe.get_doc(make_rm_stock_entry(sco.name))
+		send.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 10})
+		send.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+		self.assertEqual((ste.items[0].qty, ste.items[0].conversion_factor), (10, 1))
+		ste.submit()
+
+		sco.load_from_db()
+		self.assertEqual(sco.supplied_items[0].total_supplied_qty, 0)
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
