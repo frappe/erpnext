@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
@@ -44,6 +43,8 @@ from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 )
 from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
 	SalesOrderSourcingService,
+	get_planned_bundle_component_qty,
+	get_planned_bundle_qty,
 )
 from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
 	SubAssemblyService,
@@ -353,6 +354,7 @@ class ProductionPlan(Document):
 	def before_submit(self):
 		self.validate_closed_sales_order_items()
 		self.validate_sales_order_planned_qty()
+		self.validate_bundle_component_planned_qty()
 
 	def validate_closed_sales_order_items(self):
 		so_items = {row.sales_order_item for row in self.po_items if row.sales_order_item}
@@ -418,14 +420,41 @@ class ProductionPlan(Document):
 				precision,
 			)
 			if flt(qty, precision) > unplanned_qty:
-				frappe.throw(
-					_(
-						"Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan."
-					).format(
-						qty, row.stock_uom, frappe.bold(row.item_code), sales_order, max(unplanned_qty, 0)
-					),
-					title=_("Sales Order Qty Exceeded"),
-				)
+				throw_sales_order_qty_exceeded(qty, row.stock_uom, row.item_code, sales_order, unplanned_qty)
+
+	def validate_bundle_component_planned_qty(self):
+		planned_qty = {}
+		for row in self.po_items:
+			if row.sales_order and row.sales_order_item and row.product_bundle_item:
+				key = (row.sales_order, row.sales_order_item, row.item_code)
+				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+		if not planned_qty:
+			return
+
+		so_items = list({key[1] for key in planned_qty})
+		already_planned = get_planned_bundle_component_qty(so_items)
+		packed_qty = {
+			(row.parent_detail_docname, row.item_code): row
+			for row in frappe.get_all(
+				"Packed Item",
+				filters={"parenttype": "Sales Order", "parent_detail_docname": ("in", so_items)},
+				fields=["parent_detail_docname", "item_code", "uom", {"SUM": "qty", "as": "qty"}],
+				group_by="parent_detail_docname, item_code, uom",
+			)
+		}
+		allowance = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
+		)
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
+
+		for (sales_order, so_item, item_code), qty in planned_qty.items():
+			packed = packed_qty.get((so_item, item_code)) or frappe._dict()
+			unplanned_qty = flt(
+				flt(packed.qty) * (1 + allowance / 100) - already_planned.get((so_item, item_code), 0),
+				precision,
+			)
+			if flt(qty, precision) > unplanned_qty:
+				throw_sales_order_qty_exceeded(qty, packed.uom, item_code, sales_order, unplanned_qty)
 
 	def get_so_item_planned_qty(self):
 		"""Planned qty per Sales Order line, excluding product bundle components."""
@@ -519,11 +548,19 @@ class ProductionPlan(Document):
 				"sales_order": ("in", sales_orders),
 				"docstatus": 1,
 				"sales_order_item": ("is", "set"),
+				"product_bundle_item": ("is", "not set"),
 			},
 			group_by="sales_order, sales_order_item",
 		)
 
-		data += get_planned_qty_of_references(sales_orders)
+		bundle_qty = get_planned_bundle_qty(sales_orders)
+		bundle_lines = {row.sales_order_item for row in bundle_qty}
+		data += [
+			row
+			for row in get_planned_qty_of_references(sales_orders)
+			if row.sales_order_item not in bundle_lines
+		]
+		data += bundle_qty
 
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
@@ -723,6 +760,15 @@ def get_schedule_signature(doc):
 	)
 
 
+def throw_sales_order_qty_exceeded(qty, uom, item_code, sales_order, unplanned_qty):
+	frappe.throw(
+		_("Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan.").format(
+			qty, uom, frappe.bold(item_code), sales_order, max(unplanned_qty, 0)
+		),
+		title=_("Sales Order Qty Exceeded"),
+	)
+
+
 def get_planned_qty_of_references(sales_orders):
 	plans = get_plans_with_references(sales_orders)
 	if not plans:
@@ -741,10 +787,11 @@ def get_planned_qty_of_references(sales_orders):
 		.where(reference.parent.isin(plans))
 		.orderby(reference.idx)
 	).run(as_dict=True)
-	return allocate_reference_qty(references, get_planned_qty_by_order_row(plans))
+	planned_qty, item_codes = get_planned_qty_by_item_reference(plans)
+	return allocate_reference_qty(references, planned_qty, item_codes)
 
 
-def allocate_reference_qty(references, planned_qty):
+def allocate_reference_qty(references, planned_qty, item_codes=None):
 	"""Split the planned qty of each combined row over its references, in order."""
 	allocated = []
 	for row in references:
@@ -752,7 +799,12 @@ def allocate_reference_qty(references, planned_qty):
 		qty = min(flt(row.qty), max(planned_qty.get(key, 0), 0))
 		planned_qty[key] = planned_qty.get(key, 0) - qty
 		allocated.append(
-			frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
+			frappe._dict(
+				sales_order=row.sales_order,
+				sales_order_item=row.sales_order_item,
+				item_code=(item_codes or {}).get(key),
+				qty=qty,
+			)
 		)
 	return allocated
 
@@ -770,12 +822,16 @@ def get_plans_with_references(sales_orders):
 	).run(pluck=True)
 
 
-def get_planned_qty_by_order_row(plans):
-	plan_item = frappe.qb.DocType("Production Plan Item")
-	rows = (
-		frappe.qb.from_(plan_item)
-		.select(plan_item.parent, plan_item.sales_order_item, Sum(plan_item.planned_qty).as_("qty"))
-		.where(plan_item.parent.isin(plans))
-		.groupby(plan_item.parent, plan_item.sales_order_item)
-	).run(as_dict=True)
-	return {(row.parent, row.sales_order_item): flt(row.qty) for row in rows}
+def get_planned_qty_by_item_reference(plans):
+	"""Planned qty and item of the plan rows each reference points to; older plans point by Sales Order Item."""
+	rows = frappe.get_all(
+		"Production Plan Item",
+		filters={"parent": ("in", plans)},
+		fields=["parent", "item_reference", "sales_order_item", "item_code", "planned_qty"],
+	)
+	planned_qty, item_codes = {}, {}
+	for row in rows:
+		key = (row.parent, row.item_reference or row.sales_order_item)
+		planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+		item_codes[key] = row.item_code
+	return planned_qty, item_codes

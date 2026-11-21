@@ -2799,6 +2799,145 @@ class TestProductionPlan(ERPNextTestSuite):
 		"""
 		self.assertEqual(pln.po_items[0].planned_qty, 10)
 
+	def test_planned_bundle_components_are_not_planned_again(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Replan")
+		fg_item = make_item("_Test PP Bundle Replan FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=["_Test PP Bundle Replan RM"], currency="INR")
+
+		sales_order = make_sales_order(item_code=bundle_item, qty=10, do_not_submit=1)
+		sales_order.append(
+			"items",
+			{"item_code": fg_item, "qty": 10, "rate": 100, "warehouse": sales_order.items[0].warehouse},
+		)
+		sales_order.submit()
+
+		first_plan = make_plan_from_sales_orders([sales_order])
+		first_plan.set("po_items", [row for row in first_plan.po_items if row.item_code != fg_item])
+		first_plan.submit()
+		bundle_line = sales_order.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", bundle_line, "production_plan_qty"), 10)
+
+		second_plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual([(row.item_code, row.planned_qty) for row in second_plan.po_items], [(fg_item, 10)])
+
+		extra_plan = create_production_plan(
+			item_code=components[0], planned_qty=20, skip_getting_mr_items=True, do_not_submit=1
+		)
+		extra_plan.po_items[0].update({"sales_order": sales_order.name, "sales_order_item": bundle_line})
+		extra_plan.po_items[0].product_bundle_item = bundle_item
+		self.assertRaisesRegex(frappe.ValidationError, "is left to plan", extra_plan.submit)
+
+	def test_bundle_components_on_work_orders_are_not_subtracted_twice(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle WO")
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+		first_plan = make_plan_from_sales_orders([sales_order])
+		for row in first_plan.po_items:
+			row.planned_qty /= 2
+		first_plan.submit()
+		# what Work Orders for 5 of the 10 bundles write
+		frappe.db.set_value("Sales Order Item", sales_order.items[0].name, "work_order_qty", 5)
+
+		second_plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual([row.planned_qty for row in second_plan.po_items], [10, 10])
+
+	def test_combined_bundle_components_of_two_orders_submit(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combine")
+		sales_orders = [make_sales_order(item_code=bundle_item, qty=10) for _ in range(2)]
+		plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+		self.assertEqual([row.planned_qty for row in plan.po_items], [40, 40])
+		plan.submit()
+
+	def test_combined_bundle_components_are_planned_per_sales_order_line(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combine Lines")
+		sales_orders = [make_sales_order(item_code=bundle_item, qty=10) for _ in range(2)]
+		make_plan_from_sales_orders(sales_orders, combine_items=1).submit()
+
+		self.assertEqual(
+			[
+				frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "production_plan_qty")
+				for sales_order in sales_orders
+			],
+			[10, 10],
+		)
+		self.assertFalse(make_plan_from_sales_orders(sales_orders, combine_items=1).po_items)
+
+	def test_combined_bundle_work_orders_add_up_per_sales_order_line(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combined WO")
+		sales_orders = [make_sales_order(item_code=components[0], qty=5)]
+		sales_orders += [make_sales_order(item_code=bundle_item, qty=10) for _ in range(2)]
+		plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+		plan.submit()
+		plan.make_work_order()
+		for name in frappe.get_all("Work Order", {"production_plan": plan.name}, pluck="name"):
+			work_order = frappe.get_doc("Work Order", name)
+			work_order.wip_warehouse = "Work In Progress - _TC"
+			work_order.submit()
+
+		self.assertEqual(
+			[
+				frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "work_order_qty")
+				for sales_order in sales_orders
+			],
+			[5, 10, 10],
+		)
+
+	def test_sub_assembly_work_order_of_combined_plan_submits(self):
+		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
+		sub_item = make_item("_Test PP Combined Sub SA", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test PP Combined Sub FG", {"is_stock_item": 1}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], currency="INR")
+		sales_orders = [make_sales_order(item_code=fg_item, qty=5) for _ in range(2)]
+
+		plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+		plan.sub_assembly_warehouse = "_Test Warehouse - _TC"
+		plan.get_sub_assembly_items()
+		plan.submit()
+		plan.make_work_order()
+
+		work_order = frappe.get_doc(
+			"Work Order", {"production_plan": plan.name, "production_item": sub_item, "docstatus": 0}
+		)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.submit()
+
+	def test_planned_qty_of_bundle_component_on_two_rows(self):
+		rm_item = make_item("_Test PP Bundle Twice RM", {"is_stock_item": 1}).name
+		component = make_item("_Test PP Bundle Twice A", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=[rm_item], currency="INR")
+		bundle_item = make_item("_Test PP Bundle Twice", {"is_stock_item": 0}).name
+		bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle_item})
+		bundle.append("items", {"item_code": component, "qty": 2})
+		bundle.append("items", {"item_code": component, "qty": 2})
+		bundle.insert().submit()
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+
+		first_plan = make_plan_from_sales_orders([sales_order])
+		for row in first_plan.po_items:
+			row.planned_qty /= 2
+		first_plan.submit()
+		bundle_line = sales_order.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", bundle_line, "production_plan_qty"), 5)
+		# what Work Orders for 5 of the 10 bundles write
+		frappe.db.set_value("Sales Order Item", bundle_line, "work_order_qty", 5)
+
+		second_plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual(sum(row.planned_qty for row in second_plan.po_items), 20)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_bundle_on_two_sales_order_lines(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Two Lines")
+		sales_order = make_sales_order(item_code=bundle_item, qty=10, do_not_submit=1)
+		sales_order.append(
+			"items",
+			{"item_code": bundle_item, "qty": 5, "rate": 100, "warehouse": sales_order.items[0].warehouse},
+		)
+		sales_order.submit()
+
+		plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual(sorted(row.planned_qty for row in plan.po_items), [10, 10, 20, 20])
+		plan.submit()
+
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
@@ -6752,6 +6891,30 @@ def receive_items_for_reservation(item_codes, warehouse):
 			for item_code in item_codes
 		]
 	)
+
+
+def make_manufactured_bundle(prefix):
+	"""Product Bundle of two components with a BOM, two of each per bundle."""
+	from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+	rm_item = make_item(f"{prefix} RM", {"is_stock_item": 1}).name
+	components = [make_item(f"{prefix} {name}", {"is_stock_item": 1}).name for name in "AB"]
+	for item in components:
+		make_bom(item=item, raw_materials=[rm_item], currency="INR")
+	bundle_item = make_item(f"{prefix} Bundle", {"is_stock_item": 0}).name
+	make_product_bundle(parent=bundle_item, items=components, qty=2)
+	return bundle_item, components
+
+
+def make_plan_from_sales_orders(sales_orders, combine_items=0):
+	plan = frappe.new_doc("Production Plan")
+	plan.company = sales_orders[0].company
+	plan.get_items_from = "Sales Order"
+	plan.combine_items = combine_items
+	for sales_order in sales_orders:
+		plan.append("sales_orders", {"sales_order": sales_order.name})
+	plan.get_items()
+	return plan
 
 
 def make_bom(**args):
