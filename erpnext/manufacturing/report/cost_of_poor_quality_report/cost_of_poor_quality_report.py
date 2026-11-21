@@ -10,6 +10,7 @@ from frappe.utils import flt, get_datetime
 from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.report.utils import validate_date_range
+from erpnext.manufacturing.doctype.job_card.job_card import get_workstation_minutes
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
@@ -108,27 +109,31 @@ def clip_to_date_range(data, report_filters):
 	start = get_datetime(report_filters.get("from_date")) if report_filters.get("from_date") else None
 	end = get_datetime(report_filters.get("to_date")) if report_filters.get("to_date") else None
 
-	minutes = defaultdict(float)
+	time_logs = defaultdict(list)
 	for log in frappe.get_all(
 		"Job Card Time Log",
-		filters={"parent": ["in", [row.name for row in data]], "parenttype": "Job Card"},
-		fields=["parent", "from_time", "to_time", "time_in_mins"],
+		filters={
+			"parent": ["in", [row.name for row in data]],
+			"parenttype": "Job Card",
+			"from_time": ["is", "set"],
+			"to_time": ["is", "set"],
+		},
+		fields=["parent", "from_time", "to_time"],
 	):
-		minutes[log.parent] += get_minutes_in_range(log, start, end)
+		if clipped_log := clip_time_log(log, start, end):
+			time_logs[log.parent].append(clipped_log)
 
 	for row in data:
-		row.total_time_in_mins = flt(minutes[row.name], 2)
-		row.operating_cost = flt(row.hour_rate) * minutes[row.name] / 60.0
+		# union of the intervals, so parallel operators count once, as in the Job Card
+		minutes = get_workstation_minutes(time_logs[row.name])
+		row.total_time_in_mins = flt(minutes, 2)
+		row.operating_cost = flt(row.hour_rate) * minutes / 60.0
 
 
-def get_minutes_in_range(log, start, end):
-	log_start, log_end = get_datetime(log.from_time), get_datetime(log.to_time)
-	duration = (log_end - log_start).total_seconds()
-	if duration <= 0:
-		return 0
-
-	overlap = (min(log_end, end or log_end) - max(log_start, start or log_start)).total_seconds()
-	return flt(log.time_in_mins) * max(overlap, 0) / duration
+def clip_time_log(log, start, end):
+	from_time, to_time = get_datetime(log.from_time), get_datetime(log.to_time)
+	from_time, to_time = max(from_time, start or from_time), min(to_time, end or to_time)
+	return frappe._dict(from_time=from_time, to_time=to_time) if from_time < to_time else None
 
 
 def keep_exact_serial_no(data, serial_no):
