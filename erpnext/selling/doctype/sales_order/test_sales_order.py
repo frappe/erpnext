@@ -1811,6 +1811,28 @@ class TestSalesOrder(ERPNextTestSuite):
 		# reserved qty in packed item should increase after changing bundle item uom
 		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 8)
 
+	def test_update_child_removing_bundle_row_releases_component_reserved_qty(self):
+		bundle = make_item("_Test Removed Bundle", {"is_stock_item": 0}).name
+		component = make_item("_Test Removed Bundle Component", {"is_stock_item": 1}).name
+		make_product_bundle(bundle, [component], 2)
+		existing_reserved_qty = get_reserved_qty(component)
+
+		so = make_sales_order(
+			item_list=[
+				{"item_code": bundle, "qty": 5, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+				{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+			]
+		)
+		self.assertEqual(get_reserved_qty(component), existing_reserved_qty + 10)
+
+		kept_row = so.items[1]
+		trans_item = json.dumps(
+			[{"item_code": kept_row.item_code, "qty": 1, "rate": 100, "docname": kept_row.name}]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
+
+		self.assertEqual(get_reserved_qty(component), existing_reserved_qty)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_update_child_with_tax_template(self):
 		"""
