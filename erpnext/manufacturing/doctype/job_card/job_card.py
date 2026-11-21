@@ -729,7 +729,7 @@ class JobCard(Document):
 				return workstation
 
 	def schedule_time_logs(self, row):
-		row.remaining_time_in_mins = row.time_in_mins
+		row.remaining_time_in_mins = flt(self.time_required)
 		while row.remaining_time_in_mins > 0:
 			slot_end = self.place_row_start(row)
 			if not slot_end:
@@ -806,12 +806,8 @@ class JobCard(Document):
 			self.validate_overlap_for_workstation(args, row)
 
 	def schedule_without_working_hours(self, row):
-		if get_datetime(row.planned_end_time) <= get_datetime(row.planned_start_time):
-			row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.time_in_mins)
-			row.remaining_time_in_mins = 0.0
-		else:
-			row.remaining_time_in_mins -= time_diff_in_minutes(row.planned_end_time, row.planned_start_time)
-
+		row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+		row.remaining_time_in_mins = 0.0
 		self.update_time_logs(row)
 
 	def adjust_start_date_for_holiday(self, workstation_doc, row):
@@ -827,15 +823,17 @@ class JobCard(Document):
 		return start_date
 
 	def consume_working_hour_slot(self, row, workstation_end_time):
-		time_in_mins = time_diff_in_minutes(workstation_end_time, row.planned_start_time)
+		planned_end_time = get_datetime(
+			add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+		)
 
-		# If remaining time fits in workstation time logs else split hours as per workstation time
-		if time_in_mins > row.remaining_time_in_mins:
-			row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+		# compare datetimes, not float minutes, so float noise cannot spill into the next slot
+		if planned_end_time <= workstation_end_time:
+			row.planned_end_time = planned_end_time
 			row.remaining_time_in_mins = 0
 		else:
-			row.planned_end_time = add_to_date(row.planned_start_time, minutes=time_in_mins)
-			row.remaining_time_in_mins -= time_in_mins
+			row.planned_end_time = workstation_end_time
+			row.remaining_time_in_mins -= time_diff_in_minutes(workstation_end_time, row.planned_start_time)
 
 		self.update_time_logs(row)
 

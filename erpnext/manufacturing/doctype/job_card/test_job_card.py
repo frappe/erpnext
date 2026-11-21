@@ -5276,6 +5276,148 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(job_card.items[0].required_qty, 6)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_pushed_back_operation_is_scheduled_for_its_whole_time(self):
+		workstation = make_jc_review_workstation()
+		rm_item = make_jc_review_item()
+
+		def make_work_order(minutes_per_unit, planned_start_date):
+			return make_jc_review_work_order(
+				make_jc_review_item(),
+				[{"item_code": rm_item, "qty": 1}],
+				[
+					{
+						"operation": make_jc_review_operation(workstation),
+						"workstation": workstation,
+						"time_in_mins": minutes,
+					}
+					for minutes in minutes_per_unit
+				],
+				planned_start_date=planned_start_date,
+			)
+
+		make_work_order([6], "2031-03-03 07:20:00")
+		wo = make_work_order([6, 3], "2031-03-03 08:00:00")
+
+		self.assertEqual(
+			[
+				[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs]
+				for job_card in get_jc_review_job_cards(wo.name)
+			],
+			[
+				[("2031-03-03 08:30:00", "2031-03-03 09:30:00")],
+				[("2031-03-03 09:40:00", "2031-03-03 10:10:00")],
+			],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_batch_job_cards_are_scheduled_for_their_share_of_the_time(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=5)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 30, "batch_size": 5}],
+			planned_start_date="2031-03-03 08:00:00",
+		)
+
+		job_cards = get_jc_review_job_cards(wo.name)
+		self.assertEqual([job_card.time_required for job_card in job_cards], [30, 30])
+		self.assertEqual(
+			[[(str(row.from_time), str(row.to_time)) for row in jc.scheduled_time_logs] for jc in job_cards],
+			[
+				[("2031-03-03 08:00:00", "2031-03-03 08:30:00")],
+				[("2031-03-03 08:40:00", "2031-03-03 09:10:00")],
+			],
+		)
+		wo.reload()
+		self.assertEqual(str(wo.planned_end_date), "2031-03-03 09:10:00")
+		self.assertEqual(str(wo.operations[0].planned_start_time), "2031-03-03 08:00:00")
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_batch_operation_spans_job_cards_scheduled_out_of_order(self):
+		workstation = make_jc_review_workstation()
+		make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[
+				{
+					"operation": make_jc_review_operation(workstation),
+					"workstation": workstation,
+					"time_in_mins": 3,
+				}
+			],
+			planned_start_date="2031-03-03 08:30:00",
+		)
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=5)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 50, "batch_size": 5}],
+			qty=11,
+			planned_start_date="2031-03-03 08:00:00",
+		)
+
+		# the 10 minute card for the last unit fits before the 08:30 booking
+		self.assertEqual(
+			[str(job_card.expected_start_date) for job_card in get_jc_review_job_cards(wo.name)],
+			["2031-03-03 09:10:00", "2031-03-03 10:10:00", "2031-03-03 08:00:00"],
+		)
+		wo.reload()
+		self.assertEqual(
+			(str(wo.operations[0].planned_start_time), str(wo.operations[0].planned_end_time)),
+			("2031-03-03 08:00:00", "2031-03-03 11:00:00"),
+		)
+		self.assertEqual(str(wo.planned_end_date), "2031-03-03 11:00:00")
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "mins_between_operations": 10, "allow_overtime": 0},
+	)
+	def test_float_noise_does_not_book_another_working_hour_slot(self):
+		for time_in_mins, qty, start, expected in [
+			# 60 / 29 * 29 is 60.00000000000001
+			(60, 29, "2031-03-03 11:00:00", [("2031-03-03 11:00:00", "2031-03-03 12:00:00")]),
+			# 256.1 - 16.1 - 240 leaves 2.8e-14 minutes
+			(
+				256.1,
+				1,
+				"2031-03-03 11:43:54",
+				[
+					("2031-03-03 11:43:54", "2031-03-03 12:00:00"),
+					("2031-03-03 13:00:00", "2031-03-03 17:00:00"),
+				],
+			),
+		]:
+			workstation = frappe.get_doc("Workstation", make_jc_review_workstation())
+			workstation.append("working_hours", {"start_time": "08:00:00", "end_time": "12:00:00"})
+			workstation.append("working_hours", {"start_time": "13:00:00", "end_time": "17:00:00"})
+			workstation.save()
+			operation = {
+				"operation": make_jc_review_operation(workstation.name),
+				"workstation": workstation.name,
+				"time_in_mins": time_in_mins,
+				"fixed_time": 1,
+			}
+			wo = make_jc_review_work_order(
+				make_jc_review_item(),
+				[{"item_code": make_jc_review_item(), "qty": 1}],
+				[operation],
+				qty=qty,
+				planned_start_date=start,
+			)
+
+			job_card = get_jc_review_job_cards(wo.name)[0]
+			self.assertEqual(
+				[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs], expected
+			)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 1, "overproduction_percentage_for_work_order": 100},
 	)
