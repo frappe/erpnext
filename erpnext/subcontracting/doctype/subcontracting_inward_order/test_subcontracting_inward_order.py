@@ -7,6 +7,7 @@ from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as 
 from erpnext.selling.doctype.sales_order.mapper import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_bundle import get_batch_nos
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )
@@ -669,8 +670,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(scio.items[0].returned_qty, 1)
 
 	def test_subcontracting_return_refuses_batch_beyond_its_delivered_qty(self):
-		from erpnext.stock.serial_batch_bundle import get_batch_nos
-
 		so, scio = create_so_scio(service_item="Service Item 3", fg_item="FG Item with Batch")
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
 		scio.reload()
