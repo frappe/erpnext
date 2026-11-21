@@ -2184,6 +2184,65 @@ class TestStockEntry(ERPNextTestSuite):
 		manual_row.basic_rate = 600
 		self.assertRaises(frappe.ValidationError, entry.save)
 
+	def test_manual_secondary_item_cost_covers_qty_net_of_process_loss(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as _make_stock_entry,
+		)
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append(
+			"items",
+			{"item_code": rm_item, "qty": 1, "rate": 100.0, "source_warehouse": "_Test Warehouse - _TC"},
+		)
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "Scrap",
+				"qty": 10,
+				"valuation_type": "Manual",
+				"cost": 50,
+				"process_loss_per": 20,
+			},
+		)
+		bom_doc.save()
+		bom_doc.submit()
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{
+				"company": "_Test Company",
+				"fg_warehouse": "_Test Warehouse 1 - _TC",
+				"production_item": fg_item,
+				"bom_no": bom_doc.name,
+				"qty": 1.0,
+				"stock_uom": frappe.db.get_value("Item", fg_item, "stock_uom"),
+				"skip_transfer": 1,
+			}
+		)
+		work_order.get_items_and_operations_from_bom()
+		work_order.submit()
+
+		entry = frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 1))
+		entry.insert()
+
+		# 8 of the 10 scrap units are made and carry the full manual cost, as the BOM credits it
+		manual_row = next(d for d in entry.items if d.valuation_type == "Manual")
+		self.assertEqual(manual_row.qty, 8)
+		self.assertEqual(manual_row.basic_amount, 50)
+		fg_row = next(d for d in entry.items if d.is_finished_item)
+		self.assertEqual(fg_row.basic_amount, bom_doc.total_cost)
+
 	def test_manual_secondary_item_of_foreign_currency_bom_uses_company_currency_cost(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,

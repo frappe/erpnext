@@ -8,6 +8,7 @@ from frappe.query_builder.functions import Coalesce, IfNull, Max, Min, NullIf, S
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.manufacturing.doctype.bom_secondary_item.bom_secondary_item import get_manual_rate
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -108,7 +109,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			item_args["bom_secondary_item"] = row.name
 			if row.get("valuation_type") == "Manual":
 				item_args["set_basic_rate_manually"] = 1
-				item_args["basic_rate"] = flt(row.get("manual_rate"))
+				item_args["basic_rate"] = get_manual_rate(row)
 
 			if row.secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
 				item_args["t_warehouse"] = self.wo_doc.scrap_warehouse
@@ -1082,9 +1083,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.valuation_type = bom_row.get("valuation_type")
 			if row.valuation_type == "Manual":
 				row.set_basic_rate_manually = 1
-				row.basic_rate = (
-					flt(bom_row.base_cost) / flt(bom_row.stock_qty) if flt(bom_row.get("stock_qty")) else 0
-				)
+				row.basic_rate = get_manual_rate(bom_row)
 			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
@@ -1099,7 +1098,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			for row in frappe.get_all(
 				"BOM Secondary Item",
 				filters={"name": ("in", names)},
-				fields=["name", "valuation_type", "base_cost", "stock_qty"],
+				fields=["name", "valuation_type", "base_cost", "stock_qty", "process_loss_per"],
 			)
 		}
 
@@ -1450,7 +1449,8 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.process_loss_per,
 			doctype.secondary_item_type,
 			doctype.valuation_type,
-			(doctype.base_cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
+			doctype.base_cost,
+			doctype.stock_qty,
 		)
 	if table_name == "BOM Item":
 		return query.select(
