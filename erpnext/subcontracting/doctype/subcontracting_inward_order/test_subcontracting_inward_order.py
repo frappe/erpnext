@@ -697,16 +697,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
-		use_bom_with_secondary_item()
-
-		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
-		scio.reload()
-		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
-		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
-		wo.submit()
-
+		scio, wo = create_scio_with_secondary_item()
 		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
 
 		scio.reload()
@@ -721,14 +712,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_manufacture_cancel_checks_all_rows_of_a_secondary_item(self):
-		use_bom_with_secondary_item()
-		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
-		scio.reload()
-		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
-		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
-		wo.submit()
+		scio, wo = create_scio_with_secondary_item()
 		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 1)).submit()
 
 		manufacture = frappe.new_doc("Stock Entry").update(
@@ -755,6 +739,21 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		manufacture.reload()
 		self.assertRaisesRegex(frappe.ValidationError, "Secondary Item", manufacture.cancel)
+
+	def test_secondary_item_on_two_manufacture_rows(self):
+		scio, wo = create_scio_with_secondary_item()
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		secondary_row = next(item for item in manufacture.items if item.item_code == "Basic RM 2")
+		secondary_row.qty = 3
+		manufacture.append("items", frappe.copy_doc(secondary_row))
+		manufacture.submit()
+
+		scio.reload()
+		self.assertEqual([row.produced_qty for row in scio.secondary_items], [6])
+
+		manufacture.cancel()
+		scio.reload()
+		self.assertFalse(scio.secondary_items)
 
 	def test_self_rm_billed_qty(self):
 		so, scio = create_so_scio()
@@ -1888,8 +1887,8 @@ def create_delivered_so_scio():
 	return so, scio
 
 
-def use_bom_with_secondary_item():
-	"""Point the Basic FG Item subcontracting BOM to a copy of its BOM with a scrap item."""
+def create_scio_with_secondary_item():
+	"""Make a Work Order (Skip Material Transfer) for an inward order whose BOM has a scrap item."""
 	new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
 	new_bom.secondary_items.append(
 		frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, secondary_item_type="Scrap")
@@ -1898,6 +1897,15 @@ def use_bom_with_secondary_item():
 	sc_bom = frappe.get_doc("Subcontracting BOM", {"finished_good": "Basic FG Item"})
 	sc_bom.finished_good_bom = new_bom.name
 	sc_bom.save()
+
+	so, scio = create_so_scio()
+	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+	return scio, wo
 
 
 def receive_batch_twice(scio, first_qty=3):
