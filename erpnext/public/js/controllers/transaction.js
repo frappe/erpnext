@@ -3336,15 +3336,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	blanket_order(doc, cdt, cdn) {
 		var me = this;
 		var item = locals[cdt][cdn];
-		if (item.blanket_order && (item.parenttype == "Sales Order" || item.parenttype == "Purchase Order")) {
+		if (item.blanket_order) {
 			frappe.call({
 				method: "erpnext.stock.get_item_details.get_blanket_order_details",
 				args: {
 					ctx: {
 						doctype: doc.doctype,
 						item_code: item.item_code,
-						customer: doc.customer,
+						customer: doc.customer || doc.party_name,
 						supplier: doc.supplier,
+						quotation_to: doc.quotation_to,
 						company: doc.company,
 						currency: doc.currency,
 						transaction_date: doc.transaction_date,
