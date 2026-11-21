@@ -166,7 +166,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 			fields=["name", "stock_qty", "fg_item_qty"],
 		)
 		conversion_factors = {
-			d.name: flt(d.stock_qty) / flt(d.fg_item_qty) for d in so_items if flt(d.fg_item_qty)
+			d.name: flt(d.stock_qty) / flt(d.fg_item_qty)
+			for d in so_items
+			if flt(d.stock_qty) and flt(d.fg_item_qty)
 		}
 		for item in self.items:
 			if item.sales_order_item in conversion_factors:
