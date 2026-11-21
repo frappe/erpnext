@@ -86,7 +86,7 @@ class StockInternalTransferService:
 			return
 
 		item_wise_received_qty = self.get_item_wise_inter_received_qty(inter_company_reference)
-		precision = frappe.get_precision(self.doc.doctype + " Item", "qty")
+		precision = frappe.get_precision(self.doc.doctype + " Item", "stock_qty")
 
 		over_receipt_allowance = frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
 
@@ -98,17 +98,16 @@ class StockInternalTransferService:
 		for key, transferred_qty in item_wise_transfer_qty.items():
 			recevied_qty = flt(item_wise_received_qty.get(key), precision)
 			if over_receipt_allowance:
-				transferred_qty = transferred_qty + flt(
-					transferred_qty * over_receipt_allowance / 100, precision
-				)
+				transferred_qty += transferred_qty * over_receipt_allowance / 100
 
 			if recevied_qty > flt(transferred_qty, precision):
 				from erpnext.controllers.status_updater import OverAllowanceError
 
 				frappe.throw(
-					_("Item {0} cannot be received in more than {1} qty against the {2} {3}").format(
+					_("Item {0} cannot be received in more than {1} {2} against the {3} {4}").format(
 						bold(key[1]),
 						bold(flt(transferred_qty, precision)),
+						frappe.get_cached_value("Item", key[1], "stock_uom"),
 						bold(parent_doctype),
 						get_link_to_form(parent_doctype, inter_company_reference),
 					),
@@ -145,17 +144,18 @@ class StockInternalTransferService:
 				child_tab.name,
 				child_tab.item_code,
 				child_tab.qty,
+				child_tab.stock_qty,
 			)
 			.where((parent_tab.name == inter_company_reference) & (parent_tab.docstatus == 1))
 		)
 		if parent_doctype == "Delivery Note":
-			query = query.select(child_tab.returned_qty, child_tab.stock_qty, child_tab.conversion_factor)
+			query = query.select(child_tab.returned_qty)
 
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
 		for row in data:
-			returned_qty = flt(row.get("returned_qty")) / (flt(row.get("conversion_factor")) or 1)
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - returned_qty
+			returned_qty = flt(row.get("returned_qty"))
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.stock_qty) - returned_qty
 
 		if parent_doctype == "Delivery Note":
 			self.add_component_transfer_qty(item_wise_transfer_qty, inter_company_reference, data)
@@ -183,10 +183,10 @@ class StockInternalTransferService:
 
 		if self.doc.doctype == "Purchase Invoice":
 			reference_field, item_reference_field = "inter_company_invoice_reference", "sales_invoice_item"
-			fields = ["item_code", "qty"]
+			fields = ["item_code", "stock_qty"]
 		else:
 			reference_field, item_reference_field = "inter_company_reference", "delivery_note_item"
-			fields = ["item_code", "qty", "delivery_note_packed_item"]
+			fields = ["item_code", "stock_qty", "delivery_note_packed_item"]
 
 		other_items = get_inter_company_items(
 			self.doc.doctype,
@@ -197,9 +197,13 @@ class StockInternalTransferService:
 
 		# a cancelled document no longer counts
 		own_items = self.doc.items if self.doc.docstatus == 1 else []
+		if own_items:
+			# validate sets it only after this check
+			self.doc.set_qty_as_per_stock_uom()
+
 		item_wise_received_qty = defaultdict(float)
 		for row in [*other_items, *own_items]:
 			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
-			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
+			item_wise_received_qty[(reference, row.item_code)] += flt(row.stock_qty)
 
 		return item_wise_received_qty
