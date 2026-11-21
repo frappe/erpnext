@@ -879,7 +879,10 @@ class StockController(AccountsController):
 		if is_rejected:
 			serial_nos = row.get("rejected_serial_no")
 			type_of_transaction = "Inward" if not self.is_return else "Outward"
-			qty = self.get_rejected_stock_qty(row)
+			qty = flt(
+				self.get_rejected_stock_qty(row),
+				frappe.get_precision("Serial and Batch Entry", "qty"),
+			)
 			warehouse = row.get("rejected_warehouse")
 
 		if (
@@ -1395,6 +1398,10 @@ class StockController(AccountsController):
 			exclude_serial_nos=exclude_serial_nos,
 			total_qty=total_qty,
 		)
+
+	def get_rejected_warehouse_return_stock_qty(self, row, qty_field) -> float:
+		"""Qty a package of a return row takes back from the rejected warehouse in its qty."""
+		return flt(row.get(qty_field))
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(

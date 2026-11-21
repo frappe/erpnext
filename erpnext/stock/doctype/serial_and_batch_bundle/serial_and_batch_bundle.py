@@ -1094,10 +1094,10 @@ class SerialandBatchBundle(Document):
 			self.set_incoming_rate(parent=parent, row=row, save=True)
 
 		if self.docstatus == 0 and parent.get("is_return") and parent.is_new():
-			self.reset_qty(row, qty_field=qty_field)
+			self.reset_qty(parent, row, qty_field=qty_field)
 
 		self.calculate_qty_and_amount(save=True)
-		self.validate_quantity(row, qty_field=qty_field)
+		self.validate_quantity(parent, row, qty_field=qty_field)
 
 	def validate_not_linked_to_another_draft(self, parent, row):
 		"""A draft voucher can't take over the bundle of another draft voucher."""
@@ -1318,9 +1318,9 @@ class SerialandBatchBundle(Document):
 
 		return [], []
 
-	def reset_qty(self, row, qty_field=None):
+	def reset_qty(self, parent, row, qty_field=None):
 		qty_field = self.get_qty_field(row, qty_field=qty_field)
-		qty = abs(flt(self.get_row_qty(row, qty_field), self.precision("total_qty")))
+		qty = abs(flt(self.get_row_qty(parent, row, qty_field), self.precision("total_qty")))
 
 		idx = None
 		while qty > 0:
@@ -1347,19 +1347,19 @@ class SerialandBatchBundle(Document):
 			self.flags.ignore_links = True
 			self.save()
 
-	def get_row_qty(self, row, qty_field) -> float:
+	def get_row_qty(self, parent, row, qty_field) -> float:
 		"""What the row holds in the units a package counts in."""
 		if qty_field == "qty" and row.get("stock_qty"):
 			return flt(row.get("stock_qty"))
 
 		if qty_field == "rejected_qty":
-			return flt(row.get(qty_field)) * flt(row.get("conversion_factor") or 1)
+			return parent.get_rejected_stock_qty(row)
 
 		return flt(row.get(qty_field))
 
-	def validate_quantity(self, row, qty_field=None):
+	def validate_quantity(self, parent, row, qty_field=None):
 		qty_field = self.get_qty_field(row, qty_field=qty_field)
-		qty = self.get_row_qty(row, qty_field)
+		qty = self.get_row_qty(parent, row, qty_field)
 
 		precision = row.precision(qty_field)
 		if abs(abs(flt(self.total_qty, precision)) - abs(flt(qty, precision))) > 0.01:
