@@ -8309,15 +8309,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		over_return.items[0].received_qty = -1
 		self.assertRaises(StockOverReturnError, over_return.save)
 
-<<<<<<< HEAD
-	def test_accepted_return_after_rejected_warehouse_return(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
-			make_purchase_return,
-=======
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
 	def test_rejected_warehouse_return_takes_back_the_rejected_stock_value(self):
-		from erpnext.stock.doctype.purchase_receipt.mapper import (
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return_against_rejected_warehouse,
 		)
 
@@ -8365,29 +8360,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# 0.67 Kg rejected at 100 per 0.3356 Kg, as the receipt credited it
 		self.assertEqual(srbnb_debit, 199.64)
 
-	def test_rejected_qty_return_after_accepted_qty_return(self):
-		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
-
-		pr = make_purchase_receipt(
-			qty=5,
-			rejected_qty=5,
-			warehouse="_Test Warehouse - _TC",
-			rejected_warehouse="_Test Rejected Warehouse - _TC",
-		)
-
-		accepted_return = make_purchase_return(pr.name)
-		accepted_return.items[0].rejected_qty = 0
-		accepted_return.submit()
-
-		rejected_return = make_purchase_return(pr.name)
-		self.assertEqual(rejected_return.items[0].qty, 0)
-		self.assertEqual(rejected_return.items[0].rejected_qty, -5)
-		rejected_return.submit()
-
-	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
-	def test_rejected_warehouse_return_rows_share_the_rejected_qty(self):
-		from erpnext.stock.doctype.purchase_receipt.mapper import (
->>>>>>> 4ab5740 (test: rejected warehouse return takes back the rejected stock value)
+	def test_accepted_return_after_rejected_warehouse_return(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
 			make_purchase_return_against_rejected_warehouse,
 		)
 
