@@ -17,8 +17,10 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Coalesce, IfNull
 from frappe.utils import cint, flt, get_link_to_form, nowdate
 
+from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -283,10 +285,90 @@ def _new_manufacture_stock_entry(work_order, purpose, qty):
 	if purpose in ["Material Transfer for Manufacture", "Manufacture"]:
 		stock_entry.subcontracting_inward_order = work_order.subcontracting_inward_order
 	# accept 0 qty as well
-	stock_entry.fg_completed_qty = (
-		qty if qty is not None else (flt(work_order.qty) - flt(work_order.produced_qty))
-	)
+	if qty is None:
+		qty = (
+			get_pending_consumption_qty(work_order)
+			if purpose == "Material Consumption for Manufacture"
+			else flt(work_order.qty) - flt(work_order.produced_qty)
+		)
+	stock_entry.fg_completed_qty = qty
 	return stock_entry
+
+
+def get_pending_consumption_qty(work_order):
+	"""The qty still to consume, measured the way the consumption entry picks its materials."""
+	if (
+		not work_order.skip_transfer
+		and get_backflush_based_on(work_order.bom_no) == "Material Transferred for Manufacture"
+	):
+		return get_pending_consumption_qty_based_on_transfer(work_order)
+
+	return get_pending_consumption_qty_based_on_bom(work_order)
+
+
+def get_pending_consumption_qty_based_on_bom(work_order):
+	"""The qty the materials left for the order cover, as the consumption entry takes each per the BOM,
+	at most what is left to produce."""
+	basis_field = "required_qty" if work_order.skip_transfer else "transferred_qty"
+	materials = {}
+	for row in work_order.required_items:
+		if (row.include_item_in_manufacturing or row.is_additional_item) and flt(row.required_qty) > 0:
+			material = materials.setdefault(row.item_code, frappe._dict(left_qty=0.0, required_qty=0.0))
+			material.left_qty += flt(row.get(basis_field)) - flt(row.consumed_qty)
+			material.required_qty += flt(row.required_qty)
+
+	left_for_qty = min(
+		(material.left_qty * flt(work_order.qty) / material.required_qty for material in materials.values()),
+		default=0,
+	)
+	pending_to_produce = flt(work_order.qty) - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
+	return max(flt(min(left_for_qty, pending_to_produce), work_order.precision("qty")), 0)
+
+
+def get_pending_consumption_qty_based_on_transfer(work_order):
+	"""A material left in WIP is pending for the transferred qty less the For Quantity of the entries
+	that consumed it, as the consumption entry counts it. One already covered is drained by any qty,
+	so it is pending for what is left to produce."""
+	precision = work_order.precision("qty")
+	transferred_qty = flt(work_order.material_transferred_for_manufacturing)
+	pending_to_produce = transferred_qty - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
+	covered_qty = get_covered_qty_by_item(work_order.name)
+	pending_qty = max(
+		(
+			max(flt(transferred_qty - covered_qty.get(row.item_code, 0), precision), 0) or pending_to_produce
+			for row in work_order.required_items
+			if flt(flt(row.transferred_qty) - flt(row.consumed_qty), row.precision("consumed_qty")) > 0
+		),
+		default=0,
+	)
+	return max(flt(min(pending_qty, pending_to_produce), precision), 0)
+
+
+def get_covered_qty_by_item(work_order):
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	detail = frappe.qb.DocType("Stock Entry Detail")
+	entries = (
+		frappe.qb.from_(stock_entry)
+		.inner_join(detail)
+		.on(detail.parent == stock_entry.name)
+		.select(
+			Coalesce(detail.original_item, detail.item_code).as_("item_code"),
+			stock_entry.name,
+			stock_entry.fg_completed_qty,
+		)
+		.distinct()
+		.where(
+			(stock_entry.work_order == work_order)
+			& (stock_entry.docstatus == 1)
+			& stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"])
+			& (IfNull(detail.s_warehouse, "") != "")
+		)
+	).run(as_dict=True)
+
+	covered_qty = {}
+	for entry in entries:
+		covered_qty[entry.item_code] = covered_qty.get(entry.item_code, 0) + flt(entry.fg_completed_qty)
+	return covered_qty
 
 
 def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehouse, source_stock_entry):
