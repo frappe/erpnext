@@ -1010,9 +1010,7 @@ class SerialandBatchBundle(Document):
 		if self.is_rejected and is_material_from_in_transit_warehouse(
 			self.voucher_type, self.voucher_detail_no
 		):
-			# Rejected material of a transfer keeps the value it had in transit. A charge spread
-			# over the accepted quantity does not belong to it.
-			rate = flt(self.get_transit_rate(row)) or rate
+			rate = self.get_rejected_transfer_rate(row) or rate
 
 		entry_rates = self.get_transfer_rates() or self.get_subcontracting_return_rates()
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
@@ -1459,6 +1457,17 @@ class SerialandBatchBundle(Document):
 		receipt_item = receipt.get("items", {"name": row.reference_name})[0].subcontracting_receipt_item
 		consumed = receipt.get_consumed_serial_batches().get((receipt_item, row.rm_item_code), {})
 		return {key: identity.rate for key, identity in consumed.items()}
+
+	def get_rejected_transfer_rate(self, row) -> float:
+		"""Rejected material of a transfer keeps the value it had in transit, plus its share of a
+		landed cost."""
+		from erpnext.stock.stock_ledger import get_landed_cost_rate
+
+		transit_rate = flt(self.get_transit_rate(row))
+		if not transit_rate:
+			return 0.0
+
+		return transit_rate + get_landed_cost_rate(self.voucher_type, self.voucher_detail_no)
 
 	def get_transit_rate(self, row) -> float:
 		"""What one stock unit of the material was worth on its way into the in-transit warehouse."""

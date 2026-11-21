@@ -690,9 +690,10 @@ class BuyingController(SubcontractingController):
 			if not details:
 				continue
 
-			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
-			if row.landed_cost_voucher_amount:
-				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
+			amount = flt(
+				row.valuation_rate * row.stock_qty - self.get_valued_landed_cost(row, row.stock_qty),
+				row.precision("base_amount"),
+			)
 
 			if not amount:
 				# GL Entry rejects a row with neither a debit nor a credit.
@@ -817,13 +818,23 @@ class BuyingController(SubcontractingController):
 				item.valuation_rate = (
 					net_rate
 					+ item.item_tax_amount
-					+ flt(item.landed_cost_voucher_amount)
+					+ self.get_valued_landed_cost(item, qty_in_stock_uom)
 					+ flt(item.get("amount_difference_with_purchase_invoice"))
 				) / qty_in_stock_uom
 			else:
 				item.valuation_rate = 0.0
 
 		update_regional_item_valuation_rate(self)
+
+	def get_valued_landed_cost(self, row, valued_stock_qty) -> float:
+		"""Landed cost of the valued stock qty. An internal receipt spreads it over the accepted and
+		rejected stock, as the stock ledger does."""
+		landed_cost = flt(row.landed_cost_voucher_amount)
+		if not (landed_cost and flt(row.get("rejected_qty")) and self.is_internal_receipt()):
+			return landed_cost
+
+		received_stock_qty = get_stock_qty(row, row.qty) + get_stock_qty(row, row.rejected_qty)
+		return landed_cost * valued_stock_qty / received_stock_qty
 
 	def get_rejected_valuation_rate(self, row) -> float:
 		if not is_rejected_material_valued(self.doctype, row.name):

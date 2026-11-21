@@ -4039,10 +4039,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
-		# a repost reads the rate from the database, without the row
+		# a repost reads the rate from the database, without the row; the rejected 10 Nos take
+		# their share of the charge, 120 / 30 Nos each
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=120)
 
-		self.assertEqual(get_stock_value_by_warehouse(pr.name)[rejected_warehouse], 70)
+		self.assertEqual(get_stock_value_by_warehouse(pr.name)[rejected_warehouse], 110)
 
 	def test_landed_cost_voucher_on_a_receipt_with_rejected_batch_material(self):
 		"""A landed cost voucher rebuilds the entries of the receipt; the package of the in-transit
@@ -4125,9 +4126,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(packages, [-10])
 
-	def test_landed_cost_voucher_leaves_the_rejected_material_of_a_transfer_alone(self):
-		"""A charge is spread over the material the receipt accepted; what was rejected keeps the
-		value it arrived in transit with."""
+	def test_landed_cost_voucher_spreads_over_the_rejected_material_of_a_transfer(self):
+		"""A charge is spread over the material the receipt accepted and rejected, and the warehouse
+		accounts take what the stock took."""
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
@@ -4185,7 +4186,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(moved_value[transit_warehouse], -1000)
 		self.assertEqual(moved_value[to_warehouse], 784)
-		self.assertEqual(moved_value[rejected_warehouse], 300)
+		self.assertEqual(moved_value[rejected_warehouse], 336)
 
 		booked = {}
 		for entry in frappe.get_all(
@@ -4197,6 +4198,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			booked[entry.account] += flt(entry.debit) - flt(entry.credit)
 
 		self.assertEqual(flt(sum(booked.values()), 2), 0)
+		for warehouse, value in moved_value.items():
+			self.assertEqual(flt(booked[get_inventory_account(company, warehouse)], 2), value)
 
 	def test_return_of_a_fully_rejected_receipt(self):
 		"""A receipt that rejected every unit can be sent back."""

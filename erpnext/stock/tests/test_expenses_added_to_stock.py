@@ -187,3 +187,46 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 			},
 		)
 		self.assertFalse(booked)
+
+	def test_internal_receipt_with_rejected_qty_books_purchase_expense_without_landed_cost(self):
+		"""The purchase expense of an internal receipt leaves out the share of a landed cost that went
+		into its accepted stock."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		make_stock_entry(item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY)
+		dn = create_delivery_note(
+			item_code=self.item,
+			company=COMPANY,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			warehouse=WAREHOUSE,
+			target_warehouse=create_warehouse("_Test Transfer Transit", company=COMPANY),
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": create_warehouse("_Test Transfer To", company=COMPANY),
+				"qty": 7,
+				"rejected_qty": 3,
+				"received_qty": 10,
+				"rejected_warehouse": create_warehouse("_Test Transfer Rejected", company=COMPANY),
+			}
+		)
+		pr.submit()
+		create_landed_cost_voucher("Purchase Receipt", pr.name, COMPANY, charges=120)
+
+		booked = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": pr.name, "is_cancelled": 0, "account": self.purchase_expense_account},
+			pluck="debit",
+		)
+		self.assertEqual(booked, [700])
