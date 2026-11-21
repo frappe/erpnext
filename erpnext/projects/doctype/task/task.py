@@ -576,8 +576,13 @@ def set_tasks_as_overdue():
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
+=======
+def make_timesheet(source_name: str, target_doc: str | dict | Document | None = None):
+	def set_missing_values(source: dict, target: dict) -> None:
+>>>>>>> 19964b0 (fix(projects): remove unused ignore_permissions from Task make_timesheet)
 		target.parent_project = source.project
 		target.append(
 			"time_logs",
@@ -595,7 +600,6 @@ def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 		{"Task": {"doctype": "Timesheet"}},
 		target_doc,
 		postprocess=set_missing_values,
-		ignore_permissions=ignore_permissions,
 	)
 
 	return doclist
