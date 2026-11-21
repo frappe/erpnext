@@ -207,7 +207,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					() => this.set_warehouse(row),
 					() =>
 						this.set_item(row, item_code, barcode, batch_no, serial_no).then((qty) => {
-							this.show_scan_message(row.idx, !is_new_row, qty);
+							// the scan dialog sets the qty itself and resolves without one
+							if (qty) this.show_scan_message(row.idx, !is_new_row, qty);
 						}),
 					() => this.set_serial_no(row, serial_no),
 					() => this.set_batch_no(row, batch_no),
@@ -283,15 +284,13 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			frappe.model.set_value(row.doctype, row.name, item_data);
 
 			resolve(
-				frappe
-					.run_serially([
-						() => this.set_batch_no(row, this.dialog.get_value("batch_no")),
-						() => this.set_barcode(row, this.dialog.get_value("barcode")),
-						() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
-						() => this.add_child_for_remaining_qty(row),
-						() => this.clean_up(),
-					])
-					.then(() => item_data[this.qty_field])
+				frappe.run_serially([
+					() => this.set_batch_no(row, this.dialog.get_value("batch_no")),
+					() => this.set_barcode(row, this.dialog.get_value("barcode")),
+					() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
+					() => this.add_child_for_remaining_qty(row),
+					() => this.clean_up(),
+				])
 			);
 
 			this.dialog.hide();
