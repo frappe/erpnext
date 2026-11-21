@@ -72,16 +72,19 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		make_stock_entry(
 			item_code="_Test Item", qty=5, to_warehouse="Stores - _TC", purpose="Material Receipt"
 		)
-		_, manufacture = make_manufacture_with_extra_item(2)
-		so, _ = make_manufacture_with_extra_item(3)
+		_, unbilled = make_manufacture_with_extra_item(2)
+		so, billed = make_manufacture_with_extra_item(3)
 
 		si = make_sales_invoice(so.name)
 		si.items = [item for item in si.items if item.item_code == "_Test Item"]
 		si.submit()
 
-		manufacture.reload()
-		manufacture.cancel()
-		self.assertEqual(manufacture.docstatus, 2)
+		unbilled.reload()
+		unbilled.cancel()
+		self.assertEqual(unbilled.docstatus, 2)
+
+		billed.reload()
+		self.assertRaisesRegex(frappe.ValidationError, "billed quantity", billed.cancel)
 
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
