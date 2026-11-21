@@ -1312,7 +1312,7 @@ def get_whole_sales_unit_qty(item, stock_qty: float, max_qty: float | None = Non
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
-	"""Returns True if there is any Stock Reservation Entry for the given voucher."""
+	"""Returns True if any Stock Reservation Entry of the given voucher still holds stock."""
 
 	if _get_stock_reservation_entries_for_voucher(
 		voucher_type, voucher_no, voucher_detail_no, fields=["name"], ignore_status=True
@@ -2228,7 +2228,7 @@ def _get_stock_reservation_entries_for_voucher(
 		query = query.where(sre.voucher_detail_no == voucher_detail_no)
 
 	if ignore_status:
-		query = query.where(sre.delivered_qty < sre.reserved_qty)
+		query = query.where(sre.delivered_qty + sre.transferred_qty + sre.consumed_qty < sre.reserved_qty)
 
 	return query.run(as_dict=True)
 
