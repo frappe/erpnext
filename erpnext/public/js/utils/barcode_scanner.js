@@ -53,9 +53,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			return Promise.resolve();
 		}
 
-		// scans share the selector flags, so each one waits for the one before it
-		const scan = (this.last_scan || Promise.resolve()).then(() => this.scan(input));
-		this.last_scan = scan.catch(() => {});
+		// scans share the selector flags and the form's rows, so each one waits for the one before it;
+		// queued on the form since Pick List makes a new scanner per scan
+		const scan = (this.frm.last_barcode_scan || Promise.resolve()).then(() => this.scan(input));
+		this.frm.last_barcode_scan = scan.catch(() => {});
 		return scan;
 	}
 
