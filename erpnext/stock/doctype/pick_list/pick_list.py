@@ -1829,7 +1829,8 @@ def create_dn_wo_so(pick_list, delivery_note=None):
 
 def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations=None):
 	if not target_doc:
-		target_doc = frappe.new_doc(target)
+		# currency comes from the customer or company, not the global default
+		target_doc = frappe.new_doc(target, currency=None)
 
 	target_doc.company = pick_list.company
 
