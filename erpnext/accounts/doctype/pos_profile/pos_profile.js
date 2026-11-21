@@ -114,6 +114,16 @@ frappe.ui.form.on("POS Profile", {
 			};
 		});
 
+		frm.set_query("cash_difference_account", function (doc) {
+			return {
+				filters: {
+					report_type: "Profit and Loss",
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.set_query("write_off_cost_center", function (doc) {
 			return {
 				filters: {
