@@ -45,6 +45,10 @@ class QtyMismatchError(ValidationError):
 	pass
 
 
+# valuation charges whose share of each item comes from the tax calculation
+ITEM_WISE_VALUATION_CHARGE_TYPES = ("On Item Quantity", "On Previous Row Amount", "On Previous Row Total")
+
+
 class BuyingController(SubcontractingController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
@@ -861,7 +865,7 @@ class BuyingController(SubcontractingController):
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
 				# Allocate the full amount to stock/asset items only (e.g. Freight)
 				total_actual_tax_on_stock_items += amount
-			elif d.charge_type != "On Item Quantity":
+			elif d.charge_type not in ITEM_WISE_VALUATION_CHARGE_TYPES:
 				total_actual_tax_amount += amount
 
 		return tax_accounts, total_valuation_amount, total_actual_tax_amount, total_actual_tax_on_stock_items
@@ -898,12 +902,15 @@ class BuyingController(SubcontractingController):
 		self._spread_charge_over_items(charge_per_item, total_on_all_items, all_items)
 		self._spread_charge_over_items(charge_per_item, total_on_stock_items, stock_items)
 		for tax in self.get("taxes"):
-			if tax.charge_type == "On Item Quantity" and tax.category in ("Valuation", "Valuation and Total"):
-				for item_idx, amount in self.get_quantity_based_tax_amounts(tax).items():
+			if tax.charge_type in ITEM_WISE_VALUATION_CHARGE_TYPES and tax.category in (
+				"Valuation",
+				"Valuation and Total",
+			):
+				for item_idx, amount in self.get_item_wise_tax_amounts(tax).items():
 					charge_per_item[item_idx] = charge_per_item.get(item_idx, 0.0) + amount
 		return charge_per_item
 
-	def get_quantity_based_tax_amounts(self, tax):
+	def get_item_wise_tax_amounts(self, tax):
 		# Reuse the signed, rounded base amounts calculated for each item.
 		if self.get("_item_wise_tax_details"):
 			return {
@@ -991,10 +998,10 @@ class BuyingController(SubcontractingController):
 			if not amount:
 				continue
 
-			if tax.charge_type == "On Item Quantity":
+			if tax.charge_type in ITEM_WISE_VALUATION_CHARGE_TYPES:
 				amount = sum(
 					charge
-					for item_idx, charge in self.get_quantity_based_tax_amounts(tax).items()
+					for item_idx, charge in self.get_item_wise_tax_amounts(tax).items()
 					if item_idx in stock_item_idx
 				)
 			elif tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
