@@ -482,7 +482,14 @@ class ProductionPlan(Document):
 
 	def get_consolidated_planned_qty(self, bundle_lines=False):
 		"""Planned qty of consolidated rows allotted to their Sales Order lines, of product bundle lines or of other lines."""
-		rows = [row for row in self.po_items if not row.sales_order and row.sales_order_item]
+		rows = [
+			row
+			for row in self.po_items
+			if not row.sales_order
+			and row.sales_order_item
+			# components of older plans share one item reference, so they cannot be told apart
+			and (row.item_reference or not bundle_lines)
+		]
 		if not rows:
 			return []
 
