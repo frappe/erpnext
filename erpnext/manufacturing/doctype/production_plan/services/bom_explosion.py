@@ -250,10 +250,9 @@ def _process_subitem(
 
 	explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
 	explode = explodable and _should_explode_subitem(d, include_subcontracted_items) and d.qty > 0
-	if not data.get("include_exploded_items") or not child_bom or not explode:
+	if not explode:
 		_merge_subitem(item_details, d)
-
-	if explode:
+	else:
 		qty = (
 			d.qty
 			if d.is_phantom_item
