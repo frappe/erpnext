@@ -747,6 +747,126 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(own_transfer.docstatus, 1)
 
+	def test_consumed_alternative_item_counts_on_its_original_row(self):
+		sco = make_reserving_order_with_new_items("Alt Consumed")
+		frappe.db.set_value("BOM", sco.items[0].bom, "allow_alternative_item", 1)
+		sco.reserve_stock = 0
+		sco.submit()
+		original = sco.supplied_items[0]
+		alternative = make_item("Subcontracted RM Item Alt Consumed Alternative", {"is_stock_item": 1}).name
+		set_alternative_item(original.rm_item_code, alternative)
+		make_stock_entry(
+			item_code=alternative,
+			target=original.reserve_warehouse,
+			qty=original.required_qty,
+			basic_rate=120,
+		)
+
+		transfer = make_supplied_item_transfer(sco, original)
+		transfer.items[0].update(
+			{"item_code": alternative, "original_item": original.rm_item_code, "allow_alternative_item": 1}
+		)
+		transfer.insert()
+		transfer.submit()
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertEqual(
+			frappe.db.get_value(original.doctype, original.name, "consumed_qty"), original.required_qty
+		)
+
+	def test_alternative_item_counts_on_the_order_row_it_was_sent_on_net_of_returns(self):
+		set_backflush_based_on("Material Transferred for Subcontract")
+		suffix = "Row Alt"
+		service_item = make_item(f"Subcontracted Service Item {suffix}", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			f"Subcontracted FG Item {suffix}", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		first, second, shared, other = (
+			make_item(f"Subcontracted RM Item {suffix} {code}", {"is_stock_item": 1}).name for code in "ABXY"
+		)
+		make_bom(item=fg_item, raw_materials=[first, second], rate=100, currency="INR")
+		set_alternative_item(first, shared)
+		set_alternative_item(first, other)
+		set_alternative_item(second, shared)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		first_row, second_row = sco.supplied_items
+		for item_code, qty in ((shared, 10), (other, 5)):
+			make_stock_entry(item_code=item_code, target=first_row.reserve_warehouse, qty=qty, basic_rate=100)
+
+		def send(row, alternative):
+			transfer = make_supplied_item_transfer(sco, row)
+			transfer.items[0].update(
+				{"item_code": alternative, "original_item": row.rm_item_code, "allow_alternative_item": 1}
+			)
+			transfer.insert()
+			transfer.submit()
+
+		send(first_row, shared)
+		frappe.flags.args = {"rm_details": [first_row.name]}
+		returned = get_materials_from_supplier(sco.name)
+		frappe.flags.args = None
+		returned.submit()
+		send(first_row, other)
+		send(second_row, shared)
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertEqual(
+			[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items], [5, 5]
+		)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": True})
+	def test_return_booked_on_one_row_keeps_consumed_qty_positive(self):
+		suffix = "Split Return"
+		service_item = make_item(f"Subcontracted Service Item {suffix}", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			f"Subcontracted FG Item {suffix}", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item(f"Subcontracted RM Item {suffix}", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+		service_item_row = {
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": service_item,
+			"qty": 5,
+			"rate": 100,
+			"fg_item": fg_item,
+			"fg_item_qty": 5,
+		}
+		sco = get_subcontracting_order(service_items=[service_item_row, dict(service_item_row)])
+		make_stock_entry(
+			item_code=rm_item, target=sco.supplied_items[0].reserve_warehouse, qty=10, basic_rate=100
+		)
+		for row in sco.supplied_items:
+			make_supplied_item_transfer(sco, row).submit()
+
+		def receive_one():
+			receipt = make_subcontracting_receipt(sco.name)
+			receipt.items[0].qty = 1
+			receipt.remove(receipt.items[1])
+			receipt.submit()
+
+		receive_one()
+		# return 8 of the 9 left, all booked on the first row
+		frappe.flags.args = {"rm_details": [sco.supplied_items[0].name]}
+		returned = get_materials_from_supplier(sco.name)
+		frappe.flags.args = None
+		returned.items[0].qty = 8
+		returned.submit()
+		receive_one()
+
+		self.assertEqual(
+			[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items], [0, 2]
+		)
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
