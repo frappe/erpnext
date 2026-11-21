@@ -152,10 +152,7 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		is_internal_transfer = self.is_internal_transfer()
-		if (is_internal_transfer or self.is_inter_company_receipt()) and (
-			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
-		):
+		if self.get("is_internal_supplier") and self.is_stock_receipt():
 			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 
 			doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
@@ -184,7 +181,7 @@ class BuyingController(SubcontractingController):
 				elif item.serial_and_batch_bundle:
 					self.resize_package(item, "serial_and_batch_bundle", "qty")
 
-				if is_internal_transfer and item.get(field) and bundle_ids.get(item.get(field)):
+				if item.get(field) and bundle_ids.get(item.get(field)):
 					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
 
 	def has_stock_qty_changed(self, row, qty_field) -> bool:
@@ -347,10 +344,10 @@ class BuyingController(SubcontractingController):
 	def set_rejected_package(self, row, package) -> None:
 		"""Package of the material the row rejects.
 
-		A receipt of an internal transfer builds no package for it on its own, so rejected material
+		A receipt from an internal supplier builds no package for it on its own, so rejected material
 		of a tracked item would have nothing to say where it came from.
 		"""
-		if not self.has_rejected_stock(row):
+		if not get_stock_qty(row, row.rejected_qty):
 			self.remove_package(row, "rejected_serial_and_batch_bundle")
 			return
 
