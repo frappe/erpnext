@@ -1,0 +1,953 @@
+{
+ "allow_guest": 0,
+ "blocks": [
+  {
+   "baseStyles": {
+    "display": "flex",
+    "flexDirection": "row",
+    "flexShrink": 0,
+    "height": "100%",
+    "isolation": "isolate",
+    "overflowX": "hidden",
+    "position": "static",
+    "width": "inherit"
+   },
+   "blockName": "body",
+   "children": [
+    {
+     "componentId": "portal_sidebar-nm9u0g52w",
+     "componentName": "portal_sidebar",
+     "componentProps": {},
+     "componentSlots": {},
+     "isStudioComponent": true
+    },
+    {
+     "baseStyles": {
+      "background": "var(--surface-base)",
+      "display": "flex",
+      "flex": "1",
+      "flexDirection": "column",
+      "height": "100%",
+      "minWidth": "0px"
+     },
+     "blockName": "Main",
+     "children": [
+      {
+       "baseStyles": {
+        "background": "var(--surface-base)",
+        "borderColor": "var(--outline-gray-1)",
+        "borderStyle": "solid",
+        "borderWidth": "0px 0px 1px 0px",
+        "display": "flex",
+        "flexDirection": "column",
+        "flexShrink": 0,
+        "justifyContent": "center",
+        "minHeight": "48px",
+        "padding": "0px 20px",
+        "width": "100%"
+       },
+       "blockName": "Page header",
+       "children": [
+        {
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "width": "100%"
+         },
+         "blockName": "Header row",
+         "children": [
+          {
+           "baseStyles": {
+            "minWidth": "0px"
+           },
+           "blockName": "Breadcrumbs",
+           "componentId": "Breadcrumbs-0i5vd8cfu",
+           "componentName": "Breadcrumbs",
+           "componentProps": {
+            "items": "{{ [{ label: __('Addresses'), route: '/addresses' }] }}"
+           }
+          },
+          {
+           "blockName": "Add address",
+           "componentEvents": {
+            "click": {
+             "action": "Run Script",
+             "script": "newAddress()"
+            }
+           },
+           "componentId": "Button-ldntlfyj0",
+           "componentName": "Button",
+           "componentProps": {
+            "iconLeft": "lucide-plus",
+            "label": "{{ __('Add address') }}",
+            "size": "sm",
+            "variant": "solid"
+           }
+          }
+         ],
+         "componentId": "div-cbs44bn3d",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "div-bkieugxgu",
+       "componentName": "div",
+       "mobileStyles": {
+        "padding": "0px 12px"
+       },
+       "originalElement": "div"
+      },
+      {
+       "baseStyles": {
+        "alignItems": "center",
+        "display": "flex",
+        "flex": "1",
+        "flexDirection": "column",
+        "gap": "20px",
+        "minHeight": "0px",
+        "overflowY": "auto",
+        "padding": "20px 20px 80px",
+        "width": "100%"
+       },
+       "blockName": "Content",
+       "children": [
+        {
+         "baseStyles": {
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "24px",
+          "maxWidth": "900px",
+          "width": "100%"
+         },
+         "blockName": "Page",
+         "children": [
+          {
+           "baseStyles": {
+            "width": "100%"
+           },
+           "blockName": "List",
+           "children": [
+            {
+             "blockName": "ListHeader",
+             "children": [
+              {
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-pmutwpucc",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('Address') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-m9pz8lkh5",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              },
+              {
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-48l52o388",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('Type') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-jjcwchtsb",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              },
+              {
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-bsuq01gua",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('City') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-0o5wsi5fl",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              },
+              {
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-4fdtnriel",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('Used by default') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-cs1yu2zhf",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              },
+              {
+               "baseStyles": {
+                "justifyContent": "flex-end"
+               },
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-actionhdr",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": ""
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-action01",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              }
+             ],
+             "componentId": "ListHeader-fcva9ffy7",
+             "componentName": "ListHeader",
+             "componentProps": {},
+             "componentSlots": {}
+            },
+            {
+             "blockName": "ListRows",
+             "componentId": "ListRows-c46r1kic3",
+             "componentName": "ListRows",
+             "componentProps": {
+              "items": "{{ rows }}"
+             },
+             "componentSlots": {
+              "default": {
+               "parentBlockId": "ListRows-c46r1kic3",
+               "slotContent": [
+                {
+                 "blockName": "ListRow",
+                 "children": [
+                  {
+                   "blockName": "Address",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "display": "flex",
+                      "flexDirection": "column",
+                      "gap": "6px",
+                      "minWidth": "0px"
+                     },
+                     "blockName": "Lines",
+                     "children": [
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-8)"
+                       },
+                       "blockName": "Title",
+                       "componentId": "TextBlock-qvx4zxaqc",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-base-medium",
+                        "tag": "span",
+                        "text": "{{ item.title }}"
+                       }
+                      },
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-5)",
+                        "minWidth": "0px",
+                        "overflow": "hidden",
+                        "textOverflow": "ellipsis",
+                        "whiteSpace": "nowrap"
+                       },
+                       "blockName": "Street",
+                       "componentId": "TextBlock-xv9k2ora0",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-sm",
+                        "tag": "span",
+                        "text": "{{ item.street }}"
+                       }
+                      }
+                     ],
+                     "componentId": "div-qdc66dxbg",
+                     "componentName": "div",
+                     "originalElement": "div"
+                    }
+                   ],
+                   "componentId": "ListCell-4hmtbxx5k",
+                   "componentName": "ListCell",
+                   "componentProps": {}
+                  },
+                  {
+                   "blockName": "Type",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-7)",
+                      "minWidth": "0px",
+                      "overflow": "hidden",
+                      "textOverflow": "ellipsis",
+                      "whiteSpace": "nowrap"
+                     },
+                     "blockName": "Type",
+                     "componentId": "TextBlock-ai7h1dfxz",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ item.typeLabel }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListCell-rofgdc8i2",
+                   "componentName": "ListCell",
+                   "componentProps": {}
+                  },
+                  {
+                   "blockName": "City",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-7)",
+                      "minWidth": "0px",
+                      "overflow": "hidden",
+                      "textOverflow": "ellipsis",
+                      "whiteSpace": "nowrap"
+                     },
+                     "blockName": "City",
+                     "componentId": "TextBlock-j71efylbr",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ item.city }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListCell-neae4bt0f",
+                   "componentName": "ListCell",
+                   "componentProps": {}
+                  },
+                  {
+                   "blockName": "Preferred",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "alignItems": "center",
+                      "display": "flex",
+                      "gap": "6px"
+                     },
+                     "blockName": "Preferred badges",
+                     "children": [
+                      {
+                       "blockName": "Billing badge",
+                       "componentId": "Badge-billing01",
+                       "componentName": "Badge",
+                       "componentProps": {
+                        "label": "{{ __('Billing') }}",
+                        "size": "sm",
+                        "theme": "green",
+                        "variant": "subtle"
+                       },
+                       "visibilityCondition": "{{ item.is_primary_address }}"
+                      },
+                      {
+                       "blockName": "Shipping badge",
+                       "componentId": "Badge-shipping1",
+                       "componentName": "Badge",
+                       "componentProps": {
+                        "label": "{{ __('Shipping') }}",
+                        "size": "sm",
+                        "theme": "blue",
+                        "variant": "subtle"
+                       },
+                       "visibilityCondition": "{{ item.is_shipping_address }}"
+                      },
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-5)"
+                       },
+                       "blockName": "None",
+                       "componentId": "TextBlock-nopref01",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-base",
+                        "tag": "span",
+                        "text": "—"
+                       },
+                       "visibilityCondition": "{{ !item.is_primary_address && !item.is_shipping_address }}"
+                      }
+                     ],
+                     "componentId": "div-preferred01",
+                     "componentName": "div",
+                     "originalElement": "div"
+                    }
+                   ],
+                   "componentId": "ListCell-wfoh4v99x",
+                   "componentName": "ListCell",
+                   "componentProps": {}
+                  },
+                  {
+                   "blockName": "Action",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "display": "flex",
+                      "justifyContent": "flex-end",
+                      "width": "100%"
+                     },
+                     "blockName": "Right",
+                     "children": [
+                      {
+                       "blockName": "Edit",
+                       "componentEvents": {
+                        "click": {
+                         "action": "Run Script",
+                         "script": "editAddress(item)"
+                        }
+                       },
+                       "componentId": "Button-editaddr1",
+                       "componentName": "Button",
+                       "componentProps": {
+                        "icon": "lucide-pencil",
+                        "label": "{{ __('Edit') }}",
+                        "size": "sm",
+                        "variant": "ghost"
+                       }
+                      }
+                     ],
+                     "componentId": "div-action01",
+                     "componentName": "div",
+                     "originalElement": "div"
+                    }
+                   ],
+                   "componentId": "ListCell-action01",
+                   "componentName": "ListCell",
+                   "componentProps": {}
+                  }
+                 ],
+                 "componentId": "ListRow-aj4f0bdso",
+                 "componentName": "ListRow",
+                 "componentProps": {}
+                }
+               ],
+               "slotId": "ListRows-690dq159m:default",
+               "slotName": "default"
+              }
+             }
+            }
+           ],
+           "classes": [
+            "portal-reveal"
+           ],
+           "componentId": "List-foojqjzwq",
+           "componentName": "List",
+           "componentProps": {
+            "columns": [
+             "minmax(0, 1fr)",
+             "8rem",
+             "9rem",
+             "11rem",
+             "4rem"
+            ],
+            "rowHeight": 60
+           },
+           "componentSlots": {},
+           "visibilityCondition": "{{ rows.length }}"
+          },
+          {
+           "blockName": "Loading",
+           "componentId": "PortalSkeleton-addresses",
+           "componentName": "PortalSkeleton",
+           "componentProps": {
+            "columns": [
+             "minmax(0, 1fr)",
+             "8rem",
+             "9rem",
+             "11rem",
+             "4rem"
+            ],
+            "count": 3,
+            "variant": "list"
+           },
+           "isCustomVueComponent": true,
+           "visibilityCondition": "{{ !loaded && !loadFailed }}"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px",
+            "justifyContent": "center",
+            "padding": "64px 0px",
+            "width": "100%"
+           },
+           "blockName": "Empty state",
+           "children": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "background": "var(--surface-gray-2)",
+              "borderRadius": "9999px",
+              "display": "flex",
+              "justifyContent": "center",
+              "padding": "12px"
+             },
+             "blockName": "Icon circle",
+             "children": [
+              {
+               "blockName": "Icon",
+               "classes": [
+                "size-6",
+                "text-ink-gray-5"
+               ],
+               "componentId": "span-g4u5n2d1e",
+               "componentName": "Icon",
+               "componentProps": {
+                "icon": "lucide-map-pin"
+               }
+              }
+             ],
+             "componentId": "div-kd0pl6ffl",
+             "componentName": "div",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-7)"
+             },
+             "blockName": "TextBlock",
+             "componentId": "TextBlock-rmy76s0vy",
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-base",
+              "tag": "span",
+              "text": "{{ empty.title }}"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-5)"
+             },
+             "blockName": "TextBlock",
+             "componentId": "TextBlock-450qmniv0",
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-sm",
+              "tag": "span",
+              "text": "{{ empty.caption }}"
+             }
+            }
+           ],
+           "componentId": "div-pdmuv40da",
+           "componentName": "div",
+           "originalElement": "div",
+           "visibilityCondition": "{{ (loaded || loadFailed) && !rows.length }}"
+          }
+         ],
+         "componentId": "div-2ph5cn879",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "div-ey9gjgbee",
+       "componentName": "div",
+       "mobileStyles": {
+        "padding": "20px 12px 80px"
+       },
+       "originalElement": "div"
+      },
+      {
+       "blockName": "Address dialog",
+       "children": [
+        {
+         "baseStyles": {
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "16px",
+          "width": "100%"
+         },
+         "blockName": "Form",
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "row",
+            "gap": "16px",
+            "width": "100%"
+           },
+           "blockName": "Title and type",
+           "children": [
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Title",
+             "componentId": "FormControl-2u76pr8zg",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Address title') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "title"
+              },
+              "type": "text"
+             }
+            },
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Type",
+             "componentId": "FormControl-p8bksobe2",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Address type') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "addressType"
+              },
+              "options": "{{ addressTypes }}",
+              "type": "select"
+             }
+            }
+           ],
+           "componentId": "div-titleandtype",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "blockName": "Line 1",
+           "componentId": "FormControl-pt547eh3z",
+           "componentName": "FormControl",
+           "componentProps": {
+            "label": "{{ __('Address line 1') }}",
+            "modelValue": {
+             "$type": "variable",
+             "name": "line1"
+            },
+            "required": true,
+            "type": "text"
+           }
+          },
+          {
+           "blockName": "Line 2",
+           "componentId": "FormControl-ih34e2r5o",
+           "componentName": "FormControl",
+           "componentProps": {
+            "label": "{{ __('Address line 2') }}",
+            "modelValue": {
+             "$type": "variable",
+             "name": "line2"
+            },
+            "type": "text"
+           }
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "row",
+            "gap": "16px",
+            "width": "100%"
+           },
+           "blockName": "City and state",
+           "children": [
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "City",
+             "componentId": "FormControl-zkaspdui6",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('City') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "city"
+              },
+              "required": true,
+              "type": "text"
+             }
+            },
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "State",
+             "componentId": "FormControl-rzbr6u9da",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('State') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "state"
+              },
+              "type": "text"
+             }
+            }
+           ],
+           "componentId": "div-cityandstate",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "row",
+            "gap": "16px",
+            "width": "100%"
+           },
+           "blockName": "Code and country",
+           "children": [
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Pincode",
+             "componentId": "FormControl-ciin6y6q3",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Postal code') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "pincode"
+              },
+              "type": "text"
+             }
+            },
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Country",
+             "componentId": "FormControl-828z4rda9",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Country') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "country"
+              },
+              "options": "{{ countries }}",
+              "required": true,
+              "type": "combobox"
+             }
+            }
+           ],
+           "componentId": "div-codeandcountry",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "row",
+            "gap": "16px",
+            "width": "100%"
+           },
+           "blockName": "Email and phone",
+           "children": [
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Email",
+             "componentId": "FormControl-3csospi0p",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Email') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "email"
+              },
+              "type": "text"
+             }
+            },
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Phone",
+             "componentId": "FormControl-nqqq445yh",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Phone') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "phone"
+              },
+              "type": "text"
+             }
+            }
+           ],
+           "componentId": "div-emailandphone",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "row",
+            "gap": "16px",
+            "width": "100%"
+           },
+           "blockName": "Defaults",
+           "children": [
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Billing",
+             "componentId": "FormControl-x8txl00iz",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Use as billing address') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "isBilling"
+              },
+              "type": "checkbox"
+             }
+            },
+            {
+             "baseStyles": {
+              "flex": "1",
+              "minWidth": "0px"
+             },
+             "blockName": "Shipping",
+             "componentId": "FormControl-z6n2k303s",
+             "componentName": "FormControl",
+             "componentProps": {
+              "label": "{{ __('Use as shipping address') }}",
+              "modelValue": {
+               "$type": "variable",
+               "name": "isShipping"
+              },
+              "type": "checkbox"
+             }
+            }
+           ],
+           "componentId": "div-defaults",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-red-7)"
+           },
+           "blockName": "Error",
+           "componentId": "TextBlock-4dofcoi1z",
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-sm",
+            "tag": "p",
+            "text": "{{ saveError }}"
+           },
+           "visibilityCondition": "{{ saveError }}"
+          }
+         ],
+         "componentId": "div-bsdhzaceo",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "Dialog-k5cebiunt",
+       "componentName": "Dialog",
+       "componentProps": {
+        "actions": "{{ dialogActions }}",
+        "modelValue": {
+         "$type": "variable",
+         "name": "dialogOpen"
+        },
+        "size": "lg",
+        "title": "{{ dialogTitle }}"
+       }
+      }
+     ],
+     "componentId": "div-qdf6vmr1s",
+     "componentName": "div",
+     "originalElement": "div"
+    }
+   ],
+   "componentId": "root",
+   "componentName": "div",
+   "originalElement": "body"
+  }
+ ],
+ "creation": "2026-10-14 13:15:09.614314",
+ "docstatus": 0,
+ "doctype": "Studio Page",
+ "frappe_app": "erpnext",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-11-14 15:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "addresses",
+ "owner": "Administrator",
+ "page_name": "addresses",
+ "page_title": "Addresses",
+ "published": 1,
+ "resources": [
+  {
+   "auto": 1,
+   "fetch_document_using_filters": 0,
+   "limit": 0,
+   "method": "GET",
+   "params": "{}",
+   "resource_name": "addresses",
+   "resource_type": "API Resource",
+   "url": "erpnext.portal.customer_portal.get_portal_addresses"
+  },
+  {
+   "auto": 1,
+   "fetch_document_using_filters": 0,
+   "limit": 0,
+   "method": "GET",
+   "params": "{}",
+   "resource_name": "addressOptions",
+   "resource_type": "API Resource",
+   "url": "erpnext.portal.customer_portal.get_portal_address_options"
+  }
+ ],
+ "route": "/addresses",
+ "studio_app": "customer-portal"
+}
