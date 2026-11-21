@@ -10,6 +10,7 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
 
+from erpnext import require_permission
 from erpnext.controllers.stock_controller import StockController
 
 
@@ -23,6 +24,17 @@ class SerialNoCannotCannotChangeError(ValidationError):
 
 class SerialNoWarehouseError(ValidationError):
 	pass
+
+
+STOCK_MANAGED_FIELDS = (
+	"item_code",
+	"warehouse",
+	"batch_no",
+	"status",
+	"company",
+	"customer",
+	"purchase_rate",
+)
 
 
 class SerialNo(StockController):
@@ -75,12 +87,15 @@ class SerialNo(StockController):
 		self.validate_warehouse()
 
 	def validate_warehouse(self):
-		if not self.get("__islocal"):
-			item_code, warehouse = frappe.db.get_value("Serial No", self.name, ["item_code", "warehouse"])
-			if not self.via_stock_ledger and item_code != self.item_code:
-				frappe.throw(_("Item Code cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
-			if not self.via_stock_ledger and warehouse != self.warehouse:
-				frappe.throw(_("Warehouse cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
+		if self.get("__islocal") or self.via_stock_ledger:
+			return
+
+		for fieldname in STOCK_MANAGED_FIELDS:
+			if self.has_value_changed(fieldname):
+				frappe.throw(
+					_("{0} cannot be changed for Serial No.").format(_(self.meta.get_label(fieldname))),
+					SerialNoCannotCannotChangeError,
+				)
 
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
@@ -191,6 +206,7 @@ def auto_fetch_serial_number(
 	for_doctype: str | None = None,
 	exclude_sr_nos=None,
 ) -> list[str]:
+	require_permission("Warehouse", warehouse, "select")
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
@@ -222,6 +238,9 @@ def auto_fetch_serial_number(
 def get_pos_reserved_serial_nos(filters):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
+
+	frappe.has_permission("POS Invoice", "read", throw=True)
+	require_permission("Warehouse", filters.get("warehouse"), "select")
 
 	POSInvoice = frappe.qb.DocType("POS Invoice")
 	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")

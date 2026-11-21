@@ -119,6 +119,208 @@ class TestLandedCostVoucher(FrappeTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "of all items is zero"):
 			lcv.set_applicable_charges_on_item()
 
+	def test_stock_account_cannot_be_charge_account(self):
+		receipt = make_purchase_receipt(qty=10, rate=100)
+		stock_account = frappe.db.get_value(
+			"Account", {"company": receipt.company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			expense_account=stock_account,
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, lcv.insert)
+
+	def test_purchase_and_return_with_qty_based_charges_can_be_submitted(self):
+		purchase = make_purchase_receipt(qty=2, rate=100)
+		original = make_purchase_receipt(qty=1, rate=100)
+		purchase_return = make_purchase_receipt(qty=-1, rate=100, is_return=1, return_against=original.name)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=purchase.doctype,
+			receipt_document=purchase.name,
+			charges=80,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.append(
+			"purchase_receipts",
+			{"receipt_document_type": purchase_return.doctype, "receipt_document": purchase_return.name},
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual(sorted(item.applicable_charges for item in lcv.items), sorted([160, -80]))
+
+	def test_return_only_voucher_with_qty_based_charges_can_be_submitted(self):
+		original = make_purchase_receipt(qty=1, rate=100)
+		purchase_return = make_purchase_receipt(qty=-1, rate=100, is_return=1, return_against=original.name)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=purchase_return.doctype,
+			receipt_document=purchase_return.name,
+			charges=80,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual([item.applicable_charges for item in lcv.items], [80])
+
+	def test_rounding_difference_stays_off_return_rows(self):
+		purchase = make_purchase_receipt(qty=10000, rate=1, do_not_save=True)
+		for _i in range(2):
+			purchase.append("items", purchase.items[0].as_dict().copy().update({"name": None}))
+		purchase.insert()
+		purchase.submit()
+		original = make_purchase_receipt(qty=1, rate=1)
+		purchase_return = make_purchase_receipt(qty=-1, rate=1, is_return=1, return_against=original.name)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=purchase.doctype,
+			receipt_document=purchase.name,
+			charges=100,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.append(
+			"purchase_receipts",
+			{"receipt_document_type": purchase_return.doctype, "receipt_document": purchase_return.name},
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		charges = sorted(item.applicable_charges for item in lcv.items)
+		self.assertEqual(charges, [0, 33.33, 33.33, 33.34])
+
+	def test_manual_distribution_refuses_negative_charges(self):
+		receipt = make_purchase_receipt(qty=10, rate=100, do_not_save=True)
+		receipt.append(
+			"items",
+			receipt.items[0]
+			.as_dict()
+			.copy()
+			.update({"name": None, "qty": 1, "received_qty": 1, "stock_qty": 1}),
+		)
+		receipt.insert()
+		receipt.submit()
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 300
+		lcv.items[1].applicable_charges = -200
+		lcv.insert()
+		self.assertRaises(frappe.ValidationError, lcv.submit)
+
+	def make_receipt_with_rows(self, row_count):
+		receipt = make_purchase_receipt(qty=1, rate=100, do_not_save=True)
+		for _i in range(row_count - 1):
+			receipt.append("items", receipt.items[0].as_dict().copy().update({"name": None}))
+		receipt.insert()
+		receipt.submit()
+		return receipt
+
+	def test_small_charge_distribution_has_no_negative_share(self):
+		receipt = self.make_receipt_with_rows(7)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=0.04,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.insert()
+		lcv.submit()
+
+		shares = [flt(row.applicable_charges) for row in lcv.items]
+		self.assertTrue(all(share >= 0 for share in shares))
+		self.assertEqual(flt(sum(shares), 2), 0.04)
+
+	def test_manual_rounding_difference_keeps_shares_non_negative(self):
+		receipt = self.make_receipt_with_rows(2)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 100.01
+		lcv.items[1].applicable_charges = 0
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual([flt(row.applicable_charges) for row in lcv.items], [100.0, 0.0])
+
+	def test_get_items_needs_receipt_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		receipt = make_purchase_receipt(qty=2, rate=100)
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.append("purchase_receipts", {"receipt_document_type": "Sales Invoice", "receipt_document": "X"})
+		self.assertRaises(frappe.ValidationError, lcv.get_items_from_purchase_receipts)
+
+		lcv.purchase_receipts[0].update(
+			{"receipt_document_type": "Purchase Receipt", "receipt_document": receipt.name}
+		)
+		users = {}
+		for company in ("_Test Company 1", "_Test Company"):
+			users[company] = create_user(
+				f"lcv-items-{frappe.scrub(company)}@example.com", "Stock Manager"
+			).name
+			if not frappe.db.exists("User Permission", {"user": users[company], "allow": "Company"}):
+				add_user_permission("Company", company, users[company])
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(users["_Test Company 1"])
+		self.assertRaises(frappe.PermissionError, lcv.get_items_from_purchase_receipts)
+
+		frappe.set_user(users["_Test Company"])
+		lcv.get_items_from_purchase_receipts()
+		self.assertEqual([item.item_code for item in lcv.items], ["_Test Item"])
+
+	def test_stock_manager_gets_items_from_purchase_invoice(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		invoice = make_purchase_invoice(qty=2, rate=100, update_stock=1)
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.append(
+			"purchase_receipts",
+			{"receipt_document_type": "Purchase Invoice", "receipt_document": invoice.name},
+		)
+
+		stock_manager = create_user("lcv-invoice-stock-manager@example.com", "Stock Manager", "Stock User")
+		other_company_user = create_user(
+			"lcv-invoice-other-company@example.com", "Stock Manager", "Stock User"
+		)
+		if not frappe.db.exists("User Permission", {"user": other_company_user.name, "allow": "Company"}):
+			add_user_permission("Company", "_Test Company 1", other_company_user.name)
+		stock_user = create_user("lcv-invoice-stock-user@example.com", "Stock User")
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		for user in (other_company_user, stock_user):
+			frappe.set_user(user.name)
+			self.assertRaises(frappe.PermissionError, lcv.get_items_from_purchase_receipts)
+
+		frappe.set_user(stock_manager.name)
+		lcv.get_items_from_purchase_receipts()
+		self.assertEqual([(item.item_code, item.qty) for item in lcv.items], [("_Test Item", 2)])
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 

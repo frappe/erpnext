@@ -1,16 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-const DIFFERENCE_FIELD_NAMES = [
-	"difference_in_qty",
-	"fifo_qty_diff",
-	"fifo_value_diff",
-	"fifo_valuation_diff",
-	"valuation_diff",
-	"fifo_difference_diff",
-	"diff_value_diff",
-];
-
 frappe.query_reports["Stock Ledger Invariant Check"] = {
 	filters: [
 		{
@@ -41,8 +31,17 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 	],
 
 	formatter(value, row, column, data, default_formatter) {
+		const difference_fields = [
+			"difference_in_qty",
+			"fifo_qty_diff",
+			"fifo_value_diff",
+			"fifo_valuation_diff",
+			"valuation_diff",
+			"fifo_difference_diff",
+			"diff_value_diff",
+		];
 		value = default_formatter(value, row, column, data);
-		if (DIFFERENCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
+		if (difference_fields.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
 			value = '<span style="color:red">' + value + "</span>";
 		}
 		return value;

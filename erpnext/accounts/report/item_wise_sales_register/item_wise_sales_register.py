@@ -2,6 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import hashlib
+import re
+
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
@@ -11,13 +14,15 @@ from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.xlsxutils import handle_html
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.accounts.report.utils import get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns, validate_date_range
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,
 )
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return _execute(filters)
 
 
@@ -29,24 +34,19 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
 	item_list = get_items(filters, additional_table_columns, additional_conditions)
+	if not item_list:
+		return columns, [], None, None, None, 0
+
+	itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 	default_taxes = {}
-	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
-		for tax in tax_columns:
-			default_taxes[f"{tax}_rate"] = 0
-			default_taxes[f"{tax}_amount"] = 0
+	for tax in tax_columns:
+		default_taxes[f"{tax}_rate"] = 0
+		default_taxes[f"{tax}_amount"] = 0
 
 	mode_of_payments = get_mode_of_payments(set(d.parent for d in item_list))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)
 
-	data = []
-	total_row_map = {}
-	skip_total_row = 0
-	prev_group_by_value = ""
-
-	if filters.get("group_by"):
-		grand_total = get_grand_total(filters, "Sales Invoice")
-
+	rows = []
 	customer_details = get_customer_details()
 
 	for d in item_list:
@@ -118,34 +118,48 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 			}
 		)
 
-		if filters.get("group_by"):
-			row.update({"percent_gt": flt(row["total"] / grand_total) * 100})
-			group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
-			data, prev_group_by_value = add_total_row(
-				data,
-				filters,
-				prev_group_by_value,
-				d,
-				total_row_map,
-				group_by_field,
-				subtotal_display_field,
-				grand_total,
-				tax_columns,
-			)
-			add_sub_total_row(row, total_row_map, d.get(group_by_field, ""), tax_columns)
+		rows.append((d, row))
 
+	if filters.get("group_by"):
+		return columns, get_grouped_data(filters, rows, tax_columns), None, None, None, 1
+
+	return columns, [row for _item, row in rows], None, None, None, 0
+
+
+def get_grouped_data(filters: dict, rows: list[tuple[dict, dict]], tax_columns: list[str]) -> list[dict]:
+	data = []
+	total_row_map = {}
+	prev_group_by_value = ""
+	grand_total = sum(flt(row["total"]) for _item, row in rows)
+	group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
+
+	for d, row in rows:
+		row["percent_gt"] = get_percent(row["total"], grand_total)
+		data, prev_group_by_value = add_total_row(
+			data,
+			filters,
+			prev_group_by_value,
+			d,
+			total_row_map,
+			group_by_field,
+			subtotal_display_field,
+			grand_total,
+			tax_columns,
+		)
+		add_sub_total_row(row, total_row_map, d.get(group_by_field, ""), tax_columns)
 		data.append(row)
 
-	if filters.get("group_by") and item_list:
-		total_row = total_row_map.get(prev_group_by_value or d.get("item_name"))
-		total_row["percent_gt"] = flt(total_row["total"] / grand_total * 100)
-		data.append(total_row)
-		data.append({})
-		add_sub_total_row(total_row, total_row_map, "total_row", tax_columns)
-		data.append(total_row_map.get("total_row"))
-		skip_total_row = 1
+	total_row = total_row_map.get(prev_group_by_value or d.get("item_name"))
+	total_row["percent_gt"] = get_percent(total_row["total"], grand_total)
+	data.append(total_row)
+	data.append({})
+	add_sub_total_row(total_row, total_row_map, "total_row", tax_columns)
+	data.append(total_row_map.get("total_row"))
+	return data
 
-	return columns, data, None, None, None, skip_total_row
+
+def get_percent(value: float, grand_total: float) -> float:
+	return flt(value) / grand_total * 100 if grand_total else 0.0
 
 
 def get_income_account(row):
@@ -547,7 +561,7 @@ def get_tax_accounts(
 	tax_columns = {}
 	invoice_item_row = {}
 	itemised_tax = {}
-	scrubbed_description_map = {}
+	column_keys = {}
 	add_deduct_tax = "charge_type"
 
 	tax_amount_precision = (
@@ -603,15 +617,12 @@ def get_tax_accounts(
 		add_deduct_tax,
 		tax_amount,
 	) in tax_details:
-		description = handle_html(description)
-		scrubbed_description = scrubbed_description_map.get(description)
-		if not scrubbed_description:
-			scrubbed_description = frappe.scrub(description)
-			scrubbed_description_map[description] = scrubbed_description
+		# keyed by account, as different accounts can share a description
+		account = account_head or handle_html(description)
+		column_key = get_column_key(account, column_keys)
 
-		if scrubbed_description not in tax_columns and tax_amount:
-			# as description is text editor earlier and markup can break the column convention in reports
-			tax_columns[scrubbed_description] = description
+		if column_key not in tax_columns and tax_amount:
+			tax_columns[column_key] = account
 
 		if item_wise_tax_detail:
 			try:
@@ -645,35 +656,43 @@ def get_tax_accounts(
 								else tax_value
 							)
 
-							itemised_tax.setdefault(d.name, {})[scrubbed_description] = frappe._dict(
-								{
-									"tax_rate": tax_rate,
-									"tax_amount": tax_value,
-									"is_other_charges": 0 if tuple([account_head]) in tax_accounts else 1,
-								}
+							add_item_tax(
+								itemised_tax.setdefault(d.name, {}),
+								column_key,
+								frappe._dict(
+									{
+										"tax_rate": tax_rate,
+										"tax_amount": tax_value,
+										"is_other_charges": 0 if tuple([account_head]) in tax_accounts else 1,
+									}
+								),
 							)
 
 			except ValueError:
 				continue
 		elif charge_type == "Actual" and tax_amount:
 			for d in invoice_item_row.get(parent, []):
-				itemised_tax.setdefault(d.name, {})[scrubbed_description] = frappe._dict(
-					{
-						"tax_rate": "NA",
-						"tax_amount": flt(
-							(tax_amount * d.base_net_amount) / d.base_net_total, tax_amount_precision
-						),
-					}
+				add_item_tax(
+					itemised_tax.setdefault(d.name, {}),
+					column_key,
+					frappe._dict(
+						{
+							"tax_rate": "NA",
+							"tax_amount": flt(
+								(tax_amount * d.base_net_amount) / d.base_net_total, tax_amount_precision
+							),
+						}
+					),
 				)
 
 	tax_columns_list = list(tax_columns.keys())
 	tax_columns_list.sort()
-	for scrubbed_desc in tax_columns_list:
-		desc = tax_columns[scrubbed_desc]
+	for column_key in tax_columns_list:
+		account = tax_columns[column_key]
 		columns.append(
 			{
-				"label": _(desc + " Rate"),
-				"fieldname": f"{scrubbed_desc}_rate",
+				"label": _(account + " Rate"),
+				"fieldname": f"{column_key}_rate",
 				"fieldtype": "Float",
 				"width": 100,
 			}
@@ -681,8 +700,8 @@ def get_tax_accounts(
 
 		columns.append(
 			{
-				"label": _(desc + " Amount"),
-				"fieldname": f"{scrubbed_desc}_amount",
+				"label": _(account + " Amount"),
+				"fieldname": f"{column_key}_amount",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 100,
@@ -721,6 +740,45 @@ def get_tax_accounts(
 	]
 
 	return itemised_tax, tax_columns_list
+
+
+def add_item_tax(item_taxes: dict, column_key: str, tax: frappe._dict) -> None:
+	"""Add a tax row's share to the item, summing rows that book to the same account."""
+	if column_key not in item_taxes:
+		item_taxes[column_key] = tax
+		return
+
+	item_taxes[column_key].tax_rate = combine_tax_rates(item_taxes[column_key].tax_rate, tax.tax_rate)
+	item_taxes[column_key].tax_amount += tax.tax_amount
+
+
+def get_column_key(account: str, column_keys: dict) -> str:
+	"""Return a column key for the account that does not depend on the other accounts in the report.
+
+	Accounts whose names scrub to the same key (e.g. "Tax-1 - TC" and "Tax 1 - TC") get a suffix
+	derived from their own name, so a saved report keeps each column on its account across filters.
+	"""
+	if account not in column_keys:
+		column_keys[account] = frappe.scrub(account)
+		if has_scrubbed_name_clash(account):
+			column_keys[account] += "_" + hashlib.sha256(account.encode()).hexdigest()[:8]
+
+	return column_keys[account]
+
+
+def has_scrubbed_name_clash(account: str) -> bool:
+	# "_" is a single character wildcard, so this matches every name that may scrub to the same key
+	pattern = re.sub(r"[ \-%\\]", "_", account)
+	similar_accounts = frappe.get_all("Account", filters={"name": ("like", pattern)}, pluck="name")
+	return any(name != account and frappe.scrub(name) == frappe.scrub(account) for name in similar_accounts)
+
+
+def combine_tax_rates(existing_rate: float | str, rate: float | str) -> float | str:
+	"""Sum rates of tax rows booked to the same account; "NA" if any of them has no rate."""
+	if "NA" in (existing_rate, rate):
+		return "NA"
+
+	return flt(existing_rate) + flt(rate)
 
 
 def add_total_row(

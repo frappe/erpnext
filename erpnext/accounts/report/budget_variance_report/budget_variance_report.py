@@ -6,7 +6,7 @@ import datetime
 
 import frappe
 from frappe import _
-from frappe.utils import flt, formatdate
+from frappe.utils import cstr, flt, formatdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
@@ -23,6 +23,7 @@ def execute(filters=None):
 		dimensions = filters.get("budget_against_filter")
 	else:
 		dimensions = get_cost_centers(filters)
+	dimensions = get_permitted_dimensions(filters.get("budget_against"), dimensions)
 
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["from_fiscal_year"])
 	cam_map = get_dimension_account_month_map(filters)
@@ -181,6 +182,14 @@ def get_cost_centers(filters):
 		)  # nosec
 
 
+def get_permitted_dimensions(budget_against: str, dimensions: list) -> list:
+	"""Keep only the dimensions the user may read, in their original order."""
+	if not dimensions:
+		return []
+	permitted = set(frappe.get_list(budget_against, filters={"name": ["in", dimensions]}, pluck="name"))
+	return [dimension for dimension in dimensions if dimension in permitted]
+
+
 # Get dimension & target details
 def get_dimension_target_details(filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
@@ -262,6 +271,7 @@ def get_actual_details(name, filters):
 				and rgt <= "{cc_rgt}"
 			"""
 
+	company_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 	ac_details = frappe.db.sql(
 		f"""
 			select
@@ -282,7 +292,9 @@ def get_actual_details(name, filters):
 				and b.{budget_against} = gl.{budget_against}
 				and gl.fiscal_year between %s and %s
 				and gl.is_cancelled = 0
+				and gl.voucher_type != 'Period Closing Voucher'
 				and b.{budget_against} = %s
+				and (gl.finance_book in ('', %s) or gl.finance_book is null)
 				and exists(
 					select
 						name
@@ -296,7 +308,7 @@ def get_actual_details(name, filters):
 					gl.name
 				order by gl.fiscal_year
 		""",
-		(filters.from_fiscal_year, filters.to_fiscal_year, name),
+		(filters.from_fiscal_year, filters.to_fiscal_year, name, cstr(company_finance_book)),
 		as_dict=1,
 	)
 

@@ -5,13 +5,20 @@ frappe.provide("erpnext.buying");
 
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Order");
 
+const get_service_item = (frm, row) =>
+	frm.doc.service_items.find(
+		(service_item) => service_item.purchase_order_item === row.purchase_order_item
+	);
+
 // client script for Subcontracting Order Item is not necessarily required as the server side code will do everything that is necessary.
 // this is just so that the user does not get potentially confused
 frappe.ui.form.on("Subcontracting Order Item", {
 	qty(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "amount", row.qty * row.rate);
-		const service_item = frm.doc.service_items[row.idx - 1];
+		const service_item = get_service_item(frm, row);
+		if (!service_item) return;
+
 		frappe.model.set_value(
 			service_item.doctype,
 			service_item.name,
@@ -27,10 +34,11 @@ frappe.ui.form.on("Subcontracting Order Item", {
 		);
 	},
 	before_items_remove(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		frm.toggle_enable(["service_items"], true);
-		frm.get_field("service_items").grid.grid_rows[row.idx - 1].remove();
-		frm.toggle_enable(["service_items"], false);
+		const service_item = get_service_item(frm, locals[cdt][cdn]);
+		if (!service_item) return;
+
+		frappe.model.clear_doc(service_item.doctype, service_item.name);
+		frm.refresh_field("service_items");
 	},
 });
 

@@ -1,21 +1,74 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
+from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.patches.v16_0.append_fieldname_to_pos_search_fields import execute as append_fieldname
+from erpnext.tests.permission_test_utils import make_fenced_user
 
 
-class TestPOSSettings(unittest.TestCase):
+class TestPOSSettings(FrappeTestCase):
 	def setUp(self):
 		self.settings = frappe.get_single("POS Settings")
 		self.settings.invoice_fields = []
 		self.settings.pos_search_fields = []
 
 	def tearDown(self):
+		frappe.set_user("Administrator")
 		frappe.db.rollback()
+
+	def test_pos_settings_write_access_is_limited_to_managers(self):
+		for role in ("Sales User", "Accounts User", "Accounts Manager", "System Manager"):
+			with self.subTest(role=role):
+				user = make_fenced_user(f"pos-settings-{frappe.scrub(role)}@example.com", [role])
+				with self.set_user(user):
+					settings = frappe.get_doc("POS Settings")
+					settings.check_permission("read")
+					settings.set("invoice_fields", [])
+					if role in ("Sales User", "Accounts User"):
+						with self.assertRaises(frappe.PermissionError):
+							settings.save()
+					else:
+						settings.save()
+
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.PermissionError):
+				frappe.get_doc("POS Settings").check_permission("read")
+
+	def test_required_invoice_field_cannot_be_empty(self):
+		for fieldname in ("po_no", "terms", "discount_amount", "ignore_pricing_rule"):
+			self.settings.append("invoice_fields", {"fieldname": fieldname, "reqd": 1})
+		self.settings.save()
+
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		invoice = create_pos_invoice(
+			item_code="_Test Non Stock Item", qty=1, rate=100, pos_profile=pos_profile.name, do_not_save=1
+		)
+		invoice.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		invoice.insert()
+		with self.assertRaisesRegex(frappe.MandatoryError, "Purchase Order"):
+			invoice.submit()
+
+		invoice.reload()
+		invoice.po_no = "PO-2026-001"
+		invoice.terms = "<p><br></p>"
+		invoice.save()
+		with self.assertRaisesRegex(frappe.MandatoryError, "Terms"):
+			invoice.submit()
+
+		invoice.reload()
+		invoice.terms = '<p><img src="/files/payment-terms.png"></p>'
+		invoice.discount_amount = 0
+		invoice.ignore_pricing_rule = 0
+		invoice.submit()
+		self.assertEqual(invoice.docstatus, 1)
+		invoice.cancel()
+		frappe.get_doc("POS Opening Entry", opening_entry.name).cancel()
 
 	def assertInvalid(self, message):
 		with self.assertRaises(frappe.ValidationError) as context:

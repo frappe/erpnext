@@ -12,6 +12,7 @@ from frappe.utils import get_link_to_form, parse_json
 from frappe.utils.background_jobs import enqueue
 
 from erpnext.stock.report.stock_balance.stock_balance import execute
+from erpnext.stock.utils import PendingRepostingError
 
 
 class ClosingStockBalance(Document):
@@ -91,6 +92,7 @@ class ClosingStockBalance(Document):
 
 	@frappe.whitelist()
 	def enqueue_job(self):
+		self.validate_no_pending_reposts()
 		self.db_set("status", "In Progress")
 		self.clear_attachment()
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
@@ -98,6 +100,32 @@ class ClosingStockBalance(Document):
 	@frappe.whitelist()
 	def regenerate_closing_balance(self):
 		self.enqueue_job()
+
+	def validate_no_pending_reposts(self):
+		if self.has_pending_reposts():
+			frappe.throw(
+				self.get_pending_reposts_message(),
+				PendingRepostingError,
+				title=_("Stock Reposting Ongoing"),
+			)
+
+	def has_pending_reposts(self):
+		return bool(
+			frappe.db.exists(
+				"Repost Item Valuation",
+				{
+					"docstatus": 1,
+					"status": ("in", ["Queued", "In Progress"]),
+					"posting_date": ("<=", self.to_date),
+					"company": self.company,
+				},
+			)
+		)
+
+	def get_pending_reposts_message(self):
+		return _(
+			"Cannot generate the closing balance of Closing Stock Balance {0} while Repost Item Valuation entries dated on or before {1} are pending. Try again once they are completed."
+		).format(self.name, frappe.bold(frappe.format(self.to_date, "Date")))
 
 	def clear_attachment(self):
 		if attachments := get_attachments(self.doctype, self.name):
@@ -142,6 +170,10 @@ class ClosingStockBalance(Document):
 
 def prepare_closing_stock_balance(name):
 	doc = frappe.get_doc("Closing Stock Balance", name)
+	if doc.has_pending_reposts():
+		doc.db_set("status", "Failed")
+		doc.log_error(title=_("Closing Stock Balance Failed"), message=doc.get_pending_reposts_message())
+		return
 
 	doc.db_set("status", "In Progress")
 

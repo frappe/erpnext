@@ -142,3 +142,24 @@ class TestPaymentLedger(FrappeTestCase):
 		vouchers = [x.get("voucher_no") for x in data]
 		self.assertIn(own.name, vouchers)
 		self.assertNotIn(other.name, vouchers)
+
+	def test_party_permission_for_other_doctype_does_not_limit_rows(self):
+		args = dict(
+			company=self.company,
+			debit_to=self.debit_to,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			income_account=self.income_account,
+			warehouse=self.warehouse,
+		)
+		for customer in ("_Test Customer", "_Test Customer 1"):
+			create_sales_invoice(customer=customer, **args)
+
+		user = make_fenced_user("test_payment_ledger@example.com", ["Accounts User"])
+		add_user_permission("Customer", "_Test Customer", user, applicable_for="Sales Invoice")
+
+		with self.set_user(user):
+			data = execute(filters=frappe._dict({"company": self.company, "party_type": "Customer"}))[1]
+
+		parties = {row.party for row in data if row.party}
+		self.assertTrue({"_Test Customer", "_Test Customer 1"}.issubset(parties))

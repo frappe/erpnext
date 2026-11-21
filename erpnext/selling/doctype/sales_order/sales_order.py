@@ -34,10 +34,14 @@ from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
-from erpnext.selling.doctype.customer.customer import check_credit_limit
+from erpnext.selling.doctype.customer.customer import (
+	check_credit_limit,
+	is_sales_order_credit_check_bypassed,
+)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	clear_reserve_stock_if_disabled,
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
@@ -512,15 +516,7 @@ class SalesOrder(SellingController):
 			project.db_update()
 
 	def check_credit_limit(self):
-		# if bypass credit limit check is set to true (1) at sales order level,
-		# then we need not to check credit limit and vise versa
-		if not cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				{"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				"bypass_credit_limit_check",
-			)
-		):
+		if not is_sales_order_credit_check_bypassed(self.customer, self.company):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
@@ -546,7 +542,14 @@ class SalesOrder(SellingController):
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
 	def update_status(self, status):
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			validate_reopen_against_blanket_order,
+		)
+
 		self.check_modified_date()
+		if status != "Closed" and self.status == "Closed":
+			validate_reopen_against_blanket_order(self)
+
 		if status == "Closed":
 			self.validate_no_reserved_stock()
 
@@ -584,11 +587,11 @@ class SalesOrder(SellingController):
 
 		for d in self.get("items"):
 			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
-				if self.has_product_bundle(d.item_code):
-					for p in self.get("packed_items"):
-						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
-							_valid_for_reserve(p.item_code, p.warehouse)
-				else:
+				# the order's own packed rows, as the bundle may since be disabled
+				packed_items = [p for p in self.get("packed_items") if p.parent_detail_docname == d.name]
+				for p in packed_items:
+					_valid_for_reserve(p.item_code, p.warehouse)
+				if not packed_items:
 					_valid_for_reserve(d.item_code, d.warehouse)
 
 		for item_code, warehouse in item_wh_list:
@@ -598,11 +601,10 @@ class SalesOrder(SellingController):
 		pass
 
 	def on_update_after_submit(self):
-		self.calculate_commission()
-		self.calculate_contribution()
 		self.check_credit_limit()
 
 	def before_update_after_submit(self):
+		super().before_update_after_submit()
 		self.validate_po()
 		self.validate_drop_ship()
 		self.validate_supplier_after_submit()
@@ -770,8 +772,9 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_reserved_stock(self):
-		"""Clean reserved stock flag for non-stock Item"""
+		"""Uncheck Reserve Stock when stock reservation is disabled, and on non-stock items."""
 
+		clear_reserve_stock_if_disabled(self)
 		enable_stock_reservation = frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")
 
 		for item in self.items:
@@ -856,7 +859,12 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 	"""Returns the unreserved quantity for the Sales Order Item."""
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
-	return item.stock_qty - flt(item.delivered_qty) * item.get("conversion_factor", 1) - existing_reserved_qty
+	unreserved_qty = (
+		item.stock_qty - flt(item.delivered_qty) * item.get("conversion_factor", 1) - existing_reserved_qty
+	)
+
+	# a residue below stock qty precision, as a fractional conversion factor leaves, is not unreserved
+	return unreserved_qty if flt(unreserved_qty, item.precision("stock_qty")) > 0 else 0
 
 
 def get_list_context(context=None):
@@ -1280,7 +1288,7 @@ def make_sales_invoice(
 			target.set_advances()
 
 	def set_missing_values(source, target):
-		target.flags.ignore_permissions = True
+		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1444,8 +1452,13 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	from frappe.desk.calendar import get_event_conditions
+	from frappe.desk.reportview import get_match_cond
+
+	if frappe.only_has_select_perm("Sales Order"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	conditions = get_event_conditions("Sales Order", filters)
+	match_conditions = get_match_cond("Sales Order")
 
 	data = frappe.db.sql(
 		f"""
@@ -1461,6 +1474,7 @@ def get_events(start, end, filters=None):
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
 			{conditions}
+			{match_conditions}
 		""",
 		{"start": start, "end": end},
 		as_dict=True,
@@ -1500,7 +1514,6 @@ def make_purchase_order_for_default_supplier(
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
-		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
@@ -1619,7 +1632,6 @@ def make_purchase_order_for_default_supplier(
 
 		set_delivery_date(doc.items, source_name)
 		doc.insert()
-		frappe.db.commit()
 		purchase_orders.append(doc)
 
 	return purchase_orders
@@ -1655,6 +1667,8 @@ def make_purchase_order(
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
+		target.incoterm = ""
+		target.named_place = ""
 		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
@@ -1884,6 +1898,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			{
 				"item_code": item.get("item_code"),
 				"qty": item.get("quantity"),
+				"uom": item.get("uom"),
 				"schedule_date": schedule_date,
 				"warehouse": item_wh.get(item.get("main_bom_item")) or item.get("warehouse"),
 				"sales_order": sales_order,
@@ -1934,14 +1949,18 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		target.actual_qty = bin_details.get("actual_qty")
 		target.company_total_stock = bin_details.get("company_total_stock")
 
+	def get_packed_qty_to_pick(packed_item, parent) -> float:
+		# what is left on this component, as components of one bundle can be picked unevenly
+		delivered_qty = flt(packed_item.qty) * flt(parent.delivered_qty) / flt(parent.qty)
+		return flt(
+			flt(packed_item.qty) - max(flt(packed_item.picked_qty), delivered_qty),
+			packed_item.precision("qty"),
+		)
+
 	def update_packed_item_qty(source, target, source_parent) -> None:
-		qty = flt(source.qty)
-		for item in source_parent.items:
-			if source.parent_detail_docname == item.name:
-				picked_qty = flt(item.picked_qty) / (flt(item.conversion_factor) or 1)
-				pending_percent = (item.qty - max(picked_qty, item.delivered_qty)) / item.qty
-				target.qty = target.stock_qty = qty * pending_percent
-				return
+		parent = source_parent.get("items", {"name": source.parent_detail_docname})[0]
+		target.qty = target.stock_qty = get_packed_qty_to_pick(source, parent)
+		target.conversion_factor = 1
 
 	def should_pick_order_item(item) -> bool:
 		return (
@@ -2012,6 +2031,8 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 @frappe.whitelist()
 def get_work_order_items(sales_order, for_raw_material_request=0):
 	"""Returns items with BOM that already do not have a linked work order"""
+	from erpnext.manufacturing.doctype.work_order.work_order import qty_against_sales_order
+
 	if sales_order:
 		so = frappe.get_doc("Sales Order", sales_order)
 		so.check_permission("read")
@@ -2027,6 +2048,10 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 			)
 		]
 
+		overproduction_percentage_for_sales_order = (
+			frappe.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
+			/ 100
+		)
 		for table in [so.items, so.packed_items]:
 			for i in table:
 				bom = get_default_bom(i.item_code)
@@ -2035,13 +2060,12 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(wo.qty - wo.process_loss_qty))
+						.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
 							& (wo.sales_order_item == i.name)
-							& (wo.docstatus.lt(2))
-							& (wo.status != "Closed")
+							& (wo.docstatus == 1)
 						)
 						.run()[0][0]
 					)
@@ -2049,7 +2073,10 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 				else:
 					pending_qty = stock_qty
 
-				if pending_qty and i.item_code not in product_bundle_parents:
+				if not pending_qty:
+					pending_qty = stock_qty * overproduction_percentage_for_sales_order
+
+				if pending_qty > 0 and i.item_code not in product_bundle_parents:
 					items.append(
 						dict(
 							name=i.name,

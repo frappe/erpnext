@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -74,6 +74,71 @@ class TestStockLedgerInvariantCheck(FrappeTestCase):
 		data = self.run_report(item_code=item, show_incorrect_entries=1)
 		self.assertEqual(len(data), 2)
 		self.assertEqual(data[-1].name, sle.name)
+
+	def test_show_incorrect_entries_catches_a_wrong_valuation_rate(self):
+		item = self.make_movements()
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		frappe.db.set_value("Stock Ledger Entry", sle.name, "valuation_rate", sle.valuation_rate + 10)
+
+		data = self.run_report(item_code=item, show_incorrect_entries=1)
+
+		self.assertEqual(data[-1].name if data else None, sle.name)
+
+	def test_null_rate_in_fifo_queue_is_valued_at_zero(self):
+		item = self.make_movements()
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_queue", json.dumps([[sle.qty_after_transaction, None]])
+		)
+
+		data = self.run_report(item_code=item)
+
+		self.assertEqual(data[-1].fifo_stock_value, 0)
+
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+	def test_rounded_stock_values_are_not_incorrect(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_method": "FIFO"}).name
+		for qty, days in ((1.004, -2), (2.006, -1)):
+			create_stock_reconciliation(
+				item_code=item,
+				warehouse=WAREHOUSE,
+				qty=qty,
+				rate=1,
+				posting_date=frappe.utils.add_days(frappe.utils.today(), days),
+			)
+
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
+
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": ""})
+	def test_blank_currency_precision_uses_the_ledger_precision(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_method": "Moving Average"}
+		).name
+		make_stock_entry(
+			item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=33.33, posting_date="2026-06-01"
+		)
+		create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=12.25, rate=37.77, posting_date="2026-06-02"
+		)
+
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		self.assertEqual(sle.stock_value, 462.68)
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
 
 	def test_moving_average_item_skips_fifo_queue_checks(self):
 		from erpnext.stock.doctype.item.test_item import make_item

@@ -105,6 +105,8 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 		and posting_date >= %(from_date)s
 		and posting_date <= %(to_date)s
 		and is_cancelled = 0
+		and ifnull(finance_book, '') in (%(finance_book)s, '')
+		and voucher_type != 'Period Closing Voucher'
 		order by account, posting_date""".format(
 			dimension=frappe.scrub(filters.get("dimension")), condition=condition
 		),
@@ -192,7 +194,7 @@ def get_dimensions(filters):
 	if meta.has_field("company"):
 		query_filters = {"company": filters.get("company")}
 
-	return frappe.get_all(filters.get("dimension"), filters=query_filters, pluck="name")
+	return frappe.get_list(filters.get("dimension"), filters=query_filters, pluck="name")
 
 
 def get_columns(dimension_list):

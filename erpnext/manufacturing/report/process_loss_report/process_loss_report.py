@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
 
+from erpnext.accounts.report.utils import validate_date_range
+
 Filters = frappe._dict
 Row = frappe._dict
 Data = list[Row]
@@ -14,6 +16,8 @@ QueryArgs = dict[str, str]
 
 
 def execute(filters: Filters) -> tuple[Columns, Data]:
+	validate_date_range(filters)
+
 	filters = frappe._dict(filters or {})
 	columns = get_columns()
 	data = get_data(filters)

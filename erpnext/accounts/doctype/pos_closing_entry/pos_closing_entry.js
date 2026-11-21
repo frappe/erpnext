@@ -49,7 +49,7 @@ frappe.ui.form.on("POS Closing Entry", {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.status == "Failed") {
+		if (frm.doc.docstatus > 0 && frm.doc.status == "Failed") {
 			const issue = '<a id="jump_to_error" style="text-decoration: underline;">issue</a>';
 			frm.dashboard.set_headline(
 				__(
@@ -64,8 +64,11 @@ frappe.ui.form.on("POS Closing Entry", {
 			});
 
 			frm.add_custom_button(__("Retry"), function () {
-				frm.call("retry", {}, () => {
-					frm.reload_doc();
+				frappe.call({
+					method: "run_doc_method",
+					args: { dt: frm.doc.doctype, dn: frm.doc.name, method: "retry" },
+					freeze: true,
+					callback: () => frm.reload_doc(),
 				});
 			});
 		}

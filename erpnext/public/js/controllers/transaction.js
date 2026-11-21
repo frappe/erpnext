@@ -9,7 +9,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: this.frm });
 
 		this.set_fields_onload_for_line_item();
-		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Quality Inspection"];
 
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
@@ -260,11 +260,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.fields_dict["items"].grid.get_field('blanket_order')) {
 			this.frm.set_query("blanket_order", "items", function(doc, cdt, cdn) {
 				var item = locals[cdt][cdn];
+				const is_selling = ["Sales Order", "Quotation"].includes(doc.doctype);
 				return {
 					query: "erpnext.controllers.queries.get_blanket_orders",
 					filters: {
 						"company": doc.company,
-						"blanket_order_type": doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
+						"blanket_order_type": is_selling ? "Selling" : "Purchasing",
+						"party": is_selling ? doc.customer || doc.party_name : doc.supplier,
+						"quotation_to": doc.quotation_to,
 						"item": item.item_code
 					}
 				}
@@ -449,6 +452,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	refresh() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company(this.frm);
+		// Remember the currency the rendered document is denominated in, so that a
+		// real currency change can be told apart from a mere exchange rate refresh
+		// (e.g. triggered by a date change).
+		this._doc_currency = this.frm.doc.currency;
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
@@ -512,6 +519,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
 			me.frm.doc.name);
+
+		// a return keeps the taxes of the document it is made against
+		if (this.frm.doc.is_return && this.frm.doc.return_against) return;
 
 		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
 			return;
@@ -710,13 +720,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								() => {
 									// check if batch serial selector is disabled or not
-									if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog)
-										return frappe.db.get_single_value('Stock Settings', 'disable_serial_no_and_batch_selector')
-											.then((value) => {
-												if (value) {
-													frappe.flags.hide_serial_batch_dialog = true;
-												}
-											});
+									if (show_batch_dialog && frappe.boot.sysdefaults.disable_serial_no_and_batch_selector) {
+										frappe.flags.hide_serial_batch_dialog = true;
+									}
 								},
 								() => {
 									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog && !frappe.flags.dialog_set) {
@@ -909,6 +915,40 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	update_stock() {
 		this.frm.trigger('set_default_internal_warehouse');
+	}
+
+	add_inter_company_order_button(label, target_doctype, reference_fieldname) {
+		if (!frappe.model.can_create(target_doctype)) return;
+
+		frappe.call({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
+			args: {
+				reference_name: this.frm.doc.name,
+				doctype: target_doctype,
+				reference_fieldname: reference_fieldname,
+			},
+			callback: (r) => {
+				const received_items = r.message;
+				// An order made from its counterpart links it without item references.
+				const is_made_from_counterpart =
+					this.frm.doc.inter_company_order_reference && $.isEmptyObject(received_items);
+				const has_pending_qty = this.frm.doc.items.some(
+					(item) =>
+						!item.closed &&
+						flt(
+							(item.stock_qty - flt(received_items[item.name])) / item.conversion_factor,
+							precision("qty", item)
+						) > 0
+				);
+				if (is_made_from_counterpart || !has_pending_qty) return;
+
+				this.frm.add_custom_button(
+					label,
+					() => this.make_inter_company_order(this.frm),
+					__("Create")
+				);
+			},
+		});
 	}
 
 	set_default_internal_warehouse() {
@@ -1216,20 +1256,30 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let me = this;
 		this.set_dynamic_labels();
 		let company_currency = this.get_company_currency();
-		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
+		// A mapped document keeps its source's rate, unless its currency is changed
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& (!this.frm.doc.__onload?.load_after_mapping || inter_company_reference
-					|| this.frm.doc.use_transaction_date_exchange_rate)) {
+					|| this.frm.doc.use_transaction_date_exchange_rate
+					|| this._doc_currency !== this.frm.doc.currency)) {
 
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					if(exchange_rate != me.frm.doc.conversion_rate) {
-						me.set_margin_amount_based_on_currency(exchange_rate);
-						me.set_actual_charges_based_on_currency(exchange_rate);
+						// Margins and actual charges are amounts in the transaction
+						// currency; convert them only when the currency itself changed,
+						// not when just the exchange rate was refreshed (e.g. by a date
+						// change), otherwise the entered margin keeps shrinking.
+						if (me._doc_currency !== me.frm.doc.currency) {
+							me.set_margin_amount_based_on_currency(exchange_rate);
+							me.set_actual_charges_based_on_currency(exchange_rate);
+						}
 						me.frm.set_value("conversion_rate", exchange_rate);
 					}
+					// Advance only after converting, so overlapping triggers can't skip it.
+					me._doc_currency = me.frm.doc.currency;
 				});
 		} else {
+			this._doc_currency = this.frm.doc.currency;
 			// company currency and doc currency is same
 			// this will prevent unnecessary conversion rate triggers
 			if(this.frm.doc.currency === this.get_company_currency()) {
@@ -1283,7 +1333,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				doc: this.frm.doc,
 				method: "apply_shipping_rule",
 				callback: function(r) {
-					me._calculate_taxes_and_totals();
+					me.calculate_discounted_totals();
 				}
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
 		}
@@ -1476,7 +1526,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item = frappe.get_doc(cdt, cdn);
 		item.conversion_factor = 1.0;
 		if (item.stock_qty) {
-			item.conversion_factor = flt(item.stock_qty) / flt(item.qty);
+			item.conversion_factor = flt(
+				flt(item.stock_qty) / flt(item.qty),
+				precision("conversion_factor", item)
+			);
 		}
 
 		refresh_field("conversion_factor", item.name, item.parentfield);

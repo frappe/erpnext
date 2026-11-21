@@ -1,13 +1,17 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections import defaultdict
-
 import frappe
 from frappe import _
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+from frappe.utils import make_filter_tuple
+
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	columns = get_columns()
 	data = get_data(filters)
@@ -17,12 +21,16 @@ def execute(filters=None):
 
 def get_data(report_filters):
 	fields = get_fields()
-	filters = get_filter_condition(report_filters)
+	filters = [
+		make_filter_tuple("Work Order", key, value)
+		for key, value in get_filter_condition(report_filters).items()
+	]
+	if allowed_companies := get_allowed_companies():
+		filters.append(["Work Order", "company", "in", allowed_companies])
 
 	wo_items = {}
 
 	work_orders = frappe.get_all("Work Order", filters=filters, fields=fields)
-	get_returned_materials(work_orders)
 
 	for d in work_orders:
 		d.extra_consumed_qty = 0.0
@@ -45,32 +53,9 @@ def get_data(report_filters):
 	return data
 
 
-def get_returned_materials(work_orders):
-	raw_materials_qty = defaultdict(float)
-
-	raw_materials = frappe.get_all(
-		"Stock Entry",
-		fields=[
-			"`tabStock Entry`.`work_order`",
-			"`tabStock Entry Detail`.`item_code`",
-			"`tabStock Entry Detail`.`qty`",
-		],
-		filters=[
-			["Stock Entry", "is_return", "=", 1],
-			["Stock Entry Detail", "docstatus", "=", 1],
-			["Stock Entry", "work_order", "in", [d.name for d in work_orders]],
-		],
-	)
-
-	for d in raw_materials:
-		key = (d.work_order, d.item_code)
-		raw_materials_qty[key] += d.qty
-
-	for row in work_orders:
-		row.returned_qty = 0.0
-		key = (row.parent, row.raw_material_item_code)
-		if raw_materials_qty.get(key):
-			row.returned_qty = raw_materials_qty.get(key)
+def get_allowed_companies():
+	user_permissions = get_user_permissions(frappe.session.user)
+	return get_allowed_docs_for_doctype(user_permissions.get("Company", []), "Work Order")
 
 
 def get_fields():
@@ -81,6 +66,7 @@ def get_fields():
 		"`tabWork Order Item`.`required_qty`",
 		"`tabWork Order Item`.`transferred_qty`",
 		"`tabWork Order Item`.`consumed_qty`",
+		"`tabWork Order Item`.`returned_qty`",
 		"`tabWork Order`.`status`",
 		"`tabWork Order`.`name`",
 		"`tabWork Order`.`production_item`",
@@ -92,7 +78,7 @@ def get_fields():
 def get_filter_condition(report_filters):
 	filters = {
 		"docstatus": 1,
-		"status": ("in", ["In Process", "Completed", "Stopped"]),
+		"status": ("in", ["In Process", "Completed", "Stopped", "Closed"]),
 		"creation": ("between", [report_filters.from_date, report_filters.to_date]),
 	}
 

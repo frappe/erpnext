@@ -85,7 +85,7 @@ frappe.ui.form.on("Work Order", {
 
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
-			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
+			return doc.status === "Completed" ? "green" : "orange";
 		});
 	},
 
@@ -361,10 +361,14 @@ frappe.ui.form.on("Work Order", {
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
-			if (data.completed_qty + data.process_loss_qty != frm.doc.qty) {
-				pending_qty = frm.doc.qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+			let operation_qty = erpnext.work_order.get_operation_target_qty(frm, data);
+			if (data.completed_qty + data.process_loss_qty != operation_qty) {
+				pending_qty = flt(
+					operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty),
+					precision("completed_qty", data)
+				);
 
-				if (pending_qty) {
+				if (pending_qty > 0) {
 					dialog.fields_dict.operations.df.data.push({
 						__checked: 1,
 						name: data.name,
@@ -506,10 +510,15 @@ frappe.ui.form.on("Work Order", {
 			let total_completed_qty = frm.doc.qty * frm.doc.operations.length;
 
 			frm.doc.operations.forEach((d) => {
+				let operation_qty = erpnext.work_order.get_operation_target_qty(frm, d);
+				let completed_qty = operation_qty
+					? Math.min((flt(d.completed_qty) + flt(d.process_loss_qty)) / operation_qty, 1) *
+					  frm.doc.qty
+					: frm.doc.qty;
 				if (!status_wise_oprtation_data[d.status]) {
-					status_wise_oprtation_data[d.status] = [d.completed_qty, d.operation];
+					status_wise_oprtation_data[d.status] = [completed_qty, d.operation];
 				} else {
-					status_wise_oprtation_data[d.status][0] += d.completed_qty;
+					status_wise_oprtation_data[d.status][0] += completed_qty;
 					status_wise_oprtation_data[d.status][1] += ", " + d.operation;
 				}
 			});
@@ -687,6 +696,10 @@ frappe.ui.form.on("Work Order Operation", {
 });
 
 erpnext.work_order = {
+	get_operation_target_qty(frm, row) {
+		return flt(frm.doc.__onload?.operation_target_qty?.[row.name] ?? frm.doc.qty);
+	},
+
 	set_custom_buttons: function (frm) {
 		var doc = frm.doc;
 
@@ -832,7 +845,7 @@ erpnext.work_order = {
 	},
 
 	set_default_warehouse: function (frm) {
-		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
+		if (!frm.doc.wip_warehouse) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.get_default_warehouse",
 				callback: function (r) {
@@ -919,14 +932,18 @@ erpnext.work_order = {
 
 	show_prompt_for_qty_input: function (frm, purpose) {
 		let max = this.get_max_transferable_qty(frm, purpose);
+		const allowance = (flt(frm.doc.qty) * flt(frm.doc.__onload?.overproduction_percentage)) / 100;
+		const allowed_qty = flt(max + allowance, precision("qty"));
+		// only the overproduction allowance may be left
+		const default_qty = max || allowed_qty;
 
 		let fields = [
 			{
 				fieldtype: "Float",
 				label: __("Qty for {0}", [__(purpose)]),
 				fieldname: "qty",
-				description: __("Max: {0}", [max]),
-				default: max,
+				description: __("Max: {0}", [allowed_qty]),
+				default: default_qty,
 			},
 			{
 				fieldtype: "Check",
@@ -947,10 +964,8 @@ erpnext.work_order = {
 			frm.qty_prompt = frappe.prompt(
 				fields,
 				(data) => {
-					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
-
-					if (data.qty > max) {
-						frappe.msgprint(__("Quantity must not be more than {0}", [max]));
+					if (data.qty > allowed_qty) {
+						frappe.msgprint(__("Quantity must not be more than {0}", [allowed_qty]));
 						reject();
 					}
 					data.purpose = purpose;
@@ -963,7 +978,14 @@ erpnext.work_order = {
 	},
 
 	make_se: function (frm, purpose) {
-		this.show_prompt_for_qty_input(frm, purpose)
+		const only_leftover_items_pending =
+			purpose === "Material Transfer for Manufacture" &&
+			this.get_max_transferable_qty(frm, purpose) <= 0;
+		const get_qty = only_leftover_items_pending
+			? Promise.resolve({ qty: 0 })
+			: this.show_prompt_for_qty_input(frm, purpose);
+
+		get_qty
 			.then((data) => {
 				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,

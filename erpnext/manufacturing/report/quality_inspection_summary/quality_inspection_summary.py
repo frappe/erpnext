@@ -5,8 +5,11 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	columns, data = [], []
 	data = get_data(filters)
 	columns = get_columns(filters)
@@ -15,7 +18,7 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	query_filters = {"docstatus": ("<", 2)}
+	query_filters = {"docstatus": 1}
 
 	fields = [
 		"name",
@@ -36,7 +39,7 @@ def get_data(filters):
 
 	query_filters["report_date"] = ["between", [filters.get("from_date"), filters.get("to_date")]]
 
-	return frappe.get_all(
+	return frappe.get_list(
 		"Quality Inspection", fields=fields, filters=query_filters, order_by="report_date asc"
 	)
 
@@ -49,7 +52,8 @@ def get_chart_data(periodic_data, columns):
 	datasets = []
 
 	for d in periodic_data:
-		status_wise_data[d.status] += 1
+		if d.status in status_wise_data:
+			status_wise_data[d.status] += 1
 
 	datasets.append(
 		{

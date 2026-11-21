@@ -33,7 +33,7 @@ frappe.query_reports["Work Order Consumed Materials"] = {
 			get_query: function () {
 				return {
 					filters: {
-						status: ["in", ["In Process", "Completed", "Stopped"]],
+						status: ["in", ["In Process", "Completed", "Stopped", "Closed"]],
 					},
 				};
 			},
@@ -49,7 +49,7 @@ frappe.query_reports["Work Order Consumed Materials"] = {
 			label: __("Status"),
 			fieldname: "status",
 			fieldtype: "Select",
-			options: ["", "In Process", "Completed", "Stopped"],
+			options: ["", "In Process", "Completed", "Stopped", "Closed"],
 		},
 		{
 			label: __("Excess Materials Consumed"),

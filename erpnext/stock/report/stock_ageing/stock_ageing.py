@@ -7,6 +7,8 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
@@ -29,6 +31,7 @@ BATCH_SLOT_DATE_INDEX = 3
 BATCH_SLOT_VALUE_INDEX = 4
 
 AVERAGE_AGE_COLUMN = 6
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
 MAX_CHART_ITEMS = 10
 
 
@@ -45,8 +48,9 @@ def execute(filters: Filters = None) -> tuple:
 	return columns, data, None, chart_data
 
 
-def get_age_ranges(age_range: str) -> list[str]:
-	return [num.strip() for num in age_range.split(",") if num.strip().isdigit()]
+def get_age_ranges(age_range: str | None) -> list[str]:
+	ranges = [num.strip() for num in (age_range or "30, 60, 90").split(",") if num.strip().isdigit()]
+	return sorted(ranges, key=cint)
 
 
 def get_float_precision() -> int:
@@ -286,6 +290,7 @@ class FIFOSlots:
 		self.transferred_item_details = {}
 		self.serial_no_details = {}
 		self.batch_no_details = {}
+		self.batches_with_negative_slots = set()
 		self.batchwise_valuation_by_batch = {}
 		self.valuation_method_by_item = {}
 		self.filters = filters
@@ -306,6 +311,7 @@ class FIFOSlots:
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
+		self.subcontracting_returns = self._get_subcontracting_returns()
 		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
@@ -516,7 +522,7 @@ class FIFOSlots:
 	def _prefetch_batchwise_valuations(self) -> None:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -553,7 +559,7 @@ class FIFOSlots:
 		company = self.filters.get("company")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = frappe.qb.DocType("Item")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -644,6 +650,11 @@ class FIFOSlots:
 		if not qty:
 			return qty, stock_value_difference
 
+		if (batch_no, row.warehouse) not in self.batches_with_negative_slots:
+			return qty, stock_value_difference
+
+		negative_slot_may_remain = False
+
 		for slot in list(fifo_queue):
 			if not self._is_matching_negative_batch_slot(slot, batch_no, use_batchwise_valuation):
 				continue
@@ -664,9 +675,15 @@ class FIFOSlots:
 
 			if not flt(slot[BATCH_SLOT_QTY_INDEX]) and not flt(slot[BATCH_SLOT_VALUE_INDEX]):
 				fifo_queue.remove(slot)
+			elif flt(slot[BATCH_SLOT_QTY_INDEX]) < 0:
+				negative_slot_may_remain = True
 
 			if not qty:
+				negative_slot_may_remain = True
 				break
+
+		if not negative_slot_may_remain:
+			self.batches_with_negative_slots.discard((batch_no, row.warehouse))
 
 		return qty, stock_value_difference
 
@@ -779,6 +796,7 @@ class FIFOSlots:
 		fifo_queue.append(
 			[batch_no, use_batchwise_valuation, -(qty), row.posting_date, -(stock_value_difference)]
 		)
+		self.batches_with_negative_slots.add((batch_no, row.warehouse))
 		self.transferred_item_details[transfer_key].append([qty, row.posting_date, stock_value_difference])
 
 	def _consume_fifo_slots(
@@ -788,6 +806,10 @@ class FIFOSlots:
 		index = -1 if from_end else 0
 		qty_to_pop = abs(row.actual_qty)
 		stock_value = abs(row.stock_value_difference)
+		if qty_to_pop and self._is_return_entry(row):
+			qty_to_pop, stock_value = self._consume_slots_at_return_rate(
+				fifo_queue, transfer_key, qty_to_pop, stock_value, from_end
+			)
 
 		while qty_to_pop:
 			slot = fifo_queue[index] if fifo_queue else [0, None, 0]
@@ -813,6 +835,45 @@ class FIFOSlots:
 				)
 				qty_to_pop = 0
 				stock_value = 0
+
+	def _get_subcontracting_returns(self) -> set:
+		return set(
+			frappe.get_all(
+				"Subcontracting Receipt",
+				filters={"is_return": 1, "docstatus": 1, "company": self.filters.get("company")},
+				pluck="name",
+			)
+		)
+
+	def _is_return_entry(self, row: dict) -> bool:
+		if row.voucher_type in PURCHASE_VOUCHER_TYPES:
+			return True
+
+		return row.voucher_type == "Subcontracting Receipt" and row.voucher_no in self.subcontracting_returns
+
+	def _consume_slots_at_return_rate(
+		self, fifo_queue: list, transfer_key: tuple, qty_to_pop: float, stock_value: float, from_end: bool
+	) -> tuple[float, float]:
+		return_rate = stock_value / qty_to_pop
+		for slot in list(reversed(fifo_queue)) if from_end else list(fifo_queue):
+			slot_qty = flt(slot[FIFO_QTY_INDEX])
+			if slot_qty <= 0 or abs(flt(slot[FIFO_VALUE_INDEX]) / slot_qty - return_rate) > 0.01:
+				continue
+
+			qty = min(slot_qty, qty_to_pop)
+			value = flt(slot[FIFO_VALUE_INDEX]) * qty / slot_qty
+			slot[FIFO_QTY_INDEX] = slot_qty - qty
+			slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_VALUE_INDEX]) - value
+			if not slot[FIFO_QTY_INDEX]:
+				fifo_queue.remove(slot)
+
+			self.transferred_item_details[transfer_key].append([qty, slot[FIFO_DATE_INDEX], value])
+			qty_to_pop -= qty
+			stock_value -= value
+			if not qty_to_pop:
+				break
+
+		return qty_to_pop, stock_value
 
 	def _adjust_incoming_transfer_qty(
 		self,
@@ -1034,7 +1095,7 @@ class FIFOSlots:
 	def _get_stock_ledger_entries(self) -> Iterator[dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self._get_item_query()  # used as derived table in sle query
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		sle_query = (
 			frappe.qb.from_(sle)
@@ -1069,6 +1130,14 @@ class FIFOSlots:
 			)
 		)
 
+		if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
+			sle_query = sle_query.where(sle.warehouse.isin(warehouses))
+
+		if companies := get_allowed_docs_for_doctype(
+			get_user_permissions().get("Company", []), "Stock Ledger Entry"
+		):
+			sle_query = sle_query.where(sle.company.isin(companies))
+
 		if self.filters.get("warehouse"):
 			sle_query = self._get_warehouse_conditions(sle, sle_query)
 		elif self.filters.get("warehouse_type"):
@@ -1098,7 +1167,7 @@ class FIFOSlots:
 			.where((bundle.docstatus == 1) & (entry.serial_no.isnotnull()))
 		)
 
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 		query = (
 			query.join(sle)
 			.on(sle.serial_and_batch_bundle == bundle.name)
@@ -1145,7 +1214,7 @@ class FIFOSlots:
 		if sabb_name:
 			query = query.where(bundle.name == sabb_name)
 		else:
-			to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+			to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 			query = (
 				query.join(sle)
 				.on(sle.serial_and_batch_bundle == bundle.name)

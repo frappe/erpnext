@@ -23,7 +23,7 @@ frappe.ui.form.on("Delivery Note", {
 			Shipment: "Shipment",
 		}),
 			frm.set_indicator_formatter("item_code", function (doc) {
-				return doc.docstatus == 1 || doc.qty <= doc.actual_qty ? "green" : "orange";
+				return doc.docstatus == 1 || doc.stock_qty <= doc.actual_qty ? "green" : "orange";
 			});
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {
@@ -139,6 +139,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
+		this.frm.ignore_doctypes_on_cancel_all.push("Packing Slip");
 		this.frm.make_methods = {
 			"Delivery Trip": this.make_delivery_trip,
 		};
@@ -275,7 +276,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 				);
 			}
 
-			if (doc.docstatus == 1 && doc.status != "Completed" && frappe.model.can_create("Delivery Trip")) {
+			if (doc.docstatus == 1 && doc.status != "Closed" && frappe.model.can_create("Delivery Trip")) {
 				this.frm.add_custom_button(
 					__("Delivery Trip"),
 					function () {

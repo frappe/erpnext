@@ -290,11 +290,13 @@ has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.ha
 
 permission_query_conditions = {
 	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
+	"Contract": "erpnext.crm.doctype.contract.contract.get_permission_query_conditions",
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
 }
 
 has_permission = {
 	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
+	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
 }
 
@@ -309,7 +311,6 @@ has_website_permission = {
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
 
 before_tests = "erpnext.setup.utils.before_tests"
@@ -444,6 +445,7 @@ scheduler_events = {
 	},
 	"hourly": [
 		"erpnext.projects.doctype.project.project.hourly_reminder",
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.fail_overdue_agreements",
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
@@ -669,6 +671,10 @@ global_search_doctypes = {
 		{"doctype": "Warranty Claim", "index": 47},
 	],
 }
+
+ignore_links_on_delete = [
+	"Asset Activity",
+]
 
 additional_timeline_content = {"*": ["erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs"]}
 

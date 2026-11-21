@@ -6,7 +6,17 @@ import unittest
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
+from frappe.utils import (
+	add_days,
+	add_months,
+	flt,
+	get_first_day,
+	getdate,
+	now_datetime,
+	nowdate,
+	nowtime,
+	today,
+)
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
@@ -28,6 +38,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 
 class TestAssetRepair(unittest.TestCase):
@@ -37,6 +48,10 @@ class TestAssetRepair(unittest.TestCase):
 		create_asset_data()
 		create_item("_Test Stock Item")
 		frappe.db.sql("delete from `tabTax Rule`")
+
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.rollback()
 
 	def test_asset_status(self):
 		date = nowdate()
@@ -154,7 +169,7 @@ class TestAssetRepair(unittest.TestCase):
 		serial_no = serial_nos[0]
 
 		# should not raise any error
-		create_asset_repair(
+		consumed_repair = create_asset_repair(
 			stock_consumption=1,
 			item_code=stock_entry.get("items")[0].item_code,
 			warehouse="_Test Warehouse - _TC",
@@ -171,6 +186,15 @@ class TestAssetRepair(unittest.TestCase):
 
 		asset_repair.repair_status = "Completed"
 		self.assertRaises(frappe.ValidationError, asset_repair.submit)
+
+		# cancelling the repair cancels its stock entry and the consumed bundle
+		consumed_bundle = consumed_repair.stock_items[0].serial_and_batch_bundle
+		consumed_repair.cancel()
+		repair_stock_entry = frappe.db.get_value(
+			"Stock Entry", {"asset_repair": consumed_repair.name}, "docstatus"
+		)
+		self.assertEqual(repair_stock_entry, 2)
+		self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", consumed_bundle, "docstatus"), 2)
 
 	def test_no_increase_in_asset_value_when_not_capitalized(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
@@ -402,6 +426,141 @@ class TestAssetRepair(unittest.TestCase):
 
 		self.assertEqual(repair_cost, 500)
 
+	def test_capitalized_stock_items_are_valued_at_the_stock_ledger_rate(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		asset = create_asset(calculate_depreciation=1, submit=1)
+		spare_part = create_item("_Test Asset Repair Spare Part").name
+		asset_repair = create_asset_repair(
+			asset=asset, stock_consumption=1, item_code=spare_part, rate=500, qty=2
+		)
+		make_stock_entry(
+			item_code=spare_part, target=asset_repair.stock_items[0].warehouse, qty=2, basic_rate=100
+		)
+
+		asset_repair.update(
+			{
+				"repair_status": "Completed",
+				"completion_date": now_datetime(),
+				"capitalize_repair_cost": 1,
+				"cost_center": "Main - _TC",
+			}
+		)
+		asset_repair.submit()
+		asset.reload()
+
+		self.assertEqual(asset_repair.stock_items[0].total_value, 200)
+		self.assertEqual(asset_repair.total_repair_cost, 200)
+		self.assertEqual(asset.additional_asset_cost, 200)
+
+	def test_stock_entry_is_cancelled_only_with_its_repair(self):
+		asset_repair = create_asset_repair(stock_consumption=1, submit=1)
+		stock_entry = frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name})
+
+		self.assertRaises(frappe.ValidationError, stock_entry.cancel)
+
+		asset_repair.cancel()
+		self.assertEqual(stock_entry.db_get("docstatus"), 2)
+
+	def test_stock_entry_is_posted_on_the_completion_date(self):
+		asset_repair = create_asset_repair(stock_consumption=1, failure_date=add_days(nowdate(), -5))
+		frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Receipt",
+				"company": asset_repair.company,
+				"set_posting_time": 1,
+				"posting_date": add_days(nowdate(), -5),
+				"items": [
+					{
+						"t_warehouse": asset_repair.stock_items[0].warehouse,
+						"item_code": asset_repair.stock_items[0].item_code,
+						"qty": 1,
+						"basic_rate": 100,
+					}
+				],
+			}
+		).submit()
+
+		asset_repair.repair_status = "Completed"
+		asset_repair.completion_date = add_days(nowdate(), -3)
+		asset_repair.submit()
+
+		posting_date = frappe.db.get_value("Stock Entry", {"asset_repair": asset_repair.name}, "posting_date")
+		self.assertEqual(str(posting_date), add_days(nowdate(), -3))
+
+	def test_asset_stays_out_of_order_while_a_repair_is_pending(self):
+		asset = create_asset(submit=1)
+		create_asset_repair(asset=asset)
+		completed_repair = create_asset_repair(asset=asset)
+		completed_repair.update({"repair_status": "Completed", "completion_date": nowdate()})
+		completed_repair.save()
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+		asset.reload()
+		asset.set_status()
+		self.assertEqual(asset.db_get("status"), "Out of Order")
+
+	def test_capitalized_repair_raises_value_of_asset_without_depreciation(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000 + asset_repair.repair_cost)
+		self.assertTrue(asset_repair.db_get("asset_value_updated"))
+
+		asset_repair.cancel()
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)
+
+	def test_cancelling_old_repair_does_not_lower_value_of_asset_without_depreciation(self):
+		asset = create_asset(submit=1)
+		asset_repair = create_asset_repair(
+			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+		)
+		# simulate a repair submitted before its cost was added to the value after depreciation
+		asset_repair.db_set("asset_value_updated", 0)
+		asset.db_set("value_after_depreciation", 100000)
+
+		asset_repair.cancel()
+		self.assertEqual(asset.db_get("value_after_depreciation"), 100000)
+
+	def test_repair_roles_capitalize_spares(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		purchase_invoice = make_purchase_invoice(
+			item="_Test Non Stock Item", expense_account="Administrative Expenses - _TC", rate=100
+		).name
+		make_stock_entry(item_code="_Test Stock Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		repairs = {}
+		for role in ("Manufacturing Manager", "Quality Manager", "Accounts User"):
+			with self.subTest(role=role):
+				asset = create_asset(calculate_depreciation=1, submit=1)
+				user = make_fenced_user(f"repair-{frappe.scrub(role)}@example.com", [role])
+				with as_user(user):
+					asset_repair = make_capitalized_repair(asset, purchase_invoice)
+					asset_repair.submit()
+
+				self.assertEqual(asset.db_get("additional_asset_cost"), asset_repair.total_repair_cost)
+				self.assertTrue(
+					frappe.db.exists("Stock Entry", {"asset_repair": asset_repair.name, "docstatus": 1})
+				)
+				repairs[role] = (user, asset_repair)
+
+		for role in ("Manufacturing Manager", "Quality Manager"):
+			user, asset_repair = repairs[role]
+			with self.subTest(role=role), as_user(user):
+				asset_repair.cancel()
+			self.assertEqual(frappe.db.get_value("Asset", asset_repair.asset, "additional_asset_cost"), 0)
+
+		asset = create_asset(calculate_depreciation=1, submit=1)
+		with as_user(make_fenced_user("repair-manufacturing-user@example.com", ["Manufacturing User"])):
+			asset_repair = make_capitalized_repair(asset, purchase_invoice)
+			self.assertRaises(frappe.PermissionError, asset_repair.submit)
+
+		with as_user(make_fenced_user("repair-sales-user@example.com", ["Sales User"])):
+			self.assertRaises(frappe.PermissionError, get_repair_cost_for_purchase_invoice, purchase_invoice)
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations
@@ -422,7 +581,7 @@ def create_asset_repair(**args):
 		{
 			"asset": asset.name,
 			"asset_name": asset.asset_name,
-			"failure_date": nowdate(),
+			"failure_date": args.failure_date or nowdate(),
 			"description": "Test Description",
 			"repair_cost": 0,
 			"company": asset.company,
@@ -472,7 +631,13 @@ def create_asset_repair(**args):
 
 		if args.stock_consumption:
 			stock_entry = frappe.get_doc(
-				{"doctype": "Stock Entry", "stock_entry_type": "Material Receipt", "company": asset.company}
+				{
+					"doctype": "Stock Entry",
+					"stock_entry_type": "Material Receipt",
+					"company": asset.company,
+					"posting_date": getdate(asset_repair.failure_date),
+					"set_posting_time": 1,
+				}
 			)
 			stock_entry.append(
 				"items",
@@ -502,3 +667,32 @@ def create_asset_repair(**args):
 
 		asset_repair.submit()
 	return asset_repair
+
+
+def make_capitalized_repair(asset, purchase_invoice: str):
+	asset_repair = frappe.new_doc("Asset Repair")
+	asset_repair.update(
+		{
+			"asset": asset.name,
+			"company": asset.company,
+			"failure_date": nowdate(),
+			"completion_date": now_datetime(),
+			"repair_status": "Completed",
+			"capitalize_repair_cost": 1,
+			"cost_center": "Main - _TC",
+			"description": "Test Description",
+			"purchase_invoice": purchase_invoice,
+			"repair_cost": 50,
+			"stock_consumption": 1,
+		}
+	)
+	asset_repair.append(
+		"stock_items",
+		{
+			"item_code": "_Test Stock Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"valuation_rate": 100,
+			"consumed_quantity": 1,
+		},
+	)
+	return asset_repair.insert()

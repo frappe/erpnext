@@ -13,7 +13,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils import date_diff, get_datetime, getdate, now_datetime, time_diff_in_seconds
 from frappe.utils.user import is_website_user
 
 
@@ -184,6 +184,11 @@ class Issue(Document):
 		replicated_issue.first_response_time = 0
 		replicated_issue.first_responded_on = None
 		replicated_issue.creation = now_datetime()
+		replicated_issue.status = "Open"
+		replicated_issue.opening_date = getdate()
+		replicated_issue.resolution_time = None
+		replicated_issue.user_resolution_time = None
+		replicated_issue.sla_resolution_date = None
 
 		# Reset SLA
 		if replicated_issue.service_level_agreement:
@@ -192,7 +197,6 @@ class Issue(Document):
 			replicated_issue.agreement_status = "First Response Due"
 			replicated_issue.response_by = None
 			replicated_issue.resolution_by = None
-			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()
 
@@ -233,10 +237,6 @@ class Issue(Document):
 		).insert(ignore_permissions=True)
 
 		return replicated_issue.name
-
-	def reset_issue_metrics(self):
-		self.db_set("resolution_time", None)
-		self.db_set("user_resolution_time", None)
 
 
 def get_list_context(context=None):
@@ -285,7 +285,9 @@ def set_multiple_status(names, status):
 @frappe.whitelist(methods=["POST"])
 def set_status(name, status):
 	frappe.has_permission("Issue", "write", name, throw=True)
-	frappe.db.set_value("Issue", name, "status", status)
+	issue = frappe.get_doc("Issue", name)
+	issue.status = status
+	issue.save()
 
 
 def auto_close_tickets():
@@ -391,7 +393,7 @@ def calculate_first_response_time(issue, first_responded_on):
 		"Service Level Agreement", issue.service_level_agreement
 	).support_and_resolution
 
-	if issue_creation_date.day == first_responded_on.day:
+	if getdate(issue_creation_date) == getdate(first_responded_on):
 		if is_work_day(issue_creation_date, support_hours):
 			start_time, end_time = get_working_hours(issue_creation_date, support_hours)
 

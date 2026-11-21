@@ -18,7 +18,7 @@
   }
  ],
  "links": [],
- "modified": "2023-02-10 01:40:23.713390",
+ "modified": "2026-10-05 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Sales Stage",
@@ -36,6 +36,24 @@
    "role": "Sales Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1
   }
  ],
  "quick_entry": 1,

@@ -7,10 +7,12 @@ from frappe import _, scrub
 from frappe.query_builder import DocType
 from frappe.utils import add_days, add_to_date, flt, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	return Analytics(filters).run()
 
 

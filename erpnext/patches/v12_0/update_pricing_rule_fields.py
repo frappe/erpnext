@@ -31,12 +31,14 @@ def execute():
 
 		child_doctype = doctype + " Item"
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 		frappe.db.sql(
 			f""" UPDATE `tab{child_doctype}` SET pricing_rules = pricing_rule
 			WHERE docstatus < 2 and pricing_rule is not null and pricing_rule != ''
 		"""
 		)
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 		data = frappe.db.sql(
 			f""" SELECT pricing_rule, name, parent,
 				parenttype, creation, modified, docstatus, modified_by, owner, name
@@ -64,6 +66,7 @@ def execute():
 			)
 
 		if values:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 			frappe.db.sql(
 				""" INSERT INTO
 				`tabPricing Rule Detail` (`pricing_rule`, `child_docname`, `parent`, `parentfield`, `parenttype`,
@@ -105,6 +108,7 @@ def execute():
 			)
 
 		if values:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 			frappe.db.sql(
 				""" INSERT INTO
 				`tab{doctype}` ({field}, parent, parentfield, parenttype, creation, modified,

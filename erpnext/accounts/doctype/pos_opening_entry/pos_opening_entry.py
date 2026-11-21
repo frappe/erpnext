@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -37,6 +37,7 @@ class POSOpeningEntry(StatusUpdater):
 
 	def validate(self):
 		self.validate_pos_profile_and_cashier()
+		self.validate_balance_details()
 		self.validate_payment_method_account()
 		self.set_status()
 
@@ -58,6 +59,39 @@ class POSOpeningEntry(StatusUpdater):
 
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
 			frappe.throw(_("User {} is disabled. Please select valid user/cashier").format(self.user))
+
+		self.validate_cashier_of_pos_profile()
+
+	def validate_cashier_of_pos_profile(self):
+		cashiers = frappe.get_all(
+			"POS Profile User",
+			filters={"parent": self.pos_profile, "parenttype": "POS Profile"},
+			pluck="user",
+		)
+		if cashiers and all(cashiers) and self.user not in cashiers:
+			frappe.throw(
+				_("User {0} is not in Applicable for Users of POS Profile {1}").format(
+					frappe.bold(self.user), frappe.bold(self.pos_profile)
+				),
+				title=_("Invalid Cashier"),
+			)
+
+	def validate_balance_details(self):
+		modes_of_payment = set()
+		for d in self.balance_details:
+			if flt(d.opening_amount) < 0:
+				frappe.throw(
+					_("Row #{0}: Opening Amount for {1} cannot be negative").format(
+						d.idx, frappe.bold(d.mode_of_payment)
+					)
+				)
+			if d.mode_of_payment in modes_of_payment:
+				frappe.throw(
+					_("Row #{0}: Mode of Payment {1} is added more than once").format(
+						d.idx, frappe.bold(d.mode_of_payment)
+					)
+				)
+			modes_of_payment.add(d.mode_of_payment)
 
 	def validate_payment_method_account(self):
 		invalid_modes = []

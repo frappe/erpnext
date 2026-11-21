@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, nowdate, nowtime
 
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 from erpnext.stock.utils import _get_stock_balance, get_or_make_bin
 
 
@@ -494,6 +495,12 @@ class StockReservationEntry(Document):
 			frappe.throw(msg)
 
 
+def clear_reserve_stock_if_disabled(doc: Document) -> None:
+	"""Uncheck Reserve Stock on a voucher when stock reservation is disabled."""
+	if not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+		doc.reserve_stock = 0
+
+
 def validate_stock_reservation_settings(voucher: object) -> None:
 	"""Raises an exception if `Stock Reservation` is not enabled or `Voucher Type` is not allowed."""
 
@@ -517,10 +524,8 @@ def get_available_qty_to_reserve(
 ) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.batch.batch import get_batch_qty
-
 	if batch_no:
-		return get_batch_qty(
+		return get_batch_qty_for_stock(
 			item_code=item_code,
 			warehouse=warehouse,
 			batch_no=batch_no,
@@ -592,6 +597,7 @@ def get_available_serial_nos_to_reserve(
 				& (sre.warehouse == warehouse)
 				& (sre.reserved_qty >= sre.delivered_qty)
 				& (sre.status.notin(["Delivered", "Cancelled"]))
+				& (sb_entry.delivered_qty < sb_entry.qty)
 				& (sre.reservation_based_on == "Serial and Batch")
 			)
 		)
@@ -682,6 +688,27 @@ def get_sre_reserved_qty_details_for_voucher(voucher_type: str, voucher_no: str)
 			& (sre.status.notin(["Delivered", "Cancelled"]))
 		)
 		.groupby(sre.voucher_detail_no)
+	).run(as_list=True)
+
+	return frappe._dict(data)
+
+
+def get_undelivered_picked_qty_details(sales_order: str) -> dict:
+	"""Returns the undelivered picked qty per Sales Order Item from submitted Pick Lists."""
+
+	pick_list_item = frappe.qb.DocType("Pick List Item")
+	data = (
+		frappe.qb.from_(pick_list_item)
+		.select(
+			pick_list_item.sales_order_item,
+			Sum(pick_list_item.picked_qty - pick_list_item.delivered_qty),
+		)
+		.where(
+			(pick_list_item.docstatus == 1)
+			& (pick_list_item.sales_order == sales_order)
+			& (pick_list_item.picked_qty > pick_list_item.delivered_qty)
+		)
+		.groupby(pick_list_item.sales_order_item)
 	).run(as_list=True)
 
 	return frappe._dict(data)
@@ -902,12 +929,37 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		for field in ("company", "item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre[field])
 
+		round_to_ledger_qty(sb_entries)
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
 		bundle.save()
 
 		return bundle.name
+
+
+def round_to_ledger_qty(sb_entries: list[dict]) -> None:
+	"""Round the reserved total as the stock ledger posts it, on the last entry.
+
+	The other entries keep their reserved qty, so each reservation still matches what it delivers.
+	"""
+	qty_before_last = sum(flt(entry.qty) for entry in sb_entries[:-1])
+	total = flt(
+		qty_before_last + flt(sb_entries[-1].qty), frappe.get_precision("Serial and Batch Entry", "qty")
+	)
+	sb_entries[-1].qty = total - qty_before_last
+
+
+def get_qty_up_to_rounding(qty: float, full_qty: float) -> float:
+	"""``full_qty`` when ``qty`` falls short of it only by rounding."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return full_qty if flt(full_qty - qty, precision) == 0 else qty
+
+
+def get_qty_to_undeliver(delivered_qty: float, qty: float) -> float:
+	"""Undeliver ``qty`` and leave the delivered qty as the stock ledger posts it, with no rounding residue."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return delivered_qty - flt(delivered_qty - min(delivered_qty, qty), precision)
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
@@ -972,6 +1024,9 @@ def create_stock_reservation_entries_for_so_items(
 
 	sre_count = 0
 	reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", sales_order.name)
+	undelivered_picked_qty = (
+		{} if from_voucher_type == "Pick List" else get_undelivered_picked_qty_details(sales_order.name)
+	)
 
 	for item in items if items_details else sales_order.get("items"):
 		# Skip if `Reserved Stock` is not checked for the item.
@@ -989,8 +1044,8 @@ def create_stock_reservation_entries_for_so_items(
 			)
 			continue
 
-		# Stock should be reserved from the Pick List if has Picked Qty.
-		if not from_voucher_type == "Pick List" and flt(item.picked_qty) > 0:
+		# Stock should be reserved from the Pick List while it has undelivered Picked Qty.
+		if flt(undelivered_picked_qty.get(item.name), item.precision("picked_qty")) > 0:
 			frappe.throw(
 				_("Row #{0}: Item {1} has been picked, please reserve stock from the Pick List.").format(
 					item.idx, frappe.bold(item.item_code)
@@ -1071,7 +1126,7 @@ def create_stock_reservation_entries_for_so_items(
 				qty_to_be_reserved = min(qty_to_be_reserved, item.qty_to_reserve)
 
 		# Partial Reservation
-		if qty_to_be_reserved < unreserved_qty:
+		if flt(unreserved_qty - qty_to_be_reserved, item.precision("stock_qty")) > 0:
 			if not from_voucher_type and (
 				not item.get("qty_to_reserve") or qty_to_be_reserved < flt(item.get("qty_to_reserve"))
 			):

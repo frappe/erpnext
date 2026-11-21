@@ -20,6 +20,9 @@ class IncorrectCompanyValidationError(frappe.ValidationError):
 	pass
 
 
+RECEIPT_DOCUMENT_TYPES = ("Purchase Invoice", "Purchase Receipt")
+
+
 class LandedCostVoucher(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -53,6 +56,7 @@ class LandedCostVoucher(Document):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
+				check_receipt_document_access(pr.receipt_document_type, pr.receipt_document)
 				pr_items = get_pr_items(pr)
 
 				for d in pr_items:
@@ -162,6 +166,7 @@ class LandedCostVoucher(Document):
 				)
 
 	def validate_expense_accounts(self):
+		self.validate_charge_account_types()
 		if not is_perpetual_inventory_enabled(self.company):
 			return
 
@@ -182,13 +187,28 @@ class LandedCostVoucher(Document):
 					exc=IncorrectCompanyValidationError,
 				)
 
+	def validate_charge_account_types(self):
+		for row in self.taxes:
+			if not row.expense_account:
+				continue
+
+			account_type, is_group = frappe.get_cached_value(
+				"Account", row.expense_account, ["account_type", "is_group"]
+			)
+			if account_type == "Stock" or is_group:
+				frappe.throw(
+					_("Row {0}: Account {1} cannot be used for landed cost charges").format(
+						row.idx, frappe.bold(row.expense_account)
+					),
+					title=_("Incorrect Account"),
+				)
+
 	def set_total_taxes_and_charges(self):
 		self.total_taxes_and_charges = sum(flt(d.base_amount) for d in self.get("taxes"))
 
 	def set_applicable_charges_on_item(self):
 		if self.get("taxes") and self.distribute_charges_based_on != "Distribute Manually":
 			items = self.get("items")
-			total_charges = 0.0
 			based_on_field = frappe.scrub(self.distribute_charges_based_on)
 
 			total_item_cost = sum(flt(item.get(based_on_field)) for item in items)
@@ -203,17 +223,21 @@ class LandedCostVoucher(Document):
 					)
 				)
 
-			precision = items[0].precision("applicable_charges")
-			for item in items:
-				item.applicable_charges = flt(
-					flt(item.get(based_on_field))
-					* (flt(self.total_taxes_and_charges) / flt(total_item_cost)),
-					precision,
-				)
-				total_charges += item.applicable_charges
+			self.distribute_charges(items, based_on_field, total_item_cost)
 
-			diff = flt(self.total_taxes_and_charges - total_charges, precision)
-			absorb_rounding_difference(items, diff, precision, self.total_taxes_and_charges)
+	def distribute_charges(self, items, based_on_field, total_item_cost):
+		precision = items[0].precision("applicable_charges")
+		charges_per_unit = flt(self.total_taxes_and_charges) / flt(total_item_cost)
+		for item in items:
+			item.applicable_charges = flt(flt(item.get(based_on_field)) * charges_per_unit, precision)
+
+		diff = flt(self.total_taxes_and_charges) - sum(flt(item.applicable_charges) for item in items)
+		absorb_rounding_difference(
+			self.get_rows_following_the_basis_total(),
+			flt(diff, precision),
+			precision,
+			self.total_taxes_and_charges,
+		)
 
 	def validate_applicable_charges_for_item(self):
 		if self.distribute_charges_based_on == "Distribute Manually" and len(self.taxes) > 1:
@@ -248,14 +272,44 @@ class LandedCostVoucher(Document):
 		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
 		diff = flt(diff, precision)
 
-		if abs(diff) < (2.0 / (10**precision)):
-			self.items[-1].applicable_charges += diff
-		else:
+		if abs(diff) >= (2.0 / (10**precision)):
 			frappe.throw(
 				_(
 					"Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"
 				)
 			)
+
+		absorb_rounding_difference(
+			self.get_rows_following_the_basis_total(), diff, precision, self.total_taxes_and_charges
+		)
+		self.validate_charges_follow_total_sign()
+
+	def get_charge_sign_basis(self):
+		based_on = frappe.scrub(self.distribute_charges_based_on)
+		if based_on == "distribute_manually":
+			based_on = "amount"
+
+		basis_sign = -1 if sum(flt(row.get(based_on)) for row in self.get("items")) < 0 else 1
+		return based_on, basis_sign
+
+	def get_rows_following_the_basis_total(self):
+		based_on, basis_sign = self.get_charge_sign_basis()
+		return [row for row in self.get("items") if flt(row.get(based_on)) * basis_sign >= 0]
+
+	def validate_charges_follow_total_sign(self):
+		total_sign = -1 if flt(self.total_taxes_and_charges) < 0 else 1
+		based_on, basis_sign = self.get_charge_sign_basis()
+		for row in self.get("items"):
+			expected_sign = total_sign * (-1 if flt(row.get(based_on)) * basis_sign < 0 else 1)
+			if flt(row.applicable_charges) * expected_sign >= 0:
+				continue
+
+			message = (
+				_("Row {0}: Applicable Charges for Item {1} cannot be negative")
+				if expected_sign > 0
+				else _("Row {0}: Applicable Charges for Item {1} cannot be positive")
+			)
+			frappe.throw(message.format(row.idx, frappe.bold(row.item_code)))
 
 	def on_submit(self):
 		self.validate_applicable_charges_for_item()
@@ -372,6 +426,13 @@ class LandedCostVoucher(Document):
 						),
 						tuple([item.valuation_rate, *serial_nos]),
 					)
+
+
+def check_receipt_document_access(receipt_document_type, receipt_document):
+	if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
+		frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
+
+	frappe.has_permission(receipt_document_type, "select", receipt_document, throw=True)
 
 
 def get_pr_items(purchase_receipt):

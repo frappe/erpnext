@@ -24,6 +24,7 @@ class TestInactiveSalesItems(FrappeTestCase):
 		auditor = frappe.get_doc(
 			{
 				"doctype": "User",
+				"send_welcome_email": 0,
 				"email": "test_inactive_sales_auditor@example.com",
 				"first_name": "Auditor",
 				"roles": [{"role": "Auditor"}],
@@ -53,3 +54,10 @@ class TestInactiveSalesItems(FrappeTestCase):
 		row = next(row for row in self.run_report(item=item) if row.get("last_order_date"))
 
 		self.assertEqual(row["last_order_date"], getdate(invoice.posting_date))
+
+	def test_item_templates_are_excluded(self):
+		template = make_item(
+			"_Test Inactive Sales Item Template", {"has_variants": 1, "variant_based_on": "Manufacturer"}
+		).name
+
+		self.assertEqual(self.run_report(item=template), [])

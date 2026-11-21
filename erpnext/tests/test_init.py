@@ -155,6 +155,7 @@ class TestPermissionHelpers(FrappeTestCase):
 
 		with self.assertRaises(frappe.ValidationError):
 			with as_user(user):
+				# nosemgrep: frappe-semgrep-rules.rules.frappe-missing-translate-function-python -- test-only message
 				frappe.throw("_Test as_user failure")
 		self.assertEqual(frappe.session.user, previous)
 

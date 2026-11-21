@@ -6,7 +6,17 @@ import frappe
 from frappe.model.document import Document
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Coalesce, CombineDatetime, Sum
-from frappe.utils import flt
+from frappe.utils import flt, now
+from pypika.terms import ValueWrapper
+
+PROJECTED_QTY_ADDITIONS = ("actual_qty", "ordered_qty", "indented_qty", "planned_qty")
+PROJECTED_QTY_DEDUCTIONS = (
+	"reserved_qty",
+	"reserved_qty_for_production",
+	"reserved_qty_for_sub_contract",
+	"reserved_qty_for_production_plan",
+)
+RECALCULATED_FIELDS = (*PROJECTED_QTY_ADDITIONS, *PROJECTED_QTY_DEDUCTIONS)
 
 
 class Bin(Document):
@@ -35,8 +45,10 @@ class Bin(Document):
 		warehouse: DF.Link
 	# end: auto-generated types
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def recalculate_qty(self):
+		frappe.has_permission("Repost Item Valuation", "write", throw=True)
+
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 		from erpnext.stock.stock_balance import (
 			get_indented_qty,
@@ -45,6 +57,7 @@ class Bin(Document):
 			get_reserved_qty,
 		)
 
+		self.reload()
 		self.actual_qty = get_actual_qty(self.item_code, self.warehouse)
 		self.planned_qty = get_planned_qty(self.item_code, self.warehouse)
 		self.indented_qty = get_indented_qty(self.item_code, self.warehouse)
@@ -55,7 +68,9 @@ class Bin(Document):
 		self.update_reserved_qty_for_sub_contracting(update_qty=False)
 		self.update_reserved_qty_for_production_plan(skip_project_qty_update=True, update_qty=False)
 		self.set_projected_qty()
-		self.save()
+		update_bin_columns(
+			self.name, {fieldname: flt(self.get(fieldname)) for fieldname in RECALCULATED_FIELDS}
+		)
 
 	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
@@ -213,6 +228,31 @@ def get_bin_details(bin_name):
 		],
 		as_dict=1,
 	)
+
+
+def update_bin_columns(bin_name, values):
+	table = frappe.qb.DocType("Bin")
+	query = frappe.qb.update(table).set(table.modified, now()).where(table.name == bin_name)
+
+	for fieldname, value in values.items():
+		query = query.set(table[fieldname], value)
+
+	query.set(table.projected_qty, get_projected_qty_term(table, values)).run()
+	frappe.clear_document_cache("Bin", bin_name)
+
+
+def get_projected_qty_term(table, values):
+	def qty(fieldname):
+		return flt(values[fieldname]) if fieldname in values else Coalesce(table[fieldname], 0)
+
+	projected_qty = ValueWrapper(0)
+	for fieldname in PROJECTED_QTY_ADDITIONS:
+		projected_qty = projected_qty + qty(fieldname)
+
+	for fieldname in PROJECTED_QTY_DEDUCTIONS:
+		projected_qty = projected_qty - qty(fieldname)
+
+	return projected_qty
 
 
 def update_qty(bin_name, args):

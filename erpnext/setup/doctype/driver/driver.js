@@ -15,6 +15,7 @@ frappe.ui.form.on("Driver", {
 	refresh: function (frm) {
 		frm.set_query("address", function () {
 			return {
+				query: "erpnext.accounts.custom.address.address_query",
 				filters: {
 					is_your_company_address: !frm.doc.transporter ? 1 : 0,
 				},

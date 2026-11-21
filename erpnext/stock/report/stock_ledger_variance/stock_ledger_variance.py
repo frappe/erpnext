@@ -1,10 +1,9 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import json
-
 import frappe
 from frappe import _
+from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt
 
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
@@ -205,8 +204,8 @@ def get_data(filters=None):
 	data = []
 	if item_warehouse_map:
 		float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
-		currency_precision = (
-			cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
+		currency_precision = get_field_precision(
+			frappe.get_meta("Stock Ledger Entry").get_field("stock_value")
 		)
 
 		for item_warehouse in item_warehouse_map:
@@ -276,13 +275,10 @@ def has_difference(row, float_precision, currency_precision, difference_in, valu
 		qty_diff = flt(row.difference_in_qty, float_precision)
 		value_diff = flt(row.diff_value_diff, currency_precision)
 
-		if row.stock_queue and json.loads(row.stock_queue):
-			value_diff = value_diff or (
-				flt(row.fifo_value_diff, currency_precision)
-				or flt(row.fifo_difference_diff, currency_precision)
-			)
-
-			qty_diff = qty_diff or flt(row.fifo_qty_diff, float_precision)
+		value_diff = value_diff or (
+			flt(row.fifo_value_diff, currency_precision) or flt(row.fifo_difference_diff, currency_precision)
+		)
+		qty_diff = qty_diff or flt(row.fifo_qty_diff, float_precision)
 
 		valuation_diff = flt(row.valuation_diff, currency_precision) or flt(
 			row.fifo_valuation_diff, currency_precision

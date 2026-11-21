@@ -34,7 +34,7 @@ frappe.query_reports["POS Register"] = {
 			options: "POS Profile",
 		},
 		{
-			fieldname: "cashier",
+			fieldname: "owner",
 			label: __("Cashier"),
 			fieldtype: "Link",
 			options: "User",

@@ -9,6 +9,8 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull
 from pypika.terms import Bracket, LiteralValue
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 class PaymentLedger:
 	def __init__(self, filters=None):
@@ -189,7 +191,13 @@ class PaymentLedger:
 			)
 		)
 		self.columns.append(
-			dict(label=_("Party"), fieldname="party", fieldtype="data", options=options, width="100")
+			dict(
+				label=_("Party"),
+				fieldname="party",
+				fieldtype="Dynamic Link",
+				options="party_type",
+				width="100",
+			)
 		)
 		self.columns.append(
 			dict(
@@ -263,4 +271,6 @@ class PaymentLedger:
 
 
 def execute(filters=None):
+	validate_date_range(filters, "period_start_date", "period_end_date")
+
 	return PaymentLedger(filters).run()

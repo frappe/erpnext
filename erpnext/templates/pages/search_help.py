@@ -22,6 +22,7 @@ def get_context(context):
 		context.title = _("Docs Search")
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- results are permission-filtered
 @frappe.whitelist(allow_guest=True)
 def get_help_results_sections(text):
 	out = []

@@ -20,7 +20,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
-from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -32,6 +32,7 @@ from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
+from erpnext.utilities.transaction_base import get_whole_number_uoms, validate_qty_is_integer
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -183,7 +184,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_dt": "Material Request",
 				"target_parent_field": "per_ordered",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 				"percent_join_field": "material_request",
 			}
 		]
@@ -208,6 +209,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		self.validate_schedule_date()
 		validate_for_items(self)
+		self.set_last_purchase_rate()
 		self.check_on_hold_or_closed_status()
 
 		self.validate_uom_is_integer("uom", "qty")
@@ -229,6 +231,19 @@ class PurchaseOrder(BuyingController):
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.set_missing_terms()
+
+	def set_last_purchase_rate(self):
+		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+			return
+
+		for d in self.get("items"):
+			if d.item_code:
+				d.last_purchase_rate = flt(
+					item_last_purchase_rate(
+						self.name, self.conversion_rate, d.item_code, d.conversion_factor
+					),
+					d.precision("last_purchase_rate"),
+				)
 
 	def set_has_unit_price_items(self):
 		"""
@@ -351,19 +366,53 @@ class PurchaseOrder(BuyingController):
 			itemwise_qty.setdefault(d.item_code, 0)
 			itemwise_qty[d.item_code] += flt(d.stock_qty)
 
+		precision = self.items[0].precision("stock_qty")
 		for item_code, qty in itemwise_qty.items():
-			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
+			if flt(qty, precision) < flt(itemwise_min_order_qty.get(item_code), precision):
 				frappe.throw(
 					_(
 						"Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
-					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
+					).format(item_code, flt(qty, precision), itemwise_min_order_qty.get(item_code))
+				)
+
+		self.warn_marginal_min_order_qty(itemwise_qty, itemwise_min_order_qty)
+
+	def warn_marginal_min_order_qty(self, itemwise_qty, itemwise_min_order_qty):
+		"""Toast when an item's ordered qty exceeds its minimum only by purchase UOM rounding."""
+		if not self.is_new():
+			return
+
+		precision = self.items[0].precision("stock_qty")
+		itemwise_step = frappe._dict()
+		itemwise_stock_uom = frappe._dict()
+		for d in self.get("items"):
+			step = 10 ** -d.precision("qty") * flt(d.conversion_factor)
+			itemwise_step[d.item_code] = max(itemwise_step.get(d.item_code, 0), step)
+			itemwise_stock_uom[d.item_code] = d.stock_uom
+
+		for item_code, qty in itemwise_qty.items():
+			min_order_qty = flt(itemwise_min_order_qty.get(item_code))
+			overage = flt(qty) - min_order_qty
+			if min_order_qty and flt(overage, precision) > 0 and overage < itemwise_step[item_code]:
+				frappe.msgprint(
+					_(
+						"Item {0}: Ordered qty {1} {2} exceeds the minimum order qty {3} {2} by {4} {2} due to purchase UOM rounding."
+					).format(
+						item_code,
+						flt(qty, precision),
+						itemwise_stock_uom[item_code],
+						min_order_qty,
+						flt(overage, precision),
+					),
+					indicator="orange",
+					alert=True,
 				)
 
 	def validate_bom_for_subcontracting_items(self):
 		for item in self.items:
 			if not item.bom:
 				frappe.throw(
-					_("Row #{0}: BOM is not specified for subcontracting item {0}").format(
+					_("Row #{0}: BOM is not specified for subcontracting item {1}").format(
 						item.idx, item.item_code
 					)
 				)
@@ -393,10 +442,30 @@ class PurchaseOrder(BuyingController):
 							)
 					if not item.fg_item_qty:
 						frappe.throw(_("Row #{0}: Finished Good Item Qty can not be zero").format(item.idx))
+
+				self.validate_finished_good_qty()
 		else:
 			for item in self.items:
 				item.set("fg_item", None)
 				item.set("fg_item_qty", 0)
+
+	def validate_finished_good_qty(self):
+		finished_good_uoms = {
+			item.name: item.stock_uom
+			for item in frappe.get_all(
+				"Item",
+				filters={"name": ["in", list({item.fg_item for item in self.items})]},
+				fields=["name", "stock_uom"],
+			)
+		}
+		integer_uoms = get_whole_number_uoms(finished_good_uoms.values())
+
+		for item in self.items:
+			if stock_uom := finished_good_uoms.get(item.fg_item):
+				if stock_uom in integer_uoms:
+					validate_qty_is_integer(
+						item.fg_item_qty, stock_uom, item.precision("fg_item_qty"), item.idx
+					)
 
 	def get_schedule_dates(self):
 		for d in self.get("items"):
@@ -476,8 +545,15 @@ class PurchaseOrder(BuyingController):
 		super().update_prevdoc_status()
 
 	def update_status(self, status):
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			validate_reopen_against_blanket_order,
+		)
+
 		self.check_modified_date()
 		was_closed = self.status == "Closed"
+		if status != "Closed" and was_closed:
+			validate_reopen_against_blanket_order(self)
+
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
@@ -551,7 +627,11 @@ class PurchaseOrder(BuyingController):
 		pass
 
 	def update_status_updater(self):
-		self.status_updater.append(
+		self.status_updater.extend(self.get_sales_order_status_updater())
+
+	@staticmethod
+	def get_sales_order_status_updater():
+		return [
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Sales Order Item",
@@ -560,10 +640,10 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
-			}
-		)
-		self.status_updater.append(
+				**get_stock_qty_status_args(
+					frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales")
+				),
+			},
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Packed Item",
@@ -572,9 +652,9 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_packed_item",
 				"target_ref_field": "qty",
-				"source_field": "stock_qty",
-			}
-		)
+				**get_stock_qty_status_args(),
+			},
+		]
 
 	def update_delivered_qty_in_sales_order(self):
 		"""Update delivered qty in Sales Order for drop ship"""
@@ -622,9 +702,9 @@ class PurchaseOrder(BuyingController):
 		if not self.is_subcontracted or self.is_old_subcontracting_flow:
 			return
 
-		finished_goods_without_service_item = {
-			d.fg_item for d in self.items if (not d.item_code and d.fg_item)
-		}
+		finished_goods_without_service_item = list(
+			{d.fg_item for d in self.items if (not d.item_code and d.fg_item)}
+		)
 
 		if subcontracting_boms := get_subcontracting_boms_for_finished_goods(
 			finished_goods_without_service_item
@@ -649,19 +729,13 @@ class PurchaseOrder(BuyingController):
 		return result
 
 	def update_ordered_qty_in_so_for_removed_items(self, removed_items):
-		"""
-		Updates ordered_qty in linked SO when item rows are removed using Update Items
-		"""
-		if not self.is_against_so():
+		"""Recalculate the ordered qty of Sales Order rows linked to rows removed through Update Items."""
+		if not removed_items:
 			return
-		for item in removed_items:
-			prev_ordered_qty = flt(
-				frappe.get_cached_value("Sales Order Item", item.get("sales_order_item"), "ordered_qty")
-			)
 
-			frappe.db.set_value(
-				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
-			)
+		# the removed rows are still in self.items, so their Sales Order rows are recalculated too
+		for args in self.get_sales_order_status_updater():
+			self._update_children({**args, "cond": ""}, update_modified=True)
 
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
@@ -813,15 +887,16 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_purchase_invoice_from_portal(purchase_order_name):
 	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
 	if frappe.session.user not in frappe.get_all(
 		"Portal User", {"parenttype": "Supplier", "parent": doc.supplier}, pluck="user"
 	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+	for item in [item for item in doc.items if not item.qty]:
+		doc.remove(item)
 	doc.save()
-	frappe.db.commit()
 	frappe.response["type"] = "redirect"
 	frappe.response.location = "/purchase-invoices/" + doc.name
 

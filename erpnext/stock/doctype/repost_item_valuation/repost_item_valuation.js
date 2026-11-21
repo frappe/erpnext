@@ -90,8 +90,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 			}).addClass("btn-primary");
 		}
 
-		frm.trigger("show_update_valuation_field");
-
 		frm.trigger("show_reposting_progress");
 
 		if (frm.doc.status === "Queued" && frm.doc.docstatus === 1) {
@@ -99,19 +97,14 @@ frappe.ui.form.on("Repost Item Valuation", {
 		}
 	},
 
-	show_update_valuation_field(frm) {
-		frm.toggle_display(
-			"recalculate_valuation_rate",
-			["Purchase Receipt", "Purchase Invoice", "Stock Entry"].includes(frm.doc.voucher_type)
-		);
-	},
-
 	execute_reposting(frm) {
 		frm.add_custom_button(__("Start Reposting"), () => {
 			frappe.call({
 				method: "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.execute_repost_item_valuation",
-				callback: function () {
-					frappe.msgprint(__("Reposting has been started in the background."));
+				callback: function (r) {
+					if (r.message) {
+						frappe.msgprint(__("Reposting has been started in the background."));
+					}
 				},
 			});
 		});
@@ -123,7 +116,7 @@ frappe.ui.form.on("Repost Item Valuation", {
 		let progress = 0.0;
 		let total_count = frm.doc.items_to_be_repost ? JSON.parse(frm.doc.items_to_be_repost).length : 0;
 
-		if (total_count > 1) {
+		if (total_count > 1 && frm.doc.based_on !== "Item and Warehouse") {
 			progress = flt((cint(frm.doc.current_index) / total_count) * 100, 2) || 0.5;
 			title = __("Reposting for Item-Wh Completed {0}%", [progress]);
 
@@ -166,7 +159,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 
 	voucher_type: function (frm) {
 		frm.trigger("set_company_on_transaction");
-		frm.trigger("show_update_valuation_field");
 	},
 
 	voucher_no: function (frm) {

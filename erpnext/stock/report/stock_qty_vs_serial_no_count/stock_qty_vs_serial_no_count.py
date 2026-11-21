@@ -138,30 +138,80 @@ def sync_serial_no_status_for_warehouse(warehouse, item_code=None):
 	if item_code:
 		filters["name"] = item_code
 
+	warehouses = get_warehouses(warehouse)
 	for item in frappe.get_all("Item", filters=filters, pluck="name"):
-		sync_serial_no_status_for_item(item, warehouse)
+		sync_serial_no_status_for_item(item, warehouses)
+		restore_serial_nos_in_stock(item, warehouses)
 
 
-def sync_serial_no_status_for_item(item_code, warehouse):
-	"""Correct Serial No records this report counts in the warehouse but whose last
-	stock ledger movement says the stock left it. Reposting rebuilds qty and valuation
-	from the ledger but never rewrites Serial No warehouse/status, so records orphaned
-	by cancelled or amended vouchers keep inflating the serial count."""
-	serial_nos = frappe.get_all(
-		"Serial No",
-		filters={"item_code": item_code, "warehouse": warehouse, "status": ("in", ["Active", "Expired"])},
-		pluck="name",
-	)
+def restore_serial_nos_in_stock(item_code, warehouses):
+	serial_nos = get_serial_nos_received_in(item_code, warehouses)
 	if not serial_nos:
 		return
 
 	last_moves = get_last_ledger_moves(item_code, serial_nos)
 	for serial_no in serial_nos:
 		row = last_moves.get(serial_no)
-		if row and flt(row.qty) > 0 and row.warehouse == warehouse:
+		if row and flt(row.qty) > 0 and row.warehouse in warehouses:
+			frappe.db.set_value(
+				"Serial No",
+				serial_no,
+				{"warehouse": row.warehouse, "status": "Active"},
+				update_modified=False,
+			)
+
+
+def get_serial_nos_received_in(item_code, warehouses):
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	serial_no = frappe.qb.DocType("Serial No")
+	return (
+		frappe.qb.from_(entry)
+		.inner_join(bundle)
+		.on(entry.parent == bundle.name)
+		.inner_join(serial_no)
+		.on(serial_no.name == entry.serial_no)
+		.select(entry.serial_no)
+		.distinct()
+		.where(
+			(bundle.item_code == item_code)
+			& (bundle.docstatus == 1)
+			& (Coalesce(bundle.is_cancelled, 0) == 0)
+			& (entry.qty > 0)
+			& (Coalesce(entry.warehouse, bundle.warehouse).isin(warehouses))
+			& (
+				(serial_no.status.notin(["Active", "Expired"]))
+				| (Coalesce(serial_no.warehouse, "").notin(warehouses))
+			)
+		)
+		.run(pluck=True)
+	)
+
+
+def sync_serial_no_status_for_item(item_code, warehouses):
+	"""Correct Serial No records this report counts in the warehouse but whose last
+	stock ledger movement says the stock left it. Reposting rebuilds qty and valuation
+	from the ledger but never rewrites Serial No warehouse/status, so records orphaned
+	by cancelled or amended vouchers keep inflating the serial count."""
+	serial_nos = frappe.get_all(
+		"Serial No",
+		filters={
+			"item_code": item_code,
+			"warehouse": ("in", warehouses),
+			"status": ("in", ["Active", "Expired"]),
+		},
+		fields=["name", "warehouse"],
+	)
+	if not serial_nos:
+		return
+
+	last_moves = get_last_ledger_moves(item_code, [d.name for d in serial_nos])
+	for serial_no in serial_nos:
+		row = last_moves.get(serial_no.name)
+		if row and flt(row.qty) > 0 and row.warehouse == serial_no.warehouse:
 			continue
 
-		set_serial_no_state_from_ledger(serial_no, row)
+		set_serial_no_state_from_ledger(serial_no.name, row)
 
 
 def set_serial_no_state_from_ledger(serial_no, row):

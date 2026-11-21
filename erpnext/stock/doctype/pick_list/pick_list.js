@@ -249,7 +249,11 @@ frappe.ui.form.on("Pick List", {
 		frm.clear_table("locations");
 		frm.trigger("add_get_items_button");
 	},
-	create_delivery_note: (frm) => {
+	create_delivery_note: async (frm) => {
+		if (!(await confirm_if_delivery_note_drafts_exist(frm.doc))) {
+			return;
+		}
+
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery_note",
 			frm: frm,
@@ -352,6 +356,42 @@ frappe.ui.form.on("Pick List", {
 		frappe.set_route("query-report", "Reserved Stock");
 	},
 });
+
+async function confirm_if_delivery_note_drafts_exist(source_doc) {
+	let drafts;
+	try {
+		drafts = await frappe.xcall("erpnext.stock.doctype.pick_list.pick_list.get_existing_drafts", {
+			source_name: source_doc.name,
+		});
+	} catch (error) {
+		console.error(error);
+		return true;
+	}
+
+	if (!drafts.length) {
+		return true;
+	}
+
+	const links = drafts.map((name) => frappe.utils.get_form_link("Delivery Note", name, true)).join(", ");
+	const message =
+		drafts.length === 1
+			? __(
+					"A draft Delivery Note already exists for this Pick List: {0}. Do you still want to create a new one?",
+					[links]
+			  )
+			: __(
+					"{0} draft Delivery Note documents already exist for this Pick List: {1}. Do you still want to create a new one?",
+					[drafts.length, links]
+			  );
+
+	return new Promise((resolve) => {
+		frappe.confirm(
+			message,
+			() => resolve(true),
+			() => resolve(false)
+		);
+	});
+}
 
 frappe.ui.form.on("Pick List Item", {
 	item_code: (frm, cdt, cdn) => {

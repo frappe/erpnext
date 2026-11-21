@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_events_in_timeline": 0, 
- "allow_guest_to_view": 0, 
+ "allow_guest_to_view": 1, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:partner_name", 
@@ -846,7 +846,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2026-09-16 12:00:00.000000", 
+ "modified": "2026-11-06 01:16:48.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

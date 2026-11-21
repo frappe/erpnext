@@ -277,6 +277,7 @@
    "fieldname": "error_log",
    "fieldtype": "Text",
    "label": "Error Log",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
@@ -289,7 +290,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2024-09-21 09:05:52.945112",
+ "modified": "2026-11-05 07:22:25.192504",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",

@@ -28,6 +28,7 @@ def move_credit_limit_to_child_table():
 		):
 			fields = ", bypass_credit_limit_check_at_sales_order"
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		credit_limit_records = frappe.db.sql(
 			f"""
 			SELECT name, credit_limit {fields}

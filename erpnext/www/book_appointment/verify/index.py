@@ -38,7 +38,14 @@ def get_context(context):
 		context.message = _("Verification link has expired.")
 		return context
 
-	verify_appointment(appointment)
+	try:
+		verify_appointment(appointment)
+	except frappe.ValidationError as e:
+		frappe.clear_last_message()
+		context.success = False
+		context.message = str(e)
+		return context
+
 	# GET requests are rolled back at the end of the request unless this flag is set
 	frappe.local.flags.commit = True
 	context.success = True

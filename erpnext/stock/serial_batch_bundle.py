@@ -36,6 +36,9 @@ INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES = ("Disassemble", "Material Receipt")
 
 SERIAL_NO_QUERY_BATCH_SIZE = 500
 
+# their bundles only reserve stock; a POS Invoice's bundle moves to its Sales Invoice on consolidation
+RESERVING_VOUCHER_TYPES = ("Pick List", "POS Invoice")
+
 
 def get_serial_no_status(sle):
 	warehouse = sle.warehouse if sle.actual_qty > 0 else None
@@ -53,7 +56,7 @@ def get_serial_no_status(sle):
 
 def get_status_for_serial_nos(sle):
 	status = "Inactive"
-	if sle.actual_qty < 0:
+	if sle.actual_qty < 0 and sle.voucher_type not in ["Purchase Invoice", "Purchase Receipt"]:
 		status = "Delivered"
 		if sle.voucher_type == "Stock Entry":
 			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
@@ -61,11 +64,22 @@ def get_status_for_serial_nos(sle):
 				status = "Consumed"
 
 		if sle.is_cancelled == 1 and (
-			sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"] or status == "Consumed"
+			sle.voucher_type in ["Purchase Invoice", "Purchase Receipt", "Stock Reconciliation"]
+			or status == "Consumed"
 		):
 			status = "Inactive"
 
 	return status
+
+
+def get_serial_no_status_term(sn_table, sle, warehouse, status):
+	if warehouse:
+		return "Active"
+
+	if not sle.is_cancelled:
+		return status
+
+	return Case().when(sn_table.purchase_document_no == sle.voucher_no, "Inactive").else_(status)
 
 
 class SerialBatchBundle:
@@ -198,10 +212,60 @@ class SerialBatchBundle:
 				"is_rejected": self.is_rejected_entry(),
 				"make_bundle_from_sle": 1,
 				"sle": self.sle,
+				**self.get_entries_held_by_voucher(),
 			}
 		).make_serial_and_batch_bundle()
 
 		self.set_serial_and_batch_bundle(sn_doc)
+
+	def get_entries_held_by_voucher(self):
+		"""Serial nos and batch qty that draft bundles on this voucher's rows hold, to skip when picking."""
+		if self.sle.actual_qty > 0:
+			return {}
+
+		item_doctype = self.child_doctype
+		if item_doctype == "Packed Item":
+			item_doctype = self.sle.voucher_type + " Item"
+
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		entries = (
+			frappe.qb.from_(bundle)
+			.inner_join(entry)
+			.on(entry.parent == bundle.name)
+			.select(entry.serial_no, entry.batch_no, entry.qty, bundle.warehouse)
+			.where(
+				(
+					bundle.name.isin(self.get_bundles_on_voucher_rows(item_doctype))
+					| bundle.name.isin(self.get_bundles_on_voucher_rows("Packed Item"))
+				)
+				& (bundle.item_code == self.item_code)
+				& (bundle.type_of_transaction == "Outward")
+				& (bundle.docstatus == 0)
+			)
+		).run(as_dict=True)
+
+		held_batches = frappe._dict()
+		for row in entries:
+			if row.batch_no:
+				held = held_batches.setdefault(
+					(row.batch_no, row.warehouse),
+					frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=0),
+				)
+				held.qty += row.qty
+
+		return {
+			"ignore_serial_nos": [row.serial_no for row in entries if row.serial_no],
+			"already_picked_batches": held_batches,
+		}
+
+	def get_bundles_on_voucher_rows(self, doctype):
+		row = frappe.qb.DocType(doctype)
+		return (
+			frappe.qb.from_(row)
+			.select(row.serial_and_batch_bundle)
+			.where((row.parenttype == self.sle.voucher_type) & (row.parent == self.sle.voucher_no))
+		)
 
 	def validate_actual_qty(self, sn_doc):
 		link = get_link_to_form("Serial and Batch Bundle", sn_doc.name)
@@ -216,42 +280,71 @@ class SerialBatchBundle:
 			if sn_doc.type_of_transaction == "Inward":
 				correct_type = "Outward"
 
-			msg = f"The type of transaction of Serial and Batch Bundle {link} is {bold(sn_doc.type_of_transaction)} but as per the Actual Qty {self.sle.actual_qty} for the item {bold(self.sle.item_code)} in the {self.sle.voucher_type} {self.sle.voucher_no} the type of transaction should be {bold(correct_type)}"
-			frappe.throw(_(msg), title=_("Incorrect Type of Transaction"))
+			msg = _(
+				"The type of transaction of Serial and Batch Bundle {0} is {1} but as per the Actual Qty {2} for the item {3} in the {4} {5} the type of transaction should be {6}"
+			).format(
+				link,
+				bold(_(sn_doc.type_of_transaction)),
+				self.sle.actual_qty,
+				bold(self.sle.item_code),
+				_(self.sle.voucher_type),
+				self.sle.voucher_no,
+				bold(_(correct_type)),
+			)
+			frappe.throw(msg, title=_("Incorrect Type of Transaction"))
 
 		precision = sn_doc.precision("total_qty")
 		if self.sle.actual_qty and flt(sn_doc.total_qty, precision) != flt(self.sle.actual_qty, precision):
-			msg = f"Total qty {flt(sn_doc.total_qty, precision)} of Serial and Batch Bundle {link} is not equal to Actual Qty {flt(self.sle.actual_qty, precision)} in the {self.sle.voucher_type} {self.sle.voucher_no}"
-			frappe.throw(_(msg))
+			msg = _(
+				"Total qty {0} of Serial and Batch Bundle {1} is not equal to Actual Qty {2} in the {3} {4}"
+			).format(
+				flt(sn_doc.total_qty, precision),
+				link,
+				flt(self.sle.actual_qty, precision),
+				_(self.sle.voucher_type),
+				self.sle.voucher_no,
+			)
+			frappe.throw(msg)
 
 	def validate_item(self):
-		msg = ""
+		hints = []
 		if self.sle.actual_qty > 0:
 			if not self.item_details.has_batch_no and not self.item_details.has_serial_no:
-				msg = f"Item {self.item_code} is not a batch or serial no item"
+				hints.append(_("Item {0} is not a batch or serial no item").format(self.item_code))
 
 			if self.item_details.has_serial_no and not self.item_details.serial_no_series:
-				msg += f". If you want auto pick serial bundle, then kindly set Serial No Series in Item {self.item_code}"
+				hints.append(
+					_(
+						"If you want auto pick serial bundle, then kindly set Serial No Series in Item {0}"
+					).format(self.item_code)
+				)
 
 			if (
 				self.item_details.has_batch_no
 				and not self.item_details.batch_number_series
 				and not frappe.db.get_single_value("Stock Settings", "naming_series_prefix")
 			):
-				msg += f". If you want auto pick batch bundle, then kindly set Batch Number Series in Item {self.item_code}"
+				hints.append(
+					_(
+						"If you want auto pick batch bundle, then kindly set Batch Number Series in Item {0}"
+					).format(self.item_code)
+				)
 
 		elif self.sle.actual_qty < 0:
 			if not frappe.db.get_single_value(
 				"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
 			):
-				msg += ". If you want auto pick serial/batch bundle, then kindly enable 'Auto Create Serial and Batch Bundle' in Stock Settings."
+				hints.append(
+					_(
+						"If you want auto pick serial/batch bundle, then kindly enable 'Auto Create Serial and Batch Bundle' in Stock Settings."
+					)
+				)
 
-		if msg:
-			error_msg = (
-				f"Serial and Batch Bundle not set for item {self.item_code} in warehouse {self.warehouse}"
-				+ msg
+		if hints:
+			msg = _("Serial and Batch Bundle not set for item {0} in warehouse {1}").format(
+				self.item_code, self.warehouse
 			)
-			frappe.throw(_(error_msg))
+			frappe.throw(". ".join([msg, *hints]))
 
 	def set_serial_and_batch_bundle(self, sn_doc):
 		self.sle.auto_created_serial_and_batch_bundle = 1
@@ -367,15 +460,17 @@ class SerialBatchBundle:
 				"voucher_no": self.sle.voucher_no,
 			},
 		):
-			msg = f"""
-					The Serial and Batch Bundle
-					{bold(self.sle.serial_and_batch_bundle)}
-					does not belong to Item {bold(self.item_code)}
-					or Warehouse {bold(self.warehouse)}
-					or {self.sle.voucher_type} no {bold(self.sle.voucher_no)}
-				"""
-
-			frappe.throw(_(msg))
+			frappe.throw(
+				_(
+					"The Serial and Batch Bundle {0} does not belong to Item {1} or Warehouse {2} or {3} no {4}"
+				).format(
+					bold(self.sle.serial_and_batch_bundle),
+					bold(self.item_code),
+					bold(self.warehouse),
+					_(self.sle.voucher_type),
+					bold(self.sle.voucher_no),
+				)
+			)
 
 	def delink_serial_and_batch_bundle(self):
 		if self.is_pos_or_asset_repair_transaction():
@@ -514,14 +609,7 @@ class SerialBatchBundle:
 		query = (
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
-			.set(
-				sn_table.status,
-				"Active"
-				if warehouse
-				else status
-				if (sn_table.purchase_document_no != sle.voucher_no or sle.is_cancelled != 1)
-				else "Inactive",
-			)
+			.set(sn_table.status, get_serial_no_status_term(sn_table, sle, warehouse, status))
 			.set(sn_table.company, sle.company)
 			.set(sn_table.customer, customer)
 			.where(sn_table.name.isin(serial_nos))
@@ -781,7 +869,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			query = query.where(bundle.voucher_no != self.sle.voucher_no)
 
 		if self.sle.posting_datetime:
-			query = query.where(bundle.posting_datetime <= self.sle.posting_datetime)
+			query = query.where(get_posted_before_sle_condition(self.sle, bundle))
 
 		return query
 
@@ -829,8 +917,32 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		return self.serial_no_incoming_rate.get(serial_no, 0.0)
 
 
+def get_posted_before_sle_condition(sle, bundle):
+	"""Bundles posted before the SLE; on the same posting datetime, those whose own SLE was created earlier."""
+	sle_creation = sle.creation if sle.get("name") else None
+	if not sle.get("name") and sle.get("serial_and_batch_bundle"):
+		sle_creation = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"serial_and_batch_bundle": sle.serial_and_batch_bundle, "is_cancelled": 0},
+			"creation",
+		)
+
+	sle_table = frappe.qb.DocType("Stock Ledger Entry")
+	bundle_sle_exists = (sle_table.serial_and_batch_bundle == bundle.name) & (sle_table.is_cancelled == 0)
+	if sle_creation:
+		bundle_sle_exists &= sle_table.creation < sle_creation
+
+	tie_condition = ExistsCriterion(
+		frappe.qb.from_(sle_table).select(sle_table.name).where(bundle_sle_exists)
+	)
+
+	return (bundle.posting_datetime < sle.posting_datetime) | (
+		(bundle.posting_datetime == sle.posting_datetime) & tie_condition
+	)
+
+
 def is_rejected(voucher_type, voucher_detail_no, warehouse):
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
 		return warehouse == frappe.get_cached_value(
 			voucher_type + " Item", voucher_detail_no, "rejected_warehouse"
 		)
@@ -878,43 +990,9 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		parent = frappe.qb.DocType("Serial and Batch Bundle")
 		child = frappe.qb.DocType("Serial and Batch Entry")
 
-		sle_creation = self.sle.creation if self.sle.get("name") else None
-		if not self.sle.get("name") and self.sle.get("serial_and_batch_bundle"):
-			sle_creation = frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"serial_and_batch_bundle": self.sle.serial_and_batch_bundle, "is_cancelled": 0},
-				"creation",
-			)
-
 		timestamp_condition = ""
 		if self.sle.posting_datetime:
-			timestamp_condition = parent.posting_datetime < self.sle.posting_datetime
-
-			sle_table = frappe.qb.DocType("Stock Ledger Entry")
-			if sle_creation:
-				# bundle creation and SLE creation are different timelines (a
-				# bundle can be created much before its SLE), so break the tie
-				# using the creation of the bundle's own SLE
-				tie_condition = ExistsCriterion(
-					frappe.qb.from_(sle_table)
-					.select(sle_table.name)
-					.where(
-						(sle_table.serial_and_batch_bundle == parent.name)
-						& (sle_table.is_cancelled == 0)
-						& (sle_table.creation < sle_creation)
-					)
-				)
-			else:
-				# the current entry is not yet in the ledger and will get the
-				# latest creation, so the same-timestamp entries which are
-				# already in the ledger precede it
-				tie_condition = ExistsCriterion(
-					frappe.qb.from_(sle_table)
-					.select(sle_table.name)
-					.where((sle_table.serial_and_batch_bundle == parent.name) & (sle_table.is_cancelled == 0))
-				)
-
-			timestamp_condition |= (parent.posting_datetime == self.sle.posting_datetime) & tie_condition
+			timestamp_condition = get_posted_before_sle_condition(self.sle, parent)
 
 		query = (
 			frappe.qb.from_(parent)
@@ -1299,6 +1377,12 @@ class SerialBatchCreation:
 
 		if self.get("already_picked_batches"):
 			kwargs["already_picked_batches"] = self.already_picked_batches
+			if self.get("voucher_type") == "POS Invoice":
+				# a submitted POS Invoice's own reserved batch qty is already in already_picked_batches
+				kwargs["ignore_voucher_nos"] = [self.voucher_no]
+
+		if self.has_serial_no and not self.get("serial_nos"):
+			kwargs["sales_order_item"] = self.get_sales_order_item()
 
 		if (
 			self.has_serial_no
@@ -1317,6 +1401,11 @@ class SerialBatchCreation:
 				kwargs["posting_datetime"] = self.get("posting_datetime")
 
 			self.batches = get_available_batches(kwargs)
+
+	def get_sales_order_item(self) -> str | None:
+		"""Sales Order row the delivered row is against, so its reserved serial nos are picked."""
+		if self.get("voucher_type") in ("Delivery Note", "Sales Invoice") and self.get("voucher_detail_no"):
+			return frappe.db.get_value(f"{self.voucher_type} Item", self.voucher_detail_no, "so_detail")
 
 	def set_auto_serial_batch_entries_for_inward(self):
 		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):
@@ -1453,17 +1542,28 @@ class SerialBatchCreation:
 					"item": self.get("item_code"),
 					"reference_doctype": self.get("voucher_type"),
 					"reference_name": self.get("voucher_no"),
+					"manufacturing_date": self.get_posting_date_for_new_batch(),
 				}
 			)
 		)
+
+	def get_posting_date_for_new_batch(self):
+		if self.get("posting_date"):
+			return getdate(self.posting_date)
+
+		if self.get("posting_datetime"):
+			return getdate(self.posting_datetime)
 
 	def get_auto_created_serial_nos(self):
 		sr_nos = []
 		serial_nos_details = []
 
 		if not self.serial_no_series:
-			msg = f"Please set Serial No Series in the item {self.item_code} or create Serial and Batch Bundle manually."
-			frappe.throw(_(msg))
+			frappe.throw(
+				_(
+					"Please set Serial No Series in the item {0} or create Serial and Batch Bundle manually."
+				).format(self.item_code)
+			)
 
 		voucher_no = ""
 		if self.get("voucher_no"):

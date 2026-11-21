@@ -15,6 +15,7 @@ from pydantic import InstanceOf
 
 from erpnext import _refuse
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import _get_stock_balance
 
 
@@ -43,9 +44,9 @@ class PutawayRule(Document):
 	def validate(self):
 		self.validate_duplicate_rule()
 		self.validate_warehouse_and_company()
+		self.set_stock_capacity()
 		self.validate_capacity()
 		self.validate_priority()
-		self.set_stock_capacity()
 
 	def validate_duplicate_rule(self):
 		existing_rule = frappe.db.exists(
@@ -64,7 +65,20 @@ class PutawayRule(Document):
 			frappe.throw(_("Priority cannot be lesser than 1."), title=_("Invalid Priority"))
 
 	def validate_warehouse_and_company(self):
-		company = frappe.db.get_value("Warehouse", self.warehouse, "company")
+		company, is_group, disabled = frappe.db.get_value(
+			"Warehouse", self.warehouse, ["company", "is_group", "disabled"]
+		)
+		if (is_group or disabled) and not self.disable:
+			frappe.throw(
+				_("Warehouse {0} must be an enabled warehouse that is not a group.").format(
+					frappe.bold(self.warehouse)
+				),
+				title=_("Invalid Warehouse"),
+			)
+
+		if not self.disable and not frappe.get_cached_value("Item", self.item_code, "is_stock_item"):
+			frappe.throw(_("Item {0} is not a stock item.").format(frappe.bold(self.item_code)))
+
 		if company != self.company:
 			frappe.throw(
 				_("Warehouse {0} does not belong to Company {1}.").format(
@@ -89,7 +103,10 @@ class PutawayRule(Document):
 			frappe.throw(_("Capacity must be greater than 0"), title=_("Invalid"))
 
 	def set_stock_capacity(self):
-		self.stock_capacity = (flt(self.conversion_factor) or 1) * flt(self.capacity)
+		self.stock_uom = frappe.get_cached_value("Item", self.item_code, "stock_uom")
+		self.uom = self.uom or self.stock_uom
+		self.conversion_factor = get_conversion_factor(self.item_code, self.uom).get("conversion_factor") or 1
+		self.stock_capacity = flt(self.conversion_factor) * flt(self.capacity)
 
 
 @frappe.whitelist()
@@ -127,7 +144,26 @@ def apply_putaway_rule(
 	if not frappe.has_permission("Item", "read"):
 		return
 
+	items = frappe.parse_json(items)
+	bundles = {item.get("serial_and_batch_bundle") for item in items if item.get("serial_and_batch_bundle")}
+	if bundles:  # the preview copies them for the caller
+		readable = frappe.get_list(
+			"Serial and Batch Bundle",
+			filters={"name": ("in", list(bundles))},
+			pluck="name",
+			limit_page_length=0,
+		)
+		if len(readable) < len(bundles):
+			_refuse()
+
 	return _apply_putaway_rule(doctype, items, company, sync, purpose)
+
+
+def get_row_conversion_factor(item):
+	if item.uom and item.item_code:
+		return flt(get_conversion_factor(item.item_code, item.uom).get("conversion_factor")) or 1.0
+
+	return 1.0
 
 
 def _apply_putaway_rule(
@@ -148,9 +184,10 @@ def _apply_putaway_rule(
 	"""
 	if isinstance(items, str):
 		items = json.loads(items)
+	sync = bool(sync and frappe.parse_json(sync))
 
 	items_not_accomodated, updated_table = [], []
-	item_wise_rules = defaultdict(list)
+	item_wise_rules = {}
 
 	for item in items:
 		if isinstance(item, dict):
@@ -161,18 +198,25 @@ def _apply_putaway_rule(
 		if item.get("serial_no"):
 			serial_nos = get_serial_nos(item.get("serial_no"))
 
-		item.conversion_factor = flt(item.conversion_factor) or 1.0
+		item.conversion_factor = flt(item.conversion_factor) or get_row_conversion_factor(item)
 		pending_qty, item_code = flt(item.qty), item.item_code
-		pending_stock_qty = flt(item.transfer_qty) if doctype == "Stock Entry" else flt(item.stock_qty)
-		uom_must_be_whole_number = frappe.db.get_value("UOM", item.uom, "must_be_whole_number")
+		pending_stock_qty = pending_qty * item.conversion_factor
+		uom_must_be_whole_number = frappe.get_cached_value("UOM", item.uom, "must_be_whole_number")
 
 		if not pending_qty or not item_code:
 			updated_table = add_row(
-				item, pending_qty, source_warehouse or item.warehouse, updated_table, serial_nos=serial_nos
+				item,
+				pending_qty,
+				source_warehouse or item.warehouse,
+				updated_table,
+				serial_nos=serial_nos,
+				keep_rejected=True,
 			)
 			continue
 
-		at_capacity, rules = get_ordered_putaway_rules(item_code, company, source_warehouse=source_warehouse)
+		if item_code not in item_wise_rules:
+			item_wise_rules[item_code] = get_item_putaway_rules(item_code, company)
+		at_capacity, rules = select_vacant_rules(item_wise_rules[item_code], source_warehouse)
 
 		if not rules:
 			warehouse = (
@@ -185,19 +229,13 @@ def _apply_putaway_rule(
 				# rules available, but no free space
 				items_not_accomodated.append([item_code, pending_qty])
 			else:
-				updated_table = add_row(item, pending_qty, warehouse, updated_table, serial_nos=serial_nos)
+				updated_table = add_row(
+					item, pending_qty, warehouse, updated_table, serial_nos=serial_nos, keep_rejected=True
+				)
 			continue
 
-		# maintain item/item-warehouse wise rules, to handle if item is entered twice
-		# in the table, due to different price, etc.
-		key = item_code
-		if doctype == "Stock Entry" and purpose == "Material Transfer" and source_warehouse:
-			key = (item_code, source_warehouse)
-
-		if not item_wise_rules[key]:
-			item_wise_rules[key] = rules
-
-		for rule in item_wise_rules[key]:
+		keep_rejected = True
+		for rule in rules:
 			if pending_stock_qty > 0 and rule.free_space:
 				stock_qty_to_allocate = (
 					flt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty
@@ -212,8 +250,15 @@ def _apply_putaway_rule(
 					continue
 
 				updated_table = add_row(
-					item, qty_to_allocate, rule.warehouse, updated_table, rule.name, serial_nos=serial_nos
+					item,
+					qty_to_allocate,
+					rule.warehouse,
+					updated_table,
+					rule.name,
+					serial_nos=serial_nos,
+					keep_rejected=keep_rejected,
 				)
+				keep_rejected = False
 
 				pending_stock_qty -= stock_qty_to_allocate
 				pending_qty -= qty_to_allocate
@@ -230,10 +275,11 @@ def _apply_putaway_rule(
 		show_unassigned_items_message(items_not_accomodated)
 
 	if updated_table and _items_changed(items, updated_table, doctype):
+		_split_bundles(updated_table, doctype, keep_original=not sync)
 		items[:] = updated_table
 		frappe.msgprint(_("Applied putaway rules."), alert=True)
 
-	if sync and json.loads(sync):  # sync with client side
+	if sync:  # sync with client side
 		return items
 
 
@@ -279,39 +325,36 @@ def _items_changed(old, new, doctype: str) -> bool:
 
 def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
 	"""Returns an ordered list of putaway rules to apply on an item."""
-	filters = {"item_code": item_code, "company": company, "disable": 0}
-	if source_warehouse:
-		filters.update({"warehouse": ["!=", source_warehouse]})
+	return select_vacant_rules(get_item_putaway_rules(item_code, company), source_warehouse)
 
+
+def get_item_putaway_rules(item_code, company):
 	rules = frappe.get_all(
 		"Putaway Rule",
 		fields=["name", "item_code", "stock_capacity", "priority", "warehouse"],
-		filters=filters,
+		filters={"item_code": item_code, "company": company, "disable": 0},
 		order_by="priority asc, capacity desc",
 	)
+	for rule in rules:
+		balance_qty = _get_stock_balance(rule.item_code, rule.warehouse, nowdate())
+		rule["free_space"] = max(flt(rule.stock_capacity) - flt(balance_qty), 0)
 
+	return rules
+
+
+def select_vacant_rules(rules, source_warehouse=None):
+	rules = [rule for rule in rules if rule.warehouse != source_warehouse]
 	if not rules:
 		return False, None
 
-	vacant_rules = []
-	for rule in rules:
-		balance_qty = _get_stock_balance(rule.item_code, rule.warehouse, nowdate())
-		free_space = flt(rule.stock_capacity) - flt(balance_qty)
-		if free_space > 0:
-			rule["free_space"] = free_space
-			vacant_rules.append(rule)
-
+	vacant_rules = [rule for rule in rules if rule.free_space > 0]
 	if not vacant_rules:
-		# After iterating through rules, if no rules are left
-		# then there is not enough space left in any rule
 		return True, None
 
-	vacant_rules = sorted(vacant_rules, key=lambda i: (i["priority"], -i["free_space"]))
-
-	return False, vacant_rules
+	return False, sorted(vacant_rules, key=lambda rule: (rule.priority, -rule.free_space))
 
 
-def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=None):
+def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=None, keep_rejected=False):
 	new_updated_table_row = copy.deepcopy(item)
 	new_updated_table_row.idx = 1 if not updated_table else cint(updated_table[-1].idx) + 1
 	new_updated_table_row.name = None
@@ -323,19 +366,103 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 	else:
 		new_updated_table_row.stock_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
 		new_updated_table_row.warehouse = warehouse
-		new_updated_table_row.rejected_qty = 0
-		new_updated_table_row.received_qty = to_allocate
+		if not keep_rejected:
+			new_updated_table_row.rejected_qty = 0
+
+		new_updated_table_row.received_qty = flt(to_allocate) + flt(new_updated_table_row.rejected_qty)
 
 	if rule:
 		new_updated_table_row.putaway_rule = rule
 
 	if serial_nos:
-		new_updated_table_row.serial_no = get_serial_nos_to_allocate(serial_nos, to_allocate)
+		new_updated_table_row.serial_no = get_serial_nos_to_allocate(
+			serial_nos, flt(to_allocate) * flt(new_updated_table_row.conversion_factor or 1)
+		)
 
-	new_updated_table_row.serial_and_batch_bundle = ""
+	# legacy serial / batch fields rebuild the bundle on save; a picked bundle is split later
+	if item.get("use_serial_batch_fields") or item.get("serial_no") or item.get("batch_no"):
+		new_updated_table_row.serial_and_batch_bundle = ""
+
+	if not keep_rejected:
+		new_updated_table_row.rejected_serial_and_batch_bundle = ""
 
 	updated_table.append(new_updated_table_row)
 	return updated_table
+
+
+def _split_bundles(rows, doctype: str, keep_original: bool = True):
+	"""Give every row made from one source row its share of the picked bundle; the preview copies them all."""
+	qty_field = "transfer_qty" if doctype == "Stock Entry" else "stock_qty"
+	warehouse_field = "t_warehouse" if doctype == "Stock Entry" else "warehouse"
+
+	rows_by_bundle = defaultdict(list)
+	for row in rows:
+		if row.get("serial_and_batch_bundle"):
+			rows_by_bundle[row.get("serial_and_batch_bundle")].append(row)
+
+	precision = frappe.get_precision("Serial and Batch Bundle", "total_qty")
+	for bundle in frappe.get_all(
+		"Serial and Batch Bundle",
+		filters={"name": ("in", list(rows_by_bundle))},
+		fields=["name", "total_qty", "warehouse", "type_of_transaction"],
+	):
+		bundle_rows = rows_by_bundle[bundle.name]
+		qtys = [abs(flt(row.get(qty_field))) for row in bundle_rows]
+
+		if (
+			len(bundle_rows) == 1
+			and not flt(qtys[0] - abs(flt(bundle.total_qty)), precision)
+			and (
+				bundle.type_of_transaction == "Outward"
+				or bundle.warehouse == bundle_rows[0].get(warehouse_field)
+			)
+		):
+			continue
+
+		bundle = frappe.get_doc("Serial and Batch Bundle", bundle.name)
+		slices = _slice_entries(bundle.entries, qtys, precision)
+		for idx, (row, share) in enumerate(zip(bundle_rows, slices, strict=True)):
+			if not share:
+				row.serial_and_batch_bundle = ""
+				continue
+
+			doc = bundle if idx == 0 and keep_original else frappe.copy_doc(bundle, ignore_no_copy=False)
+			doc.set("entries", [])
+			for entry in share:
+				doc.append("entries", entry)
+
+			if doc.type_of_transaction == "Inward":
+				doc.warehouse = row.get(warehouse_field)
+
+			doc.save()
+			row.serial_and_batch_bundle = doc.name
+
+
+def _slice_entries(entries, qtys, precision):
+	"""Cut bundle entries into one slice per qty, in bundle order; a batch entry may straddle two slices."""
+	slices = []
+	idx, left = 0, 0.0
+
+	for qty in qtys:
+		share, need = [], flt(qty, precision)
+		while need > 0 and idx < len(entries):
+			entry = entries[idx]
+			if not left:
+				left = abs(flt(entry.qty))
+
+			take = min(left, need)
+			row = entry.as_dict(no_default_fields=True)
+			row["qty"] = take
+			share.append(row)
+
+			left = flt(left - take, precision)
+			need = flt(need - take, precision)
+			if not left:
+				idx += 1
+
+		slices.append(share)
+
+	return slices
 
 
 def show_unassigned_items_message(items_not_accomodated):

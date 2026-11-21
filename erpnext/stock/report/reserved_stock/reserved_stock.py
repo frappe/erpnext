@@ -3,7 +3,11 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, getdate
+from frappe.utils import add_days, flt, getdate
+
+from erpnext.accounts.report.utils import validate_date_range
+
+AVAILABLE_QTY_INDEX = 7
 
 
 def execute(filters=None):
@@ -18,6 +22,7 @@ def execute(filters=None):
 
 
 def validate_filters(filters):
+	validate_date_range(filters)
 	if not filters:
 		frappe.throw(_("Please set filters"))
 
@@ -77,12 +82,32 @@ def get_data(filters):
 		limit_page_length=0,
 		as_list=True,
 	)
-	rows = []
+	data = [list(row) for row in data]
+	set_available_qty(data)
+
+	return data
+
+
+def set_available_qty(data):
+	if not data:
+		return
+
+	bin = frappe.qb.DocType("Bin")
+	free_qty = {
+		(item_code, warehouse): flt(actual_qty) - flt(reserved_stock)
+		for item_code, warehouse, actual_qty, reserved_stock in (
+			frappe.qb.from_(bin)
+			.select(bin.item_code, bin.warehouse, bin.actual_qty, bin.reserved_stock)
+			.where(
+				(bin.item_code.isin({row[2] for row in data}))
+				& (bin.warehouse.isin({row[1] for row in data}))
+			)
+			.run()
+		)
+	}
+
 	for row in data:
-		row = list(row)
-		row[7] = row[7] - row[5] if row[7] is not None and row[5] is not None else None
-		rows.append(row)
-	return rows
+		row[AVAILABLE_QTY_INDEX] = free_qty.get((row[2], row[1]), 0.0)
 
 
 def get_columns():

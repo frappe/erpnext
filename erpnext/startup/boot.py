@@ -23,11 +23,27 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.allow_stale = cint(
 			frappe.db.get_single_value("Accounts Settings", "allow_stale")
 		)
+		bootinfo.sysdefaults.bill_for_rejected_quantity_in_purchase_invoice = cint(
+			frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")
+		)
+		bootinfo.sysdefaults.set_valuation_rate_for_rejected_materials = cint(
+			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+		)
 		bootinfo.sysdefaults.over_billing_allowance = frappe.db.get_single_value(
 			"Accounts Settings", "over_billing_allowance"
 		)
 		bootinfo.sysdefaults.disable_include_dimensions = cint(
 			frappe.get_single_value("Accounts Settings", "disable_include_dimensions")
+		)
+		bootinfo.sysdefaults.disable_serial_no_and_batch_selector = cint(
+			frappe.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector")
+		)
+		bootinfo.sysdefaults.pick_serial_and_batch_based_on = frappe.get_single_value(
+			"Stock Settings", "pick_serial_and_batch_based_on"
+		)
+
+		bootinfo.sysdefaults.sample_retention_warehouse = frappe.db.get_single_value(
+			"Stock Settings", "sample_retention_warehouse"
 		)
 
 		remove_disabled_price_list_defaults(bootinfo)

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -5,7 +7,9 @@ from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.gross_profit import gross_profit
 from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
@@ -119,6 +123,12 @@ class TestGrossProfit(FrappeTestCase):
 			do_not_submit=do_not_submit,
 		)
 		return sinv
+
+	def append_copy_of_first_item(self, sales_invoice):
+		"""Append a copy of the first item row with its own idx, so rows load in a fixed order."""
+		row = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		row.idx = None
+		return sales_invoice.append("items", row)
 
 	def create_delivery_note(
 		self, item=None, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
@@ -398,7 +408,7 @@ class TestGrossProfit(FrappeTestCase):
 
 		# Invoice with an item added twice
 		sinv = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate(), do_not_submit=True)
-		sinv.append("items", frappe.copy_doc(sinv.items[0], ignore_no_copy=False))
+		self.append_copy_of_first_item(sinv)
 		sinv = sinv.save().submit()
 
 		# Create Credit Note for Invoice
@@ -1031,10 +1041,8 @@ class TestGrossProfit(FrappeTestCase):
 	@change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_legacy_return_prefers_item_without_linked_return(self):
 		sales_invoice = self.create_sales_invoice(qty=2, rate=100, do_not_submit=True)
-		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
-		second_item.idx = None
+		second_item = self.append_copy_of_first_item(sales_invoice)
 		second_item.rate = 200
-		sales_invoice.append("items", second_item)
 		sales_invoice.submit()
 
 		linked_return = make_sales_return(sales_invoice.name)
@@ -1207,12 +1215,10 @@ class TestGrossProfit(FrappeTestCase):
 			basic_rate=33.33333,
 		)
 		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
-		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
-		second_item.idx = None
+		second_item = self.append_copy_of_first_item(sales_invoice)
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
-		sales_invoice.append("items", second_item)
 		sales_invoice.submit()
 
 		sales_return = make_sales_return(sales_invoice.name)
@@ -1235,7 +1241,71 @@ class TestGrossProfit(FrappeTestCase):
 		self.assertEqual(invoice_row.qty, 30000)
 		self.assertEqual(invoice_row.buying_amount, 999999.9)
 
-	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80):
+	def test_undelivered_invoices_use_valuation_rate_of_their_date(self):
+		item = create_item("_Test Gross Profit Moving Average Item")
+		item.db_set("valuation_method", "Moving Average")
+		earlier_date = add_days(nowdate(), -8)
+
+		invoices = []
+		for posting_date, rate in ((earlier_date, 100), (nowdate(), 300)):
+			make_stock_entry(
+				company=self.company,
+				item_code=item.name,
+				target=self.warehouse,
+				qty=2,
+				basic_rate=rate,
+				posting_date=posting_date,
+			)
+			sinv = self.create_sales_invoice(qty=2, rate=500, posting_date=posting_date, do_not_save=True)
+			sinv.items[0].item_code = item.name
+			invoices.append(sinv.submit())
+
+		filters = dict(company=self.company, from_date=earlier_date, to_date=nowdate(), item_code=item.name)
+		with patch.object(
+			gross_profit, "_get_incoming_rate", wraps=gross_profit._get_incoming_rate
+		) as rate_lookup:
+			_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		buying_amounts = {row.sales_invoice: row.buying_amount for row in data if row.indent == 0}
+
+		self.assertEqual(buying_amounts[invoices[0].name], 200)
+		self.assertEqual(buying_amounts[invoices[1].name], 400)
+		self.assertTrue(rate_lookup.call_args_list)
+		self.assertTrue(all(call.args[0].get("item_code") for call in rate_lookup.call_args_list))
+
+	def test_fifo_rate_cache_accounts_for_quantity(self):
+		item = create_item("_Test Gross Profit FIFO Qty Item")
+		item.db_set("valuation_method", "FIFO")
+		posting_date = add_days(nowdate(), -1)
+
+		for qty, rate in ((1, 100), (2, 300)):
+			make_stock_entry(
+				company=self.company,
+				item_code=item.name,
+				target=self.warehouse,
+				qty=qty,
+				basic_rate=rate,
+				posting_date=posting_date,
+				posting_time="08:00:00",
+			)
+
+		generator = GrossProfitGenerator.__new__(GrossProfitGenerator)
+		generator.average_buying_rate = {}
+		generator.filters = frappe._dict(company=self.company)
+		row = frappe._dict(
+			warehouse=self.warehouse,
+			posting_date=posting_date,
+			posting_time="09:00:00",
+			serial_and_batch_bundle=None,
+			qty=-1,
+			parenttype="Sales Invoice",
+			parent="FIFO cache test",
+		)
+
+		self.assertEqual(generator.get_average_buying_rate(row, item.name), 100)
+		row.qty = -3
+		self.assertAlmostEqual(generator.get_average_buying_rate(row, item.name), 700 / 3)
+
+	def create_drop_ship_order(self, qty=10, selling_rate=100, buying_rate=80, bill_purchase_order=True):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -1250,9 +1320,116 @@ class TestGrossProfit(FrappeTestCase):
 		purchase_order.items[0].rate = buying_rate
 		purchase_order.supplier = "_Test Supplier"
 		purchase_order.submit()
-		make_purchase_invoice(purchase_order.name).submit()
+		if bill_purchase_order:
+			make_purchase_invoice(purchase_order.name).submit()
 
 		return so
+
+	def test_bundle_delivery_note_billed_in_parts(self):
+		bundle = self.make_stocked_bundle()
+		dnote = self.create_delivery_note(item=bundle, qty=4, rate=500)
+
+		for _ in range(2):
+			sinv = make_sales_invoice(dnote.name)
+			sinv.items[0].qty = 2
+			sinv.save().submit()
+			self.assertEqual(self.get_invoice_buying_amount(sinv.name), 260)
+
+	def test_bundle_invoiced_before_delivery(self):
+		bundle = self.make_stocked_bundle()
+		sinv = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			item_code=bundle,
+			qty=3,
+			rate=500,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+		)
+		make_delivery_note(sinv.name).submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 390)
+
+	def test_sales_order_delivered_in_parts_uses_qty_weighted_rate(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = create_item("_Test Gross Profit Partly Delivered Item").name
+		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=1, basic_rate=100)
+		so = make_sales_order(
+			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=4
+		)
+
+		delivered_value = 0
+		for qty in (1, 3):
+			make_stock_entry(
+				company=self.company, item_code=item, target=self.warehouse, qty=qty, basic_rate=300
+			)
+			dnote = make_delivery_note(so.name)
+			dnote.items[0].qty = qty
+			dnote.submit()
+			delivered_value += dnote.items[0].stock_qty * dnote.items[0].incoming_rate
+		sinv = make_sales_invoice(so.name).submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
+
+	def test_payment_term_group_keeps_invoice_without_schedule(self):
+		item = create_item("_Test Gross Profit No Terms Item", is_stock_item=0).name
+		sinv = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			item_code=item,
+			rate=500,
+			cost_center=self.cost_center,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+		)
+		# POS invoices have no payment schedule
+		frappe.db.delete("Payment Schedule", {"parent": sinv.name})
+
+		filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), sales_invoice=sinv.name)
+		_, data = execute(frappe._dict(filters, group_by="Payment Term"))
+
+		self.assertEqual(data[-1][1], 500)
+
+	def test_project_group_uses_item_project(self):
+		project = frappe.get_doc(
+			{"doctype": "Project", "project_name": "_Test Gross Profit Project", "company": self.company}
+		).insert()
+		sinv = self.create_sales_invoice(rate=500, do_not_save=True)
+		sinv.items[0].project = project.name
+		sinv.submit()
+
+		filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), project=[project.name])
+		_, data = execute(frappe._dict(filters, group_by="Project"))
+
+		self.assertEqual(data[0][0], project.name)
+		self.assertEqual(data[-1][1], 500)
+
+	def make_stocked_bundle(self):
+		"""Bundle of one unit each of two components valued at 100 and 30."""
+		components = []
+		for rate in (100, 30):
+			item = create_item(f"_Test Gross Profit Bundle Component {rate}").name
+			make_stock_entry(
+				company=self.company, item_code=item, target=self.warehouse, qty=20, basic_rate=rate
+			)
+			components.append(item)
+
+		bundle = create_item("_Test Gross Profit Bundle", is_stock_item=0).name
+		make_product_bundle(bundle, components)
+		return bundle
+
+	def get_invoice_buying_amount(self, sales_invoice):
+		filters = dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), sales_invoice=sales_invoice
+		)
+		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		return data[-1].buying_amount
 
 
 def make_sales_person(sales_person_name="_Test Sales Person"):

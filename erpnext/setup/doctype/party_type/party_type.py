@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -19,7 +20,12 @@ class PartyType(Document):
 		party_type: DF.Link
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		if not self.is_new() and self.has_value_changed("account_type"):
+			if frappe.db.exists("GL Entry", {"party_type": self.name}):
+				frappe.throw(
+					_("Cannot change Account Type for {0} after ledger entries exist").format(self.name)
+				)
 
 
 @frappe.whitelist()
@@ -28,8 +34,13 @@ def get_party_type(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	account_type = None
 
-	if filters and filters.get("account"):
-		account_type = frappe.db.get_value("Account", filters.get("account"), "account_type")
+	account = filters.get("account") if filters else None
+	if account:
+		ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+		if not isinstance(account, str) or not frappe.has_permission("Account", ptype, doc=account):
+			return []
+
+		account_type = frappe.db.get_value("Account", account, "account_type")
 		if account_type:
 			if account_type in ["Receivable", "Payable"]:
 				# Include Employee regardless of its configured account_type, but still respect the text filter

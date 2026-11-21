@@ -22,12 +22,14 @@ def validate_status(status, options):
 
 status_map = {
 	"Lead": [
+		["Open", "eval:self.status in ('Opportunity', 'Quotation', 'Lost Quotation')"],
 		["Lost Quotation", "has_lost_quotation"],
 		["Opportunity", "has_opportunity"],
 		["Quotation", "has_quotation"],
 		["Converted", "has_customer"],
 	],
 	"Opportunity": [
+		["Open", "eval:self.status=='Quotation'"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Lost", "has_lost_quotation"],
 		["Quotation", "has_active_quotation"],
@@ -277,6 +279,14 @@ class StatusUpdater(Document):
 						else "`{}`".format(args["target_ref_field"])
 					)
 
+					if self.get("is_return") and args.get("overflow_type") == "billing":
+						if args.get("billing_flag") and not self.get(args["billing_flag"]):
+							# the return never changes the order's billed amount
+							continue
+						if self.docstatus != 2 and flt(d.get("qty")) * flt(d.get("rate")) <= 0:
+							# this return row lowers billing, so it cannot create an overflow
+							continue
+
 					# get all qty where qty > target_field
 					item = frappe.db.sql(
 						"""select item_code, {ref_expr} as `{target_ref_field}`,
@@ -451,6 +461,7 @@ class StatusUpdater(Document):
 				if not args.get("second_source_extra_cond"):
 					args["second_source_extra_cond"] = ""
 
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 				args["second_source_condition"] = frappe.db.sql(
 					""" select ifnull((select sum({second_source_field})
 					from `tab{second_source_dt}`
@@ -465,6 +476,7 @@ class StatusUpdater(Document):
 					args["extra_cond"] = ""
 
 				args["source_dt_value"] = (
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 					frappe.db.sql(
 						"""
 						(select ifnull(sum({source_field}), 0)
@@ -479,10 +491,16 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
+				if args.get("round_to_target_precision"):
+					args["source_dt_value"] = flt(
+						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
+					)
+
 				target_value = args["source_dt_value"]
 				if args.get("target_conversion_factor"):
 					target_value = f"{target_value} / {args['target_conversion_factor']}"
 
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 				frappe.db.sql(
 					"""update `tab{target_dt}`
 					set {target_field} = {target_value} {update_modified}
