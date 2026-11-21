@@ -16,6 +16,7 @@ from erpnext.manufacturing.scheduling.plan_adapter import (
 	apply_schedule,
 	build_plan_tasks,
 	get_schedule_preview,
+	get_supplier_lead_times,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
@@ -719,8 +720,6 @@ class TestPlanAdapter(ERPNextTestSuite):
 		).insert()
 
 	def test_supplier_lead_times_follow_renamed_item(self):
-		from erpnext.manufacturing.scheduling.plan_adapter import get_supplier_lead_times
-
 		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
 		old_item = create_item("Test PPS Renamed RM Old").name
 		self.make_supplier_lead_time(old_item, suppliers)
