@@ -1371,8 +1371,8 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertNotIn("Stock Adjustment - TCP1", gl_map)
 
 		stock_in_hand_account = get_inventory_account(company, warehouse)
-		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 99.99)
-		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 99.99)
+		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 100)
+		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 100)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[1])
@@ -3308,6 +3308,36 @@ class TestStockEntry(ERPNextTestSuite):
 			sorted([["Stock In Hand - TCP1", 100.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 100.0]]),
 		)
 
+	def test_additional_cost_split_over_equal_rows_adds_up_to_the_cost(self):
+		receipt = make_stock_entry(
+			company="_Test Company with perpetual inventory", purpose="Material Receipt", do_not_save=True
+		)
+		receipt.items = []
+		for _ in range(3):
+			item_code = make_item(properties={"is_stock_item": 1}).name
+			receipt.append(
+				"items",
+				stock_entry_row(
+					item_code, 1, t_warehouse="Stores - TCP1", cost_center="Main - TCP1", basic_rate=100
+				),
+			)
+
+		expense_account = "Miscellaneous Expenses - TCP1"
+		receipt.append(
+			"additional_costs", {"expense_account": expense_account, "description": "Freight", "amount": 100}
+		)
+		receipt.insert()
+		receipt.submit()
+		receipt.reload()
+
+		self.assertEqual(flt(sum(d.additional_cost for d in receipt.items), 2), 100)
+		cost_credit = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": receipt.name, "account": expense_account, "is_cancelled": 0},
+			pluck="credit",
+		)
+		self.assertEqual(flt(sum(cost_credit), 2), 100)
+
 	def test_conversion_factor_change(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		repack_entry = frappe.copy_doc(self.globalTestRecords["Stock Entry"][3])
@@ -3544,6 +3574,25 @@ class TestStockEntry(ERPNextTestSuite):
 
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
+
+	def test_additional_cost_split_gives_nothing_to_a_zero_value_row(self):
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Material Receipt",
+			additional_costs=[frappe._dict(base_amount=100)],
+			items=[
+				*[
+					frappe._dict(item_code=f"RECEIVED_{i}", basic_amount=100, t_warehouse="X")
+					for i in range(6)
+				],
+				frappe._dict(item_code="FREE", basic_amount=0, t_warehouse="X"),
+			],
+		)
+
+		se.distribute_additional_costs()
+
+		self.assertEqual(se.items[-1].additional_cost, 0)
+		self.assertEqual(flt(sum(d.additional_cost for d in se.items), 2), 100)
 
 	def test_independent_manufacture_entry(self):
 		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."
