@@ -22,6 +22,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import set_entry_header_values
 from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
 
 
@@ -343,13 +344,13 @@ class StockReconciliation(StockController):
 					}
 				)
 
-				serial_and_batch_bundle.db_set(
-					{
-						"creation": creation,
-						"voucher_no": self.name,
-						"voucher_detail_no": voucher_detail_no,
-					}
-				)
+				values = {
+					"creation": creation,
+					"voucher_no": self.name,
+					"voucher_detail_no": voucher_detail_no,
+				}
+				serial_and_batch_bundle.db_set(values)
+				set_entry_header_values(serial_and_batch_bundle.name, values)
 
 	def get_bundle_for_specific_serial_batch(self, row) -> str:
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
