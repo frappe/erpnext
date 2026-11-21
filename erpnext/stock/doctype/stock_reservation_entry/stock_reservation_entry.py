@@ -394,11 +394,14 @@ class StockReservationEntry(Document):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if self.reserved_qty == self.delivered_qty:
+				precision = self.precision("reserved_qty")
+				reserved_qty = flt(self.reserved_qty, precision)
+				delivered_qty = flt(self.delivered_qty, precision)
+				if reserved_qty == delivered_qty:
 					status = "Delivered"
-				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
+				elif delivered_qty and delivered_qty < reserved_qty:
 					status = "Partially Delivered"
-				elif self.reserved_qty == self.voucher_qty:
+				elif reserved_qty == flt(self.voucher_qty, precision):
 					status = "Reserved"
 				else:
 					status = "Partially Reserved"
