@@ -148,6 +148,9 @@ class BuyingController(SubcontractingController):
 
 	def create_package_for_transfer(self) -> None:
 		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
+		# a return gets its packages from the receipt it returns, on submit
+		if self.get("is_return"):
+			return
 
 		if self.get("is_return"):
 			return
