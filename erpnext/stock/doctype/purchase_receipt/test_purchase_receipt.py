@@ -7894,11 +7894,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 			return pr.insert()
 
-		def get_package_qty(pr):
+		def get_package_qty(pr, bundle_field="serial_and_batch_bundle"):
 			return abs(
-				frappe.db.get_value(
-					"Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle, "total_qty"
-				)
+				frappe.db.get_value("Serial and Batch Bundle", pr.items[0].get(bundle_field), "total_qty")
 			)
 
 		self.assertEqual(get_package_qty(make_receipt(4)), 4)
@@ -7907,6 +7905,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.items[0].update({"qty": 4, "received_qty": 4})
 		pr.save()
 		self.assertEqual(get_package_qty(pr), 4)
+
+		pr = make_receipt(1, rejected_qty=4)
+		pr.items[0].update({"rejected_qty": 3, "received_qty": 4})
+		pr.save()
+		self.assertEqual(get_package_qty(pr, "rejected_serial_and_batch_bundle"), 3)
 
 		# accepted and rejected material do not take the same batch twice
 		make_receipt(3, rejected_qty=2).submit()
