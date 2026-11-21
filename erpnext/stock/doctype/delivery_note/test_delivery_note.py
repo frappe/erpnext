@@ -1470,6 +1470,7 @@ class TestDeliveryNote(FrappeTestCase):
 	def test_mapping_same_dn_twice_is_idempotent(self):
 		# "Get Items From > Delivery Note" passes the in-progress invoice back as target_doc.
 		# Selecting the same DN again must not append a second row for the same dn_detail.
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 		dn = create_delivery_note(qty=5)
 
 		si = make_sales_invoice(dn.name)
@@ -1490,6 +1491,7 @@ class TestDeliveryNote(FrappeTestCase):
 	def test_sales_invoice_qty_after_return(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		dn = create_delivery_note(qty=10)
 
 		dnr1 = make_sales_return(dn.name)
@@ -1566,6 +1568,7 @@ class TestDeliveryNote(FrappeTestCase):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		so = make_sales_order(po_no="12345")
 
 		si = make_sales_invoice(so.name)
@@ -1589,6 +1592,7 @@ class TestDeliveryNote(FrappeTestCase):
 		# SO -> DN
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		so = make_sales_order(po_no="12345")
 
 		si = make_sales_invoice(so.name)
@@ -1675,6 +1679,7 @@ class TestDeliveryNote(FrappeTestCase):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		so = make_sales_order(qty=2)
 		so.submit()
 
@@ -1693,6 +1698,7 @@ class TestDeliveryNote(FrappeTestCase):
 	def test_make_sales_invoice_from_dn_with_returned_qty_duplicate_items(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=9, basic_rate=100)
 		dn = create_delivery_note(qty=8, do_not_submit=True)
 		dn.append(
 			"items",
@@ -2476,6 +2482,7 @@ class TestDeliveryNote(FrappeTestCase):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		so = make_sales_order(qty=10)
 		si = make_sales_invoice(so.name)
 		si.insert()
@@ -4097,6 +4104,7 @@ class TestDeliveryNote(FrappeTestCase):
 	def test_delivery_note_per_billed_after_return(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		so = make_sales_order(qty=2)
 		dn = make_delivery_note(so.name)
 		dn.submit()
