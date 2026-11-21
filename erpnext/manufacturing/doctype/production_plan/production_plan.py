@@ -434,7 +434,8 @@ class ProductionPlan(Document):
 				so_item.parent,
 				so_item.item_code,
 				so_item.warehouse,
-				(so_item.stock_qty - so_item.stock_reserved_qty).as_("qty"),
+				(so_item.stock_qty - _reserved_qty_from_stock(so_item)).as_("qty"),
+				_reserved_work_order_output_qty(so_item).as_("reserved_work_order_output_qty"),
 				so_item.work_order_qty,
 				so_item.stock_qty,
 				so_item.production_plan_qty,
@@ -448,7 +449,7 @@ class ProductionPlan(Document):
 			.where(
 				(so_item.parent.isin(so_list))
 				& (so_item.docstatus == 1)
-				& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
+				& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
 				& (so_item.stock_qty > so_item.production_plan_qty)
 			)
 		)
@@ -463,11 +464,16 @@ class ProductionPlan(Document):
 
 		items = items_query.run(as_dict=True)
 
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
 		for item in items:
-			pending_qty = flt(item.qty) - max(
-				item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0
+			# Reserved Work Order output is not delivered yet, so deliveries come on top of it
+			delivered_or_reserved_qty = flt(item.delivered_qty) * item.conversion_factor + flt(
+				item.reserved_work_order_output_qty
 			)
-			item.pending_qty = min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty))
+			pending_qty = flt(item.qty) - max(item.work_order_qty, delivered_or_reserved_qty, 0)
+			item.pending_qty = flt(
+				min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty)), precision
+			)
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -1404,6 +1410,34 @@ class ProductionPlan(Document):
 		)
 		all_work_orders_completed = all(s == "Completed" for s in wo_status)
 		return all_work_orders_completed
+
+
+def _reserved_qty_from_stock(so_item):
+	"""Reserved qty of a Sales Order Item, less the Work Order output that work_order_qty already counts."""
+	return so_item.stock_reserved_qty - _reserved_work_order_output_qty(so_item)
+
+
+def _reserved_work_order_output_qty(so_item):
+	"""Open reservations of the output of a Sales Order Item's own Work Orders."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	work_order = frappe.qb.DocType("Work Order")
+	work_order_output_qty = (
+		frappe.qb.from_(sre)
+		.inner_join(stock_entry)
+		.on(stock_entry.name == sre.from_voucher_no)
+		.inner_join(work_order)
+		.on(work_order.name == stock_entry.work_order)
+		.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_detail_no == so_item.name)
+			& (sre.from_voucher_type == "Stock Entry")
+			& (work_order.sales_order_item == so_item.name)
+		)
+	)
+	return IfNull(work_order_output_qty, 0)
 
 
 def get_mr_item_planned_qty_query(mr_item):
