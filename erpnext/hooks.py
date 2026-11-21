@@ -344,8 +344,6 @@ sounds = [
 	{"name": "numpad-touch", "src": "/assets/erpnext/sounds/numpad-touch.mp3", "volume": 0.8},
 ]
 
-has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
-
 permission_query_conditions = {
 	"Employee": "erpnext.setup.doctype.employee.employee.get_permission_query_conditions",
 	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
