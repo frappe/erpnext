@@ -179,6 +179,17 @@ class TestSchedulingEngine(unittest.TestCase):
 		self.assertEqual(result_a.assignments["planA:op"].start, dt(12, 9))
 		self.assertEqual(result_b.assignments["planB:op"].start, dt(12, 13))
 
+	def test_fractional_free_segments_leave_no_zero_length_block(self):
+		def at(second):
+			return dt(12, 9) + datetime.timedelta(seconds=second)
+
+		load = {"WS-A": [Interval(at(6), at(12)), Interval(at(54), at(60))]}
+		engine = SchedulingEngine([Resource("WS-A", calendar=day_shift_calendar())], existing_load=load)
+
+		result = engine.schedule([Task("t1", duration_mins=0.8, resource="WS-A")], anchor=dt(12, 9))
+
+		self.assertEqual(result.assignments["t1"].blocks, [Interval(at(0), at(6)), Interval(at(12), at(54))])
+
 
 if __name__ == "__main__":
 	unittest.main()
