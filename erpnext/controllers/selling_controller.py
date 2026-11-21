@@ -699,7 +699,7 @@ class SellingController(StockController):
 				None,
 			)
 			if old_item:
-				old_qty = flt(old_item.get("stock_qty") or old_item.get("actual_qty") or old_item.get("qty"))
+				old_qty = flt(old_item.get("stock_qty") or old_item.get("qty"))
 				if (
 					old_item.item_code != d.item_code
 					or old_item.warehouse != d.warehouse
@@ -764,10 +764,7 @@ class SellingController(StockController):
 				and not item_details.has_batch_no
 			):
 				# Get incoming rate based on original item cost based on valuation method
-				if d.doctype == "Packed Item":
-					qty = flt(d.qty)
-				else:
-					qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
+				qty = flt(d.get("stock_qty") or d.get("qty"))
 
 				if old_doc:
 					reset_incoming_rate()
