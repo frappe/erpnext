@@ -129,12 +129,16 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 	args = frappe.parse_json(args)
 
 	def postprocess(source, target):
+		from erpnext.accounts.services.advances import can_read_advance_vouchers, set_advances
+
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
 
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
-		if target.get("allocate_advances_automatically"):
-			target.set_advances()
+		if target.get("allocate_advances_automatically") and (
+			ignore_permissions or can_read_advance_vouchers()
+		):
+			set_advances(target)
 
 		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
 
