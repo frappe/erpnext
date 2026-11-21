@@ -121,7 +121,7 @@ class MaterialRequirementsPlanningReport:
 				)
 			)
 
-	def get_non_planned_orders(self, items, mps_data, from_date=None, to_date=None):
+	def get_non_planned_orders(self, items, mps_data, from_date, to_date):
 		"""Return the Sales Order demand of the items beyond the MPS, per item and delivery date."""
 		so = frappe.qb.DocType("Sales Order")
 		so_item = frappe.qb.DocType("Sales Order Item")
@@ -169,7 +169,7 @@ class MaterialRequirementsPlanningReport:
 			key = (row.item_code, getdate(row.delivery_date))
 			planned[key] = planned.get(key, 0.0) + flt(row.planned_qty)
 
-		for row in skipped_data or []:
+		for row in skipped_data:
 			key = (row.item_code, getdate(row.delivery_date))
 			planned[key] = max(planned.get(key, 0.0) - flt(row.adhoc_qty), 0.0)
 
