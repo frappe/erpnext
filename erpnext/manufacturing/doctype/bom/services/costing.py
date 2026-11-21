@@ -184,6 +184,12 @@ class BOMCostingService:
 		)
 
 	def _accumulate_operation_cost(self, d, update_hour_rate, save=True):
+		# as in the Work Order, fixed time is never per batch and a batch based operation always is
+		if d.fixed_time:
+			d.set_cost_based_on_bom_qty = 0
+		elif frappe.get_cached_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+			d.set_cost_based_on_bom_qty = 1
+
 		if d.workstation or d.workstation_type:
 			self.update_rate_and_time(d, update_hour_rate, save)
 
