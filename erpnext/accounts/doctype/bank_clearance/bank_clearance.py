@@ -76,6 +76,8 @@ class BankClearance(Document):
 			frappe.throw(_("Account is mandatory to get payment entries"))
 
 		frappe.get_doc("Account", self.account).check_permission("read")
+		if self.bank_account:
+			erpnext.require_permission("Bank Account", self.bank_account)
 
 		entries = []
 
