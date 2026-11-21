@@ -442,23 +442,14 @@ class ProductionPlan(Document):
 		return planned_qty
 
 	def get_consolidated_planned_qty(self):
-		"""Planned qty of consolidated rows allotted to their Sales Order lines, excluding product bundle components.
-		Qty above a row's references counts against its last Sales Order line."""
+		"""Planned qty of consolidated rows allotted to their Sales Order lines, excluding product bundle components."""
 		row_qty = {}
 		for row in self.po_items:
 			if not row.sales_order and row.sales_order_item and not row.product_bundle_item:
 				key = (row.parent, row.sales_order_item)
 				row_qty[key] = row_qty.get(key, 0) + flt(row.planned_qty)
 
-		allotted = allocate_reference_qty(self.prod_plan_references, row_qty)
-		last_line = {
-			(ref.parent, ref.item_reference): row
-			for ref, row in zip(self.prod_plan_references, allotted, strict=True)
-		}
-		for key, row in last_line.items():
-			row.qty += row_qty[key]  # left unallotted by allocate_reference_qty
-
-		return [row for row in allotted if row.qty > 0]
+		return [row for row in allocate_reference_qty(self.prod_plan_references, row_qty) if row.qty > 0]
 
 	def on_submit(self):
 		self.update_bin_qty()
@@ -768,15 +759,20 @@ def get_planned_qty_of_references(sales_orders):
 
 
 def allocate_reference_qty(references, planned_qty):
-	"""Split the planned qty of each combined row over its references, in order."""
+	"""Split the planned qty of each combined row over its references, in order.
+	Qty above the references goes to the row's own line, its first reference."""
 	allocated = []
+	own_line = {}
 	for row in references:
 		key = (row.parent, row.item_reference)
 		qty = min(flt(row.qty), max(planned_qty.get(key, 0), 0))
 		planned_qty[key] = planned_qty.get(key, 0) - qty
-		allocated.append(
-			frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
-		)
+		line = frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
+		allocated.append(line)
+		own_line.setdefault(key, line)
+
+	for key, line in own_line.items():
+		line.qty += planned_qty[key]
 	return allocated
 
 
