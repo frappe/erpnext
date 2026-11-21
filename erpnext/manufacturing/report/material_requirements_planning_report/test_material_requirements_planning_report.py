@@ -892,6 +892,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		row = frappe._dict(
 			item_code=item, type_of_material="Manufacture", required_qty=qty, delivery_date=today()
 		)
+		report.lead_times = get_item_lead_times([item])
 		report.set_lead_time(row)
 		self.assertEqual(row.lead_time, 7)
 
