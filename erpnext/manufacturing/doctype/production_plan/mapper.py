@@ -49,7 +49,7 @@ def sales_order_query(
 			(table.stock_qty > table.production_plan_qty)
 			& (table.docstatus == 1)
 			& (table.closed == 0)
-			& (so_table.status.notin(["Stopped", "Closed"]))
+			& (so_table.status != "Closed")
 		)
 	)
 	query = _apply_sales_order_filters(query, so_table, table, filters, txt)
