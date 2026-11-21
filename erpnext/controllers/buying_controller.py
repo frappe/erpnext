@@ -25,7 +25,10 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 	is_rejected_material_valued,
 )
 from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
-from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.controllers.sales_and_purchase_return import (
+	get_rate_for_return,
+	validate_return_warehouse_stock,
+)
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.setup.utils import get_exchange_rate
@@ -87,6 +90,8 @@ class BuyingController(SubcontractingController):
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate()
+			# needs the valuation rate rejected qty goes out at
+			validate_return_warehouse_stock(self)
 			self.sync_accepted_packages()
 			self.set_serial_and_batch_bundle()
 
