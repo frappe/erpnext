@@ -567,6 +567,9 @@ class StatusService:
 		return qty[0][0] if qty and qty[0][0] else 0
 
 	def update_work_order_qty_in_combined_so(self):
+		if not self.doc.production_plan_item:
+			return
+
 		total_bundle_qty = self._total_bundle_qty()
 		prod_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
 		po_item = frappe.get_value(
