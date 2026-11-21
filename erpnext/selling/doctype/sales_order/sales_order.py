@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
+from erpnext.accounts.doctype.sales_invoice.services.inter_company import validate_inter_company_order_qty
 from erpnext.accounts.utils import pre_submit_validation
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -576,6 +577,9 @@ class SalesOrder(SellingController):
 		for d in self.get("items"):
 			if d.delivered_by_supplier and not d.supplier:
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
+
+	def before_submit(self):
+		validate_inter_company_order_qty(self)
 
 	def on_submit(self):
 		super().update_prevdoc_status()

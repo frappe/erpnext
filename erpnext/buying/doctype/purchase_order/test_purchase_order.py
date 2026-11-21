@@ -2556,6 +2556,17 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			po.name,
 		)
 
+	def test_two_internal_sales_order_drafts_cannot_both_take_the_full_qty(self):
+		po = make_internal_purchase_order()
+		drafts = []
+		for _i in range(2):
+			so = make_inter_company_sales_order(po.name)
+			so.items[0].delivery_date = today()
+			drafts.append(so.insert())
+
+		drafts[0].submit()
+		self.assertRaisesRegex(frappe.ValidationError, "already ordered in full", drafts[1].submit)
+
 	def test_internal_sales_order_drops_buying_only_terms(self):
 		frappe.get_doc(
 			doctype="Terms and Conditions", title="_Test Buy Only Terms", buying=1, selling=0, terms="FOB"
