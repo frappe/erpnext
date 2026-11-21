@@ -889,7 +889,7 @@ class SellingController(StockController):
 		sle = self.get_sl_entries(
 			item_row,
 			{
-				"actual_qty": -1 * get_ledger_qty(item_row.qty),
+				"actual_qty": -1 * self.get_source_warehouse_ledger_qty(item_row),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
 				"serial_and_batch_bundle": serial_and_batch_bundle,
@@ -899,6 +899,21 @@ class SellingController(StockController):
 			sle.dependant_sle_voucher_detail_no = item_row.name
 
 		return sle
+
+	def get_source_warehouse_ledger_qty(self, item_row) -> float:
+		"""Stock qty an item row moves in its warehouse. A return takes back no more than its delivered
+		row took out, less the row's other returns. A row with a package, a packed item and an internal
+		transfer keep their own qty."""
+		row = item_row.item_row
+		if (
+			not self.is_return
+			or item_row.serial_and_batch_bundle
+			or item_row.target_warehouse
+			or row.doctype == "Packed Item"
+		):
+			return get_ledger_qty(item_row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, item_row.warehouse)
 
 	def get_sle_for_target_warehouse(self, item_row):
 		sle = self.get_sl_entries(
