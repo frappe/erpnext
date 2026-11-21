@@ -3044,6 +3044,18 @@ class TestProductionPlan(ERPNextTestSuite):
 			frappe.ValidationError, "Only 16.0 .* is left to plan", consolidated_plan.submit
 		)
 
+	def test_consolidated_bundle_plan_saved_before_item_references_submits(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combine Old")
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+		plan = make_plan_from_sales_orders([sales_order], combine_items=1)
+		# older plans pointed every component reference at the bundle's Sales Order line
+		for row in plan.po_items:
+			row.item_reference = None
+		for row in plan.prod_plan_references:
+			row.item_reference = sales_order.items[0].name
+		plan.insert()
+		plan.submit()
+
 	def test_sub_assembly_work_order_of_combined_plan_submits(self):
 		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
 		sub_item = make_item("_Test PP Combined Sub SA", {"is_stock_item": 1}).name
