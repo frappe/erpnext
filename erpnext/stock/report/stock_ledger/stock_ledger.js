@@ -130,6 +130,9 @@ frappe.query_reports["Stock Ledger"] = {
 	],
 	formatter: function (value, row, column, data, default_formatter) {
 		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
+		if (column.fieldname == "valuation_rate" && data && data.stock_ledger_entry) {
+			value = erpnext.stock_ledger_explain_link(value, data);
+		}
 		if (column.fieldname == "out_qty" && data && data.out_qty < 0) {
 			value = "<span style='color:red'>" + value + "</span>";
 		} else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
@@ -145,6 +148,20 @@ frappe.query_reports["Stock Ledger"] = {
 			frappe.set_route("query-report", "Stock Balance", filters);
 		});
 	},
+};
+
+erpnext.stock_ledger_explain_link = function (value, data) {
+	const params = new URLSearchParams({
+		item_code: data.item_code,
+		warehouse: data.warehouse,
+		entry: data.stock_ledger_entry,
+	});
+	const title = __("How was this calculated?");
+	const icon = frappe.utils.icon("info", "xs");
+	const link = `<a href="${frappe.router.make_url([
+		"stock-valuation-explained",
+	])}?${params}" title="${title}" aria-label="${title}" style="margin-right: 4px">${icon}</a>`;
+	return `<div class="text-right">${link}${$("<div>").html(value).text()}</div>`;
 };
 
 erpnext.utils.add_inventory_dimensions("Stock Ledger", 10);
