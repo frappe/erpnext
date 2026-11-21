@@ -63,6 +63,7 @@ class BuyingController(SubcontractingController):
 
 		self.validate_items()
 		validate_item_uoms(self.get("items"))
+		self.set_received_qty()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_deduct_with_valuation_taxes()
@@ -1141,13 +1142,18 @@ class BuyingController(SubcontractingController):
 			if self.is_return and not flt(d.rejected_qty) and d.rejected_warehouse:
 				d.rejected_warehouse = None
 
+	def set_received_qty(self):
+		if self.doctype != "Purchase Receipt" and not self.get("update_stock"):
+			return
+
+		for d in self.get("items"):
+			if not flt(d.received_qty) and (flt(d.qty) or flt(d.rejected_qty)):
+				d.received_qty = flt(flt(d.qty) + flt(d.rejected_qty), d.precision("received_qty"))
+
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
 		for d in self.get("items"):
 			self.validate_negative_quantity(d, ["received_qty", "qty", "rejected_qty"])
-
-			if not flt(d.received_qty) and (flt(d.qty) or flt(d.rejected_qty)):
-				d.received_qty = flt(d.qty) + flt(d.rejected_qty)
 
 			# Check Received Qty = Accepted Qty + Rejected Qty
 			val = flt(d.qty) + flt(d.rejected_qty)
