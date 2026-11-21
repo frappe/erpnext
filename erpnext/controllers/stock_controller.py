@@ -813,6 +813,23 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 
 
 @frappe.whitelist()
+def show_payment_ledger_preview(company: str, doctype: str, docname: str):
+	from erpnext.controllers.ledger_preview import get_payment_ledger_preview
+
+	filters = frappe._dict(company=company)
+	doc = frappe.get_lazy_doc(doctype, docname)
+	doc.check_permission("read")
+	frappe.has_permission("Payment Ledger Entry", "read", throw=True)
+	doc.run_method("before_gl_preview")
+
+	pl_columns, pl_data = get_payment_ledger_preview(doc, filters)
+
+	frappe.db.rollback()
+
+	return {"pl_columns": pl_columns, "pl_data": pl_data}
+
+
+@frappe.whitelist()
 def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	from erpnext.controllers.ledger_preview import get_stock_ledger_preview
 

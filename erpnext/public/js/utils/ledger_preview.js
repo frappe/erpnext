@@ -59,9 +59,43 @@ erpnext.accounts.ledger_preview = {
 		}
 	},
 
+	show_payment_ledger_preview(frm) {
+		let me = this;
+		if (!frm.is_new() && frm.doc.docstatus == 0 && frappe.model.can_read("Payment Ledger Entry")) {
+			frm.add_custom_button(
+				__("Payment Ledger"),
+				function () {
+					frappe.call({
+						type: "GET",
+						method: "erpnext.controllers.stock_controller.show_payment_ledger_preview",
+						args: {
+							company: frm.doc.company,
+							doctype: frm.doc.doctype,
+							docname: frm.doc.name,
+						},
+						callback: function (response) {
+							me.make_dialog(
+								"Payment Ledger Preview",
+								"payment_ledger_preview_html",
+								response.message.pl_columns,
+								response.message.pl_data
+							);
+						},
+					});
+				},
+				__("Preview")
+			);
+		}
+	},
+
 	make_dialog(label, fieldname, columns, data) {
-		if (data.length === 0 && fieldname === "accounting_ledger_preview_html") {
-			frappe.msgprint("<strong>" + __("No Impact on Accounting Ledger") + "</strong>");
+		const no_impact_messages = {
+			accounting_ledger_preview_html: __("No Impact on Accounting Ledger"),
+			payment_ledger_preview_html: __("No Impact on Payment Ledger"),
+		};
+
+		if (data.length === 0 && no_impact_messages[fieldname]) {
+			frappe.msgprint("<strong>" + no_impact_messages[fieldname] + "</strong>");
 		} else {
 			let me = this;
 			let dialog = new frappe.ui.Dialog({
