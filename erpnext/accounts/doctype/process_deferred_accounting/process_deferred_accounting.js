@@ -10,20 +10,14 @@ frappe.ui.form.on("Process Deferred Accounting", {
 				},
 			};
 		});
-	},
 
-	type: function (frm) {
-		if (frm.doc.company && frm.doc.type) {
-			frm.set_query("account", function () {
-				return {
-					filters: {
-						company: frm.doc.company,
-						root_type: frm.doc.type === "Income" ? "Liability" : "Asset",
-						is_group: 0,
-					},
-				};
-			});
-		}
+		frm.set_query("account", function () {
+			const filters = { company: frm.doc.company, is_group: 0 };
+			if (frm.doc.type) {
+				filters.root_type = frm.doc.type === "Income" ? "Liability" : "Asset";
+			}
+			return { filters };
+		});
 	},
 
 	validate: function () {
