@@ -27,15 +27,17 @@ class StockInternalTransferService:
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
-
-				if (
-					self.doc.get("is_internal_supplier")
-					and self.doc.docstatus == 1
-					and not self.doc.get("is_return")
-				):
-					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
+
+			# the status updater checks an inter-company Purchase Receipt against its Delivery Note
+			if (
+				self.doc.get("is_internal_supplier")
+				and self.doc.docstatus == 1
+				and not self.doc.get("is_return")
+				and (self.doc.doctype == "Purchase Invoice" or self.doc.is_internal_transfer())
+			):
+				self.validate_internal_transfer_qty()
 
 	def validate_internal_transfer_warehouse(self):
 		for row in self.doc.items:
@@ -86,6 +88,9 @@ class StockInternalTransferService:
 			return
 
 		item_wise_received_qty = self.get_item_wise_inter_received_qty(inter_company_reference)
+		for qty_map in (item_wise_transfer_qty, item_wise_received_qty):
+			add_item_wise_total(qty_map)
+
 		precision = frappe.get_precision(self.doc.doctype + " Item", "qty")
 
 		over_receipt_allowance = frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
@@ -183,10 +188,10 @@ class StockInternalTransferService:
 
 		if self.doc.doctype == "Purchase Invoice":
 			reference_field, item_reference_field = "inter_company_invoice_reference", "sales_invoice_item"
-			fields = ["item_code", "qty"]
+			fields = ["item_code", "qty", "rejected_qty"]
 		else:
 			reference_field, item_reference_field = "inter_company_reference", "delivery_note_item"
-			fields = ["item_code", "qty", "delivery_note_packed_item"]
+			fields = ["item_code", "qty", "rejected_qty", "delivery_note_packed_item"]
 
 		other_items = get_inter_company_items(
 			self.doc.doctype,
@@ -200,6 +205,15 @@ class StockInternalTransferService:
 		item_wise_received_qty = defaultdict(float)
 		for row in [*other_items, *own_items]:
 			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
-			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
+			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty) + flt(row.rejected_qty)
 
 		return item_wise_received_qty
+
+
+def add_item_wise_total(qty_map):
+	"""Add each item's total under (None, item_code), so rows that link no source row are checked too."""
+	totals = defaultdict(float)
+	for (_reference, item_code), qty in qty_map.items():
+		totals[(None, item_code)] += qty
+
+	qty_map.update(totals)
