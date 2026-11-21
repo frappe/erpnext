@@ -1268,6 +1268,94 @@ class TestDeliveryNote(ERPNextTestSuite):
 		credit_note.submit()
 		self.assertEqual(make_sales_invoice(dn.name).items[0].qty, 0.25)
 
+	def make_dn_with_return_in_non_stock_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		so = make_sales_order(item_code=item.name, qty=3, uom="Box")
+		dn = create_dn_against_so(so.name, 3)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = -1
+		dn_return.submit()
+		return so, dn
+
+	def test_dn_is_completed_after_return_in_non_stock_uom(self):
+		_, dn = self.make_dn_with_return_in_non_stock_uom()
+
+		si = make_sales_invoice(dn.name)
+		self.assertEqual(si.items[0].qty, 2)
+		si.submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+	def test_dn_is_completed_after_return_in_non_stock_uom_billed_against_so(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_so_invoice
+
+		so, dn = self.make_dn_with_return_in_non_stock_uom()
+
+		si = make_so_invoice(so.name)
+		si.items[0].qty = 2
+		si.submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+	def test_dn_is_completed_after_return_of_a_fraction_of_its_uom(self):
+		item = make_item(properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 8}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		dn = create_delivery_note(item_code=item.name, qty=1.01, do_not_save=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 8})
+		dn.submit()
+
+		# 1 Kg is 0.125 Box, so the 0.88 Box left to bill is rounded
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].update({"uom": "Kg", "conversion_factor": 1, "qty": -1})
+		dn_return.submit()
+
+		make_sales_invoice(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+	def test_dn_billed_on_original_amount_after_full_return_in_non_stock_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=15, basic_rate=100)
+		dn = create_delivery_note(item_code=item.name, qty=3, rate=0.29, do_not_save=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 5})
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		si.items[0].qty = 1
+		si.submit()
+
+		# 3 x 0.29 is 0.8699999999999999 in floats
+		make_sales_return(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 33.333333)
+
+	def test_dn_billed_on_original_amount_after_full_return_of_rows_in_non_stock_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 10}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=70, basic_rate=100)
+		dn = create_delivery_note(item_code=item.name, qty=3.5, rate=0.29, do_not_save=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 10})
+		dn.append("items", dn.items[0].as_dict(no_default_fields=True))
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		for row in si.items:
+			row.qty = 1
+		si.submit()
+
+		# Each row's 1.015 is stored as 1.02, so the returned amounts must be rounded per row
+		make_sales_return(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 28.431373)
+
 	def test_dn_is_completed_when_unbilled_item_is_returned(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
