@@ -4218,6 +4218,28 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		for sco in orders:
 			self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "per_received"), 100)
 
+	def test_purchase_receipt_receives_the_service_for_process_loss_qty(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 9
+		scr.items[0].process_loss_qty = 1
+		scr.save()
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		pr.submit()
+
+		self.assertEqual(pr.items[0].qty, 10)
+		self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "per_received"), 100)
+
 	def test_purchase_receipt_only_once_from_submitted_receipt(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
 
