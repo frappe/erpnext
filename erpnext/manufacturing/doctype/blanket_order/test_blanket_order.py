@@ -638,6 +638,23 @@ class TestBlanketOrder(ERPNextTestSuite):
 		lead_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
 		lead_quotation.insert()
 
+	def test_blanket_order_link_matches_the_typed_text(self):
+		item = make_item("_Test Blanket Order Search Item", {"is_stock_item": 1}).name
+		first = make_blanket_order(blanket_order_type="Purchasing", item_code=item)
+		second = make_blanket_order(blanket_order_type="Purchasing", item_code=item)
+		link_filters = {
+			"company": "_Test Company",
+			"blanket_order_type": "Purchasing",
+			"item": item,
+			"party": first.supplier,
+		}
+
+		orders = get_blanket_orders("Blanket Order", first.name, "name", 0, 20, link_filters)
+		self.assertEqual([order[0] for order in orders], [first.name])
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, link_filters)
+		self.assertCountEqual([order[0] for order in orders], [first.name, second.name])
+		self.assertEqual(len(get_blanket_orders("Blanket Order", "", "name", 0, 1, link_filters)), 1)
+
 	def test_blanket_order_rate_is_set_by_the_server(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
 		po = make_purchase_order_against(bo, qty=10)
