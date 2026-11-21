@@ -130,7 +130,7 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	currency: function (frm) {
-		let base_currency = frappe.defaults.get_global_default("currency");
+		let base_currency = erpnext.get_currency(frm.doc.company);
 		if (frm.doc.currency && base_currency != frm.doc.currency) {
 			frappe.call({
 				method: "erpnext.setup.utils.get_exchange_rate",
@@ -149,6 +149,8 @@ frappe.ui.form.on("Timesheet", {
 					}
 				},
 			});
+		} else {
+			frm.set_value("exchange_rate", 1);
 		}
 		frm.trigger("set_dynamic_field_label");
 	},

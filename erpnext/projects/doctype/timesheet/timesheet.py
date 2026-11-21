@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Coalesce, Concat, Date, Round
 from frappe.utils import cint, cstr, flt, get_datetime, getdate, nowdate
 from frappe.utils.deprecations import deprecated
 
+import erpnext
 from erpnext import _refuse, require_permission
 from erpnext.setup.utils import get_exchange_rate
 
@@ -74,10 +75,25 @@ class Timesheet(Document):
 		self.validate_time_logs()
 		self.check_task_and_project_access(self.time_logs)
 		self.validate_tasks_not_cancelled()
+		self.set_dates()
+		self.set_exchange_rate()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
-		self.set_dates()
+
+	def set_exchange_rate(self):
+		"""A company currency Timesheet always has rate 1. A foreign one still at the default 1
+		gets the rate on its start date, so its base amounts and project costs are converted."""
+		company_currency = self.get_company_currency()
+		if not self.currency or self.currency == company_currency:
+			self.exchange_rate = 1
+		elif flt(self.exchange_rate) in (0, 1):
+			self.exchange_rate = get_exchange_rate(self.currency, company_currency, self.start_date) or 1
+
+	def get_company_currency(self):
+		if self.company:
+			return erpnext.get_company_currency(self.company)
+		return erpnext.get_default_currency()
 
 	def validate_tasks_not_cancelled(self):
 		tasks = [log.task for log in self.time_logs if log.task]
