@@ -923,16 +923,23 @@ class SubcontractingController(StockController):
 			"name": "bom_detail_no",
 			"source_warehouse": "reserve_warehouse",
 		}
-		for field in [
+		fields_list = [
 			"item_code",
 			"name",
-			"rate",
 			"stock_uom",
 			"source_warehouse",
 			"description",
 			"item_name",
 			"stock_uom",
-		]:
+		]
+
+		if doctype == "BOM Item":
+			# BOM Item rate is in the BOM currency and UOM
+			fields.append("`tabBOM Item`.`base_rate` / `tabBOM Item`.`conversion_factor` as rate")
+		else:
+			fields_list.append("rate")
+
+		for field in fields_list:
 			fields.append(f"`tab{doctype}`.`{field}` As {alias_dict.get(field, field)}")
 
 		filters = [
@@ -1035,6 +1042,7 @@ class SubcontractingController(StockController):
 		if self.doctype == self.subcontract_data.order_doctype:
 			rm_obj.required_qty = flt(qty, rm_obj.precision("required_qty"))
 			rm_obj.amount = flt(rm_obj.required_qty * rm_obj.rate, rm_obj.precision("amount"))
+			rm_obj.rate = flt(rm_obj.rate, rm_obj.precision("rate"))
 		else:
 			rm_obj.consumed_qty = flt(qty, rm_obj.precision("consumed_qty"))
 			rm_obj.required_qty = flt(bom_item.required_qty or qty, rm_obj.precision("required_qty"))
