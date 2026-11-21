@@ -7821,6 +7821,35 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(taken_qty, -1.0)
 
+	def test_landed_cost_keeps_internal_pr_that_rejects_into_transit(self):
+		"""A Landed Cost Voucher posts again what an internal receipt that rejects into transit moved."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": create_warehouse("_Test Transfer To", company=dn.company),
+				"qty": 4,
+				"rejected_qty": 2,
+				"received_qty": 6,
+				"rejected_warehouse": transit_warehouse,
+			}
+		)
+		pr.submit()
+		create_landed_cost_voucher("Purchase Receipt", pr.name, dn.company)
+
+		transit_qty = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr.name, "warehouse": transit_warehouse, "is_cancelled": 0},
+			pluck="actual_qty",
+			order_by="actual_qty",
+		)
+		self.assertEqual(transit_qty, [-2.01, 0.67])
+
 	def test_internal_pr_qty_change_in_another_uom(self):
 		"""Changing the qty of a draft internal receipt resizes its package in stock UOM."""
 		item = make_item(
