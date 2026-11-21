@@ -48,6 +48,20 @@ frappe.ui.form.on("Holiday List", {
 			frm.set_df_property("subdivision", "hidden", 1);
 		}
 	},
+	// these buttons call a whitelisted doc method that mutates the `holidays`
+	// table on the server and syncs the result back, instead of going through
+	// the grid APIs — that sync never marks the form dirty on its own, so a
+	// Save right after (on an already-saved doc) was a no-op ("No changes to
+	// Save") even though rows were visibly added.
+	get_weekly_off_dates: function (frm) {
+		frm.call("get_weekly_off_dates").then(() => frm.dirty());
+	},
+	get_local_holidays: function (frm) {
+		frm.call("get_local_holidays").then(() => frm.dirty());
+	},
+	clear_table: function (frm) {
+		frm.call("clear_table").then(() => frm.dirty());
+	},
 });
 
 frappe.ui.form.on("Holiday", {
