@@ -535,7 +535,8 @@ def get_used_serial_nos(doc, table=None):
 def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
 	if ctx.doctype == "Material Request" and ctx.material_request_type == "Material Transfer":
 		# Source Warehouse ignores user permissions, so hide only the stock of one the user cannot see
-		out.update(_get_bin_details(ctx.item_code, get_accessible_warehouse(ctx.from_warehouse)))
+		is_permitted = erpnext._is_within_user_permissions("Warehouse", ctx.from_warehouse)
+		out.update(_get_bin_details(ctx.item_code, ctx.from_warehouse if is_permitted else None))
 
 	elif out.get("warehouse"):
 		bin_details = _get_bin_details(
