@@ -72,7 +72,8 @@ def get_received_rows(receipt_doctype):
 
 
 def update_per_received(request):
-	frappe.get_doc("Material Request", request)._update_percent_field(
+	doc = frappe.get_doc("Material Request", request)
+	doc._update_percent_field(
 		{
 			"target_dt": "Material Request Item",
 			"target_parent_dt": "Material Request",
@@ -83,3 +84,5 @@ def update_per_received(request):
 		},
 		update_modified=False,
 	)
+	doc.reload()
+	doc.set_status(update=True, update_modified=False)

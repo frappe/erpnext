@@ -22,6 +22,8 @@ def execute():
 	for name, rows in requests.items():
 		request = frappe.get_doc("Material Request", name)
 		request.update_per_ordered(update_modified=False)
+		request.reload()
+		request.set_status(update=True, update_modified=False)
 		request.update_requested_qty(rows)
 
 
