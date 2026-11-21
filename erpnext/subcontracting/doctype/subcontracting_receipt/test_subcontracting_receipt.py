@@ -2396,6 +2396,31 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(service_credit, [100])
 
+	def test_service_cost_of_rejected_and_lost_qty_is_credited_to_the_service_account(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
+		rejected_warehouse = create_warehouse(
+			"_Test Rejected Warehouse", company="_Test Company with perpetual inventory"
+		)
+		for fg_row_values in (
+			{"qty": 8, "rejected_qty": 2, "rejected_warehouse": rejected_warehouse},
+			{"qty": 9, "process_loss_qty": 1},
+		):
+			scr = make_service_receipt(
+				"Subcontracted Service Item 10", "Subcontracted Item SA10", 10, 100, 10, fg_row_values
+			)
+			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+			scr_return.submit()
+
+			for voucher_no, side in ((scr.name, "credit"), (scr_return.name, "debit")):
+				service_amount = frappe.get_all(
+					"GL Entry",
+					filters={"voucher_no": voucher_no, "account": service_expense_account, "is_cancelled": 0},
+					pluck=side,
+				)
+				self.assertEqual(service_amount, [1000])
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
@@ -6093,7 +6118,7 @@ def set_service_expense_account(service_item):
 	return service_expense_account
 
 
-def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
+def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_values=None):
 	service_items = [
 		{
 			"warehouse": "Stores - TCP1",
@@ -6119,6 +6144,7 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	)
 
 	scr = make_subcontracting_receipt(sco.name)
+	scr.items[0].update(fg_row_values or {})
 	scr.submit()
 	return scr
 
