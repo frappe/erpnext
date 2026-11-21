@@ -384,7 +384,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 	def test_secondary_qty_nets_off_the_unrounded_bom_process_loss(self):
 		fg_item = "Subcontracted Item SA1"
-		bom = make_bom_with_secondary_item(fg_item, secondary_qty=1)
+		bom = make_bom_with_secondary_item(fg_item, secondary_qty=1, secondary_uom="Kg")
 		# 33.333% of 1, stored at a float precision of 2
 		frappe.db.set_value(
 			"BOM Secondary Item",
@@ -395,6 +395,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		secondary_row = next(row for row in scr.items if row.bom_secondary_item)
 		self.assertEqual(secondary_row.qty, flt(300 * (1 - 0.33333), secondary_row.precision("qty")))
+
+	def test_whole_number_secondary_qty_nets_off_the_bom_process_loss_qty(self):
+		fg_item = "Subcontracted Item SA1"
+		bom = make_bom_with_secondary_item(fg_item, secondary_qty=3)
+		# 33.33% of 3 Nos, which the BOM keeps as a whole 1 Nos
+		frappe.db.set_value(
+			"BOM Secondary Item",
+			bom.secondary_items[0].name,
+			{"process_loss_per": 33.33, "process_loss_qty": 1},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 300)
+
+		secondary_row = next(row for row in scr.items if row.bom_secondary_item)
+		self.assertEqual(secondary_row.qty, 600)
 
 	def test_full_return_with_secondary_items_marks_the_receipt_returned(self):
 		fg_item = "Subcontracted Item SA1"
@@ -5797,10 +5811,14 @@ def make_receipt_with_rejected_qty_and_scrap():
 	return scr, scrap_item
 
 
-def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, secondary_item_types=("Scrap",)):
+def make_bom_with_secondary_item(
+	fg_item, quantity=1, secondary_qty=0.5, secondary_item_types=("Scrap",), secondary_uom="Nos"
+):
 	"""BOM with one raw material per unit and a secondary item of each type."""
 	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
-	secondary_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+	secondary_item = make_item(
+		properties={"is_stock_item": 1, "stock_uom": secondary_uom, "valuation_rate": 10}
+	).name
 
 	bom = make_bom(
 		item=fg_item,
