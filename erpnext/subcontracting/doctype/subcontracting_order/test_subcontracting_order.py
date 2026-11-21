@@ -2130,6 +2130,7 @@ def make_reserved_production_plan():
 		do_not_submit=True,
 		reserve_stock=True,
 		skip_available_sub_assembly_item=True,
+		include_subcontracted_items=1,
 		for_warehouse="_Test Warehouse - _TC",
 		sub_assembly_warehouse="_Test Warehouse - _TC",
 		skip_getting_mr_items=True,
