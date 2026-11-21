@@ -564,4 +564,4 @@ erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion
 erpnext.patches.v16_0.recalculate_ordered_qty_of_material_requests_ordered_in_parts
 erpnext.patches.v16_0.recalculate_received_qty_of_material_requests_received_in_parts
 erpnext.patches.v16_0.restrict_employee_project_perms_to_select
-execute:frappe.db.set_single_value("Stock Reposting Settings", "stock_ledger_audit_frequency", "Every 3 Days")
+execute:frappe.db.set_single_value("Stock Reposting Settings", "repost_incorrect_valuation_entries", 1)
