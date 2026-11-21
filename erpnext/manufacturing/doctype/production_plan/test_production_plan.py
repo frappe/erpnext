@@ -2863,25 +2863,23 @@ class TestProductionPlan(ERPNextTestSuite):
 
 	def test_combined_bundle_work_orders_add_up_per_sales_order_line(self):
 		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combined WO")
-		sales_orders = [make_sales_order(item_code=bundle_item, qty=10) for _ in range(3)]
-		plans = [
-			make_plan_from_sales_orders(sales_orders[:2], combine_items=1),
-			make_plan_from_sales_orders(sales_orders[2:]),
-		]
-		for plan in plans:
-			plan.submit()
-			plan.make_work_order()
-			for name in frappe.get_all("Work Order", {"production_plan": plan.name}, pluck="name"):
-				work_order = frappe.get_doc("Work Order", name)
-				work_order.wip_warehouse = "Work In Progress - _TC"
-				work_order.submit()
+		sales_orders = [make_sales_order(item_code=components[0], qty=5)]
+		sales_orders += [make_sales_order(item_code=bundle_item, qty=10) for _ in range(2)]
+		plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+		plan.submit()
+		plan.make_work_order()
+		for name in frappe.get_all("Work Order", {"production_plan": plan.name}, pluck="name"):
+			work_order = frappe.get_doc("Work Order", name)
+			work_order.wip_warehouse = "Work In Progress - _TC"
+			work_order.submit()
 
-		# combined lines get what a line planned on its own gets
-		work_order_qty = [
-			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "work_order_qty")
-			for sales_order in sales_orders
-		]
-		self.assertEqual(work_order_qty, [work_order_qty[2]] * 3)
+		self.assertEqual(
+			[
+				frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "work_order_qty")
+				for sales_order in sales_orders
+			],
+			[5, 10, 10],
+		)
 
 	def test_sub_assembly_work_order_of_combined_plan_submits(self):
 		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
