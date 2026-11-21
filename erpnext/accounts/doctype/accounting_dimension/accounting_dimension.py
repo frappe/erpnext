@@ -10,7 +10,7 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.database.schema import validate_column_name
 from frappe.model import core_doctypes_list
 from frappe.model.document import Document
-from frappe.utils import cstr
+from frappe.utils import cstr, get_link_to_form
 
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	get_allowed_types_from_settings,
@@ -41,7 +41,17 @@ class AccountingDimension(Document):
 	# end: auto-generated types
 
 	def before_insert(self):
+		self.validate_accounting_dimensions_enabled()
 		self.set_fieldname_and_label()
+
+	def validate_accounting_dimensions_enabled(self):
+		if not frappe.get_single_value("Accounts Settings", "enable_accounting_dimensions"):
+			frappe.throw(
+				_("Accounting Dimensions are disabled. Please enable them in {0} to create one.").format(
+					get_link_to_form("Accounts Settings", "Accounts Settings")
+				),
+				title=_("Accounting Dimensions Disabled"),
+			)
 
 	def validate(self):
 		self.validate_doctype()

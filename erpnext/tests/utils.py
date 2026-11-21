@@ -3262,6 +3262,7 @@ class BootStrapTestData:
 		self.make_records(["first_name"], records)
 
 	def make_dimensions(self):
+		frappe.db.set_single_value("Accounts Settings", "enable_accounting_dimensions", 1)
 		records = [
 			{
 				"doctype": "Accounting Dimension",
