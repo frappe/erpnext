@@ -4422,6 +4422,27 @@ class TestPickList(ERPNextTestSuite):
 		delivery_note = create_delivery_note(pick_list.name)
 		self.assertEqual([(row.item_code, row.qty) for row in delivery_note.items], [(item_with_so, 3)])
 
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_currency": "USD"})
+	def test_sales_invoice_from_pick_list_without_so_takes_company_currency(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=2, basic_rate=100)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"purpose": "Delivery",
+				"locations": [
+					{"item_code": item, "qty": 2, "stock_qty": 2, "picked_qty": 2, "warehouse": warehouse}
+				],
+			}
+		).submit()
+
+		sales_invoice = create_delivery(pick_list.name, target="Sales Invoice")
+		self.assertEqual((sales_invoice.currency, sales_invoice.conversion_rate), ("INR", 1))
+
 	def test_creating_dn_from_so_with_different_addresses(self):
 		warehouse = "_Test Warehouse - _TC"
 		item1 = make_item().name
