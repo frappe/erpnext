@@ -5,7 +5,7 @@ import copy
 from collections import defaultdict
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
@@ -901,6 +901,30 @@ class TestSubcontractingOrder(FrappeTestCase):
 		ste.items[0].qty = 4
 		ste.save()
 		ste.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
+		)
+
+	@change_settings("Buying Settings", {"over_transfer_allowance": 20})
+	def test_status_stays_partial_while_one_raw_material_is_short(self):
+		make_subcontracted_item(item_code="Subcontracted Item Two RM")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Two RM",
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] += 1
+		rm_items[1]["qty"] -= 1
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
 
 		self.assertEqual(
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
