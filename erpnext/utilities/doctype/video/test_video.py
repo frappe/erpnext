@@ -50,8 +50,46 @@ class TestVideo(FrappeTestCase):
 		batch_update_youtube_data()
 		self.assertEqual(frappe.db.get_value("Video", video.name, "view_count"), 5000)
 
+	def test_video_url_must_be_a_web_link(self):
+		with self.set_user(make_desk_user()):
+			self.assert_video_urls()
+
+	def assert_video_urls(self):
+		for title, url in (
+			("Test Vimeo Link", "https://vimeo.com/76979871"),
+			("Test Drive Link", "https://drive.google.com/file/d/abc123/view"),
+		):
+			self.assertEqual(make_video(title, url, provider="Vimeo").url, url)
+
+		for provider in ("Vimeo", "YouTube"):
+			for url in (
+				'V01X" style="animation:spinner-border 1s" onanimationstart="alert(1)',
+				"javascript:alert(1)",
+				'https://x" onmouseover="alert(1)',
+			):
+				self.assertRaises(frappe.ValidationError, make_video, "Test Bad Link", url, provider=provider)
+
+	def test_video_without_url_asks_for_it(self):
+		self.assertRaises(frappe.MandatoryError, make_video, "Test No URL", None, provider="Vimeo")
+
 
 def make_video(title: str, url: str, provider: str = "YouTube"):
 	return frappe.get_doc(
 		{"doctype": "Video", "title": title, "provider": provider, "url": url, "description": "Test"}
 	).insert()
+
+
+def make_desk_user():
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "test-video-desk-user@example.com",
+				"first_name": "Test Video Desk",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock User"}],
+			}
+		)
+		.insert(ignore_if_duplicate=True)
+		.name
+	)
