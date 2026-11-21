@@ -1189,19 +1189,21 @@ class BuyingController(SubcontractingController):
 
 		# rows of this return post together, so the rows before it count as returned
 		for earlier_row in self.get_earlier_rows_of_receipt_row(row, warehouse):
-			take_back_from_left(left, earlier_row, earlier_row.qty)
+			earlier_qty = earlier_row.qty if earlier_row.warehouse == warehouse else earlier_row.rejected_qty
+			take_back_from_left(left, earlier_row, earlier_qty)
 
 		return take_back_from_left(left, row, qty)
 
 	def get_earlier_rows_of_receipt_row(self, row, warehouse) -> list:
-		"""Rows of this return before the row that return its receipt row to the warehouse."""
+		"""Rows of this return before the row that return its receipt row's accepted or rejected stock
+		from the warehouse."""
 		reference_field = get_return_against_item_fields(self.doctype)
 		return [
 			d
 			for d in self.get("items")
 			if d.idx < row.idx
 			and d.get(reference_field) == row.get(reference_field)
-			and d.warehouse == warehouse
+			and warehouse in (d.warehouse, d.rejected_warehouse)
 		]
 
 	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
