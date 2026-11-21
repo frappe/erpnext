@@ -9,6 +9,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.serial_batch_bundle import get_batch_nos
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )
@@ -594,6 +595,42 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(scio.items[0].delivered_qty, 2)
 		self.assertEqual(scio.items[0].returned_qty, 1)
 
+	def test_subcontracting_return_refuses_batch_beyond_its_delivered_qty(self):
+		so, scio = create_so_scio(service_item="Service Item 3", fg_item="FG Item with Batch")
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		batches = []
+		for qty in (3, 2):
+			manufacture = frappe.new_doc("Stock Entry").update(
+				make_stock_entry_from_wo(wo.name, "Manufacture", qty)
+			)
+			manufacture.submit()
+			fg_row = next(item for item in manufacture.items if item.is_finished_item)
+			batches.append(next(iter(get_batch_nos(fg_row.serial_and_batch_bundle))))
+		scio.reload()
+		frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
+
+		def make_return(qty, batch_no):
+			scio.reload()
+			fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+			fg_return.items[0].update(
+				{
+					"qty": qty,
+					"t_warehouse": "Stores - _TC",
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
+				}
+			)
+			return fg_return
+
+		make_return(3, batches[0]).submit()
+		self.assertRaisesRegex(frappe.ValidationError, "left to return", make_return(2, batches[0]).submit)
+		make_return(2, batches[1]).submit()
+
 	def test_process_loss_receipt_qty_for_multi_unit_bom(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
 		new_bom.quantity = 2
@@ -660,27 +697,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
-<<<<<<< HEAD
-		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
-		new_bom.secondary_items.append(
-			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, secondary_item_type="Scrap")
-		)
-		new_bom.submit()
-		sc_bom = frappe.get_doc("Subcontracting BOM", "SB-0001")
-		sc_bom.finished_good_bom = new_bom.name
-		sc_bom.save()
-
-		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
-		scio.reload()
-		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
-		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
-		wo.submit()
-
-=======
 		scio, wo = create_scio_with_secondary_item()
->>>>>>> 5ec0cfa (test: secondary item on two Manufacture rows of a subcontracting inward order)
 		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
 
 		scio.reload()
@@ -693,8 +710,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		self.assertNotEqual(delivery.items[-1].item_code, "Basic RM 2")
 
-<<<<<<< HEAD
-=======
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_manufacture_cancel_checks_all_rows_of_a_secondary_item(self):
 		scio, wo = create_scio_with_secondary_item()
@@ -740,7 +755,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertFalse(scio.secondary_items)
 
->>>>>>> 5ec0cfa (test: secondary item on two Manufacture rows of a subcontracting inward order)
 	def test_self_rm_billed_qty(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
@@ -1380,6 +1394,31 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio = make_subcontracting_inward_order(so.name)
 		self.assertEqual(scio.items[0].qty, 18)
 
+	def test_draft_inward_order_follows_updated_sales_order_fg_qty(self):
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		item_list = [
+			{"item_code": "Service Item 1", "qty": 10, "fg_item": "Basic FG Item", "fg_item_qty": 10}
+		]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.insert()
+
+		row = so.items[0]
+		trans_item = {
+			"docname": row.name,
+			"item_code": row.item_code,
+			"qty": row.qty,
+			"rate": row.rate,
+			"fg_item": row.fg_item,
+			"fg_item_qty": 5,
+		}
+		update_child_qty_rate("Sales Order", frappe.as_json([trans_item]), so.name)
+
+		scio = frappe.get_doc(scio.doctype, scio.name)
+		self.assertRaisesRegex(frappe.ValidationError, "higher than the available quantity", scio.submit)
+
 	def test_receipt_cancel_keeps_other_receipt_reservation(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_reserved_qty_details_for_voucher,
@@ -1848,8 +1887,6 @@ def create_delivered_so_scio():
 	return so, scio
 
 
-<<<<<<< HEAD
-=======
 def create_scio_with_secondary_item():
 	"""Make a Work Order (Skip Material Transfer) for an inward order whose BOM has a scrap item."""
 	new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
@@ -1871,7 +1908,6 @@ def create_scio_with_secondary_item():
 	return scio, wo
 
 
->>>>>>> 5ec0cfa (test: secondary item on two Manufacture rows of a subcontracting inward order)
 def receive_batch_twice(scio, first_qty=3):
 	"""Receive the batch raw material in two entries that share one batch; the second takes the rest."""
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
