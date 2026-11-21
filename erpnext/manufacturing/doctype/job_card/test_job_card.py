@@ -1170,19 +1170,21 @@ class TestJobCard(ERPNextTestSuite):
 		corrective_operation = frappe.get_doc(
 			doctype="Operation", is_corrective_operation=1, name=frappe.generate_hash()
 		).insert()
-		corrective_job_card = make_corrective_job_card(
-			job_card.name, operation=corrective_operation.name, for_operation=job_card.operation
-		)
-		corrective_job_card.hour_rate = 1000
-		corrective_job_card.insert()
-		corrective_job_card.append(
-			"time_logs", jc_review_log("2031-03-11 10:00:00", 7, corrective_job_card.for_quantity)
-		)
-		corrective_job_card.submit()
+		for from_time in ("2031-03-11 10:00:00", "2031-03-11 11:00:00"):
+			corrective_job_card = make_corrective_job_card(
+				job_card.name, operation=corrective_operation.name, for_operation=job_card.operation
+			)
+			corrective_job_card.hour_rate = 1000
+			corrective_job_card.insert()
+			corrective_job_card.append(
+				"time_logs", jc_review_log(from_time, 7, corrective_job_card.for_quantity)
+			)
+			corrective_job_card.submit()
 
+		# 233.34 if each card's cost were rounded before adding them up
 		self.assertEqual(
 			frappe.db.get_value("Work Order", wo.name, ["corrective_operation_cost", "total_operating_cost"]),
-			(116.67, 716.67),
+			(233.33, 833.33),
 		)
 
 	@ERPNextTestSuite.change_settings(
