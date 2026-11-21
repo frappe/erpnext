@@ -274,20 +274,19 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			on_hide: reject,
 		});
 
-		this.dialog.set_primary_action(__("Update"), () => {
+		this.dialog.set_primary_action(__("Update"), (values) => {
 			const item_data = { item_code: item_code };
-			item_data[this.qty_field] = this.dialog.get_value("scanned_qty");
+			item_data[this.qty_field] = values.scanned_qty;
 			item_data["has_item_scanned"] = 1;
 
-			this.remaining_qty =
-				flt(this.dialog.get_value("qty")) - flt(this.dialog.get_value("scanned_qty"));
+			this.remaining_qty = flt(values.qty) - flt(values.scanned_qty);
 
 			resolve(
 				frappe.run_serially([
 					() => frappe.model.set_value(row.doctype, row.name, item_data),
-					() => this.set_batch_no(row, this.dialog.get_value("batch_no")),
-					() => this.set_barcode(row, this.dialog.get_value("barcode")),
-					() => this.set_serial_no(row, this.dialog.get_value("serial_no")),
+					() => this.set_batch_no(row, values.batch_no),
+					() => this.set_barcode(row, values.barcode),
+					() => this.set_serial_no(row, values.serial_no),
 					() => this.add_child_for_remaining_qty(row),
 					() => this.clean_up(),
 				])
