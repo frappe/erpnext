@@ -2407,7 +2407,7 @@ class StockController(AccountsController):
 			data_map = get_data_map()
 
 			field = data_map[purpose or self.doctype]["field"]
-			if self._action == "cancel" and purpose != "Subcontracting Delivery":
+			if self._action == "cancel":
 				rows = {
 					get_row_key(item): item
 					for item in self.get(data_map[purpose or self.doctype]["table_name"])
@@ -2517,9 +2517,14 @@ class StockController(AccountsController):
 		if self.doctype == "Subcontracting Receipt":
 			return self.get_remaining_consumption(keys)
 
-		return self.get_remaining_transfers(keys)
+		return self.get_remaining_stock_entries(keys)
 
-	def get_remaining_transfers(self, sco_rm_details: list[str]) -> list[dict]:
+	def get_remaining_stock_entries(self, details: list[str]) -> list[dict]:
+		order_field, detail_field = (
+			("subcontracting_inward_order", "scio_detail")
+			if self.purpose == "Subcontracting Delivery"
+			else ("subcontracting_order", "sco_rm_detail")
+		)
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
@@ -2532,7 +2537,7 @@ class StockController(AccountsController):
 			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
 			.select(
 				detail.name,
-				detail.sco_rm_detail.as_("key"),
+				detail[detail_field].as_("key"),
 				detail.transfer_qty.as_("qty"),
 				submitted_at,
 				bundle_entry.serial_no,
@@ -2541,9 +2546,9 @@ class StockController(AccountsController):
 			)
 			.where(
 				(stock_entry.docstatus == 1)
-				& (stock_entry.purpose == "Send to Subcontractor")
-				& (stock_entry.subcontracting_order == self.subcontracting_order)
-				& detail.sco_rm_detail.isin(sco_rm_details)
+				& (stock_entry.purpose == self.purpose)
+				& (stock_entry[order_field] == self.get(order_field))
+				& detail[detail_field].isin(details)
 			)
 			.orderby(submitted_at)
 		).run(as_dict=True)
