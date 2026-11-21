@@ -666,7 +666,7 @@ class SubcontractingReceipt(SubcontractingController):
 		per_unit = secondary_item.stock_qty / bom.quantity
 		received_qty = self.get_secondary_qty(item, per_unit, fg_qty_before, "received_qty")
 		qty = self.get_secondary_qty(
-			item, per_unit * (1 - flt(secondary_item.process_loss_per) / 100), fg_qty_before, "qty"
+			item, per_unit - self.get_process_loss_per_unit(bom, secondary_item), fg_qty_before, "qty"
 		)
 		# a return's zero row is dropped, or priced from the receipt once it gets the qty left
 		rate = (
@@ -701,6 +701,13 @@ class SubcontractingReceipt(SubcontractingController):
 				"rejected_warehouse": self.rejected_warehouse,
 			},
 		)
+
+	@staticmethod
+	def get_process_loss_per_unit(bom, secondary_item):
+		"""A whole number UOM keeps the BOM's whole loss qty; others use the unrounded percentage."""
+		if frappe.get_cached_value("UOM", secondary_item.stock_uom, "must_be_whole_number"):
+			return secondary_item.process_loss_qty / bom.quantity
+		return secondary_item.stock_qty * flt(secondary_item.process_loss_per) / 100 / bom.quantity
 
 	@staticmethod
 	def get_secondary_qty(item, per_unit, fg_qty_before, fieldname):
