@@ -7174,6 +7174,18 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		pr.items[0].uom = "Box"
 		pr.items[0].conversion_factor = 0.3356
+		pr.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Customs Duty - TCP1",
+				"add_deduct_tax": "Add",
+				"category": "Valuation",
+				"charge_type": "On Net Total",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"rate": 10,
+			},
+		)
 		pr.submit()
 
 		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
