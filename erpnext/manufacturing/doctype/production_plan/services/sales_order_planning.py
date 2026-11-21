@@ -183,12 +183,14 @@ class SalesOrderSourcingService:
 			frappe.qb.from_(so_item)
 			.from_(pi)
 			.select(*_so_packed_columns(so_item, pi))
-			.distinct()
 			.where(_so_packed_filter(bom, so_item, pi, so_list))
 		)
 		if self.doc.item_code:
 			query = query.where(so_item.item_code == self.doc.item_code)
-		return query.run(as_dict=True)
+
+		items = query.run(as_dict=True)
+		_set_packed_item_pending_qty(items)
+		return items
 
 	def get_mr_items(self):
 		# Check for empty table or empty rows
@@ -246,7 +248,7 @@ class SalesOrderSourcingService:
 			refs[bom_no]["qty"] += data.pending_qty
 			return True
 
-		refs[bom_no] = {"qty": data.pending_qty, "po_item_ref": data.name, "so_details": [detail]}
+		refs[bom_no] = {"qty": data.pending_qty, "so_details": [detail]}
 		return False
 
 	def _append_po_item(self, data, item_details, bom_no):
@@ -281,6 +283,7 @@ class SalesOrderSourcingService:
 			po_item.planned_qty = refs[po_item.bom_no]["qty"]
 			po_item.pending_qty = refs[po_item.bom_no]["qty"]
 			po_item.sales_order = ""
+			po_item.item_reference = po_item.bom_no
 		self.add_pp_ref(refs)
 
 	def add_pp_ref(self, refs):
@@ -289,7 +292,7 @@ class SalesOrderSourcingService:
 				self.doc.append(
 					"prod_plan_references",
 					{
-						"item_reference": refs[bom_no]["po_item_ref"],
+						"item_reference": bom_no,
 						"sales_order": so_detail["sales_order"],
 						"sales_order_item": so_detail["sales_order_item"],
 						"qty": so_detail["qty"],
@@ -366,6 +369,23 @@ def _set_so_item_pending_qty(items):
 		)
 
 
+def _set_packed_item_pending_qty(items):
+	"""Share out what is left to plan of each component of a Sales Order line across its packed rows."""
+	planned_qty = get_planned_bundle_component_qty([item.name for item in items])
+	totals = {}
+	for item in items:
+		key = (item.name, item.item_code)
+		unplanned, pending = totals.get(key, (-planned_qty.get(key, 0), 0))
+		totals[key] = (unplanned + flt(item.qty), pending + flt(item.pending_qty))
+	remaining = {key: min(unplanned, pending) for key, (unplanned, pending) in totals.items()}
+
+	precision = frappe.get_precision("Production Plan Item", "planned_qty")
+	for item in items:
+		key = (item.name, item.item_code)
+		item.pending_qty = flt(max(min(flt(item.pending_qty), remaining[key]), 0), precision)
+		remaining[key] -= item.pending_qty
+
+
 def _so_packed_columns(so_item, pi):
 	pending_qty = (
 		frappe.qb.terms.Case()
@@ -380,6 +400,7 @@ def _so_packed_columns(so_item, pi):
 		pi.item_code,
 		pi.warehouse.as_("warehouse"),
 		pending_qty.as_("pending_qty"),
+		pi.qty,
 		pi.parent_item,
 		pi.description,
 		so_item.name,
@@ -394,7 +415,7 @@ def _so_packed_filter(bom, so_item, pi, so_list):
 		(so_item.work_order_qty <= so_item.delivered_qty) & (so_item.qty > so_item.delivered_qty)
 	)
 	return (
-		(so_item.parent == pi.parent)
+		(pi.parent_detail_docname == so_item.name)
 		& (so_item.docstatus == 1)
 		& (pi.parent_detail_docname == so_item.name)
 		& (so_item.closed == 0)
@@ -402,6 +423,80 @@ def _so_packed_filter(bom, so_item, pi, so_list):
 		& pending
 		& bom_exists
 	)
+
+
+def get_planned_bundle_component_qty(so_items):
+	"""Qty of each product bundle component of a Sales Order line planned on submitted plans."""
+	from erpnext.manufacturing.doctype.production_plan.production_plan import (
+		get_planned_qty_of_references,
+	)
+
+	if not so_items:
+		return {}
+
+	rows = frappe.get_all(
+		"Production Plan Item",
+		filters={
+			"sales_order": ("is", "set"),
+			"sales_order_item": ("in", so_items),
+			"product_bundle_item": ("is", "set"),
+			"docstatus": 1,
+		},
+		fields=["sales_order_item", "item_code", {"SUM": "planned_qty", "as": "qty"}],
+		group_by="sales_order_item, item_code",
+	)
+	sales_orders = frappe.get_all(
+		"Sales Order Item", filters={"name": ("in", so_items)}, pluck="parent", distinct=True
+	)
+	so_items = set(so_items)
+	rows += [row for row in get_planned_qty_of_references(sales_orders) if row.sales_order_item in so_items]
+
+	planned_qty = {}
+	for row in rows:
+		key = (row.sales_order_item, row.item_code)
+		planned_qty[key] = planned_qty.get(key, 0) + flt(row.qty)
+	return planned_qty
+
+
+def get_planned_bundle_qty(sales_orders):
+	"""Bundles planned per Sales Order line: the least planned share among its manufactured components."""
+	components = _get_manufactured_bundle_components(sales_orders)
+	planned_qty = get_planned_bundle_component_qty(list({row.sales_order_item for row in components}))
+	precision = frappe.get_precision("Sales Order Item", "production_plan_qty")
+
+	bundle_qty = {}
+	for row in components:
+		key = (row.sales_order, row.sales_order_item)
+		planned = planned_qty.get((row.sales_order_item, row.item_code), 0)
+		qty = flt(planned * flt(row.stock_qty) / flt(row.qty), precision)
+		bundle_qty[key] = min(bundle_qty.get(key, qty), qty)
+
+	return [
+		frappe._dict(sales_order=key[0], sales_order_item=key[1], qty=qty) for key, qty in bundle_qty.items()
+	]
+
+
+def _get_manufactured_bundle_components(sales_orders):
+	bom = frappe.qb.DocType("BOM")
+	so_item = frappe.qb.DocType("Sales Order Item")
+	pi = frappe.qb.DocType("Packed Item")
+	bom_exists = ExistsCriterion(
+		frappe.qb.from_(bom).select(bom.name).where((bom.item == pi.item_code) & (bom.is_active == 1))
+	)
+	return (
+		frappe.qb.from_(pi)
+		.join(so_item)
+		.on(pi.parent_detail_docname == so_item.name)
+		.select(
+			pi.parent.as_("sales_order"),
+			so_item.name.as_("sales_order_item"),
+			so_item.stock_qty,
+			pi.item_code,
+			Sum(pi.qty).as_("qty"),
+		)
+		.where((pi.parenttype == "Sales Order") & pi.parent.isin(sales_orders) & (pi.qty > 0) & bom_exists)
+		.groupby(pi.parent, so_item.name, so_item.stock_qty, pi.item_code)
+	).run(as_dict=True)
 
 
 def _mr_item_columns(mr_item):
