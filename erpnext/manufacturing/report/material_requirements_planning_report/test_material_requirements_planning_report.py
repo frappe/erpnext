@@ -68,7 +68,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		with patch.object(
 			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
 		):
-			report.update_sales_forecast_data()
+			report.update_sales_forecast_data([])
 
 		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
 		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [4, 6])
@@ -89,7 +89,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		with patch.object(
 			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
 		):
-			report.update_sales_forecast_data()
+			report.update_sales_forecast_data([])
 
 		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [1, 1])
 
@@ -105,7 +105,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		with patch.object(
 			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
 		):
-			report.update_sales_forecast_data()
+			report.update_sales_forecast_data([])
 
 		self.assertAlmostEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
 
@@ -930,7 +930,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		dates = [
 			row.delivery_date
-			for row in report.get_sales_forecast_data()
+			for row in report.get_sales_forecast_data([])
 			if row.sales_forecast == forecast.name
 		]
 
