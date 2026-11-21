@@ -47,7 +47,7 @@ class BaseStockEntry:
 		return (
 			self.wo_doc.status == "Closed"
 			and self.doc.docstatus == 1
-			and not self.doc.is_return
+			and not (self.doc.purpose == "Material Transfer for Manufacture" and self.doc.is_return)
 			and self.doc.purpose
 			in ("Material Transfer for Manufacture", "Manufacture", "Material Consumption for Manufacture")
 		)
