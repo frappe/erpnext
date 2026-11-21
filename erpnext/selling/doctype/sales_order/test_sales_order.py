@@ -1992,6 +1992,30 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.load_from_db()
 		so.cancel()
 
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_purchase_order_for_rest_of_row_ordered_in_parts(self):
+		item = make_item(
+			properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 0.666666667}]
+		)
+		so = make_sales_order(item_code=item.name, qty=3, do_not_submit=True)
+		so.items[0].update({"uom": "Box", "conversion_factor": 0.666666667})
+		so.submit()
+
+		selected_items = [{"name": so.items[0].name, "item_code": item.name}]
+		for _ in range(2):
+			po = make_purchase_order(so.name, selected_items=selected_items)
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = 1
+			po.submit()
+
+		po = make_purchase_order(so.name, selected_items=selected_items)
+		self.assertEqual(po.items[0].qty, 1)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].ordered_qty, so.items[0].stock_qty)
+
 	def test_drop_shipping_full_for_default_suppliers(self):
 		"""Test if multiple POs are generated in one go against different default suppliers."""
 		from erpnext.selling.doctype.sales_order.sales_order import (

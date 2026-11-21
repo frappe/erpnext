@@ -26,6 +26,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 )
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.buying.utils import get_qty_to_order
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -1549,8 +1550,8 @@ def make_purchase_order_for_default_supplier(
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
-		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target.qty = qty_to_order[source.name]
+		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
 
 	def update_item_for_packed_item(source, target, source_parent):
@@ -1560,6 +1561,7 @@ def make_purchase_order_for_default_supplier(
 	suppliers = list(dict.fromkeys(suppliers))  # remove duplicates while preserving order
 
 	items_to_map = get_purchase_order_item_map(source_name, selected_items)
+	qty_to_order = get_qty_to_order(frappe.get_doc("Sales Order", source_name).items, "sales_order_item")
 
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
@@ -1597,7 +1599,7 @@ def make_purchase_order_for_default_supplier(
 						"margin_rate_or_amount",
 					],
 					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.stock_qty
+					"condition": lambda doc: qty_to_order[doc.name] > 0
 					and doc.supplier == supplier
 					and doc.name in items_to_map
 					and not is_product_bundle(doc.item_code),
@@ -1648,6 +1650,7 @@ def make_purchase_order(
 		selected_items = json.loads(selected_items)
 
 	items_to_map = get_purchase_order_item_map(source_name, selected_items)
+	qty_to_order = get_qty_to_order(frappe.get_doc("Sales Order", source_name).items, "sales_order_item")
 
 	def is_drop_ship_order(target):
 		drop_ship = True
@@ -1693,8 +1696,8 @@ def make_purchase_order(
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
-		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target.qty = qty_to_order[source.name]
+		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
 
 	def update_item_for_packed_item(source, target, source_parent):
@@ -1731,7 +1734,7 @@ def make_purchase_order(
 					"pricing_rules",
 				],
 				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.stock_qty
+				"condition": lambda doc: qty_to_order[doc.name] > 0
 				and doc.name in items_to_map
 				and not is_product_bundle(doc.item_code),
 			},
