@@ -533,8 +533,14 @@ def _mr_item_for_details(
 		shortage_warehouse = target_warehouse
 		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
 	elif transfer_warehouses and not warehouse:
-		# no warehouse: availability spans all warehouses, the selected ones included
-		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse not in transfer_warehouses)
+		# no warehouse: availability spans all warehouses, the selected ones included, so leave
+		# those out, but keep the item group's default warehouse, which receives the material
+		receiving_warehouse = get_item_group_defaults(details.item_code, company).get("default_warehouse")
+		shortage_bin = aggregate_bin_details(
+			row
+			for row in bins
+			if row.warehouse == receiving_warehouse or row.warehouse not in transfer_warehouses
+		)
 	return get_material_request_items(
 		doc,
 		details,
