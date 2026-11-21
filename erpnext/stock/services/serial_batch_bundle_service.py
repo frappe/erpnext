@@ -282,6 +282,7 @@ class SerialBatchBundleService:
 					"company": self.doc.company,
 					"is_rejected": 1 if row.get("rejected_warehouse") else 0,
 					"use_serial_batch_fields": row.use_serial_batch_fields,
+					"against_sales_order_item": row.get("so_detail"),
 					"via_landed_cost_voucher": via_landed_cost_voucher,
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
