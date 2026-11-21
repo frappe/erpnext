@@ -607,12 +607,11 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 					reqd: 1,
 					precision: stock_precision,
 					default:
-						flt(
-							Math.abs(
-								flt(this.row[this.qty_field]) *
-									erpnext.stock.get_sbie_conversion_factor(this.row, this.qty_field)
-							),
-							stock_precision
+						erpnext.stock.get_sbie_stock_qty(
+							this.frm.doc,
+							this.row,
+							this.qty_field,
+							Math.abs(flt(this.row[this.qty_field]))
 						) || null,
 					description: __("Existing entries will be replaced with the fetched entries"),
 				},
@@ -1325,17 +1324,46 @@ erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
 	return erpnext.stock.get_sbie_stock_qty_field(row, qty_field) ? flt(row.conversion_factor) || 1 : 1;
 };
 
+// An internal receipt's rejected stock qty is what its received stock qty leaves after the accepted qty.
+erpnext.stock.get_sbie_offset_qty = function (doc, row, qty_field) {
+	const is_internal_receipt =
+		doc.is_internal_supplier &&
+		doc.represents_company === doc.company &&
+		(doc.doctype === "Purchase Receipt" || (doc.doctype === "Purchase Invoice" && doc.update_stock));
+
+	return qty_field === "rejected_qty" && is_internal_receipt ? Math.abs(flt(row.qty)) : 0;
+};
+
+erpnext.stock.get_sbie_stock_qty = function (doc, row, qty_field, row_qty) {
+	const conversion_factor = erpnext.stock.get_sbie_conversion_factor(row, qty_field);
+	const stock_precision = erpnext.stock.get_sbie_stock_qty_precision(row, qty_field);
+	const offset_qty = erpnext.stock.get_sbie_offset_qty(doc, row, qty_field);
+
+	return flt(
+		flt((offset_qty + row_qty) * conversion_factor, stock_precision) -
+			flt(offset_qty * conversion_factor, stock_precision),
+		stock_precision
+	);
+};
+
 // Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
 erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
 	const conversion_factor = erpnext.stock.get_sbie_conversion_factor(row, qty_field);
 	const stock_precision = erpnext.stock.get_sbie_stock_qty_precision(row, qty_field);
+	const offset_qty = erpnext.stock.get_sbie_offset_qty(doc, row, qty_field);
+	const offset_stock_qty = flt(offset_qty * conversion_factor, stock_precision);
 	const row_qty = Math.abs(flt(row[qty_field]));
 
 	// keep a row qty that already matches, as dividing back by a fractional factor can drift
-	const qty =
-		flt(row_qty * conversion_factor, stock_precision) === flt(stock_qty, stock_precision)
-			? row_qty
-			: flt(stock_qty / conversion_factor, precision(qty_field, row));
+	let qty = row_qty;
+	if (erpnext.stock.get_sbie_stock_qty(doc, row, qty_field, row_qty) !== flt(stock_qty, stock_precision)) {
+		qty = flt(stock_qty, stock_precision)
+			? flt(
+					(flt(stock_qty) + offset_stock_qty) / conversion_factor - offset_qty,
+					precision(qty_field, row)
+			  )
+			: 0;
+	}
 
 	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
 };

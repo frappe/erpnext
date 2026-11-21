@@ -520,7 +520,7 @@ class SerialBatchBundleService:
 	def get_rejected_stock_qty(self, row) -> float:
 		"""Rejected qty of a row in the stock UOM, rounded as its bundle holds it."""
 		return flt(
-			flt(row.get("rejected_qty")) * flt(row.get("conversion_factor", 1.0)),
+			self.doc.get_rejected_stock_qty(row),
 			frappe.get_precision("Serial and Batch Entry", "qty"),
 		)
 
@@ -602,6 +602,9 @@ class SerialBatchBundleService:
 
 		if hasattr(row, "stock_qty"):
 			qty = row.stock_qty
+
+		if row.get("return_qty_from_rejected_warehouse"):
+			qty = self.doc.get_rejected_warehouse_return_stock_qty(row)
 
 		if self.doc.doctype == "Stock Entry":
 			qty = row.transfer_qty

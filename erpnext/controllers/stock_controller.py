@@ -307,6 +307,14 @@ class StockController(AccountsController):
 			total_qty,
 		)
 
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty of a row in the stock UOM."""
+		return flt(row.get("rejected_qty")) * flt(row.get("conversion_factor") or 1)
+
+	def get_rejected_warehouse_return_stock_qty(self, row) -> float:
+		"""Stock qty a return row takes back from the rejected warehouse, in its qty if it has no stock qty."""
+		return flt(row.get("stock_qty") or row.get("qty"))
+
 	def get_sl_entries(self, d, args):
 		from erpnext.stock.services.stock_ledger_service import StockLedgerService
 
