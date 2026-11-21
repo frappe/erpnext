@@ -686,7 +686,10 @@ class ProductionPlan(Document):
 
 	def validate_closed_sales_order_items(self):
 		so_items = {row.sales_order_item for row in self.po_items if row.sales_order_item}
-		so_items.update(row.sales_order_item for row in self.get_allocated_references() if row.qty)
+		precision = self.precision("qty", "prod_plan_references")
+		so_items.update(
+			row.sales_order_item for row in self.get_allocated_references() if flt(row.qty, precision)
+		)
 		if not so_items:
 			return
 
