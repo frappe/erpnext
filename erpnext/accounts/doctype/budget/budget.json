@@ -48,7 +48,8 @@
   "action_if_annual_exceeded_on_cumulative_expense",
   "action_if_accumulated_monthly_exceeded_on_cumulative_expense",
   "section_break_kkan",
-  "revision_of"
+  "revision_of",
+  "commitment_version"
  ],
  "fields": [
   {
@@ -264,6 +265,15 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "commitment_version",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Commitment Version",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
    "default": "1",
    "fieldname": "distribute_equally",
    "fieldtype": "Check",
@@ -336,7 +346,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-10 02:35:01.197613",
+ "modified": "2026-11-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",
