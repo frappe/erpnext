@@ -1171,8 +1171,9 @@ class BuyingController(SubcontractingController):
 		return self.get_return_stock_qty(row, row.qty, row.warehouse)
 
 	def get_rejected_stock_qty(self, row) -> float:
-		"""Rejected qty in the stock UOM, capped on a return like the accepted qty."""
-		if not self.is_return or row.get("rejected_serial_and_batch_bundle"):
+		"""Rejected qty in the stock UOM, capped on a return like the accepted qty. Not on an internal
+		receipt, whose transit entry for the rejected qty is not capped."""
+		if not self.is_return or row.get("rejected_serial_and_batch_bundle") or self.is_internal_receipt():
 			return get_stock_qty(row, row.rejected_qty)
 
 		return self.get_return_stock_qty(row, row.rejected_qty, row.rejected_warehouse)
