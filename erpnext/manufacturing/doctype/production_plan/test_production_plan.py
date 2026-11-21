@@ -2369,7 +2369,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertNotIn(mr.name, [row.material_request for row in plan.material_requests])
 		self.assertNotIn(so.name, [row.sales_order for row in plan.sales_orders])
 
-	def test_variant_with_a_draft_bom_is_planned_from_its_template_bom(self):
+	def test_variant_is_planned_from_its_submitted_template_bom(self):
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
 		template = make_item(
@@ -2379,6 +2379,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		variant.insert()
 		raw_material = make_item(properties={"is_stock_item": 1}).name
 		template_bom = make_bom(item=template, raw_materials=[raw_material])
+		make_bom(item=template, raw_materials=[raw_material], do_not_submit=True)
 		make_bom(item=variant.name, raw_materials=[raw_material], do_not_submit=True)
 		mr = make_material_request(
 			material_request_type="Manufacture", item_code=variant.name, qty=5, uom=variant.stock_uom
