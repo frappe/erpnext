@@ -91,8 +91,10 @@ def get_creditable_qty(return_doc) -> dict:
 			if row.dn_detail
 			else [d.name for d in original_rows if d.item_code == row.item_code]
 		)
-		factor = flt(row.conversion_factor) or 1
-		returned = abs(flt(row.stock_qty) or flt(row.qty) * factor)
+		qty = abs(flt(row.qty))
+		returned = abs(flt(row.stock_qty)) or qty * (flt(row.conversion_factor) or 1)
+		# the row's own stock qty per qty, which may be the rest of the delivered row
+		factor = returned / qty if qty else flt(row.conversion_factor) or 1
 		needed = max(returned - flt(settled_qty.get(row.name)) * factor, 0)
 		creditable_qty[row.name] = flt(take_credit(available, sources, needed) / factor, 6)
 
