@@ -1845,7 +1845,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 
 			new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
 				if (r) {
-					frappe.model.set_value(item.doctype, item.name, {
+					return frappe.model.set_value(item.doctype, item.name, {
 						serial_and_batch_bundle: r.name,
 						use_serial_batch_fields: 0,
 						basic_rate: r.avg_rate,
