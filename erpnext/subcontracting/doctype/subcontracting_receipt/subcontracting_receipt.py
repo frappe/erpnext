@@ -579,11 +579,8 @@ class SubcontractingReceipt(SubcontractingController):
 
 			original_row = original_rows[row.subcontracting_receipt_item]
 			returned = already_returned.get((row.item_code, row.subcontracting_receipt_item), {})
-			row.received_qty = flt(
-				flt(returned.get("received_qty")) - original_row.received_qty, row.precision("received_qty")
-			)
 			row.qty = flt(flt(returned.get("qty")) - original_row.qty, row.precision("qty"))
-			row.process_loss_qty = flt(row.received_qty - row.qty, row.precision("process_loss_qty"))
+			row.received_qty = row.qty
 
 	def remove_returned_secondary_rows_without_qty(self):
 		"""A return's secondary row that rounds to nothing is returned by a later return."""
@@ -665,10 +662,14 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def append_secondary_item(self, item, bom, secondary_item, warehouse, own_cost=0.0, fg_qty_before=0.0):
 		per_unit = secondary_item.stock_qty / bom.quantity
-		received_qty = self.get_secondary_qty(item, per_unit, fg_qty_before, "received_qty")
 		qty = self.get_secondary_qty(
 			item, per_unit - (secondary_item.process_loss_qty / bom.quantity), fg_qty_before, "qty"
 		)
+		# a return sends back only the stocked qty, with no process loss, as make_return_doc maps rows
+		received_qty = (
+			qty if self.is_return else self.get_secondary_qty(item, per_unit, fg_qty_before, "received_qty")
+		)
+
 		# a return's zero row is dropped, or priced from the receipt once it gets the qty left
 		rate = (
 			0.0

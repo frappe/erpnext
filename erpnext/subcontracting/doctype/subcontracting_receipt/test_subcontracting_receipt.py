@@ -662,6 +662,22 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.items[1].returned_qty, 5)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_returns_of_secondary_items_with_process_loss_send_back_the_stocked_qty(self):
+		fg_item = "Subcontracted Item SA1"
+		bom = make_bom_with_secondary_item(fg_item, quantity=2, secondary_qty=2)
+		frappe.db.set_value(
+			"BOM Secondary Item", bom.secondary_items[0].name, {"process_loss_per": 50, "process_loss_qty": 1}
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 4)
+
+		# the second return is the last one, which takes the secondary qty left on the receipt
+		for _ in range(2):
+			scr_return = make_partial_return(scr.name, 2)
+			secondary_row = next(row for row in scr_return.items if row.bom_secondary_item)
+			self.assertEqual(
+				(secondary_row.received_qty, secondary_row.process_loss_qty, secondary_row.qty), (-1, 0, -1)
+			)
+
 	def test_batch_return_value_matches_receipt(self):
 		fg_item = make_item(
 			properties={
