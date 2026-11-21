@@ -50,6 +50,7 @@ from .mapper import (
 )
 
 CLOSED_WORK_ORDER_STATUSES = ("Closed", "Stopped")
+RUNNING_TIME_LOG_END = datetime.datetime(9999, 12, 31)
 
 
 class OverlapError(frappe.ValidationError):
@@ -488,7 +489,7 @@ class JobCard(Document):
 		if d.get("employee"):
 			open_job_cards = self.get_open_job_cards(d.get("employee"), workstation=self.workstation)
 
-		data = self.get_overlap_for(d, open_job_cards=open_job_cards)
+		data = self.get_overlap_for(d, open_job_cards=open_job_cards, include_running=True)
 		if data:
 			frappe.throw(
 				_("Row {0}: From Time and To Time of {1} are overlapping with {2}").format(
@@ -561,8 +562,8 @@ class JobCard(Document):
 		if sub_op_total_qty:
 			self.total_completed_qty = min(sub_op_total_qty)
 
-	def get_overlap_for(self, args, open_job_cards=None):
-		time_logs = self.get_overlapping_time_logs(args, open_job_cards)
+	def get_overlap_for(self, args, open_job_cards=None, include_running=False):
+		time_logs = self.get_overlapping_time_logs(args, open_job_cards, include_running)
 		if not time_logs:
 			return {}
 
@@ -578,9 +579,9 @@ class JobCard(Document):
 
 		return time_logs[0]
 
-	def get_overlapping_time_logs(self, args, open_job_cards=None):
+	def get_overlapping_time_logs(self, args, open_job_cards=None, include_running=False):
 		time_logs = []
-		time_logs.extend(self.get_time_logs(args, "Job Card Time Log"))
+		time_logs.extend(self.get_time_logs(args, "Job Card Time Log", include_running=include_running))
 		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time", open_job_cards=open_job_cards))
 		return time_logs
 
@@ -629,7 +630,7 @@ class JobCard(Document):
 				alloted_capacity[key] = time_logs[i]["to_time"]
 		return alloted_capacity
 
-	def get_time_logs(self, args, doctype, open_job_cards=None):
+	def get_time_logs(self, args, doctype, open_job_cards=None, include_running=False):
 		if args.get("remaining_time_in_mins") and get_datetime(args.from_time) >= get_datetime(args.to_time):
 			args.to_time = add_to_date(args.from_time, minutes=args.get("remaining_time_in_mins"))
 
@@ -639,19 +640,27 @@ class JobCard(Document):
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType(doctype)
 
-		query = self.get_base_overlap_query(jc, jctl, args)
+		query = self.get_base_overlap_query(jc, jctl, args, include_running)
 		query = self.apply_workstation_filters(query, jc)
 		query = self.apply_employee_filters(query, jc, jctl, args, doctype, open_job_cards)
 		query = self.apply_docstatus_filters(query, jc, doctype)
 
-		return query.run(as_dict=True)
+		time_logs = query.run(as_dict=True)
+		for log in time_logs:
+			# only a running time log comes back without a To Time
+			log.to_time = log.to_time or RUNNING_TIME_LOG_END
+		return time_logs
 
-	def get_base_overlap_query(self, jc, jctl, args):
+	def get_base_overlap_query(self, jc, jctl, args, include_running=False):
+		# a running time log has no To Time yet and keeps the workstation busy
+		to_time = (args.to_time or RUNNING_TIME_LOG_END) if include_running else args.to_time
 		time_conditions = [
 			((jctl.from_time < args.from_time) & (jctl.to_time > args.from_time)),
-			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
-			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
+			((jctl.from_time < to_time) & (jctl.to_time > to_time)),
+			((jctl.from_time >= args.from_time) & (jctl.to_time <= to_time)),
 		]
+		if include_running and args.from_time:
+			time_conditions.append(jctl.to_time.isnull() & (jc.docstatus == 0) & (jctl.from_time < to_time))
 
 		return (
 			frappe.qb.from_(jctl)
