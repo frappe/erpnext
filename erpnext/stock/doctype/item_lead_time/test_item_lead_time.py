@@ -22,6 +22,17 @@ class TestItemLeadTime(ERPNextTestSuite):
 
 		self.assertEqual(get_item_capacity(new_item_code, "Daily"), 40)
 
+	def test_lead_time_is_renamed_with_its_item(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		self.make_lead_time(item_code)
+		new_item_code = frappe.rename_doc("Item", item_code, f"{item_code}-RENAMED")
+
+		self.assertEqual(frappe.db.get_value("Item Lead Time", {"item_code": new_item_code}), new_item_code)
+		make_item(item_code, {"is_stock_item": 1})
+		self.assertEqual(self.make_lead_time(item_code).name, item_code)
+
 	def test_capacity_is_computed_and_negative_times_refused(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
