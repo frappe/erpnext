@@ -1136,6 +1136,17 @@ class TestItem(ERPNextTestSuite):
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
+	def test_uom_conversion_target_uom_shows_stock_uom(self):
+		item_doc = make_item("Test Item Target UOM", {"stock_uom": "Gram", "uoms": [dict(uom="Kg")]})
+
+		item_doc = frappe.get_doc("Item", item_doc.name)
+		for row in item_doc.uoms:
+			self.assertEqual(row.target_uom, "Gram")
+			self.assertEqual(row.as_dict().target_uom, "Gram")
+
+		row = frappe.get_doc("UOM Conversion Detail", item_doc.uoms[0].name)
+		self.assertEqual(row.target_uom, "Gram")
+
 	def test_disabled_uom_cannot_be_used_by_item(self):
 		disabled_uom = frappe.get_doc(
 			{"doctype": "UOM", "uom_name": frappe.generate_hash(length=12), "enabled": 0}
