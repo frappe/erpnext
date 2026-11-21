@@ -154,7 +154,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 		)
 
 	_add_additional_operating_cost(stock_entry, work_order, expense_account, job_card)
-	_add_corrective_operation_cost(stock_entry, work_order, expense_account)
+	_add_corrective_operation_cost(stock_entry, work_order, expense_account, job_card)
 
 
 def _add_remaining_operating_cost(stock_entry, work_order, expense_account, job_card, remaining_cost):
@@ -224,11 +224,16 @@ def _add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_c
 		_append_operating_cost(stock_entry, expense_account, unit_cost * flt(stock_entry.fg_completed_qty))
 
 
+def makes_semi_finished_good(work_order, job_card=None) -> bool:
+	"""Work order level costs go to the finished good, not to a semi-finished good of a job card."""
+	return bool(job_card and job_card.finished_good and job_card.finished_good != work_order.production_item)
+
+
 def _add_additional_operating_cost(stock_entry, work_order, expense_account, job_card=None):
 	if not (work_order and work_order.additional_operating_cost and work_order.qty):
 		return
 
-	if job_card and job_card.finished_good and job_card.finished_good != work_order.production_item:
+	if makes_semi_finished_good(work_order, job_card):
 		return
 
 	per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
@@ -245,8 +250,11 @@ def _add_additional_operating_cost(stock_entry, work_order, expense_account, job
 	)
 
 
-def _add_corrective_operation_cost(stock_entry, work_order, expense_account):
+def _add_corrective_operation_cost(stock_entry, work_order, expense_account, job_card=None):
 	if not (work_order and work_order.corrective_operation_cost and _corrective_cost_enabled()):
+		return
+
+	if makes_semi_finished_good(work_order, job_card):
 		return
 
 	max_qty = _max_operation_quantity(work_order) - work_order.produced_qty
