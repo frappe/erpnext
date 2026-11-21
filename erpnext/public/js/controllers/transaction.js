@@ -2197,8 +2197,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
+						row.price_list_rate = r.message;
+						row.rate = r.message;
 						frappe.run_serially([
-							() => frappe.model.set_value(cdt, cdn, "price_list_rate", r.message),
+							() => this.frm.script_manager.trigger("rate", cdt, cdn),
 							() => this.apply_pricing_rule(row, true),
 						]);
 					}
