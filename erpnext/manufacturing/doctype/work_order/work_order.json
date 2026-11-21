@@ -608,11 +608,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-05-19 12:20:38.102403",
-=======
  "modified": "2026-11-21 06:30:00.000000",
->>>>>>> 027c7a7 (fix(manufacturing): use company currency for Work Order Corrective Operation Cost)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

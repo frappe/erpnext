@@ -693,10 +693,7 @@ class TestJobCard(FrappeTestCase):
 		cost_after_cancel = self.work_order.total_operating_cost
 		self.assertEqual(cost_after_cancel, original_cost)
 
-<<<<<<< HEAD
 	@change_settings(
-=======
-	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
 	)
@@ -733,8 +730,7 @@ class TestJobCard(FrappeTestCase):
 			(233.33, 833.33),
 		)
 
-	@ERPNextTestSuite.change_settings(
->>>>>>> 19a89d3 (test: Work Order corrective operation cost is rounded)
+	@change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_if_corrective_jc_ops_cost_is_added_to_manufacture_stock_entry(self):

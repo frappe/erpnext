@@ -420,8 +420,9 @@ class WorkOrder(Document):
 			self.actual_operating_cost if self.actual_operating_cost else self.planned_operating_cost
 		)
 
-		self.total_operating_cost = (
-			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost)
+		self.total_operating_cost = flt(
+			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost),
+			self.precision("total_operating_cost"),
 		)
 
 	@staticmethod
