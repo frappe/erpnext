@@ -989,21 +989,13 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		],
 	)
 
-	loyalty_point_details = []
+	loyalty_points = {}
 
 	if party_type == "Customer":
-		loyalty_point_details = frappe._dict(
-			frappe.get_all(
-				"Loyalty Point Entry",
-				filters={
-					"customer": party,
-					"expiry_date": (">=", getdate()),
-				},
-				group_by="company",
-				fields=["company", {"SUM": "loyalty_points", "as": "loyalty_points"}],
-				as_list=1,
-			)
-		)
+		loyalty_points = get_customer_loyalty_points(party, doctype)
+		# a customer who bought only at the POS has points but no Sales Invoice
+		invoiced_companies = {d.company for d in companies}
+		companies += [frappe._dict(company=c) for c in loyalty_points if c not in invoiced_companies]
 
 	company_wise_billing_this_year = frappe._dict()
 
@@ -1032,17 +1024,18 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 		total_unpaid = flt(company_wise_total_unpaid.get(d.company))
 
-		if loyalty_point_details:
-			loyalty_points = loyalty_point_details.get(d.company)
-
 		info = {}
 		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
 		info["currency"] = party_account_currency
 		info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
 		info["company"] = d.company
 
-		if party_type == "Customer" and loyalty_point_details:
-			info["loyalty_points"] = loyalty_points
+		if programs := loyalty_points.get(d.company):
+			info["loyalty_programs"] = programs
+			# points of a former program cannot be redeemed, so they are not part of this total
+			info["loyalty_points"] = sum(
+				p.loyalty_points for p in programs if p.loyalty_program == loyalty_program
+			)
 
 		if party_type == "Supplier":
 			info["total_unpaid"] = -1 * info["total_unpaid"]
@@ -1059,6 +1052,35 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		company_wise_info.append(info)
 
 	return company_wise_info
+
+
+def get_customer_loyalty_points(customer: str, doctype: str) -> dict[str, list]:
+	"""Return the customer's live points per company, with one row for each program."""
+	allowed_companies = get_allowed_docs_for_doctype(get_user_permissions().get("Company", []), doctype)
+	rows = frappe.get_all(
+		"Loyalty Point Entry",
+		# the same rows an invoice dated today can redeem
+		filters={
+			"customer": customer,
+			"posting_date": ("<=", getdate()),
+			"expiry_date": (">=", getdate()),
+			"is_cancelled": 0,
+		},
+		group_by="company, loyalty_program",
+		fields=["company", "loyalty_program", {"SUM": "loyalty_points", "as": "loyalty_points"}],
+		order_by="company, loyalty_program",
+	)
+
+	points = {}
+	for row in rows:
+		if not row.loyalty_points or (allowed_companies and row.company not in allowed_companies):
+			continue
+
+		points.setdefault(row.company, []).append(
+			frappe._dict(loyalty_program=row.loyalty_program, loyalty_points=row.loyalty_points)
+		)
+
+	return points
 
 
 def get_party_shipping_address(doctype: str, name: str) -> str | None:

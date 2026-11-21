@@ -16,7 +16,10 @@ from erpnext.accounts.deferred_revenue import (
 	validate_deferred_revenue_return_cancellation,
 	validate_service_stop_date,
 )
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+	is_loyalty_program_enabled,
+	validate_loyalty_points,
+)
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
 	validate_coupon_code,
@@ -399,6 +402,9 @@ class SalesInvoice(SellingController):
 		if self.is_pos and self.is_return:
 			POSService(self).verify_payment_amount_is_negative()
 
+		if self.customer and not (self.loyalty_program or self.is_return or self.is_consolidated):
+			LoyaltyService(self).set_loyalty_program()
+
 		if self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
@@ -527,11 +533,12 @@ class SalesInvoice(SellingController):
 			and not self.is_consolidated
 			and self.loyalty_program
 			and not self.dont_create_loyalty_points
+			and is_loyalty_program_enabled()
 		):
 			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
-			LoyaltyService(against_si_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_si_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_si_doc).make_loyalty_point_entry()
 		if self.redeem_loyalty_points and not self.is_consolidated and self.loyalty_points:
 			LoyaltyService(self).apply_loyalty_points()
@@ -597,10 +604,10 @@ class SalesInvoice(SellingController):
 			self.update_project()
 
 		if not self.is_return and not self.is_consolidated and self.loyalty_program:
-			LoyaltyService(self).delete_loyalty_point_entry()
+			LoyaltyService(self).reverse_loyalty_point_entries()
 		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
-			LoyaltyService(against_si_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_si_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_si_doc).make_loyalty_point_entry()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
@@ -1378,11 +1385,13 @@ def get_bank_cash_account(mode_of_payment: str, company: str) -> dict:
 
 
 @frappe.whitelist()
-def get_loyalty_programs(customer: str) -> list:
+def get_loyalty_programs(customer: str, company: str | None = None) -> list:
 	from .services.loyalty import get_loyalty_programs as _get
 
 	frappe.has_permission("Customer", "read", customer, throw=True)
-	return _get(customer, set_single_program=frappe.has_permission("Customer", "write", customer))
+	return _get(
+		customer, set_single_program=frappe.has_permission("Customer", "write", customer), company=company
+	)
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

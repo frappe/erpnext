@@ -8,16 +8,21 @@
  "field_order": [
   "loyalty_program",
   "loyalty_program_tier",
+  "entry_type",
   "customer",
   "invoice_type",
   "invoice",
   "redeem_against",
+  "reversal_of",
   "loyalty_points",
   "purchase_amount",
+  "amount",
+  "earn_rate",
   "expiry_date",
   "posting_date",
   "company",
-  "discretionary_reason"
+  "discretionary_reason",
+  "is_cancelled"
  ],
  "fields": [
   {
@@ -82,8 +87,7 @@
    "fieldname": "invoice_type",
    "fieldtype": "Link",
    "label": "Invoice Type",
-   "options": "DocType",
-   "reqd": 1
+   "options": "DocType"
   },
   {
    "fieldname": "invoice",
@@ -96,12 +100,49 @@
    "fieldname": "discretionary_reason",
    "fieldtype": "Data",
    "label": "Discretionary Reason"
+  },
+  {
+   "fieldname": "entry_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Entry Type",
+   "options": "\nEarn\nRedeem\nEarn Reversal\nRedeem Reversal\nAdjustment\nOpening\nExpiry",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Is Cancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Loyalty Point Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "earn_rate",
+   "fieldtype": "Float",
+   "label": "Earn Rate",
+   "read_only": 1
   }
  ],
  "icon": "star",
  "in_create": 1,
  "links": [],
- "modified": "2024-07-01 08:51:13.927009",
+ "modified": "2026-11-20 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Point Entry",

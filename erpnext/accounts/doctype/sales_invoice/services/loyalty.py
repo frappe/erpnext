@@ -7,6 +7,10 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, getdate
 
+from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry import (
+	add_loyalty_point_entry,
+	make_reverse_entries,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 )
@@ -33,58 +37,74 @@ class LoyaltyService:
 		)
 		if (
 			lp_details
+			# points of another company's program can never be redeemed
+			and lp_details.company == doc.company
 			and getdate(lp_details.from_date) <= getdate(doc.posting_date)
 			and (not lp_details.to_date or getdate(lp_details.to_date) >= getdate(doc.posting_date))
 		):
 			collection_factor = lp_details.collection_factor if lp_details.collection_factor else 1.0
 			points_earned = cint(eligible_amount / collection_factor)
 
-			entry = frappe.get_doc(
+			add_loyalty_point_entry(
 				{
-					"doctype": "Loyalty Point Entry",
 					"company": doc.company,
 					"loyalty_program": lp_details.loyalty_program,
 					"loyalty_program_tier": lp_details.tier_name,
 					"customer": doc.customer,
+					"entry_type": "Earn",
 					"invoice_type": doc.doctype,
 					"invoice": doc.name,
 					"loyalty_points": points_earned,
 					"purchase_amount": eligible_amount,
+					"amount": flt(points_earned * lp_details.conversion_factor),
+					"earn_rate": collection_factor,
 					"expiry_date": add_days(doc.posting_date, lp_details.expiry_duration)
 					if lp_details.expiry_duration
 					else NO_EXPIRY_DATE,
 					"posting_date": doc.posting_date,
 				}
 			)
-			entry.flags.ignore_permissions = 1
-			entry.save()
 			self._set_loyalty_program_tier()
 
-	def delete_loyalty_point_entry(self) -> None:
+	def set_loyalty_program(self) -> None:
+		"""Enrol the customer in the single auto opt-in program of the invoice's company.
+
+		The customer has no company, so this is the first point where the company is known.
+		"""
 		doc = self.doc
-		lp_entry = frappe.db.get_all(
-			"Loyalty Point Entry", filters={"invoice": doc.name, "loyalty_points": (">", 0)}, fields=["name"]
-		)
+		programs = get_loyalty_programs(doc.customer, company=doc.company)
+		if len(programs) == 1:
+			doc.loyalty_program = programs[0]
 
-		if not lp_entry:
-			return
-
-		against_lp_entry = frappe.db.get_all(
+	def reverse_loyalty_point_entries(self) -> None:
+		"""Cancel the invoice's points rows with reverse rows. No row is deleted."""
+		doc = self.doc
+		earned_entries = frappe.get_all(
 			"Loyalty Point Entry",
-			filters={"redeem_against": lp_entry[0].name},
-			fields=["name", "invoice"],
+			filters={
+				"invoice_type": doc.doctype,
+				"invoice": doc.name,
+				"loyalty_points": (">", 0),
+				"is_cancelled": 0,
+			},
+			pluck="name",
 		)
 
-		if against_lp_entry:
-			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
-			frappe.throw(
-				_(
-					"{0} cannot be cancelled since the Loyalty Points earned has been redeemed. "
-					"First cancel the {1} No {2}"
-				).format(doc.doctype, doc.doctype, invoice_list)
+		if earned_entries:
+			redeemed_by = frappe.get_all(
+				"Loyalty Point Entry",
+				filters={"redeem_against": ("in", earned_entries), "is_cancelled": 0},
+				pluck="invoice",
 			)
-		else:
-			frappe.db.delete("Loyalty Point Entry", filters={"invoice": doc.name})
+			if redeemed_by:
+				frappe.throw(
+					_(
+						"{0} cannot be cancelled since the Loyalty Points earned has been redeemed. "
+						"First cancel the {1} No {2}"
+					).format(doc.doctype, doc.doctype, ", ".join(redeemed_by))
+				)
+
+		if make_reverse_entries(doc.doctype, doc.name):
 			self._set_loyalty_program_tier()
 
 	def apply_loyalty_points(self) -> None:
@@ -98,6 +118,9 @@ class LoyaltyService:
 			doc.customer, doc.loyalty_program, doc.company, doc.posting_date
 		)
 		redemption_details = get_redemption_details(doc.customer, doc.loyalty_program, doc.company)
+		conversion_factor = flt(
+			frappe.get_cached_value("Loyalty Program", doc.loyalty_program, "conversion_factor")
+		)
 
 		points_to_redeem = doc.loyalty_points
 		for lp_entry in loyalty_point_entries:
@@ -105,24 +128,24 @@ class LoyaltyService:
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			redeemed_points = min(available_points, points_to_redeem)
-			entry = frappe.get_doc(
+			add_loyalty_point_entry(
 				{
-					"doctype": "Loyalty Point Entry",
 					"company": doc.company,
 					"loyalty_program": doc.loyalty_program,
 					"loyalty_program_tier": lp_entry.loyalty_program_tier,
 					"customer": doc.customer,
+					"entry_type": "Redeem",
 					"invoice_type": doc.doctype,
 					"invoice": doc.name,
 					"redeem_against": lp_entry.name,
 					"loyalty_points": -1 * redeemed_points,
-					"purchase_amount": doc.grand_total,
+					# a redemption is not spend, so it must not move the customer's tier
+					"purchase_amount": 0,
+					"amount": flt(-1 * redeemed_points * conversion_factor),
 					"expiry_date": lp_entry.expiry_date,
 					"posting_date": doc.posting_date,
 				}
 			)
-			entry.flags.ignore_permissions = 1
-			entry.save()
 			points_to_redeem -= redeemed_points
 			if points_to_redeem < 1:
 				break
@@ -151,7 +174,7 @@ class LoyaltyService:
 		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
 
 
-def get_loyalty_programs(customer: str, set_single_program: bool = True) -> list:
+def get_loyalty_programs(customer: str, set_single_program: bool = True, company: str | None = None) -> list:
 	"""Return applicable loyalty programs for the customer."""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs as _get
 
@@ -159,7 +182,7 @@ def get_loyalty_programs(customer: str, set_single_program: bool = True) -> list
 	if customer_doc.loyalty_program:
 		return [customer_doc.loyalty_program]
 
-	lp_details = _get(customer_doc)
+	lp_details = _get(customer_doc, company=company)
 
 	if set_single_program and len(lp_details) == 1:
 		customer_doc.db_set("loyalty_program", lp_details[0])

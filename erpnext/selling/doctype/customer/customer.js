@@ -213,14 +213,7 @@ frappe.ui.form.on("Customer", {
 				);
 			}
 
-			const loyalty = (frm.doc.__onload?.dashboard_info || []).filter((d) => d.loyalty_points);
-			loyalty.forEach((info) => {
-				const label =
-					loyalty.length > 1
-						? __("Loyalty Points ({0}): {1}", [info.company, info.loyalty_points])
-						: __("Loyalty Points: {0}", [info.loyalty_points]);
-				frm.dashboard.add_indicator(label, "blue");
-			});
+			frm.trigger("add_loyalty_points_indicators");
 
 			frm.trigger("render_items_tab");
 		} else {
@@ -251,6 +244,31 @@ frappe.ui.form.on("Customer", {
 	},
 	validate: function (frm) {
 		if (frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
+	},
+
+	add_loyalty_points_indicators(frm) {
+		const rows = (frm.doc.__onload?.dashboard_info || []).flatMap((info) =>
+			(info.loyalty_programs || []).map((row) => ({ ...row, company: info.company }))
+		);
+		const show_company = new Set(rows.map((row) => row.company)).size > 1;
+
+		rows.forEach((row) => {
+			const is_current = row.loyalty_program === frm.doc.loyalty_program;
+			let label;
+			if (rows.length === 1 && is_current) {
+				label = __("Loyalty Points: {0}", [row.loyalty_points]);
+			} else if (show_company) {
+				label = __("Loyalty Points ({0}, {1}): {2}", [
+					row.loyalty_program,
+					row.company,
+					row.loyalty_points,
+				]);
+			} else {
+				label = __("Loyalty Points ({0}): {1}", [row.loyalty_program, row.loyalty_points]);
+			}
+			// points of a former program cannot be redeemed
+			frm.dashboard.add_indicator(label, is_current ? "blue" : "gray");
+		});
 	},
 
 	render_items_tab(frm) {

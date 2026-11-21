@@ -19,7 +19,7 @@ from frappe.query_builder.functions import Cast, Coalesce, Max
 from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
 from frappe.utils.user import get_users_with_role
 
-from erpnext import get_company_currency
+from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
@@ -564,7 +564,8 @@ class Customer(TransactionBase):
 		if self.loyalty_program:
 			return
 
-		loyalty_program = get_loyalty_programs(self)
+		# the customer has no company, so offer only the programs of the user's company
+		loyalty_program = get_loyalty_programs(self, company=get_default_company())
 		if not loyalty_program:
 			return
 
@@ -586,18 +587,22 @@ class Customer(TransactionBase):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(doc: Document):
+def get_loyalty_programs(doc: Document, company: str | None = None):
 	"""returns applicable loyalty programs for a customer"""
 
 	lp_details = []
+	filters = [
+		["auto_opt_in", "=", 1],
+		["from_date", "<=", today()],
+		[functions.IfNull(Field("to_date"), "2500-01-01"), ">=", today()],
+	]
+	if company:
+		filters.append(["company", "=", company])
+
 	loyalty_programs = frappe.get_all(
 		"Loyalty Program",
 		fields=["name", "customer_group", "customer_territory"],
-		filters=[
-			["auto_opt_in", "=", 1],
-			["from_date", "<=", today()],
-			[functions.IfNull(Field("to_date"), "2500-01-01"), ">=", today()],
-		],
+		filters=filters,
 	)
 
 	for loyalty_program in loyalty_programs:
