@@ -297,7 +297,6 @@ class BuyingController(SubcontractingController):
 			row.get(field)
 			for row in rows
 			for field in ("serial_and_batch_bundle", "rejected_serial_and_batch_bundle")
-			if row.get(field)
 		]
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		for batch_no, qty in get_package_batch_qty(packages).items():
@@ -398,6 +397,8 @@ class BuyingController(SubcontractingController):
 		if not row.rejected_warehouse:
 			return
 
+		received = self.get_received_batch_qty(row)
+		accepted = get_package_batch_qty([row.serial_and_batch_bundle])
 		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
 			package,
 			row.rejected_warehouse,
@@ -406,7 +407,10 @@ class BuyingController(SubcontractingController):
 			qty=get_stock_qty(row, row.rejected_qty),
 			exclude_serial_nos=self.get_accepted_serial_nos(row),
 			from_last=True,
-			exclude_batch_qty=self.get_received_batch_qty(row),
+			exclude_batch_qty={
+				batch_no: received.get(batch_no, 0) + accepted.get(batch_no, 0)
+				for batch_no in received.keys() | accepted.keys()
+			},
 		)
 
 		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
@@ -2105,6 +2109,10 @@ def rounds_stock_qty(row) -> bool:
 
 def get_package_batch_qty(packages) -> dict:
 	"""Qty of each batch in the packages."""
+	packages = [package for package in packages if package]
+	if not packages:
+		return {}
+
 	batch_qty = {}
 	for entry in frappe.get_all(
 		"Serial and Batch Entry",
