@@ -1682,7 +1682,14 @@ class update_entries_after:
 
 		if (
 			not self.args.get("sle_id")
-			or (sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle)
+			or (
+				sle.serial_and_batch_bundle
+				and (
+					sle.auto_created_serial_and_batch_bundle
+					# sales rows get their bundles before the ledger
+					or sle.voucher_type in ("Delivery Note", "Sales Invoice")
+				)
+			)
 			or self.is_outward_internal_transfer_leg(sle)
 		):
 			self.update_outgoing_rate_on_transaction(sle)
