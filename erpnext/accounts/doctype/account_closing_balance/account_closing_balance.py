@@ -38,6 +38,7 @@ class AccountClosingBalance(Document):
 		is_period_closing_voucher_entry: DF.Check
 		period_closing_voucher: DF.Link | None
 		project: DF.Link | None
+		reporting_currency: DF.Link | None
 		reporting_currency_exchange_rate: DF.Float
 	# end: auto-generated types
 
@@ -47,7 +48,12 @@ class AccountClosingBalance(Document):
 def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 	accounting_dimensions = get_accounting_dimensions()
 
+	reporting_currency = frappe.get_cached_value("Company", company, "reporting_currency")
+	exchange_rate = get_reporting_currency_exchange_rate(company, closing_date)
+	set_amount_in_reporting_currency(closing_entries, exchange_rate)
+
 	previous_closing_entries = get_previous_closing_entries(company, closing_date, accounting_dimensions)
+	restate_in_new_reporting_currency(previous_closing_entries, company, reporting_currency)
 	combined_entries = closing_entries + previous_closing_entries
 
 	merged_entries = aggregate_with_last_account_closing_balance(combined_entries, accounting_dimensions)
@@ -56,10 +62,11 @@ def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 
 	# one row per dimension combination can run into lakhs; inserting them one
 	# by one exceeds the write limit of a single transaction
-	exchange_rate = get_reporting_currency_exchange_rate(company, closing_date)
 	timestamp = now()
 	rows = [
-		get_closing_balance_row(value, voucher_name, closing_date, exchange_rate, timestamp)
+		get_closing_balance_row(
+			value, voucher_name, closing_date, reporting_currency, exchange_rate, timestamp
+		)
 		for value in merged_entries.values()
 	]
 	frappe.db.bulk_insert(
@@ -70,7 +77,29 @@ def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 	)
 
 
-def get_closing_balance_row(value, voucher_name, closing_date, exchange_rate, timestamp):
+def restate_in_new_reporting_currency(previous_entries, company, reporting_currency):
+	"""Carried amounts are in the reporting currency of the previous closing. The reporting
+	currency changes when a parent company is set, so convert those amounts again at the rate
+	of the previous closing date. Rows made before this field existed have no currency and are kept."""
+	stale_entries = [
+		entry
+		for entry in previous_entries
+		if entry.get("reporting_currency") and entry.get("reporting_currency") != reporting_currency
+	]
+	if not stale_entries:
+		return
+
+	exchange_rate = get_reporting_currency_exchange_rate(company, stale_entries[0].get("closing_date"))
+	set_amount_in_reporting_currency(stale_entries, exchange_rate)
+
+
+def set_amount_in_reporting_currency(entries, exchange_rate):
+	for entry in entries:
+		entry["debit_in_reporting_currency"] = flt(entry.get("debit")) * exchange_rate
+		entry["credit_in_reporting_currency"] = flt(entry.get("credit")) * exchange_rate
+
+
+def get_closing_balance_row(value, voucher_name, closing_date, reporting_currency, exchange_rate, timestamp):
 	"""Return the row that `Document.submit` would have written.
 
 	The validate hooks still run, so app hooks and Server Scripts see each row; only the write is batched.
@@ -87,10 +116,10 @@ def get_closing_balance_row(value, voucher_name, closing_date, exchange_rate, ti
 			"modified_by": frappe.session.user,
 			"creation": timestamp,
 			"modified": timestamp,
+			"reporting_currency": reporting_currency,
+			"reporting_currency_exchange_rate": exchange_rate,
 		}
 	)
-	if exchange_rate:
-		set_amount_with_exchange_rate(cle, exchange_rate)
 	cle.run_method("validate")
 	cle.set_new_name()
 	return cle.get_valid_dict(convert_dates_to_str=True, ignore_virtual=True)
@@ -107,6 +136,8 @@ def aggregate_with_last_account_closing_balance(entries, accounting_dimensions):
 				"credit": 0,
 				"debit_in_account_currency": 0,
 				"credit_in_account_currency": 0,
+				"debit_in_reporting_currency": 0,
+				"credit_in_reporting_currency": 0,
 			},
 		)
 
@@ -115,6 +146,8 @@ def aggregate_with_last_account_closing_balance(entries, accounting_dimensions):
 		merged_entries[key]["credit"] += entry.get("credit")
 		merged_entries[key]["debit_in_account_currency"] += entry.get("debit_in_account_currency")
 		merged_entries[key]["credit_in_account_currency"] += entry.get("credit_in_account_currency")
+		merged_entries[key]["debit_in_reporting_currency"] += flt(entry.get("debit_in_reporting_currency"))
+		merged_entries[key]["credit_in_reporting_currency"] += flt(entry.get("credit_in_reporting_currency"))
 
 	return merged_entries
 
@@ -165,6 +198,10 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 			account_closing_balance.credit,
 			account_closing_balance.debit_in_account_currency,
 			account_closing_balance.credit_in_account_currency,
+			account_closing_balance.debit_in_reporting_currency,
+			account_closing_balance.credit_in_reporting_currency,
+			account_closing_balance.reporting_currency,
+			account_closing_balance.closing_date,
 			account_closing_balance.cost_center,
 			account_closing_balance.project,
 			account_closing_balance.finance_book,
@@ -182,18 +219,13 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 	return entries
 
 
-def set_amount_in_reporting_currency(cle, company, closing_date):
-	if exchange_rate := get_reporting_currency_exchange_rate(company, closing_date):
-		set_amount_with_exchange_rate(cle, exchange_rate)
-
-
-def get_reporting_currency_exchange_rate(company, closing_date):
+def get_reporting_currency_exchange_rate(company, closing_date) -> float:
 	default_currency, reporting_currency = frappe.get_cached_value(
 		"Company", company, ["default_currency", "reporting_currency"]
 	)
 
 	if not reporting_currency:
-		return
+		return 0
 
 	reporting_currency_exchange_rate = get_exchange_rate(default_currency, reporting_currency, closing_date)
 	if not reporting_currency_exchange_rate:
@@ -206,16 +238,3 @@ def get_reporting_currency_exchange_rate(company, closing_date):
 		)
 
 	return reporting_currency_exchange_rate
-
-
-def set_amount_with_exchange_rate(cle, reporting_currency_exchange_rate):
-	debit_in_reporting_currency = flt(cle.get("debit", 0) * reporting_currency_exchange_rate)
-	credit_in_reporting_currency = flt(cle.get("credit", 0) * reporting_currency_exchange_rate)
-
-	cle.update(
-		{
-			"reporting_currency_exchange_rate": reporting_currency_exchange_rate,
-			"debit_in_reporting_currency": debit_in_reporting_currency,
-			"credit_in_reporting_currency": credit_in_reporting_currency,
-		}
-	)
