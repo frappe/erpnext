@@ -3341,9 +3341,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					ctx: {
 						doctype: doc.doctype,
 						item_code: item.item_code,
-						customer: doc.customer,
+						customer: doc.customer || doc.party_name,
 						supplier: doc.supplier,
-						party_name: doc.party_name,
 						quotation_to: doc.quotation_to,
 						company: doc.company,
 						currency: doc.currency,
