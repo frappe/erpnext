@@ -637,6 +637,27 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		serial_nos = [get_serial_nos(item.serial_and_batch_bundle) for item in rm_return.items]
 		self.assertFalse(set(serial_nos[0]) & set(serial_nos[1]))
 
+	def test_rm_return_rows_with_only_a_batch_take_its_reserved_serial_nos(self):
+		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.submit()
+		scio.reload()
+		rm_row = next(item for item in rm_in.items if item.item_code == "RM with Serial and Batch")
+		batch_no = next(iter(get_batch_nos(rm_row.serial_and_batch_bundle)))
+
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		row = next(item for item in rm_return.items if item.item_code == "RM with Serial and Batch")
+		row.update({"qty": 2, "use_serial_batch_fields": 1, "batch_no": batch_no})
+		rm_return.items = [row]
+		rm_return.append("items", row.as_dict(no_default_fields=True))
+		rm_return.submit()
+
+		serial_nos = [get_serial_nos(item.serial_and_batch_bundle) for item in rm_return.items]
+		self.assertEqual([len(serials) for serials in serial_nos], [2, 2])
+		self.assertFalse(set(serial_nos[0]) & set(serial_nos[1]))
+
 	def test_fg_return_takes_batches_up_to_their_delivered_qty(self):
 		first, second = (
 			frappe.get_doc(doctype="Batch", item="RM with Batch", batch_id=frappe.generate_hash(length=10))
