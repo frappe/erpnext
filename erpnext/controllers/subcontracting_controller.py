@@ -552,6 +552,14 @@ class SubcontractingController(StockController):
 				item.conversion_factor = 1
 
 	def validate_items(self):
+		if self.doctype != "Subcontracting Receipt":
+			order_item_doctype = (
+				"Purchase Order Item" if self.doctype == "Subcontracting Order" else "Sales Order Item"
+			)
+			order_name = self.purchase_order if self.doctype == "Subcontracting Order" else self.sales_order
+			order_item_field = frappe.scrub(order_item_doctype)
+			pending_qty_by_row = get_pending_subcontracted_quantity(order_item_doctype, order_name)
+
 		for item in self.items:
 			is_stock_item, is_sub_contracted_item = frappe.get_value(
 				"Item", item.item_code, ["is_stock_item", "is_sub_contracted_item"]
@@ -577,17 +585,6 @@ class SubcontractingController(StockController):
 					)
 
 				if self.doctype != "Subcontracting Receipt":
-					order_item_doctype = (
-						"Purchase Order Item"
-						if self.doctype == "Subcontracting Order"
-						else "Sales Order Item"
-					)
-
-					order_name = (
-						self.purchase_order if self.doctype == "Subcontracting Order" else self.sales_order
-					)
-					order_item_field = frappe.scrub(order_item_doctype)
-
 					if not item.get(order_item_field):
 						frappe.throw(
 							_("Row {0}: Item {1} must be linked to a {2}.").format(
@@ -596,12 +593,7 @@ class SubcontractingController(StockController):
 						)
 
 					pending_qty = flt(
-						flt(
-							get_pending_subcontracted_quantity(
-								order_item_doctype,
-								order_name,
-							).get(item.get(order_item_field))
-						)
+						flt(pending_qty_by_row.get(item.get(order_item_field)))
 						/ item.subcontracting_conversion_factor,
 						frappe.get_precision(
 							order_item_doctype,

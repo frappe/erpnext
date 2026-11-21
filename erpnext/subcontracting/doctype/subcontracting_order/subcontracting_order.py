@@ -128,7 +128,6 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_uom_is_integer("stock_uom", "qty", "Subcontracting Order Item")
 		self.validate_item_stock_uom_is_integer("item_code", "qty", "Subcontracting Order Item")
 		self.validate_purchase_order_for_subcontracting()
-		self.validate_items()
 		self.validate_service_items()
 		self.validate_header_with_purchase_order()
 		self.validate_rows_with_purchase_order()
