@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Min, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
@@ -514,6 +515,37 @@ class SellingController(StockController):
 		# validate ran before these bundles existed
 		if service.is_batch_check_needed():
 			service.validate_outward_bundle_batches(rows=packed_rows)
+
+	def make_item_bundles(self):
+		"""Make the auto-picked bundles of item rows before the stock reservations read them."""
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		rows = [
+			d
+			for d in self.items
+			if not d.serial_and_batch_bundle
+			and d.warehouse
+			and flt(d.stock_qty) > 0
+			and not d.get("delivered_by_supplier")
+			and not self.has_product_bundle(d.item_code)
+		]
+		if not rows:
+			return
+
+		# reserved rows first, so an earlier unreserved row cannot take what a later row reserved
+		reserved_rows = get_reserved_warehouses_by_order_row(
+			[d.so_detail for d in rows if d.get("so_detail")]
+		)
+		rows.sort(key=lambda d: d.get("so_detail") not in reserved_rows)
+
+		service = SerialBatchBundleService(self)
+		picked_serial_nos = service.get_serial_nos_used_in_rows()
+		picked_batches = service.get_batches_used_in_rows()
+		for d in rows:
+			get_serial_and_batch_bundle(d, self, None, picked_serial_nos, picked_batches)
+
+		if service.is_batch_check_needed():
+			service.validate_outward_bundle_batches(rows=rows)
 
 	def get_item_list(self):
 		il = []
@@ -1150,6 +1182,9 @@ class SellingController(StockController):
 						& (table.warehouse == item.warehouse)
 						& (table.delivered_qty < table.reserved_qty)
 					)
+					# Serial and Batch reservations match the row's serial / batch nos exactly, so they go
+					# before Qty ones; this keeps submit and cancel independent of the order of rows
+					.orderby(table.reservation_based_on, order=Order.desc)
 					.orderby(table.creation)
 				)
 				sre_list = query.run(pluck="name")
@@ -1159,6 +1194,8 @@ class SellingController(StockController):
 					continue
 
 				qty_to_deliver = item.get("stock_qty") or item.qty
+				# shared by the row's reservations, so none counts a delivered serial / batch qty twice
+				delivered_serial_nos, delivered_batch_qty = get_delivered_serial_batch_for_reservation(item)
 				for sre in sre_list:
 					if qty_to_deliver <= 0:
 						break
@@ -1167,13 +1204,6 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
-						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
-						# present so this never crashes on a missing bundle.
-						(
-							delivered_serial_nos,
-							delivered_batch_qty,
-						) = get_delivered_serial_batch_for_reservation(item)
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in delivered_serial_nos:
@@ -1189,7 +1219,9 @@ class SellingController(StockController):
 									delivered_qty = get_qty_up_to_rounding(
 										min(pending_qty, available_batch_qty), pending_qty
 									)
-									entry.delivered_qty += delivered_qty
+									entry.delivered_qty = flt(
+										entry.delivered_qty + delivered_qty, entry.precision("delivered_qty")
+									)
 									entry.db_update()
 									qty_can_be_deliver += delivered_qty
 									delivered_batch_qty[entry.batch_no] = available_batch_qty - delivered_qty
@@ -1199,7 +1231,9 @@ class SellingController(StockController):
 							(sre_doc.reserved_qty - sre_doc.delivered_qty), qty_to_deliver
 						)
 
-					sre_doc.delivered_qty += qty_can_be_deliver
+					sre_doc.delivered_qty = flt(
+						sre_doc.delivered_qty + qty_can_be_deliver, sre_doc.precision("delivered_qty")
+					)
 					sre_doc.db_update()
 
 					# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
@@ -1227,7 +1261,7 @@ class SellingController(StockController):
 						"warehouse": item.warehouse,
 						"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
 					},
-					order_by="creation",
+					order_by="reservation_based_on desc, creation",
 				)
 
 				# Skip if no Stock Reservation Entries.
@@ -1235,6 +1269,11 @@ class SellingController(StockController):
 					continue
 
 				qty_to_undelivered = item.get("stock_qty") or item.qty
+				# shared by the row's reservations, so none reverses a delivered serial / batch qty twice
+				(
+					serial_nos_to_undelivered,
+					batch_qty_to_undelivered,
+				) = get_delivered_serial_batch_for_reservation(item)
 				for sre in sre_list:
 					if qty_to_undelivered <= 0:
 						break
@@ -1243,23 +1282,23 @@ class SellingController(StockController):
 
 					qty_can_be_undelivered = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 						if sre_doc.has_serial_no:
-							serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in serial_nos_to_undelivered:
+								if entry.delivered_qty and entry.serial_no in serial_nos_to_undelivered:
 									entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
 									entry.db_update()
 									qty_can_be_undelivered += 1
 									serial_nos_to_undelivered.remove(entry.serial_no)
 						else:
-							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if batch_qty_to_undelivered.get(entry.batch_no, 0) > 0:
 									undelivered_qty = get_qty_to_undeliver(
 										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
 									)
-									entry.delivered_qty -= undelivered_qty
+									entry.delivered_qty = flt(
+										entry.delivered_qty - undelivered_qty,
+										entry.precision("delivered_qty"),
+									)
 									entry.db_update()
 									qty_can_be_undelivered += undelivered_qty
 									batch_qty_to_undelivered[entry.batch_no] -= undelivered_qty
@@ -1267,7 +1306,9 @@ class SellingController(StockController):
 						# `Qty to Undelivered` should be less than or equal to `Delivered Qty`.
 						qty_can_be_undelivered = min(sre_doc.delivered_qty, qty_to_undelivered)
 
-					sre_doc.delivered_qty -= qty_can_be_undelivered
+					sre_doc.delivered_qty = flt(
+						sre_doc.delivered_qty - qty_can_be_undelivered, sre_doc.precision("delivered_qty")
+					)
 					sre_doc.db_update()
 
 					# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
@@ -1388,7 +1429,11 @@ def get_serial_and_batch_bundle(
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
 	from erpnext.stock.doctype.packed_item.packed_item import set_incoming_rate_from_bundle
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation, add_picked_batches
+	from erpnext.stock.serial_batch_bundle import (
+		SerialBatchCreation,
+		add_picked_batches,
+		get_serial_batch_fields_of_auto_bundle,
+	)
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
@@ -1399,7 +1444,9 @@ def get_serial_and_batch_bundle(
 	if not frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"):
 		return
 
-	item_details = frappe.db.get_value("Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
+	item_details = frappe.get_cached_value(
+		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+	)
 
 	if not item_details.has_serial_no and not item_details.has_batch_no:
 		return
@@ -1412,7 +1459,7 @@ def get_serial_and_batch_bundle(
 			"voucher_no": parent.name if parent.docstatus < 2 else None,
 			"voucher_detail_no": delivery_note_child.name if delivery_note_child else child.name,
 			"posting_datetime": get_combine_datetime(parent.posting_date, parent.posting_time),
-			"qty": child.qty,
+			"qty": child.get("stock_qty") or child.qty,
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",
@@ -1422,7 +1469,7 @@ def get_serial_and_batch_bundle(
 	)
 
 	doc = sn_doc.make_serial_and_batch_bundle()
-	child.db_set("serial_and_batch_bundle", doc.name)
+	child.db_set({"serial_and_batch_bundle": doc.name, **get_serial_batch_fields_of_auto_bundle(doc)})
 	set_incoming_rate_from_bundle(child, doc)
 	if picked_serial_nos is not None:
 		picked_serial_nos[child.item_code].extend(
