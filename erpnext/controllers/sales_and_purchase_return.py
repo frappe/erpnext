@@ -70,9 +70,11 @@ def validate_return_warehouse_stock(doc):
 		if key not in qty_left:
 			qty_left[key] = get_qty_held_at_rate(doc, row, rate)
 
+		# Subcontracting Receipt Item has no stock_qty: its qty is in the stock UOM
+		precision = row.precision("stock_qty") or row.precision("qty")
 		# stock_qty is set later in validate
-		qty_left[key] -= abs(flt(flt(row.qty) * flt(row.conversion_factor or 1), row.precision("stock_qty")))
-		if row.idx in moved_rows and flt(qty_left[key], row.precision("stock_qty")) < 0:
+		qty_left[key] -= abs(flt(flt(row.qty) * flt(row.conversion_factor or 1), precision))
+		if row.idx in moved_rows and flt(qty_left[key], precision) < 0:
 			frappe.throw(
 				_(
 					"Row #{0}: {1} does not hold enough of item {2} at the rate of {3}, at which {4} received it. Move the goods back to {5} and return them from there."
