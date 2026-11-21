@@ -301,12 +301,7 @@ frappe.ui.form.on("Sales Order", {
 						if (sales_order_item) {
 							frm.doc.items.forEach((item) => {
 								if (item.name === sales_order_item) {
-									let unreserved_qty =
-										(flt(item.stock_qty) -
-											(item.stock_reserved_qty
-												? flt(item.stock_reserved_qty)
-												: flt(item.delivered_qty) * flt(item.conversion_factor))) /
-										flt(item.conversion_factor);
+									let unreserved_qty = get_unreserved_qty(item);
 
 									if (unreserved_qty > 0) {
 										dialog.fields_dict.items.df.data.forEach((row) => {
@@ -442,12 +437,7 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.doc.items.forEach((item) => {
 			if (item.reserve_stock) {
-				let unreserved_qty =
-					(flt(item.stock_qty) -
-						(item.stock_reserved_qty
-							? flt(item.stock_reserved_qty)
-							: flt(item.delivered_qty) * flt(item.conversion_factor))) /
-					flt(item.conversion_factor);
+				let unreserved_qty = get_unreserved_qty(item);
 
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
@@ -1926,4 +1916,15 @@ function prevent_past_delivery_dates(frm) {
 			minDate: new Date(frm.doc.transaction_date),
 		});
 	}
+}
+
+function get_unreserved_qty(item) {
+	// stock_reserved_qty is what is still reserved, so the delivered qty comes off as well
+	const unreserved_stock_qty =
+		flt(item.stock_qty) -
+		flt(item.delivered_qty) * flt(item.conversion_factor) -
+		flt(item.stock_reserved_qty);
+	// left unrounded so the server gets back the stock qty it computes itself
+	if (flt(unreserved_stock_qty, precision("stock_qty", item)) <= 0) return 0;
+	return unreserved_stock_qty / flt(item.conversion_factor);
 }
