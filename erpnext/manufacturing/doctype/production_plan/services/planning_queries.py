@@ -178,7 +178,7 @@ def get_sales_orders(self):
 		query = query.where(so_item.item_code == self.item_code)
 		bom_subquery = bom_subquery.where(self.get_bom_item_condition() or bom.item == so_item.item_code)
 
-	packed_subquery = _packed_item_subquery(bom, so, so_item)
+	packed_subquery = _packed_item_subquery(so, so_item)
 	query = query.where(ExistsCriterion(bom_subquery) | ExistsCriterion(packed_subquery))
 	return query.run(as_dict=True)
 
@@ -233,15 +233,22 @@ def _apply_open_so_filters(plan, query, so, so_item):
 	return query
 
 
-def _packed_item_subquery(bom, so, so_item):
+def _packed_item_subquery(so, so_item):
 	pi = frappe.qb.DocType("Packed Item")
-	bom_exists = ExistsCriterion(
-		frappe.qb.from_(bom)
-		.select(bom.name)
-		.where((bom.item == pi.item_code) & (bom.is_active == 1) & (bom.docstatus == 1))
-	)
 	return (
 		frappe.qb.from_(pi)
 		.select(pi.name)
-		.where((pi.parent == so.name) & (pi.parent_item == so_item.item_code) & bom_exists)
+		.where(
+			(pi.parent == so.name) & (pi.parent_item == so_item.item_code) & has_submitted_bom(pi.item_code)
+		)
+	)
+
+
+def has_submitted_bom(item_code):
+	"""Exists check for an active, submitted BOM of the item."""
+	bom = frappe.qb.DocType("BOM")
+	return ExistsCriterion(
+		frappe.qb.from_(bom)
+		.select(bom.name)
+		.where((bom.item == item_code) & (bom.is_active == 1) & (bom.docstatus == 1))
 	)
