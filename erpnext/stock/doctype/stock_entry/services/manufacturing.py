@@ -289,7 +289,6 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.validate_manufactured_qty()
 		self.check_if_operations_completed()
 		self.check_duplicate_entry_for_work_order()
-		self.validate_component_and_quantities()
 		self.validate_finished_good_serial_batch_for_work_order()
 		self.validate_alternative_items()
 
@@ -1376,14 +1375,16 @@ def get_production_item_details(work_order=None, bom_no=None):
 
 def _check_bom_component_qty(doc, bom_items):
 	"""Validate that stock entry items match BOM quantities."""
-	precision = frappe.get_precision("Stock Entry Detail", "qty")
+	precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 	for row in bom_items:
-		row.qty = row.qty * doc.fg_completed_qty
+		# Get Items rounds a whole number qty up
+		row.qty = ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
 		matched_items = [
 			item for item in doc.items if item.s_warehouse and get_original_item(item) == row.item_code
 		]
 		if matched_items:
-			if flt(row.qty, precision) != flt(sum(flt(item.qty) for item in matched_items), precision):
+			stock_qty = sum(flt(item.transfer_qty) for item in matched_items)
+			if flt(row.qty, precision) != flt(stock_qty, precision):
 				frappe.throw(
 					_(
 						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
@@ -1721,7 +1722,8 @@ def set_previous_operation_serial_batch(parent_doc, row):
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
 	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
-		qty = ceil(qty)
+		# rounding to 9 decimals first keeps float noise (0.07 * 100) from adding a unit
+		qty = ceil(flt(qty, 9))
 
 	return qty
 
