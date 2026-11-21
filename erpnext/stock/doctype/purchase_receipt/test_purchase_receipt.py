@@ -2276,7 +2276,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
 		for _ in range(2):
-			make_stock_entry(item_code=item, target="Stores - TCP1", qty=5, basic_rate=100, company=seller)
+			make_stock_entry(item_code=item, target="Stores - TCP1", qty=3, basic_rate=100, company=seller)
 
 		dn = create_delivery_note(
 			item_code=item,
@@ -2292,19 +2292,36 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		dn.selling_price_list = "_Test Price List"
 		dn.submit()
 
-		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.items[0].warehouse = "Stores - _TC"
-		pr.submit()
-
 		def get_batches(bundle):
-			entries = frappe.get_all("Serial and Batch Entry", {"parent": bundle}, ["batch_no", "qty"])
-			return {d.batch_no: abs(d.qty) for d in entries}
+			entries = frappe.get_all(
+				"Serial and Batch Entry", {"parent": bundle}, ["batch_no", "qty"], order_by="idx"
+			)
+			return [(d.batch_no, abs(d.qty)) for d in entries]
 
-		delivered = get_batches(
+		def make_receipt(qty, rejected_qty=0):
+			pr = make_inter_company_purchase_receipt(dn.name)
+			pr.items[0].update(
+				{
+					"warehouse": "Stores - _TC",
+					"rejected_warehouse": create_warehouse("_Test Rejected", company="_Test Company"),
+					"qty": qty,
+					"rejected_qty": rejected_qty,
+					"received_qty": qty + rejected_qty,
+				}
+			)
+			return pr.submit()
+
+		(b1, _), (b2, _) = get_batches(
 			frappe.db.get_value("Delivery Note Item", dn.items[0].name, "serial_and_batch_bundle")
 		)
-		self.assertEqual(len(delivered), 2)
-		self.assertEqual(get_batches(pr.items[0].serial_and_batch_bundle), delivered)
+
+		pr = make_receipt(2, rejected_qty=1)
+		self.assertEqual(get_batches(pr.items[0].serial_and_batch_bundle), [(b1, 2)])
+		self.assertEqual(get_batches(pr.items[0].rejected_serial_and_batch_bundle), [(b2, 1)])
+
+		# a later receipt takes what is left of the delivered batches
+		pr = make_receipt(3)
+		self.assertEqual(get_batches(pr.items[0].serial_and_batch_bundle), [(b1, 1), (b2, 2)])
 		self.assertEqual(
 			frappe.db.get_value("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle, "company"),
 			"_Test Company",
