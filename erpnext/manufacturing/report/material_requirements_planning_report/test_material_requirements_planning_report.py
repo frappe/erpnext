@@ -894,6 +894,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rm_rows = sorted((row.indent, row.required_qty) for row in rows if row.item_code == plan.rm_item)
 		self.assertEqual(rm_rows, [(0, 5), (1, 10)])
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_closed_sales_order_rows_are_not_planned(self):
 		from erpnext.controllers.item_close import update_closed_status
 
