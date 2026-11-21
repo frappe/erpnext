@@ -81,6 +81,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 		this.toggle_section(true);
 		this.render_skeleton();
+		this.return_cap = await erpnext.stock.get_sbie_return_cap(this.frm.doc, this.row, this.qty_field);
 		this.load_page();
 	}
 
@@ -984,7 +985,8 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			this.frm.doc,
 			this.row,
 			this.qty_field,
-			this.get_effective_qty()
+			this.get_effective_qty(),
+			this.return_cap
 		);
 		if (flt(this.row[this.qty_field]) !== expected) {
 			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, expected);
@@ -998,7 +1000,8 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			this.frm.doc,
 			this.row,
 			this.qty_field,
-			this.server_total_qty
+			this.server_total_qty,
+			this.return_cap
 		);
 		if (flt(this.row[this.qty_field]) !== qty) {
 			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, qty);
@@ -1346,8 +1349,21 @@ erpnext.stock.get_sbie_stock_qty = function (doc, row, qty_field, row_qty) {
 	);
 };
 
+// Stock qty a receipt return row's package must hold, as the server caps some returns of parts.
+erpnext.stock.get_sbie_return_cap = async function (doc, row, qty_field) {
+	if (!doc.is_return || !["Purchase Receipt", "Purchase Invoice"].includes(doc.doctype)) return;
+
+	const qty = row[qty_field];
+	const conversion_factor = row.conversion_factor;
+	const stock_qty = await frappe.xcall(
+		"erpnext.stock.doctype.serial_and_batch_bundle.inline_editor.get_return_stock_qty",
+		{ doc: doc, row_name: row.name, qty_field: qty_field }
+	);
+	return { qty: qty, conversion_factor: conversion_factor, stock_qty: stock_qty };
+};
+
 // Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
-erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
+erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty, return_cap) {
 	const conversion_factor = erpnext.stock.get_sbie_conversion_factor(row, qty_field);
 	const stock_precision = erpnext.stock.get_sbie_stock_qty_precision(row, qty_field);
 	const offset_qty = erpnext.stock.get_sbie_offset_qty(doc, row, qty_field);
@@ -1356,7 +1372,16 @@ erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
 
 	// keep a row qty that already matches, as dividing back by a fractional factor can drift
 	let qty = row_qty;
-	if (erpnext.stock.get_sbie_stock_qty(doc, row, qty_field, row_qty) !== flt(stock_qty, stock_precision)) {
+	if (
+		return_cap &&
+		flt(return_cap.conversion_factor) === flt(row.conversion_factor) &&
+		flt(stock_qty, stock_precision) &&
+		flt(stock_qty, stock_precision) === flt(return_cap.stock_qty, stock_precision)
+	) {
+		qty = Math.abs(flt(return_cap.qty));
+	} else if (
+		erpnext.stock.get_sbie_stock_qty(doc, row, qty_field, row_qty) !== flt(stock_qty, stock_precision)
+	) {
 		qty = flt(stock_qty, stock_precision)
 			? flt(
 					(flt(stock_qty) + offset_stock_qty) / conversion_factor - offset_qty,
@@ -1435,12 +1460,19 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 		);
 
 		row[bundle_field] = summary.bundle;
+		delete pending_map[key];
 		let qty_field = cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty";
-		row[qty_field] = erpnext.stock.get_sbie_row_qty(frm.doc, row, qty_field, summary.total_qty);
+		let return_cap = await erpnext.stock.get_sbie_return_cap(frm.doc, row, qty_field);
+		row[qty_field] = erpnext.stock.get_sbie_row_qty(
+			frm.doc,
+			row,
+			qty_field,
+			summary.total_qty,
+			return_cap
+		);
 		if (row.received_qty != null) {
 			row.received_qty = flt(row.qty) + flt(row.rejected_qty);
 		}
-		delete pending_map[key];
 	}
 };
 

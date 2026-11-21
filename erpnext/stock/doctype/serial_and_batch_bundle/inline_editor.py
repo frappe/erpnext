@@ -181,6 +181,28 @@ def upsert_bundle_entries(
 	return get_bundle_summary(bundle.name)
 
 
+@frappe.whitelist()
+def get_return_stock_qty(doc: dict | str, row_name: str, qty_field: str) -> float:
+	"""Stock qty the package of a draft receipt return row must hold for the qty field, as the server caps
+	some returns of parts at what the original row has left."""
+	from erpnext.controllers.sales_and_purchase_return import get_return_reference_field
+
+	doc = parse_json(doc)
+	if doc.get("doctype") not in ("Purchase Receipt", "Purchase Invoice") or not doc.get("is_return"):
+		frappe.throw(_("Only a Purchase Receipt or Purchase Invoice return is supported"))
+
+	doc = frappe.get_doc(doc)
+	doc.docstatus = 0  # a cancelled doc would read the posted entries of any row name
+	frappe.has_permission(doc.doctype, "read", doc=doc, throw=True)
+	row = doc.get("items", {"name": row_name})[0]
+	original_parent = frappe.db.get_value(
+		row.doctype, row.get(get_return_reference_field(doc.doctype)), "parent"
+	)
+	frappe.has_permission(doc.doctype, "read", doc=original_parent, throw=True)
+
+	return abs(flt(frappe.new_doc("Serial and Batch Bundle").get_row_qty(doc, row, qty_field)))
+
+
 def validate_parent_document(child_row, doc):
 	if doc.get("doctype") not in SUPPORTED_VOUCHER_TYPES:
 		frappe.throw(

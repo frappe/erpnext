@@ -598,6 +598,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				stock_bin = {"item_code": item, "warehouse": warehouse}
 				self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 0)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_inline_editor_gets_the_uncapped_stock_qty_of_an_accepted_return_package(self):
+		"""The inline editor gets the stock qty of an accepted return row's own qty, as its package is not
+		capped at what the original row has left."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import get_return_stock_qty
+
+		item = self.make_item_for_returns_of_parts(0.3356)
+		pr = make_purchase_receipt(item_code=item, qty=6, uom="Box", conversion_factor=0.3356, rate=100)
+		first_return = make_return_doc("Purchase Receipt", pr.name)
+		first_return.items[0].update({"qty": -3, "received_qty": -3})
+		first_return.submit()
+		last_return = make_return_doc("Purchase Receipt", pr.name)
+		last_return.insert()
+
+		self.assertEqual(get_return_stock_qty(last_return.as_dict(), last_return.items[0].name, "qty"), 1.01)
+
 	def return_receipt_in_parts(self, conversion_factor=0.3356):
 		"""Receipt of 6 Box, returned as two parts of 3 Box, whose stock qty rounds unevenly: at 0.3356 Kg
 		the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down (1.00 Kg each of 2.01 Kg)."""
@@ -5065,6 +5082,33 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			get_net_qty_by_warehouse([rejected_return.name]),
 			{warehouses.rejected: -1.0, warehouses.transit: 1.0},
 		)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_inline_editor_gets_the_rejected_stock_qty_a_return_takes_back(self):
+		"""The inline editor gets the capped rejected stock qty of a return row, and only for a receipt the
+		user can read."""
+		from frappe.permissions import add_user_permission
+
+		from erpnext.buying.test_utils import create_user_with_roles
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import get_return_stock_qty
+
+		pr, _warehouses, _batch_no = self.make_split_transfer_receipt()
+		rejected_return = make_return_doc("Purchase Receipt", pr.name)
+		rejected_return.items[0].update({"qty": 0, "rejected_qty": -3, "received_qty": -3})
+		rejected_return.insert()
+		args = {
+			"doc": rejected_return.as_dict(),
+			"row_name": rejected_return.items[0].name,
+			"qty_field": "rejected_qty",
+		}
+
+		self.assertEqual(get_return_stock_qty(**args), 1.0)
+
+		user = create_user_with_roles("pr-other-company-user@example.com", "Purchase User").name
+		add_user_permission("Company", "_Test Company", user)
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, get_return_stock_qty, **args)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_rejected_warehouse_return_of_a_batch(self):
