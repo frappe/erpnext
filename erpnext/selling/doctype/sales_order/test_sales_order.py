@@ -4336,6 +4336,11 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(reserved_qty, 5)
 
+	def test_sales_order_without_items_raises_mandatory_error(self):
+		so = make_sales_order(do_not_save=True)
+		so.items = []
+		self.assertRaises(frappe.MandatoryError, so.insert)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
