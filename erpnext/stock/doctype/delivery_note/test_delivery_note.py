@@ -5367,7 +5367,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(data[0][in_qty], 1)
 
 
-<<<<<<< HEAD
 def make_so_with_reserved_produced_serial_no():
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -5416,7 +5415,8 @@ def make_so_with_reserved_produced_serial_no():
 	)
 
 	return so, reserved, unreserved
-=======
+
+
 def make_bundle_received_at_two_rates(properties):
 	"""A Product Bundle of a stock item received in _Test Warehouse - _TC as 2 @ 10, then 2 @ 40."""
 	item = make_item(properties={"is_stock_item": 1, **properties}).name
@@ -5431,17 +5431,6 @@ def make_bundle_received_at_two_rates(properties):
 			posting_date=add_days(nowdate(), days),
 		)
 	return bundle
-
-
-def get_serial_batch_item_row(item, qty):
-	return {
-		"item_code": item,
-		"qty": qty,
-		"rate": 100,
-		"warehouse": "_Test Warehouse - _TC",
-		"use_serial_batch_fields": 1,
-	}
->>>>>>> 5301619 (test: packed row of serial nos valued as a pool keeps its incoming rate)
 
 
 def make_bundle_of_a_serial_item(serial_no_series):
