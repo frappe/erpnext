@@ -1645,24 +1645,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
 			this.frm.doc.price_list_currency != company_currency);
 
-		let show = cint(this.frm.doc.discount_amount) ||
+		let show = flt(this.frm.doc.discount_amount) ||
 				((this.frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
-<<<<<<< HEAD
 		if(this.frm.doc.doctype && frappe.meta.get_docfield(this.frm.doc.doctype, "net_total")) {
-=======
-		taxes_fields.forEach((field) => {
-			this.frm.toggle_display(field, this.frm.doc[field] !== 0 || this.frm.doc.docstatus !== 1);
-		});
-
-		let show =
-			flt(this.frm.doc.discount_amount) ||
-			(this.frm.doc.taxes || []).filter(function (d) {
-				return d.included_in_print_rate === 1;
-			}).length;
-
-		if (this.frm.doc.doctype && frappe.meta.get_docfield(this.frm.doc.doctype, "net_total")) {
->>>>>>> 9c9466c (fix(selling): show Net Total for an additional discount below 1)
 			this.frm.toggle_display("net_total", show);
 		}
 
@@ -1776,25 +1762,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const me = this;
 		// toggle columns
 		var item_grid = this.frm.fields_dict["items"].grid;
-<<<<<<< HEAD
 		$.each(["base_rate", "base_price_list_rate", "base_amount", "base_rate_with_margin"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
-=======
-		var me = this;
-
-		var show =
-			flt(this.frm.doc.discount_amount) ||
-			(this.frm.doc.taxes || []).filter(function (d) {
-				return d.included_in_print_rate === 1;
-			}).length;
-
-		$.each(["net_rate", "net_amount"], function (i, fname) {
-			if (frappe.meta.get_docfield(item_grid.doctype, fname)) item_grid.set_column_disp(fname, show);
->>>>>>> 9c9466c (fix(selling): show Net Total for an additional discount below 1)
 		});
 
-		var show = (cint(this.frm.doc.discount_amount)) ||
+		var show = (flt(this.frm.doc.discount_amount)) ||
 			((this.frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
 		$.each(["net_rate", "net_amount"], function(i, fname) {
