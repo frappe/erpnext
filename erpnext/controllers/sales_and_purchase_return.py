@@ -522,8 +522,8 @@ def get_returned_packed_items(delivery_note: str) -> list[dict]:
 	)
 
 
-def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, doctype):
-	# return map of warehouses with qty and stock qty
+def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, doctype, conversion_factor):
+	# return map of warehouses with qty (in the receipt row's UOM) and stock qty
 	# Example: {'_Test Rejected Warehouse - _TC': {'qty': 5.0, 'stock_qty': 5.0}, '_Test Warehouse - _TC': {'qty': 8.0, 'stock_qty': 8.0}}
 
 	parent_doc = frappe.qb.DocType(doctype)
@@ -565,6 +565,8 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 	_return_map = frappe._dict({})
 
 	for row in data:
+		uom_factor = flt(row.conversion_factor) / flt(conversion_factor)
+
 		if row.warehouse and row.warehouse not in _return_map:
 			_return_map[row.warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
 
@@ -573,12 +575,12 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 
 		if row.warehouse:
 			qty_map = _return_map.get(row.warehouse)
-			qty_map.qty += abs(flt(row.qty))
+			qty_map.qty += abs(flt(row.qty)) * uom_factor
 			qty_map.stock_qty += abs(flt(row.stock_qty))
 
 		if row.rejected_warehouse:
 			rejected_qty_map = _return_map.get(row.rejected_warehouse)
-			rejected_qty_map.qty += abs(flt(row.rejected_qty))
+			rejected_qty_map.qty += abs(flt(row.rejected_qty)) * uom_factor
 			rejected_qty_map.stock_qty += abs(flt(row.rejected_qty) * flt(row.conversion_factor))
 
 	return _return_map
@@ -749,18 +751,26 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_purchase_flow(
-				source_parent.name, source_parent.supplier, source_doc.name, doctype
+				source_parent.name,
+				source_parent.supplier,
+				source_doc.name,
+				doctype,
+				source_doc.conversion_factor,
 			)
 
 			wh_map = returned_qty_map.get(source_doc.warehouse) or frappe._dict()
 			rejected_wh_map = returned_qty_map.get(source_doc.rejected_warehouse) or frappe._dict()
+			pending_qty = flt(source_doc.qty - flt(wh_map.qty), target_doc.precision("qty"))
+			pending_rejected_qty = flt(
+				source_doc.rejected_qty - flt(rejected_wh_map.qty), target_doc.precision("rejected_qty")
+			)
 
 			if doctype == "Subcontracting Receipt":
 				target_doc.received_qty = -1 * flt(source_doc.qty)
 			else:
-				target_doc.rejected_qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+				target_doc.rejected_qty = -1 * pending_rejected_qty
 
-			target_doc.qty = -1 * flt(source_doc.qty - (wh_map.qty or 0))
+			target_doc.qty = -1 * pending_qty
 
 			if hasattr(target_doc, "stock_qty") and not return_against_rejected_qty:
 				target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (flt(wh_map.stock_qty) or 0))
@@ -772,7 +782,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.subcontracting_receipt_item = source_doc.name
 				if return_against_rejected_qty:
-					target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+					target_doc.qty = -1 * pending_rejected_qty
 					target_doc.rejected_qty = 0.0
 					target_doc.rejected_warehouse = ""
 					target_doc.warehouse = source_doc.rejected_warehouse
@@ -787,7 +797,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.delivery_note_packed_item = source_doc.delivery_note_packed_item
 
 			if doctype == "Purchase Receipt" and return_against_rejected_qty:
-				target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+				target_doc.qty = -1 * pending_rejected_qty
 				target_doc.rejected_qty = 0.0
 				target_doc.rejected_warehouse = ""
 				target_doc.warehouse = source_doc.rejected_warehouse

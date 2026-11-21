@@ -286,6 +286,32 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(second_return.items[0].qty, -24)
 		second_return.save().submit()
 
+	def test_purchase_receipt_return_maps_qty_left_after_return_in_another_uom(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		pr = make_purchase_receipt(
+			item_code=item, qty=5, rejected_qty=1, uom="Box", stock_uom="Nos", conversion_factor=10
+		)
+
+		rejected_return = make_return_doc(pr.doctype, pr.name, return_against_rejected_qty=True)
+		row = rejected_return.items[0]
+		row.uom, row.conversion_factor, row.qty, row.received_qty = "Nos", 1, -2, -2
+		rejected_return.submit()
+
+		self.assertEqual(
+			make_return_doc(pr.doctype, pr.name, return_against_rejected_qty=True).items[0].qty, -0.8
+		)
+		self.assertEqual(make_return_doc(pr.doctype, pr.name).items[0].rejected_qty, -0.8)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_sales_invoice_return_rows_share_the_original_row_qty(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
