@@ -186,7 +186,7 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 		.on((item.name == item_uom.parent) & (item_uom.uom == item.purchase_uom))
 		.select(*_subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty))
 		.where(_subitem_filter(bom_item, bom, item, bom_no, include_non_stock_items))
-		.groupby(bom_item.item_code)
+		.groupby(bom_item.item_code, bom_item.do_not_explode)
 		# idx is not grouped; Min() preserves the original ordering and is valid on postgres
 		.orderby(Min(bom_item.idx))
 	).run(as_dict=True)
@@ -197,7 +197,8 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 
 def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty):
 	qty = IfNull(parent_qty * Sum(bom_item.stock_qty / IfNull(bom.quantity, 1)) * planned_qty, 0).as_("qty")
-	# only item_code is grouped; the remaining item-attribute columns are functionally dependent on it,
+	# item_code and do_not_explode are grouped, so a Do Not Explode line never shares a row with a line
+	# that explodes. The remaining item-attribute columns are functionally dependent on item_code,
 	# so Max() returns their single value on both engines. is_phantom_item is the exception: the same
 	# item_code can sit on a phantom line and a real-RM line in one BOM, and get_subitems() drops any
 	# row whose is_phantom_item is truthy. Max() would let a single phantom line mask the real material
@@ -214,7 +215,7 @@ def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, pl
 		Count(bom_item.name).distinct().as_("line_count"),
 		Max(item.default_bom).as_("default_bom"),
 		Max(bom_item.bom_no).as_("line_bom_no"),
-		Max(bom_item.do_not_explode).as_("do_not_explode"),
+		bom_item.do_not_explode,
 		Max(bom_item.stock_uom).as_("stock_uom"),
 		Max(item.min_order_qty).as_("min_order_qty"),
 		Max(item.safety_stock).as_("safety_stock"),
