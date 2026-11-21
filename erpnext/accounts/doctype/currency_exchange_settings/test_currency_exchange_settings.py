@@ -104,3 +104,35 @@ class TestCurrencyExchangeSettings(UnitTestCase):
 			frappe.local.conf.db_name = "site_two"
 			self.assertEqual(get_exchange_rate("USD", "INR", "2026-01-01"), 90)
 			self.assertEqual(request.call_count, 2)
+
+	def test_validation_uses_default_company_currency_and_list_result_keys(self):
+		# Bank of Canada style provider: only quotes rates into CAD and returns them inside a list.
+		settings = frappe.get_doc(
+			{
+				"doctype": "Currency Exchange Settings",
+				"service_provider": "Custom",
+				"api_endpoint": "https://example.com/FX{from_currency}{to_currency}/json",
+				"req_params": [{"key": "start_date", "value": "{transaction_date}"}],
+				"result_key": [
+					{"key": "observations"},
+					{"key": "0"},
+					{"key": "FX{from_currency}{to_currency}"},
+					{"key": "v"},
+				],
+			}
+		)
+		module = "erpnext.accounts.doctype.currency_exchange_settings.currency_exchange_settings"
+		with (
+			patch(f"{module}.erpnext.get_default_currency", return_value="CAD"),
+			patch(f"{module}.requests.get") as request,
+		):
+			request.return_value.url = "https://example.com/FXUSDCAD/json"
+			request.return_value.json.return_value = {"observations": [{"FXUSDCAD": {"v": "1.4257"}}]}
+			response, value = settings.validate_parameters()
+			settings.validate_result(response, value)
+
+		self.assertEqual(request.call_args.args[0], "https://example.com/FXUSDCAD/json")
+
+		with patch(f"{module}.erpnext.get_default_currency", return_value="USD"):
+			args = settings.get_test_args()
+		self.assertEqual((args["from_currency"], args["to_currency"]), ("EUR", "USD"))
