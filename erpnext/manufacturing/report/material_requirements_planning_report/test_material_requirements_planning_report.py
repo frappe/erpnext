@@ -132,6 +132,25 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(sum(flt(row.adhoc_qty) for row in rows), 25)
 		self.assertAlmostEqual(sum(row.planned_qty for row in rows), 100)
 
+	def test_order_without_ad_hoc_row_keeps_the_forecast(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_monthly_forecast(item, add_days(today(), 1))
+		make_mrp_sales_order(item, 25, add_days(today(), 20), warehouse="Stores - _TC")
+
+		_, rows, _, _ = execute(
+			frappe._dict(
+				company=COMPANY,
+				warehouse=["All Warehouses - _TC"],
+				item_code=item,
+				from_date=today(),
+				to_date=add_days(today(), 40),
+				type_of_material="All",
+				bucket_size="Daily",
+			)
+		)
+
+		self.assertAlmostEqual(sum(row.planned_qty for row in rows if row.get("item_code") == item), 100)
+
 	def test_mps_demand_before_the_report_dates_uses_up_its_forecast_period(self):
 		item, mps = make_forecast_with_mps_demand(150)
 
@@ -1136,9 +1155,7 @@ def make_forecast_with_mps_demand(planned_qty):
 	"""Return an item with a monthly forecast of 100 and an MPS for it with demand in that month."""
 	item = make_item(properties={"is_stock_item": 1}).name
 	start_date = add_days(today(), 1)
-	forecast = make_sales_forecast(item_code=item, from_date=start_date, demand_number=1, do_not_submit=True)
-	forecast.items[0].demand_qty = 100
-	forecast.submit()
+	forecast = make_monthly_forecast(item, start_date)
 
 	mps = make_mps(
 		parent_warehouse="All Warehouses - _TC",
@@ -1146,6 +1163,14 @@ def make_forecast_with_mps_demand(planned_qty):
 		items=[make_mps_row(item, delivery_date=add_days(start_date, 14), planned_qty=planned_qty)],
 	)
 	return item, mps
+
+
+def make_monthly_forecast(item, from_date):
+	"""Return a submitted forecast of 100 for the item in the month from the date."""
+	forecast = make_sales_forecast(item_code=item, from_date=from_date, demand_number=1, do_not_submit=True)
+	forecast.items[0].demand_qty = 100
+	forecast.submit()
+	return forecast
 
 
 def get_mrp_rows(mps):
