@@ -127,9 +127,12 @@ class OperationsService:
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
 
-		planned_end_date = self.doc.operations and self.doc.operations[-1].planned_end_time
-		if planned_end_date:
-			self.doc.db_set("planned_end_date", planned_end_date)
+		# operations with the same Sequence ID run in parallel, so the last row may not end last
+		end_times = [
+			get_datetime(row.planned_end_time) for row in self.doc.operations if row.planned_end_time
+		]
+		if end_times:
+			self.doc.db_set("planned_end_date", max(end_times))
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
