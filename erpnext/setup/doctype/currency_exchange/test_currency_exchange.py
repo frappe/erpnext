@@ -83,6 +83,21 @@ def patched_requests_get(*args, **kwargs):
 
 @mock.patch("requests.get", side_effect=patched_requests_get)
 class TestCurrencyExchange(ERPNextTestSuite):
+	def test_currency_existence_lookup_refreshes_after_changes(self, mock_get):
+		currency = frappe.get_doc(
+			{"doctype": "Currency", "currency_name": frappe.generate_hash(length=10)}
+		).insert()
+		self.assertEqual(get_exchange_rate(currency.name, currency.name), 1)
+		with mock.patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			self.assertEqual(get_exchange_rate(currency.name, currency.name), 1)
+			self.assertEqual(queries.call_count, 0)
+
+		frappe.delete_doc("Currency", currency.name)
+		with self.assertRaises(frappe.ValidationError):
+			get_exchange_rate(currency.name, currency.name)
+		frappe.copy_doc(currency).insert()
+		self.assertEqual(get_exchange_rate(currency.name, currency.name), 1)
+
 	def setUp(self):
 		self.load_test_records("Currency Exchange")
 		save_new_records(self.globalTestRecords["Currency Exchange"])
