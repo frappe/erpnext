@@ -337,3 +337,9 @@ class TestShareTransferValidation(ERPNextTestSuite):
 	def test_purchase_requires_a_from_shareholder(self):
 		doc = self.make_transfer(transfer_type="Purchase", from_shareholder="", asset_account="Cash - _TC")
 		self.assertRaises(frappe.ValidationError, doc.basic_validations)
+
+	def test_residual_balance_entry_uses_the_lot_rate(self):
+		doc = self.make_transfer(rate=15, amount=1500)
+		entry = doc.return_share_balance_entry(1, 100, 10)
+		self.assertEqual(entry["rate"], 10)
+		self.assertEqual(entry["amount"], 1000)
