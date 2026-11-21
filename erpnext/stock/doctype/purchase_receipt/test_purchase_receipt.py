@@ -2309,23 +2309,28 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 					"received_qty": qty + rejected_qty,
 				}
 			)
-			return pr.submit()
+			return pr.insert()
 
 		(b1, _), (b2, _) = get_batches(
 			frappe.db.get_value("Delivery Note Item", dn.items[0].name, "serial_and_batch_bundle")
 		)
 
-		pr = make_receipt(2, rejected_qty=1)
+		pr = make_receipt(2, rejected_qty=1).submit()
 		self.assertEqual(get_batches(pr.items[0].serial_and_batch_bundle), [(b1, 2)])
 		self.assertEqual(get_batches(pr.items[0].rejected_serial_and_batch_bundle), [(b2, 1)])
 
+		draft = make_receipt(1)
+
 		# a later receipt takes what is left of the delivered batches
-		pr = make_receipt(3)
+		pr = make_receipt(3).submit()
 		self.assertEqual(get_batches(pr.items[0].serial_and_batch_bundle), [(b1, 1), (b2, 2)])
 		self.assertEqual(
 			frappe.db.get_value("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle, "company"),
 			"_Test Company",
 		)
+
+		# so a draft saved before it can not receive the same batch again
+		self.assertRaises(frappe.ValidationError, draft.submit)
 
 	def test_lcv_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
