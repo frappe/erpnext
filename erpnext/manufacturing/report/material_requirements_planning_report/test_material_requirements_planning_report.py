@@ -68,7 +68,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		with patch.object(
 			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
 		):
-			report.update_sales_forecast_data()
+			report.update_sales_forecast_data([])
 
 		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
 		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [4, 6])
@@ -89,7 +89,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		with patch.object(
 			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
 		):
-			report.update_sales_forecast_data()
+			report.update_sales_forecast_data([])
 
 		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [1, 1])
 
@@ -105,7 +105,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		with patch.object(
 			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
 		):
-			report.update_sales_forecast_data()
+			report.update_sales_forecast_data([])
 
 		self.assertAlmostEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
 
@@ -122,6 +122,34 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rows = get_mrp_row_list(mps)
 
 		self.assertEqual([row.demand_qty for row in rows if row.item_code == item], [150])
+
+	def test_non_planned_order_uses_up_the_forecast_of_its_period(self):
+		item, mps = make_forecast_with_mps_demand(70)
+		make_mrp_sales_order(item, 25, add_days(today(), 20), warehouse="Stores - _TC")
+
+		rows = [row for row in get_mrp_row_list(mps) if row.item_code == item]
+
+		self.assertEqual(sum(flt(row.adhoc_qty) for row in rows), 25)
+		self.assertAlmostEqual(sum(row.planned_qty for row in rows), 100)
+
+	def test_order_without_ad_hoc_row_keeps_the_forecast(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_monthly_forecast(item, add_days(today(), 1))
+		make_mrp_sales_order(item, 25, add_days(today(), 20), warehouse="Stores - _TC")
+
+		_, rows, _, _ = execute(
+			frappe._dict(
+				company=COMPANY,
+				warehouse=["All Warehouses - _TC"],
+				item_code=item,
+				from_date=today(),
+				to_date=add_days(today(), 40),
+				type_of_material="All",
+				bucket_size="Daily",
+			)
+		)
+
+		self.assertAlmostEqual(sum(row.planned_qty for row in rows if row.get("item_code") == item), 100)
 
 	def test_mps_demand_before_the_report_dates_uses_up_its_forecast_period(self):
 		item, mps = make_forecast_with_mps_demand(150)
@@ -471,7 +499,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		other_order = frappe._dict(item_code="_Test Item", delivery_date=delivery_date, adhoc_qty=5)
 		planned_order = frappe._dict(item_code="_Test Item", delivery_date=delivery_date, adhoc_qty=10)
 
-		rows = list(report.get_demand_beyond_mps([other_order], [planned_order]))
+		rows = list(report.get_demand_beyond_mps([other_order], [planned_order], report.mps_data))
 
 		self.assertEqual([row.adhoc_qty for row in rows], [5])
 
@@ -921,7 +949,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		dates = [
 			row.delivery_date
-			for row in report.get_sales_forecast_data()
+			for row in report.get_sales_forecast_data([])
 			if row.sales_forecast == forecast.name
 		]
 
@@ -1127,9 +1155,7 @@ def make_forecast_with_mps_demand(planned_qty):
 	"""Return an item with a monthly forecast of 100 and an MPS for it with demand in that month."""
 	item = make_item(properties={"is_stock_item": 1}).name
 	start_date = add_days(today(), 1)
-	forecast = make_sales_forecast(item_code=item, from_date=start_date, demand_number=1, do_not_submit=True)
-	forecast.items[0].demand_qty = 100
-	forecast.submit()
+	forecast = make_monthly_forecast(item, start_date)
 
 	mps = make_mps(
 		parent_warehouse="All Warehouses - _TC",
@@ -1137,6 +1163,14 @@ def make_forecast_with_mps_demand(planned_qty):
 		items=[make_mps_row(item, delivery_date=add_days(start_date, 14), planned_qty=planned_qty)],
 	)
 	return item, mps
+
+
+def make_monthly_forecast(item, from_date):
+	"""Return a submitted forecast of 100 for the item in the month from the date."""
+	forecast = make_sales_forecast(item_code=item, from_date=from_date, demand_number=1, do_not_submit=True)
+	forecast.items[0].demand_qty = 100
+	forecast.submit()
+	return forecast
 
 
 def get_mrp_rows(mps):
@@ -1164,11 +1198,11 @@ def get_mrp_row_list(mps, **filters):
 	return [row for row in rows if row.get("item_code")]
 
 
-def make_mrp_sales_order(item_code, qty, delivery_date, transaction_date=None):
+def make_mrp_sales_order(item_code, qty, delivery_date, transaction_date=None, warehouse=WAREHOUSE):
 	sales_order = make_sales_order(
 		item_code=item_code,
 		qty=qty,
-		warehouse=WAREHOUSE,
+		warehouse=warehouse,
 		transaction_date=transaction_date or today(),
 		do_not_save=True,
 	)

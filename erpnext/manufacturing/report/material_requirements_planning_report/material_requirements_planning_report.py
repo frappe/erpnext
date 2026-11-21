@@ -84,7 +84,7 @@ class MaterialRequirementsPlanningReport:
 		self.dates = self.get_dates()
 		self.mps_data = self.get_mps_data(self.filters.from_date, self.filters.to_date)
 		items = self.get_items_from_mps(self.mps_data)
-		self.update_sales_forecast_data()
+		self.update_sales_forecast_data(items)
 
 		self.item_rm_details = self.get_raw_materials_data(items)
 		self.load_lead_times()
@@ -102,10 +102,27 @@ class MaterialRequirementsPlanningReport:
 		return data, chart
 
 	def add_non_planned_orders(self, items):
-		if not items:
-			return
+		orders = self.get_non_planned_orders(
+			items, self.mps_data, self.filters.get("from_date"), self.filters.get("to_date")
+		)
+		for row in orders:
+			self.mps_data.append(
+				frappe._dict(
+					{
+						"item_code": row.item_code,
+						"item_name": row.item_code,
+						"delivery_date": row.delivery_date,
+						"adhoc_qty": row.adhoc_qty,
+						"warehouse": row.warehouse,
+						"is_adhoc": 1,
+					}
+				)
+			)
 
-		_adhoc_so_details = frappe._dict({})
+	def get_non_planned_orders(self, items, mps_data, from_date, to_date):
+		"""Return the Sales Order demand of the items beyond the MPS, per item and delivery date."""
+		if not items:
+			return []
 
 		so = frappe.qb.DocType("Sales Order")
 		so_item = frappe.qb.DocType("Sales Order Item")
@@ -134,11 +151,11 @@ class MaterialRequirementsPlanningReport:
 		if self.filters.get("warehouse"):
 			query = query.where(so_item.warehouse.isin(self.get_warehouses()))
 
-		if self.filters.get("from_date"):
-			query = query.where(so_item.delivery_date >= self.filters.get("from_date"))
+		if from_date:
+			query = query.where(so_item.delivery_date >= from_date)
 
-		if self.filters.get("to_date"):
-			query = query.where(so_item.delivery_date <= self.filters.get("to_date"))
+		if to_date:
+			query = query.where(so_item.delivery_date <= to_date)
 
 		skipped_data = []
 		if skip_orders := self.get_orders_to_skip():
@@ -146,28 +163,15 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(so.name.notin(skip_orders))
 
 		data = query.run(as_dict=True)
+		return list(self.get_demand_beyond_mps(data, skipped_data, mps_data))
 
-		for row in self.get_demand_beyond_mps(data, skipped_data):
-			self.mps_data.append(
-				frappe._dict(
-					{
-						"item_code": row.item_code,
-						"item_name": row.item_code,
-						"delivery_date": row.delivery_date,
-						"adhoc_qty": row.adhoc_qty,
-						"warehouse": row.warehouse,
-						"is_adhoc": 1,
-					}
-				)
-			)
-
-	def get_demand_beyond_mps(self, data, skipped_data=None):
+	def get_demand_beyond_mps(self, data, skipped_data, mps_data):
 		planned = {}
-		for row in self.mps_data:
+		for row in mps_data:
 			key = (row.item_code, getdate(row.delivery_date))
 			planned[key] = planned.get(key, 0.0) + flt(row.planned_qty)
 
-		for row in skipped_data or []:
+		for row in skipped_data:
 			key = (row.item_code, getdate(row.delivery_date))
 			planned[key] = max(planned.get(key, 0.0) - flt(row.adhoc_qty), 0.0)
 
@@ -270,8 +274,8 @@ class MaterialRequirementsPlanningReport:
 				details.reserved_qty -= reserved_qty
 				details.projected_qty += reserved_qty
 
-	def update_sales_forecast_data(self):
-		sales_forecast_data = self.get_sales_forecast_data()
+	def update_sales_forecast_data(self, items):
+		sales_forecast_data = self.get_sales_forecast_data(items)
 
 		if not sales_forecast_data:
 			return
@@ -1212,7 +1216,7 @@ class MaterialRequirementsPlanningReport:
 			return False
 		return not (self.filters.to_date and date > getdate(self.filters.to_date))
 
-	def get_sales_forecast_data(self):
+	def get_sales_forecast_data(self, items):
 		forecast_doc = frappe.qb.DocType("Sales Forecast")
 		doctype = frappe.qb.DocType("Sales Forecast Item")
 
@@ -1251,7 +1255,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code == self.filters.item_code)
 
 		sales_data = query.run(as_dict=True)
-		self.consume_forecast(sales_data)
+		self.consume_forecast(sales_data, items)
 		sales_data = [row for row in sales_data if flt(row.qty, self.qty_precision)]
 
 		return [
@@ -1260,18 +1264,22 @@ class MaterialRequirementsPlanningReport:
 			if self.is_in_date_range(row.delivery_date)
 		]
 
-	def consume_forecast(self, forecast_rows):
-		"""Let the MPS demand of a forecast period use up that period's forecast."""
+	def consume_forecast(self, forecast_rows, items):
+		"""Let the MPS and non-planned Sales Order demand of a forecast period use up its forecast."""
 		if not forecast_rows:
 			return
 
 		periods = [get_forecast_period(row) for row in forecast_rows]
 		# the whole period counts, even the days outside the report dates
-		mps_data = self.get_mps_data(min(start for start, _ in periods), max(end for _, end in periods))
+		from_date, to_date = min(start for start, _ in periods), max(end for _, end in periods)
+		mps_data = self.get_mps_data(from_date, to_date)
+		orders = self.get_non_planned_orders(items, mps_data, from_date, to_date)
 
 		demand_by_item = {}
-		for row in mps_data:
-			demand = frappe._dict(date=getdate(row.delivery_date), qty=flt(row.planned_qty))
+		for row in mps_data + orders:
+			demand = frappe._dict(
+				date=getdate(row.delivery_date), qty=flt(row.planned_qty) + flt(row.adhoc_qty)
+			)
 			demand_by_item.setdefault(row.item_code, []).append(demand)
 
 		for row, (start_date, end_date) in zip(forecast_rows, periods, strict=True):
