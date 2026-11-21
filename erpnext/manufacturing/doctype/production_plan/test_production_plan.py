@@ -2471,6 +2471,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.insert()
 		plan.submit()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_closed_sales_order_rows_are_not_planned(self):
 		from erpnext.controllers.item_close import update_closed_status
 
@@ -2492,6 +2493,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.get_open_sales_orders()
 		self.assertNotIn(so.name, [row.sales_order for row in plan.sales_orders])
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_closed_product_bundle_row_is_not_planned(self):
 		from erpnext.controllers.item_close import update_closed_status
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
