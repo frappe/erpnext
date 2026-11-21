@@ -3494,7 +3494,7 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 		if (r) {
 			let update_values = {
 				serial_and_batch_bundle: r.name,
-				qty: Math.abs(r.total_qty),
+				qty: erpnext.stock.get_sbie_row_qty(frm.doc, item_row, "qty", Math.abs(r.total_qty)),
 			};
 
 			if (r.warehouse) {
