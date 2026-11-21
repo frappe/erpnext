@@ -499,19 +499,20 @@ class SubcontractingInwardController:
 		if not self.subcontracting_inward_order or self.purpose != "Subcontracting Return":
 			return
 
-		return_qty, rows = defaultdict(float), {}
-		for item in self.items:
-			for batch_no, qty in get_batch_qty_of_row(item).items():
-				return_qty[(item.scio_detail, batch_no)] += qty
-				rows.setdefault((item.scio_detail, batch_no), item)
-		if not return_qty:
+		rows = [
+			(item, batch_no, qty)
+			for item in self.items
+			for batch_no, qty in get_batch_qty_of_row(item).items()
+		]
+		if not rows:
 			return
 
-		open_qty = self.get_unreturned_batch_qty({scio_detail for scio_detail, batch_no in return_qty})
-		for (scio_detail, batch_no), qty in return_qty.items():
-			item = rows[(scio_detail, batch_no)]
+		open_qty = self.get_unreturned_batch_qty([item.scio_detail for item in self.items])
+		for item, batch_no, qty in rows:
+			key = (item.scio_detail, batch_no)
 			precision = item.precision("transfer_qty")
-			allowed_qty = flt(open_qty.get((scio_detail, batch_no)), precision)
+			allowed_qty = flt(open_qty.get(key), precision)
+			open_qty[key] = allowed_qty - qty
 			if flt(qty, precision) > allowed_qty:
 				frappe.throw(
 					_(
@@ -539,8 +540,7 @@ class SubcontractingInwardController:
 			.where(
 				(entry.docstatus == 1)
 				& entry.purpose.isin(["Subcontracting Delivery", "Subcontracting Return"])
-				& entry_item.scio_detail.isin(list(scio_details))
-				& batch_entry.batch_no.isnotnull()
+				& entry_item.scio_detail.isin(scio_details)
 			)
 			.groupby(entry_item.scio_detail, batch_entry.batch_no)
 		).run(as_dict=True)
