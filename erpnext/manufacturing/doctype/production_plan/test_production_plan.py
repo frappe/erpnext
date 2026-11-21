@@ -301,7 +301,13 @@ class TestProductionPlan(FrappeTestCase):
 	def test_production_plan_without_multi_level(self):
 		"Test MR Planning table for non exploded BOM."
 		pln = create_production_plan(item_code="Test Production Item 1", use_multi_level_bom=0)
+<<<<<<< HEAD
 		self.assertTrue(len(pln.mr_items), 2)
+=======
+		self.assertEqual(
+			sorted(row.item_code for row in pln.mr_items), ["Raw Material Item 1", "Subassembly Item 1"]
+		)
+>>>>>>> 79dbdad (test: assert the single-level material request items)
 		pln.cancel()
 
 	def test_production_plan_without_multi_level_for_existing_ordered_qty(self):
