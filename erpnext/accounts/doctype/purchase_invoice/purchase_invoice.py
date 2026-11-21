@@ -341,12 +341,22 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 		PurchaseTaxWithholding(self).on_validate()
+		self.reset_receipt_qty_without_update_stock()
 		self.set_percentage_received()
 
 		if self.on_hold:
 			self.validate_invoice_hold()
 
 		pre_submit_validation(self, check_prev_docstatus=True)
+
+	def reset_receipt_qty_without_update_stock(self):
+		if self.update_stock:
+			return
+
+		for row in self.items:
+			if not row.pr_detail:
+				row.received_qty = 0
+				row.rejected_qty = 0
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0

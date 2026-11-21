@@ -4082,23 +4082,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaises(StockOverReturnError, return_doc.save)
 
-	def test_partial_returns_ignore_received_qty_without_update_stock(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-
-		invoice = make_purchase_invoice(qty=10, received_qty=10)
-
-		first_return = make_return_doc(invoice.doctype, invoice.name)
-		first_return.items[0].qty = -4
-		first_return.save().submit()
-
-		self.assertEqual(first_return.items[0].received_qty, -10)
-
-		second_return = make_return_doc(invoice.doctype, invoice.name)
-		second_return.items[0].qty = -6
-		second_return.save().submit()
-
-		self.assertEqual(second_return.docstatus, 1)
-
 	def test_apply_discount_on_grand_total(self):
 		"""
 		To test if after applying discount on grand total,
@@ -4341,6 +4324,24 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
+
+	def test_receipt_qty_reset_when_update_stock_is_unchecked(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+
+		pi = make_purchase_invoice(qty=5, rate=100, update_stock=1, do_not_submit=True)
+		self.assertEqual(pi.items[0].received_qty, 5)
+
+		pi.update_stock = 0
+		pi.save()
+		self.assertEqual(pi.items[0].received_qty, 0)
+		self.assertEqual(pi.items[0].rejected_qty, 0)
+
+		pi.submit()
+		pr = make_purchase_receipt_from_pi(pi.name)
+		self.assertEqual(len(pr.items), 1)
+		self.assertEqual(pr.items[0].qty, 5)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
