@@ -114,6 +114,8 @@ class AccountingDimension(Document):
 				frappe.throw(_("Company {0} is added more than once").format(frappe.bold(default.company)))
 
 	def on_update(self):
+		# Field creation reads the dimensions before the framework's post-save cache clear.
+		self.clear_cache()
 		if frappe.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
@@ -272,19 +274,24 @@ def get_doctypes_with_dimensions():
 
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all(
-		"Accounting Dimension",
-		fields=["label", "fieldname", "disabled", "document_type"],
-		filters={"disabled": 0},
-	)
+	# The database value cache is cleared on document changes and transaction boundaries.
+	cache = frappe.db.value_cache["Accounting Dimension"]
+	cache_key = ("get_accounting_dimensions",)
+	if cache_key not in cache:
+		cache[cache_key] = frappe.get_all(
+			"Accounting Dimension",
+			fields=["label", "fieldname", "disabled", "document_type"],
+			filters={"disabled": 0},
+		)
 
 	if as_list:
-		return [d.fieldname for d in accounting_dimensions]
+		return [d.fieldname for d in cache[cache_key]]
 	else:
-		return accounting_dimensions
+		return [d.copy() for d in cache[cache_key]]
 
 
 def get_checks_for_pl_and_bs_accounts():
+<<<<<<< HEAD
 	return frappe.db.sql(
 		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
 			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
@@ -292,6 +299,37 @@ def get_checks_for_pl_and_bs_accounts():
 		as_dict=1,
 	)
 
+=======
+	cache = frappe.db.value_cache["Accounting Dimension"]
+	detail_cache = frappe.db.value_cache["Accounting Dimension Detail"]
+	cache_key = ("get_checks_for_pl_and_bs_accounts",)
+	# Both tables must retain the result; changing either invalidates the joined lookup.
+	if cache_key in cache and cache[cache_key] is detail_cache.get(cache_key):
+		return [d.copy() for d in cache[cache_key]]
+
+	AccountingDimension = frappe.qb.DocType("Accounting Dimension")
+	AccountingDimensionDetail = frappe.qb.DocType("Accounting Dimension Detail")
+
+	query = (
+		frappe.qb.from_(AccountingDimension)
+		.join(AccountingDimensionDetail)
+		.on(AccountingDimension.name == AccountingDimensionDetail.parent)
+		.select(
+			AccountingDimension.label,
+			AccountingDimension.disabled,
+			AccountingDimension.fieldname,
+			AccountingDimensionDetail.default_dimension,
+			AccountingDimensionDetail.company,
+			AccountingDimensionDetail.mandatory_for_pl,
+			AccountingDimensionDetail.mandatory_for_bs,
+		)
+		.where(AccountingDimension.disabled == 0)
+	)
+
+	cache[cache_key] = detail_cache[cache_key] = query.run(as_dict=1)
+	return [d.copy() for d in cache[cache_key]]
+
+>>>>>>> 5162452 (fix(accounts): cache repeated transaction lookups)
 
 def get_dimension_with_children(doctype, dimensions):
 	if isinstance(dimensions, str):
