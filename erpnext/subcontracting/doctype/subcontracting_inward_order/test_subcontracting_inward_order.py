@@ -302,6 +302,28 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			next((item for item in scio.received_items if item.rm_item_code == "Self RM 2"), None)
 		)
 
+	def test_own_item_from_two_warehouses_is_consumed_once(self):
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code="Self RM", qty=2, to_warehouse=other_warehouse, purpose="Material Receipt")
+		scio, wo = create_scio_work_order_with_own_item_from_stores()
+
+		for warehouses in (("Stores - _TC", other_warehouse), (other_warehouse, "Stores - _TC")):
+			submit_manufacture_with_own_item(wo, warehouses)
+
+		self.assertEqual(get_own_item_consumed_qty(scio), [2, 2])
+
+	def test_cancel_own_item_from_two_warehouses_in_any_order(self):
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code="Self RM", qty=2, to_warehouse=other_warehouse, purpose="Material Receipt")
+		scio, wo = create_scio_work_order_with_own_item_from_stores()
+
+		first = submit_manufacture_with_own_item(wo, (other_warehouse,))
+		second = submit_manufacture_with_own_item(wo, ("Stores - _TC", other_warehouse))
+		first.cancel()
+		second.cancel()
+
+		self.assertEqual(get_own_item_consumed_qty(scio), [0])
+
 	def test_work_order_creation_qty(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
 		new_bom.items = new_bom.items[:3]
@@ -1940,6 +1962,42 @@ def receive_customer_material(scio, rm_item, qty, rate):
 	rm_in.submit()
 	scio.reload()
 	return rm_in
+
+
+def create_scio_work_order_with_own_item_from_stores():
+	so, scio = create_so_scio()
+	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	next(item for item in wo.required_items if item.item_code == "Self RM").source_warehouse = "Stores - _TC"
+	wo.submit()
+	return scio, wo
+
+
+def submit_manufacture_with_own_item(wo, warehouses):
+	"""Manufacture 1 FG taking 1 Self RM from each of `warehouses`."""
+	manufacture = frappe.new_doc("Stock Entry").update(
+		make_stock_entry_from_wo(wo.name, "Manufacture", qty=1)
+	)
+	own_row = next(item for item in manufacture.items if item.item_code == "Self RM")
+	own_row.update({"qty": 1, "s_warehouse": warehouses[0]})
+	for warehouse in warehouses[1:]:
+		row = frappe.copy_doc(own_row)
+		row.update({"s_warehouse": warehouse, "idx": len(manufacture.items) + 1})
+		manufacture.append("items", row)
+	manufacture.submit()
+	return manufacture
+
+
+def get_own_item_consumed_qty(scio):
+	return frappe.get_all(
+		"Subcontracting Inward Order Received Item",
+		filters={"parent": scio.name, "rm_item_code": "Self RM"},
+		pluck="consumed_qty",
+		order_by="idx",
+	)
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
