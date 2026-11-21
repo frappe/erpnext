@@ -6,11 +6,15 @@ from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
+	create_unreconcile_doc_for_selection,
+)
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.tests.assertions import assert_post_only
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused_for_names,
@@ -67,6 +71,9 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 			transaction_date=today(),
 		)
 		return so
+
+	def test_00_unreconcile_selection_rejects_get(self):
+		assert_post_only(self, create_unreconcile_doc_for_selection)
 
 	def test_01_unreconcile_invoice(self):
 		si1 = self.create_sales_invoice()

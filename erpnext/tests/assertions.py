@@ -4,7 +4,16 @@
 from contextlib import contextmanager
 from types import SimpleNamespace
 
+import frappe
 from frappe.database import savepoint
+
+
+def assert_post_only(test_case, *functions):
+	"""Assert each whitelisted function rejects GET, so a cross-site link cannot call it."""
+	for fn in functions:
+		test_case.assertEqual(
+			frappe.allowed_http_methods_for_whitelisted_func.get(fn), ("POST",), fn.__qualname__
+		)
 
 
 @contextmanager
