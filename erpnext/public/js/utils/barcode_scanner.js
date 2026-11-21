@@ -279,7 +279,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			item_data[this.qty_field] = values.scanned_qty;
 			item_data["has_item_scanned"] = 1;
 
-			this.remaining_qty = flt(values.qty) - flt(values.scanned_qty);
+			const remaining_qty = flt(values.qty) - flt(values.scanned_qty);
 
 			resolve(
 				frappe.run_serially([
@@ -287,7 +287,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					() => this.set_batch_no(row, values.batch_no),
 					() => this.set_barcode(row, values.barcode),
 					() => this.set_serial_no(row, values.serial_no),
-					() => this.add_child_for_remaining_qty(row),
+					() => this.add_child_for_remaining_qty(row, remaining_qty),
 					() => this.clean_up(),
 				])
 			);
@@ -431,8 +431,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
-	add_child_for_remaining_qty(prev_row) {
-		if (this.remaining_qty && this.remaining_qty > 0) {
+	add_child_for_remaining_qty(prev_row, remaining_qty) {
+		if (remaining_qty > 0) {
 			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 			let row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
 
@@ -454,12 +454,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				row[key] = prev_row[key];
 			}
 
-			row[this.qty_field] = this.remaining_qty;
+			row[this.qty_field] = remaining_qty;
 			if (this.qty_field == "qty" && frappe.meta.has_field(row.doctype, "stock_qty")) {
-				row["stock_qty"] = this.remaining_qty * row.conversion_factor;
+				row["stock_qty"] = flt(remaining_qty * row.conversion_factor, precision("stock_qty", row));
 			}
 
-			this.frm.script_manager.trigger("item_code", row.doctype, row.name);
+			return this.frm.script_manager.trigger("item_code", row.doctype, row.name);
 		}
 	}
 
