@@ -1886,6 +1886,34 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(sbe_pp_list, get_serial_batch_entries("Subcontracting Order", sco.name))
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_order_from_plan_without_raw_material_rows_reserves_from_stock(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_details_for_voucher,
+		)
+
+		plan = make_reserved_production_plan(reserve_stock=False)
+		sco = make_subcontracting_order_from_plan(plan)
+
+		self.assertTrue(get_sre_details_for_voucher("Subcontracting Order", sco.name))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_order_from_plan_reserves_unplanned_raw_materials_from_stock(self):
+		unplanned_item = make_item(properties={"is_stock_item": 1}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(
+			item=sub_assembly,
+			raw_materials=["Subcontracted SRM Item 10", unplanned_item],
+			rate=100,
+			currency="INR",
+		)
+
+		plan = make_reserved_production_plan(sub_assembly=sub_assembly, unplanned_items=[unplanned_item])
+		sco = make_subcontracting_order_from_plan(plan)
+
+		for row in sco.supplied_items:
+			self.assertEqual(row.stock_reserved_qty, row.required_qty)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_gives_the_unused_balance_back_to_the_plan(self):
 		plan = make_reserved_production_plan()
 		sco = make_subcontracting_order_from_plan(plan)
@@ -2113,22 +2141,24 @@ def set_unconverted_service_cost(sco):
 	)
 
 
-def make_reserved_production_plan():
-	"""Production Plan that reserves the raw materials of one subcontracted sub-assembly."""
+def make_reserved_production_plan(
+	reserve_stock=True, sub_assembly="Subcontracted Item SA10", unplanned_items=()
+):
+	"""Production Plan of one subcontracted sub-assembly that reserves its raw materials when `reserve_stock`.
+
+	`unplanned_items` get no raw material row; without `reserve_stock` no item does."""
 	from erpnext.manufacturing.doctype.production_plan.production_plan import (
 		get_items_for_material_requests,
 	)
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import create_production_plan
 
 	parent_fg = make_item()
-	make_bom(
-		item=parent_fg.name, raw_materials=["Subcontracted Item SA10"], rate=100, rm_qty=1, currency="INR"
-	)
+	make_bom(item=parent_fg.name, raw_materials=[sub_assembly], rate=100, rm_qty=1, currency="INR")
 	plan = create_production_plan(
 		item_code=parent_fg.name,
 		planned_qty=10,
 		do_not_submit=True,
-		reserve_stock=True,
+		reserve_stock=reserve_stock,
 		skip_available_sub_assembly_item=True,
 		for_warehouse="_Test Warehouse - _TC",
 		sub_assembly_warehouse="_Test Warehouse - _TC",
@@ -2137,7 +2167,8 @@ def make_reserved_production_plan():
 	plan.get_sub_assembly_items()
 	plan.sub_assembly_items[0].supplier = "_Test Supplier"
 	for d in get_items_for_material_requests(plan.as_dict()):
-		plan.append("mr_items", d)
+		if reserve_stock and d["item_code"] not in unplanned_items:
+			plan.append("mr_items", d)
 		make_stock_entry(target="_Test Warehouse - _TC", item_code=d["item_code"], qty=10, basic_rate=100)
 	plan.submit()
 	return plan
