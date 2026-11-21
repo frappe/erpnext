@@ -12,17 +12,7 @@ import frappe.defaults
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
-<<<<<<< HEAD
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
-=======
-from erpnext.stock.get_item_details import (
-	get_bundle_row_stock_qty,
-	get_conversion_factor,
-	get_item_details,
-	get_price_list_rate,
-)
-from erpnext.stock.utils import is_serial_no_wise_valuation_disabled
->>>>>>> 5b9c476 (fix(stock): keep a packed row's rate for serial nos valued as a pool)
 
 
 class PackedItem(Document):
@@ -227,67 +217,11 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	return pi_row
 
 
-<<<<<<< HEAD
-=======
-def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, linked_packed_item):
-	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
-	key = get_packed_item_key(
-		doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item
-	)
-	return packed_items_table.get(key)
-
-
-def get_packed_item_key(doc, main_item_row, item_code, packed_items_table, linked_packed_item=None):
-	# an unsaved row made from a Sales Order or a return is found by the packed row it links to,
-	# since its idx shifts when a row above it is deleted
-	order_key = (main_item_row.item_code, item_code, linked_packed_item)
-	if doc.is_new() and linked_packed_item and packed_items_table.get(order_key):
-		return order_key
-
-	return (main_item_row.item_code, item_code, main_item_row.idx if doc.is_new() else main_item_row.name)
-
-
-def get_stale_row_idx(stale_rows, location=None):
-	"""Index of the stale row packed from the Pick List row ``location``, else of the first one."""
-	if not location:
-		return 0
-	return next((idx for idx, row in enumerate(stale_rows) if is_packed_from(row, location)), 0)
-
-
 def set_incoming_rate_from_bundle(row, bundle):
 	"""Rate of the serial or batch nos picked on submit; validate looked it up before they were picked."""
-	# serial nos valued as one pool carry no rate of their own
-	if not is_serial_no_wise_valuation_disabled(row.item_code):
-		row.db_set("incoming_rate", flt(bundle.avg_rate, row.precision("incoming_rate")))
+	row.db_set("incoming_rate", flt(bundle.avg_rate, row.precision("incoming_rate")))
 
 
-def get_location_filters(row) -> dict:
-	"""Filters that tell apart a component's packed rows of one bundle row, or their ledger entries."""
-	if row.serial_and_batch_bundle:
-		return {"serial_and_batch_bundle": row.serial_and_batch_bundle}
-	return {"warehouse": row.warehouse}
-
-
-def is_packed_from(pi_row, location):
-	"""Whether a packed row holds serial nos of the Pick List row ``location``, or its warehouse and batch."""
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
-	serial_nos = {number.lower() for number in get_serial_nos(pi_row.serial_no)}
-	if serial_nos & {number.lower() for number in get_serial_nos(location.serial_no)}:
-		return True
-	return (pi_row.warehouse, pi_row.batch_no or "") == (location.warehouse, location.batch_no or "")
-
-
-def remove_unused_pick_list_rows(doc, packed_items_table):
-	"""Drop packed rows a re-save no longer packs from the Pick List, e.g. after the bundle qty is lowered."""
-	pick_list_rows = {item.name for item in doc.get("items") if item.get("against_pick_list")}
-	for rows in packed_items_table.values():
-		for row in rows:
-			if row.parent_detail_docname in pick_list_rows:
-				doc.remove(row)
-
-
->>>>>>> 5b9c476 (fix(stock): keep a packed row's rate for serial nos valued as a pool)
 def get_packed_item_details(item_code, company):
 	item = frappe.qb.DocType("Item")
 	item_default = frappe.qb.DocType("Item Default")
