@@ -170,7 +170,7 @@ def get_sales_orders(self):
 	so = frappe.qb.DocType("Sales Order")
 	so_item = frappe.qb.DocType("Sales Order Item")
 
-	bom_subquery = get_item_or_template_bom_query(bom, so_item)
+	bom_subquery = get_item_or_template_bom_query(bom, so_item.item_code)
 	query = _open_so_base_query(self, so, so_item)
 	query = _apply_open_so_filters(self, query, so, so_item)
 
@@ -178,22 +178,23 @@ def get_sales_orders(self):
 		query = query.where(so_item.item_code == self.item_code)
 		bom_subquery = bom_subquery.where(self.get_bom_item_condition() or bom.item == so_item.item_code)
 
-	packed_subquery = _packed_item_subquery(bom, so, so_item)
+	packed_subquery = _packed_item_subquery(so, so_item)
 	query = query.where(ExistsCriterion(bom_subquery) | ExistsCriterion(packed_subquery))
 	return query.run(as_dict=True)
 
 
-def get_item_or_template_bom_query(bom, so_item):
-	"""Active BOMs of the Sales Order item or of its template."""
+def get_item_or_template_bom_query(bom, item_code):
+	"""Active, submitted BOMs of the item or of its template."""
 	item = frappe.qb.DocType("Item")
 	return (
 		frappe.qb.from_(bom)
 		.from_(item)
 		.select(bom.name)
 		.where(
-			(item.name == so_item.item_code)
+			(item.name == item_code)
 			& bom.item.isin([item.name, item.variant_of])
 			& (bom.is_active == 1)
+			& (bom.docstatus == 1)
 		)
 	)
 
@@ -233,13 +234,17 @@ def _apply_open_so_filters(plan, query, so, so_item):
 	return query
 
 
-def _packed_item_subquery(bom, so, so_item):
+def _packed_item_subquery(so, so_item):
 	pi = frappe.qb.DocType("Packed Item")
-	bom_exists = ExistsCriterion(
-		frappe.qb.from_(bom).select(bom.name).where((bom.item == pi.item_code) & (bom.is_active == 1))
-	)
 	return (
 		frappe.qb.from_(pi)
 		.select(pi.name)
-		.where((pi.parent == so.name) & (pi.parent_item == so_item.item_code) & bom_exists)
+		.where(
+			(pi.parent == so.name) & (pi.parent_item == so_item.item_code) & has_submitted_bom(pi.item_code)
+		)
 	)
+
+
+def has_submitted_bom(item_code):
+	"""Exists check for an active, submitted BOM of the item or of its template."""
+	return ExistsCriterion(get_item_or_template_bom_query(frappe.qb.DocType("BOM"), item_code))

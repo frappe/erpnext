@@ -2520,6 +2520,52 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item", pln.save)
 
+	def test_orders_for_items_with_only_a_draft_bom_are_not_listed(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item("Test PP Item With Draft BOM", {"is_stock_item": 1})
+		raw_material = make_item("Test PP RM For Draft BOM", {"is_stock_item": 1}).name
+		make_bom(item=item.name, raw_materials=[raw_material], do_not_submit=True)
+		mr = make_material_request(
+			material_request_type="Manufacture", item_code=item.name, qty=5, uom=item.stock_uom
+		)
+		so = make_sales_order(item_code=item.name, qty=5)
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = so.company
+		plan.get_pending_material_requests()
+		plan.get_open_sales_orders()
+
+		self.assertNotIn(mr.name, [row.material_request for row in plan.material_requests])
+		self.assertNotIn(so.name, [row.sales_order for row in plan.sales_orders])
+
+	def test_variant_is_planned_from_its_submitted_template_bom(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		template = make_item(
+			properties={"is_stock_item": 1, "has_variants": 1, "attributes": [{"attribute": "Test Size"}]}
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.insert()
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		template_bom = make_bom(item=template, raw_materials=[raw_material])
+		make_bom(item=template, raw_materials=[raw_material], do_not_submit=True)
+		make_bom(item=variant.name, raw_materials=[raw_material], do_not_submit=True)
+		mr = make_material_request(
+			material_request_type="Manufacture", item_code=variant.name, qty=5, uom=variant.stock_uom
+		)
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = mr.company
+		plan.item_code = variant.name
+		plan.get_pending_material_requests()
+		self.assertEqual([row.material_request for row in plan.material_requests], [mr.name])
+
+		plan.get_mr_items()
+		self.assertEqual(
+			[(row.item_code, row.bom_no) for row in plan.po_items], [(variant.name, template_bom.name)]
+		)
+
 	def test_get_warehouse_list_group(self):
 		"Check if required child warehouses are returned."
 		warehouse_json = '[{"warehouse":"_Test Warehouse Group - _TC"}]'

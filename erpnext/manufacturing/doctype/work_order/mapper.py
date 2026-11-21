@@ -77,7 +77,11 @@ def _default_bom_for_item(item, project):
 		return bom_no
 
 	variant_of = frappe.db.get_value("Item", item, "variant_of")
-	return frappe.db.get_value("BOM", {"item": variant_of, "is_default": 1}) if variant_of else None
+	return (
+		frappe.db.get_value("BOM", {"item": variant_of, "is_default": 1, "docstatus": 1})
+		if variant_of
+		else None
+	)
 
 
 def _handle_missing_default_bom(res, item, project, throw):

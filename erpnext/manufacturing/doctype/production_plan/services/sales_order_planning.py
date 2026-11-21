@@ -12,6 +12,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_item_or_template_bom_query,
 	get_sales_orders,
+	has_submitted_bom,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 
@@ -51,12 +52,6 @@ class SalesOrderSourcingService:
 		self.add_mr_in_table(query.run(as_dict=True))
 
 	def _pending_mr_base_query(self, mr, mr_item):
-		bom = frappe.qb.DocType("BOM")
-		bom_exists = ExistsCriterion(
-			frappe.qb.from_(bom)
-			.select(bom.name)
-			.where((bom.item == mr_item.item_code) & (bom.is_active == 1))
-		)
 		return (
 			frappe.qb.from_(mr)
 			.from_(mr_item)
@@ -70,7 +65,7 @@ class SalesOrderSourcingService:
 				& (mr.company == self.doc.company)
 				& (mr_item.stock_qty > IfNull(mr_item.ordered_qty, 0))
 				& (mr_item.stock_qty > IfNull(_mr_item_planned_qty_query(mr_item), 0))
-				& bom_exists
+				& has_submitted_bom(mr_item.item_code)
 			)
 		)
 
@@ -158,7 +153,7 @@ class SalesOrderSourcingService:
 	def _so_items(self, so_list):
 		bom = frappe.qb.DocType("BOM")
 		so_item = frappe.qb.DocType("Sales Order Item")
-		items_subquery = get_item_or_template_bom_query(bom, so_item)
+		items_subquery = get_item_or_template_bom_query(bom, so_item.item_code)
 		items_query = (
 			frappe.qb.from_(so_item)
 			.select(*_so_item_columns(so_item))
@@ -176,7 +171,6 @@ class SalesOrderSourcingService:
 		return items
 
 	def _so_packed_items(self, so_list):
-		bom = frappe.qb.DocType("BOM")
 		so_item = frappe.qb.DocType("Sales Order Item")
 		pi = frappe.qb.DocType("Packed Item")
 		query = (
@@ -184,7 +178,7 @@ class SalesOrderSourcingService:
 			.from_(pi)
 			.select(*_so_packed_columns(so_item, pi))
 			.distinct()
-			.where(_so_packed_filter(bom, so_item, pi, so_list))
+			.where(_so_packed_filter(so_item, pi, so_list))
 		)
 		if self.doc.item_code:
 			query = query.where(so_item.item_code == self.doc.item_code)
@@ -203,13 +197,12 @@ class SalesOrderSourcingService:
 		self.doc.calculate_total_planned_qty()
 
 	def _mr_items(self, mr_list):
-		bom = frappe.qb.DocType("BOM")
 		mr_item = frappe.qb.DocType("Material Request Item")
 		query = (
 			frappe.qb.from_(mr_item)
 			.select(*_mr_item_columns(mr_item))
 			.distinct()
-			.where(_mr_items_filter(bom, mr_item, mr_list))
+			.where(_mr_items_filter(mr_item, mr_list))
 		)
 		if self.doc.item_code:
 			query = query.where(mr_item.item_code == self.doc.item_code)
@@ -386,10 +379,7 @@ def _so_packed_columns(so_item, pi):
 	]
 
 
-def _so_packed_filter(bom, so_item, pi, so_list):
-	bom_exists = ExistsCriterion(
-		frappe.qb.from_(bom).select(bom.name).where((bom.item == pi.item_code) & (bom.is_active == 1))
-	)
+def _so_packed_filter(so_item, pi, so_list):
 	pending = ((so_item.work_order_qty > so_item.delivered_qty) & (so_item.qty > so_item.work_order_qty)) | (
 		(so_item.work_order_qty <= so_item.delivered_qty) & (so_item.qty > so_item.delivered_qty)
 	)
@@ -400,7 +390,7 @@ def _so_packed_filter(bom, so_item, pi, so_list):
 		& (so_item.closed == 0)
 		& (so_item.parent.isin(so_list))
 		& pending
-		& bom_exists
+		& has_submitted_bom(pi.item_code)
 	)
 
 
@@ -428,13 +418,10 @@ def _mr_item_planned_qty_query(mr_item):
 	)
 
 
-def _mr_items_filter(bom, mr_item, mr_list):
-	bom_exists = ExistsCriterion(
-		frappe.qb.from_(bom).select(bom.name).where((bom.item == mr_item.item_code) & (bom.is_active == 1))
-	)
+def _mr_items_filter(mr_item, mr_list):
 	return (
 		(mr_item.parent.isin(mr_list))
 		& (mr_item.docstatus == 1)
 		& (mr_item.stock_qty > mr_item.ordered_qty)
-		& bom_exists
+		& has_submitted_bom(mr_item.item_code)
 	)
