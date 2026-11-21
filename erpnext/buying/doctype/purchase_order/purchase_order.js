@@ -556,73 +556,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		this.frm.add_custom_button(
 			__("Link to Material Request"),
 			function () {
-				var my_items = [];
-				for (var i in me.frm.doc.items) {
-					if (!me.frm.doc.items[i].material_request) {
-						my_items.push(me.frm.doc.items[i].item_code);
-					}
-				}
-				frappe.call({
-					method: "erpnext.buying.utils.get_linked_material_requests",
-					args: {
-						items: my_items,
-					},
-					callback: function (r) {
-						if (r.exc) return;
-
-						var i = 0;
-						var item_length = me.frm.doc.items.length;
-						while (i < item_length) {
-							var qty = me.frm.doc.items[i].qty;
-							(r.message || []).forEach(function (d) {
-								if (
-									d.qty > 0 &&
-									qty > 0 &&
-									me.frm.doc.items[i].item_code == d.item_code &&
-									!me.frm.doc.items[i].material_request_item
-								) {
-									me.frm.doc.items[i].material_request = d.mr_name;
-									me.frm.doc.items[i].material_request_item = d.mr_item;
-									var my_qty = Math.min(qty, d.qty);
-									qty = qty - my_qty;
-									d.qty = d.qty - my_qty;
-									me.frm.doc.items[i].stock_qty =
-										my_qty * me.frm.doc.items[i].conversion_factor;
-									me.frm.doc.items[i].qty = my_qty;
-
-									frappe.msgprint(
-										__("Assigning {0} to {1} (row {2})", [
-											d.mr_name,
-											d.item_code,
-											me.frm.doc.items[i].idx,
-										])
-									);
-									if (qty > 0) {
-										frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
-										var new_row = frappe.model.add_child(
-											me.frm.doc,
-											me.frm.doc.items[i].doctype,
-											"items"
-										);
-										item_length++;
-
-										for (var key in me.frm.doc.items[i]) {
-											new_row[key] = me.frm.doc.items[i][key];
-										}
-
-										new_row.idx = item_length;
-										new_row["stock_qty"] = new_row.conversion_factor * qty;
-										new_row["qty"] = qty;
-										new_row["material_request"] = "";
-										new_row["material_request_item"] = "";
-									}
-								}
-							});
-							i++;
-						}
-						refresh_field("items");
-					},
-				});
+				erpnext.buying.link_to_mrs(me.frm);
 			},
 			__("Tools")
 		);

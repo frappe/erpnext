@@ -176,14 +176,14 @@ def get_linked_material_requests(items: str | list):
 	mr = frappe.qb.DocType("Material Request")
 	mr_item = frappe.qb.DocType("Material Request Item")
 
-	for item in items:
+	for item in set(items):
 		query = (
 			frappe.qb.from_(mr)
 			.join(mr_item)
 			.on(mr.name == mr_item.parent)
 			.select(
 				mr.name.as_("mr_name"),
-				(mr_item.qty - mr_item.ordered_qty).as_("qty"),
+				(mr_item.stock_qty - mr_item.ordered_qty).as_("stock_qty"),
 				mr_item.item_code,
 				mr_item.name.as_("mr_item"),
 			)
