@@ -6,6 +6,7 @@ from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, escape_html, flt, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
+from erpnext.manufacturing.doctype.work_order.services.reservation import get_unused_inward_serial_batch
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	add_picked_batches,
@@ -113,6 +114,12 @@ class StockEntrySABB(BaseStockEntry):
 			if d.batch_no:
 				qty = d.qty - d.delivered_qty if only_pending else d.qty
 				batch_nos[d.batch_no] = batch_nos.get(d.batch_no, 0) + qty
+
+		if self.doc.purpose == "Return Raw Material to Customer":
+			unused = get_unused_inward_serial_batch(self.doc.subcontracting_inward_order, scio_detail)
+			serial_nos += unused.serial_nos
+			for batch_no, qty in unused.batches.items():
+				batch_nos[batch_no] = batch_nos.get(batch_no, 0) + qty
 
 		return serial_nos, batch_nos
 

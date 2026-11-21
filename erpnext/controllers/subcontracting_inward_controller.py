@@ -6,7 +6,14 @@ from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import escape_html, flt, get_link_to_form
 
-from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_batch_list_from_item
+from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	release_unused_inward_reservations,
+)
+from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_reserved_qty_details_for_voucher,
+)
+from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_batch_list_from_item, get_serial_nos
 
 
 class SubcontractingInwardController:
@@ -547,30 +554,7 @@ class SubcontractingInwardController:
 		return {(row.scio_detail, row.batch_no): -row.qty for row in result}
 
 	def get_serial_nos_and_batches_from_sres(self, scio_detail, only_pending=True):
-		serial_nos, batch_nos = [], frappe._dict()
-
-		table = frappe.qb.DocType("Stock Reservation Entry")
-		child_table = frappe.qb.DocType("Serial and Batch Entry")
-		query = (
-			frappe.qb.from_(table)
-			.join(child_table)
-			.on(table.name == child_table.parent)
-			.select(child_table.serial_no, child_table.batch_no, child_table.qty)
-			.where((table.docstatus == 1) & (table.voucher_detail_no == scio_detail))
-		)
-
-		if only_pending:
-			query = query.where(child_table.qty != child_table.delivered_qty)
-		else:
-			query = query.where(child_table.delivered_qty > 0)
-
-		for d in query.run(as_dict=True):
-			if d.serial_no and d.serial_no not in serial_nos:
-				serial_nos.append(d.serial_no)
-			if d.batch_no and d.batch_no not in batch_nos:
-				batch_nos[d.batch_no] = d.qty
-
-		return serial_nos, batch_nos
+		return StockEntrySABB(self).get_serial_nos_and_batches_from_sres(scio_detail, only_pending)
 
 	def validate_delivery(self):
 		if self.purpose == "Subcontracting Delivery":
@@ -1161,7 +1145,40 @@ class SubcontractingInwardController:
 		if self.purpose == "Return Raw Material to Customer":
 			if self._action == "cancel":
 				self.validate_no_later_work_order_reservation()
+			else:
+				self.release_unused_work_order_reservations()
 			self.adjust_inward_reservations(release=self._action == "submit")
+
+	def release_unused_work_order_reservations(self):
+		"""Take what the return needs from the unused part of its Work Order reservations: the qty the inward order no longer holds, or the returned serial and batch nos."""
+		return_qty = defaultdict(float)
+		for item in self.items:
+			if not item.serial_and_batch_bundle:
+				return_qty[item.scio_detail] += item.transfer_qty
+				continue
+
+			release_unused_inward_reservations(
+				self.subcontracting_inward_order,
+				{item.scio_detail: item.transfer_qty},
+				frappe._dict(
+					serial_nos=get_serial_nos(item.serial_and_batch_bundle),
+					batches={
+						batch_no: abs(row.qty)
+						for batch_no, row in get_batch_nos(item.serial_and_batch_bundle).items()
+					},
+				),
+			)
+
+		reserved_qty = get_sre_reserved_qty_details_for_voucher(
+			"Subcontracting Inward Order", self.subcontracting_inward_order
+		)
+		short_qty = {}
+		for scio_detail, qty in return_qty.items():
+			if (missing_qty := qty - flt(reserved_qty.get(scio_detail))) > 0:
+				short_qty[scio_detail] = missing_qty
+
+		if short_qty:
+			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
 
 	def validate_no_later_work_order_reservation(self):
 		"""Cancel gives batch qty back newest reservation first, which is wrong once a later Work Order took from them."""
