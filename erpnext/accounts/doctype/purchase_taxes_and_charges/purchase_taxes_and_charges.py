@@ -37,6 +37,7 @@ class PurchaseTaxesandCharges(Document):
 		is_tax_withholding_account: DF.Check
 		item_wise_tax_detail: DF.Code | None
 		net_amount: DF.Currency
+		original_tax_row: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

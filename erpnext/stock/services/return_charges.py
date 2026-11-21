@@ -20,16 +20,10 @@ class ReturnChargesService:
 			return
 
 		original = frappe.get_doc(doc.doctype, doc.return_against)
-		# rows can be removed from a return, so match each charge to the original's by account and description
-		original_charges = {}
-		for tax in get_actual_valuation_charges(original):
-			original_charges.setdefault((tax.account_head, tax.description), []).append(tax)
-
 		returned_share = self.get_returned_share(original)
-		for tax in charges:
-			if same_charges := original_charges.get((tax.account_head, tax.description)):
-				base_share = flt(same_charges.pop(0).base_tax_amount) * returned_share
-				tax.tax_amount = -flt(base_share / doc.conversion_rate, tax.precision("tax_amount"))
+		for tax, original_tax in pair_with_original_charges(charges, get_actual_valuation_charges(original)):
+			base_share = flt(original_tax.base_tax_amount) * returned_share
+			tax.tax_amount = -flt(base_share / doc.conversion_rate, tax.precision("tax_amount"))
 
 	def is_traced_to_original(self) -> bool:
 		"""Only rows linked to the original row tell which charge the returned stock carried."""
@@ -88,6 +82,35 @@ def get_charge_proportions(doc) -> list:
 		return [(row, flt(row.get("rejected_qty")) / total_rejected_qty) for row in items]
 
 	return []
+
+
+def pair_with_original_charges(charges, original_charges) -> list:
+	"""Each charge with the original charge it was mapped from, claimed by one charge only. Other charges,
+	such as those of returns made before that link, take the next unclaimed original charge on the same
+	account and description."""
+	by_name = {tax.name: tax for tax in original_charges}
+	claimed = {}
+	for tax in charges:
+		if tax.original_tax_row in by_name:
+			claimed.setdefault(tax.original_tax_row, tax)
+
+	unclaimed = {}
+	for tax in original_charges:
+		if tax.name not in claimed:
+			unclaimed.setdefault((tax.account_head, tax.description), []).append(tax)
+
+	pairs = []
+	for tax in charges:
+		if claimed.get(tax.original_tax_row) is tax:
+			original_tax = by_name[tax.original_tax_row]
+		else:
+			same_charges = unclaimed.get((tax.account_head, tax.description))
+			original_tax = same_charges.pop(0) if same_charges else None
+
+		if original_tax:
+			pairs.append((tax, original_tax))
+
+	return pairs
 
 
 def get_actual_valuation_charges(doc) -> list:
