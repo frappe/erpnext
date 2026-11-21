@@ -88,6 +88,26 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual([(row.item_code, row.planned_qty) for row in mps.items], [(item, 3)])
 
+	def test_fetch_buttons_clear_saved_rows_when_nothing_matches(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item("_Test MPS Refetch Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=5)
+		make_material_request(item_code=item, qty=5, material_request_type="Manufacture")
+		mps = make_mps(to_date=add_days(today(), 60), select_items=[item])
+		mps.fetch_sales_orders(customer=order.customer)
+		mps.fetch_materials_requests(material_request_type="Manufacture")
+		self.assertTrue(mps.sales_orders and mps.material_requests)
+
+		mps.fetch_sales_orders(customer="_Test Customer With No Orders")
+		mps.reload()
+		self.assertEqual(mps.sales_orders, [])
+
+		mps.fetch_materials_requests(from_date=add_days(today(), 30))
+		mps.reload()
+		self.assertEqual(mps.material_requests, [])
+
 	def test_demand_rows_keep_their_warehouse(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
