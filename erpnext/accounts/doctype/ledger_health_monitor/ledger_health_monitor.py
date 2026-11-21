@@ -1,7 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -25,4 +26,6 @@ class LedgerHealthMonitor(Document):
 		monitor_for_last_x_days: DF.Int
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		if self.enable_health_monitor and not self.companies:
+			frappe.throw(_("Add at least one Company to monitor, or disable the Health Monitor."))
