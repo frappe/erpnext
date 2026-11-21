@@ -14,6 +14,8 @@ frappe.ui.form.on("Payment Gateway Account", {
 			return {
 				filters: {
 					company: frm.doc.company,
+					is_group: 0,
+					account_type: ["in", ["Bank", "Cash"]],
 				},
 			};
 		});
