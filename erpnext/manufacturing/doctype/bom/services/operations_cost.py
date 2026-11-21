@@ -86,12 +86,7 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 
 
 def _add_operation_workstation_costs(stock_entry, work_order, row, op_expense_account):
-	workstation_cost = frappe.get_all(
-		"Workstation Cost",
-		fields=["operating_component", "operating_cost"],
-		filters={"parent": row.workstation, "parenttype": "Workstation", "operating_cost": (">", 0)},
-		order_by="idx",
-	)
+	workstation_cost = _get_operating_components(work_order, row)
 	total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
 	if not (flt(row.actual_operating_cost) and total_component_rate):
 		return False
@@ -109,6 +104,53 @@ def _add_operation_workstation_costs(stock_entry, work_order, row, op_expense_ac
 		)
 		stock_entry.append("additional_costs", row_data)
 	return True
+
+
+def _get_operating_components(work_order, row):
+	"""Components of the workstations the operation's Job Cards ran on, weighted by the cost run on each."""
+	job_card_costs = _job_card_costs_by_workstation(work_order, row)
+	if not job_card_costs:
+		return _workstation_components([row.workstation])
+
+	components = {}
+	workstation_cost = _workstation_components(list(job_card_costs))
+	for workstation, cost in job_card_costs.items():
+		rows = [wc for wc in workstation_cost if wc.parent == workstation]
+		total_rate = sum(flt(wc.operating_cost) for wc in rows)
+		if not total_rate:
+			continue
+		for wc in rows:
+			component = components.setdefault(
+				wc.operating_component,
+				frappe._dict(operating_component=wc.operating_component, operating_cost=0.0),
+			)
+			component.operating_cost += cost * flt(wc.operating_cost) / total_rate
+	return list(components.values())
+
+
+def _job_card_costs_by_workstation(work_order, row):
+	job_card = frappe.qb.DocType("Job Card")
+	rows = (
+		frappe.qb.from_(job_card)
+		.select(job_card.workstation, Sum(job_card.total_time_in_mins * job_card.hour_rate / 60.0))
+		.where(
+			(job_card.work_order == work_order.name)
+			& (job_card.operation_id == row.name)
+			& (job_card.docstatus == 1)
+			& (IfNull(job_card.is_corrective_job_card, 0) == 0)
+		)
+		.groupby(job_card.workstation)
+	).run()
+	return {workstation: flt(cost) for workstation, cost in rows}
+
+
+def _workstation_components(workstations):
+	return frappe.get_all(
+		"Workstation Cost",
+		fields=["parent", "operating_component", "operating_cost"],
+		filters={"parent": ("in", workstations), "parenttype": "Workstation", "operating_cost": (">", 0)},
+		order_by="idx",
+	)
 
 
 def _split_by_component_rate(amount, workstation_cost, total_component_rate):

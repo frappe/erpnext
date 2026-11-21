@@ -265,6 +265,23 @@ class TestWorkstation(ERPNextTestSuite):
 		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
 		self.assertFalse([row for row in entry.additional_costs if row.has_operating_cost])
 
+	def test_manufacture_splits_operating_cost_by_job_card_workstation(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+
+		planned = make_workstation(workstation_name="_Test WS Planned Rent", hour_rate_rent=600)
+		actual = make_workstation(workstation_name="_Test WS Actual Wages", hour_rate_labour=100)
+		work_order = make_work_order_with_completed_job_card(planned.name, actual.name)
+
+		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
+		self.assertEqual(
+			[
+				(row.operating_component, row.amount)
+				for row in entry.additional_costs
+				if row.has_operating_cost
+			],
+			[(_("Wages"), 100)],
+		)
+
 	def test_component_wise_operating_cost_adds_up_to_the_actual_cost(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
 
