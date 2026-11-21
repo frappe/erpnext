@@ -151,14 +151,15 @@ class StockEntrySABB(BaseStockEntry):
 			return serial_nos, batch_nos
 
 		taken = self.get_serial_batch_set_on_rows()
-		for row in self.doc.items:
+		# rows with a batch entered pick first, so other rows do not take that batch's serial nos
+		for row in sorted(self.doc.items, key=lambda row: not get_entered_batch(row)):
 			if not has_serial_batch_set(row):
 				serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
 					row.scio_detail,
 					row.transfer_qty,
 					only_pending=self.doc.purpose != "Subcontracting Return",
 					taken=taken[row.scio_detail],
-					batch_no=row.batch_no if row.use_serial_batch_fields else None,
+					batch_no=get_entered_batch(row),
 				)
 				add_taken(taken[row.scio_detail], serial_nos_list, batch_nos_list)
 
@@ -316,6 +317,10 @@ def has_serial_batch_set(row):
 		row.serial_no
 		or (row.batch_no and not frappe.get_cached_value("Item", row.item_code, "has_serial_no"))
 	)
+
+
+def get_entered_batch(row):
+	return row.batch_no if row.use_serial_batch_fields else None
 
 
 def get_serial_nos_and_batch_qty(row):
