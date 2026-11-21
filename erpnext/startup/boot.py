@@ -9,6 +9,22 @@ from frappe.utils import cint
 import erpnext.accounts.utils
 from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 
+BOOT_COMPANY_FIELDS = (
+	"name",
+	"default_currency",
+	"country",
+	"default_letter_head",
+	"enable_perpetual_inventory",
+)
+READABLE_COMPANY_FIELDS = (
+	"name",
+	"cost_center",
+	"default_selling_terms",
+	"default_buying_terms",
+	"default_bank_account",
+	"exchange_gain_loss_account",
+)
+
 
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
@@ -51,26 +67,7 @@ def boot_session(bootinfo):
 			frappe.get_single_value("Selling Settings", "allow_sales_order_creation_for_expired_quotation")
 		)
 
-		# if no company, show a dialog box to create a new company
-		bootinfo.customer_count = frappe.db.sql("""SELECT count(*) FROM `tabCustomer`""")[0][0]
-
-		if not bootinfo.customer_count:
-			bootinfo.setup_complete = (
-				frappe.db.sql(
-					"""SELECT `name`
-				FROM `tabCompany`
-				LIMIT 1"""
-				)
-				and "Yes"
-				or "No"
-			)
-
-		bootinfo.docs += frappe.db.sql(
-			"""select name, default_currency, cost_center, default_selling_terms, default_buying_terms,
-			default_letter_head, default_bank_account, enable_perpetual_inventory, country, exchange_gain_loss_account from `tabCompany`""",
-			as_dict=1,
-			update={"doctype": ":Company"},
-		)
+		bootinfo.docs += get_boot_companies()
 
 		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")
 		bootinfo.party_account_types = frappe._dict(party_account_types)
@@ -85,6 +82,26 @@ def boot_session(bootinfo):
 			"Accounts Settings", "default_ageing_range"
 		)
 		bootinfo.sysdefaults.repost_allowed_doctypes = frappe.get_hooks("repost_allowed_doctypes")
+
+
+def get_boot_companies():
+	# every company is listed (currency is needed client-side); ledger defaults only where readable
+	companies = frappe.get_all("Company", fields=list(BOOT_COMPANY_FIELDS), limit_page_length=0)
+	readable_defaults = get_readable_company_defaults()
+
+	for company in companies:
+		company.update(readable_defaults.get(company.name, {}))
+		company.doctype = ":Company"
+
+	return companies
+
+
+def get_readable_company_defaults():
+	if not frappe.has_permission("Company", "read"):
+		return {}
+
+	companies = frappe.get_list("Company", fields=list(READABLE_COMPANY_FIELDS), limit_page_length=0)
+	return {company.name: company for company in companies}
 
 
 def remove_disabled_price_list_defaults(bootinfo):
