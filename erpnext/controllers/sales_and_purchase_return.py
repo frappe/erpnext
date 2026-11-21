@@ -101,6 +101,8 @@ def get_takes_of_moved_stock(doc) -> list:
 
 def get_stock_takes(doc) -> list:
 	"""Stock each return row takes out: its qty from its warehouse and its rejected qty from its rejected warehouse."""
+	from erpnext.controllers.buying_controller import get_stock_qty
+
 	receipt_rows = frappe.get_all(
 		f"{doc.doctype} Item",
 		filters={"parent": doc.return_against},
@@ -116,10 +118,7 @@ def get_stock_takes(doc) -> list:
 			take = frappe._dict(
 				row=row, warehouse=row.get(warehouse_field), is_rejected=qty_field == "rejected_qty"
 			)
-			# rounded as the ledger posts it
-			take.stock_qty = abs(
-				flt(flt(row.get(qty_field)) * flt(row.conversion_factor or 1), row.precision("stock_qty"))
-			)
+			take.stock_qty = abs(get_stock_qty(row, row.get(qty_field)))
 			take.receipt_warehouses = get_receipt_warehouses_if_moved(doc, take, receipt_rows)
 			takes.append(take)
 
