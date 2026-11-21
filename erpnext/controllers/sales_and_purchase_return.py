@@ -169,9 +169,12 @@ def validate_returned_items(doc):
 					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
 				add_returned_row(doc, key, d, already_returned_items)
 
+				# the return row may be in another UOM than the original
+				rate_precision = d.precision("rate")
 				if (
-					ref.rate
-					and flt(d.rate) > ref.rate
+					ref.stock_uom_rate
+					and flt(d.rate, rate_precision)
+					> flt(ref.stock_uom_rate * flt(d.conversion_factor or 1), rate_precision)
 					and doc.doctype in ("Delivery Note", "Sales Invoice")
 					and get_valuation_method(d.item_code, doc.company) != "Moving Average"
 				):
@@ -286,9 +289,8 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 
 
 def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
+	# stock qty, so that a return in another UOM is held to what was billed or moved
 	fields = ["stock_qty"]
-	if (doc.doctype == "Purchase Invoice" or doc.doctype == "Sales Invoice") and not doc.update_stock:
-		fields = ["qty"]
 
 	tracks_accepted_rejected_split = doc.doctype in (
 		"Purchase Receipt",
@@ -410,7 +412,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		frappe._dict(
 			{
 				"qty": 0,
-				"rate": 0,
+				"stock_uom_rate": 0,
 				"stock_qty": 0,
 				"rejected_qty": 0,
 				"received_qty": 0,
@@ -423,8 +425,8 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	item_dict = valid_items[key]
 	item_dict["qty"] += ref_item_row.qty
 	item_dict["stock_qty"] += ref_item_row.get("stock_qty", 0)
-	if ref_item_row.get("rate", 0) > item_dict["rate"]:
-		item_dict["rate"] = ref_item_row.get("rate", 0)
+	stock_uom_rate = flt(ref_item_row.get("rate")) / flt(ref_item_row.get("conversion_factor") or 1)
+	item_dict["stock_uom_rate"] = max(item_dict["stock_uom_rate"], stock_uom_rate)
 
 	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		item_dict["received_qty"] += ref_item_row.received_qty
@@ -565,21 +567,21 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 	_return_map = frappe._dict({})
 
 	for row in data:
-		if row.warehouse and row.warehouse not in _return_map:
-			_return_map[row.warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
-
-		if row.rejected_warehouse and row.rejected_warehouse not in _return_map:
-			_return_map[row.rejected_warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
+		for warehouse in (row.warehouse, row.rejected_warehouse):
+			if warehouse and warehouse not in _return_map:
+				_return_map[warehouse] = frappe._dict({"qty": 0, "stock_qty": 0, "qty_in_stock_uom": 0})
 
 		if row.warehouse:
 			qty_map = _return_map.get(row.warehouse)
 			qty_map.qty += abs(flt(row.qty))
 			qty_map.stock_qty += abs(flt(row.stock_qty))
+			qty_map.qty_in_stock_uom += abs(flt(row.qty)) * flt(row.conversion_factor)
 
 		if row.rejected_warehouse:
 			rejected_qty_map = _return_map.get(row.rejected_warehouse)
 			rejected_qty_map.qty += abs(flt(row.rejected_qty))
 			rejected_qty_map.stock_qty += abs(flt(row.rejected_qty) * flt(row.conversion_factor))
+			rejected_qty_map.qty_in_stock_uom += abs(flt(row.rejected_qty)) * flt(row.conversion_factor)
 
 	return _return_map
 
@@ -593,8 +595,15 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	else:
 		party_type = "customer"
 
+	def sum_in_stock_uom(field):
+		qty_in_stock_uom = {
+			"MUL": [{"ABS": f"`tab{child_doctype}`.{field}"}, f"`tab{child_doctype}`.conversion_factor"]
+		}
+		return {"SUM": [qty_in_stock_uom], "as": f"{field}_in_stock_uom"}
+
 	fields = [
 		{"SUM": [{"ABS": f"`tab{child_doctype}`.qty"}], "as": "qty"},
+		sum_in_stock_uom("qty"),
 	]
 
 	if doctype != "Subcontracting Receipt":
@@ -603,10 +612,7 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 		]
 
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
-		fields += [
-			{"SUM": [{"ABS": f"`tab{child_doctype}`.rejected_qty"}], "as": "rejected_qty"},
-			{"SUM": [{"ABS": f"`tab{child_doctype}`.received_qty"}], "as": "received_qty"},
-		]
+		fields += [sum_in_stock_uom("rejected_qty"), sum_in_stock_uom("received_qty")]
 
 		if doctype == "Purchase Receipt":
 			fields += [
@@ -627,6 +633,53 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	)
 
 	return data[0]
+
+
+def set_qty_left_to_return(source_row, target_row, returned_in_stock_uom: dict) -> None:
+	"""Map what is left to return of each qty field, in the source row's UOM or, if that UOM cannot
+	hold it, in stock UOM; earlier returns may be in another UOM."""
+	conversion_factor = flt(source_row.conversion_factor or 1)
+	stock_qty_left = {
+		field: flt(source_row.get(field)) * conversion_factor - flt(returned_qty)
+		for field, returned_qty in returned_in_stock_uom.items()
+	}
+	# Subcontracting Receipt Item has no uom field: it is always in stock UOM
+	row_uom = source_row.get("uom") or source_row.stock_uom
+	if row_uom != source_row.stock_uom and not all(
+		is_exact_in_row_uom(source_row, qty) for qty in stock_qty_left.values()
+	):
+		set_row_in_stock_uom(target_row)
+		conversion_factor = 1
+
+	for field, qty in stock_qty_left.items():
+		target_row.set(field, -1 * flt(qty / conversion_factor, target_row.precision(field)))
+
+
+def is_exact_in_row_uom(row, stock_qty) -> bool:
+	"""Whether a stock qty converts to the row's UOM and back without loss, as a whole number if the UOM
+	must be one."""
+	conversion_factor = flt(row.conversion_factor or 1)
+	qty = flt(stock_qty / conversion_factor, row.precision("qty"))
+	if qty != cint(qty) and frappe.get_cached_value("UOM", row.uom, "must_be_whole_number"):
+		return False
+
+	stock_qty_precision = row.precision("stock_qty")
+	return flt(qty * conversion_factor, stock_qty_precision) == flt(stock_qty, stock_qty_precision)
+
+
+def set_row_in_stock_uom(row) -> None:
+	"""Switch a mapped row to stock UOM, with its per-unit prices converted."""
+	conversion_factor = flt(row.conversion_factor or 1)
+	per_unit_fields = ["price_list_rate", "rate", "discount_amount", "rate_with_margin"]
+	if row.get("margin_type") == "Amount":
+		per_unit_fields.append("margin_rate_or_amount")
+
+	for field in per_unit_fields:
+		if row.get(field):
+			row.set(field, flt(row.get(field) / conversion_factor, row.precision(field)))
+
+	row.uom = row.stock_uom
+	row.conversion_factor = 1
 
 
 def make_return_doc(doctype: str, source_name: str, target_doc=None, return_against_rejected_qty=False):
@@ -755,12 +808,19 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			wh_map = returned_qty_map.get(source_doc.warehouse) or frappe._dict()
 			rejected_wh_map = returned_qty_map.get(source_doc.rejected_warehouse) or frappe._dict()
 
+			if return_against_rejected_qty:
+				returned_in_stock_uom = {"rejected_qty": rejected_wh_map.qty_in_stock_uom}
+			elif doctype == "Subcontracting Receipt":
+				returned_in_stock_uom = {"qty": wh_map.qty_in_stock_uom}
+			else:
+				returned_in_stock_uom = {
+					"qty": wh_map.qty_in_stock_uom,
+					"rejected_qty": rejected_wh_map.qty_in_stock_uom,
+				}
+			set_qty_left_to_return(source_doc, target_doc, returned_in_stock_uom)
+
 			if doctype == "Subcontracting Receipt":
 				target_doc.received_qty = -1 * flt(source_doc.qty)
-			else:
-				target_doc.rejected_qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
-
-			target_doc.qty = -1 * flt(source_doc.qty - (wh_map.qty or 0))
 
 			if hasattr(target_doc, "stock_qty") and not return_against_rejected_qty:
 				target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (flt(wh_map.stock_qty) or 0))
@@ -772,7 +832,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.subcontracting_receipt_item = source_doc.name
 				if return_against_rejected_qty:
-					target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+					target_doc.qty = target_doc.rejected_qty
 					target_doc.rejected_qty = 0.0
 					target_doc.rejected_warehouse = ""
 					target_doc.warehouse = source_doc.rejected_warehouse
@@ -787,7 +847,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.delivery_note_packed_item = source_doc.delivery_note_packed_item
 
 			if doctype == "Purchase Receipt" and return_against_rejected_qty:
-				target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+				target_doc.qty = target_doc.rejected_qty
 				target_doc.rejected_qty = 0.0
 				target_doc.rejected_warehouse = ""
 				target_doc.warehouse = source_doc.rejected_warehouse
@@ -798,13 +858,14 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
-			target_doc.received_qty = -1 * flt(
-				source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
+			set_qty_left_to_return(
+				source_doc,
+				target_doc,
+				{
+					field: returned_qty_map.get(f"{field}_in_stock_uom")
+					for field in ("qty", "received_qty", "rejected_qty")
+				},
 			)
-			target_doc.rejected_qty = -1 * flt(
-				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
-			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
 
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 			target_doc.purchase_order = source_doc.purchase_order
@@ -820,7 +881,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.customer, source_doc.name, doctype
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			set_qty_left_to_return(source_doc, target_doc, {"qty": returned_qty_map.get("qty_in_stock_uom")})
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 
 			target_doc.against_sales_order = source_doc.against_sales_order
@@ -836,7 +897,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.customer, source_doc.name, doctype
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			set_qty_left_to_return(source_doc, target_doc, {"qty": returned_qty_map.get("qty_in_stock_uom")})
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 
 			target_doc.sales_order = source_doc.sales_order
