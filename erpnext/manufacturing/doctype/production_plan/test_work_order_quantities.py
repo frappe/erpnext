@@ -323,6 +323,21 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		self.assertEqual(work_order.reload().produced_qty, 95)
 		self.assert_pending_qty(plan, field, 0)
 
+	def test_lower_loss_offsets_excess_loss_of_another_work_order(self):
+		field = "production_plan_item"
+		plan = self.make_plan(qty=90, consider_process_loss=True)
+		work_orders = []
+		for _ in range(2):
+			work_order = self.create_work_order(plan, field)
+			work_order.qty = 50
+			work_order.submit()
+			work_orders.append(work_order)
+
+		# version-16-hotfix defaults a zero loss to the BOM's 10%, so lose 1 here and 9 on the other
+		self.manufacture_with_loss(work_orders[0], loss_qty=1)
+		self.manufacture_with_loss(work_orders[1], loss_qty=9)
+		self.assert_pending_qty(plan, field, 0)
+
 	def test_whole_number_replacement_rounds_up(self):
 		field = "production_plan_sub_assembly_item"
 		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10}).name
