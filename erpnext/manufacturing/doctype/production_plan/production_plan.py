@@ -2432,9 +2432,15 @@ def get_items_for_material_requests(
 					row for row in bins if row.warehouse == row_target_warehouse
 				)
 			elif is_transfer and not row_scope_warehouse:
-				# no warehouse: availability spans all warehouses, the selected ones included
+				# no warehouse: availability spans all warehouses, the selected ones included, so leave
+				# those out, but keep the item group's default warehouse, which receives the material
+				receiving_warehouse = get_item_group_defaults(details.item_code, company).get(
+					"default_warehouse"
+				)
 				shortage_bin = _aggregate_bin_details(
-					row for row in bins if row.warehouse not in transfer_warehouses
+					row
+					for row in bins
+					if row.warehouse == receiving_warehouse or row.warehouse not in transfer_warehouses
 				)
 
 			if details.qty > 0:
@@ -2567,9 +2573,10 @@ def _get_transfer_locations(mr_items, warehouses, company):
 			0, flt(item.get("quantity")) * flt(item.get("conversion_factor"))
 		)
 
+	# keep all locations, so a skipped receiving warehouse does not crowd out the others
 	return {
 		item_code: get_available_item_locations(
-			item_code, warehouses, required_qty, company, ignore_validation=True
+			item_code, warehouses, required_qty, company, ignore_validation=True, keep_all_locations=True
 		)
 		if required_qty > 0
 		else []
@@ -2583,6 +2590,10 @@ def _transfer_from_locations(item, locations, new_mr_items, required_qty):
 	for d in locations:
 		if flt(required_qty, precision) <= 0:
 			return required_qty
+
+		# stock is not transferred from the receiving warehouse to itself
+		if d.get("warehouse") == item.get("warehouse"):
+			continue
 
 		quantity = flt(min(required_qty, d.get("qty")), precision)
 		if quantity <= 0:
