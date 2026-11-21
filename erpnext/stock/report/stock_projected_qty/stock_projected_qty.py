@@ -10,6 +10,7 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_warehouses_condition
+from erpnext.stock.reorder_item import get_reorder_levels_for_variants
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -303,14 +304,21 @@ def get_item_map(item_code, include_uom):
 	alive = (item.end_of_life > today()) | item.end_of_life.isnull()
 	if frappe.db.db_type != "postgres":
 		alive |= item.end_of_life == "0000-00-00"
+	is_live_stock_item = (item.is_stock_item == 1) & (item.disabled == 0) & alive
 
 	query = (
 		frappe.qb.from_(item)
-		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.select(
+			item.name,
+			item.item_name,
+			item.description,
+			item.item_group,
+			item.brand,
+			item.stock_uom,
+			item.variant_of,
+		)
 		.where(
-			(item.is_stock_item == 1)
-			& (item.disabled == 0)
-			& alive
+			is_live_stock_item
 			& (ExistsCriterion(frappe.qb.from_(bin).select(bin.name).where(bin.item_code == item.name)))
 		)
 	)
@@ -326,10 +334,19 @@ def get_item_map(item_code, include_uom):
 	items = query.run(as_dict=True)
 
 	ir = frappe.qb.DocType("Item Reorder")
-	query = frappe.qb.from_(ir).select("*")
+	# same items as the re-order job
+	query = (
+		frappe.qb.from_(ir)
+		.inner_join(item)
+		.on(ir.parent == item.name)
+		.select(ir.star)
+		.where(is_live_stock_item)
+	)
 
 	if item_code:
-		query = query.where(ir.parent == item_code)
+		# a variant without re-order levels uses its template's
+		templates = [d.variant_of for d in items if d.variant_of]
+		query = query.where(ir.parent.isin([item_code, *templates]))
 
 	reorder_levels = frappe._dict()
 	for d in query.run(as_dict=True):
@@ -337,6 +354,8 @@ def get_item_map(item_code, include_uom):
 			reorder_levels[d.parent] = []
 
 		reorder_levels[d.parent].append(d)
+
+	reorder_levels = get_reorder_levels_for_variants(reorder_levels, item_code)
 
 	item_map = frappe._dict()
 	for item in items:
