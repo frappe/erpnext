@@ -1261,6 +1261,42 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 50)
 
+	def test_early_payment_discount_on_usd_purchase_invoice_from_usd_bank(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			credit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=100,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		pi.payment_terms_template = "Test Discount Template"
+		frappe.db.set_value("Company", pi.company, "default_discount_account", "Write Off - _TC")
+		pi.save()
+		pi.submit()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+		self.assertEqual(pe.deductions[0].amount, -800)
+
+	def test_early_payment_discount_on_usd_sales_order(self):
+		so = make_sales_order(customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_save=1)
+		so.conversion_rate = 80
+		create_payment_terms_template_with_discount()
+		so.payment_terms_template = "Test Discount Template"
+		so.save()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{
