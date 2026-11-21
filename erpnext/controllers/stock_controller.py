@@ -540,7 +540,7 @@ class StockController(AccountsController):
 	def update_stock_reservation_entries(self):
 		from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
 
-		def get_sre_list(item):
+		def get_sre_list(item, newest_first=False):
 			table = frappe.qb.DocType("Stock Reservation Entry")
 			query = (
 				frappe.qb.from_(table)
@@ -557,13 +557,16 @@ class StockController(AccountsController):
 				)
 				# serial and batch reservations first, so a qty one only takes what they did not match
 				.orderby(table.reservation_based_on, order=Order.desc)
-				.orderby(table.creation)
+				.orderby(table.creation, order=Order.desc if newest_first else Order.asc)
 			)
 			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
 				query = query.where(table.voucher_detail_no == item.get(reference_field))
 				# supplier warehouse reservations are used by the receipt, not the transfer
 				if warehouse_field := data_map[purpose or self.doctype].get("exclude_warehouse_field"):
 					query = query.where(table.warehouse != item.get(warehouse_field))
+				# a return takes back from the supplier warehouse reservations
+				if warehouse_field := data_map[purpose or self.doctype].get("warehouse_field"):
+					query = query.where(table.warehouse == item.get(warehouse_field))
 			else:
 				query = query.where(
 					(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
@@ -588,6 +591,14 @@ class StockController(AccountsController):
 					"exclude_warehouse_field": "t_warehouse",
 					"field": "transferred_qty",
 				},
+				"Return of Components": {
+					"table_name": "items",
+					"voucher_type": "Subcontracting Order",
+					"voucher_no": self.get("subcontracting_order"),
+					"voucher_detail_no_field": "sco_rm_detail",
+					"warehouse_field": "s_warehouse",
+					"field": "transferred_qty",
+				},
 				"Subcontracting Receipt": {
 					"table_name": "supplied_items",
 					"voucher_type": "Subcontracting Order",
@@ -595,9 +606,10 @@ class StockController(AccountsController):
 				},
 			}
 
-		purpose = self.get("purpose")
+		is_components_return = self.doctype == "Stock Entry" and self.is_reserved_components_return
+		purpose = "Return of Components" if is_components_return else self.get("purpose")
 		if (
-			purpose == "Subcontracting Delivery"
+			purpose in ("Subcontracting Delivery", "Return of Components")
 			or (
 				purpose == "Send to Subcontractor"
 				and frappe.get_value("Subcontracting Order", self.subcontracting_order, "reserve_stock")
@@ -613,7 +625,8 @@ class StockController(AccountsController):
 
 			field = data_map[purpose or self.doctype]["field"]
 			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
-				sre_list = get_sre_list(item)
+				# a submit uses the oldest reservation first, so a cancel gives back the newest first
+				sre_list = get_sre_list(item, newest_first=self._action == "cancel")
 
 				if not sre_list:
 					continue
@@ -631,11 +644,10 @@ class StockController(AccountsController):
 					if sre_doc.reservation_based_on == "Serial and Batch":
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
-								is_open = (
-									entry.qty > entry.delivered_qty
-									if self._action == "submit"
-									else entry.delivered_qty
-								)
+								is_open = entry.qty > entry.delivered_qty
+								if self._action == "cancel":
+									# the entry counts every usage of the reservation, so give back only this one's
+									is_open = entry.delivered_qty and working_qty < sre_doc.get(field)
 								if entry.serial_no in serial_nos and is_open:
 									entry.delivered_qty = 1 if self._action == "submit" else 0
 									entry.db_update()
@@ -644,12 +656,11 @@ class StockController(AccountsController):
 						else:
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in batch_qty:
-									delivered_qty = min(
-										(entry.qty - entry.delivered_qty)
-										if self._action == "submit"
-										else entry.delivered_qty,
-										batch_qty[entry.batch_no],
-									)
+									open_qty = entry.qty - entry.delivered_qty
+									if self._action == "cancel":
+										# the entry counts every usage of the reservation, so give back only this one's
+										open_qty = min(entry.delivered_qty, sre_doc.get(field) - working_qty)
+									delivered_qty = min(open_qty, batch_qty[entry.batch_no])
 									entry.delivered_qty = flt(
 										entry.delivered_qty
 										+ (
@@ -664,7 +675,12 @@ class StockController(AccountsController):
 									batch_qty[entry.batch_no] -= delivered_qty
 					else:
 						working_qty = min(
-							(sre_doc.reserved_qty - sre_doc.get(field))
+							(
+								sre_doc.reserved_qty
+								- sre_doc.delivered_qty
+								- sre_doc.transferred_qty
+								- sre_doc.consumed_qty
+							)
 							if self._action == "submit"
 							else sre_doc.get(field),
 							qty,
