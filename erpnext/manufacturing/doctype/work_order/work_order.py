@@ -1684,14 +1684,16 @@ class WorkOrder(Document):
 			.left_join(plan_item)
 			.on(plan_item.name == wo.production_plan_item)
 			.select(Sum(qty_against_sales_order(wo, plan_item)))
-			.where((wo.sales_order == self.sales_order) & (wo.docstatus == 1))
+			.where(
+				(wo.sales_order == self.sales_order)
+				& (wo.sales_order_item == self.sales_order_item)
+				& (wo.docstatus == 1)
+			)
 		)
 		if self.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.product_bundle_item)
 		else:
-			query = query.where(
-				(wo.production_item == self.production_item) & (wo.sales_order_item == self.sales_order_item)
-			)
+			query = query.where(wo.production_item == self.production_item)
 
 		return query.run(as_list=1)
 
