@@ -4430,58 +4430,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				)
 
 	def test_last_return_of_a_row_takes_the_rest_of_its_part_of_an_actual_valuation_charge(self):
-		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
-
 		# a service row keeps its part of the charge, so the charge is never fully returned
 		for second_is_stock in (1, 0):
 			with self.subTest(second_is_stock=second_is_stock):
-				items = [
-					make_item(properties={"is_stock_item": 1}).name,
-					make_item(properties={"is_stock_item": second_is_stock}).name,
-				]
-				pr = make_purchase_receipt(
-					company="_Test Company with perpetual inventory",
-					warehouse="Stores - TCP1",
-					supplier_warehouse="Work In Progress - TCP1",
-					item_code=items[0],
-					qty=3,
-					rate=100,
-					do_not_save=True,
-				)
-				pr.append(
-					"items",
-					{
-						"item_code": items[1],
-						"qty": 3,
-						"received_qty": 3,
-						"rate": 100,
-						"warehouse": "Stores - TCP1",
-						"conversion_factor": 1,
-						"uom": "_Test UOM",
-						"cost_center": "Main - TCP1",
-					},
-				)
-				pr.append(
-					"taxes",
-					{
-						"category": "Valuation",
-						"charge_type": "Actual",
-						"account_head": "Expenses Included In Valuation - TCP1",
-						"description": "Freight",
-						"tax_amount": 100,
-						"allocate_full_amount_to_stock_items": 0,
-					},
-				)
-				pr.submit()
-
-				returns = []
-				for row in pr.items[: 1 + second_is_stock]:
-					for _ in range(3):
-						pr_return = make_purchase_return(pr.name)
-						pr_return.items = [d for d in pr_return.items if d.purchase_receipt_item == row.name]
-						pr_return.items[0].update({"qty": -1, "received_qty": -1})
-						pr_return.submit()
-						returns.append(pr_return)
+				pr = make_two_row_receipt_with_freight(second_is_stock)
+				returns = return_each_row_in_thirds(pr, pr.items[: 1 + second_is_stock])
 
 				# each row carries 50; its last return takes the rest, as its stock ledger entry does
 				self.assertEqual(
@@ -4498,6 +4451,15 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 						},
 					)
 				)
+
+	def test_last_return_of_a_row_takes_the_rest_of_its_part_in_company_currency(self):
+		pr = make_two_row_receipt_with_freight(currency="USD", conversion_rate=2)
+		returns = return_each_row_in_thirds(pr, pr.items)
+
+		# each row carries 100; a return of USD 16.67 reverses 33.34, so the last one takes 33.32
+		self.assertEqual(
+			[pr_return.taxes[0].tax_amount for pr_return in returns], [-16.67, -16.67, -16.66] * 2
+		)
 
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
@@ -10267,6 +10229,62 @@ def make_receipt_with_freight_charges(*tax_amounts):
 			},
 		)
 	return pr.submit()
+
+
+def make_two_row_receipt_with_freight(second_is_stock=1, **args):
+	"""Submitted receipt of a stock row and a second row, each for Qty 3 at Rate 100, with an Actual
+	valuation charge of 100 spread over both."""
+	pr = make_purchase_receipt(
+		company="_Test Company with perpetual inventory",
+		warehouse="Stores - TCP1",
+		supplier_warehouse="Work In Progress - TCP1",
+		item_code=make_item(properties={"is_stock_item": 1}).name,
+		qty=3,
+		rate=100,
+		do_not_save=True,
+		**args,
+	)
+	pr.append(
+		"items",
+		{
+			"item_code": make_item(properties={"is_stock_item": second_is_stock}).name,
+			"qty": 3,
+			"received_qty": 3,
+			"rate": 100,
+			"warehouse": "Stores - TCP1",
+			"conversion_factor": 1,
+			"uom": "_Test UOM",
+			"cost_center": "Main - TCP1",
+		},
+	)
+	pr.append(
+		"taxes",
+		{
+			"category": "Valuation",
+			"charge_type": "Actual",
+			"account_head": "Expenses Included In Valuation - TCP1",
+			"description": "Freight",
+			"tax_amount": 100,
+			"allocate_full_amount_to_stock_items": 0,
+		},
+	)
+	return pr.submit()
+
+
+def return_each_row_in_thirds(pr, rows) -> list:
+	"""Submitted returns of one unit of each row, three times per row."""
+	from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+	returns = []
+	for row in rows:
+		for _ in range(3):
+			pr_return = make_purchase_return(pr.name)
+			pr_return.items = [d for d in pr_return.items if d.purchase_receipt_item == row.name]
+			pr_return.items[0].update({"qty": -1, "received_qty": -1})
+			pr_return.submit()
+			returns.append(pr_return)
+
+	return returns
 
 
 def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:
