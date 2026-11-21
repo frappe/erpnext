@@ -3,6 +3,7 @@
 
 import math
 from datetime import datetime, timedelta
+from itertools import pairwise
 
 import frappe
 from frappe import _
@@ -1423,7 +1424,7 @@ def convert_to_daily_bucket_data(data):
 	for row in data:
 		start_date, end_date = get_forecast_period(row)
 		no_of_days = days_diff(end_date, start_date)
-		for i in range(no_of_days):
+		for i, qty in enumerate(get_daily_forecast_qty(row, no_of_days)):
 			bucketed_data.append(
 				frappe._dict(
 					{
@@ -1433,12 +1434,22 @@ def convert_to_daily_bucket_data(data):
 						"sales_forecast": row.sales_forecast,
 						"stock_uom": row.stock_uom,
 						"parent_warehouse": row.parent_warehouse,
-						"qty": row.qty / no_of_days,
+						"qty": qty,
 					}
 				)
 			)
 
 	return bucketed_data
+
+
+def get_daily_forecast_qty(row, no_of_days):
+	"""Spread the forecast qty evenly over its days, in whole units for a whole number item."""
+	if not is_whole_number_qty(row.item_code, row.qty):
+		return [row.qty / no_of_days] * no_of_days
+
+	# a day gets the units its running total reaches, so the whole units never lag the even spread
+	running_totals = [math.ceil(row.qty * day / no_of_days) for day in range(no_of_days + 1)]
+	return [total - previous_total for previous_total, total in pairwise(running_totals)]
 
 
 @frappe.request_cache
@@ -1613,11 +1624,16 @@ def split_forecast_qty(rows, qty):
 		qty * flt(d.planned_qty) / total_planned_qty if total_planned_qty else (qty if idx == 0 else 0)
 		for idx, d in enumerate(rows)
 	]
-	if flt(qty) == round(qty) and is_whole_number_item(rows[0].item_code):
+	if is_whole_number_qty(rows[0].item_code, qty):
 		shares = round_shares_keeping_total(shares, round(qty))
 
 	for d, share in zip(rows, shares, strict=True):
 		d.sales_forecast_qty += share
+
+
+def is_whole_number_qty(item_code, qty):
+	"""Whether qty is whole and the item's stock UOM must be a whole number."""
+	return flt(qty) == round(qty) and is_whole_number_item(item_code)
 
 
 def is_whole_number_item(item_code):
