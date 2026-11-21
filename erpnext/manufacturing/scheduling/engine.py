@@ -178,14 +178,14 @@ class SchedulingEngine:
 			return [continuous_block(anchor, duration_mins, forward)]
 
 		blocks = []
-		remaining = duration_mins
+		remaining = datetime.timedelta(minutes=duration_mins)
 		day, boundary = anchor.date(), anchor
 		for _ in range(self.horizon_days):
 			windows = resource.calendar.windows_for_day(day)
 			for window in windows if forward else reversed(windows):
 				taken, remaining = self.consume_window(resource, window, boundary, remaining, forward)
 				blocks.extend(taken)
-				if remaining <= 0:
+				if not remaining:
 					blocks.sort(key=lambda block: block.start)
 					return blocks
 
@@ -202,13 +202,13 @@ class SchedulingEngine:
 		blocks = []
 		segments = self.free_segments(resource, start, end)
 		for segment_start, segment_end in segments if forward else reversed(segments):
-			take_mins = min(remaining, (segment_end - segment_start).total_seconds() / 60)
-			if take_mins <= 0:
+			take = min(remaining, segment_end - segment_start)
+			if not take:
 				continue
 
-			blocks.append(cut_segment(segment_start, segment_end, take_mins, forward))
-			remaining -= take_mins
-			if remaining <= 0:
+			blocks.append(cut_segment(segment_start, segment_end, take, forward))
+			remaining -= take
+			if not remaining:
 				break
 
 		return blocks, remaining
@@ -245,8 +245,7 @@ def continuous_block(anchor, duration_mins, forward):
 	return Interval(anchor, anchor + delta) if forward else Interval(anchor - delta, anchor)
 
 
-def cut_segment(segment_start, segment_end, take_mins, forward):
-	delta = datetime.timedelta(minutes=take_mins)
+def cut_segment(segment_start, segment_end, delta, forward):
 	if forward:
 		return Interval(segment_start, segment_start + delta)
 
