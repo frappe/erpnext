@@ -563,6 +563,34 @@ class TestProductionPlan(FrappeTestCase):
 		pln.reload()
 		pln.cancel()
 
+	def test_combined_plan_skips_references_of_items_without_default_bom(self):
+		item = "Test Production Item 1"
+		item_with_draft_bom = make_item("_Test PP Combine Item With Draft BOM", {"is_stock_item": 1}).name
+		make_bom(item=item_with_draft_bom, raw_materials=["Raw Material Item 1"], do_not_submit=True)
+		sales_order = make_sales_order(item_code=item, qty=5, do_not_submit=1)
+		sales_order.append(
+			"items",
+			{
+				"item_code": item_with_draft_bom,
+				"qty": 2,
+				"rate": 100,
+				"warehouse": sales_order.items[0].warehouse,
+			},
+		)
+		sales_order.submit()
+
+		pln = frappe.new_doc("Production Plan")
+		pln.company = sales_order.company
+		pln.get_items_from = "Sales Order"
+		pln.combine_items = 1
+		pln.append("sales_orders", {"sales_order": sales_order.name})
+		pln.get_items()
+
+		self.assertEqual(
+			[(row.sales_order_item, row.qty) for row in pln.prod_plan_references],
+			[(sales_order.items[0].name, 5)],
+		)
+
 	def test_production_plan_subassembly_default_supplier(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
