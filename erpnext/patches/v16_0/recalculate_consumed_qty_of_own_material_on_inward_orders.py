@@ -80,7 +80,7 @@ def get_own_material_rows(inward_order, fg_row):
 			"docstatus": 1,
 			"is_customer_provided_item": 0,
 		},
-		fields=["name", "rm_item_code", "warehouse", "is_additional_item", "billed_qty", "returned_qty"],
+		fields=["name", "rm_item_code", "warehouse", "is_additional_item", "billed_qty"],
 		order_by="idx",
 	)
 
@@ -103,17 +103,10 @@ def merge_duplicate_rows(rows):
 
 def merge_row(target, row):
 	target.billed_qty = flt(target.billed_qty + row.billed_qty, get_precision("billed_qty"))
-	target.returned_qty = flt(target.returned_qty + row.returned_qty, get_precision("returned_qty"))
+	frappe.db.set_value(RECEIVED_ITEM, target.name, "billed_qty", target.billed_qty, update_modified=False)
 	frappe.db.set_value(
-		RECEIVED_ITEM,
-		target.name,
-		{"billed_qty": target.billed_qty, "returned_qty": target.returned_qty},
-		update_modified=False,
+		"Sales Invoice Item", {"scio_detail": row.name}, "scio_detail", target.name, update_modified=False
 	)
-	for doctype in ("Sales Invoice Item", "Stock Entry Detail"):
-		frappe.db.set_value(
-			doctype, {"scio_detail": row.name}, "scio_detail", target.name, update_modified=False
-		)
 	frappe.db.delete(RECEIVED_ITEM, row.name)
 
 
