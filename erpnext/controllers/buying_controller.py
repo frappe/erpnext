@@ -243,14 +243,18 @@ class BuyingController(SubcontractingController):
 		)
 
 	def get_received_batch_qty(self, row) -> dict:
-		"""Qty of each batch that submitted receipts, net of their returns, took out of transit for the delivered row."""
+		"""Qty of each batch that submitted receipts, net of their returns, took for the delivered row.
+
+		An internal receipt takes it out of transit. An inter-company receipt has no transit, so its own
+		packages count.
+		"""
 		receipt_rows = self.get_receipt_rows(row)
 		if not receipt_rows:
 			return {}
 
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
-		received = (
+		query = (
 			frappe.qb.from_(entry)
 			.join(bundle)
 			.on(entry.parent == bundle.name)
@@ -258,13 +262,15 @@ class BuyingController(SubcontractingController):
 			.where(
 				(bundle.voucher_type == self.doctype)
 				& bundle.voucher_detail_no.isin(receipt_rows)
-				& (bundle.warehouse == row.from_warehouse)
 				& (bundle.docstatus == 1)
 				& (bundle.is_cancelled == 0)
 			)
 			.groupby(entry.batch_no)
-			.run()
 		)
+		if self.is_inter_company_receipt():
+			return {batch_no: flt(qty) for batch_no, qty in query.run() if batch_no}
+
+		received = query.where(bundle.warehouse == row.from_warehouse).run()
 		return {batch_no: -flt(qty) for batch_no, qty in received if batch_no}
 
 	def get_receipt_rows(self, row) -> list:
