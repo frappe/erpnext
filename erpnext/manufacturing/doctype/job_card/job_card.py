@@ -912,14 +912,10 @@ class JobCard(Document):
 		)
 
 	def reset_required_items(self):
-		"""Rebuild the items for a changed For Quantity until material moves against them."""
+		"""Rescale the items' Required Qty to a changed For Quantity."""
 		if self.is_new() or not self.items or not self.has_value_changed("for_quantity"):
 			return
 
-		if any(flt(row.transferred_qty) or flt(row.consumed_qty) for row in self.items):
-			return
-
-		self.items = []
 		self.set_required_items()
 
 	@frappe.whitelist()
@@ -939,26 +935,13 @@ class JobCard(Document):
 		operation = next((row for row in doc.operations if row.name == self.operation_id), {})
 		operation_qty = get_operation_qty(doc, operation)
 		other_job_cards_qty = self.get_other_job_cards_qty()
+		unmatched_rows = list(self.items)
 		for d in doc.required_items:
-			if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
-				frappe.throw(
-					_("Row {0} : Operation is required against the raw material item {1}").format(
-						d.idx, d.item_code
-					)
-				)
+			self.set_required_item(doc, d, operation_qty, other_job_cards_qty, unmatched_rows)
 
-			if self.is_corrective_job_card or self.is_own_material(d):
-				self.append(
-					"items",
-					{
-						"item_code": d.item_code,
-						"source_warehouse": self.source_warehouse or d.source_warehouse,
-						"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
-						"item_name": d.item_name,
-						"description": d.description,
-						"required_qty": self.get_required_qty(d, operation_qty, other_job_cards_qty),
-					},
-				)
+		for row in unmatched_rows:
+			if not (flt(row.transferred_qty) or flt(row.consumed_qty)):
+				self.remove(row)
 
 	def get_other_job_cards_qty(self) -> frappe._dict:
 		"""For Quantity and Required Qty per item of the other job cards of this operation."""
@@ -981,6 +964,35 @@ class JobCard(Document):
 			.groupby(job_card_item.item_code)
 		)
 		return frappe._dict(for_quantity=flt(for_quantity.run()[0][0]), required_qty=dict(required_qty.run()))
+
+	def set_required_item(self, doc, d, operation_qty, other_job_cards_qty, unmatched_rows):
+		if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
+			frappe.throw(
+				_("Row {0} : Operation is required against the raw material item {1}").format(
+					d.idx, d.item_code
+				)
+			)
+
+		if not (self.is_corrective_job_card or self.is_own_material(d)):
+			return
+
+		required_qty = self.get_required_qty(d, operation_qty, other_job_cards_qty)
+		if row := next((row for row in unmatched_rows if row.item_code == d.item_code), None):
+			unmatched_rows.remove(row)
+			row.required_qty = max(required_qty, flt(row.transferred_qty))
+			return
+
+		self.append(
+			"items",
+			{
+				"item_code": d.item_code,
+				"source_warehouse": self.source_warehouse or d.source_warehouse,
+				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+				"item_name": d.item_name,
+				"description": d.description,
+				"required_qty": required_qty,
+			},
+		)
 
 	def get_required_qty(self, d, operation_qty, other_job_cards_qty) -> float:
 		"""This job card's share of the work order item: the rounded qty up to the operation's
