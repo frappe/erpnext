@@ -2195,9 +2195,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					ctx: params,
 					item_code: row.item_code,
 				},
-				callback: function (r) {
+				callback: (r) => {
 					if (!r.exc && r.message) {
-						frappe.model.set_value(cdt, cdn, "price_list_rate", r.message);
+						frappe.run_serially([
+							() => frappe.model.set_value(cdt, cdn, "price_list_rate", r.message),
+							() => this.apply_pricing_rule(row, true),
+						]);
 					}
 				},
 			});
