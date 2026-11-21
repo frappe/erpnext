@@ -919,6 +919,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				"condition": item_condition,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
+			"Purchase Taxes and Charges": {
+				"doctype": "Purchase Taxes and Charges",
+				"field_map": {"name": "original_tax_row"},
+			},
 			"Packed Item": {
 				"doctype": "Packed Item",
 				"field_map": {
