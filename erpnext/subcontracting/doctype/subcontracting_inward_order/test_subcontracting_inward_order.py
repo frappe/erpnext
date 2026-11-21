@@ -660,18 +660,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
-<<<<<<< HEAD
-		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
-		new_bom.secondary_items.append(
-			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, secondary_item_type="Scrap")
-		)
-		new_bom.submit()
-		sc_bom = frappe.get_doc("Subcontracting BOM", "SB-0001")
-		sc_bom.finished_good_bom = new_bom.name
-		sc_bom.save()
-=======
 		use_bom_with_secondary_item()
->>>>>>> 3dd14f3 (test: Manufacture cancel checks every row of a secondary item together)
 
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
