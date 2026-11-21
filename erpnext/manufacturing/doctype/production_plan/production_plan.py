@@ -403,7 +403,7 @@ class ProductionPlan(Document):
 			for row in frappe.get_all(
 				"Sales Order Item",
 				filters={"name": ("in", [key[1] for key in planned_qty])},
-				fields=["name", "item_code", "stock_qty", "stock_uom"],
+				fields=["name", "item_code", "stock_qty", "stock_reserved_qty", "stock_uom"],
 			)
 		}
 		allowance = flt(
@@ -414,7 +414,9 @@ class ProductionPlan(Document):
 		for (sales_order, so_item), qty in planned_qty.items():
 			row = so_items[so_item]
 			unplanned_qty = flt(
-				flt(row.stock_qty) * (1 + allowance / 100) - flt(already_planned.get((sales_order, so_item))),
+				flt(row.stock_qty) * (1 + allowance / 100)
+				- flt(row.stock_reserved_qty)
+				- flt(already_planned.get((sales_order, so_item))),
 				precision,
 			)
 			if flt(qty, precision) > unplanned_qty:

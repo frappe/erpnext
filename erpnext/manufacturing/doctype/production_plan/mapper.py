@@ -46,7 +46,7 @@ def sales_order_query(
 		.select(table.parent)
 		.distinct()
 		.where(
-			(table.stock_qty > table.production_plan_qty)
+			((table.stock_qty - table.stock_reserved_qty) > table.production_plan_qty)
 			& (table.docstatus == 1)
 			& (table.closed == 0)
 			& (so_table.status != "Closed")
