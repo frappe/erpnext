@@ -37,6 +37,7 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.utilities.transaction_base import TransactionBase
 
 from .mapper import (
+	get_moved_entries,
 	stock_entry_exists,
 )
 
@@ -1009,6 +1010,15 @@ class PickList(TransactionBase):
 			return picked_items
 
 		items_data = self._get_pick_list_items(items)
+		moved_entries = get_moved_entries(
+			[
+				row.name
+				for row in items_data
+				if row.serial_and_batch_bundle
+				and not row.batch_no
+				and (row.delivered_qty or row.transferred_qty)
+			]
+		)
 
 		for item_data in items_data:
 			key = (item_data.warehouse, item_data.batch_no) if item_data.batch_no else item_data.warehouse
@@ -1019,10 +1029,8 @@ class PickList(TransactionBase):
 
 			if item_data.serial_and_batch_bundle:
 				if not item_data.batch_no and not serial_no:
-					bundle_batches = get_batches_from_bundle(item_data.serial_and_batch_bundle)
+					bundle_batches = get_held_bundle_batches(item_data, moved_entries.get(item_data.name, []))
 					for batch_no, batch_qty in bundle_batches.items():
-						batch_qty = abs(batch_qty)
-
 						key = (item_data.warehouse, batch_no)
 						if key not in picked_items[item_data.item_code]:
 							picked_items[item_data.item_code][key] = {"picked_qty": 0}
@@ -1074,6 +1082,9 @@ class PickList(TransactionBase):
 		query = get_open_pick_list_items_query(
 			[x.item_code for x in items], exclude_pick_list=self.name
 		).select(
+			pi_item.name,
+			pi_item.delivered_qty,
+			pi_item.transferred_qty,
 			pi_item.item_code,
 			pi_item.warehouse,
 			pi_item.batch_no,
@@ -1356,6 +1367,20 @@ def get_delivered_sales_order_item_query(pi_item):
 		.select(so_item.name)
 		.where((so_item.name == pi_item.sales_order_item) & (so_item.delivered_qty >= so_item.qty))
 	)
+
+
+def get_held_bundle_batches(row, moved_entries):
+	"""Batch qty a bundle-only pick list row still holds: its bundle batches less what its vouchers moved."""
+	moved_qty = defaultdict(float)
+	for entry in moved_entries:
+		moved_qty[entry.batch_no] += abs(entry.qty)
+
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	held_qty = {
+		batch_no: flt(abs(qty) - moved_qty[batch_no], precision)
+		for batch_no, qty in get_batches_from_bundle(row.serial_and_batch_bundle).items()
+	}
+	return {batch_no: qty for batch_no, qty in held_qty.items() if qty > 0}
 
 
 def get_holding_qty_case(pi_item):
