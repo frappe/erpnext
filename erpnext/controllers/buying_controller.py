@@ -1046,7 +1046,7 @@ class BuyingController(SubcontractingController):
 				"actual_qty": ("<", 0) if outward else (">", 0),
 			},
 			"actual_qty",
-			order_by="creation",
+			order_by="creation asc",
 		)
 
 	def get_received_stock_qty(self, row, accepted_qty):
