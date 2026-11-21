@@ -224,6 +224,30 @@ class TestGetItemDetail(ERPNextTestSuite):
 			self.assertEqual(details.valuation_rate, 50)
 			self.assertEqual(details.actual_qty, 1)
 
+	def test_material_request_source_warehouse_hides_stock_outside_user_permission(self):
+		ctx = frappe._dict(
+			{
+				"item_code": self.make_stock_item_in_two_warehouses(),
+				"company": "_Test Company",
+				"doctype": "Material Request",
+				"material_request_type": "Material Transfer",
+				"warehouse": "_Test Warehouse 1 - _TC",
+				"transaction_date": today(),
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+
+		with as_user(self.make_warehouse_fenced_user(["Stock User", "Purchase User"])):
+			for from_warehouse, actual_qty in (("_Test Warehouse - _TC", 0), ("_Test Warehouse 1 - _TC", 1)):
+				with self.subTest(from_warehouse=from_warehouse):
+					details = get_item_details(
+						ctx.copy().update({"from_warehouse": from_warehouse}), overwrite_warehouse=False
+					)
+					self.assertEqual(details.actual_qty, actual_qty)
+
 	def test_stock_qty_methods_apply_warehouse_user_permission(self):
 		item_code = self.make_stock_item_in_two_warehouses()
 
