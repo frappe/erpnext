@@ -2389,24 +2389,9 @@ class TestDeliveryNote(FrappeTestCase):
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
 	)
 	def test_packed_item_incoming_rate_is_of_the_batch_picked_on_submit(self):
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "DNPBR-.#####",
-			}
-		).name
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [item])
-		for days, rate in ((-2, 10), (-1, 40)):
-			make_stock_entry(
-				item_code=item,
-				target="_Test Warehouse - _TC",
-				qty=2,
-				basic_rate=rate,
-				posting_date=add_days(nowdate(), days),
-			)
+		bundle = make_bundle_received_at_two_rates(
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "DNPBR-.#####"}
+		)
 
 		for use_serial_batch_fields in (0, 1):
 			with self.subTest(use_serial_batch_fields=use_serial_batch_fields):
@@ -2419,6 +2404,24 @@ class TestDeliveryNote(FrappeTestCase):
 				self.assertEqual(
 					frappe.db.get_value("Packed Item", dn.packed_items[0].name, "incoming_rate"), 10
 				)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_packed_item_incoming_rate_of_serial_nos_valued_as_a_pool(self):
+		bundle = make_bundle_received_at_two_rates(
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "DNPSP-.#####",
+				"use_serial_no_wise_valuation": 0,
+				"valuation_method": "Moving Average",
+			}
+		)
+
+		dn = create_delivery_note(item_code=bundle, qty=1)
+
+		# the moving average, not the zero of a bundle without serial no rates
+		self.assertEqual(frappe.db.get_value("Packed Item", dn.packed_items[0].name, "incoming_rate"), 25)
 
 	def test_delivery_note_bundle_with_batched_item(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
@@ -5225,11 +5228,38 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(debit_by_account["Cost of Goods Sold - TCP1"], 500)
 
 
+<<<<<<< HEAD
 def make_so_with_reserved_produced_serial_no():
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 		get_sre_reserved_serial_nos_for_voucher_detail_nos,
 	)
+=======
+def make_bundle_received_at_two_rates(properties):
+	"""A Product Bundle of a stock item received in _Test Warehouse - _TC as 2 @ 10, then 2 @ 40."""
+	item = make_item(properties={"is_stock_item": 1, **properties}).name
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [item])
+	for days, rate in ((-2, 10), (-1, 40)):
+		make_stock_entry(
+			item_code=item,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=rate,
+			posting_date=add_days(nowdate(), days),
+		)
+	return bundle
+
+
+def get_serial_batch_item_row(item, qty):
+	return {
+		"item_code": item,
+		"qty": qty,
+		"rate": 100,
+		"warehouse": "_Test Warehouse - _TC",
+		"use_serial_batch_fields": 1,
+	}
+>>>>>>> 5301619 (test: packed row of serial nos valued as a pool keeps its incoming rate)
 
 	warehouse = "_Test Warehouse - _TC"
 	fg_item = make_item(
