@@ -493,7 +493,9 @@ class ProductionPlan(Document):
 		if not rows:
 			return []
 
-		allotted = allocate_reference_qty(self.prod_plan_references, *group_planned_qty_by_item_reference(rows))
+		allotted = allocate_reference_qty(
+			self.prod_plan_references, *group_planned_qty_by_item_reference(rows)
+		)
 		packed_lines = frappe.get_all(
 			"Packed Item",
 			filters={"parent_detail_docname": ("in", [row.sales_order_item for row in allotted])},
