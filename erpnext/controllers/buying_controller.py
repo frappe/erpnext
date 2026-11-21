@@ -220,6 +220,7 @@ class BuyingController(SubcontractingController):
 				type_of_transaction="Outward",
 				do_not_submit=True,
 				qty=get_stock_qty(row, row.qty),
+				exclude_batch_qty=self.get_received_batch_qty(row),
 			)
 
 		if not flt(row.stock_qty):
@@ -232,7 +233,39 @@ class BuyingController(SubcontractingController):
 			do_not_submit=True,
 			qty=get_stock_qty(row, row.qty),
 			exclude_serial_nos=self.get_rejected_serial_nos(row),
+			exclude_batch_qty=self.get_received_batch_qty(row),
 		)
+
+	def get_received_batch_qty(self, row) -> dict:
+		"""Qty of each batch that submitted receipts already took out of transit for the delivered row."""
+		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
+		reference = row.get(field) or row.get("delivery_note_packed_item")
+		item = frappe.qb.DocType(row.doctype)
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+
+		condition = item[field] == reference
+		if self.doctype == "Purchase Receipt":
+			condition |= item.delivery_note_packed_item == reference
+
+		received = (
+			frappe.qb.from_(entry)
+			.join(bundle)
+			.on(entry.parent == bundle.name)
+			.join(item)
+			.on(bundle.voucher_detail_no == item.name)
+			.select(entry.batch_no, Sum(entry.qty))
+			.where(
+				condition
+				& (bundle.voucher_type == self.doctype)
+				& (bundle.warehouse == row.from_warehouse)
+				& (bundle.docstatus == 1)
+				& (bundle.is_cancelled == 0)
+			)
+			.groupby(entry.batch_no)
+			.run()
+		)
+		return {batch_no: -flt(qty) for batch_no, qty in received if batch_no}
 
 	def get_delivered_package(self, row) -> str | None:
 		"""Package of the material the delivery note put in the in-transit warehouse."""
@@ -307,6 +340,7 @@ class BuyingController(SubcontractingController):
 			qty=get_stock_qty(row, row.rejected_qty),
 			exclude_serial_nos=self.get_accepted_serial_nos(row),
 			from_last=True,
+			exclude_batch_qty=self.get_received_batch_qty(row),
 		)
 
 		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)

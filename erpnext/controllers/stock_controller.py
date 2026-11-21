@@ -275,6 +275,7 @@ class StockController(AccountsController):
 		exclude_serial_nos=None,
 		total_qty=0,
 		from_last=False,
+		exclude_batch_qty=None,
 	):
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
@@ -288,6 +289,7 @@ class StockController(AccountsController):
 			exclude_serial_nos,
 			total_qty,
 			from_last,
+			exclude_batch_qty,
 		)
 
 	def get_sl_entries(self, d, args):
@@ -1135,6 +1137,9 @@ def make_bundle_for_material_transfer(**kwargs):
 		for idx, row in enumerate(keep, start=1):
 			row.idx = idx
 
+	if kwargs.exclude_batch_qty and not bundle_doc.has_serial_no:
+		bundle_doc.entries = get_entries_less_batch_qty(bundle_doc.entries, kwargs.exclude_batch_qty)
+
 	if (
 		flt(kwargs.qty)
 		and abs(flt(kwargs.qty)) < abs(flt(bundle_doc.total_qty))
@@ -1202,6 +1207,22 @@ def add_transfer_to_reservation(sre_doc, transfer) -> None:
 
 	transfer.qty -= qty
 	sre_doc.transferred_qty = flt(flt(sre_doc.transferred_qty) + qty, sre_doc.precision("transferred_qty"))
+
+
+def get_entries_less_batch_qty(entries, batch_qty):
+	"""The entries, less the qty of each batch in `batch_qty`, without the ones left empty."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	batch_qty = batch_qty.copy()
+	kept = []
+	for row in entries:
+		taken = min(abs(flt(row.qty)), flt(batch_qty.get(row.batch_no)))
+		batch_qty[row.batch_no] = flt(batch_qty.get(row.batch_no)) - taken
+		row.qty = flt(abs(flt(row.qty)) - taken, precision)
+		if row.qty > 0:
+			row.idx = len(kept) + 1
+			kept.append(row)
+
+	return kept
 
 
 def get_entries_up_to_qty(entries, qty):
