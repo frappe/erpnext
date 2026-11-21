@@ -584,11 +584,11 @@ class ProductionPlan(Document):
 				continue
 
 			item_details = get_item_details(data.item_code, throw=False)
-			if self.combine_items:
-				bom_no = item_details.get("bom_no")
-				if data.get("bom_no"):
-					bom_no = data.get("bom_no")
+			bom_no = data.bom_no or item_details and item_details.get("bom_no") or ""
+			if not bom_no:
+				continue
 
+			if self.combine_items:
 				if bom_no in refs:
 					refs[bom_no]["so_details"].append(
 						{"sales_order": data.parent, "sales_order_item": data.name, "qty": data.pending_qty}
@@ -605,10 +605,6 @@ class ProductionPlan(Document):
 					refs[bom_no]["so_details"].append(
 						{"sales_order": data.parent, "sales_order_item": data.name, "qty": data.pending_qty}
 					)
-
-			bom_no = data.bom_no or item_details and item_details.get("bom_no") or ""
-			if not bom_no:
-				continue
 
 			pi = self.append(
 				"po_items",
