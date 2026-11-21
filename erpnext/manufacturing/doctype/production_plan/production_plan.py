@@ -1471,6 +1471,7 @@ def get_subitems(
 			bom_item.source_warehouse,
 			item.default_bom.as_("default_bom"),
 			Max(bom_item.bom_no).as_("line_bom_no"),
+			bom_item.do_not_explode,
 			bom_item.description.as_("description"),
 			bom_item.stock_uom.as_("stock_uom"),
 			item.min_order_qty.as_("min_order_qty"),
@@ -1485,11 +1486,12 @@ def get_subitems(
 			& (bom_item.docstatus < 2)
 			& (item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1)
 		)
-		.groupby(bom_item.item_code)
+		.groupby(bom_item.item_code, bom_item.do_not_explode)
 	).run(as_dict=True)
 
 	for d in items:
-		child_bom = d.line_bom_no or d.default_bom
+		# a Do Not Explode line has no BOM, so it must not take the item's default BOM
+		child_bom = d.line_bom_no or (None if d.do_not_explode else d.default_bom)
 		if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
 			continue
 
