@@ -165,7 +165,7 @@ def get_subitems(
 		_process_subitem(
 			doc, data, item_details, d, company, include_non_stock_items, include_subcontracted_items
 		)
-	return {key: value for key, value in item_details.items() if not value.get("is_phantom_item")}
+	return item_details
 
 
 def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planned_qty):
