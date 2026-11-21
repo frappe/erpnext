@@ -207,10 +207,8 @@ class ProductionPlan(Document):
 	def get_open_sales_orders(self):
 		"""Pull sales orders  which are pending to deliver based on criteria selected"""
 		open_so = get_sales_orders(self)
-
-		if open_so:
-			self.add_so_in_table(open_so)
-		else:
+		self.add_so_in_table(open_so)
+		if not open_so:
 			frappe.msgprint(_("Sales orders are not available for production"))
 
 	def add_so_in_table(self, open_so):
