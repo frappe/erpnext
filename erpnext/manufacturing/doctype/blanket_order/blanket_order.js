@@ -137,7 +137,7 @@ frappe.ui.form.on("Blanket Order", {
 	supplier: reset_party_pricing,
 
 	currency: function (frm) {
-		return blanket_order_pricing.apply(frm, null, { reset_conversion_rate: true });
+		return blanket_order_pricing.apply(frm, null, { reset_conversion_rate: true, reset_rate: true });
 	},
 
 	from_date: function (frm) {
@@ -162,7 +162,9 @@ frappe.ui.form.on("Blanket Order", {
 });
 
 frappe.ui.form.on("Blanket Order Item", {
-	item_code: apply_item_pricing,
+	item_code: function (frm, cdt, cdn) {
+		return blanket_order_pricing.apply(frm, cdn, { reset_rate: true });
+	},
 
 	qty: apply_item_pricing,
 
@@ -209,7 +211,8 @@ const blanket_order_pricing = {
 		}
 
 		if (frm.__applying_blanket_order_price_list) {
-			frm.__pending_blanket_order_price_list = { item_name, options };
+			frm.__pending_blanket_order_price_list ||= [];
+			frm.__pending_blanket_order_price_list.push({ item_name, options });
 			return;
 		}
 
@@ -224,6 +227,7 @@ const blanket_order_pricing = {
 					reset_party_values: options.reset_party_values,
 					reset_conversion_rate: options.reset_conversion_rate,
 					reset_plc_conversion_rate: options.reset_plc_conversion_rate,
+					reset_rate: options.reset_rate,
 				},
 			});
 			if (response.message) {
@@ -242,8 +246,8 @@ const blanket_order_pricing = {
 			pending = frm.__pending_blanket_order_price_list;
 			frm.__pending_blanket_order_price_list = null;
 		}
-		if (pending) {
-			return this.apply(frm, pending.item_name, pending.options);
+		for (const { item_name, options } of pending || []) {
+			await this.apply(frm, item_name, options);
 		}
 	},
 };
@@ -303,7 +307,7 @@ function reset_party_pricing(frm) {
 }
 
 function reset_price_list_exchange_rate(frm) {
-	return blanket_order_pricing.apply(frm, null, { reset_plc_conversion_rate: true });
+	return blanket_order_pricing.apply(frm, null, { reset_plc_conversion_rate: true, reset_rate: true });
 }
 
 function apply_item_pricing(frm, cdt, cdn) {
