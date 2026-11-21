@@ -111,9 +111,11 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				doc.get("is_return")
 				and item.return_qty_from_rejected_warehouse
 				and not doc.is_internal_transfer()
+				and item.purchase_receipt_item
+				and flt(frappe.db.get_value("Purchase Receipt Item", item.purchase_receipt_item, "qty"))
 			):
-				# Take back the rejected stock value the receipt credited, less the charges it carried.
-				outgoing_amount = flt(stock_value_diff) - flt(item.item_tax_amount)
+				# A receipt with accepted qty values its rejected stock without charges; take that value back.
+				outgoing_amount = flt(stock_value_diff)
 				credit_amount = outgoing_amount
 
 			if (
