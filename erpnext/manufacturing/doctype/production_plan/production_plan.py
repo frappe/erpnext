@@ -32,7 +32,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.utils import get_or_make_bin
+from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.query import get_user_permission_conditions_qb
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
@@ -121,6 +121,18 @@ class ProductionPlan(Document):
 		self.validate_data()
 		self.validate_sales_orders()
 		self.validate_material_request_type()
+		self.validate_warehouse_belongs_to_company()
+
+	def validate_warehouse_belongs_to_company(self):
+		warehouses = {self.for_warehouse, self.sub_assembly_warehouse}
+		warehouses.update(row.warehouse for row in self.po_items)
+		warehouses.update(row.fg_warehouse for row in self.sub_assembly_items)
+		for row in self.mr_items:
+			warehouses.update((row.warehouse, row.from_warehouse))
+
+		for warehouse in warehouses:
+			if warehouse:
+				validate_warehouse_company(warehouse, self.company)
 
 	def validate_material_request_type(self):
 		for row in self.get("mr_items"):
