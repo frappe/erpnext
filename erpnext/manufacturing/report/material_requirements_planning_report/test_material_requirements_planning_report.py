@@ -885,12 +885,12 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(getdate(buckets[-1].delivery_date), getdate("2026-11-26"))
 		self.assertAlmostEqual(sum(bucket.qty for bucket in buckets), 31)
 
-	def test_whole_number_forecast_is_split_into_whole_daily_qty(self):
+	def test_whole_number_forecast_is_spread_evenly_in_whole_daily_qty(self):
 		row = frappe._dict(frequency="Weekly", item_code="_Test Item", delivery_date=today(), qty=10)
 
 		buckets = convert_to_daily_bucket_data([row])
 
-		self.assertEqual([bucket.qty for bucket in buckets], [2, 2, 2, 1, 1, 1, 1])
+		self.assertEqual([bucket.qty for bucket in buckets], [2, 1, 2, 1, 2, 1, 1])
 
 	def test_forecast_is_limited_to_the_report_dates(self):
 		forecast = make_sales_forecast(from_date=add_days(today(), 10), demand_number=1)
