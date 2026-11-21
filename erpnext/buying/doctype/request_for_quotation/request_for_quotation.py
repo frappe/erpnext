@@ -9,6 +9,7 @@ from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.utils import get_url
+from frappe.utils.html_utils import sanitize_html
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
@@ -82,6 +83,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.update_email_id()
+		self.validate_with_previous_doc()
 
 		if self.docstatus < 1:
 			# after amend and save, status still shows as cancelled, until submit
@@ -124,6 +126,22 @@ class RequestforQuotation(BuyingController):
 
 			if not self.subject:
 				self.subject = data.subject
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Material Request": {
+					"ref_dn_field": "material_request",
+					"compare_fields": [["company", "="]],
+				},
+				"Material Request Item": {
+					"ref_dn_field": "material_request_item",
+					"compare_fields": [["item_code", "="], ["uom", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
 
 	def validate_duplicate_supplier(self):
 		supplier_list = [d.supplier for d in self.suppliers]
@@ -194,6 +212,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_email_id(rfq_supplier)
 
 		message = self.supplier_rfq_mail(rfq_supplier, "", self.get_link(), True)
+		message["message"] = sanitize_html(message["message"])
 
 		return message
 
@@ -421,10 +440,10 @@ class RequestforQuotation(BuyingController):
 				supplier.quote_status = quote_status
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_supplier_emails(rfq_name: str):
 	check_portal_enabled("Request for Quotation")
-	rfq = frappe.get_doc("Request for Quotation", rfq_name)
+	rfq = frappe.get_doc("Request for Quotation", rfq_name, check_permission="write")
 	if rfq.docstatus == 1:
 		rfq.send_to_supplier()
 

@@ -36,6 +36,10 @@ class QualityProcedure(NestedSet):
 	def before_save(self):
 		self.check_for_incorrect_child()
 
+	def validate_nsm_parent(self):
+		# add_child_to_parent makes the parent a group in on_update
+		pass
+
 	def on_update(self):
 		NestedSet.on_update(self)
 		self.set_parent()

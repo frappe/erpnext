@@ -1202,8 +1202,6 @@
   },
   {
    "depends_on": "eval:doc.sales_partner",
-   "fetch_from": "sales_partner.commission_rate",
-   "fetch_if_empty": 1,
    "fieldname": "commission_rate",
    "fieldtype": "Float",
    "label": "Commission Rate (%)",

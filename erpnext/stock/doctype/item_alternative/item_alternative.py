@@ -9,6 +9,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
 
+import erpnext
+
 
 class ItemAlternative(Document):
 	# begin: auto-generated types
@@ -114,6 +116,7 @@ def get_alternative_item_pairs(item_codes) -> set:
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_items(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
 	item_code = filters.get("item_code")
+	erpnext.require_permission("Item", item_code)
 	search = f"%{txt}%"
 	# each leg has distinct values (validate_duplicate), so start+page_len rows per leg suffice
 	limit = cint(start) + cint(page_len)

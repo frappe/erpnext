@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+import erpnext
+
 
 class ItemManufacturer(Document):
 	# begin: auto-generated types
@@ -80,6 +82,11 @@ class ItemManufacturer(Document):
 
 @frappe.whitelist()
 def get_item_manufacturer_part_no(item_code: str, manufacturer: str):
+	erpnext.require_permission("Item", item_code)
+	return _get_item_manufacturer_part_no(item_code, manufacturer)
+
+
+def _get_item_manufacturer_part_no(item_code: str, manufacturer: str):
 	return frappe.db.get_value(
 		"Item Manufacturer",
 		{"item_code": item_code, "manufacturer": manufacturer},

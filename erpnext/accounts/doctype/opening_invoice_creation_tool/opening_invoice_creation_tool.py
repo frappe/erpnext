@@ -296,7 +296,7 @@ class OpeningInvoiceCreationTool(Document):
 
 		return invoice
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def make_invoices(self):
 		self.validate_company()
 		invoices = self.get_invoices()
@@ -311,6 +311,7 @@ class OpeningInvoiceCreationTool(Document):
 			job_id = f"opening_invoice::{self.name}"
 
 			if not is_job_enqueued(job_id):
+				# nosemgrep: frappe-semgrep-rules.rules.frappe-enqueue-without-after-commit -- user action, invoices are passed to the job
 				enqueue(
 					start_import,
 					queue="default",

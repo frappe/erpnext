@@ -75,7 +75,7 @@ erpnext.buying = {
 				if (this.frm.fields_dict.tc_name) {
 					this.frm.set_query("tc_name", function () {
 						return {
-							filters: { buying: 1 },
+							filters: { buying: 1, disabled: 0 },
 						};
 					});
 				}

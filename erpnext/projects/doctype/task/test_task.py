@@ -12,6 +12,12 @@ from erpnext.projects.doctype.task.task import (
 	ParentIsGroupError,
 	set_tasks_as_overdue,
 )
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	assert_refused,
+	make_company_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -573,6 +579,92 @@ class TestTask(ERPNextTestSuite):
 
 		with self.set_user(user.name):
 			self.assertRaises(frappe.DoesNotExistError, check_if_child_exists, "")
+
+	def test_task_needs_access_to_its_project(self):
+		own_project, other_project, user = make_project_access_fixtures("Task Joined")
+
+		with as_user(user):
+			task = insert_completed_task("_Test Fenced Task", own_project)
+			self.assertEqual(frappe.db.get_value("Project", own_project, "percent_complete"), 100)
+
+			assert_refused(self, insert_completed_task, "_Test Fenced Task", other_project)
+			task.project = other_project
+			assert_refused(self, task.save)
+
+		self.assertEqual(
+			frappe.db.get_value("Project", other_project, ["status", "percent_complete"]), ("Open", 0)
+		)
+
+	def test_task_changes_need_access_to_its_project(self):
+		_own_project, other_project, user = make_project_access_fixtures("Task Left")
+		task = insert_completed_task("_Test Fenced Left Task", other_project).name
+		open_task = frappe.get_doc(
+			{"doctype": "Task", "subject": "_Test Fenced Open Task", "project": other_project}
+		).insert()
+		# tasks the user may edit, in a project the user may not pick
+		frappe.db.set_value("Task", {"name": ["in", [task, open_task.name]]}, "company", "_Test Company")
+
+		with as_user(user):
+			for name, changes in (
+				(task, {"project": None}),
+				(task, {"status": "Open"}),
+				(task, {"task_weight": 5}),
+				(open_task.name, {"progress": 50}),
+			):
+				changed = frappe.get_doc("Task", name)
+				changed.update(changes)
+				assert_refused(self, changed.save)
+			assert_refused(self, frappe.get_doc("Task", task).delete)
+
+			edited = frappe.get_doc("Task", task)
+			edited.description = "Edited by a user who cannot pick the project"
+			edited.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Project", other_project, ["status", "percent_complete"]), ("Open", 50)
+		)
+
+	def test_web_form_task_needs_access_to_the_project_it_leaves(self):
+		from frappe.website.doctype.web_form.web_form import accept
+		from frappe.website.doctype.web_form.web_form import delete as delete_from_web_form
+
+		own_project, other_project, user = make_project_access_fixtures("Task Web Form")
+		task = insert_completed_task("_Test Web Form Task", other_project)
+		frappe.db.set_value("Task", task.name, "owner", user)
+		move_out = {"doctype": "Task", "name": task.name, "subject": task.subject, "project": own_project}
+
+		try:
+			with as_user(user):
+				assert_refused(self, accept, "tasks", move_out)
+				assert_refused(self, delete_from_web_form, "tasks", task.name)
+			self.assertEqual(frappe.db.get_value("Project", other_project, "percent_complete"), 100)
+
+			project = frappe.get_doc("Project", other_project)
+			project.append("users", {"user": user})
+			project.save()
+			with as_user(user):
+				accept("tasks", move_out)
+			self.assertEqual(frappe.db.get_value("Task", task.name, "project"), own_project)
+		finally:
+			frappe.flags.in_web_form = False
+
+
+def make_project_access_fixtures(label):
+	"""A project of _Test Company, a project of another company, and a Projects User limited to _Test Company."""
+	from erpnext.projects.doctype.project.test_project import make_project
+
+	own_project = make_project({"project_name": f"_Test Project {label} Own"}).name
+	other_project = make_project(
+		{"project_name": f"_Test Project {label} Other", "company": OTHER_COMPANY}
+	).name
+	email = f"{label.lower().replace(' ', '-')}@example.com"
+	return own_project, other_project, make_company_fenced_user(email, ["Projects User"], "_Test Company")
+
+
+def insert_completed_task(subject, project):
+	return frappe.get_doc(
+		{"doctype": "Task", "subject": subject, "project": project, "status": "Completed"}
+	).insert()
 
 
 def create_task(

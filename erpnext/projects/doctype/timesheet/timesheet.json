@@ -10,7 +10,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "company",
   "customer",
@@ -46,14 +45,14 @@
   "per_billed",
   "section_break_18",
   "note",
-  "amended_from"
+  "amended_from",
+  "title"
  ],
  "fields": [
   {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
@@ -315,8 +314,9 @@
  "icon": "clock",
  "idx": 1,
  "is_submittable": 1,
+ "link_display_mode": "Search",
  "links": [],
- "modified": "2026-07-30 11:04:12.882140",
+ "modified": "2026-11-09 13:38:27.908228",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",

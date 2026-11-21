@@ -74,6 +74,19 @@ class TestStockLedgerInvariantCheck(ERPNextTestSuite):
 		self.assertEqual(len(data), 2)
 		self.assertEqual(data[-1].name, sle.name)
 
+	def test_null_rate_in_fifo_queue_is_valued_at_zero(self):
+		item = self.make_movements()
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_queue", json.dumps([[sle.qty_after_transaction, None]])
+		)
+
+		data = self.run_report(item_code=item)
+
+		self.assertEqual(data[-1].fifo_stock_value, 0)
+
 	def test_show_incorrect_entries_catches_a_wrong_valuation_rate(self):
 		item = self.make_movements()
 		sle = frappe.get_last_doc(

@@ -110,7 +110,7 @@ class ShippingRule(Document):
 			self.validate_countries(doc)
 
 		if self.calculate_based_on == "Net Total":
-			value = doc.base_net_total
+			value = self.get_net_total(doc)
 			by_value = True
 
 		elif self.calculate_based_on == "Net Weight":
@@ -129,6 +129,26 @@ class ShippingRule(Document):
 			shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
 
 		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
+
+	def get_net_total(self, doc):
+		"""Net total before a Grand Total discount, which depends on the shipping charge itself."""
+		if (
+			doc.apply_discount_on != "Grand Total"
+			or not doc.discount_amount
+			or doc.get("is_cash_or_non_trade_discount")
+		):
+			return doc.base_net_total
+
+		# rounded per item, as base_net_amount was, so the total does not drift with the discount
+		base_net_total = sum(
+			flt(
+				(item.net_amount + flt(item.distributed_discount_amount)) * doc.conversion_rate,
+				item.precision("base_net_amount"),
+			)
+			for item in doc.items
+			if not item.get("is_alternative")
+		)
+		return flt(base_net_total, doc.precision("base_net_total"))
 
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):

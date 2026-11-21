@@ -38,10 +38,12 @@ PORTAL_PAYABLE_DOCTYPES = ("Sales Order", "Sales Invoice")
 def run_as_administrator():
 	previous_session = frappe._dict(frappe.session)
 	previous_form_dict = frappe.local.form_dict
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- gateway callback books the payment, restored in finally
 	frappe.set_user("Administrator")
 	try:
 		yield
 	finally:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- gateway callback books the payment, restored in finally
 		frappe.set_user(previous_session.user)
 		frappe.local.session.update(previous_session)
 		frappe.local.form_dict = previous_form_dict
@@ -629,17 +631,17 @@ class PaymentRequest(Document):
 			or get_account_currency(party_account)
 		)
 
-		party_amount = bank_amount = self.outstanding_amount
-
+		bank_amount = None
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
 			exchange_rate = ref_doc.get("conversion_rate")
+			# Keep the request-currency amount based on the rate used for the reference document.
 			bank_amount = flt(self.outstanding_amount / exchange_rate, self.precision("grand_total"))
 
-		# outstanding amount is already in Part's account currency
+		# The Payment Request outstanding amount is in the party account currency.
 		payment_entry = get_payment_entry(
 			self.reference_doctype,
 			self.reference_name,
-			party_amount=party_amount,
+			party_amount=self.outstanding_amount,
 			bank_account=self.payment_account,
 			bank_amount=bank_amount,
 			created_from_payment_request=True,

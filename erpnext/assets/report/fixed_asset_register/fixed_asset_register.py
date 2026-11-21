@@ -15,6 +15,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 	validate_fiscal_year,
 )
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -52,6 +53,11 @@ def get_data(filters):
 	depreciation_amount_map = get_asset_depreciation_amount_map(filters, finance_book)
 
 	revaluation_amount_map = get_asset_value_adjustment_map(filters, finance_book)
+
+	if not finance_book:
+		value_assets_on_first_finance_book(
+			filters, assets_linked_to_fb, depreciation_amount_map, revaluation_amount_map
+		)
 
 	group_by = frappe.scrub(filters.get("group_by"))
 	end_date = get_report_end_date(filters)
@@ -154,6 +160,7 @@ def get_conditions(filters):
 		conditions["company"] = filters.company
 
 	if filters.filter_based_on == "Date Range":
+		validate_date_range(filters)
 		if not filters.from_date and not filters.to_date:
 			filters.from_date = add_months(nowdate(), -12)
 			filters.to_date = nowdate()
@@ -174,10 +181,11 @@ def get_conditions(filters):
 
 	if filters.get("only_existing_assets"):
 		conditions["asset_type"] = "Existing Asset"
+
 	if filters.get("asset_category"):
 		conditions["asset_category"] = filters.get("asset_category")
-	if filters.get("cost_center"):
-		conditions["cost_center"] = ["in", get_cost_centers_with_children([filters.get("cost_center")])]
+	if cost_centers := get_filter_values(filters.get("cost_center")):
+		conditions["cost_center"] = ["in", get_cost_centers_with_children(cost_centers)]
 
 	if status:
 		# In Store assets are those that are not sold or scrapped or capitalized
@@ -276,6 +284,38 @@ def get_assets_linked_to_fb(filters):
 	return assets_linked_to_fb
 
 
+def value_assets_on_first_finance_book(
+	filters, assets_linked_to_fb: set, depreciation_amount_map: dict, revaluation_amount_map: dict
+) -> None:
+	"""With no finance book chosen, list a depreciating asset with only named books on its first book."""
+	first_finance_books = get_first_finance_books(assets_linked_to_fb)
+	for finance_book in set(first_finance_books.values()):
+		book_depreciation_map = get_asset_depreciation_amount_map(filters, finance_book)
+		book_revaluation_map = get_asset_value_adjustment_map(filters, finance_book)
+		for asset, asset_finance_book in first_finance_books.items():
+			if asset_finance_book == finance_book:
+				depreciation_amount_map[asset] = book_depreciation_map.get(asset, 0.0)
+				revaluation_amount_map[asset] = book_revaluation_map.get(asset, 0.0)
+
+	assets_linked_to_fb.update(first_finance_books)
+
+
+def get_first_finance_books(assets_linked_to_fb: set) -> dict[str, str]:
+	"""First finance book of each asset that has no row for the selected or blank book."""
+	afb = frappe.qb.DocType("Asset Finance Book")
+	rows = (
+		frappe.qb.from_(afb)
+		.select(afb.parent, afb.finance_book)
+		.where((afb.parenttype == "Asset") & (afb.idx == 1))
+		.run()
+	)
+	return {
+		asset: finance_book
+		for asset, finance_book in rows
+		if finance_book and asset not in assets_linked_to_fb
+	}
+
+
 def get_asset_depreciation_amount_map(filters, finance_book):
 	start_date = filters.from_date if filters.filter_based_on == "Date Range" else filters.year_start_date
 	end_date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
@@ -305,8 +345,8 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		query = query.where(asset.asset_type == "Existing Asset")
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
-	if filters.cost_center:
-		query = query.where(asset.cost_center.isin(get_cost_centers_with_children([filters.cost_center])))
+	if cost_centers := get_filter_values(filters.cost_center):
+		query = query.where(asset.cost_center.isin(get_cost_centers_with_children(cost_centers)))
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
@@ -356,8 +396,8 @@ def get_asset_value_adjustment_map(filters, finance_book):
 		query = query.where(asset.asset_type == "Existing Asset")
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
-	if filters.cost_center:
-		query = query.where(asset.cost_center.isin(get_cost_centers_with_children([filters.cost_center])))
+	if cost_centers := get_filter_values(filters.cost_center):
+		query = query.where(asset.cost_center.isin(get_cost_centers_with_children(cost_centers)))
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
@@ -454,7 +494,7 @@ def get_columns(filters):
 	if filters.get("group_by") in ["Asset Category", "Location"]:
 		return [
 			{
-				"label": _("{}").format(filters.get("group_by")),
+				"label": _(filters.get("group_by")),
 				"fieldtype": "Link",
 				"fieldname": frappe.scrub(filters.get("group_by")),
 				"options": filters.get("group_by"),

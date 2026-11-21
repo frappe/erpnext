@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import BLANK_ACCOUNTING_DIMENSION
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -12,6 +13,125 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
+	def test_blank_and_multiple_payment_method_filters(self):
+		invoices = {}
+		for methods in ((), (None,), ("",), ("Cash",), ("Bank Draft",), ("Cash", "Bank Draft")):
+			invoice = self.create_sales_invoice()
+			for method in methods:
+				frappe.get_doc(
+					{
+						"doctype": "Sales Invoice Payment",
+						"parent": invoice.name,
+						"parenttype": "Sales Invoice",
+						"parentfield": "payments",
+						"mode_of_payment": method,
+					}
+				).db_insert()
+			invoices[invoice.name] = methods or (None,)
+		filters = frappe._dict(
+			company=invoice.company, from_date=invoice.posting_date, to_date=invoice.posting_date
+		)
+		for selected, matching_methods in (
+			([], (None, "", "Cash", "Bank Draft")),
+			([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+			(["Cash"], ("Cash",)),
+			(["Cash", "Bank Draft"], ("Cash", "Bank Draft")),
+			([BLANK_ACCOUNTING_DIMENSION, "Cash"], (None, "", "Cash")),
+			("Cash", ("Cash",)),
+			(frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "Cash"]), (None, "", "Cash")),
+		):
+			with self.subTest(selected=selected):
+				filters.mode_of_payment = selected
+				vouchers = [row.get("voucher_no") for row in execute(filters)[1]]
+				for name, methods in invoices.items():
+					self.assertEqual(
+						vouchers.count(name), int(any(method in matching_methods for method in methods))
+					)
+
+	def test_blank_and_multiple_customer_filters(self):
+		invoice = self.create_sales_invoice()
+		make_customer("_Test Customer 2")
+		other_invoice = create_sales_invoice(customer="_Test Customer 2")
+		filters = frappe._dict(
+			company=invoice.company, from_date=invoice.posting_date, to_date=invoice.posting_date
+		)
+		for selected, expected in (
+			([], {invoice.name, other_invoice.name}),
+			([BLANK_ACCOUNTING_DIMENSION], set()),
+			([invoice.customer], {invoice.name}),
+			([invoice.customer, other_invoice.customer], {invoice.name, other_invoice.name}),
+			([BLANK_ACCOUNTING_DIMENSION, invoice.customer], {invoice.name}),
+			(invoice.customer, {invoice.name}),
+			(frappe.as_json([invoice.customer, other_invoice.customer]), {invoice.name, other_invoice.name}),
+		):
+			with self.subTest(selected=selected):
+				filters.customer = selected
+				vouchers = {row.get("voucher_no") for row in execute(filters)[1]}
+				self.assertEqual(vouchers & {invoice.name, other_invoice.name}, expected)
+
+	def test_blank_and_multiple_brand_filters(self):
+		invoice = self.create_sales_invoice()
+		filters = frappe._dict(
+			company=invoice.company, from_date=invoice.posting_date, to_date=invoice.posting_date
+		)
+		for brand in (None, "", "_Test Brand", "_Test Other Brand"):
+			frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, "brand", brand)
+			for selected, matching_brands in (
+				([], (None, "", "_Test Brand", "_Test Other Brand")),
+				([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+				(["_Test Brand"], ("_Test Brand",)),
+				(["_Test Brand", "_Test Other Brand"], ("_Test Brand", "_Test Other Brand")),
+				([BLANK_ACCOUNTING_DIMENSION, "_Test Brand"], (None, "", "_Test Brand")),
+				("_Test Brand", ("_Test Brand",)),
+				(frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "_Test Brand"]), (None, "", "_Test Brand")),
+			):
+				with self.subTest(brand=brand, selected=selected):
+					filters.brand = selected
+					vouchers = {row.get("voucher_no") for row in execute(filters)[1]}
+					self.assertEqual(invoice.name in vouchers, brand in matching_brands)
+
+	def test_blank_and_multiple_tree_filters(self):
+		invoice = self.create_sales_invoice()
+		for fieldname, doctype in (("warehouse", "Warehouse"), ("item_group", "Item Group")):
+			value = "Stores - _TC" if fieldname == "warehouse" else invoice.items[0].item_group
+			parent = frappe.db.get_value(doctype, value, "parent_" + fieldname)
+			for stored_value in (None, "", value):
+				frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, fieldname, stored_value)
+				for selected, expected in (
+					([BLANK_ACCOUNTING_DIMENSION], not stored_value),
+					([value], bool(stored_value)),
+					([parent], bool(stored_value)),
+					([parent, value], bool(stored_value)),
+					([BLANK_ACCOUNTING_DIMENSION, parent], True),
+					(value, bool(stored_value)),
+				):
+					with self.subTest(fieldname=fieldname, stored_value=stored_value, selected=selected):
+						filters = frappe._dict(
+							company=invoice.company,
+							from_date=invoice.posting_date,
+							to_date=invoice.posting_date,
+						)
+						filters[fieldname] = selected
+						vouchers = {row.get("voucher_no") for row in execute(filters)[1]}
+						self.assertEqual(invoice.name in vouchers, expected)
+			frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, fieldname, value)
+
+	def test_blank_customer_group_filter(self):
+		invoice = self.create_sales_invoice()
+		group = frappe.db.get_value("Sales Invoice", invoice.name, "customer_group")
+		filters = frappe._dict(company=invoice.company, from_date=today(), to_date=today())
+		for value in (None, "", group):
+			frappe.db.set_value("Sales Invoice", invoice.name, "customer_group", value)
+			for selected, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], not value),
+				(["All Customer Groups"], bool(value)),
+				([BLANK_ACCOUNTING_DIMENSION, "All Customer Groups"], True),
+			):
+				with self.subTest(value=value, selected=selected):
+					filters.customer_group = selected
+					vouchers = {row.get("voucher_no") for row in execute(filters)[1]}
+					self.assertEqual(invoice.name in vouchers, expected)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.customer = "_Test Customer"

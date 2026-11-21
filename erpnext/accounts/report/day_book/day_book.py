@@ -9,6 +9,7 @@ from frappe.utils import flt, getdate
 from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_party_name_map
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
@@ -20,8 +21,7 @@ def execute(filters=None):
 def validate_filters(filters):
 	if not filters.company:
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
-	if getdate(filters.from_date) > getdate(filters.to_date):
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range({"from_date": getdate(filters.from_date), "to_date": getdate(filters.to_date)})
 
 
 def get_data(filters):

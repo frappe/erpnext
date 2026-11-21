@@ -76,6 +76,7 @@ class UnreconcilePayment(Document):
 				alloc.account,
 				alloc.party_type,
 				alloc.party,
+				update_payment_schedule=True,
 			)
 
 			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", 1)

@@ -172,6 +172,7 @@ def _get_pricing_rules(apply_on, args, values):
 	values["price_list"] = args.get("price_list")
 
 	pricing_rules = (
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- transaction_type is validated; values use placeholders or are escaped
 		frappe.db.sql(
 			"""select `tabPricing Rule`.*,
 			{child_doc}.{apply_on_field}, {child_doc}.uom
@@ -422,6 +423,10 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 
 def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 	rules = []
+	# strip float noise only: Float and Currency columns hold 9 decimals, so no stored value is cut
+	precision = 9
+	qty = flt(qty, precision)
+	rate = flt(rate, precision)
 
 	for rule in pricing_rules:
 		status = False
@@ -430,8 +435,8 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 		if rule.get("uom"):
 			conversion_factor = get_conversion_factor(rule.item_code, rule.uom).get("conversion_factor", 1)
 
-		if flt(qty) >= (flt(rule.min_qty) * conversion_factor) and (
-			flt(qty) <= (rule.max_qty * conversion_factor) if rule.max_qty else True
+		if qty >= flt(flt(rule.min_qty) * conversion_factor, precision) and (
+			qty <= flt(rule.max_qty * conversion_factor, precision) if rule.max_qty else True
 		):
 			status = True
 
@@ -440,8 +445,8 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 			conversion_factor = 1.0
 
 		if status and (
-			flt(rate) >= (flt(rule.min_amt) * conversion_factor)
-			and (flt(rate) <= (rule.max_amt * conversion_factor) if rule.max_amt else True)
+			rate >= flt(flt(rule.min_amt) * conversion_factor, precision)
+			and (rate <= flt(rule.max_amt * conversion_factor, precision) if rule.max_amt else True)
 		):
 			status = True
 		else:
@@ -628,6 +633,7 @@ def apply_pricing_rule_on_transaction(doc):
 	conditions = get_other_conditions(conditions, values, doc)
 	conditions += " and coalesce(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- transaction_type is validated; values use placeholders or are escaped
 	pricing_rules = frappe.db.sql(
 		f""" Select `tabPricing Rule`.* from `tabPricing Rule`
 		where  {conditions} and `tabPricing Rule`.disable = 0
@@ -739,6 +745,7 @@ def get_transaction_pricing_rules(doc):
 		values,
 		doc_before_save,
 	)
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- transaction_type is validated; values use placeholders or are escaped
 	coupon_rules = frappe.db.sql(f"select * from `tabPricing Rule` where {conditions}", values, as_dict=True)
 	coupon_rules = filter_pricing_rules_for_qty_amount(
 		doc_before_save.total_qty, doc_before_save.total, coupon_rules

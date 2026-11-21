@@ -8,6 +8,8 @@ from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
 	ManyBlankToValuesError,
 	OverlappingConditionError,
 )
+from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -73,6 +75,37 @@ class TestShippingRule(ERPNextTestSuite):
 			shipping_rule.get("conditions")[1].from_value = range_b[0]
 			shipping_rule.get("conditions")[1].to_value = range_b[1]
 			self.assertRaises(OverlappingConditionError, shipping_rule.insert)
+
+	def test_net_total_band_before_grand_total_discount(self):
+		"""120 before the discount is in the 100 band, 98 after it would be in the 50 band."""
+		so = make_sales_order(qty=1, rate=120, do_not_save=True)
+		so.set("taxes", [])
+		so.shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount").name
+		calculate_taxes_and_totals(so)
+
+		so.apply_discount_on = "Grand Total"
+		so.additional_discount_percentage = 10
+		for _ in range(2):
+			calculate_taxes_and_totals(so)
+			self.assertEqual(so.taxes[0].tax_amount, 100)
+			self.assertEqual(so.discount_amount, 22)
+			self.assertEqual(so.grand_total, 198)
+
+	def test_net_total_band_before_grand_total_discount_in_foreign_currency(self):
+		"""111.10 at 0.9001 is 100.00 in company currency, the top of the 50 band."""
+		so = make_sales_order(
+			qty=1, rate=111.10, currency="USD", customer="_Test Customer USD", do_not_save=True
+		)
+		so.conversion_rate = so.plc_conversion_rate = 0.9001
+		so.set("taxes", [])
+		so.shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount").name
+		calculate_taxes_and_totals(so)
+
+		so.apply_discount_on = "Grand Total"
+		so.additional_discount_percentage = 10
+		for _ in range(2):
+			calculate_taxes_and_totals(so)
+			self.assertEqual(so.taxes[0].base_tax_amount, 50)
 
 
 def create_shipping_rule(shipping_rule_type, shipping_rule_name):

@@ -7,6 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, flt, formatdate
 
+from erpnext.accounts.report.utils import validate_date_range
+
 DISPOSAL_VALUE_FIELDS = {
 	"Sold": "value_of_sold_asset",
 	"Scrapped": "value_of_scrapped_asset",
@@ -15,6 +17,8 @@ DISPOSAL_VALUE_FIELDS = {
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	filters.day_before_from_date = add_days(filters.from_date, -1)
 	columns, data = get_columns(filters), get_data(filters)
 	return columns, data

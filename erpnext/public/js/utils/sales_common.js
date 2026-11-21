@@ -66,7 +66,7 @@ erpnext.sales_common = {
 
 				if (this.frm.fields_dict.tc_name) {
 					this.frm.set_query("tc_name", function () {
-						return { filters: { selling: 1 } };
+						return { filters: { selling: 1, disabled: 0 } };
 					});
 				}
 
@@ -202,8 +202,23 @@ erpnext.sales_common = {
 				erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
 			}
 
-			sales_partner() {
+			async sales_partner() {
 				this.apply_pricing_rule();
+				if (!this.frm.fields_dict.commission_rate) return;
+
+				const partner = this.frm.doc.sales_partner;
+				const rate = partner
+					? await frappe.xcall(
+							"erpnext.setup.doctype.sales_partner.sales_partner.get_commission_rate",
+							{
+								sales_partner: partner,
+							}
+					  )
+					: 0;
+				if (partner === this.frm.doc.sales_partner) {
+					await this.frm.set_value("commission_rate", rate);
+					this.calculate_commission();
+				}
 			}
 
 			campaign() {
@@ -359,10 +374,10 @@ erpnext.sales_common = {
 			calculate_commission() {
 				if (!this.frm.fields_dict.commission_rate || this.frm.doc.docstatus === 1) return;
 
-				if (this.frm.doc.commission_rate > 100) {
-					this.frm.set_value("commission_rate", 100);
+				if (this.frm.doc.commission_rate < 0 || this.frm.doc.commission_rate > 100) {
+					this.frm.set_value("commission_rate", this.frm.doc.commission_rate < 0 ? 0 : 100);
 					frappe.throw(
-						__("{0} cannot be greater than 100", [
+						__("{0} must be between 0 and 100", [
 							frappe.meta.get_translated_label(
 								this.frm.doc.doctype,
 								"commission_rate",

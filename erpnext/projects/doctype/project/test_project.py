@@ -708,6 +708,80 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.gross_margin, sales_invoice.base_net_total)
 		self.assertEqual(project.per_gross_margin, 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"sales_update_frequency": "Each Transaction", "allow_multiple_items": 1}
+	)
+	def test_sales_amount_follows_sales_order_row_project(self):
+		"""Each Sales Order row counts for its own project. A row with an empty or cleared project
+		counts for the order's project."""
+		header, row, row_only = (
+			make_project({"project_name": f"_Test SO Row Project {frappe.generate_hash(length=6)}"})
+			for _ in range(3)
+		)
+
+		def order_row(rate, project):
+			return {
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": rate,
+				"project": project,
+			}
+
+		order = make_sales_order(
+			item_list=[order_row(3000, header.name), order_row(2000, row.name), order_row(1000, "")],
+			do_not_save=True,
+		)
+		order.project = header.name
+		order.insert()
+		order.submit()
+		make_sales_order(item_list=[order_row(4000, row_only.name)])
+
+		def sales_amount(project):
+			return frappe.db.get_value("Project", project.name, "total_sales_amount")
+
+		self.assertEqual(sales_amount(header), 4000)
+		self.assertEqual(sales_amount(row), 2000)
+		self.assertEqual(sales_amount(row_only), 4000)
+
+		order.cancel()
+		self.assertEqual(sales_amount(header), 0)
+		self.assertEqual(sales_amount(row), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"sales_update_frequency": "Each Transaction", "allow_multiple_items": 1}
+	)
+	def test_sales_amount_moves_with_row_project_changed_after_submit(self):
+		"""A row's project can change on a submitted order, and Update Items can remove a row. The
+		projects the order no longer names drop the amount."""
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		header, before, after = (
+			make_project({"project_name": f"_Test SO Row Move {frappe.generate_hash(length=6)}"})
+			for _ in range(3)
+		)
+		order = make_sales_order(qty=1, rate=3000, do_not_save=True)
+		order.project = header.name
+		order.append(
+			"items", {**order.items[0].as_dict(no_default_fields=True), "rate": 2000, "project": before.name}
+		)
+		order.insert()
+		order.submit()
+
+		def sales_amount(project):
+			return frappe.db.get_value("Project", project.name, "total_sales_amount")
+
+		order.items[1].project = after.name
+		order.save()
+		self.assertEqual((sales_amount(before), sales_amount(after)), (0, 2000))
+
+		first = order.items[0]
+		trans_items = [
+			{"item_code": first.item_code, "rate": first.rate, "qty": first.qty, "docname": first.name}
+		]
+		update_child_qty_rate("Sales Order", frappe.as_json(trans_items), order.name)
+		self.assertEqual((sales_amount(header), sales_amount(after)), (3000, 0))
+
 	def test_consumed_material_cost_from_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -743,7 +817,6 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.total_consumed_material_cost, 1000)
 
 	def test_landed_cost_after_delivery_reaches_consumed_cost(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
@@ -778,21 +851,186 @@ class TestProject(ERPNextTestSuite):
 		delivery_note.project = project.name
 		delivery_note.insert()
 		delivery_note.submit()
-		make_purchase_invoice(
-			company=company,
-			warehouse="Stores - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			cost_center="Main - TCP1",
-			item_code="_Test Non Stock Item",
-			qty=1,
-			rate=50,
-			project=project.name,
-		)
 		create_landed_cost_voucher("Purchase Receipt", receipt.name, company, charges=50)
 
 		project.reload()
 		self.assertEqual(project.total_purchase_cost, 0)
 		self.assertEqual(project.total_consumed_material_cost, 1050)
+		self.assertEqual(project.gross_margin, -1050)
+
+	def test_landed_cost_claim_reduces_purchase_cost_on_the_vendor_invoice_project(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.projects.doctype.project.costing.drivers import CostDrivers
+		from erpnext.projects.doctype.project.costing.queries import ProjectCostQueries
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Vendor Claim {frappe.generate_hash(length=6)}"})
+		other_project = make_project(
+			{"project_name": f"_Test Other Vendor Claim Project {frappe.generate_hash(length=6)}"}
+		)
+		item = make_item(properties={"is_stock_item": 1}).name
+		receipt = make_purchase_receipt(item_code=item, qty=10, rate=100)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=80,
+			project=project.name,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		invoice.apply_discount_on = "Net Total"
+		invoice.discount_amount = 20
+		other_row = invoice.append("items", invoice.items[0].as_dict(no_default_fields=True))
+		other_row.project = other_project.name
+		other_row.rate = 20
+		invoice.submit()
+		self.assertEqual(other_project.reload().total_purchase_cost, 16)
+		self.assertEqual(project.reload().total_purchase_cost, 64)
+
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=40,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 40})
+		voucher.insert()
+		self.assertEqual(project.reload().total_purchase_cost, 64)
+		voucher.submit()
+
+		self.assertEqual(project.reload().total_purchase_cost, 32)
+		self.assertEqual(other_project.reload().total_purchase_cost, 8)
+		month = getdate(invoice.posting_date).strftime("%Y-%m")
+		self.assertEqual(ProjectCostQueries(project.name).purchase_cost(by_month=True), {month: 32})
+		self.assertEqual(CostDrivers(project.name, {}).suppliers()[0]["amount"], 32)
+
+		issue_to_project(item, 10, project.name)
+		self.assertEqual(project.reload().total_consumed_material_cost, 1040)
+		self.assertEqual(project.gross_margin, -1072)
+
+		voucher.cancel()
+		self.assertEqual(other_project.reload().total_purchase_cost, 16)
+		self.assertEqual(project.reload().total_purchase_cost, 64)
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
+	def test_purchase_cost_excludes_stock_valuation_expense_accounts(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		project = make_project({"project_name": f"_Test Valuation Invoice {frappe.generate_hash(length=6)}"})
+		make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=20, project=project.name)
+		make_purchase_invoice(
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=50,
+			project=project.name,
+			expense_account="Expenses Included In Valuation - _TC",
+		)
+
+		self.assertEqual(project.reload().total_purchase_cost, 20)
+
+	def test_landed_cost_claim_comes_first_from_valuation_rows(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Valuation Claim {frappe.generate_hash(length=6)}"})
+		receipt = make_purchase_receipt(item_code=make_item(properties={"is_stock_item": 1}).name, qty=10)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=50,
+			project=project.name,
+			expense_account="Expenses Included In Valuation - _TC",
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		service = invoice.append("items", invoice.items[0].as_dict(no_default_fields=True))
+		service.rate = 100
+		service.expense_account = "Cost of Goods Sold - _TC"
+		invoice.submit()
+		self.assertEqual(project.reload().total_purchase_cost, 100)
+
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=80,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 80})
+		voucher.insert()
+		voucher.submit()
+
+		# 50 of the claim is the valuation row; only the other 30 comes off the service row.
+		self.assertEqual(project.reload().total_purchase_cost, 70)
+
+	def test_return_takes_the_landed_cost_claim_of_its_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Claimed Return {frappe.generate_hash(length=6)}"})
+		receipt = make_purchase_receipt(item_code=make_item(properties={"is_stock_item": 1}).name, qty=10)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item", qty=2, rate=50, project=project.name
+		)
+		debit_note = make_return_doc("Purchase Invoice", invoice.name)
+		debit_note.items[0].qty = -1
+		debit_note.submit()
+		self.assertEqual(project.reload().total_purchase_cost, 50)
+
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=40,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 40})
+		voucher.insert()
+		voucher.submit()
+		# 60% of the invoice stays an expense: 100 x 0.6 less the returned 50 x 0.6.
+		self.assertEqual(project.reload().total_purchase_cost, 30)
+
+		voucher.cancel()
+		self.assertEqual(project.reload().total_purchase_cost, 50)
+
+	def test_return_of_a_fully_claimed_invoice_adds_no_purchase_cost(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		project = make_project({"project_name": f"_Test Full Claim Return {frappe.generate_hash(length=6)}"})
+		receipt = make_purchase_receipt(item_code=make_item(properties={"is_stock_item": 1}).name, qty=10)
+		invoice = make_purchase_invoice(
+			item_code="_Test Non Stock Item", qty=1, rate=100, project=project.name
+		)
+		voucher = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+		voucher.append("vendor_invoices", {"vendor_invoice": invoice.name, "amount": 100})
+		voucher.insert()
+		voucher.submit()
+		self.assertEqual(project.reload().total_purchase_cost, 0)
+
+		make_return_doc("Purchase Invoice", invoice.name).submit()
+		self.assertEqual(project.reload().total_purchase_cost, 0)
 
 	def test_drop_shipped_stock_is_purchase_cost(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -962,6 +1200,8 @@ class TestProject(ERPNextTestSuite):
 			charges=50,
 		)
 
+		self.assertEqual(project.reload().total_purchase_cost, 0)
+
 		issue = make_stock_entry(
 			item_code=finished_good, qty=1, from_warehouse=warehouse, company=company, do_not_save=True
 		)
@@ -971,6 +1211,7 @@ class TestProject(ERPNextTestSuite):
 
 		project.reload()
 		self.assertEqual(project.total_consumed_material_cost, 1050)
+		self.assertEqual(project.gross_margin, -1050)
 
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from

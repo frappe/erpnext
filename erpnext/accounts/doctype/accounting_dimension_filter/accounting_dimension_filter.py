@@ -40,9 +40,32 @@ class AccountingDimensionFilter(Document):
 			"Accounting Dimension", {"document_type": self.accounting_dimension}, "fieldname"
 		) or frappe.scrub(self.accounting_dimension)  # scrub to handle default accounting dimension
 
+		self.validate_ledger_accounts()
 		self.validate_applicable_accounts()
 
+	def validate_ledger_accounts(self):
+		# GL entries never post to a group account, so a filter on one would never apply
+		accounts = [d.applicable_on_account for d in self.get("accounts") if d.applicable_on_account]
+		if not accounts:
+			return
+
+		group_accounts = frappe.get_all(
+			"Account", filters={"name": ["in", accounts], "is_group": 1}, pluck="name"
+		)
+
+		for account in self.get("accounts"):
+			if account.applicable_on_account in group_accounts:
+				frappe.throw(
+					_("Row {0}: {1} is a group account. Select a ledger account.").format(
+						account.idx, frappe.bold(account.applicable_on_account)
+					),
+					title=_("Group Account Not Allowed"),
+				)
+
 	def validate_applicable_accounts(self):
+		if self.disabled:
+			return
+
 		ApplicableOnAccount = frappe.qb.DocType("Applicable On Account")
 		AccountingDimensionFilter = frappe.qb.DocType("Accounting Dimension Filter")
 
@@ -53,6 +76,7 @@ class AccountingDimensionFilter(Document):
 			.select(ApplicableOnAccount.applicable_on_account.as_("account"))
 			.where(AccountingDimensionFilter.name != self.name)
 			.where(AccountingDimensionFilter.accounting_dimension == self.accounting_dimension)
+			.where(AccountingDimensionFilter.disabled == 0)
 		)
 
 		accounts = query.run(as_dict=1)
@@ -73,6 +97,7 @@ def get_dimension_filter_map():
 	ApplicableOnAccount = frappe.qb.DocType("Applicable On Account")
 	AccountingDimensionFilter = frappe.qb.DocType("Accounting Dimension Filter")
 	AllowedDimension = frappe.qb.DocType("Allowed Dimension")
+	AccountingDimension = frappe.qb.DocType("Accounting Dimension")
 
 	query = (
 		frappe.qb.from_(AccountingDimensionFilter)
@@ -80,6 +105,8 @@ def get_dimension_filter_map():
 		.on(AccountingDimensionFilter.name == ApplicableOnAccount.parent)
 		.left_join(AllowedDimension)
 		.on(AllowedDimension.parent == AccountingDimensionFilter.name)
+		.left_join(AccountingDimension)
+		.on(AccountingDimension.document_type == AccountingDimensionFilter.accounting_dimension)
 		.select(
 			ApplicableOnAccount.applicable_on_account,
 			AllowedDimension.dimension_value,
@@ -89,6 +116,8 @@ def get_dimension_filter_map():
 			ApplicableOnAccount.is_mandatory,
 		)
 		.where(AccountingDimensionFilter.disabled == 0)
+		# a disabled dimension is not posted to GL, so its filters cannot be met
+		.where(AccountingDimension.disabled.isnull() | (AccountingDimension.disabled == 0))
 	)
 
 	filters = query.run(as_dict=1)

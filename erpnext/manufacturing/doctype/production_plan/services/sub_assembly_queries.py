@@ -10,9 +10,12 @@ from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	_get_bin_details,
 	aggregate_bin_details,
-	get_bin_details,
+	get_planned_process_loss_percentage,
+	get_qty_before_process_loss,
 	get_uom_conversion_factor,
+	round_up_to_whole_unit,
 )
 
 
@@ -25,6 +28,7 @@ def get_sub_assembly_items(
 	warehouse=None,
 	indent=0,
 	skip_available_sub_assembly_item=False,
+	consider_process_loss=False,
 ):
 	precision = frappe.get_precision("Production Plan Sub Assembly Item", "qty")
 	parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
@@ -45,6 +49,7 @@ def get_sub_assembly_items(
 			indent,
 			precision,
 			skip_available_sub_assembly_item,
+			consider_process_loss,
 		)
 		if d.value:
 			get_sub_assembly_items(
@@ -56,6 +61,7 @@ def get_sub_assembly_items(
 				warehouse,
 				indent=indent + 1,
 				skip_available_sub_assembly_item=skip_available_sub_assembly_item,
+				consider_process_loss=consider_process_loss,
 			)
 
 
@@ -71,23 +77,29 @@ def _add_sub_assembly_child(
 	indent,
 	precision,
 	skip_available,
+	consider_process_loss,
 ):
 	required_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 	stock_qty = _resolve_available_sub_assembly(
 		d, required_qty, bin_details, company, warehouse, skip_available
 	)
 	if not d.is_phantom_item:
+		d.process_loss_percentage = (
+			get_planned_process_loss_percentage(d.value) if consider_process_loss else 0
+		)
+		stock_qty = round_up_to_whole_unit(stock_qty, d.stock_uom)
 		bom_data.append(
 			_sub_assembly_row(
 				d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision
 			)
 		)
+		stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage, d.stock_uom)
 	return stock_qty
 
 
 def _resolve_available_sub_assembly(d, stock_qty, bin_details, company, warehouse, skip_available):
 	if warehouse and d.item_code not in bin_details:
-		bins = get_bin_details(d, company, for_warehouse=warehouse)
+		bins = _get_bin_details(d, company, for_warehouse=warehouse)
 		bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
 
 	if skip_available:
@@ -126,6 +138,7 @@ def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, requi
 			"indent": indent,
 			"stock_qty": flt(stock_qty, precision),
 			"required_qty": flt(required_qty, precision),
+			"process_loss_percentage": d.process_loss_percentage,
 			"projected_qty": bin_dict.get("projected_qty", 0),
 			"main_bom": bom_no,
 		}

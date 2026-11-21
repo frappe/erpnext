@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.controllers.accounts_controller import merge_taxes
@@ -71,21 +72,30 @@ def make_purchase_receipt(
 			merge_taxes(source_parent, target_parent)
 		target_parent.run_method("calculate_taxes_and_totals")
 
-	def update_item(obj, target, source_parent):
-		from erpnext.controllers.sales_and_purchase_return import get_returned_qty_map_for_row
-
-		returned_qty_map = (
-			get_returned_qty_map_for_row(
-				source_parent.name, source_parent.supplier, obj.name, "Purchase Invoice"
+	def get_returned_qty(obj, source_parent):
+		"""Qty cancelled by debit notes against the row, in the row's UOM."""
+		debit_note = frappe.qb.DocType("Purchase Invoice")
+		debit_note_item = frappe.qb.DocType("Purchase Invoice Item")
+		returned_stock_qty = (
+			frappe.qb.from_(debit_note_item)
+			.join(debit_note)
+			.on(debit_note.name == debit_note_item.parent)
+			.select(Sum(-debit_note_item.qty * debit_note_item.conversion_factor))
+			.where(
+				(debit_note.return_against == source_parent.name)
+				& (debit_note.is_return == 1)
+				& (debit_note.docstatus == 1)
+				& (debit_note_item.purchase_invoice_item == obj.name)
 			)
-			or {}
-		)
+		).run()[0][0]
+		return flt(returned_stock_qty) / flt(obj.conversion_factor or 1)
 
-		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj)
+	def update_item(obj, target, source_parent):
+		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj) - get_returned_qty(obj, source_parent)
+		pending_qty = max(flt(pending_qty, target.precision("qty")), 0)
 
-		target.qty = pending_qty - flt(returned_qty_map.get("qty"))
-		target.received_qty = pending_qty
-		target.stock_qty = (pending_qty - flt(returned_qty_map.get("qty"))) * flt(obj.conversion_factor)
+		target.qty = target.received_qty = pending_qty
+		target.stock_qty = pending_qty * flt(obj.conversion_factor)
 		target.amount = pending_qty * flt(obj.rate)
 		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 

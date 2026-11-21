@@ -71,7 +71,6 @@ def _enrich_bom_items(bom_items, bom_doc):
 		bom_item.update(next(item for item in items if item.get("name") == bom_item.get("item_code")))
 		bom_item.parent_bom_qty = bom_doc.quantity
 		bom_item.expandable = 0 if bom_item.value in ("", None) else 1
-		bom_item.image = frappe.db.escape(bom_item.image)
 
 
 @frappe.whitelist()
@@ -223,3 +222,4 @@ def _postprocess_variant_bom(source, doc, item, variant_items, source_name):
 	add_variant_item(variant_items, doc, source_name)
 	for row in doc.items[mapped_rows:]:
 		row.qty = flt(row.qty) * (flt(source.quantity) or 1)
+		row.stock_qty = flt(row.qty * row.conversion_factor, row.precision("stock_qty"))

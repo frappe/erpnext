@@ -48,7 +48,8 @@ class BaseStockEntry:
 			self.wo_doc.status == "Closed"
 			and self.doc.docstatus == 1
 			and not self.doc.is_return
-			and self.doc.purpose in ("Material Transfer for Manufacture", "Manufacture")
+			and self.doc.purpose
+			in ("Material Transfer for Manufacture", "Manufacture", "Material Consumption for Manufacture")
 		)
 
 	def validate_alternative_items(self):

@@ -5,12 +5,12 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
-	if filters.from_date > filters.to_date:
-		frappe.msgprint(_("To Date must be greater than From Date"))
+	validate_date_range(filters)
 
 	data = []
 	columns = get_columns(filters)

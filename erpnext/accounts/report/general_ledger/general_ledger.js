@@ -43,6 +43,9 @@ frappe.query_reports["General Ledger"] = {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
+			on_change: function () {
+				toggle_reporting_date_rate_filter().then(() => frappe.query_report.refresh());
+			},
 		},
 		{
 			fieldname: "voucher_no",
@@ -210,6 +213,15 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Check",
 		},
 		{
+			fieldname: "convert_at_reporting_date_rate",
+			label: __("Convert at Reporting Date Exchange Rate"),
+			fieldtype: "Check",
+			hidden: 1,
+			description: __(
+				"Convert company currency amounts to account currency at the exchange rate on To Date"
+			),
+		},
+		{
 			fieldname: "add_values_in_transaction_currency",
 			label: __("Add Columns in Transaction Currency"),
 			fieldtype: "Check",
@@ -232,6 +244,31 @@ frappe.query_reports["General Ledger"] = {
 	],
 	collapsible_filters: true,
 	separate_check_filters: true,
+	onload: function () {
+		toggle_reporting_date_rate_filter();
+	},
 };
+
+async function toggle_reporting_date_rate_filter() {
+	const filter = frappe.query_report.get_filter("convert_at_reporting_date_rate");
+	const accounts = frappe.query_report.get_filter_value("account");
+	const company_currency = erpnext.get_currency(frappe.query_report.get_filter_value("company"));
+
+	let in_account_currency = false;
+	if (accounts?.length) {
+		const currencies = await frappe.db.get_list("Account", {
+			filters: { name: ["in", accounts] },
+			fields: ["account_currency"],
+			group_by: "account_currency",
+		});
+		in_account_currency = currencies.length === 1 && currencies[0].account_currency !== company_currency;
+	}
+
+	filter.df.hidden = !in_account_currency;
+	filter.refresh();
+	if (!in_account_currency && filter.get_value()) {
+		filter.set_value(0);
+	}
+}
 
 erpnext.utils.add_dimensions("General Ledger", 15);

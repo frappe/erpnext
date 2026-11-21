@@ -29,6 +29,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.work_order.mapper import (
 	create_job_card,
 	get_operation_qty,
+	get_operation_target_qty,
 	split_qty_based_on_batch_size,
 )
 
@@ -74,10 +75,11 @@ class OperationsService:
 			self.doc.actual_operating_cost += flt(d.actual_operating_cost)
 
 		variable_cost = self.doc.actual_operating_cost or self.doc.planned_operating_cost
-		self.doc.total_operating_cost = (
+		self.doc.total_operating_cost = flt(
 			flt(self.doc.additional_operating_cost)
 			+ flt(variable_cost)
-			+ flt(self.doc.corrective_operation_cost)
+			+ flt(self.doc.corrective_operation_cost),
+			self.doc.precision("total_operating_cost"),
 		)
 
 	@staticmethod
@@ -126,9 +128,12 @@ class OperationsService:
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
 
-		planned_end_date = self.doc.operations and self.doc.operations[-1].planned_end_time
-		if planned_end_date:
-			self.doc.db_set("planned_end_date", planned_end_date)
+		# operations with the same Sequence ID run in parallel, so the last row may not end last
+		end_times = [
+			get_datetime(row.planned_end_time) for row in self.doc.operations if row.planned_end_time
+		]
+		if end_times:
+			self.doc.db_set("planned_end_date", max(end_times))
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
@@ -230,7 +235,13 @@ class OperationsService:
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 		self.doc.set("operations", [])
-		if not self.doc.bom_no or not frappe.get_cached_value("BOM", self.doc.bom_no, "with_operations"):
+		if not self.doc.bom_no:
+			return
+
+		# With multi-level BOM, sub-assembly operations apply even when the top-level BOM has none
+		if not self.doc.use_multi_level_bom and not frappe.get_cached_value(
+			"BOM", self.doc.bom_no, "with_operations"
+		):
 			return
 
 		operations = self._collect_bom_operations()
@@ -272,7 +283,6 @@ class OperationsService:
 			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
 				continue
 			d.time_in_mins = flt(saved.time_in_mins) * flt(self.doc.qty) / flt(previous.qty)
-		self.calculate_operating_cost()
 
 	def _get_fixed_time_flags(self):
 		boms = {d.bom or self.doc.bom_no for d in self.doc.get("operations")}
@@ -417,9 +427,10 @@ class OperationsService:
 
 	def _operation_status(self, d):
 		qty = self._operation_qty(d)
-		if not qty:
+		operation_qty = get_operation_target_qty(self.doc, d)
+		if not qty and operation_qty:
 			return "Pending"
-		if qty < flt(get_operation_qty(self.doc, d), d.precision("completed_qty")):
+		if qty < operation_qty:
 			return "Work in Progress"
 		return "Completed"
 

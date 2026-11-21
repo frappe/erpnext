@@ -288,7 +288,7 @@
    "fieldtype": "Select",
    "label": "From Voucher Type",
    "no_copy": 1,
-   "options": "\nPick List\nPurchase Receipt\nStock Entry\nWork Order\nProduction Plan\nSubcontracting Inward Order",
+   "options": "\nPick List\nPurchase Receipt\nPurchase Invoice\nStock Entry\nWork Order\nProduction Plan\nSubcontracting Inward Order",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
@@ -344,7 +344,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-14 20:46:51.253079",
+ "modified": "2026-11-02 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

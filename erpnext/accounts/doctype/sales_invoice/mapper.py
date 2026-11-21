@@ -9,8 +9,13 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import flt, get_link_to_form, getdate
 
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.sales_invoice.services.inter_company import get_inter_company_counterpart
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, _get_party_details
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 
 @frappe.whitelist()
@@ -164,6 +169,16 @@ def validate_inter_company_transaction(doc, doctype):
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
 
+def validate_no_counterpart_sales_invoice(purchase_invoice):
+	"""Purchase Invoice rows link no Sales Invoice rows, so its header link marks it as already invoiced."""
+	if sales_invoice := purchase_invoice.inter_company_invoice_reference:
+		frappe.throw(
+			_(
+				"Cannot create Intercompany Sales Invoice. Purchase Invoice {0} already has Sales Invoice {1}."
+			).format(purchase_invoice.name, get_link_to_form("Sales Invoice", sales_invoice))
+		)
+
+
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name: str, target_doc: str | dict | Document | None = None):
 	return make_inter_company_transaction("Sales Invoice", source_name, target_doc)
@@ -188,6 +203,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			else {}
 		)
 
+	if doctype != "Purchase Invoice":
+		validate_not_made_from_counterpart(source_doc, target_doctype, received_items)
+
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
 
@@ -203,6 +221,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			_apply_purchase_party_details(target_doc, source_doc, details)
 		else:
 			_apply_sales_party_details(target_doc, source_doc, details)
+		clear_inapplicable_terms(target_doc)
 
 	def get_pending_qty(row):
 		received_stock_qty = received_items.get(row.name, 0.0)
@@ -281,6 +300,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
+	if doctype == "Purchase Invoice":
+		validate_no_counterpart_sales_invoice(source_doc)
+
 	if not doclist.get("items"):
 		if target_doctype in ("Sales Invoice", "Purchase Invoice"):
 			message = _(
@@ -295,6 +317,21 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		frappe.throw(message.format(target_doctype, doctype, target_doctype))
 
 	return doclist
+
+
+def validate_not_made_from_counterpart(source_doc, target_doctype, received_items):
+	"""A document made from its counterpart links it, but the counterpart rows link none of its rows back."""
+	reference_field = get_inter_company_counterpart(source_doc.doctype)[1]
+	reference = source_doc.get(reference_field)
+	if reference and not any(row.name in received_items for row in source_doc.items):
+		frappe.throw(
+			_("Cannot create Intercompany {0}. {1} {2} was created from {0} {3}.").format(
+				target_doctype,
+				source_doc.doctype,
+				source_doc.name,
+				get_link_to_form(target_doctype, reference),
+			)
+		)
 
 
 def clear_item_tax_template_of_other_company(item, company):
@@ -412,29 +449,39 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 	if reference_fieldname != item_reference_field:
 		frappe.throw(_("Invalid field {0}").format(reference_fieldname), frappe.PermissionError)
 
-	filters = {
-		reference_field: reference_name,
-		"docstatus": 1,
-	}
-
-	target_doctypes = frappe.get_all(
-		doctype,
-		filters=filters,
-		pluck="name",
-	)
 	received_items_map = {}
-	if target_doctypes:
-		received_items_data = frappe.get_all(
-			doctype + " Item",
-			filters={"parent": ("in", target_doctypes)},
-			fields=[reference_fieldname, "stock_qty"],
-		)
-		for item in received_items_data:
-			key = item.get(reference_fieldname)
-			if key:
-				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
+	for item in get_inter_company_items(
+		doctype, {reference_field: reference_name}, reference_fieldname, ["stock_qty"]
+	):
+		key = item.get(reference_fieldname)
+		if key:
+			received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
 
 	return received_items_map
+
+
+def get_inter_company_items(doctype, filters, reference_fieldname, fields):
+	"""Items of the submitted documents matching `filters`, and of their returns for Purchase Invoices.
+	A return row links only the invoice row it returns, so it gets that row's `reference_fieldname`."""
+	parents = frappe.get_all(doctype, filters={**filters, "docstatus": 1}, pluck="name")
+	if not parents:
+		return []
+
+	fields = ["name", reference_fieldname, *fields]
+	if doctype == "Purchase Invoice":
+		parents += frappe.get_all(
+			doctype, filters={"return_against": ("in", parents), "docstatus": 1}, pluck="name"
+		)
+		fields.append("purchase_invoice_item")
+
+	items = frappe.get_all(doctype + " Item", filters={"parent": ("in", parents)}, fields=fields)
+	reference_by_row = {item.name: item.get(reference_fieldname) for item in items}
+	for item in items:
+		item[reference_fieldname] = reference_by_row[item.name] or reference_by_row.get(
+			item.get("purchase_invoice_item")
+		)
+
+	return items
 
 
 def set_purchase_references(doc):
@@ -605,8 +652,6 @@ def create_dunning(
 	args: str | dict | bool | None = None,
 	ignore_permissions: bool = False,
 ):
-	from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
-
 	if isinstance(args, bool):
 		ignore_permissions = args
 		args = None
@@ -624,27 +669,29 @@ def create_dunning(
 			target.cost_center = dunning_type.cost_center
 			target.language = source.language
 
-		# update outstanding from doc
-		if source.payment_schedule and len(source.payment_schedule) == 1:
-			for row in target.overdue_payments:
-				if row.payment_schedule == source.payment_schedule[0].name:
-					# outstanding_amount is in the party account currency, but the Overdue Payment
-					# row is in the invoice's transaction currency. When they differ, use the
-					# payment schedule's own outstanding — it is kept in transaction currency and
-					# updated as payments are allocated, so it stays correct even when the invoice
-					# and its payments post at different exchange rates (#56006).
-					if source.party_account_currency and source.party_account_currency != source.currency:
-						row.outstanding = source.payment_schedule[0].outstanding
-					else:
-						row.outstanding = source.get("outstanding_amount")
-
-		if len(source.payment_schedule) > 1 and source.party_account_currency == source.currency:
+		if source.payment_schedule:
 			outstanding = get_payment_schedule_outstanding(source, source.payment_schedule)
 			for row in target.overdue_payments[:]:
-				if row.sales_invoice == source.name:
+				if row.sales_invoice == source.name and row.payment_schedule in outstanding:
 					row.outstanding = outstanding[row.payment_schedule]
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
+
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
 
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))

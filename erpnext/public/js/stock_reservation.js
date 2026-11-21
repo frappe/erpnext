@@ -165,11 +165,10 @@ $.extend(erpnext.stock_reservation, {
 
 		frm.doc[parms.table_name].forEach((item) => {
 			let unreserved_qty =
-				(flt(item[qty_field]) -
-					(item.stock_reserved_qty
-						? flt(item.stock_reserved_qty)
-						: flt(item[dispatch_qty_field]) * flt(item.conversion_factor || 1))) /
-				flt(item.conversion_factor || 1);
+				flt(item[qty_field]) -
+				(item.stock_reserved_qty
+					? flt(item.stock_reserved_qty)
+					: flt(item[dispatch_qty_field]) * flt(item.conversion_factor || 1));
 
 			if (unreserved_qty > 0) {
 				let args = {

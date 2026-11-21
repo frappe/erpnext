@@ -770,6 +770,7 @@ class PeriodClosingVoucher(AccountsController):
 		correction_factor = 2
 		if frappe.db.db_type == "postgres":
 			analyzer = frappe.json.loads(
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
 				(
 					frappe.db.sql(
 						f"explain (format json) {raw_query}",
@@ -781,6 +782,7 @@ class PeriodClosingVoucher(AccountsController):
 		else:
 			estimated_count = (
 				cint(
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
 					frappe.db.sql(
 						f"explain {raw_query}",
 						as_dict=True,
@@ -818,6 +820,7 @@ class PeriodClosingVoucher(AccountsController):
 			correction_factor = 2
 			if frappe.db.db_type == "postgres":
 				analyzer = frappe.json.loads(
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
 					(
 						frappe.db.sql(
 							f"explain (format json) {raw_query}",
@@ -829,6 +832,7 @@ class PeriodClosingVoucher(AccountsController):
 			else:
 				estimated_count = (
 					cint(
+						# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
 						frappe.db.sql(
 							f"explain {raw_query};",
 							as_dict=True,

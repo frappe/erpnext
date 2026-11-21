@@ -1,3 +1,10 @@
+{%
+	/* Show the description as plain text. A space after each line break or block end keeps
+	paragraphs and list items apart. No backslashes: the bundler drops them from templates. */
+	const task_text = (html) => frappe.utils.escape_html(
+		frappe.utils.html2text(cstr(html).replace(/<br *[/]?>|<[/](p|div|li|h[1-6])>/gi, "$& "))
+	);
+%}
 <div class="open-activities">
 	<div class="new-btn pb-3">
 		<span>
@@ -31,7 +38,7 @@
 									</svg>
 								</span>
 								<a href="/app/todo/{{ frappe.utils.escape_html(tasks[i].name) }}" title="{{ __('Open Task') }}">
-									{%= tasks[i].description %}
+									{%= task_text(tasks[i].description) %}
 								</a>
 							</div>
 							<div class="checkbox">
@@ -41,13 +48,13 @@
 						</div>
 						{% if(tasks[i].date) { %}
 							<div class="text-muted ml-1">
-								{%= frappe.datetime.global_date_format(tasks[i].date) %}
+								{%= frappe.datetime.str_to_user(tasks[i].date) %}
 							</div>
 						{% } %}
 						{% if(tasks[i].allocated_to) { %}
 							<div class="text-muted  ml-1">
 								{{ __("Allocated To:") }}
-								{%= tasks[i].allocated_to %}
+								{%= frappe.utils.escape_html(tasks[i].allocated_to) %}
 							</div>
 						{% } %}
 						</div>
@@ -79,7 +86,7 @@
 					</div>
 					{% if (t.date) { %}
 					<div class="ml-auto">
-						{%= frappe.datetime.global_date_format(t.date) %}
+						{%= frappe.datetime.str_to_user(t.date) %}
 					</div>
 					{% } %}
 					<div class="checkbox {% if(!t.date) { %}ml-auto{% } else { %}ml-2{% } %}">
@@ -90,7 +97,7 @@
 				<div class="pl-2 mb-2 mt-2">
 					<div class="label-area font-md">
 						<a href="/app/todo/{{ frappe.utils.escape_html(t.name) }}" title="{{ __('Open Task') }}">
-							{%= t.description %}
+							{%= task_text(t.description) %}
 						</a>
 					</div>
 				</div>
@@ -124,16 +131,15 @@
                             </div>
                         </div>
                         <div class="text-muted ml-1">
-                            {%= frappe.datetime.global_date_format(events[i].starts_on) %}
+                            {%= frappe.datetime.str_to_user(events[i].starts_on) %}
 
                             {% if (events[i].ends_on) { %}
-                                {% if (frappe.datetime.obj_to_user(events[i].starts_on) != frappe.datetime.obj_to_user(events[i].ends_on)) %}
+                                {% if (!frappe.datetime.convert_to_user_tz(events[i].starts_on, false).isSame(frappe.datetime.convert_to_user_tz(events[i].ends_on, false), "day")) %}
                                     -
-                                    {%= frappe.datetime.global_date_format(frappe.datetime.obj_to_user(events[i].ends_on)) %}
-                                    {%= frappe.datetime.get_time(events[i].ends_on) %}
+                                    {%= frappe.datetime.str_to_user(events[i].ends_on) %}
                                 {% } else if (events[i].ends_on) { %}
                                     -
-                                    {%= frappe.datetime.get_time(events[i].ends_on) %}
+                                    {%= frappe.datetime.convert_to_user_tz(events[i].ends_on, false).format(frappe.datetime.get_user_time_fmt()) %}
                                 {% } %}
                             {% } %}
 
@@ -170,16 +176,15 @@
 					</div>
 				</div>
 				<div class="text-muted ml-1">
-					{%= frappe.datetime.global_date_format(event.starts_on) %}
+					{%= frappe.datetime.str_to_user(event.starts_on) %}
 
 					{% if (event.ends_on) { %}
-					{% if (frappe.datetime.obj_to_user(event.starts_on) != frappe.datetime.obj_to_user(event.ends_on)) %}
+					{% if (!frappe.datetime.convert_to_user_tz(event.starts_on, false).isSame(frappe.datetime.convert_to_user_tz(event.ends_on, false), "day")) %}
 					-
-					{%= frappe.datetime.global_date_format(frappe.datetime.obj_to_user(event.ends_on)) %}
-					{%= frappe.datetime.get_time(event.ends_on) %}
+					{%= frappe.datetime.str_to_user(event.ends_on) %}
 					{% } else if (event.ends_on) { %}
 					-
-					{%= frappe.datetime.get_time(event.ends_on) %}
+					{%= frappe.datetime.convert_to_user_tz(event.ends_on, false).format(frappe.datetime.get_user_time_fmt()) %}
 					{% } %}
 					{% } %}
 

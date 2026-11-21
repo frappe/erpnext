@@ -151,7 +151,7 @@ class LoyaltyService:
 		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
 
 
-def get_loyalty_programs(customer: str) -> list:
+def get_loyalty_programs(customer: str, set_single_program: bool = True) -> list:
 	"""Return applicable loyalty programs for the customer."""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs as _get
 
@@ -161,7 +161,7 @@ def get_loyalty_programs(customer: str) -> list:
 
 	lp_details = _get(customer_doc)
 
-	if len(lp_details) == 1:
+	if set_single_program and len(lp_details) == 1:
 		customer_doc.db_set("loyalty_program", lp_details[0])
 
 	return lp_details

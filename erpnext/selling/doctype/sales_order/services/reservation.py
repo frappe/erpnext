@@ -10,6 +10,7 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	clear_reserve_stock_if_disabled,
 	get_sre_reserved_qty_details_for_voucher,
 )
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
@@ -20,8 +21,9 @@ class SalesOrderStockReservation:
 		self.doc = doc
 
 	def validate_reserved_stock(self) -> None:
-		"""Clean reserved stock flag for non-stock Item"""
+		"""Uncheck Reserve Stock when stock reservation is disabled, and on non-stock items."""
 
+		clear_reserve_stock_if_disabled(self.doc)
 		enable_stock_reservation = frappe.get_single_value("Stock Settings", "enable_stock_reservation")
 
 		for item in self.doc.items:
@@ -47,11 +49,11 @@ class SalesOrderStockReservation:
 
 		for d in self.doc.get("items"):
 			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
-				if self.doc.has_product_bundle(d.item_code):
-					for p in self.doc.get("packed_items"):
-						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
-							_valid_for_reserve(p.item_code, p.warehouse)
-				else:
+				# the order's own packed rows, as the bundle may since be disabled
+				packed_items = [p for p in self.doc.get("packed_items") if p.parent_detail_docname == d.name]
+				for p in packed_items:
+					_valid_for_reserve(p.item_code, p.warehouse)
+				if not packed_items:
 					_valid_for_reserve(d.item_code, d.warehouse)
 
 		for item_code, warehouse in item_wh_list:
@@ -114,10 +116,16 @@ class SalesOrderStockReservation:
 			if not frappe.db.exists("Sales Order Item", item.get("sales_order_item"))
 		]
 
+		packed_item_warehouses = {d.name: d.warehouse for d in self.doc.packed_items}
 		for item in packed_items:
 			items_details.remove(item)
 			item["qty"] = item.pop("qty_to_reserve")
 			item["from_voucher_type"] = from_voucher_type
+			if not from_voucher_type:
+				# a manual reservation of a component is made in its packed row's warehouse
+				item["warehouse"] = packed_item_warehouses.get(
+					item.get("sales_order_item"), item.get("warehouse")
+				)
 
 			picked_bundle = item.pop("serial_and_batch_bundle", None)
 			if picked_bundle:
@@ -160,11 +168,12 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
 	if item.get("delivered_qty") is not None:
-		return (
+		unreserved_qty = (
 			item.stock_qty
 			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
 			- existing_reserved_qty
 		)
+		precision = item.precision("stock_qty")
 	else:
 		stock_qty, delivered_qty, conversion_factor = frappe.get_value(
 			"Sales Order Item",
@@ -175,4 +184,8 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 			item.qty / stock_qty
 		)  # ratio of packed item qty to main item qty in product bundle
 		delivered_qty = delivered_qty * conversion_factor * bundle_conversion_factor
-		return item.qty - delivered_qty - existing_reserved_qty
+		unreserved_qty = item.qty - delivered_qty - existing_reserved_qty
+		precision = item.precision("qty")
+
+	# a residue below stock qty precision, as a fractional conversion factor leaves, is not unreserved
+	return unreserved_qty if flt(unreserved_qty, precision) > 0 else 0

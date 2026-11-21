@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils import flt, getdate
 
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting-other-method -- set_status uses db_set once submitted or cancelled
 class BankTransaction(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.

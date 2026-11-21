@@ -930,6 +930,7 @@
    "fieldname": "inter_company_order_reference",
    "fieldtype": "Link",
    "label": "Inter Company Order Reference",
+   "no_copy": 1,
    "options": "Sales Order",
    "read_only": 1
   },
@@ -1309,7 +1310,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-12 18:16:58.531757",
+ "modified": "2026-11-16 04:16:51.560603",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

@@ -7,9 +7,9 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.naming import NamingSeries
-from frappe.query_builder import Interval
-from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
+from frappe.query_builder.functions import Count, UnixTimestamp
 from frappe.utils import (
+	add_years,
 	cint,
 	cstr,
 	escape_html,
@@ -18,6 +18,7 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	now_datetime,
+	nowdate,
 	nowtime,
 	strip,
 )
@@ -217,6 +218,7 @@ class Item(Document):
 					queue="long",
 					timeout=600,
 					job_name=f"set_opening_stock_for_{self.name}",
+					enqueue_after_commit=True,
 				)
 				frappe.msgprint(
 					_(
@@ -238,6 +240,7 @@ class Item(Document):
 		self.validate_description()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
+		self.validate_removed_uoms_not_in_item_price()
 		self.validate_item_type()
 		self.validate_naming_series()
 		if self.is_new():
@@ -340,7 +343,10 @@ class Item(Document):
 			if not exchange_rate:
 				return False
 
-			price_list_rate = price_list_rate / exchange_rate
+			price_list_rate = flt(
+				price_list_rate / exchange_rate,
+				frappe.get_precision("Item Price", "price_list_rate", currency),
+			)
 
 		frappe.get_doc(
 			{
@@ -501,26 +507,6 @@ class Item(Document):
 					)
 				)
 
-	def update_template_tables(self):
-		template = frappe.get_cached_doc("Item", self.variant_of)
-
-		# add item taxes from template
-		for d in template.get("taxes"):
-			self.append("taxes", d)
-
-		# copy re-order table if empty
-		if not self.get("reorder_levels"):
-			for d in template.get("reorder_levels"):
-				n = {}
-				for k in (
-					"warehouse",
-					"warehouse_reorder_level",
-					"warehouse_reorder_qty",
-					"material_request_type",
-				):
-					n[k] = d.get(k)
-				self.append("reorder_levels", n)
-
 	def validate_conversion_factor(self):
 		check_list = []
 		for d in self.get("uoms"):
@@ -537,6 +523,29 @@ class Item(Document):
 				frappe.throw(
 					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx)
 				)
+
+	def validate_removed_uoms_not_in_item_price(self):
+		"""An Item Price is per one of the Item's UOMs, so that UOM cannot be removed while one uses it."""
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		removed_uoms = {d.uom for d in doc_before_save.uoms} - {d.uom for d in self.uoms}
+		if not removed_uoms:
+			return
+
+		item_price = frappe.db.get_value(
+			"Item Price",
+			{"item_code": self.name, "uom": ("in", list(removed_uoms))},
+			["name", "uom"],
+			as_dict=True,
+		)
+		if item_price:
+			frappe.throw(
+				_("UOM {0} cannot be removed from the Item as Item Price {1} uses it.").format(
+					bold(item_price.uom), get_link_to_form("Item Price", item_price.name)
+				)
+			)
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
@@ -773,7 +782,7 @@ class Item(Document):
 			"Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 		).format(frappe.bold(old_name))
 
-		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
+		frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_properties_before_merge(self, new_name):
 		# Validate properties before merging
@@ -911,19 +920,7 @@ class Item(Document):
 		item_group = frappe.get_cached_doc("Item Group", self.item_group)
 		if item_group.item_group_defaults:
 			for item in item_group.item_group_defaults:
-				self.append(
-					"item_defaults",
-					{
-						"company": item.company,
-						"default_warehouse": item.default_warehouse,
-						"default_price_list": item.default_price_list,
-						"buying_cost_center": item.buying_cost_center,
-						"default_supplier": item.default_supplier,
-						"expense_account": item.expense_account,
-						"selling_cost_center": item.selling_cost_center,
-						"income_account": item.income_account,
-					},
-				)
+				self.append("item_defaults", frappe.copy_doc(item))
 		else:
 			defaults = frappe.defaults.get_defaults() or {}
 
@@ -937,19 +934,6 @@ class Item(Document):
 				self.append(
 					"item_defaults",
 					{"company": defaults.get("company"), "default_warehouse": defaults.default_warehouse},
-				)
-
-		if not self.taxes and item_group.taxes:
-			for tax in item_group.taxes:
-				self.append(
-					"taxes",
-					{
-						"item_tax_template": tax.item_tax_template,
-						"tax_category": tax.tax_category,
-						"valid_from": tax.valid_from,
-						"minimum_net_rate": tax.minimum_net_rate,
-						"maximum_net_rate": tax.maximum_net_rate,
-					},
 				)
 
 	def update_variants(self):
@@ -1493,7 +1477,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 		.select(UnixTimestamp(sle.posting_date), Count("*"))
 		.where(sle.item_code == name)
 		.where(sle.is_cancelled == 0)
-		.where(sle.posting_date > CurDate() - Interval(years=1))
+		.where(sle.posting_date > add_years(nowdate(), -1))
 		.groupby(sle.posting_date)
 		.run()
 	)
@@ -1531,39 +1515,17 @@ def validate_cancelled_item(item_code, docstatus=None):
 @frappe.request_cache
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
-	# get last purchase order item details
+	# the latest by date wins, a Purchase Order before a Receipt before an Invoice on the same date
+	last_purchases = []
+	for doctype in ("Purchase Order", "Purchase Receipt", "Purchase Invoice"):
+		if details := get_purchase_voucher_details(doctype, item_code, doc_name):
+			purchase_date = getdate(details[0].get("posting_date") or details[0].get("transaction_date"))
+			last_purchases.append((purchase_date, details[0]))
 
-	last_purchase_order = get_purchase_voucher_details("Purchase Order", item_code, doc_name)
+	if not last_purchases:
+		return frappe._dict()
 
-	# get last purchase receipt item details
-	last_purchase_receipt = get_purchase_voucher_details("Purchase Receipt", item_code, doc_name)
-
-	purchase_order_date = getdate(
-		last_purchase_order and last_purchase_order[0].transaction_date or "1900-01-01"
-	)
-	purchase_receipt_date = getdate(
-		last_purchase_receipt and last_purchase_receipt[0].posting_date or "1900-01-01"
-	)
-
-	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
-		# use purchase order
-
-		last_purchase = last_purchase_order[0]
-		purchase_date = purchase_order_date
-
-	elif last_purchase_receipt and (purchase_receipt_date > purchase_order_date or not last_purchase_order):
-		# use purchase receipt
-		last_purchase = last_purchase_receipt[0]
-		purchase_date = purchase_receipt_date
-
-	else:
-		last_purchase_invoice = get_purchase_voucher_details("Purchase Invoice", item_code, doc_name)
-
-		if last_purchase_invoice:
-			last_purchase = last_purchase_invoice[0]
-			purchase_date = getdate(last_purchase.posting_date)
-		else:
-			return frappe._dict()
+	purchase_date, last_purchase = max(last_purchases, key=lambda purchase: purchase[0])
 
 	conversion_factor = flt(last_purchase.conversion_factor)
 	out = frappe._dict(
@@ -1581,6 +1543,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		{
 			"price_list_rate": out.base_price_list_rate / conversion_rate,
 			"rate": out.base_rate / conversion_rate,
+			# a rate above the price list rate is a margin, not a discount
+			"discount_amount": max(out.base_price_list_rate - out.base_rate, 0) / conversion_rate,
 			"base_rate": out.base_rate,
 			"base_net_rate": out.base_net_rate,
 		}
@@ -1608,6 +1572,9 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 		)
 		.where(parent_doc.docstatus == 1)
 		.where(child_doc.item_code == item_code)
+		# skipped when the last purchase rate is updated on submit
+		.where(child_doc.is_free_item == 0)
+		.where(parent_doc.is_internal_supplier == 0)
 	)
 
 	if document_name:
@@ -1756,13 +1723,19 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	from_uom, to_uom = uom, stock_uom  # renaming for readability
 
 	exact_match = frappe.db.get_value(
-		"UOM Conversion Factor", {"to_uom": to_uom, "from_uom": from_uom}, ["value"], as_dict=1
+		"UOM Conversion Factor",
+		{"to_uom": to_uom, "from_uom": from_uom, "value": [">", 0]},
+		["value"],
+		as_dict=1,
 	)
 	if exact_match:
 		return exact_match.value
 
 	inverse_match = frappe.db.get_value(
-		"UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1
+		"UOM Conversion Factor",
+		{"to_uom": from_uom, "from_uom": to_uom, "value": [">", 0]},
+		["value"],
+		as_dict=1,
 	)
 	if inverse_match and inverse_match.value:
 		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
@@ -1792,7 +1765,12 @@ def _get_conv_factor_via_shared_uom(shared_field, other_field, first_uom, second
 		.join(second)
 		.on((first[shared_field] == second[shared_field]) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
-		.where((first[other_field] == first_uom) & (second[other_field] == second_uom) & (second.value != 0))
+		.where(
+			(first[other_field] == first_uom)
+			& (second[other_field] == second_uom)
+			& (first.value > 0)
+			& (second.value > 0)
+		)
 		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)

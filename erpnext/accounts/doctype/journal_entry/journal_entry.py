@@ -36,6 +36,7 @@ from erpnext.accounts.utils import (
 	get_balance_on,
 	get_stock_accounts,
 	get_stock_and_account_balance,
+	sync_payment_schedule_outstanding,
 )
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.setup.utils import get_exchange_rate as _get_exchange_rate
@@ -250,6 +251,7 @@ class JournalEntry(AccountsController):
 		self.update_invoice_discounting()
 		JournalTaxWithholding(self).on_submit()
 		self.update_payment_order_requests()
+		self.sync_payment_schedules()
 
 	@frappe.whitelist()
 	def get_balance_for_periodic_accounting(self) -> None:
@@ -328,8 +330,8 @@ class JournalEntry(AccountsController):
 		if self.flags.get("ignore_reposting_on_reconciliation"):
 			return
 
-		self.needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
@@ -368,6 +370,7 @@ class JournalEntry(AccountsController):
 		AssetService(self).unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
 		self.update_payment_order_requests(cancel=True)
+		self.sync_payment_schedules()
 
 	def on_trash(self):
 		from erpnext.accounts.doctype.payment_order.payment_order import clear_payment_reference
@@ -381,6 +384,12 @@ class JournalEntry(AccountsController):
 		)
 
 		update_payment_requests_from_journal_entry(self, cancel=cancel)
+
+	def sync_payment_schedules(self):
+		"""A reference moves the invoice outstanding through the ledger only, so follow it in the schedule."""
+		for reference in {(d.reference_type, d.reference_name) for d in self.accounts}:
+			if reference[0] in ("Sales Invoice", "Purchase Invoice"):
+				sync_payment_schedule_outstanding(*reference)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -527,23 +536,13 @@ class JournalEntry(AccountsController):
 			)
 		)
 		if customers:
-			from erpnext.selling.doctype.customer.customer import check_credit_limit
-
-			customer_details = frappe._dict(
-				frappe.db.get_all(
-					"Customer Credit Limit",
-					filters={
-						"parent": ["in", customers],
-						"parenttype": ["=", "Customer"],
-						"company": ["=", self.company],
-					},
-					fields=["parent", "bypass_credit_limit_check"],
-					as_list=True,
-				)
+			from erpnext.selling.doctype.customer.customer import (
+				check_credit_limit,
+				is_sales_order_credit_check_bypassed,
 			)
 
 			for customer in customers:
-				ignore_outstanding_sales_order = bool(customer_details.get(customer))
+				ignore_outstanding_sales_order = is_sales_order_credit_check_bypassed(customer, self.company)
 				check_credit_limit(customer, self.company, ignore_outstanding_sales_order)
 
 	def validate_cheque_info(self):
@@ -1050,7 +1049,7 @@ def get_default_bank_cash_account(
 	*,
 	fetch_balance: bool = True,
 ) -> dict:
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+	from erpnext.accounts.doctype.sales_invoice.services.pos import get_bank_cash_account
 
 	# the company is the scope being authorised, and doc= brings User Permissions to bear. `select`,
 	# not `read`: this also runs server-side from get_payment_entry, and Auditor/HR User/Desk User
@@ -1058,6 +1057,7 @@ def get_default_bank_cash_account(
 	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
 
 	if mode_of_payment:
+		frappe.has_permission("Mode of Payment", "select", mode_of_payment, throw=True)
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
 	if not account:

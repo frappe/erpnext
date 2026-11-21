@@ -16,7 +16,7 @@
 		[
 			"@semantic-release/git", {
 				"assets": ["erpnext/__init__.py"],
-				"message": "chore(release): Bumped to Version ${nextRelease.version}\n\n${nextRelease.notes}"
+				"message": "chore(release): Bumped to Version ${nextRelease.version}"
 			}
 		],
 		"@semantic-release/github"

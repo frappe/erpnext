@@ -10,7 +10,12 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )
-from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -44,6 +49,23 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(scio.items[0].qty, 12)
 
+	def test_manufacture_cancel_releases_its_finished_good_reservation(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.submit()
+		reservation = {"from_voucher_no": manufacture.name, "docstatus": 1}
+		self.assertTrue(frappe.db.exists("Stock Reservation Entry", reservation))
+
+		manufacture.cancel()
+
+		self.assertFalse(frappe.db.exists("Stock Reservation Entry", reservation))
+
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
 
@@ -73,29 +95,15 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_item = "Basic RM"
 
 		# Receipt 1: 5 Qty @ Unit Cost 10
-		rm_in_1 = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		rm_in_1.items = [item for item in rm_in_1.items if item.item_code == rm_item]
-		rm_in_1.items[0].qty = 5
-		rm_in_1.items[0].basic_rate = 10
-		rm_in_1.items[0].transfer_qty = 5
-		rm_in_1.submit()
-
-		scio.reload()
+		receive_customer_material(scio, rm_item, 5, 10)
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertEqual(received_item.rate, 10)
 
 		# Receipt 2: 5 Qty @ Unit Cost 20
-		rm_in_2 = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		rm_in_2.items = [item for item in rm_in_2.items if item.item_code == rm_item]
-		rm_in_2.items[0].qty = 5
-		rm_in_2.items[0].basic_rate = 20
-		rm_in_2.items[0].transfer_qty = 5
-		rm_in_2.save()
-		rm_in_2.submit()
+		rm_in_2 = receive_customer_material(scio, rm_item, 5, 20)
 
 		# Check 2: Rate should be Weighted Average
 		# (5 * 10 + 5 * 20) / 10 = 150 / 10 = 15
-		scio.reload()
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertEqual(received_item.rate, 15)
 
@@ -117,17 +125,8 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		so, scio = create_so_scio()
 		rm_item = "Basic RM"
 
-		def receive(qty, rate):
-			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-			rm_in.items = [item for item in rm_in.items if item.item_code == rm_item]
-			rm_in.items[0].qty = qty
-			rm_in.items[0].transfer_qty = qty
-			rm_in.items[0].basic_rate = rate
-			rm_in.submit()
-			scio.reload()
-
 		# Receipt 1: 10 @ 100
-		receive(10, 100)
+		receive_customer_material(scio, rm_item, 10, 100)
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertEqual(received_item.rate, 100)
 
@@ -143,7 +142,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(received_item.returned_qty, 5)
 
 		# Receipt 2: 6 @ 130 — must weight against the balance of 5, not gross 10
-		receive(6, 130)
+		receive_customer_material(scio, rm_item, 6, 130)
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertAlmostEqual(received_item.rate, (5 * 100 + 6 * 130) / 11, places=2)
 
@@ -323,6 +322,35 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
 		self.assertEqual(wo.qty, 2)
+
+	def test_raw_material_received_ignores_excess_of_one_material(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "Basic RM"]
+		rm_in.items[0].qty = 20
+		rm_in.submit()
+
+		scio.reload()
+		self.assertEqual(scio.per_raw_material_received, 25)
+
+	def test_additional_material_alone_marks_order_ongoing(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = []
+		rm_in.append(
+			"items",
+			{
+				"item_code": "Basic RM 2",
+				"qty": 5,
+				"t_warehouse": scio.customer_warehouse,
+				"against_fg": scio.items[0].name,
+			},
+		)
+		rm_in.submit()
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Ongoing")
+
+		rm_in.cancel()
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Open")
 
 	def test_rm_return(self):
 		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
@@ -1624,6 +1652,17 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_subcontracting_inward_order, so.name)
 		self.assertRaises(frappe.ValidationError, scio.submit)
 
+	def test_inward_order_refuses_two_rows_for_one_sales_order_item(self):
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.append("items", scio.items[0].as_dict(no_default_fields=True))
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Duplicate row 2 with same Sales Order Item", scio.submit
+		)
+
 	def test_delivery_mapper_qty(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
@@ -1690,6 +1729,21 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.submit()
 
+	def test_material_from_customer_keeps_fully_received_material_at_zero(self):
+		for received_qty in (5, 7):
+			with self.subTest(received_qty=received_qty):
+				so, scio = create_so_scio()
+				rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+				rm_in.items = [item for item in rm_in.items if item.item_code == "Basic RM"]
+				rm_in.items[0].qty = received_qty
+				rm_in.submit()
+
+				scio.reload()
+				rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+				row = next(item for item in rm_in.items if item.item_code == "Basic RM")
+				self.assertEqual(row.qty, 0)
+				self.assertTrue(row.scio_detail)
+
 	def test_variant_without_bom_uses_template_bom(self):
 		variant, template_bom = make_subcontracted_variant()
 		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": variant.name, "fg_item_qty": 5}]
@@ -1698,6 +1752,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio = make_subcontracting_inward_order(so.name)
 
 		self.assertEqual(scio.items[0].bom, template_bom.name)
+
+	def test_fg_reference_names_follow_inward_order_read_access(self):
+		from erpnext.controllers.subcontracting_inward_controller import get_fg_reference_names
+
+		so, scio = create_so_scio()
+		args = ("Subcontracting Inward Order Item", "", "name", 0, 20)
+		expected = [[scio.items[0].name, scio.items[0].item_code, scio.items[0].delivery_warehouse]]
+		outside = make_company_fenced_user("scio-fg-outside@example.com", ["Stock User"], OTHER_COMPANY)
+		inside = make_company_fenced_user("scio-fg-inside@example.com", ["Stock User"], "_Test Company")
+
+		with as_user(outside):
+			with self.assertRaises(frappe.PermissionError):
+				get_fg_reference_names(*args, {"parent": scio.name})
+			self.assertEqual(get_fg_reference_names(*args, {"parent": ["like", "%"]}), [])
+
+		with as_user(inside):
+			self.assertEqual(
+				[list(row) for row in get_fg_reference_names(*args, {"parent": scio.name})], expected
+			)
 
 
 def create_delivered_so_scio():
@@ -1733,6 +1806,28 @@ def receive_batch_twice(scio, first_qty=3):
 
 	scio.reload()
 	return batch_no, batch_row
+
+
+def receive_customer_material(scio, rm_item, qty, rate):
+	"""Receive the material at the rate, also beyond its required qty."""
+	received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+	rm_in.items = []
+	rm_in.append(
+		"items",
+		{
+			"scio_detail": received_item.name,
+			"item_code": rm_item,
+			"qty": qty,
+			"transfer_qty": qty,
+			"basic_rate": rate,
+			"t_warehouse": received_item.warehouse,
+			"stock_uom": received_item.stock_uom,
+		},
+	)
+	rm_in.submit()
+	scio.reload()
+	return rm_in
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):

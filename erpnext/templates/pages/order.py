@@ -52,13 +52,14 @@ def get_context(context):
 			context.available_loyalty_points = int(loyalty_details.get("loyalty_points"))
 
 	context.show_pay_button, context.pay_amount = get_payment_details(context.doc)
-	if context.show_pay_button:
-		context.csrf_token = get_csrf_token()
 
 	context.show_make_pi_button = False
 	if context.doc.get("supplier"):
 		# show Make Purchase Invoice button based on permission
 		context.show_make_pi_button = frappe.has_permission("Purchase Invoice", "create")
+
+	if context.show_pay_button or context.show_make_pi_button:
+		context.csrf_token = get_csrf_token()
 
 
 def get_attachments(dt, dn):

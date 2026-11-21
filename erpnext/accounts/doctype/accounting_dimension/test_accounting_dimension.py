@@ -3,12 +3,40 @@
 
 import frappe
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+	get_dimension_filter_sql_condition,
+	get_dimension_filter_values,
+)
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccountingDimension(ERPNextTestSuite):
+	def test_blank_dimension_filter_sql_condition(self):
+		condition, values = get_dimension_filter_sql_condition(
+			"department",
+			f'["_Test Department - _TC", "{BLANK_ACCOUNTING_DIMENSION}"]',
+		)
+
+		self.assertEqual(
+			condition,
+			"(department IN (?) OR (department IS NULL OR department = ''))",
+		)
+		self.assertEqual(values, ["_Test Department - _TC"])
+
+	def test_dimension_filter_values_preserve_plain_string_names(self):
+		values, include_blank = get_dimension_filter_values("null")
+
+		self.assertEqual(values, ["null"])
+		self.assertFalse(include_blank)
+
+		values, include_blank = get_dimension_filter_values("__blank__")
+
+		self.assertEqual(values, ["__blank__"])
+		self.assertFalse(include_blank)
+
 	def test_dimension_against_sales_invoice(self):
 		si = create_sales_invoice(do_not_save=1)
 

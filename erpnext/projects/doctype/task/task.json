@@ -128,6 +128,7 @@
    "options": "Open\nWorking\nPending Review\nOverdue\nTemplate\nCompleted\nCancelled"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "priority",
    "fieldtype": "Select",
    "in_import_template": 1,
@@ -161,6 +162,7 @@
    "label": "Timeline"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Datetime",
@@ -189,6 +191,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "exp_end_date",
    "fieldtype": "Datetime",
@@ -218,6 +221,7 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_import_template": 1,
@@ -377,7 +381,6 @@
    "options": "User"
   },
   {
-   "allow_in_quick_entry": 1,
    "default": "0",
    "fieldname": "is_template",
    "fieldtype": "Check",
@@ -430,9 +433,10 @@
  "icon": "list-checks",
  "idx": 1,
  "is_tree": 1,
+ "link_display_mode": "Search",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-10-12 16:00:00.000000",
+ "modified": "2026-11-02 16:48:25.316976",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

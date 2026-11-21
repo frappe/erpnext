@@ -52,6 +52,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		)
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(doc)
+		rows_at_invoice_rate = get_rows_at_invoice_rate(doc, net_rate_map)
 		stock_items = doc.get_stock_items()
 		perpetual_inventory = erpnext.is_perpetual_inventory_enabled(doc.company)
 		warehouse_with_no_account = []
@@ -110,10 +111,14 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 			if (
 				item.get("rejected_qty")
+				and item.item_code in stock_items
 				and not doc.is_internal_transfer()
 				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
 				outgoing_amount += get_stock_value_difference(doc.name, item.name, item.rejected_warehouse)
+				if not flt(item.qty):
+					# Valuation charges are in the rejected stock value; the tax accounts are credited for them.
+					outgoing_amount -= flt(item.item_tax_amount)
 				credit_amount = outgoing_amount
 
 			if credit_amount:
@@ -138,10 +143,13 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					if (
 						exchange_rate_map[item.purchase_invoice]
 						and doc.conversion_rate != exchange_rate_map[item.purchase_invoice]
-						and item.net_rate == net_rate_map[item.purchase_invoice_item]
+						and item.name in rows_at_invoice_rate
 					):
-						discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * (
-							exchange_rate_map[item.purchase_invoice] - doc.conversion_rate
+						discrepancy_caused_by_exchange_rate_difference = flt(
+							item.qty
+							* item.net_rate
+							* (exchange_rate_map[item.purchase_invoice] - doc.conversion_rate),
+							item.precision("base_net_amount"),
 						)
 
 						self.add_gl_entry(
@@ -152,7 +160,6 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							credit=discrepancy_caused_by_exchange_rate_difference,
 							remarks=remarks,
 							against_account=doc.supplier,
-							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
 							project=item.project,
 							item=item,
@@ -166,7 +173,6 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							credit=0.0,
 							remarks=remarks,
 							against_account=doc.supplier,
-							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
 							project=item.project,
 							item=item,
@@ -263,7 +269,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				valuation_amount_as_per_doc - flt(stock_value_diff), item.precision("base_net_amount")
 			)
 
-			if item.get("rejected_qty") and self.is_rejected_material_valued():
+			if self.has_booked_rejected_material(item):
 				rejected_item_cost = get_stock_value_difference(doc.name, item.name, item.rejected_warehouse)
 				divisional_loss -= rejected_item_cost
 
@@ -361,7 +367,8 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				doc.update_assets(d, d.valuation_rate)
 
-			if d.rejected_qty and self.is_rejected_material_valued():
+			# a non-stock item puts no rejected qty in stock
+			if d.item_code in stock_items and self.has_booked_rejected_material(d):
 				stock_asset_rbnb = (
 					doc.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
@@ -392,6 +399,14 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		return bool(
 			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
+
+	def has_booked_rejected_material(self, item) -> bool:
+		"""Rejected material gets its own stock entry when it is valued and leaves the in-transit
+		warehouse. Rejected material that stays in transit did not move."""
+		if not (flt(item.rejected_qty) and self.is_rejected_material_valued()):
+			return False
+
+		return not (item.from_warehouse and item.rejected_warehouse == item.from_warehouse)
 
 	def get_divisional_loss_account(self, item, stock_asset_rbnb):
 		"""Account that absorbs the difference between the document value and the value actually
@@ -468,3 +483,22 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					)
 
 					i += 1
+
+
+def get_rows_at_invoice_rate(doc, net_rate_map: dict) -> set:
+	"""Rows received at the Purchase Invoice net rate; a return row follows its original row."""
+	if not doc.is_return:
+		return {row.name for row in doc.items if row.net_rate == net_rate_map.get(row.purchase_invoice_item)}
+
+	receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+	original_rows = (
+		frappe.qb.from_(receipt_item)
+		.join(invoice_item)
+		.on(invoice_item.name == receipt_item.purchase_invoice_item)
+		.select(receipt_item.name)
+		.where(receipt_item.name.isin([row.purchase_receipt_item for row in doc.items]))
+		.where(receipt_item.net_rate == invoice_item.net_rate)
+		.run(pluck=True)
+	)
+	return {row.name for row in doc.items if row.purchase_receipt_item in original_rows}

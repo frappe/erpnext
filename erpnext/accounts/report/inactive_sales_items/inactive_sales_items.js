@@ -15,6 +15,7 @@ frappe.query_reports["Inactive Sales Items"] = {
 			label: __("Item"),
 			fieldtype: "Link",
 			options: "Item",
+			get_query: () => ({ filters: { has_variants: 0 } }),
 		},
 		{
 			fieldname: "item_group",

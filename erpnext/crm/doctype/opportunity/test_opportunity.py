@@ -144,8 +144,9 @@ class TestOpportunity(ERPNextTestSuite):
 		with patch(
 			"erpnext.crm.doctype.opportunity.opportunity.get_exchange_rate",
 			side_effect=lambda from_currency, *args, **kwargs: rates[from_currency],
-		):
+		) as get_rate:
 			opp = make_opportunity(with_items=0, currency="USD", opportunity_amount=1000)
+			self.assertEqual(get_rate.call_args.args[3], "for_selling")
 			self.assertEqual((opp.conversion_rate, opp.base_opportunity_amount), (83.0, 83000.0))
 
 			opp.currency = "EUR"

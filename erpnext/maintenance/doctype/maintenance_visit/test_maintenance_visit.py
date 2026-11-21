@@ -189,6 +189,32 @@ class TestMaintenanceVisit(ERPNextTestSuite):
 			customer="_Test Customer 1",
 		)
 
+	def test_visit_company_must_match_schedule(self):
+		schedule = make_maintenance_schedule()
+		schedule.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"does not match the company",
+			self.make_schedule_visit,
+			schedule,
+			schedule.schedules[0].name,
+			company="_Test Company 1",
+		)
+
+	def test_visit_warranty_claim_must_match_customer_and_company(self):
+		claim = self.make_warranty_claim()
+		for field, value in (("customer", "_Test Customer 1"), ("company", "_Test Company 1")):
+			frappe.db.set_value("Warranty Claim", claim.name, field, value)
+			self.assertRaisesRegex(
+				frappe.ValidationError, "do not belong to", self.make_visit, claim, "Fully Completed"
+			)
+			frappe.db.set_value("Warranty Claim", claim.name, field, claim.get(field))
+
+		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Open")
+		self.make_visit(claim, "Fully Completed")
+		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
+
 	def test_visit_rows_must_belong_to_its_submitted_schedule(self):
 		schedule = make_maintenance_schedule()
 		schedule.submit()

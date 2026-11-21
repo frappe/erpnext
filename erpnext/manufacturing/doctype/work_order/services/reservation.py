@@ -20,7 +20,11 @@ from frappe.utils import cint, flt, parse_json
 from pypika import functions as fn
 from pypika.terms import ExistsCriterion
 
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	clear_reserve_stock_if_disabled,
+)
 
 _SCIO_FIELDS = [
 	"item_code",
@@ -82,6 +86,11 @@ class WorkOrderStockReservation:
 			title=_("Target Warehouse Reservation Error"),
 		)
 
+	def clear_reserve_stock_if_disabled(self):
+		"""Subcontracting Inward Work Orders always reserve the customer's materials."""
+		if not self.doc.subcontracting_inward_order:
+			clear_reserve_stock_if_disabled(self.doc)
+
 	def set_reserve_stock(self):
 		for row in self.doc.required_items:
 			row.reserve_stock = self.doc.reserve_stock
@@ -110,14 +119,17 @@ class WorkOrderStockReservation:
 			transferred_qty = self._apply_transferred_qty(name, transferred_qty, row_wise_serial_batch)
 
 	def get_reservations_to_update(self, filters: dict, field: str) -> list[str]:
-		"""Submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`."""
+		"""Submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`.
+
+		Serial and batch reservations come first, so a qty one only takes what they did not match.
+		"""
 		filters, or_filters = self.get_holding_filters(filters, field)
 		return frappe.get_all(
 			"Stock Reservation Entry",
 			filters=filters,
 			or_filters=or_filters,
 			pluck="name",
-			order_by="creation",
+			order_by="reservation_based_on desc, creation",
 		)
 
 	def get_holding_filters(self, filters: dict, field: str) -> tuple[dict, dict | None]:
@@ -132,17 +144,18 @@ class WorkOrderStockReservation:
 			return transferred_qty
 
 		doc = frappe.get_doc("Stock Reservation Entry", name)
-		qty_to_update, transferred_qty = self._split_transferred_qty(doc, transferred_qty)
+		qty_to_update, remaining_qty = self._split_transferred_qty(doc, transferred_qty)
 		if qty_to_update < 0:
-			return transferred_qty
+			return remaining_qty
 
 		if doc.docstatus == 2:
 			doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 			doc.release_reversed_usage("transferred_qty", row_wise_serial_batch)
-			return transferred_qty
+		else:
+			self._apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch)
 
-		self._apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch)
-		return transferred_qty
+		# a serial and batch reservation keeps only what it matched
+		return flt(transferred_qty - doc.transferred_qty, doc.precision("transferred_qty"))
 
 	@staticmethod
 	def _split_transferred_qty(doc, transferred_qty):
@@ -184,20 +197,20 @@ class WorkOrderStockReservation:
 		qty_to_update = consumed_qty if consumed_qty < doc.reserved_qty else doc.reserved_qty
 		if qty_to_update >= 0:
 			doc.db_set("consumed_qty", flt(qty_to_update), update_modified=False)
-			consumed_qty -= qty_to_update
 
 		if doc.docstatus == 2:
 			doc.release_reversed_usage("consumed_qty", row_wise_serial_batch)
-			return consumed_qty
+		else:
+			if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
+				doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+				doc.db_set("consumed_qty", doc.matched_serial_batch_qty, update_modified=False)
 
-		if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
-			doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
-			doc.db_set("consumed_qty", doc.matched_serial_batch_qty, update_modified=False)
+			doc.update_status()
+			doc.update_reserved_stock_in_bin()
+			doc.update_reserved_qty_in_voucher()
 
-		doc.update_status()
-		doc.update_reserved_stock_in_bin()
-		doc.update_reserved_qty_in_voucher()
-		return consumed_qty
+		# a serial and batch reservation keeps only what it matched
+		return flt(consumed_qty - doc.consumed_qty, doc.precision("consumed_qty"))
 
 	def validate_reserved_qty(self):
 		sre_details = get_sre_details(self.doc.name)
@@ -604,9 +617,7 @@ def reserve_stock_for_work_order(
 
 def _reserve_or_transfer(sre, doc, is_transfer):
 	if doc.production_plan and is_transfer:
-		sre.transfer_reservation_entries_to(
-			doc.production_plan, from_doctype="Production Plan", to_doctype="Work Order"
-		)
+		hand_off_reserved_stock(doc.production_plan, "Work Order", sre.items)
 	elif doc.subcontracting_inward_order and is_transfer:
 		doc.set_qty_change()
 		sre.transfer_reservation_entries_to(
@@ -739,6 +750,7 @@ def _production_reserved_qty_field(wo, wo_item):
 		(wo.skip_transfer == 0) & (wo_item.transferred_qty > wo_item.required_qty), 0.0
 	)
 	qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+	qty_field = qty_field.when(wo_item.consumed_qty > wo_item.required_qty, 0.0)
 	qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
 	# what Subcontracting Orders took over is their demand, not the Work Order's, even when they
 	# send what the Work Order already transferred

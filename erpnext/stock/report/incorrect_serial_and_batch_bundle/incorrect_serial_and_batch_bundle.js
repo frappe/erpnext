@@ -4,6 +4,13 @@
 frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 	filters: [
 		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+		},
+		{
 			fieldname: "item_code",
 			label: __("Item Code"),
 			fieldtype: "Link",
@@ -12,8 +19,12 @@ frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return erpnext.utils.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 	],
 
@@ -24,8 +35,9 @@ frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 	},
 
 	onload(report) {
-		report.page
-			.add_inner_button(__("Fix SABB Entry"), () => {
+		report.page.add_inner_button(
+			__("Fix SABB Entry"),
+			() => {
 				let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
 				let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
 
@@ -43,7 +55,9 @@ frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 						},
 					});
 				}
-			})
-			.addClass("btn-primary");
+			},
+			null,
+			"primary"
+		);
 	},
 };

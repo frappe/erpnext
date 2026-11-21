@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Max, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Max, NullIf, Sum
 from frappe.utils import cint, flt
 
 import erpnext
@@ -18,6 +18,7 @@ from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.utilities.query import get_match_conditions_qb
 
 
 class IncorrectCompanyValidationError(frappe.ValidationError):
@@ -65,6 +66,7 @@ class LandedCostVoucher(Document):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
+				check_receipt_document_access(pr.receipt_document_type, pr.receipt_document)
 				pr_items = get_pr_items(pr)
 
 				for d in pr_items:
@@ -437,10 +439,7 @@ class LandedCostVoucher(Document):
 
 	@frappe.whitelist()
 	def get_receipt_document_details(self, receipt_document_type: str, receipt_document: str):
-		if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
-			frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
-
-		frappe.has_permission(receipt_document_type, "read", receipt_document, throw=True)
+		check_receipt_document_access(receipt_document_type, receipt_document)
 		if receipt_document_type in [
 			"Purchase Invoice",
 			"Purchase Receipt",
@@ -473,12 +472,25 @@ class LandedCostVoucher(Document):
 		self.update_project_purchase_cost()
 
 	def update_project_purchase_cost(self):
+		if not self.vendor_invoices:
+			return
 		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") != "Each Transaction":
 			return
 
-		receipts = {}
-		projects = {self.get_receipt_dimension(receipts, item, "project") for item in self.get("items")}
-		update_purchase_cost(projects - {None, ""})
+		invoices = {row.vendor_invoice for row in self.vendor_invoices}
+		invoice = frappe.qb.DocType("Purchase Invoice")
+		item = frappe.qb.DocType("Purchase Invoice Item")
+		projects = (
+			frappe.qb.from_(item)
+			.join(invoice)
+			.on(invoice.name == item.parent)
+			.select(Coalesce(NullIf(item.project, ""), invoice.project))
+			# A return takes the claim of the invoice it returns, so its project changes too.
+			.where(invoice.name.isin(invoices) | invoice.return_against.isin(invoices))
+			.distinct()
+			.run(pluck=True)
+		)
+		update_purchase_cost(set(projects) - {None, ""})
 
 	def update_claimed_landed_cost(self):
 		for vendor_invoice in {row.vendor_invoice for row in self.vendor_invoices}:
@@ -627,6 +639,13 @@ class LandedCostVoucher(Document):
 		}
 
 
+def check_receipt_document_access(receipt_document_type, receipt_document):
+	if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
+		frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
+
+	frappe.has_permission(receipt_document_type, "select", receipt_document, throw=True)
+
+
 def get_pr_items(purchase_receipt):
 	item = frappe.qb.DocType("Item")
 
@@ -661,6 +680,10 @@ def get_pr_items(purchase_receipt):
 			pr_item.amount.as_("base_amount"),
 		)
 
+		# secondary items take their share of the cost from the finished good
+		query = query.where(IfNull(pr_item.secondary_item_type, "") == "")
+		query = query.where(IfNull(pr_item.valuation_type, "") == "")
+
 	elif purchase_receipt.receipt_document_type == "Stock Entry":
 		query = query.select(
 			pr_item.basic_rate.as_("base_rate"),
@@ -690,6 +713,8 @@ def get_vendor_invoices(
 		frappe.throw(_("Invalid search query"), title=_("Invalid Query"))
 
 	query = get_vendor_invoice_query(filters)
+	for condition in get_match_conditions_qb("Purchase Invoice"):
+		query = query.where(condition)
 
 	if txt:
 		query = query.where(frappe.qb.DocType(doctype).name.like(f"%{txt}%"))

@@ -10,6 +10,7 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, escape_html, getdate, nowdate, safe_json_loads
 
+from erpnext import require_permission
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
@@ -136,19 +137,19 @@ class SerialNo(StockController):
 				)
 
 
-def get_available_serial_nos(serial_no_series, qty, item_code) -> list[str]:
+def get_available_serial_nos(serial_no_series, qty, item_code, doc=None) -> list[str]:
 	serial_nos = []
 	for _i in range(cint(qty)):
-		serial_nos.append(get_new_serial_number(serial_no_series, item_code))
+		serial_nos.append(get_new_serial_number(serial_no_series, item_code, doc))
 
 	return serial_nos
 
 
-def get_new_serial_number(series, item_code):
-	sr_no = make_autoname(series, "Serial No")
+def get_new_serial_number(series, item_code, doc=None):
+	sr_no = make_autoname(series, "Serial No", doc)
 	identity = SerialBatchIdentity("Serial No")
 	while identity.get_records(item_code, [sr_no], ["name"]):
-		sr_no = make_autoname(series, "Serial No")
+		sr_no = make_autoname(series, "Serial No", doc)
 	return sr_no
 
 
@@ -212,6 +213,7 @@ def auto_fetch_serial_number(
 	as_numbers: bool = False,
 ) -> list[str]:
 	frappe.has_permission("Item", "select", doc=item_code, throw=True)
+	require_permission("Warehouse", warehouse, "select")
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
@@ -253,7 +255,9 @@ def get_pos_reserved_serial_nos(filters: str | dict):
 	)
 
 	filters = frappe._dict(frappe.parse_json(filters))
+	frappe.has_permission("POS Invoice", "read", throw=True)
 	frappe.has_permission("Item", "select", doc=filters.item_code, throw=True)
+	require_permission("Warehouse", filters.warehouse, "select")
 	serial_ids = get_reserved_serial_nos_for_pos(frappe._dict(item_code=filters.item_code))
 	if not serial_ids:
 		return []

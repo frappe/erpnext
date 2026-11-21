@@ -7,8 +7,8 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimension_filter_condition
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import get_currency_precision, get_party_types_from_account_type
 
 
@@ -223,7 +223,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		)
 		if self.filters.cost_center:
 			query = query.where(
-				gle.cost_center.isin(get_cost_centers_with_children(self.filters.cost_center))
+				get_dimension_filter_condition(gle.cost_center, self.filters.cost_center, "Cost Center")
 			)
 
 		return frappe._dict(query.run())

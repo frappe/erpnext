@@ -46,7 +46,33 @@ def update_billed_amount_based_on_po(po_details: list, update_modified: bool = T
 	pr_items_billed_amount = get_billed_amount_against_pr(pr_items)
 	set_qty_and_amount_net_of_returns(pr_details)
 
+	allocated_amounts = get_billed_amounts(pr_details, po_billed_amt_details, pr_items_billed_amount)
 	updated_pr = []
+	for pr_item in pr_details:
+		billed_amt_against_pr = allocated_amounts[pr_item.name]
+
+		if pr_item.billed_amt != billed_amt_against_pr:
+			# update existing doc if possible
+			if pr_doc and pr_item.parent == pr_doc.name:
+				pr_item = next((item for item in pr_doc.items if item.name == pr_item.name), None)
+				pr_item.db_set("billed_amt", billed_amt_against_pr, update_modified=update_modified)
+
+			else:
+				frappe.db.set_value(
+					"Purchase Receipt Item",
+					pr_item.name,
+					"billed_amt",
+					billed_amt_against_pr,
+					update_modified=update_modified,
+				)
+
+			updated_pr.append(pr_item.parent)
+
+	return updated_pr
+
+
+def get_billed_amounts(pr_details, po_billed_amt_details, pr_items_billed_amount):
+	billed_amounts = {}
 	for pr_item in pr_details:
 		billed_amt_against_po, billed_qty_against_po = 0, 0
 		if billed_details := po_billed_amt_details.get(pr_item.purchase_order_item):
@@ -87,24 +113,9 @@ def update_billed_amount_based_on_po(po_details: list, update_modified: bool = T
 					1 - consumed_amt_against_po / billed_amt_against_po
 				)
 
-		if pr_item.billed_amt != billed_amt_against_pr:
-			# update existing doc if possible
-			if pr_doc and pr_item.parent == pr_doc.name:
-				pr_item = next((item for item in pr_doc.items if item.name == pr_item.name), None)
-				pr_item.db_set("billed_amt", billed_amt_against_pr, update_modified=update_modified)
+		billed_amounts[pr_item.name] = billed_amt_against_pr
 
-			else:
-				frappe.db.set_value(
-					"Purchase Receipt Item",
-					pr_item.name,
-					"billed_amt",
-					billed_amt_against_pr,
-					update_modified=update_modified,
-				)
-
-			updated_pr.append(pr_item.parent)
-
-	return updated_pr
+	return billed_amounts
 
 
 def set_qty_and_amount_net_of_returns(pr_details: list) -> None:
@@ -269,14 +280,16 @@ def get_percent_billed_by_amount(pr_doc, items: list, bill_for_rejected: bool) -
 		amount = flt(item.amount) + rejected_amount
 
 		if amount and item.billed_amt > amount:
-			per_over_billed = (flt(item.billed_amt / amount, 2) * 100) - 100
+			per_over_billed = flt(item.billed_amt / amount * 100 - 100, 2)
 			if (
 				per_over_billed > over_billing_allowance
 				and role_allowed_to_over_bill not in frappe.get_roles()
 			):
 				frappe.throw(
 					_("Over Billing Allowance exceeded for Purchase Receipt Item {0} ({1}) by {2}%").format(
-						item.name, frappe.bold(item.item_code), per_over_billed - over_billing_allowance
+						item.name,
+						frappe.bold(item.item_code),
+						flt(per_over_billed - over_billing_allowance, 2),
 					)
 				)
 

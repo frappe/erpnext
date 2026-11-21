@@ -10,7 +10,7 @@ from frappe.utils import cint, flt, getdate, now, nowdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
-from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
 from erpnext.controllers.item_close import validate_parent_reopen
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
@@ -180,9 +180,9 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_dt": "Material Request",
 				"target_parent_field": "per_received",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_received_stock_qty_status_args(),
 				"second_source_dt": "Purchase Invoice Item",
-				"second_source_field": "stock_qty",
+				"second_source_field": "qty * conversion_factor",
 				"second_join_field": "material_request_item",
 				"second_source_extra_cond": """ and exists(select name from `tabPurchase Invoice`
 				where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
@@ -205,7 +205,8 @@ class PurchaseReceipt(BuyingController):
 				"source_dt": "Purchase Receipt Item",
 				"target_dt": "Delivery Note Item",
 				"join_field": "delivery_note_item",
-				"source_field": "received_qty",
+				"source_field": "received_qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"target_field": "received_qty",
 				"target_parent_dt": "Delivery Note",
 				"target_ref_field": "qty",
@@ -215,7 +216,7 @@ class PurchaseReceipt(BuyingController):
 				"source_dt": "Purchase Receipt Item",
 				"target_dt": "Packed Item",
 				"join_field": "delivery_note_packed_item",
-				"source_field": "received_qty",
+				"source_field": "received_qty * conversion_factor",
 				"target_field": "received_qty",
 				"target_parent_dt": "Delivery Note",
 				"target_ref_field": "qty",
@@ -563,16 +564,20 @@ class PurchaseReceipt(BuyingController):
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
-	return frappe.db.get_value(
-		"Stock Ledger Entry",
-		{
-			"voucher_type": "Purchase Receipt",
-			"voucher_no": voucher_no,
-			"voucher_detail_no": voucher_detail_no,
-			"warehouse": warehouse,
-			"is_cancelled": 0,
-		},
-		"stock_value_difference",
+	"""Stock value the row moved in the warehouse, 0 when it posts nothing there. A row can have
+	two entries in the in-transit warehouse, when its rejected material stays there."""
+	return flt(
+		frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": voucher_no,
+				"voucher_detail_no": voucher_detail_no,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+			},
+			[{"SUM": "stock_value_difference"}],
+		)
 	)
 
 

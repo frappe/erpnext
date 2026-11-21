@@ -2,14 +2,19 @@
 # See license.txt
 
 
+from itertools import product
+
 import frappe
 from frappe import qb
 from frappe.desk.notifications import get_open_count
 from frappe.utils import add_days, flt, nowdate
+from freezegun import freeze_time
 
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import get_linked_payments
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	get_early_payment_discount_loss,
 	get_outstanding_reference_documents,
 	get_party_details,
 	get_payment_entry,
@@ -23,6 +28,9 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
+)
+from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
+	execute as bank_reconciliation_statement,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
@@ -407,6 +415,130 @@ class TestPaymentEntry(ERPNextTestSuite):
 					payment.cancel()
 					self.assertEqual(invoice.reload().outstanding_amount, 100)
 
+	def test_reconcile_rounded_foreign_advance(self):
+		for create_invoice, party in (
+			(
+				create_sales_invoice,
+				{"customer": "_Test Customer USD", "debit_to": "_Test Receivable USD - _TC"},
+			),
+			(
+				make_purchase_invoice,
+				{"supplier": "_Test Supplier USD", "credit_to": "_Test Payable USD - _TC"},
+			),
+		):
+			for deduction in (0.5, 0.4, 0.3, 0):
+				for allocation_method in ("Payment Reconciliation", "Invoice Advances"):
+					with self.subTest(party=party, deduction=deduction, allocation_method=allocation_method):
+						invoice = create_invoice(
+							currency="USD", conversion_rate=80, qty=1, rate=200, do_not_submit=True, **party
+						)
+						payment = get_payment_entry(
+							invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+						)
+						payment.set("references", [])
+						if payment.payment_type == "Receive":
+							payment.source_exchange_rate, payment.target_exchange_rate = 80, 1
+							payment.paid_amount, payment.received_amount = 100, 8000
+						else:
+							payment.source_exchange_rate, payment.target_exchange_rate = 1, 80
+							payment.paid_amount, payment.received_amount = 8000, 100
+						if deduction:
+							payment.append(
+								"deductions",
+								{
+									"account": "Write Off - _TC",
+									"cost_center": "Main - _TC",
+									"amount": deduction if payment.payment_type == "Receive" else -deduction,
+								},
+							)
+						if allocation_method == "Payment Reconciliation":
+							excess_payment = frappe.copy_doc(payment)
+						payment.submit()
+						expected_unallocated = flt(100 + deduction / 80, 2)
+						self.assertEqual(payment.unallocated_amount, expected_unallocated)
+
+						if allocation_method == "Invoice Advances":
+							invoice.set_advances()
+							for advance in invoice.advances:
+								advance.allocated_amount = (
+									expected_unallocated if advance.reference_name == payment.name else 0
+								)
+							invoice.submit()
+						else:
+							invoice.submit()
+							excess_payment.append(
+								"references",
+								{
+									"reference_doctype": invoice.doctype,
+									"reference_name": invoice.name,
+									"allocated_amount": flt(expected_unallocated + 0.01, 2),
+								},
+							)
+							excess_payment.insert()
+							self.assertNotEqual(excess_payment.difference_amount, 0)
+
+							reconciliation = frappe.new_doc("Payment Reconciliation")
+							reconciliation.update(
+								{
+									"company": payment.company,
+									"party_type": payment.party_type,
+									"party": payment.party,
+									"receivable_payable_account": payment.party_account,
+								},
+							)
+							for amount in (50, flt(expected_unallocated - 50, 2)):
+								reconciliation.get_unreconciled_entries()
+								reconciliation.allocate_entries(
+									frappe._dict(
+										invoices=[
+											row.as_dict()
+											for row in reconciliation.invoices
+											if row.invoice_number == invoice.name
+										],
+										payments=[
+											row.as_dict()
+											for row in reconciliation.payments
+											if row.reference_name == payment.name
+										],
+									)
+								)
+								self.assertEqual(len(reconciliation.allocation), 1)
+								reconciliation.allocation[0].allocated_amount = amount
+								reconciliation.reconcile()
+
+						self.assertEqual(payment.reload().unallocated_amount, 0)
+						self.assertEqual(
+							invoice.reload().outstanding_amount, flt(200 - expected_unallocated, 2)
+						)
+						gl_entries = frappe.get_all(
+							"GL Entry",
+							filters={
+								"voucher_type": payment.doctype,
+								"voucher_no": payment.name,
+								"is_cancelled": 0,
+							},
+							fields=["account", "debit", "credit"],
+						)
+						self.assertEqual(flt(sum(row.debit - row.credit for row in gl_entries), 2), 0)
+						self.assertEqual(
+							flt(
+								sum(
+									row.debit - row.credit
+									for row in gl_entries
+									if row.account == "Round Off - _TC"
+								),
+								2,
+							),
+							flt(
+								((expected_unallocated - 100) * 80 - deduction)
+								* (1 if payment.payment_type == "Receive" else -1),
+								2,
+							),
+						)
+						invoice.cancel()
+						self.assertEqual(payment.reload().unallocated_amount, expected_unallocated)
+						payment.cancel()
+
 	@ERPNextTestSuite.change_settings(
 		"System Settings",
 		{"currency_precision": "", "number_format": "#,###.##", "use_number_format_from_currency": 1},
@@ -779,6 +911,51 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 23.6)
 
+	def test_early_payment_discount_loss_without_payment_entry(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = "Test Discount Template"
+
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 18,
+			},
+		)
+		si.save()
+
+		valid_discounts = [{"type": "Percentage", "discount": 10}]
+		rows, base_total_discount_loss = get_early_payment_discount_loss(
+			si, valid_discounts, "Receive", si.company, "_Test Cost Center - _TC"
+		)
+
+		self.assertEqual(
+			rows,
+			[
+				{"account": "Write Off - _TC", "cost_center": "_Test Cost Center - _TC", "amount": 20.0},
+				{
+					"account": "_Test Account Service Tax - _TC",
+					"cost_center": "_Test Cost Center - _TC",
+					"amount": 3.6,
+				},
+			],
+		)
+		self.assertEqual(base_total_discount_loss, 23.6)
+
+		rows, base_total_discount_loss = get_early_payment_discount_loss(
+			si, valid_discounts, "Pay", si.company
+		)
+		company_cost_center = frappe.get_cached_value("Company", si.company, "cost_center")
+		self.assertEqual([row["amount"] for row in rows], [-20.0, -3.6])
+		self.assertEqual([row["cost_center"] for row in rows], [company_cost_center] * 2)
+		self.assertEqual(base_total_discount_loss, 23.6)
+
 	def test_payment_entry_against_payment_terms_with_discount_amount(self):
 		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
 
@@ -833,6 +1010,42 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 186)
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 50)
+
+	def test_early_payment_discount_on_usd_purchase_invoice_from_usd_bank(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			credit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=100,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		pi.payment_terms_template = "Test Discount Template"
+		frappe.db.set_value("Company", pi.company, "default_discount_account", "Write Off - _TC")
+		pi.save()
+		pi.submit()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+		self.assertEqual(pe.deductions[0].amount, -800)
+
+	def test_early_payment_discount_on_usd_sales_order(self):
+		so = make_sales_order(customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_save=1)
+		so.conversion_rate = 80
+		create_payment_terms_template_with_discount()
+		so.payment_terms_template = "Test Discount Template"
+		so.save()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.paid_amount, 90)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
@@ -1447,6 +1660,76 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+	def test_reallocation_with_deductions(self):
+		for make_invoice in (create_sales_invoice, make_purchase_invoice):
+			for currency, total, party_amount, deduction, exchange_difference in (
+				("INR", 1000, 950, 50, 0),
+				("INR", 1000, 1050, -50, 0),
+				("USD", 100, 99, 83, 0),
+				("USD", 100, 101, -83, 0),
+				("USD", 100, 100, 0, 50),
+				("USD", 100, 99, 83, 10),
+				("USD", 100, 49, 83, 10),
+			):
+				with self.subTest(
+					invoice=make_invoice.__name__,
+					currency=currency,
+					party_amount=party_amount,
+					deduction=deduction,
+					exchange_difference=exchange_difference,
+				):
+					invoice = make_invoice(qty=1, rate=total, currency=currency, do_not_save=True)
+					if currency == "USD":
+						invoice.conversion_rate = 83
+						if invoice.doctype == "Sales Invoice":
+							invoice.customer = "_Test Customer USD"
+							invoice.debit_to = "_Test Receivable USD - _TC"
+						else:
+							invoice.supplier = "_Test Supplier USD"
+							invoice.credit_to = "_Test Payable USD - _TC"
+					invoice.insert().submit()
+
+					payment = get_payment_entry(
+						invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+					)
+					if payment.payment_type == "Receive":
+						payment.paid_amount = party_amount
+						payment.source_exchange_rate = invoice.conversion_rate
+						payment.received_amount = party_amount * invoice.conversion_rate - exchange_difference
+					else:
+						payment.received_amount = party_amount
+						payment.target_exchange_rate = invoice.conversion_rate
+						payment.paid_amount = party_amount * invoice.conversion_rate + exchange_difference
+					if deduction:
+						payment.append(
+							"deductions",
+							{
+								"account": "_Test Write Off - _TC",
+								"cost_center": "_Test Cost Center - _TC",
+								"amount": deduction * (1 if payment.payment_type == "Receive" else -1),
+							},
+						)
+					payment.set_amounts()
+					expected_allocation = 50 if party_amount == 49 else total
+					for paid_amount_change in (False, True):
+						payment.references[0].allocated_amount = 0
+						payment.allocate_amount_to_references(party_amount, paid_amount_change, True)
+						self.assertEqual(payment.references[0].allocated_amount, expected_allocation)
+						payment.save()
+						self.assertEqual(payment.unallocated_amount, 0)
+						self.assertEqual(payment.difference_amount, 0)
+					payment.submit()
+					self.assertEqual(invoice.reload().outstanding_amount, total - expected_allocation)
+					entries = self.get_gle(payment.name)
+					self.assertEqual(sum(row.debit - row.credit for row in entries), 0)
+					self.assertEqual(
+						sum(row.debit + row.credit for row in entries if row.against_voucher == invoice.name),
+						expected_allocation * invoice.conversion_rate,
+					)
+					payment.cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, total)
+					invoice.cancel()
+
 	def test_payment_entry_exchange_gain_loss(self):
 		si = create_sales_invoice(
 			customer="_Test Customer USD",
@@ -1658,6 +1941,29 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer USD"))
 			self.assertFalse(frappe.has_permission("Journal Entry", "read", journal.name))
 			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
+
+	def test_outstanding_documents_need_payment_entry_and_voucher_read(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		readable_si = create_sales_invoice(qty=1, rate=500)
+		args = {
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"party": "_Test Customer",
+			"party_account": "Debtors - _TC",
+			"get_outstanding_invoices": True,
+			"get_orders_to_be_billed": True,
+		}
+
+		user = make_fenced_user("outstanding-docs@example.com", ["Stock User"])
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer"))
+			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
+
+		make_fenced_user(user, ["Accounts User"], [("Sales Invoice", readable_si.name)])
+		with as_user(user):
+			vouchers = {d.voucher_no for d in get_outstanding_reference_documents(args)}
+			self.assertIn(readable_si.name, vouchers)
+			self.assertNotIn(si.name, vouchers)
 
 	def test_exchange_gain_loss_split_accounts(self):
 		gain_account = create_account(
@@ -1963,6 +2269,115 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(flt(payment_entry.total_taxes_and_charges, 2), 180.0)
 		self.assertEqual(flt(payment_entry.unallocated_amount, 2), 1000.0)
 
+	def test_payment_amounts_after_tax_use_bank_currency(self):
+		for payment_type, (bank_currency, exchange_rate), tax_type in product(
+			("Receive", "Pay"), (("INR", 1), ("USD", 80)), ("Add", "Deduct", "Inclusive", "None")
+		):
+			with self.subTest(payment_type=payment_type, currency=bank_currency, tax_type=tax_type):
+				bank = "_Test Bank USD - _TC" if bank_currency == "USD" else "_Test Bank - _TC"
+				is_receipt = payment_type == "Receive"
+				payment = create_payment_entry(
+					payment_type=payment_type,
+					party_type="Customer" if is_receipt else "Supplier",
+					party="_Test Customer" if is_receipt else "_Test Supplier",
+					paid_from="Debtors - _TC" if is_receipt else bank,
+					paid_to=bank if is_receipt else "Creditors - _TC",
+					paid_amount=8000 if is_receipt else 8000 / exchange_rate,
+				)
+				payment.source_exchange_rate = 1 if is_receipt else exchange_rate
+				payment.target_exchange_rate = exchange_rate if is_receipt else 1
+				payment.received_amount = 8000 / exchange_rate if is_receipt else 8000
+				if tax_type != "None":
+					payment.append(
+						"taxes",
+						{
+							"account_head": "_Test Account Service Tax - _TC",
+							"charge_type": "On Paid Amount",
+							"rate": 10,
+							"add_deduct_tax": "Deduct" if tax_type == "Deduct" else "Add",
+							"included_in_paid_amount": tax_type == "Inclusive",
+							"description": "Service Tax",
+						},
+					)
+				payment.submit()
+				base_amount = {"Add": 8800, "Deduct": 7200}.get(tax_type, 8000)
+				amount_field = "received_amount_after_tax" if is_receipt else "paid_amount_after_tax"
+				self.assertEqual(payment.get(amount_field), base_amount / exchange_rate)
+				self.assertEqual(payment.get("base_" + amount_field), base_amount)
+				entries = frappe.get_all(
+					"GL Entry",
+					filters={"voucher_no": payment.name, "account": bank, "is_cancelled": 0},
+					fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+				)
+				self.assertEqual(abs(sum(row.debit - row.credit for row in entries)), base_amount)
+				self.assertEqual(
+					abs(
+						sum(row.debit_in_account_currency - row.credit_in_account_currency for row in entries)
+					),
+					base_amount / exchange_rate,
+				)
+				transaction = (
+					frappe.get_doc(
+						{
+							"doctype": "Bank Transaction",
+							"date": nowdate(),
+							"bank_account": make_bank_account(
+								f"_Test Payment Tax Bank {bank_currency}", payment.company, bank
+							),
+							"currency": bank_currency,
+							"deposit" if is_receipt else "withdrawal": base_amount / exchange_rate,
+						}
+					)
+					.insert()
+					.submit()
+				)
+				matches = get_linked_payments(
+					transaction.name, ["payment_entry", "exact_match"], nowdate(), nowdate()
+				)
+				self.assertIn(payment.name, [row.name for row in matches])
+				report = bank_reconciliation_statement(
+					frappe._dict(company=payment.company, account=bank, report_date=nowdate())
+				)[1]
+				row = next(row for row in report if row.get("payment_entry") == payment.name)
+				self.assertEqual(row.debit if is_receipt else row.credit, base_amount / exchange_rate)
+				transaction.cancel()
+				payment.cancel()
+
+	def test_purchase_invoice_hold_release_dates(self):
+		for release_date, blocked in (
+			(None, True),
+			(add_days(nowdate(), 1), True),
+			(nowdate(), False),
+			(add_days(nowdate(), -1), False),
+		):
+			with freeze_time(add_days(nowdate(), -2)):
+				invoice = make_purchase_invoice()
+				payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Cash - _TC")
+				invoice.block_invoice(release_date=release_date)
+			with self.subTest(release_date=release_date, operation="listing"):
+				outstanding = get_outstanding_reference_documents(
+					{
+						"company": invoice.company,
+						"party_type": "Supplier",
+						"party": invoice.supplier,
+						"party_account": invoice.credit_to,
+						"vouchers": [frappe._dict(voucher_type=invoice.doctype, voucher_no=invoice.name)],
+					}
+				)
+				self.assertEqual(bool(outstanding), not blocked)
+			with self.subTest(release_date=release_date, operation="payment"):
+				payment.posting_date = nowdate()
+				if blocked:
+					with self.assertRaisesRegex(frappe.ValidationError, "is on hold"):
+						payment.insert()
+				else:
+					payment.submit()
+					self.assertEqual(invoice.reload().outstanding_amount, 0)
+					payment.cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, invoice.grand_total)
+			invoice.unblock_invoice()
+			invoice.cancel()
+
 	def test_payment_entry_against_onhold_purchase_invoice(self):
 		pi = make_purchase_invoice()
 
@@ -2020,6 +2435,72 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_payment_term_allocation_currency_rounding(self):
+		template = frappe.new_doc("Payment Terms Template")
+		template.template_name = "_Test Three Instalments"
+		template.allocate_payment_based_on_payment_terms = 1
+		for idx, portion in enumerate((33.33, 33.33, 33.34), 1):
+			term = f"_Test Instalment {idx}"
+			create_payment_term(term)
+			template.append(
+				"terms",
+				{
+					"payment_term": term,
+					"invoice_portion": portion,
+					"credit_days_based_on": "Day(s) after invoice date",
+					"credit_days": idx,
+				},
+			)
+		template.insert()
+
+		for make_invoice in (create_sales_invoice, make_purchase_invoice):
+			invoice = make_invoice(qty=1, rate=1000, currency="USD", conversion_rate=83.335, do_not_save=True)
+			invoice.payment_terms_template = template.name
+			invoice.submit()
+			with self.subTest(doctype=invoice.doctype):
+				self.assertEqual(invoice.party_account_currency, "INR")
+				self.assertEqual(invoice.outstanding_amount, 83335)
+				payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Cash - _TC")
+				payment.save()
+				self.assertEqual(
+					[row.allocated_amount for row in payment.references], [27775.56, 27775.56, 27783.88]
+				)
+				self.assertEqual(payment.total_allocated_amount, invoice.outstanding_amount)
+				self.assertEqual(payment.unallocated_amount, 0)
+
+				payment.references[-1].allocated_amount += 0.01
+				payment.paid_amount = payment.received_amount = 83335.01
+				with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+					payment.save()
+				payment.reload().submit()
+				self.assertEqual(invoice.reload().outstanding_amount, 0)
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [0, 0, 0])
+				payment.cancel()
+				self.assertEqual(invoice.reload().outstanding_amount, 83335)
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [333.3, 333.3, 333.4])
+
+				partial_payment = get_payment_entry(
+					invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+				)
+				partial_payment.set("references", partial_payment.references[:1])
+				partial_payment.paid_amount = partial_payment.received_amount = 27775.56
+				partial_payment.submit()
+				self.assertEqual(invoice.reload().outstanding_amount, 55559.44)
+
+				payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Cash - _TC")
+				payment.submit()
+				self.assertEqual(len(payment.references), 2)
+				self.assertEqual(payment.total_allocated_amount, 55559.44)
+				self.assertEqual(payment.unallocated_amount, 0)
+				self.assertEqual(invoice.reload().outstanding_amount, 0)
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [0, 0, 0])
+				payment.cancel()
+				partial_payment.cancel()
+				self.assertEqual(invoice.reload().outstanding_amount, 83335)
+
 	def test_total_allocation_across_reference_rows(self):
 		invoice = create_sales_invoice(qty=1, rate=100)
 		payment_request = make_payment_request(
@@ -2073,7 +2554,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		payment.references[0].allocated_amount = 30
 		payment.references[1].allocated_amount = 18
 		payment.paid_amount = payment.received_amount = 48
-		with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+		# the journal has already cleared 80 from the schedule, so the first term has only 20 left
+		with self.assertRaisesRegex(frappe.ValidationError, "is greater than outstanding amount:20"):
 			payment.submit()
 
 		payment.references[0].allocated_amount = 20
@@ -2322,6 +2804,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_negative_outstanding_invoice_currency_multicurrency(self):
 		"""
 		A foreign-currency invoice whose party account is in company currency should report its

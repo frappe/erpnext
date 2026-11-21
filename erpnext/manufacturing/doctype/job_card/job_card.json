@@ -291,6 +291,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
+   "no_copy": 1,
    "options": "PO-JOB.#####",
    "reqd": 1
   },
@@ -704,7 +705,7 @@
  "icon": "clipboard-list",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-25 15:30:00.000000",
+ "modified": "2026-11-04 18:54:22.353167",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

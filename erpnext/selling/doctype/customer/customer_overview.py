@@ -4,7 +4,6 @@ from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Coalesce, Count, Sum
 from frappe.utils import add_days, add_months, add_to_date, cint, date_diff, flt, getdate, today
 
-from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
@@ -57,7 +56,6 @@ def get_customer_receivables(customer: str, company: str):
 
 	as_of = getdate(today())
 	ar = receivables(customer, company, as_of)
-	overdue_prev = receivables(customer, company, add_days(as_of, -30))["overdue"]
 	return {
 		"currency": frappe.get_cached_value("Company", company, "default_currency"),
 		"outstanding": {
@@ -65,12 +63,8 @@ def get_customer_receivables(customer: str, company: str):
 			"unpaid_count": unpaid_invoices(customer, company, as_of)["count"],
 			"days_to_pay": collection_days(customer, company, as_of, ar["outstanding"]),
 		},
-		"overdue": {
-			"value": ar["overdue"],
-			"delta": pct_change(ar["overdue"], overdue_prev),
-			"delta_positive_is_good": False,
-		},
-		"advances": {"value": reported_advances(customer, company, as_of)},
+		"overdue": {"value": ar["overdue"], **ar["late"]},
+		"advances": {"value": ar["advance"]},
 		"credit": credit_position(customer, company),
 		"ageing": ageing(ar),
 	}
@@ -246,33 +240,28 @@ def receivables(customer, company, report_date):
 		"buckets": buckets,
 		"outstanding": outstanding,
 		"overdue": overdue,
+		"late": late_summary(owed),
+		"advance": unallocated_credit(data),
 	}
 
 
-def reported_advances(customer, company, report_date):
-	from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute
+def late_summary(owed):
+	invoice_doctypes = frappe.get_hooks("invoice_doctypes")
+	late = [
+		row for row in owed if row.get("voucher_type") in invoice_doctypes and flt(row.get("total_due")) > 0
+	]
+	return {
+		"count": len({row.get("voucher_no") for row in late}),
+		"oldest_days": max((cint(row.get("age")) for row in late), default=0),
+	}
 
-	rows = execute(
-		{
-			"company": company,
-			"report_date": report_date,
-			"party_type": "Customer",
-			"party": [customer],
-			"customer": customer,
-			"ageing_based_on": "Due Date",
-			"age_as_on": "Report Date",
-			"range": "30, 60, 90",
-		}
-	)[1]
-	row = next((row for row in rows if row.get("party") == customer), None)
-	if row:
-		return row.get("advance")
-	if not _unrestricted_read("Payment Ledger Entry"):
-		return None
-	return flt(
-		get_partywise_advanced_payment_amount(["Customer"], report_date, company=company, party=customer).get(
-			customer
-		)
+
+def unallocated_credit(rows):
+	invoice_doctypes = frappe.get_hooks("invoice_doctypes")
+	return sum(
+		max(flt(row.get("paid")) - flt(row.get("invoiced")), 0.0)
+		for row in rows
+		if row.get("voucher_type") not in invoice_doctypes
 	)
 
 
@@ -508,17 +497,33 @@ def pct_change(current, previous):
 def get_customer_companies(customer: str):
 	check_access(customer)
 
-	companies = set()
-	for doctype, filters in (
-		("Sales Invoice", {"customer": customer}),
-		("Sales Order", {"customer": customer}),
-		("Quotation", {"quotation_to": "Customer", "party_name": customer}),
-		("Payment Entry", {"party_type": "Customer", "party": customer}),
-		("GL Entry", {"party_type": "Customer", "party": customer, "is_cancelled": 0}),
-	):
-		if frappe.has_permission(doctype, "read"):
-			companies.update(
-				frappe.get_list(doctype, filters={**filters, "docstatus": 1}, distinct=True, pluck="company")
+	return party_companies(
+		(
+			("Sales Invoice", {"customer": customer}),
+			("Sales Order", {"customer": customer}),
+			("Quotation", {"quotation_to": "Customer", "party_name": customer}),
+			("Payment Entry", {"party_type": "Customer", "party": customer}),
+			("GL Entry", {"party_type": "Customer", "party": customer, "is_cancelled": 0}),
+		)
+	)
+
+
+def party_companies(sources):
+	sources = [(doctype, filters) for doctype, filters in sources if frappe.has_permission(doctype, "read")]
+	companies = frappe.get_all("Company", pluck="name")
+	if len(companies) == 1:
+		active = any(
+			frappe.get_list(
+				doctype, filters={**filters, "company": companies[0], "docstatus": 1}, pluck="name", limit=1
 			)
-	companies.discard(None)
-	return sorted(companies)
+			for doctype, filters in sources
+		)
+		return companies if active else []
+
+	found = set()
+	for doctype, filters in sources:
+		found.update(
+			frappe.get_list(doctype, filters={**filters, "docstatus": 1}, distinct=True, pluck="company")
+		)
+	found.discard(None)
+	return sorted(found)

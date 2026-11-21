@@ -38,6 +38,25 @@ class TestTaxRule(ERPNextTestSuite):
 
 		self.assertRaises(ConflictingTaxRule, tax_rule2.save)
 
+	def test_conflict_ignores_item_group(self):
+		# matching never reads the item group, so these rules apply to the same invoices
+		make_tax_rule(
+			customer="_Test Customer",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			item_group="_Test Item Group",
+			priority=1,
+			save=1,
+		)
+
+		tax_rule = make_tax_rule(
+			customer="_Test Customer",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			item_group="_Test Item Group Desktops",
+			priority=1,
+		)
+
+		self.assertRaises(ConflictingTaxRule, tax_rule.save)
+
 	def test_conflict_with_non_overlapping_dates(self):
 		tax_rule1 = make_tax_rule(
 			customer="_Test Customer",

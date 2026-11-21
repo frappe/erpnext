@@ -273,6 +273,8 @@ frappe.ui.form.on("BOM", {
 
 	quantity(frm) {
 		erpnext.bom.set_qty_from_percentage(frm);
+		erpnext.bom.calculate_op_cost(frm.doc);
+		erpnext.bom.calculate_total(frm.doc);
 	},
 
 	uom(frm) {
@@ -309,11 +311,9 @@ frappe.ui.form.on("BOM", {
 	},
 
 	default_target_warehouse(frm) {
-		if (frm.doc.default_source_warehouse) {
-			frm.doc.operations.forEach((d) => {
-				frappe.model.set_value(d.doctype, d.name, "fg_warehouse", frm.doc.default_target_warehouse);
-			});
-		}
+		frm.doc.operations.forEach((d) => {
+			frappe.model.set_value(d.doctype, d.name, "fg_warehouse", frm.doc.default_target_warehouse);
+		});
 	},
 
 	refresh(frm) {
@@ -609,6 +609,14 @@ frappe.ui.form.on("BOM", {
 						reqd: 1,
 					},
 					{
+						fieldname: "uom",
+						label: __("UOM"),
+						fieldtype: "Link",
+						options: "UOM",
+						in_list_view: 1,
+						read_only: 1,
+					},
+					{
 						fieldname: "source_warehouse",
 						label: __("Source Warehouse"),
 						fieldtype: "Link",
@@ -655,6 +663,7 @@ frappe.ui.form.on("BOM", {
 				item_code: d.item_code,
 				variant_item_code: "",
 				qty: flt(d.qty / frm.doc.quantity) * flt(bom_qty),
+				uom: d.uom,
 				source_warehouse: d.source_warehouse,
 				operation: d.operation,
 			});
@@ -850,6 +859,14 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 		this.hour_rate(doc);
 	}
 
+	batch_size(doc) {
+		this.hour_rate(doc);
+	}
+
+	set_cost_based_on_bom_qty(doc) {
+		this.hour_rate(doc);
+	}
+
 	bom_no(doc, cdt, cdn) {
 		get_bom_material_detail(doc, cdt, cdn, false);
 	}
@@ -938,13 +955,21 @@ erpnext.bom.calculate_op_cost = function (doc) {
 
 	if (doc.with_operations) {
 		doc.operations.forEach((item) => {
-			let operating_cost = flt((flt(item.hour_rate) * flt(item.time_in_mins)) / 60, 2);
-			let base_operating_cost = flt(operating_cost * doc.conversion_rate, 2);
+			let operating_cost = (flt(item.hour_rate) * flt(item.time_in_mins)) / 60;
+			let base_operating_cost = operating_cost * flt(doc.conversion_rate);
+			let cost_per_unit = operating_cost / (flt(item.batch_size) || 1);
+			let base_cost_per_unit = base_operating_cost / (flt(item.batch_size) || 1);
 			frappe.model.set_value("BOM Operation", item.name, {
-				operating_cost: operating_cost,
-				base_operating_cost: base_operating_cost,
+				operating_cost: flt(operating_cost, precision("operating_cost", item)),
+				base_operating_cost: flt(base_operating_cost, precision("base_operating_cost", item)),
+				cost_per_unit: cost_per_unit,
+				base_cost_per_unit: base_cost_per_unit,
 			});
 
+			if (item.set_cost_based_on_bom_qty) {
+				operating_cost = cost_per_unit * flt(doc.quantity);
+				base_operating_cost = base_cost_per_unit * flt(doc.quantity);
+			}
 			doc.operating_cost += operating_cost;
 			doc.base_operating_cost += base_operating_cost;
 		});
@@ -987,8 +1012,35 @@ erpnext.bom.calculate_rm_cost = function (doc) {
 	frappe.model.set_value(doc.doctype, doc.name, "base_raw_material_cost", base_total_rm_cost);
 };
 
+// Valuation Rate and Manual rows keep their cost; % of Component Cost rows split the rest
+erpnext.bom.calculate_secondary_items_cost = function (doc) {
+	const rows = doc.secondary_items || [];
+	const cost_precision = precision("raw_material_cost", doc);
+	const has_own_cost = (row) => ["Valuation Rate", "Manual"].includes(row.valuation_type);
+	const own_cost = rows
+		.filter(has_own_cost)
+		.reduce((total, row) => total + flt(row.cost, cost_precision), 0);
+	const allocation_basis = flt(doc.raw_material_cost) - own_cost;
+
+	let total = 0;
+	let base_total = 0;
+	rows.forEach((row) => {
+		row.cost = has_own_cost(row)
+			? flt(row.cost, cost_precision)
+			: flt((allocation_basis * flt(row.cost_allocation_per)) / 100, cost_precision);
+		row.base_cost = flt(row.cost * flt(doc.conversion_rate), cost_precision);
+		total += row.cost;
+		base_total += row.base_cost;
+	});
+
+	doc.secondary_items_cost = total;
+	doc.base_secondary_items_cost = base_total;
+	refresh_field(["secondary_items", "secondary_items_cost", "base_secondary_items_cost"]);
+};
+
 // Calculate Total Cost
 erpnext.bom.calculate_total = function (doc) {
+	erpnext.bom.calculate_secondary_items_cost(doc);
 	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.secondary_items_cost);
 	var base_total_cost =
 		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_secondary_items_cost);
@@ -1335,10 +1387,12 @@ erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
 		},
 		callback(r) {
 			const cost = flt(r.message.rate) * flt(row.stock_qty);
-			frappe.model.set_value(cdt, cdn, {
-				cost: cost,
-				base_cost: cost * flt(doc.conversion_rate || 1),
-			});
+			frappe.model
+				.set_value(cdt, cdn, {
+					cost: cost,
+					base_cost: cost * flt(doc.conversion_rate || 1),
+				})
+				.then(() => erpnext.bom.calculate_total(doc));
 		},
 	});
 };

@@ -300,6 +300,28 @@ class TestLead(ERPNextTestSuite):
 		self.assertFalse(frappe.db.get_value("Lead", lead.name, "phone"))
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
 
+		contact.phone_nos = []
+		contact.save()
+		self.assertFalse(frappe.db.get_value("Lead", lead.name, "phone"))
+		self.assertFalse(frappe.db.get_value("Lead", lead.name, "mobile_no"))
+
+	def test_contact_number_not_marked_primary_fills_the_lead(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 1)
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "lead_name": "_Test Email Lead", "email_id": "phone_sync_lead@example.com"}
+		).insert()
+		contact_name = frappe.db.get_value(
+			"Dynamic Link",
+			{"parenttype": "Contact", "link_doctype": "Lead", "link_name": lead.name},
+			"parent",
+		)
+		contact = frappe.get_doc("Contact", contact_name)
+		contact.add_phone("9800022222")
+		contact.save()
+
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "phone"), "9800022222")
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800022222")
+
 	def test_do_not_contact_is_kept_on_a_lead_with_an_opportunity(self):
 		lead = make_lead()
 		opportunity = make_opportunity(lead.name)

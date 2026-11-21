@@ -109,6 +109,9 @@ def make_purchase_order(
 		if obj.name in requested_qty:
 			obj = get_source_item_for_qty(obj, requested_qty[obj.name])
 		update_item(obj, target, source_parent)
+		if not target.rate and not target.price_list_rate:
+			# unpriced rows fetch the price for the Purchase Order's supplier
+			target.rate = target.price_list_rate = None
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])

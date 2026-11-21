@@ -7,8 +7,12 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	columns = get_columns("utm_campaign")
 	data = get_lead_data(filters, "utm_campaign")

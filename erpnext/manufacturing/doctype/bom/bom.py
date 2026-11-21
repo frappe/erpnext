@@ -9,7 +9,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Field
 from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
+from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json, today
 from frappe.utils.caching import request_cache
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -585,6 +585,12 @@ class BOM(WebsiteGenerator):
 
 	@frappe.whitelist()
 	def get_routing(self):
+		if self.routing:
+			frappe.has_permission("Routing", "read", self.routing, throw=True)
+
+		self.set_operations_from_routing()
+
+	def set_operations_from_routing(self):
 		if not self.routing:
 			return
 
@@ -922,7 +928,7 @@ class BOM(WebsiteGenerator):
 		items = []
 		for m in self.get("items"):
 			if m.bom_no:
-				validate_bom_no(m.item_code, m.bom_no)
+				validate_production_bom(m.item_code, m.bom_no)
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
@@ -1087,7 +1093,9 @@ class BOM(WebsiteGenerator):
 			self._append_bom_material_row(row, operation_row_id)
 
 	def _append_bom_material_row(self, row, operation_row_id):
+		# get_bom_items returns the qty in stock UOM
 		row.uom = row.stock_uom
+		row.conversion_factor = 1
 		row.operation_row_id = operation_row_id
 		row.idx = None
 		row.do_not_explode = 1
@@ -1168,6 +1176,15 @@ class BOM(WebsiteGenerator):
 				if act_pbom and act_pbom[0][0]:
 					frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 
+			if subcontracting_bom := frappe.db.exists(
+				"Subcontracting BOM", {"finished_good_bom": self.name, "is_active": 1}
+			):
+				frappe.throw(
+					_(
+						"Cannot deactivate or cancel BOM as it is used in the active Subcontracting BOM {0}"
+					).format(get_link_to_form("Subcontracting BOM", subcontracting_bom))
+				)
+
 	def validate_transfer_against(self):
 		if not self.with_operations:
 			self.transfer_material_against = "Work Order"
@@ -1182,7 +1199,7 @@ class BOM(WebsiteGenerator):
 	def set_routing_operations(self):
 		self.validate_routing()
 		if self.routing and self.with_operations and not self.operations:
-			self.get_routing()
+			self.set_operations_from_routing()
 
 	def validate_routing(self):
 		if not self.routing or not self.has_value_changed("routing"):
@@ -1363,6 +1380,7 @@ def _get_price_list_item_rate(args, bom_doc):
 			"transaction_type": "buying",
 			"company": bom_doc.company,
 			"currency": bom_doc.currency,
+			"transaction_date": today(),
 			"conversion_rate": 1,  # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 			"conversion_factor": args.get("conversion_factor") or 1,
 			"plc_conversion_rate": 1,
@@ -1380,16 +1398,16 @@ def get_valuation_rate(data):
 	1) Get average valuation rate from the scoping warehouse if one is passed
 	   (source warehouse for raw materials, default target warehouse for secondary
 	   items), else from all warehouses
-	2) If no value, get last valuation rate from SLE
+	2) If no value, get last valuation rate from the company's SLE
 	3) If no value, get valuation rate from Item
 	"""
 	item_code, company = data.get("item_code"), data.get("company")
 
 	valuation_rate = _get_avg_valuation_rate_from_bins(item_code, company, data)
 
-	if (valuation_rate is not None) and valuation_rate <= 0:
-		# Explicit null value check. If None, Bins don't exist, neither does SLE
-		valuation_rate = _get_last_valuation_rate_from_sle(item_code)
+	# None: no Bin, e.g. a source warehouse that never held the item
+	if flt(valuation_rate) <= 0:
+		valuation_rate = _get_last_valuation_rate_from_sle(item_code, company)
 
 	if not valuation_rate:
 		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
@@ -1428,12 +1446,17 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 	return item_valuation.run(as_dict=True)[0].get("valuation_rate")
 
 
-def _get_last_valuation_rate_from_sle(item_code):
+def _get_last_valuation_rate_from_sle(item_code, company):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	last_val_rate = (
 		frappe.qb.from_(sle)
 		.select(sle.valuation_rate)
-		.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
+		.where(
+			(sle.item_code == item_code)
+			& (sle.company == company)
+			& (sle.valuation_rate > 0)
+			& (sle.is_cancelled == 0)
+		)
 		.orderby(sle.posting_datetime, order=frappe.qb.desc)
 		.orderby(sle.creation, order=frappe.qb.desc)
 		.limit(1)
@@ -1620,7 +1643,14 @@ def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
 
 	if cint(opts.fetch_exploded):
 		return _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition)
-	return _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods)
+
+	rate_col = t.bom_item.base_rate
+	if opts.fetch_qty_in_stock_uom:
+		rate_col = rate_col / IfNull(NullIf(t.bom_item.conversion_factor, 0), 1)
+
+	return _add_normal_item_columns(
+		query, t, amount_col, rate_col, stock_item_condition, track_semi_finished_goods
+	)
 
 
 def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
@@ -1665,16 +1695,14 @@ def _add_secondary_item_columns(query, t, stock_item_condition):
 	return query, [t.bom_item.item_code, t.bom_item.secondary_item_type]
 
 
-def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods):
+def _add_normal_item_columns(query, t, amount_col, rate_col, stock_item_condition, track_semi_finished_goods):
 	# Grouped also by bom_no/is_phantom_item: the pair MUST come from the same BOM Item row --
 	# _add_bom_item_to_dict recurses into bom_no when is_phantom_item is set, so independent Max()
 	# per column could pair one line's phantom flag with another line's bom_no and explode the
 	# wrong sub-BOM (same fix as sub_assembly_queries). The remaining non-grouped columns are
 	# constant per grouped item_code (+operation/operation_row_id) -> Max() keeps the GROUP BY
 	# valid on postgres while returning the value MySQL picked arbitrarily.
-	# NOTE: base_rate is aliased "rate" below and is what callers receive; bom_item.rate was selected
-	# under the same alias and silently shadowed (last value wins in the dict), so it is dropped here
-	# -- output is unchanged.
+	# rate_col is base_rate, per stock UOM when the qty is in stock UOM.
 	query = query.select(
 		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
@@ -1685,7 +1713,7 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 		Max(t.bom_item.uom).as_("uom"),
 		Max(t.bom_item.conversion_factor).as_("conversion_factor"),
 		amount_col,
-		Max(t.bom_item.base_rate).as_("rate"),
+		Max(rate_col).as_("rate"),
 		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
 		t.bom_item.is_phantom_item,
 		t.bom_item.bom_no,
@@ -1781,14 +1809,26 @@ def get_bom_items(bom: str, company: str, qty: float = 1, fetch_exploded: int = 
 
 def validate_bom_no(item, bom_no):
 	"""Validate BOM No of sub-contracted items"""
+	bom = get_usable_bom(bom_no)
+	if item and not _bom_contains_item(bom, item):
+		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def validate_production_bom(item, bom_no):
+	"""Validate that the BOM manufactures the item or its template."""
+	bom = get_usable_bom(bom_no)
+	if not _bom_produces_item(bom, item):
+		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def get_usable_bom(bom_no):
 	bom = frappe.get_doc("BOM", bom_no)
 	if not bom.is_active:
 		frappe.throw(_("BOM {0} must be active").format(bom_no))
 	if bom.docstatus != 1:
 		if not frappe.in_test:
 			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
-	if item and not _bom_contains_item(bom, item):
-		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+	return bom
 
 
 def _bom_contains_item(bom, item):
@@ -1800,6 +1840,11 @@ def _bom_contains_item(bom, item):
 		if d.item_code.lower() == item_lower:
 			return True
 
+	return _bom_produces_item(bom, item)
+
+
+def _bom_produces_item(bom, item):
+	item_lower = item.lower()
 	# Use the original-cased `item` for the Item lookup: names are case-sensitive on Postgres,
 	# so a lowercased name would miss the record and drop the variant->template BOM match.
 	return (

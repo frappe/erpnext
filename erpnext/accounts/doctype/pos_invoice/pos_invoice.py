@@ -218,9 +218,9 @@ class POSInvoice(SalesInvoice):
 
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
+		self.validate_auto_set_posting_time()
 		self.validate_pos_opening_entry()
 		self.validate_is_pos_using_sales_invoice()
-		self.validate_auto_set_posting_time()
 		self.validate_mode_of_payment()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
@@ -264,6 +264,9 @@ class POSInvoice(SalesInvoice):
 		self.make_bundle_for_sales_purchase_return()
 		for table_name in ["items", "packed_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.make_packed_item_bundles()
+		for table_name in ["items", "packed_items"]:
 			self.submit_serial_batch_bundle(table_name)
 
 		if self.coupon_code and self.counts_coupon_use():
@@ -341,6 +344,7 @@ class POSInvoice(SalesInvoice):
 		map_doc(self, return_sales_invoice, table_map={"doctype": return_sales_invoice.doctype})
 		return_sales_invoice.is_created_using_pos = 1
 		return_sales_invoice.is_consolidated = 1
+		return_sales_invoice.flags.is_consolidated = True
 		return_sales_invoice.return_against = frappe.db.get_value(
 			"POS Invoice", self.return_against, "consolidated_invoice"
 		)
@@ -947,6 +951,7 @@ class POSInvoice(SalesInvoice):
 		change_amount = (
 			flt(flt(paid_amount - total), self.precision("change_amount")) if paid_amount > total else 0
 		)
+		base_change_amount = flt(change_amount * self.conversion_rate, self.precision("base_change_amount"))
 
 		pi = frappe.qb.DocType("POS Invoice")
 		query = (
@@ -955,6 +960,7 @@ class POSInvoice(SalesInvoice):
 			.set(pi.base_paid_amount, base_paid_amount)
 			.set(pi.outstanding_amount, outstanding_amount)
 			.set(pi.change_amount, change_amount)
+			.set(pi.base_change_amount, base_change_amount)
 			.where(pi.name == self.name)
 		)
 		query.run()
@@ -1239,7 +1245,7 @@ def get_item_group(pos_profile):
 
 
 def create_payments_on_invoice(doc, idx, payment_details):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+	from erpnext.accounts.doctype.sales_invoice.services.pos import get_bank_cash_account
 
 	payment = frappe.new_doc("Sales Invoice Payment")
 	payment.idx = idx

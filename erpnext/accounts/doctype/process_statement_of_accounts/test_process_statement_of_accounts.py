@@ -22,7 +22,7 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		frappe.db.set_value(
 			"Letter Head",
-			"Company Letterhead - Grey",
+			"Company Letterhead",
 			"is_default",
 			0,
 			update_modified=False,

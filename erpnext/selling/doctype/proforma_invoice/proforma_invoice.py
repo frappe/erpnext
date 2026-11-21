@@ -294,7 +294,7 @@ def make_proforma_invoice(
 	return proforma.name
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	proforma = frappe.get_doc("Proforma Invoice", proforma_name)
 	proforma.check_permission("email")

@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from itertools import product
+
 import frappe
 from frappe.utils import (
 	add_days,
@@ -36,6 +38,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
 )
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_invoice,
 )
@@ -215,6 +218,50 @@ class TestAsset(AssetSetup):
 				with self.assertRaisesRegex(frappe.ValidationError, "Net Purchase Amount should be"):
 					asset.save()
 				self.assertEqual(asset.purchase_amount, 100000)
+
+	def test_partial_purchase_return_keeps_other_submitted_assets(self):
+		for doctype, separate_rows, cancel_asset in product(
+			("Purchase Receipt", "Purchase Invoice"), (False, True), (False, True)
+		):
+			with self.subTest(doctype=doctype, separate_rows=separate_rows, cancel_asset=cancel_asset):
+				items = (
+					[("Macbook Pro", 1, 100000), ("Macbook Pro", 2, 120000)]
+					if separate_rows
+					else [("Macbook Pro", 3, 100000)]
+				)
+				purchase = self.make_asset_purchase(doctype, items)
+				fieldname = frappe.scrub(doctype)
+				assets = frappe.get_all(
+					"Asset", filters={fieldname: purchase.name}, pluck="name", order_by="creation, name"
+				)
+				kept_asset = frappe.get_doc("Asset", assets[0])
+				kept_asset.available_for_use_date = purchase.posting_date
+				kept_asset.submit()
+				returned_asset = frappe.get_doc("Asset", assets[-1])
+				if cancel_asset:
+					returned_asset.available_for_use_date = purchase.posting_date
+					returned_asset.submit().cancel()
+				else:
+					returned_asset.delete()
+
+				purchase_return = make_return_doc(doctype, purchase.name)
+				if separate_rows:
+					purchase_return.remove(purchase_return.items[0])
+				purchase_return.items[0].update({"qty": -1, "received_qty": -1})
+				purchase_return.insert().submit()
+				self.assertEqual(kept_asset.reload().docstatus, 1)
+				self.assertEqual(purchase_return.docstatus, 1)
+				remaining_return = make_return_doc(doctype, purchase.name)
+				if separate_rows:
+					remaining_return.remove(remaining_return.items[0])
+				remaining_return.items[0].update({"qty": -1, "received_qty": -1})
+				with self.assertRaisesRegex(frappe.ValidationError, "assets of"):
+					remaining_return.insert()
+				remaining_return.items[0].set(fieldname + "_item", None)
+				with self.assertRaisesRegex(frappe.ValidationError, "submitted assets"):
+					remaining_return.insert()
+				purchase_return.cancel()
+				self.assertEqual(kept_asset.reload().docstatus, 1)
 
 	def test_manual_assets_use_remaining_purchase_row_quantities(self):
 		item = create_fixed_asset_item("_Test Manual Asset Purchase", auto_create_assets=0)
@@ -578,6 +625,36 @@ class TestAsset(AssetSetup):
 		update_maintenance_status()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
+	def test_asset_under_due_maintenance_keeps_depreciating(self):
+		from unittest.mock import patch
+
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2020-06-06",
+			purchase_date="2020-01-01",
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=3,
+			frequency_of_depreciation=10,
+			maintenance_required=1,
+			depreciation_start_date="2020-12-31",
+			submit=1,
+		)
+		# an overdue maintenance log stays open
+		with patch("erpnext.assets.doctype.asset.asset.has_due_maintenance", return_value=True):
+			update_maintenance_status()
+			self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "In Maintenance")
+
+			post_depreciation_entries(date="2021-01-01")
+
+		self.assertTrue(
+			frappe.db.get_value(
+				"Depreciation Schedule",
+				{"parent": get_asset_depr_schedule_doc(asset.name, "Active").name, "idx": 1},
+				"journal_entry",
+			)
+		)
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "In Maintenance")
 
 	def test_asset_splitting(self):
 		asset = create_asset(

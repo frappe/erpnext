@@ -242,6 +242,20 @@ class TestSalesTeam(ERPNextTestSuite):
 		self.person.save()
 		self.assertFalse(self.person.enabled)
 
+	def test_disable_allows_returned_and_credited_delivery_note(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return as make_credit_note
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice, make_sales_return
+
+		delivery = self.make_transaction("Delivery Note")
+		delivery.submit()
+		invoice = make_sales_invoice(delivery.name).insert()
+		invoice.submit()
+		make_sales_return(delivery.name).insert().submit()
+		make_credit_note(invoice.name).insert().submit()
+		self.person.enabled = 0
+		self.person.save()
+		self.assertFalse(self.person.enabled)
+
 	def test_group_sales_person_is_rejected(self):
 		doc = self.make_transaction()
 		doc.sales_team[0].sales_person = self.make_person(is_group=1).name
@@ -261,6 +275,18 @@ class TestSalesTeam(ERPNextTestSuite):
 		doc.append("sales_team", {"sales_person": self.other_person.name, "allocated_percentage": -50})
 		with self.assertRaises(frappe.ValidationError):
 			doc.save()
+
+	def test_row_without_sales_person_raises_mandatory_error(self):
+		for team in (
+			[{"allocated_percentage": 100}],
+			[{"allocated_percentage": 50}, {"allocated_percentage": 50}],
+			[{"sales_person": self.person.name, "allocated_percentage": 50}, {"allocated_percentage": 50}],
+		):
+			with self.subTest(team=team):
+				doc = make_sales_order(item_code="_Test Non Stock Item", qty=1, rate=1000, do_not_save=True)
+				doc.set("sales_team", team)
+				with self.assertRaises(frappe.MandatoryError):
+					doc.insert()
 
 	def test_timeline_counts_only_submitted_transactions(self):
 		from erpnext.setup.doctype.sales_person.sales_person import get_timeline_data

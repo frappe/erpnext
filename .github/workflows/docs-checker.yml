@@ -22,8 +22,4 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Validate Docs
-        env:
-          PR_NUMBER: ${{ github.event.number }}
-        run: |
-          pip install requests --quiet
-          python $GITHUB_WORKSPACE/.github/helper/documentation.py $PR_NUMBER
+        run: python $GITHUB_WORKSPACE/.github/helper/documentation.py

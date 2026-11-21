@@ -86,57 +86,50 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 
 
 def _add_operation_workstation_costs(stock_entry, work_order, row, op_expense_account):
-	from erpnext.stock.doctype.stock_entry.stock_entry import get_consumed_operating_cost
-
 	workstation_cost = frappe.get_all(
 		"Workstation Cost",
 		fields=["operating_component", "operating_cost"],
-		filters={"parent": row.workstation, "parenttype": "Workstation"},
+		filters={"parent": row.workstation, "parenttype": "Workstation", "operating_cost": (">", 0)},
+		order_by="idx",
 	)
-	consumed = get_consumed_operating_cost(work_order.name, stock_entry.bom_no, row.name) or []
 	total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
-
-	cost_added = False
-	for wc in workstation_cost:
-		if _append_workstation_cost(stock_entry, row, wc, consumed, op_expense_account, total_component_rate):
-			cost_added = True
-	return cost_added
-
-
-def _append_workstation_cost(stock_entry, row, wc, consumed, op_expense_account, total_component_rate):
-	expense_account = get_component_account(wc.operating_component, stock_entry.company) or op_expense_account
-	consumed_op_cost = next(
-		(c for c in consumed if c.get("operating_component") == wc.operating_component), {}
-	)
-	actual = _actual_operating_cost(wc, row, consumed_op_cost, total_component_rate)
-	if not actual:
+	if not (flt(row.actual_operating_cost) and total_component_rate):
 		return False
 
-	remaining_qty = row.completed_qty - consumed_op_cost.get("consumed_qty", 0)
-	operating_cost = (actual / (remaining_qty or 1)) * stock_entry.fg_completed_qty
-	qty = min(remaining_qty, stock_entry.fg_completed_qty)
-	row_data = _workstation_cost_row(expense_account, row, wc, actual, operating_cost, qty)
-	stock_entry.append("additional_costs", row_data)
+	amount, qty = _get_operation_cost_and_qty(stock_entry, work_order, row)
+	if amount <= 0:
+		return False
+
+	# A row per component, even a zero amount, so each records the qty consumed
+	component_amounts = _split_by_component_rate(amount, workstation_cost, total_component_rate)
+	for wc, component_amount in zip(workstation_cost, component_amounts, strict=True):
+		expense_account = get_component_account(wc.operating_component, stock_entry.company)
+		row_data = _workstation_cost_row(
+			expense_account or op_expense_account, row, wc, component_amount, qty
+		)
+		stock_entry.append("additional_costs", row_data)
 	return True
 
 
-def _actual_operating_cost(wc, row, consumed_op_cost, total_component_rate):
-	if flt(row.actual_operating_cost) and total_component_rate:
-		cost = flt(row.actual_operating_cost) * flt(wc.operating_cost) / total_component_rate
-	else:
-		cost = flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0)
-
-	return flt(cost - flt(consumed_op_cost.get("consumed_cost")), row.precision("actual_operating_cost"))
-
-
-def _workstation_cost_row(expense_account, row, wc, actual, operating_cost, qty):
+def _split_by_component_rate(amount, workstation_cost, total_component_rate):
+	"""Amount per component by rate, rounded on the running total so the shares add up to it."""
 	precision = frappe.get_precision("Landed Cost Taxes and Charges", "amount")
+	amounts, allocated, cumulative_rate = [], 0.0, 0.0
+	for wc in workstation_cost:
+		cumulative_rate += flt(wc.operating_cost)
+		cumulative_amount = flt(amount * cumulative_rate / total_component_rate, precision)
+		amounts.append(flt(cumulative_amount - allocated, precision))
+		allocated = cumulative_amount
+	return amounts
+
+
+def _workstation_cost_row(expense_account, row, wc, amount, qty):
 	return {
 		"expense_account": expense_account,
 		"description": _("{0} Operating Cost for operation {1}").format(
 			wc.operating_component, row.operation
 		),
-		"amount": flt(min(operating_cost, actual), precision),
+		"amount": amount,
 		"has_operating_cost": 1,
 		"operation_id": row.name,
 		"operating_component": wc.operating_component,
@@ -168,13 +161,17 @@ def _add_remaining_operating_cost(stock_entry, work_order, expense_account, job_
 	from erpnext.stock.doctype.stock_entry.stock_entry import uses_sub_assembly_operating_cost
 
 	if add_operating_cost_component_wise(stock_entry, work_order, expense_account, job_card=job_card):
+		_add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card)
 		return
 	if job_card:
+		for operation in work_order.get("operations", {"name": job_card.operation_id}):
+			_add_operation_cost(stock_entry, work_order, operation, expense_account)
 		return
 
 	if work_order.operations and not uses_sub_assembly_operating_cost(work_order, stock_entry.bom_no):
 		for operation in work_order.operations:
 			_add_operation_cost(stock_entry, work_order, operation, expense_account)
+		_add_fg_based_operating_cost(stock_entry, work_order, expense_account)
 		return
 
 	_append_operating_cost(stock_entry, expense_account, remaining_cost * flt(stock_entry.fg_completed_qty))
@@ -215,6 +212,16 @@ def _append_operating_cost(stock_entry, expense_account, amount, **operation_fie
 			**operation_fields,
 		},
 	)
+
+
+def _add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card=None):
+	"""FG-based costs of the multi-level BOM tree, next to the costs of its operations."""
+	if job_card or not work_order.use_multi_level_bom:
+		return
+
+	unit_cost = get_op_cost_from_sub_assemblies(work_order.bom_no, skip_boms_with_operations=True)
+	if unit_cost:
+		_append_operating_cost(stock_entry, expense_account, unit_cost * flt(stock_entry.fg_completed_qty))
 
 
 def _add_additional_operating_cost(stock_entry, work_order, expense_account, job_card=None):
@@ -303,25 +310,30 @@ def _manufacture_stock_entries(work_order):
 	)
 
 
-def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
+def get_op_cost_from_sub_assemblies(bom_no, op_cost=0, skip_boms_with_operations=False):
+	"""Per unit operating cost of the BOM tree. Skipped BOMs are costed by Work Order operations."""
 	conversion_rate = flt(frappe.get_cached_value("BOM", bom_no, "conversion_rate")) or 1
-	return flt(op_cost) + _get_unit_operating_cost(bom_no, {}) * conversion_rate
+	unit_cost = _get_unit_operating_cost(bom_no, {}, skip_boms_with_operations)
+	return flt(op_cost) + unit_cost * conversion_rate
 
 
-def _get_unit_operating_cost(bom_no, unit_costs):
+def _get_unit_operating_cost(bom_no, unit_costs, skip_boms_with_operations=False):
 	if bom_no in unit_costs:
 		return unit_costs[bom_no]
 
-	bom = frappe.get_cached_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=True)
+	bom = frappe.get_cached_value(
+		"BOM", bom_no, ["operating_cost", "quantity", "with_operations"], as_dict=True
+	)
 	quantity = flt(bom.quantity) or 1
-	cost = flt(bom.operating_cost) / quantity
+	cost = 0 if skip_boms_with_operations and bom.with_operations else flt(bom.operating_cost) / quantity
 
 	for row in frappe.get_all(
 		"BOM Item",
 		filters={"parent": bom_no, "parenttype": "BOM", "docstatus": 1, "bom_no": ("is", "set")},
 		fields=["bom_no", "stock_qty"],
 	):
-		cost += flt(row.stock_qty) / quantity * _get_unit_operating_cost(row.bom_no, unit_costs)
+		child_cost = _get_unit_operating_cost(row.bom_no, unit_costs, skip_boms_with_operations)
+		cost += flt(row.stock_qty) / quantity * child_cost
 
 	unit_costs[bom_no] = cost
 	return cost

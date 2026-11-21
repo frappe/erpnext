@@ -22,7 +22,7 @@ def copy_doctypes():
 
 
 def insert_into_bom():
-	fields = ["item_code", "item_name", "stock_uom", "stock_qty"]
+	fields = ["idx", "item_code", "item_name", "stock_uom", "stock_qty"]
 	data = frappe.get_all(
 		"BOM Scrap Item", {"docstatus": ("<", 2)}, ["parent", *fields, "amount", "base_amount"]
 	)
@@ -84,6 +84,7 @@ def insert_into_subcontracting_inward():
 
 
 def bulk_insert(parent_doctype, old_doctype, new_doctype, old_fields, new_fields, new_values):
+	old_fields = ["idx", *old_fields]
 	data = frappe.get_all(old_doctype, {"docstatus": ("<", 2)}, ["parent", *old_fields])
 	grouped_data = defaultdict(list)
 

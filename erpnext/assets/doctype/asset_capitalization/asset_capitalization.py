@@ -31,7 +31,7 @@ from erpnext.stock.get_item_details import (
 	get_item_warehouse_,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.stock.utils import _get_incoming_rate, check_warehouse_company
+from erpnext.stock.utils import _get_incoming_rate, check_company, check_warehouse_company
 
 force_fields = [
 	"target_item_name",
@@ -119,12 +119,16 @@ class AssetCapitalization(StockController):
 		self.update_target_asset()
 
 	def before_cancel(self):
-		if frappe.db.get_value("Asset", self.target_asset, "docstatus") == 1:
-			frappe.throw(
-				_("Cancel the submitted Target Asset {0} before cancelling this Asset Capitalization").format(
-					get_link_to_form("Asset", self.target_asset)
-				)
-			)
+		self.cancel_target_asset()
+
+	def cancel_target_asset(self):
+		"""A submitted target asset carries the capitalised value, so it is cancelled together with this."""
+		target_asset = frappe.get_doc("Asset", self.target_asset)
+		if target_asset.docstatus != 1:
+			return
+
+		target_asset.flags.cancelled_by_asset_capitalization = self.name
+		target_asset.cancel()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -723,6 +727,7 @@ def _get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 
 	# inherited from get_incoming_rate before the split; _get_incoming_rate does not scope
 	check_warehouse_company(ctx.warehouse)
+	check_company(ctx.company)
 	return frappe._dict(
 		{
 			"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,

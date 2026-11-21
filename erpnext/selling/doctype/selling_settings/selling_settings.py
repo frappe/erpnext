@@ -61,6 +61,7 @@ class SellingSettings(Document):
 		enable_utm: DF.Check
 		fallback_to_default_price_list: DF.Check
 		hide_tax_id: DF.Check
+		load_customer_overview: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		maintain_same_sales_rate: DF.Check
 		proforma_email_template: DF.Link | None
@@ -90,7 +91,8 @@ class SellingSettings(Document):
 			"editable_price_list_rate",
 			"selling_price_list",
 		]:
-			frappe.db.set_default(key, self.get(key, ""))
+			value = self.get(key)
+			frappe.db.set_default(key, "" if value is None else value)
 
 		self.update_customer_naming_settings()
 

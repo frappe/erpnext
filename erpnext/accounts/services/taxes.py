@@ -10,12 +10,12 @@ from frappe import _, throw
 from frappe.utils import cint, flt, parse_json
 
 import erpnext
-from erpnext import require_permission
+from erpnext import _refuse, require_permission
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
+	_get_item_tax_map,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
-	get_item_tax_map,
 )
 
 
@@ -205,6 +205,10 @@ def validate_tax_master(master_doctype: str, master_name: str | None = None) -> 
 
 @frappe.whitelist()
 def get_tax_rate(account_head: str) -> dict:
+	ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+	if not frappe.has_permission("Account", ptype, account_head):
+		_refuse()
+
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
@@ -433,7 +437,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc) -> None:
 		item_tax_template = _get_item_tax_template_from_item_group(ctx, item.item_group)
 
 	child_item.item_tax_template = item_tax_template
-	child_item.item_tax_rate = get_item_tax_map(
+	child_item.item_tax_rate = _get_item_tax_map(
 		doc=parent_doc,
 		tax_template=child_item.item_tax_template,
 		as_json=True,

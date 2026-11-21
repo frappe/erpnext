@@ -12,6 +12,7 @@ from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.valuation import round_off_if_near_zero
@@ -543,7 +544,7 @@ class FIFOSlots:
 	def _prefetch_batchwise_valuations(self) -> None:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -582,7 +583,7 @@ class FIFOSlots:
 		company = self.filters.get("company")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = frappe.qb.DocType("Item")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -1125,7 +1126,7 @@ class FIFOSlots:
 	def _get_stock_ledger_entries(self) -> Iterator[dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self._get_item_query()  # used as derived table in sle query
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		sle_query = (
 			frappe.qb.from_(sle)
@@ -1164,6 +1165,9 @@ class FIFOSlots:
 		if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
 			sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
+		if condition := get_allowed_companies_condition(sle.company, "Stock Ledger Entry"):
+			sle_query = sle_query.where(condition)
+
 		if self.filters.get("warehouse"):
 			sle_query = self._get_warehouse_conditions(sle, sle_query)
 		elif self.filters.get("warehouse_type"):
@@ -1186,7 +1190,7 @@ class FIFOSlots:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -1216,7 +1220,7 @@ class FIFOSlots:
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)

@@ -3,6 +3,8 @@
 
 import copy
 import json
+from itertools import product
+from unittest.mock import patch
 
 import frappe
 from frappe import qb
@@ -10,6 +12,11 @@ from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.utils import add_days, add_to_date, cint, flt, format_date, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.deferred_revenue import (
+	book_deferred_income_or_expense,
+	get_already_booked_amount,
+	get_deferred_revenue_returns,
+)
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -21,6 +28,8 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
+from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
+from erpnext.accounts.doctype.sales_invoice.services.gl_composer import SalesInvoiceGLComposer
 from erpnext.accounts.doctype.sales_invoice.services.pos import (
 	POSService,
 	get_all_mode_of_payments,
@@ -35,6 +44,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
+from erpnext.controllers.status_updater import OverAllowanceError
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -153,6 +163,22 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.naming_series = "TEST-"
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
+
+	def test_historical_print_preserves_empty_terms_after_template_disabled(self):
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions", title="Historical invoice terms", selling=1
+		).insert()
+		invoice = create_sales_invoice(do_not_save=True)
+		invoice.tc_name = terms.name
+		invoice.insert()
+		invoice.submit()
+		terms.disabled = 1
+		terms.save()
+		invoice.before_print(frappe._dict())
+		self.assertFalse(invoice.terms)
+		invoice.cancel()
+		invoice.before_print(frappe._dict())
+		self.assertFalse(invoice.terms)
 
 	def test_add_terms_after_save(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
@@ -1394,9 +1420,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		pos.is_pos = 1
 		pos.pos_profile = pos_profile.name
+		pos.account_for_change_amount = "Cash - _TC"
 
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 500})
-		pos.append("payments", {"mode_of_payment": "Cash", "amount": 500})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 512.07})
 		pos.insert()
 		pos.submit()
 
@@ -2143,6 +2170,67 @@ class TestSalesInvoice(ERPNextTestSuite):
 		cr_note.items[0].qty = 0
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
+	def test_sales_team_disabled_sales_person_carried_over(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
+
+		sales_person = "_Test Sales Person 2"
+		other_sales_person = "_Test Sales Person 1"
+
+		si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		si.submit()
+
+		cancelled_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		cancelled_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		cancelled_si.submit()
+		cancelled_si.reload()
+		cancelled_si.cancel()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		frappe.db.set_value("Sales Person", other_sales_person, "enabled", 0)
+		try:
+			with self.subTest("return against the invoice is allowed"):
+				cr_note = make_sales_return(si.name)
+				cr_note.submit()
+				self.assertEqual([d.sales_person for d in cr_note.sales_team], [sales_person])
+
+			with self.subTest("sales person newly assigned on the return is rejected"):
+				cr_note = make_sales_return(si.name)
+				cr_note.sales_team = []
+				cr_note.append(
+					"sales_team", {"sales_person": other_sales_person, "allocated_percentage": 100}
+				)
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", cr_note.save)
+
+			with self.subTest("amending the invoice is allowed"):
+				amended = frappe.copy_doc(cancelled_si)
+				amended.amended_from = cancelled_si.name
+				amended.docstatus = 0
+				amended.insert()
+				self.assertEqual([d.sales_person for d in amended.sales_team], [sales_person])
+
+			with self.subTest("delivery note against the invoice is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_delivery_note, si.name)
+
+			with self.subTest("standalone credit note with a disabled sales person is rejected"):
+				cr_note = create_sales_invoice(qty=-1, rate=1000, is_return=1, do_not_save=True)
+				cr_note.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", cr_note.save)
+
+			with self.subTest("non-return invoice linked through return_against is rejected"):
+				linked_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+				linked_si.return_against = si.name
+				linked_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", linked_si.save)
+
+			with self.subTest("new invoice with the same sales person is still rejected"):
+				new_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+				new_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", new_si.save)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
+
 	def test_return_invoice_with_account_mismatch(self):
 		debtors2 = create_account(
 			parent_account="Accounts Receivable - _TC",
@@ -2745,6 +2833,108 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_rounding_adjustment_in_foreign_currency(self):
+		"""The receivable is posted at the base rounded total and the round off at the base
+		adjustment, so the entries balance without a second round off."""
+		frappe.db.set_value("Currency", "JPY", "enabled", 1)
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "JPY",
+				"to_currency": "INR",
+				"exchange_rate": 0.567,
+			}
+		).insert()
+		debit_to = create_account(
+			account_name="_Test Receivable JPY",
+			parent_account="Accounts Receivable - _TC",
+			company="_Test Company",
+			account_currency="JPY",
+			account_type="Receivable",
+		)
+		if not frappe.db.exists("Customer", "_Test Customer JPY"):
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Customer JPY",
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+					"default_currency": "JPY",
+				}
+			).insert()
+
+		si = create_sales_invoice(
+			customer="_Test Customer JPY",
+			currency="JPY",
+			conversion_rate=0.567,
+			debit_to=debit_to,
+			rate=1701.4,
+		)
+
+		self.assertEqual(si.rounded_total, 1701)
+		self.assertEqual(si.rounding_adjustment, -0.4)
+		self.assertEqual(si.base_grand_total, 964.69)
+		self.assertEqual(si.base_rounding_adjustment, -0.22)
+		self.assertEqual(si.base_rounded_total, 964.47)
+
+		round_off_account = frappe.get_cached_value("Company", si.company, "round_off_account")
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit", "debit_in_account_currency"],
+			order_by="account asc",
+		)
+		expected_values = {
+			debit_to: [964.47, 0.0],
+			round_off_account: [0.22, 0.0],
+			"Sales - _TC": [0.0, 964.69],
+		}
+		self.assertEqual({gle.account for gle in gl_entries}, set(expected_values))
+		for gle in gl_entries:
+			self.assertEqual([gle.debit, gle.credit], expected_values[gle.account])
+			if gle.account == round_off_account:
+				# the round off account is in company currency, so both amounts are the base adjustment
+				self.assertEqual(gle.debit_in_account_currency, 0.22)
+
+		payment = get_payment_entry(
+			si.doctype,
+			si.name,
+			bank_account="_Test Cash - _TC",
+			bank_amount=964.47,
+		)
+		payment.source_exchange_rate = si.conversion_rate
+		payment.insert()
+		payment.submit()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"account": debit_to, "voucher_no": ["in", [si.name, payment.name]], "is_cancelled": 0},
+			fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		self.assertAlmostEqual(sum(gle.debit - gle.credit for gle in gl_entries), 0, places=2)
+		self.assertAlmostEqual(
+			sum(gle.debit_in_account_currency - gle.credit_in_account_currency for gle in gl_entries),
+			0,
+			places=2,
+		)
+		self.assertAlmostEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": si.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			0,
+			places=2,
+		)
+		payment.cancel()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1701)
+		si.cancel()
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_rounding_adjustment_2(self):
 		si = create_sales_invoice(rate=400, do_not_save=True)
@@ -3256,6 +3446,260 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"automatically_process_deferred_accounting_entry": 0}
+	)
+	def test_credit_note_for_unrecognized_deferred_revenue(self):
+		for currency, discount_accounting in (("INR", 0), ("USD", 0), ("INR", 1)):
+			with self.change_settings(
+				"Selling Settings", {"enable_discount_accounting": discount_accounting}
+			):
+				for basis, (via_journal, submit_journal), returned_qty in product(
+					("Days", "Months"), ((0, 0), (1, 0), (1, 1)), (1, 2)
+				):
+					with (
+						self.subTest(
+							basis=basis,
+							via_journal=via_journal,
+							submit_journal=submit_journal,
+							returned_qty=returned_qty,
+							currency=currency,
+							discount_accounting=discount_accounting,
+						),
+						self.change_settings(
+							"Accounts Settings",
+							{
+								"book_deferred_entries_based_on": basis,
+								"book_deferred_entries_via_journal_entry": via_journal,
+								"submit_journal_entries": submit_journal,
+							},
+						),
+					):
+						frappe.db.savepoint("deferred_return")
+						invoice = make_recurring_reference_invoice(
+							"2019-01-01", "2019-03-31", [("2019-01-01", "2019-03-31")]
+						)
+						invoice.items[0].qty = 2
+						invoice.items[0].rate = 50
+						if currency == "USD":
+							invoice.customer = "_Test Customer USD"
+							invoice.currency = "USD"
+							invoice.conversion_rate = 60
+							invoice.debit_to = "_Test Receivable USD - _TC"
+						if discount_accounting:
+							invoice.items[0].discount_account = create_account(
+								account_name="Discount Account",
+								parent_account="Indirect Expenses - _TC",
+								company=invoice.company,
+							)
+							invoice.items[0].price_list_rate = 100
+							invoice.items[0].discount_percentage = 50
+						invoice.insert().submit()
+
+						credit_note = make_return_doc("Sales Invoice", invoice.name)
+						credit_note.set_posting_time = 1
+						credit_note.posting_date = "2019-01-01"
+						credit_note.items[0].qty = -returned_qty
+						credit_note.insert().submit()
+
+						returned_amount = 50 * returned_qty
+						base_returned_amount = returned_amount * invoice.conversion_rate
+						expected_entries = [
+							(
+								invoice.items[0].deferred_revenue_account,
+								base_returned_amount * (1 + discount_accounting),
+								0,
+								returned_amount * (1 + discount_accounting),
+								0,
+							),
+							(invoice.debit_to, 0, base_returned_amount, 0, returned_amount),
+						]
+						if discount_accounting:
+							expected_entries.append(
+								(
+									invoice.items[0].discount_account,
+									0,
+									base_returned_amount,
+									0,
+									returned_amount,
+								)
+							)
+						self.assertCountEqual(
+							frappe.get_all(
+								"GL Entry",
+								filters={
+									"voucher_type": "Sales Invoice",
+									"voucher_no": credit_note.name,
+									"is_cancelled": 0,
+								},
+								fields=[
+									"account",
+									"debit",
+									"credit",
+									"debit_in_transaction_currency",
+									"credit_in_transaction_currency",
+								],
+								as_list=True,
+							),
+							expected_entries,
+						)
+						returned = get_deferred_revenue_returns(invoice)[invoice.items[0].name]
+						self.assertEqual(returned.base_amount, base_returned_amount)
+						self.assertEqual(returned.amount, returned_amount)
+
+						if returned_qty == 1:
+							second_credit_note = make_return_doc("Sales Invoice", invoice.name)
+							second_credit_note.set_posting_time = 1
+							second_credit_note.posting_date = "2019-01-01"
+							second_credit_note.insert().submit()
+							self.assertEqual(
+								get_deferred_revenue_returns(invoice)[invoice.items[0].name].amount, 100
+							)
+							second_credit_note.cancel()
+
+						process = (
+							frappe.get_doc(
+								doctype="Process Deferred Accounting",
+								company=invoice.company,
+								type="Income",
+								posting_date="2019-03-31",
+								start_date="2019-01-01",
+								end_date="2019-03-31",
+							)
+							.insert()
+							.submit()
+						)
+						invoice.reload()
+						self.assertEqual(
+							get_already_booked_amount(invoice, invoice.items[0])[0],
+							50 * (2 - returned_qty) * invoice.conversion_rate,
+						)
+						self.assertEqual(invoice.items[0].base_net_amount, 100 * invoice.conversion_rate)
+						self.assertEqual(invoice.items[0].net_amount, 100)
+						self.assertEqual(
+							SalesInvoiceGLComposer(credit_note).get_item_income_account(credit_note.items[0]),
+							invoice.items[0].deferred_revenue_account,
+						)
+
+						if returned_qty == 1:
+							with self.assertRaisesRegex(
+								frappe.ValidationError, "before cancelling this credit note"
+							):
+								credit_note.cancel()
+							credit_note.reload()
+
+						for name in frappe.get_all(
+							"Journal Entry", {"process_deferred_accounting": process.name}, pluck="name"
+						):
+							journal = frappe.get_doc("Journal Entry", name)
+							if journal.docstatus == 1:
+								journal.cancel()
+							else:
+								journal.delete()
+						process.cancel()
+						credit_note.cancel()
+						self.assertEqual(get_deferred_revenue_returns(invoice), {})
+						book_deferred_income_or_expense(invoice, None, "2019-03-31")
+						self.assertEqual(
+							get_already_booked_amount(invoice, invoice.items[0])[0],
+							100 * invoice.conversion_rate,
+						)
+						# Roll back each matrix case so other invoices do not enter its deferred process.
+						frappe.db.rollback(save_point="deferred_return")
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Days"})
+	def test_credit_note_after_deferred_revenue_recognition(self):
+		for recognition_date, (via_journal, submit_journal) in product(
+			("2019-01-31", "2019-03-31"), ((0, 0), (1, 0), (1, 1))
+		):
+			with (
+				self.subTest(
+					recognition_date=recognition_date, via_journal=via_journal, submit_journal=submit_journal
+				),
+				self.change_settings(
+					"Accounts Settings",
+					{
+						"book_deferred_entries_via_journal_entry": via_journal,
+						"submit_journal_entries": submit_journal,
+					},
+				),
+			):
+				invoice = make_recurring_reference_invoice(
+					"2019-01-01", "2019-03-31", [("2019-01-01", "2019-03-31")]
+				)
+				invoice.insert().submit()
+				book_deferred_income_or_expense(invoice.reload(), None, recognition_date)
+				credit_note = make_return_doc("Sales Invoice", invoice.name)
+				credit_note.insert().submit()
+				self.assertEqual(
+					frappe.get_all(
+						"GL Entry",
+						{
+							"voucher_type": "Sales Invoice",
+							"voucher_no": credit_note.name,
+							"is_cancelled": 0,
+							"debit": [">", 0],
+						},
+						pluck="account",
+					),
+					[invoice.items[0].income_account],
+				)
+				self.assertEqual(get_deferred_revenue_returns(invoice), {})
+				credit_note.cancel()
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{
+			"automatically_process_deferred_accounting_entry": 0,
+			"book_deferred_entries_based_on": "Days",
+			"book_deferred_entries_via_journal_entry": 0,
+		},
+	)
+	def test_deferred_return_account_queries(self):
+		invoice = make_recurring_reference_invoice(
+			"2019-01-01",
+			"2019-02-28",
+			[("2019-01-01", "2019-01-31")] * 5 + [("2019-02-01", "2019-02-28")] * 5,
+		)
+		other_account = create_account(
+			account_name="Deferred Subscription Revenue",
+			parent_account="Current Liabilities - _TC",
+			company=invoice.company,
+		)
+		for index, item in enumerate(invoice.items):
+			item.qty = 2
+			item.rate = 50
+			if index % 2:
+				item.deferred_revenue_account = other_account
+		invoice.insert().submit()
+		credit_note = make_return_doc("Sales Invoice", invoice.name)
+		for item in credit_note.items:
+			item.qty = -1
+		credit_note.insert()
+		frappe.get_cached_doc("Sales Invoice", invoice.name)
+		composer = SalesInvoiceGLComposer(credit_note)
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			for item in credit_note.items:
+				self.assertEqual(composer.get_item_income_account(item), item.deferred_revenue_account)
+				self.assertEqual(composer.get_item_income_account(item), item.deferred_revenue_account)
+			self.assertLessEqual(queries.call_count, 5)
+
+		book_deferred_income_or_expense(invoice.reload(), None, "2019-01-31")
+		composer = SalesInvoiceGLComposer(credit_note)
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			for index, item in enumerate(credit_note.items):
+				self.assertEqual(
+					composer.get_item_income_account(item),
+					item.income_account if index < 5 else item.deferred_revenue_account,
+				)
+			self.assertLessEqual(queries.call_count, 5)
+		credit_note.submit()
+		self.assertEqual(
+			set(get_deferred_revenue_returns(invoice)), {item.name for item in invoice.items[5:]}
+		)
+		credit_note.cancel()
+
 	def test_deferred_revenue_missing_account(self):
 		si = create_sales_invoice(posting_date="2019-01-10", do_not_submit=True)
 		si.items[0].enable_deferred_revenue = 1
@@ -3397,6 +3841,118 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
+	def test_no_inter_company_pi_from_si_made_from_pi(self):
+		pi = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"company": "_Test Company 1",
+				"supplier": "_Test Internal Supplier",
+				"currency": "USD",
+				"buying_price_list": "_Test Price List Rest of the World",
+				"credit_to": "Creditors - _TC1",
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"qty": 10,
+						"rate": 100,
+						"expense_account": "Cost of Goods Sold - _TC1",
+						"cost_center": "Main - _TC1",
+					}
+				],
+			}
+		).submit()
+
+		si = make_inter_company_transaction("Purchase Invoice", pi.name)
+		si.debit_to = "Debtors - WP"
+		si.items[0].update(
+			{
+				"income_account": "Sales - WP",
+				"expense_account": "Cost of Goods Sold - WP",
+				"cost_center": "Main - WP",
+			}
+		)
+		si.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"was created from",
+			make_inter_company_transaction,
+			"Sales Invoice",
+			si.name,
+		)
+
+	def test_inter_company_purchase_invoice_drops_selling_only_terms(self):
+		frappe.get_doc(
+			doctype="Terms and Conditions", title="_Test Sell Only Terms", selling=1, buying=0, terms="Net 30"
+		).insert()
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.tc_name = "_Test Sell Only Terms"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(
+			{
+				"expense_account": "Cost of Goods Sold - _TC1",
+				"cost_center": "Main - _TC1",
+				"warehouse": "Stores - _TC1",
+			}
+		)
+		pi.insert()
+
+		self.assertFalse(pi.tc_name)
+		self.assertFalse(pi.terms)
+
+	def test_no_second_inter_company_si_from_pi(self):
+		pi = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"company": "_Test Company 1",
+				"supplier": "_Test Internal Supplier",
+				"currency": "USD",
+				"buying_price_list": "_Test Price List Rest of the World",
+				"credit_to": "Creditors - _TC1",
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"qty": 10,
+						"rate": 100,
+						"expense_account": "Cost of Goods Sold - _TC1",
+						"cost_center": "Main - _TC1",
+					}
+				],
+			}
+		).submit()
+
+		si = make_inter_company_transaction("Purchase Invoice", pi.name)
+		si.debit_to = "Debtors - WP"
+		si.items[0].update(
+			{
+				"income_account": "Sales - WP",
+				"expense_account": "Cost of Goods Sold - WP",
+				"cost_center": "Main - WP",
+			}
+		)
+		si.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already has",
+			make_inter_company_transaction,
+			"Purchase Invoice",
+			pi.name,
+		)
+
 	def make_cross_currency_inter_company_purchase_invoice(self):
 		for doctype, party, company in (
 			("Customer", "_Test Internal Customer 3", "Wind Power LLC"),
@@ -3485,6 +4041,67 @@ class TestSalesInvoice(ERPNextTestSuite):
 			"Sales Invoice",
 			si.name,
 		)
+
+	def test_returned_inter_company_pi_can_be_invoiced_again(self):
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			qty=2,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		accounts = {"expense_account": "Cost of Goods Sold - _TC1", "cost_center": "Main - _TC1"}
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(accounts)
+		pi.submit()
+		return_pi = make_return_doc("Purchase Invoice", pi.name).submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		self.assertEqual(pi.items[0].qty, 2)
+		pi.items[0].update(accounts)
+		pi.submit()
+
+		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
+
+	def test_returned_internal_pi_cannot_be_cancelled_once_invoiced_again(self):
+		company = "_Test Company with perpetual inventory"
+		make_stock_entry(
+			item_code="_Test Item", target="Stores - TCP1", company=company, qty=1, basic_rate=100
+		)
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			debit_to="Debtors - TCP1",
+			warehouse="Stores - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			currency="INR",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.update_stock = 1
+		si.items[0].target_warehouse = "Work In Progress - TCP1"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.submit()
+		return_pi = make_return_doc("Purchase Invoice", pi.name).submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.submit()
+
+		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
 
 	def test_cancelling_one_partial_inter_company_pi_keeps_sales_invoice_linked_to_the_other(self):
 		si = create_sales_invoice(
@@ -4101,8 +4718,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertTrue(schedule.journal_entry)
 
 	def test_fixed_asset_sale_validations(self):
-		from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
-
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=0, submit=1)
 
 		def asset_invoice(asset_name, **kwargs):
@@ -4131,9 +4746,59 @@ class TestSalesInvoice(ERPNextTestSuite):
 				self.assertRaises(frappe.ValidationError, FixedAssetService(si).validate_fixed_asset)
 				frappe.db.set_value("Asset", asset.name, "status", "Submitted")
 
-	def test_fixed_asset_restore_note_text(self):
-		from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
+	def test_fixed_asset_cannot_be_added_to_multiple_invoice_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=25000, do_not_save=True
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
 
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Row #2: Asset .* is already added in another row",
+			si.insert,
+		)
+
+	def test_return_can_reference_asset_on_multiple_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro",
+			asset=asset.name,
+			qty=1,
+			rate=25000,
+			is_return=1,
+			return_against="_Test Legacy Sales Invoice",
+			do_not_save=True,
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
+
+		FixedAssetService(si).validate_fixed_asset()
+
+	def test_fixed_asset_restore_note_text(self):
 		asset = frappe._dict(doctype="Asset", name="_Test Asset For Note")
 		si = create_sales_invoice(do_not_save=True)
 
@@ -4441,6 +5106,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	def test_sales_commission(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
+		si.sales_partner = (
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test Invoice Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": 0,
+				}
+			)
+			.insert()
+			.name
+		)
 
 		frappe.db.set_value("Item", si.get("items")[0].item_code, "grant_commission", 1)
 		frappe.db.set_value("Item", si.get("items")[1].item_code, "grant_commission", 0)
@@ -4564,6 +5241,125 @@ class TestSalesInvoice(ERPNextTestSuite):
 			si.submit()
 
 	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	def test_return_against_over_billed_so_is_not_blocked(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+		so_detail = so.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		for update_billed_amount in (0, 1):
+			return_si = make_sales_return(si.name)
+			return_si.items[0].qty = -1
+			return_si.update_billed_amount_in_sales_order = update_billed_amount
+			return_si.insert()
+			return_si.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1350)
+
+		# cancelling a return adds the billing back, so it is still checked
+		with self.assertRaises(OverAllowanceError):
+			return_si.cancel()
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_row_with_negative_rate_is_checked_for_over_billing(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.insert()
+		si.submit()
+
+		# qty -1 at rate -100 adds 100 to the fully billed order line
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.update_billed_amount_in_sales_order = 1
+		return_si.insert()
+		with self.assertRaises(OverAllowanceError):
+			return_si.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_without_update_billed_amount_skips_over_billing_check(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+		so_detail = so.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		# with the flag off the return never touches the order's billing, even at a negative rate
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.update_billed_amount_in_sales_order = 0
+		return_si.insert()
+		return_si.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+		return_si.cancel()
+		self.assertEqual(return_si.docstatus, 2)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_rate_correction_through_set_value_is_not_blocked(self):
+		from frappe.client import set_value
+
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+
+		# a user with the over billing role saves a draft return at a negative rate
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.insert()
+		self.assertEqual(return_si.items[0].amount, 100)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		# correcting the rate through the api saves the row before its amount is recomputed
+		set_value("Sales Invoice Item", return_si.items[0].name, "rate", 150)
+		return_si.reload()
+		self.assertEqual(return_si.items[0].rate, 150)
+		self.assertEqual(return_si.items[0].amount, -150)
+
+	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{
 			"book_deferred_entries_via_journal_entry": 1,
@@ -4648,6 +5444,38 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		si.reload()
 		self.assertTrue(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle))
+
+	def test_credit_note_returns_packed_serial_and_batch_items(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		batch_item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SI-PKD-B-.#####"}
+		).name
+		serial_item = make_item(properties={"has_serial_no": 1, "serial_no_series": "SI-PKD-S-.#####"}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [batch_item, serial_item], qty=2)
+		for item_code in (batch_item, serial_item):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+
+		si = create_sales_invoice(item_code=bundle_item, warehouse=warehouse, update_stock=1, qty=1)
+		credit_note = make_return_doc("Sales Invoice", si.name)
+		credit_note.submit()
+		si.reload()
+		credit_note.reload()
+
+		for row, returned_row in zip(si.packed_items, credit_note.packed_items, strict=True):
+			if row.item_code == batch_item:
+				self.assertEqual(
+					get_batch_from_bundle(returned_row.serial_and_batch_bundle),
+					get_batch_from_bundle(row.serial_and_batch_bundle),
+				)
+			else:
+				self.assertEqual(
+					sorted(get_serial_nos_from_bundle(returned_row.serial_and_batch_bundle)),
+					sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)),
+				)
 
 	def test_sales_invoice_with_disabled_account(self):
 		try:
@@ -5559,6 +6387,27 @@ class TestSalesInvoice(ERPNextTestSuite):
 		project.reload()
 		self.assertIsNone(si.items[2].project)
 		self.assertEqual(project.total_billed_amount, 300)
+
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"sales_update_frequency": "Each Transaction", "allow_multiple_items": 1}
+	)
+	def test_total_billed_amount_with_cleared_item_project(self):
+		"""A row whose project cell was cleared is saved with an empty string, and still takes the
+		invoice's project."""
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		project = make_project(
+			{"project_name": f"_Test Cleared Row Project {frappe.generate_hash(length=6)}"}
+		)
+		si = create_sales_invoice(rate=3000, do_not_save=True)
+		si.project = project.name
+		si.append("items", {**si.items[0].as_dict(no_default_fields=True), "rate": 2000, "project": ""})
+		si.items[0].project = project.name
+		si.insert()
+		si.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Invoice Item", si.items[1].name, "project"), "")
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_billed_amount"), 5000)
 
 	def test_pos_returns_with_party_account_currency(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return

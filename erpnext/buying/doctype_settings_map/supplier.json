@@ -1,0 +1,28 @@
+{
+ "applies_to_doctype": "Supplier",
+ "creation": "2026-11-17 02:24:17.133287",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "supp_master_name",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "supplier_group",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "load_supplier_overview",
+   "settings_doctype": "Buying Settings"
+  }
+ ],
+ "modified": "2026-11-17 14:57:34.413380",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier - Buying",
+ "owner": "Administrator"
+}

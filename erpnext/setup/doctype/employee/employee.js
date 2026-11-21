@@ -213,16 +213,6 @@ frappe.ui.form.on("Employee", {
 		var prefered_email_fieldname = frappe.model.scrub(frm.doc.prefered_contact_email) || "user_id";
 		frm.set_value("prefered_email", frm.fields_dict[prefered_email_fieldname].value);
 	},
-
-	status: function (frm) {
-		return frm.call({
-			method: "deactivate_sales_person",
-			args: {
-				employee: frm.doc.employee,
-				status: frm.doc.status,
-			},
-		});
-	},
 });
 
 frappe.ui.form.set_controller("Employee", erpnext.setup.EmployeeController);
