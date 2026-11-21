@@ -312,19 +312,22 @@ def lock_source_rate(out: frappe._dict, source_row) -> None:
 
 
 def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
-	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+	from erpnext.stock.doctype.packed_item.packed_item import (
+		get_bundle_version_for_row,
+		get_component_stock_qty_per_unit,
+	)
 
-	active_bundle = get_active_product_bundle(ctx.item_code)
-	if active_bundle:
+	bundle = get_bundle_version_for_row(ctx)
+	if bundle:
 		valuation_rate = 0.0
-		bundled_items = frappe.get_doc("Product Bundle", active_bundle)
+		bundled_items = frappe.get_doc("Product Bundle", bundle)
 
 		for bundle_item in bundled_items.items:
 			valuation_rate += flt(
 				_get_valuation_rate(bundle_item.item_code, ctx.company, out.get("warehouse")).get(
 					"valuation_rate"
 				)
-				* bundle_item.qty
+				* get_component_stock_qty_per_unit(bundle_item, None)
 			)
 
 		out.update({"valuation_rate": valuation_rate})
