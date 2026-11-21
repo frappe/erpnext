@@ -13,20 +13,10 @@ from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_ch
 )
 
 
-def audit_stock_ledger_entries_every_3_days():
-	audit_stock_ledger_entries_if("Every 3 Days")
-
-
-def audit_stock_ledger_entries_every_7_days():
-	audit_stock_ledger_entries_if("Every 7 Days")
-
-
-def audit_stock_ledger_entries_if(frequency):
-	if frappe.db.get_single_value("Stock Reposting Settings", "stock_ledger_audit_frequency") == frequency:
-		audit_stock_ledger_entries()
-
-
 def audit_stock_ledger_entries():
+	if not frappe.db.get_single_value("Stock Reposting Settings", "repost_incorrect_valuation_entries"):
+		return
+
 	for company in frappe.get_all("Company", pluck="name"):
 		frappe.enqueue(
 			audit_company_stock_ledger_entries,
