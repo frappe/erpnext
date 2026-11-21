@@ -155,7 +155,7 @@ class SalesOrderSourcingService:
 	def _so_items(self, so_list):
 		bom = frappe.qb.DocType("BOM")
 		so_item = frappe.qb.DocType("Sales Order Item")
-		items_subquery = get_item_or_template_bom_query(bom, so_item)
+		items_subquery = get_item_or_template_bom_query(bom, so_item.item_code)
 		items_query = (
 			frappe.qb.from_(so_item)
 			.select(*_so_item_columns(so_item))
