@@ -824,11 +824,9 @@ class JobCard(Document):
 		if last_row and args.get("complete_time"):
 			for row in self.time_logs:
 				if not row.to_time:
-					to_time = get_datetime(args.get("complete_time"))
-					row.db_set(
+					row.update(
 						{
-							"to_time": to_time,
-							"time_in_mins": time_diff_in_minutes(to_time, row.from_time),
+							"to_time": get_datetime(args.get("complete_time")),
 							"operation": args.get("sub_operation"),
 							"completed_qty": (args.get("completed_qty") if last_row.idx == row.idx else 0.0),
 						}
@@ -842,50 +840,12 @@ class JobCard(Document):
 				}
 			)
 
-<<<<<<< HEAD
 			if employees:
 				for name in employees:
 					new_args.employee = name.get("employee")
-					self.add_start_time_log(new_args)
+					self.append("time_logs", new_args)
 			else:
-=======
-	def complete_open_time_logs(self, args, last_row):
-		for row in self.time_logs:
-			if not row.to_time:
-				row.update(
-					{
-						"to_time": get_datetime(args.get("complete_time")),
-						"operation": args.get("sub_operation"),
-						"completed_qty": (args.get("completed_qty") if last_row.idx == row.idx else 0.0),
-					}
-				)
-
-	def add_start_time_logs(self, args, employees):
-		new_args = frappe._dict(
-			{
-				"from_time": get_datetime(args.get("start_time")),
-				"operation": args.get("sub_operation"),
-				"completed_qty": 0.0,
-			}
-		)
-
-		if employees:
-			for name in employees:
-				new_args.employee = name.get("employee")
-<<<<<<< HEAD
->>>>>>> 51bf79c (fix(manufacturing): validate time logs added through make_time_log)
-				self.add_start_time_log(new_args)
-
-	def add_start_time_log(self, args):
-		if args.from_time and args.to_time:
-			args.time_in_mins = time_diff_in_minutes(args.to_time, args.from_time)
-
-		self.append("time_logs", args)
-=======
 				self.append("time_logs", new_args)
-		else:
-			self.append("time_logs", new_args)
->>>>>>> 984d19e (refactor(manufacturing): drop make_time_log steps that save already runs)
 
 	def update_sub_operation_status(self):
 		if not self.sub_operations:
