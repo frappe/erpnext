@@ -72,6 +72,7 @@ class BuyingController(SubcontractingController):
 		self.validate_asset_return()
 		self.validate_auto_repeat_subscription_dates()
 		self.create_package_for_transfer()
+		self.validate_delivered_batch_qty()
 
 		if self.doctype == "Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -269,6 +270,44 @@ class BuyingController(SubcontractingController):
 
 		received = query.where(bundle.warehouse == row.from_warehouse).run()
 		return {batch_no: -flt(qty) for batch_no, qty in received if batch_no}
+
+	def validate_delivered_batch_qty(self) -> None:
+		"""An inter-company receipt has no in-transit stock to stop it receiving a delivered batch twice."""
+		if self.get("is_return") or not (self.is_stock_receipt() and self.is_inter_company_receipt()):
+			return
+
+		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
+		rows_by_reference = {}
+		for row in self.get("items"):
+			if row.get(field):
+				rows_by_reference.setdefault(row.get(field), []).append(row)
+
+		for rows in rows_by_reference.values():
+			self.validate_batch_qty_left(rows)
+
+	def validate_batch_qty_left(self, rows) -> None:
+		"""Rows that receive the same delivered row take no more of a batch than earlier receipts left."""
+		delivered_package = self.get_delivered_package(rows[0])
+		if not delivered_package:
+			return
+
+		delivered = get_package_batch_qty([delivered_package])
+		received = self.get_received_batch_qty(rows[0])
+		packages = [
+			row.get(field)
+			for row in rows
+			for field in ("serial_and_batch_bundle", "rejected_serial_and_batch_bundle")
+			if row.get(field)
+		]
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		for batch_no, qty in get_package_batch_qty(packages).items():
+			left = flt(delivered.get(batch_no, 0) - received.get(batch_no, 0), precision)
+			if batch_no in delivered and flt(qty, precision) > left:
+				frappe.throw(
+					_(
+						"Row #{0}: only {1} of Batch {2} is left to receive from the delivered material. Clear the row's Serial and Batch Bundle to take the batches left."
+					).format(rows[0].idx, left, frappe.bold(batch_no))
+				)
 
 	def get_receipt_rows(self, row) -> list:
 		"""Submitted rows that receive the same delivered row as `row`, and the rows that return them."""
@@ -2062,3 +2101,16 @@ def rounds_stock_qty(row) -> bool:
 		frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
 		or frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")
 	)
+
+
+def get_package_batch_qty(packages) -> dict:
+	"""Qty of each batch in the packages."""
+	batch_qty = {}
+	for entry in frappe.get_all(
+		"Serial and Batch Entry",
+		filters={"parent": ("in", packages), "batch_no": ("is", "set")},
+		fields=["batch_no", "qty"],
+	):
+		batch_qty[entry.batch_no] = batch_qty.get(entry.batch_no, 0) + abs(entry.qty)
+
+	return batch_qty
