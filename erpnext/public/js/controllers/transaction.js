@@ -1043,6 +1043,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				precision("rate", item)
 			);
 
+		// the rate trigger does not run when the rate is unchanged
+		this.set_gross_profit(item);
 		this.calculate_taxes_and_totals();
 	}
 
@@ -2909,9 +2911,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	set_gross_profit(item) {
-		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype) && item.valuation_rate) {
-			var rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
-			item.gross_profit = flt((rate - item.valuation_rate) * item.stock_qty, precision("amount", item));
+		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype)) {
+			// valuation rate is per stock UOM, so compare it with the company currency rate per stock UOM
+			const rate =
+				(flt(item.rate) * flt(this.frm.doc.conversion_rate || 1)) /
+				(flt(item.conversion_factor) || 1);
+			item.gross_profit = flt(
+				(rate - flt(item.valuation_rate)) * flt(item.stock_qty),
+				precision("gross_profit", item)
+			);
 		}
 	}
 

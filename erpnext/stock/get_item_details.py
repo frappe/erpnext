@@ -230,7 +230,6 @@ def _get_item_details(
 		# (guarded so re-fetches never overwrite a version the user picked)
 		out.product_bundle = active_bundle
 
-	get_gross_profit(out)
 	if ctx.doctype == "Material Request":
 		out.rate = ctx.rate or out.price_list_rate
 		out.amount = flt(ctx.qty) * flt(out.rate)
@@ -2120,13 +2119,6 @@ def _get_valuation_rate(item_code: str, company: str, warehouse: str | None = No
 			return {"valuation_rate": valuation_rate[0][0] or 0.0}
 	else:
 		return {"valuation_rate": 0.0}
-
-
-def get_gross_profit(out: frappe._dict):
-	if out.valuation_rate:
-		out.update({"gross_profit": ((out.base_rate - out.valuation_rate) * out.stock_qty)})
-
-	return out
 
 
 @frappe.whitelist()
