@@ -101,10 +101,12 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		self.assertTrue(mps.sales_orders and mps.material_requests)
 
 		mps.fetch_sales_orders(customer="_Test Customer With No Orders")
+		mps.reload()
+		self.assertEqual(mps.sales_orders, [])
+
 		mps.fetch_materials_requests(from_date=add_days(today(), 30))
 		mps.reload()
-
-		self.assertEqual((mps.sales_orders, mps.material_requests), ([], []))
+		self.assertEqual(mps.material_requests, [])
 
 	def test_demand_rows_keep_their_warehouse(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
