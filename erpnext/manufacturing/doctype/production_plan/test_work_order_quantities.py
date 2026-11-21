@@ -333,8 +333,9 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 			work_order.submit()
 			work_orders.append(work_order)
 
-		self.manufacture_with_loss(work_orders[0], loss_qty=0)
-		self.manufacture_with_loss(work_orders[1], loss_qty=10)
+		# version-16-hotfix defaults a zero loss to the BOM's 10%, so lose 1 here and 9 on the other
+		self.manufacture_with_loss(work_orders[0], loss_qty=1)
+		self.manufacture_with_loss(work_orders[1], loss_qty=9)
 		self.assert_pending_qty(plan, field, 0)
 
 	def test_whole_number_replacement_rounds_up(self):
