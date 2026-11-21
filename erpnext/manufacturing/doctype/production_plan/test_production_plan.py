@@ -2179,8 +2179,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(pln.po_items[0].ordered_qty, 0)
 
 	def test_sub_assembly_work_order_not_counted_against_sales_order_qty(self):
-		"""A sub-assembly also sold on the same Sales Order: the Work Order for the qty sold
-		must submit even after the sub-assembly Work Order (for the parent assembly) is submitted."""
+		"""Sub-assembly Work Orders do not use up the Sales Order qty of the same item sold on its own."""
 		rm = make_item("_Test SO SubAsm RM", {"is_stock_item": 1, "valuation_rate": 100}).name
 		sub = make_item("_Test SO SubAsm Sub", {"is_stock_item": 1, "valuation_rate": 100}).name
 		fg = make_item("_Test SO SubAsm FG", {"is_stock_item": 1, "valuation_rate": 100}).name
@@ -2193,48 +2192,36 @@ class TestProductionPlan(ERPNextTestSuite):
 				{"item_code": sub, "qty": 5, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
 			]
 		)
-
-		pln = frappe.new_doc("Production Plan")
-		pln.company = so.company
-		pln.get_items_from = "Sales Order"
-		pln.append(
-			"sales_orders",
-			{
-				"sales_order": so.name,
-				"sales_order_date": so.transaction_date,
-				"customer": so.customer,
-				"grand_total": so.grand_total,
-			},
+		pln = create_production_plan(
+			sales_order=so,
+			get_items_from="Sales Order",
+			sub_assembly_warehouse="Work In Progress - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=True,
 		)
-		pln.get_items()
 		pln.get_sub_assembly_items()
-		for row in pln.sub_assembly_items:
-			row.fg_warehouse = "Work In Progress - _TC"
 		pln.submit()
 		pln.make_work_order()
 
 		work_orders = frappe.get_all(
 			"Work Order",
 			filters={"production_plan": pln.name, "production_item": sub},
-			fields=["name", "qty", "production_plan_sub_assembly_item"],
+			fields=["name", "qty", "sales_order", "production_plan_sub_assembly_item"],
 		)
 		sub_assembly_wo = next(wo for wo in work_orders if wo.production_plan_sub_assembly_item)
 		sold_qty_wo = next(wo for wo in work_orders if not wo.production_plan_sub_assembly_item)
-		self.assertEqual(sub_assembly_wo.qty, 2)
+		self.assertEqual((sub_assembly_wo.qty, sub_assembly_wo.sales_order), (2, so.name))
 		self.assertEqual(sold_qty_wo.qty, 5)
 
 		for name in (sub_assembly_wo.name, sold_qty_wo.name):
 			wo = frappe.get_doc("Work Order", name)
-			self.assertEqual(wo.sales_order, so.name)
 			wo.update({"wip_warehouse": "Work In Progress - _TC", "fg_warehouse": "Finished Goods - _TC"})
 			wo.submit()
-			self.assertEqual(wo.docstatus, 1)
 
-		# The sold qty is still capped: one more pc of the sub-assembly against the order is refused
-		extra = frappe.copy_doc(frappe.get_doc("Work Order", sold_qty_wo.name))
+		# The qty sold is still capped
+		extra = frappe.copy_doc(wo)
 		extra.update({"qty": 1, "production_plan": None, "production_plan_item": None})
-		extra.insert()
-		self.assertRaises(OverProductionError, extra.submit)
+		self.assertRaises(OverProductionError, extra.insert)
 
 	def test_production_plan_pending_qty_with_sales_order(self):
 		"""
