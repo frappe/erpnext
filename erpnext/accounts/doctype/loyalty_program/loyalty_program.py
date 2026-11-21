@@ -205,7 +205,10 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 
 		loyalty_amount = flt(points_to_redeem * loyalty_program_details.conversion_factor)
 
-		total_amount = ref_doc.grand_total if ref_doc.is_rounded_total_disabled() else ref_doc.rounded_total
+		# loyalty_amount is in company currency
+		total_amount = (
+			ref_doc.base_grand_total if ref_doc.is_rounded_total_disabled() else ref_doc.base_rounded_total
+		)
 		if loyalty_amount > total_amount:
 			frappe.throw(_("You can't redeem Loyalty Points having more value than the Total Amount."))
 
