@@ -72,6 +72,10 @@ class SubcontractingInwardOrder(SubcontractingController):
 			frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty"),
 		)
 
+	def before_validate(self):
+		super().before_validate()
+		self.set_subcontracting_conversion_factor()
+
 	def validate(self):
 		super().validate()
 		check_on_hold_or_closed_status("Sales Order", self.sales_order)
@@ -154,6 +158,21 @@ class SubcontractingInwardOrder(SubcontractingController):
 				else (doc.subcontracted_qty - service_item.qty)
 			)
 			doc.save()
+
+	def set_subcontracting_conversion_factor(self):
+		so_items = frappe.get_all(
+			"Sales Order Item",
+			filters={"parent": self.sales_order},
+			fields=["name", "stock_qty", "fg_item_qty"],
+		)
+		conversion_factors = {
+			d.name: flt(d.stock_qty) / flt(d.fg_item_qty)
+			for d in so_items
+			if flt(d.stock_qty) and flt(d.fg_item_qty)
+		}
+		for item in self.items:
+			if item.sales_order_item in conversion_factors:
+				item.subcontracting_conversion_factor = conversion_factors[item.sales_order_item]
 
 	def validate_customer_warehouse(self):
 		if frappe.get_cached_value("Warehouse", self.customer_warehouse, "customer") != self.customer:
