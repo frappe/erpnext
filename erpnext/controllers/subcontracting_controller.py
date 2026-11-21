@@ -532,12 +532,7 @@ class SubcontractingController(StockController):
 
 	def validate_items(self):
 		if self.doctype != "Subcontracting Receipt":
-			order_item_doctype = (
-				"Purchase Order Item" if self.doctype == "Subcontracting Order" else "Sales Order Item"
-			)
-			order_name = self.purchase_order if self.doctype == "Subcontracting Order" else self.sales_order
-			order_item_field = frappe.scrub(order_item_doctype)
-			pending_qty_by_row = get_pending_subcontracted_quantity(order_item_doctype, order_name)
+			pending_qty_by_row = get_pending_subcontracted_quantity(self.purchase_order)
 
 		for item in self.items:
 			is_stock_item, is_sub_contracted_item = frappe.get_value(
@@ -553,7 +548,6 @@ class SubcontractingController(StockController):
 						_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
 					)
 
-<<<<<<< HEAD
 				if (
 					self.doctype == "Subcontracting Order" and not item.subcontracting_conversion_factor
 				):  # this condition will only be true if user has recently updated from develop branch
@@ -565,8 +559,7 @@ class SubcontractingController(StockController):
 					item.subcontracting_conversion_factor = service_item_qty / item.qty
 
 				if self.doctype not in "Subcontracting Receipt" and item.qty > flt(
-					get_pending_subcontracted_quantity(self.purchase_order).get(item.purchase_order_item)
-					/ item.subcontracting_conversion_factor,
+					pending_qty_by_row.get(item.purchase_order_item) / item.subcontracting_conversion_factor,
 					frappe.get_precision("Purchase Order Item", "qty"),
 				):
 					frappe.throw(
@@ -575,34 +568,6 @@ class SubcontractingController(StockController):
 						).format(item.idx, item.item_name)
 					)
 				item.amount = item.qty * item.rate
-=======
-				if self.doctype != "Subcontracting Receipt":
-					if not item.get(order_item_field):
-						frappe.throw(
-							_("Row {0}: Item {1} must be linked to a {2}.").format(
-								item.idx, item.item_name, order_item_doctype
-							)
-						)
-
-					pending_qty = flt(
-						flt(pending_qty_by_row.get(item.get(order_item_field)))
-						/ item.subcontracting_conversion_factor,
-						frappe.get_precision(
-							order_item_doctype,
-							"qty",
-						),
-					)
-
-					if item.qty > pending_qty:
-						frappe.throw(
-							_(
-								"Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
-							).format(item.idx, item.item_name)
-						)
-
-				if self.doctype not in ["Subcontracting Inward Order", "Subcontracting Receipt"]:
-					item.amount = item.qty * item.rate
->>>>>>> 04b8143 (fix(subcontracting): read the order's pending qty once in validate_items)
 
 				if item.bom:
 					is_active, bom_item, docstatus = frappe.get_value(
