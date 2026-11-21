@@ -1652,6 +1652,98 @@ class TestProductionPlan(ERPNextTestSuite):
 		# 7 in Stores covers the 5 needed
 		self.assertFalse(items)
 
+	def test_no_transfer_from_receiving_warehouse_to_itself(self):
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "Stores - _TC"}],
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2, currency="INR")
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=7, rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "Stores - _TC"}], get_parent_warehouse_data=True
+		)
+
+		# 7 of the 20 needed is already in Stores, so only 13 is bought
+		self.assertEqual(
+			[(d["material_request_type"], d.get("from_warehouse"), d["quantity"]) for d in items],
+			[("Purchase", None, 13)],
+		)
+
+	def test_receiving_warehouse_does_not_crowd_out_transfer_stock(self):
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "Stores - _TC"}],
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2, currency="INR")
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=7, rate=100)
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=20, rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		items = get_items_for_material_requests(
+			plan.as_dict(),
+			warehouses=[{"warehouse": "Stores - _TC"}, {"warehouse": "_Test Warehouse - _TC"}],
+			get_parent_warehouse_data=True,
+		)
+
+		# Stores is listed first, but the 13 short is all transferred from _Test Warehouse
+		self.assertEqual(
+			[(d["material_request_type"], d.get("from_warehouse"), d["quantity"]) for d in items],
+			[("Material Transfer", "_Test Warehouse - _TC", 13)],
+		)
+
+	def test_selected_item_group_warehouse_counts_as_available(self):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test PP Receiving Group",
+				"parent_item_group": "All Item Groups",
+				"item_group_defaults": [{"company": "_Test Company", "default_warehouse": "Stores - _TC"}],
+			}
+		).insert()
+		rm_item = make_item(properties={"is_stock_item": 1, "item_group": item_group.name}).name
+		# no item default, so the item group's Stores receives the material
+		frappe.db.delete("Item Default", {"parent": rm_item})
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2, currency="INR")
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=7, rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "Stores - _TC"}], get_parent_warehouse_data=True
+		)
+
+		# 7 of the 20 needed is already in Stores, so only 13 is bought
+		self.assertEqual(
+			[(d["material_request_type"], d["warehouse"], d["quantity"]) for d in items],
+			[("Purchase", "Stores - _TC", 13)],
+		)
+
 	def test_requested_sub_assembly_components_are_not_requested(self):
 		for item in (
 			"_Test PP Bought SA RM",
