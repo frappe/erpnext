@@ -947,6 +947,7 @@ class SubcontractingInwardController:
 		if data := data.run(as_dict=True):
 			# a warehouse with its own extra row is never the BOM row's
 			used_item_wh = [(d.rm_item_code, d.warehouse) for d in data if d.warehouse]
+			precision = frappe.get_precision("Subcontracting Inward Order Received Item", "consumed_qty")
 			doc_updates = {}
 			for d in data:
 				keys = [(d.rm_item_code, d.warehouse)]
@@ -961,7 +962,7 @@ class SubcontractingInwardController:
 						keys = keys[:1]
 					used_item_wh.extend(keys)
 
-				qty = d.consumed_qty + sum(item_code_wh[key] for key in keys)
+				qty = flt(d.consumed_qty + sum(item_code_wh[key] for key in keys), precision)
 				if qty or d.is_customer_provided_item or not d.is_additional_item:
 					doc_updates[d.name] = {"consumed_qty": qty}
 				else:
