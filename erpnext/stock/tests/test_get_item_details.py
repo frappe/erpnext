@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.stock.get_item_details import (
 	get_batch_qty,
@@ -806,7 +806,12 @@ class TestGetItemDetail(ERPNextTestSuite):
 				**fields,
 			}
 		)
-		doc = {"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": items or []}
+		doc = {
+			"doctype": "Delivery Note",
+			"posting_date": today(),
+			"selling_price_list": "_Test Price List",
+			"items": items or [],
+		}
 		return get_item_details(ctx, doc=doc)
 
 	def get_picked_batch_no(self, item_code, qty, items=None):
@@ -1061,6 +1066,32 @@ class TestGetItemDetail(ERPNextTestSuite):
 			self.assertEqual(self.get_picked_batch_no(item_code, 5, items=box_row), batches[0])
 			self.assertIsNone(self.get_picked_batch_no(item_code, 6, items=box_row))
 
+	def test_auto_picked_batch_price_respects_validity_and_customer(self):
+		item_code, batches = self.make_batched_item_with_stock([10])
+
+		def add_batch_price(rate, **fields):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": "_Test Price List",
+					"batch_no": batches[0],
+					"price_list_rate": rate,
+					**fields,
+				}
+			).insert()
+
+		def get_price_list_rate():
+			return self.get_item_details_for_row(item_code, 2, customer="_Test Customer").price_list_rate
+
+		add_batch_price(99, valid_from=add_days(today(), -30), valid_upto=add_days(today(), -1))
+		add_batch_price(98, customer="_Test Customer 1")
+
+		with self.change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}):
+			self.assertFalse(get_price_list_rate())
+			add_batch_price(97, customer="_Test Customer")
+			self.assertEqual(get_price_list_rate(), 97)
+
 	def test_price_not_uom_dependent_is_applied_to_item_rows(self):
 		"""An Item Price saved for the stock UOM is scaled to the row UOM unless the Price List
 		is marked Price Not UOM Dependent."""
@@ -1234,3 +1265,53 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		with as_user(make_fenced_user("_test_tax_info_sales@example.com", ["Sales User"])):
 			self.assertEqual(get_item_tax_info(**kwargs), expected)
+
+	def test_batch_and_serial_item_details_without_doc(self):
+		"""``doc`` is optional, so a Delivery Note row of a batch or serial item works without it."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		warehouse = "_Test Warehouse - _TC"
+		batch_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TGID-B-.#####",
+			}
+		).name
+		serial_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TGID-S-.#####"}
+		).name
+		for item_code in (batch_item, serial_item):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=10)
+
+		ctx = {
+			"company": "_Test Company",
+			"doctype": "Delivery Note",
+			"customer": "_Test Customer",
+			"qty": 2,
+			"warehouse": warehouse,
+			"use_serial_batch_fields": 1,
+			"currency": "INR",
+			"price_list": "Standard Selling",
+			"price_list_currency": "INR",
+			"plc_conversion_rate": 1,
+			"conversion_rate": 1,
+			"transaction_date": today(),
+		}
+
+		batch_no = frappe.db.get_value("Batch", {"item": batch_item})
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": batch_item,
+				"price_list": "Standard Selling",
+				"batch_no": batch_no,
+				"price_list_rate": 99,
+			}
+		).insert()
+
+		details = get_item_details(dict(ctx, item_code=batch_item))
+		self.assertEqual((details.batch_no, details.price_list_rate), (batch_no, 99))
+		self.assertEqual(len(get_item_details(dict(ctx, item_code=serial_item)).serial_no.split("\n")), 2)
