@@ -739,12 +739,19 @@ class Item(Document):
 			)
 
 		frappe.db.set_value("Item", new_name, "item_code", new_name)
+		self.rename_lead_time(new_name)
 
 		if merge:
 			self.set_last_purchase_rate(new_name)
 			self.recalculate_bin_qty(new_name)
 
 		queue_item(new_name, drop=old_name)
+
+	def rename_lead_time(self, new_name):
+		"""Keep Item Lead Time named after its item."""
+		lead_time = frappe.db.get_value("Item Lead Time", {"item_code": new_name})
+		if lead_time and lead_time != new_name:
+			frappe.rename_doc("Item Lead Time", lead_time, new_name, show_alert=False)
 
 	def delete_old_bins(self, old_name, new_name=None):
 		if not new_name:
