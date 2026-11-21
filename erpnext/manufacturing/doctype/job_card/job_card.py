@@ -689,13 +689,6 @@ class JobCard(Document):
 		if self.is_new() or not self.items or not self.has_value_changed("for_quantity"):
 			return
 
-<<<<<<< HEAD
-		if any(flt(row.transferred_qty) for row in self.items):
-			return
-
-		self.items = []
-=======
->>>>>>> 25e2944 (fix(manufacturing): rescale Job Card items in place when For Quantity changes)
 		self.set_required_items()
 
 	@frappe.whitelist()
@@ -713,32 +706,10 @@ class JobCard(Document):
 		other_job_cards_qty = self.get_other_job_cards_qty()
 		unmatched_rows = list(self.items)
 		for d in doc.required_items:
-<<<<<<< HEAD
-			if not d.operation:
-				frappe.throw(
-					_("Row {0} : Operation is required against the raw material item {1}").format(
-						d.idx, d.item_code
-					)
-				)
-
-			if self.get("operation") == d.operation or self.is_corrective_job_card:
-				self.append(
-					"items",
-					{
-						"item_code": d.item_code,
-						"source_warehouse": d.source_warehouse,
-						"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
-						"item_name": d.item_name,
-						"description": d.description,
-						"required_qty": self.get_required_qty(d, doc.qty, other_job_cards_qty),
-					},
-				)
-=======
-			self.set_required_item(doc, d, operation_qty, other_job_cards_qty, unmatched_rows)
->>>>>>> 25e2944 (fix(manufacturing): rescale Job Card items in place when For Quantity changes)
+			self.set_required_item(doc, d, other_job_cards_qty, unmatched_rows)
 
 		for row in unmatched_rows:
-			if not (flt(row.transferred_qty) or flt(row.consumed_qty)):
+			if not flt(row.transferred_qty):
 				self.remove(row)
 
 	def get_other_job_cards_qty(self) -> frappe._dict:
@@ -763,23 +734,18 @@ class JobCard(Document):
 		)
 		return frappe._dict(for_quantity=flt(for_quantity.run()[0][0]), required_qty=dict(required_qty.run()))
 
-<<<<<<< HEAD
-=======
-	def set_required_item(self, doc, d, operation_qty, other_job_cards_qty, unmatched_rows):
-		if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
+	def set_required_item(self, doc, d, other_job_cards_qty, unmatched_rows):
+		if not d.operation:
 			frappe.throw(
 				_("Row {0} : Operation is required against the raw material item {1}").format(
 					d.idx, d.item_code
 				)
 			)
 
-		if d.operation_row_id and self.operation_row_id:
-			if self.operation_row_id != d.operation_row_id:
-				return
-		elif self.get("operation") != d.operation:
+		if self.get("operation") != d.operation and not self.is_corrective_job_card:
 			return
 
-		required_qty = self.get_required_qty(d, operation_qty or doc.qty, other_job_cards_qty)
+		required_qty = self.get_required_qty(d, doc.qty, other_job_cards_qty)
 		if row := next((row for row in unmatched_rows if row.item_code == d.item_code), None):
 			unmatched_rows.remove(row)
 			row.required_qty = max(required_qty, flt(row.transferred_qty))
@@ -789,7 +755,7 @@ class JobCard(Document):
 			"items",
 			{
 				"item_code": d.item_code,
-				"source_warehouse": self.source_warehouse or d.source_warehouse,
+				"source_warehouse": d.source_warehouse,
 				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 				"item_name": d.item_name,
 				"description": d.description,
@@ -797,7 +763,6 @@ class JobCard(Document):
 			},
 		)
 
->>>>>>> 25e2944 (fix(manufacturing): rescale Job Card items in place when For Quantity changes)
 	def get_required_qty(self, d, operation_qty, other_job_cards_qty) -> float:
 		"""This job card's share of the work order item: the rounded qty up to the operation's
 		running For Quantity, less what the other job cards of the operation hold."""

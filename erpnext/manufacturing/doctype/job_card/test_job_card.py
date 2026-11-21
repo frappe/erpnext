@@ -2238,10 +2238,7 @@ class TestJobCard(FrappeTestCase):
 
 		self.assertEqual(job_card.items[0].required_qty, 6)
 
-<<<<<<< HEAD
-	@change_settings(
-=======
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_for_quantity_raised_after_transfer_keeps_transferred_items(self):
 		job_card = make_jc_review_transferred_job_card()
 		item_row = job_card.items[0].name
@@ -2255,14 +2252,14 @@ class TestJobCard(FrappeTestCase):
 		job_card.append("time_logs", jc_review_log("2031-03-09 00:00:00", 60, 4))
 		job_card.submit()
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_for_quantity_lowered_after_transfer_keeps_transferred_requirement(self):
 		job_card = make_jc_review_transferred_job_card()
 		job_card.for_quantity = 1
 		job_card.save()
 		self.assertEqual(job_card.items[0].required_qty, 4)
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_for_quantity_change_drops_untransferred_rows_the_operation_does_not_need(self):
 		job_card = make_jc_review_transferred_job_card()
 		item_row = job_card.items[0].name
@@ -2272,8 +2269,7 @@ class TestJobCard(FrappeTestCase):
 
 		self.assertEqual([row.name for row in job_card.items], [item_row])
 
-	@ERPNextTestSuite.change_settings(
->>>>>>> 7a63b77 (test: For Quantity raised after a transfer keeps the transferred Job Card items)
+	@change_settings(
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 1, "overproduction_percentage_for_work_order": 100},
 	)
