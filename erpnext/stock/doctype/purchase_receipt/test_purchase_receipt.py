@@ -7867,7 +7867,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-TWOB-.####"},
 		)
 		for _ in range(2):
-			make_purchase_receipt(item_code=item.name, company=company, warehouse=source, qty=3, rate=100)
+			make_purchase_receipt(
+				item_code=item.name,
+				company=company,
+				warehouse=source,
+				qty=3,
+				rate=100,
+				posting_date=add_days(today(), -3),
+			)
 
 		dn = create_delivery_note(
 			item_code=item.name,
@@ -7879,6 +7886,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			rate=100,
 			warehouse=source,
 			target_warehouse=create_warehouse("_Test Transfer Transit", company=company),
+			posting_date=add_days(today(), -2),
 		)
 
 		def make_receipt(qty, rejected_qty=0):
@@ -7911,8 +7919,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.save()
 		self.assertEqual(get_package_qty(pr, "rejected_serial_and_batch_bundle"), 3)
 
-		# accepted and rejected material do not take the same batch twice
-		make_receipt(3, rejected_qty=2).submit()
+		# accepted and rejected material, and a later receipt, do not take the same batch twice
+		make_receipt(3, rejected_qty=1).submit()
+		make_receipt(1).submit()
 
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
