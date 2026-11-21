@@ -2972,6 +2972,26 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertFalse(make_plan_from_sales_orders(sales_orders, combine_items=1).po_items)
 
+	def test_sub_assembly_work_order_of_combined_plan_submits(self):
+		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
+		sub_item = make_item("_Test PP Combined Sub SA", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test PP Combined Sub FG", {"is_stock_item": 1}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], currency="INR")
+		sales_orders = [make_sales_order(item_code=fg_item, qty=5) for _ in range(2)]
+
+		plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+		plan.sub_assembly_warehouse = "_Test Warehouse - _TC"
+		plan.get_sub_assembly_items()
+		plan.submit()
+		plan.make_work_order()
+
+		work_order = frappe.get_doc(
+			"Work Order", {"production_plan": plan.name, "production_item": sub_item, "docstatus": 0}
+		)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.submit()
+
 	def test_planned_qty_of_bundle_component_on_two_rows(self):
 		rm_item = make_item("_Test PP Bundle Twice RM", {"is_stock_item": 1}).name
 		component = make_item("_Test PP Bundle Twice A", {"is_stock_item": 1}).name
