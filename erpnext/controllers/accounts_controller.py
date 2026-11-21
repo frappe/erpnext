@@ -227,7 +227,7 @@ class AccountsController(TransactionBase):
 				).format(
 					against_voucher_outstanding,
 					get_link_to_form(self.doctype, self.get("return_against")),
-					flt(abs(self.outstanding_amount)),
+					abs(flt(self.rounded_total) or flt(self.grand_total)),
 				)
 
 			if msg:
@@ -308,7 +308,6 @@ class AccountsController(TransactionBase):
 		InternalTransferService(self).validate()
 		self.set_incoming_rate()
 		self.init_internal_values()
-		self.validate_against_voucher_outstanding()
 
 		# Need to set taxes based on taxes_and_charges template
 		# before calculating taxes and totals
@@ -323,6 +322,12 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
+
+			update_outstanding_for_self = self.get("update_outstanding_for_self")
+			self.validate_against_voucher_outstanding()
+			if self.get("update_outstanding_for_self") != update_outstanding_for_self:
+				# the outstanding is skipped while the flag is off, so calculate it again
+				self.calculate_taxes_and_totals()
 
 			if not self.meta.get_field("is_return") or not self.is_return:
 				if not self.is_negative_grand_total_allowed():
