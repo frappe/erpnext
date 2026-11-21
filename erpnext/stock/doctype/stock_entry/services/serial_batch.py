@@ -9,6 +9,8 @@ from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	add_picked_batches,
+	get_batch_nos,
+	get_serial_batch_list_from_item,
 	get_serial_or_batch_items,
 )
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -89,8 +91,14 @@ class StockEntrySABB(BaseStockEntry):
 
 		return None
 
-	def get_serial_nos_and_batches_from_sres(self, scio_detail, only_pending=True):
+	def get_serial_nos_and_batches_from_sres(
+		self, scio_detail, qty, only_pending=True, taken=None, batch_no=None
+	):
+		"""Serial nos and batch qty reserved for scio_detail (in batch_no if given), taken in order up to qty, skipping what other rows `taken`."""
 		serial_nos, batch_nos = [], frappe._dict()
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		taken_serial_nos = taken.serial_nos if taken else set()
+		taken_batch_qty = defaultdict(float, taken.batches if taken else {})
 
 		table = frappe.qb.DocType("Stock Reservation Entry")
 		child_table = frappe.qb.DocType("Serial and Batch Entry")
@@ -107,42 +115,76 @@ class StockEntrySABB(BaseStockEntry):
 		else:
 			query = query.where(child_table.delivered_qty > 0)
 
+		if batch_no:
+			query = query.where(child_table.batch_no == batch_no)
+
 		for d in query.run(as_dict=True):
-			if d.serial_no and d.serial_no not in serial_nos:
+			if flt(qty, precision) <= 0:
+				break
+			if d.serial_no in serial_nos or d.serial_no in taken_serial_nos:
+				continue
+
+			available = d.qty - d.delivered_qty if only_pending else d.delivered_qty
+			if d.batch_no and not d.serial_no:
+				used = min(available, taken_batch_qty[d.batch_no])
+				taken_batch_qty[d.batch_no] -= used
+				available -= used
+			if flt(available, precision) <= 0:
+				continue
+
+			entry_qty = min(available, qty)
+			qty -= entry_qty
+			if d.serial_no:
 				serial_nos.append(d.serial_no)
 			if d.batch_no:
-				qty = d.qty - d.delivered_qty if only_pending else d.qty
-				batch_nos[d.batch_no] = batch_nos.get(d.batch_no, 0) + qty
+				batch_nos[d.batch_no] = batch_nos.get(d.batch_no, 0) + entry_qty
 
 		return serial_nos, batch_nos
 
 	def get_serial_batch_fields_for_subcontracting_inward(self):
 		serial_nos, batch_nos = frappe._dict(), frappe._dict()
-		for row in self.doc.items:
-			if self.doc.purpose in [
-				"Return Raw Material to Customer",
-				"Subcontracting Delivery",
-				"Subcontracting Return",
-			]:
-				if not row.serial_and_batch_bundle:
-					serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
-						row.scio_detail, only_pending=self.doc.purpose != "Subcontracting Return"
-					)
+		if self.doc.purpose not in [
+			"Return Raw Material to Customer",
+			"Subcontracting Delivery",
+			"Subcontracting Return",
+		]:
+			return serial_nos, batch_nos
 
-					if len(batch_nos_list) > 1:
-						row.use_serial_batch_fields = 0
+		taken = self.get_serial_batch_set_on_rows()
+		# rows with a batch entered pick first, so other rows do not take that batch's serial nos
+		for row in sorted(self.doc.items, key=lambda row: not get_entered_batch(row)):
+			if not has_serial_batch_set(row):
+				serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
+					row.scio_detail,
+					row.transfer_qty,
+					only_pending=self.doc.purpose != "Subcontracting Return",
+					taken=taken[row.scio_detail],
+					batch_no=get_entered_batch(row),
+				)
+				add_taken(taken[row.scio_detail], serial_nos_list, batch_nos_list)
 
-					if row.use_serial_batch_fields:
-						if serial_nos_list and not row.serial_no:
-							row.serial_no = "\n".join(
-								SerialBatchIdentity("Serial No").get_numbers(row.item_code, serial_nos_list)
-							)
-						if batch_nos_list and not row.batch_no:
-							row.batch_no = next(iter(batch_nos_list.keys()))
+				if len(batch_nos_list) > 1:
+					row.use_serial_batch_fields = 0
 
-					serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
+				if row.use_serial_batch_fields:
+					if serial_nos_list and not row.serial_no:
+						row.serial_no = "\n".join(
+							SerialBatchIdentity("Serial No").get_numbers(row.item_code, serial_nos_list)
+						)
+					if batch_nos_list and not row.batch_no:
+						row.batch_no = next(iter(batch_nos_list.keys()))
+
+				serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
 
 		return serial_nos, batch_nos
+
+	def get_serial_batch_set_on_rows(self):
+		"""Serial nos and batch qty that rows already have from a bundle or by hand, by inward order row."""
+		taken = defaultdict(lambda: frappe._dict(serial_nos=set(), batches=defaultdict(float)))
+		for row in self.doc.items:
+			if has_serial_batch_set(row):
+				add_taken(taken[row.scio_detail], *get_serial_nos_and_batch_qty(row))
+		return taken
 
 	def get_available_reserved_materials(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -263,6 +305,37 @@ class StockEntrySABB(BaseStockEntry):
 			row.idx = idx
 
 		self.doc.set("items", sorted_items)
+
+
+def has_serial_batch_set(row):
+	"""A bundle, serial nos, or a batch of an item without serial nos."""
+	if row.serial_and_batch_bundle:
+		return True
+	if not row.use_serial_batch_fields:
+		return False
+	return bool(
+		row.serial_no
+		or (row.batch_no and not frappe.get_cached_value("Item", row.item_code, "has_serial_no"))
+	)
+
+
+def get_entered_batch(row):
+	return row.batch_no if row.use_serial_batch_fields else None
+
+
+def get_serial_nos_and_batch_qty(row):
+	serial_nos, batches = get_serial_batch_list_from_item(row)
+	if row.serial_and_batch_bundle:
+		return serial_nos, {
+			batch_no: abs(d.qty) for batch_no, d in get_batch_nos(row.serial_and_batch_bundle).items()
+		}
+	return serial_nos, {batches[0]: row.transfer_qty} if batches else {}
+
+
+def add_taken(taken, serial_nos, batch_qty):
+	taken.serial_nos.update(serial_nos)
+	for batch_no, qty in batch_qty.items():
+		taken.batches[batch_no] += qty
 
 
 def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=None):
