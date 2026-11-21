@@ -827,7 +827,8 @@
    "label": "Purchase Invoice Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "depends_on": "eval: doc.uom != doc.stock_uom",
@@ -845,7 +846,8 @@
    "label": "Sales Invoice Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "collapsible": 1,
@@ -1045,7 +1047,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-15 18:00:00.000000",
+ "modified": "2026-11-15 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
