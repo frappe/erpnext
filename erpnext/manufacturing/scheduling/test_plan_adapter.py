@@ -432,6 +432,32 @@ class TestPlanAdapter(ERPNextTestSuite):
 		booked = loaders.get_booked_load([self.workstation], start_date)[self.workstation]
 		self.assertEqual(len(booked), remaining_rows + entry_count)
 
+	def test_batch_based_operation_is_scheduled_per_batch(self):
+		operation = "Test PPS Op Batch 10"
+		if not frappe.db.exists("Operation", operation):
+			make_operation(operation=operation, workstation=self.workstation)
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+
+		item = "Test PPS FG Batch 10"
+		create_item(item, valuation_rate=100)
+		self.make_bom_with_operation(
+			item, ["Test PPS RM"], time_in_mins=60, operations=[operation], batch_size=10
+		)
+		bom_no = frappe.db.get_value("BOM", {"item": item, "docstatus": 1})
+
+		# 10 units are one batch of 60 minutes, as the Work Order plans it
+		tasks, _terminal_keys = loaders.build_bom_operation_tasks(bom_no, 10, "batch")
+		self.assertEqual(tasks[0].duration_mins, 60)
+
+	def test_operation_duration_drops_float_noise(self):
+		row = frappe._dict(operation=self.operation, time_in_mins=60, fixed_time=0, batch_size=0)
+		# 60 / 29 * 232 is 480.00000000000006 in floats
+		self.assertEqual(loaders.get_operation_duration(row, 232, 29, {}), 480)
+
+		# 1 unit of a 1 minute batch of 10,000 stays schedulable
+		row.update(time_in_mins=1, batch_size=10000)
+		self.assertEqual(loaders.get_operation_duration(row, 1, 1, {self.operation: 1}), 0.0001)
+
 	def test_manual_schedule_entry_creation_is_blocked(self):
 		plan = self.make_plan()
 		entry = frappe.get_doc(
