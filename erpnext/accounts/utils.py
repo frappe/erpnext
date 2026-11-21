@@ -1264,6 +1264,11 @@ def repost_advance_payment_ledger(doc):
 
 @frappe.whitelist()
 def get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
+	frappe.has_permission("Company", "read", doc=company, throw=True)
+	return _get_company_default(company, fieldname, ignore_validation)
+
+
+def _get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
 	value = frappe.get_cached_value("Company", company, fieldname)
 
 	if not ignore_validation and not value:
@@ -1807,6 +1812,9 @@ def repost_gle_for_stock_vouchers(
 		for voucher_type, voucher_no in stock_vouchers_chunk:
 			existing_gle = gle.get((voucher_type, voucher_no), [])
 			voucher_obj = frappe.get_lazy_doc(voucher_type, voucher_no)
+			if voucher_obj.docstatus != 1:
+				continue
+
 			# Some transactions post credit as negative debit, this is handled while posting GLE
 			# but while comparing we need to make sure it's flipped so comparisons are accurate
 			inventory_account_map = voucher_obj.get_inventory_account_map()
@@ -1884,12 +1892,16 @@ def sort_stock_vouchers_by_posting_date(
 	return sorted_vouchers
 
 
-def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
+def get_future_stock_vouchers(
+	posting_date, posting_time, for_warehouses=None, for_items=None, company=None, to_datetime=None
+):
 	posting_datetime = get_combine_datetime(posting_date, posting_time)
 
 	SLE = DocType("Stock Ledger Entry")
 
 	conditions = (SLE.posting_datetime >= posting_datetime) & (SLE.is_cancelled == 0)
+	if to_datetime:
+		conditions &= SLE.posting_datetime <= to_datetime
 	if for_items:
 		conditions &= SLE.item_code.isin(for_items)
 	if for_warehouses:

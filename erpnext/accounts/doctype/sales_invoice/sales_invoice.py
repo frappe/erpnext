@@ -308,6 +308,10 @@ class SalesInvoice(SellingController):
 			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 	def validate(self):
+		# Only POS consolidation may mark an invoice as consolidated.
+		if not self.flags.is_consolidated:
+			self.is_consolidated = 0
+
 		self.validate_auto_set_posting_time()
 		super().validate()
 
@@ -383,6 +387,7 @@ class SalesInvoice(SellingController):
 					row.billing_amount = -abs(row.billing_amount)
 
 		self.validate_update_stock_for_pick_list_reference()
+		self.validate_against_pick_list_items()
 		self.set_serial_and_batch_bundle_from_pick_list()
 		self.update_packing_list()
 		TimesheetBillingService(self).set_billing_hours_and_amount()
@@ -1302,7 +1307,7 @@ class SalesInvoice(SellingController):
 
 	def counts_coupon_use(self):
 		# Returns and POS consolidation do not redeem the coupon again.
-		if self.is_return or self.get("is_consolidated"):
+		if self.is_return or (self.doctype == "Sales Invoice" and self.is_consolidated):
 			return False
 
 		if not self.items or any(
@@ -1367,6 +1372,8 @@ def make_regional_gl_entries(gl_entries, doc):
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment: str, company: str) -> dict:
+	frappe.has_permission("Company", "select", company, throw=True)
+	frappe.has_permission("Mode of Payment", "select", mode_of_payment, throw=True)
 	return _get_bank_cash_account(mode_of_payment, company)
 
 

@@ -366,6 +366,8 @@ class TransactionBase(StatusUpdater):
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
 					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
+					"against_blanket_order": item.get("against_blanket_order"),
+					"blanket_order": item.get("blanket_order"),
 				}
 			),
 			self,
@@ -480,6 +482,7 @@ class TransactionBase(StatusUpdater):
 					child = frappe.new_doc(child_doctype, parent_doc=self, parentfield="taxes")
 					child.charge_type = "On Net Total"
 					child.account_head = tax_head
+					child.description = frappe.get_cached_value("Account", tax_head, "account_name")
 					child.rate = 0
 					self.append("taxes", child)
 

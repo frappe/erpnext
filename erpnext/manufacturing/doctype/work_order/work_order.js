@@ -315,11 +315,19 @@ frappe.ui.form.on("Work Order", {
 
 	add_custom_button_to_return_components: function (frm) {
 		if (frm.doc.docstatus === 1 && ["Closed", "Completed"].includes(frm.doc.status)) {
-			let non_consumed_items = frm.doc.required_items.filter((d) => {
-				return flt(d.consumed_qty) < flt(d.transferred_qty - d.returned_qty);
+			// per item, since rows of one item split transfers by warehouse but consumption by required qty
+			let pending_qty_by_item = {};
+			frm.doc.required_items.forEach((d) => {
+				// consumed_qty already includes returned_qty
+				pending_qty_by_item[d.item_code] =
+					flt(pending_qty_by_item[d.item_code]) + flt(d.transferred_qty) - flt(d.consumed_qty);
 			});
 
-			if (non_consumed_items && non_consumed_items.length) {
+			let has_pending_qty = Object.values(pending_qty_by_item).some(
+				(qty) => flt(qty, precision("transferred_qty", frm.doc.required_items[0])) > 0
+			);
+
+			if (has_pending_qty) {
 				frm.add_custom_button(__("Return Components"), function () {
 					frm.trigger("create_stock_return_entry");
 				});
@@ -1050,14 +1058,14 @@ erpnext.work_order = {
 							precision("qty")
 						);
 						if (remaining_qty > 0) {
-							let finish_btn = frm.add_custom_button(__("Finish"), function () {
-								erpnext.work_order.make_se(frm, "Manufacture");
-							});
-
-							if (doc.material_transferred_for_manufacturing >= doc.qty) {
-								// all materials transferred for manufacturing, make this primary
-								finish_btn.addClass("btn-primary");
-							}
+							frm.add_custom_button(
+								__("Finish"),
+								function () {
+									erpnext.work_order.make_se(frm, "Manufacture");
+								},
+								null,
+								doc.material_transferred_for_manufacturing >= doc.qty ? "primary" : "default"
+							);
 						} else if (frm.doc.__onload && frm.doc.__onload.overproduction_percentage) {
 							let allowance_percentage = frm.doc.__onload.overproduction_percentage;
 
@@ -1074,10 +1082,14 @@ erpnext.work_order = {
 					}
 				} else {
 					if (flt(doc.produced_qty) < flt(doc.qty)) {
-						let finish_btn = frm.add_custom_button(__("Finish"), function () {
-							erpnext.work_order.make_se(frm, "Manufacture");
-						});
-						finish_btn.addClass("btn-primary");
+						frm.add_custom_button(
+							__("Finish"),
+							function () {
+								erpnext.work_order.make_se(frm, "Manufacture");
+							},
+							null,
+							"primary"
+						);
 					}
 				}
 			}
@@ -1091,10 +1103,14 @@ erpnext.work_order = {
 			return;
 		}
 
-		const start_btn = frm.add_custom_button(__("Start"), () => {
-			erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
-		});
-		start_btn.addClass("btn-primary");
+		frm.add_custom_button(
+			__("Start"),
+			() => {
+				erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
+			},
+			null,
+			"primary"
+		);
 	},
 
 	setup_stock_reservation(frm) {

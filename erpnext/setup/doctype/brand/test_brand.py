@@ -118,7 +118,7 @@ class TestBrand(ERPNextTestSuite):
 
 		name = "Test Brand Group Collision " + frappe.generate_hash(length=8)
 		frappe.get_doc(
-			{"doctype": "Item Group", "item_group_name": name, "parent_item_group": "_Test Item Group"}
+			{"doctype": "Item Group", "item_group_name": name, "parent_item_group": "All Item Groups"}
 		).insert()
 		frappe.get_doc(
 			{

@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 import datetime
 import json
-from collections import OrderedDict
 from typing import Any
 
 import frappe
@@ -191,7 +190,9 @@ class JobCard(Document):
 		self.set_operation_id()
 		self.reset_required_items()
 		self.set_hour_rate()
-		self.validate_sequence_id()
+		# A draft without time logs or loss can be edited. Start, progress and submit follow the sequence.
+		if self.docstatus == 1 or self.time_logs or flt(self.process_loss_qty):
+			self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
 		if self.sub_operations:
@@ -340,11 +341,8 @@ class JobCard(Document):
 		if self.is_corrective_job_card or not (self.operation_id and self.work_order):
 			return
 
-		wo_qty = self.get_allowed_wo_qty()
-		completed_qty = flt(frappe.db.get_value("Work Order Operation", self.operation_id, "completed_qty"))
-		job_card_qty = self.get_total_job_card_qty()
-
-		if job_card_qty and ((job_card_qty - completed_qty) > wo_qty):
+		precision = self.precision("for_quantity")
+		if flt(self.get_total_job_card_qty(), precision) > flt(self.get_allowed_wo_qty(), precision):
 			self.throw_extra_qty_error()
 
 	def get_allowed_wo_qty(self):
@@ -573,10 +571,10 @@ class JobCard(Document):
 		if not self.has_overlap(self.get_production_capacity(), time_logs):
 			return {}
 
-		if not self.workstation and self.workstation_type and time_logs:
-			if workstation_time := self.get_workstation_based_on_available_slot(time_logs):
-				self.workstation = workstation_time.get("workstation")
-				return workstation_time
+		if not self.workstation and self.workstation_type:
+			if workstation := self.get_free_workstation(time_logs):
+				self.workstation = workstation
+				return {}
 
 		return time_logs[0]
 
@@ -586,9 +584,10 @@ class JobCard(Document):
 		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time", open_job_cards=open_job_cards))
 		return time_logs
 
-	def get_production_capacity(self):
-		if self.workstation:
-			return frappe.get_cached_value("Workstation", self.workstation, "production_capacity") or 1
+	def get_production_capacity(self, workstation=None):
+		workstation = workstation or self.workstation
+		if workstation:
+			return frappe.get_cached_value("Workstation", workstation, "production_capacity") or 1
 		return 1
 
 	def validate_employee_overlap(self, args):
@@ -676,11 +675,13 @@ class JobCard(Document):
 		)
 
 	def apply_workstation_filters(self, query, jc):
-		if self.workstation_type:
-			query = query.where(jc.workstation_type == self.workstation_type)
-
 		if self.workstation:
-			query = query.where(jc.workstation == self.workstation)
+			return query.where(jc.workstation == self.workstation)
+
+		if self.workstation_type:
+			if workstations := get_workstations(self.workstation_type):
+				return query.where(jc.workstation.isin(workstations))
+			return query.where(jc.workstation_type == self.workstation_type)
 
 		return query
 
@@ -721,32 +722,11 @@ class JobCard(Document):
 		jobs = query.run(as_dict=True)
 		return [job.get("name") for job in jobs] if jobs else []
 
-	def get_workstation_based_on_available_slot(self, existing_time_logs) -> dict:
-		workstations = get_workstations(self.workstation_type)
-		if workstations:
-			busy_workstations = self.time_slot_wise_busy_workstations(existing_time_logs)
-			for time_slot in busy_workstations:
-				available_workstations = sorted(list(set(workstations) - set(busy_workstations[time_slot])))
-				if available_workstations:
-					return frappe._dict(
-						{
-							"workstation": available_workstations[0],
-							"planned_start_time": get_datetime(time_slot[0]),
-							"to_time": get_datetime(time_slot[1]),
-						}
-					)
-
-		return frappe._dict({})
-
-	@staticmethod
-	def time_slot_wise_busy_workstations(existing_time_logs) -> dict:
-		time_slot = OrderedDict()
-		for row in existing_time_logs:
-			from_time = get_datetime(row.from_time).strftime("%Y-%m-%d %H:%M")
-			to_time = get_datetime(row.to_time).strftime("%Y-%m-%d %H:%M")
-			time_slot.setdefault((from_time, to_time), []).append(row.workstation)
-
-		return time_slot
+	def get_free_workstation(self, overlapping_time_logs):
+		for workstation in get_workstations(self.workstation_type):
+			time_logs = [row for row in overlapping_time_logs if row.workstation == workstation]
+			if not time_logs or not self.has_overlap(self.get_production_capacity(workstation), time_logs):
+				return workstation
 
 	def schedule_time_logs(self, row):
 		row.remaining_time_in_mins = row.time_in_mins
@@ -819,11 +799,7 @@ class JobCard(Document):
 			return
 
 		if data:
-			if data.get("planned_start_time"):
-				args.planned_start_time = get_datetime(data.planned_start_time)
-			else:
-				args.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
-
+			args.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
 			args.from_time = args.planned_start_time
 			args.to_time = add_to_date(args.planned_start_time, minutes=row.remaining_time_in_mins)
 
@@ -878,11 +854,9 @@ class JobCard(Document):
 	def complete_open_time_logs(self, args, last_row):
 		for row in self.time_logs:
 			if not row.to_time:
-				to_time = get_datetime(args.get("complete_time"))
-				row.db_set(
+				row.update(
 					{
-						"to_time": to_time,
-						"time_in_mins": time_diff_in_minutes(to_time, row.from_time),
+						"to_time": get_datetime(args.get("complete_time")),
 						"operation": args.get("sub_operation"),
 						"completed_qty": (args.get("completed_qty") if last_row.idx == row.idx else 0.0),
 					}
@@ -900,16 +874,9 @@ class JobCard(Document):
 		if employees:
 			for name in employees:
 				new_args.employee = name.get("employee")
-				self.add_start_time_log(new_args)
+				self.append("time_logs", new_args)
 		else:
-			self.add_start_time_log(new_args)
-
-	def add_start_time_log(self, args):
-		if args.from_time and args.to_time:
-			args.time_in_mins = time_diff_in_minutes(args.to_time, args.from_time)
-
-		row = self.append("time_logs", args)
-		row.db_update()
+			self.append("time_logs", new_args)
 
 	def update_sub_operation_status(self):
 		if not self.sub_operations:
@@ -1285,7 +1252,7 @@ class JobCard(Document):
 			self.update_corrective_in_work_order(wo)
 
 		elif self.operation_id:
-			self.validate_produced_quantity(for_quantity, process_loss_qty, pending_qty, wo)
+			self.validate_produced_quantity(for_quantity, process_loss_qty, wo)
 			self.update_work_order_data(for_quantity, process_loss_qty, pending_qty, time_in_mins, wo)
 
 	def get_operation_totals(self):
@@ -1332,24 +1299,29 @@ class JobCard(Document):
 			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):
-		wo.corrective_operation_cost = 0.0
-		for row in frappe.get_all(
-			"Job Card",
-			fields=["total_time_in_mins", "hour_rate"],
-			filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
-		):
-			wo.corrective_operation_cost += flt(row.total_time_in_mins / 60) * flt(row.hour_rate)
+		corrective_operation_cost = sum(
+			flt(row.total_time_in_mins) / 60 * flt(row.hour_rate)
+			for row in frappe.get_all(
+				"Job Card",
+				fields=["total_time_in_mins", "hour_rate"],
+				filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
+			)
+		)
+		wo.corrective_operation_cost = flt(
+			corrective_operation_cost, wo.precision("corrective_operation_cost")
+		)
 
 		wo.calculate_operating_cost()
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.save()
 
-	def validate_produced_quantity(self, for_quantity, process_loss_qty, pending_qty, wo):
+	def validate_produced_quantity(self, for_quantity, process_loss_qty, wo):
 		if self.docstatus < 2:
 			return
 
 		operation = next((row for row in wo.operations if row.name == self.operation_id), {})
-		operation_total = (for_quantity + process_loss_qty + pending_qty) * flt(wo.qty)
+		# pending qty is handed to another card, so it is not done by the remaining cards
+		operation_total = (for_quantity + process_loss_qty) * flt(wo.qty)
 		operation_total = flt(
 			operation_total / get_operation_qty(wo, operation), wo.precision("produced_qty")
 		)
@@ -2469,7 +2441,8 @@ def make_time_log(kwargs: str | dict):
 	doc.validate_docstatus()
 	doc.validate_sequence_id()
 	doc.add_time_log(kwargs)
-	doc.set_status(update_status=True)
+	# save runs the time log validations: overlaps and From/To order
+	doc.save()
 
 
 @frappe.whitelist()

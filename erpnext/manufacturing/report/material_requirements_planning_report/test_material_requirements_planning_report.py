@@ -149,6 +149,36 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		lead_time = get_item_lead_time(item, "Manufacture")
 		self.assertAlmostEqual(lead_time, 7 / 1440 + 2, places=8)
 
+	def test_purchase_lead_time_uses_supplier_and_item_lead_times(self):
+		rm_a = make_item("_Test MRP Supplier Lead RM A", {"is_stock_item": 1, "lead_time_days": 4}).name
+		rm_b = make_item("_Test MRP Supplier Lead RM B", {"is_stock_item": 1, "lead_time_days": 9}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Lead Time",
+				"item_code": rm_a,
+				"supplier_lead_times": [
+					{"supplier": SUPPLIER, "purchase_time": 20, "buffer_time": 1, "is_default": 1}
+				],
+			}
+		).insert()
+
+		self.assertEqual(get_item_lead_time(rm_a, "Purchase"), 21)
+		self.assertEqual(get_item_lead_time(rm_b, "Purchase"), 9)
+
+	def test_purchase_lead_time_uses_ordering_supplier(self):
+		rm = make_item("_Test MRP Ordering Supplier Lead RM", {"is_stock_item": 1}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Lead Time",
+				"item_code": rm,
+				"purchase_time": 3,
+				"supplier_lead_times": [{"supplier": SUPPLIER, "purchase_time": 10, "buffer_time": 1}],
+			}
+		).insert()
+
+		self.assertEqual(get_item_lead_time(rm, "Purchase"), 3)
+		self.assertEqual(get_item_lead_time(rm, "Purchase", supplier=SUPPLIER), 11)
+
 	@freeze_time("2026-09-01 10:00:00.123456")
 	def test_manufacturing_buffer_moves_release_date_earlier(self):
 		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
@@ -894,6 +924,26 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rm_rows = sorted((row.indent, row.required_qty) for row in rows if row.item_code == plan.rm_item)
 		self.assertEqual(rm_rows, [(0, 5), (1, 10)])
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_closed_sales_order_rows_are_not_planned(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		plan = make_mrp_plan(self, rm_qty=1)
+		order = make_sales_order(
+			item_list=[
+				{"item_code": item, "qty": qty, "rate": 100, "warehouse": WAREHOUSE}
+				for item, qty in ((plan.fg_item, 3), (plan.rm_item, 2), (plan.rm_item, 4))
+			]
+		)
+		update_closed_status("Sales Order", order.name, [order.items[0].name, order.items[2].name], 1)
+
+		rows = get_mrp_row_list(frappe.get_doc("Master Production Schedule", plan.mps))
+		demand = {
+			item: sum(row.planned_qty for row in rows if row.item_code == item)
+			for item in (plan.fg_item, plan.rm_item)
+		}
+		self.assertEqual(demand, {plan.fg_item: 10, plan.rm_item: 12})
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
@@ -988,7 +1038,6 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 			],
 		}
 	)
-	# left in draft: on_submit enqueues MRP Log creation in a background job
 	mps.insert()
 
 	_, data, _, _ = execute(

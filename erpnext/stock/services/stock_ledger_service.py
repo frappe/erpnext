@@ -233,6 +233,7 @@ class StockLedgerService:
 				"voucher_no": self.doc.name,
 				"company": self.doc.company,
 				"via_landed_cost_voucher": via_landed_cost_voucher,
+				"skip_unchanged_entries": 1,
 			}
 		)
 
@@ -251,6 +252,7 @@ class StockLedgerService:
 					voucher_type=self.doc.doctype,
 					voucher_no=self.doc.name,
 					via_landed_cost_voucher=via_landed_cost_voucher,
+					skip_unchanged_entries=True,
 				)
 				if force and not repost_entries and self.doc.docstatus == 1:
 					create_accounting_repost_entry(self.doc.doctype, self.doc.name)

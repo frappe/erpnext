@@ -558,6 +558,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 		"account": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
 		"currency": company_currency,
 		"opening_balance": 0.0,
+		"is_total_row": 1,
 	}
 
 	for row in out:

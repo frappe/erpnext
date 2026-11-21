@@ -1102,6 +1102,42 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		frappe.db.set_value("Company", si.company, "round_off_account", "Round Off - _TC")
 
+	def test_early_payment_discount_on_usd_purchase_invoice_from_usd_bank(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			credit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=100,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		pi.payment_terms_template = "Test Discount Template"
+		frappe.db.set_value("Company", pi.company, "default_discount_account", "Write Off - _TC")
+		pi.save()
+		pi.submit()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+		self.assertEqual(pe.deductions[0].amount, -800)
+
+	def test_early_payment_discount_on_usd_sales_order(self):
+		so = make_sales_order(customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_save=1)
+		so.conversion_rate = 80
+		create_payment_terms_template_with_discount()
+		so.payment_terms_template = "Test Discount Template"
+		so.save()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{
@@ -1715,6 +1751,76 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+	def test_reallocation_with_deductions(self):
+		for make_invoice in (create_sales_invoice, make_purchase_invoice):
+			for currency, total, party_amount, deduction, exchange_difference in (
+				("INR", 1000, 950, 50, 0),
+				("INR", 1000, 1050, -50, 0),
+				("USD", 100, 99, 83, 0),
+				("USD", 100, 101, -83, 0),
+				("USD", 100, 100, 0, 50),
+				("USD", 100, 99, 83, 10),
+				("USD", 100, 49, 83, 10),
+			):
+				with self.subTest(
+					invoice=make_invoice.__name__,
+					currency=currency,
+					party_amount=party_amount,
+					deduction=deduction,
+					exchange_difference=exchange_difference,
+				):
+					invoice = make_invoice(qty=1, rate=total, currency=currency, do_not_save=True)
+					if currency == "USD":
+						invoice.conversion_rate = 83
+						if invoice.doctype == "Sales Invoice":
+							invoice.customer = "_Test Customer USD"
+							invoice.debit_to = "_Test Receivable USD - _TC"
+						else:
+							invoice.supplier = "_Test Supplier USD"
+							invoice.credit_to = "_Test Payable USD - _TC"
+					invoice.insert().submit()
+
+					payment = get_payment_entry(
+						invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+					)
+					if payment.payment_type == "Receive":
+						payment.paid_amount = party_amount
+						payment.source_exchange_rate = invoice.conversion_rate
+						payment.received_amount = party_amount * invoice.conversion_rate - exchange_difference
+					else:
+						payment.received_amount = party_amount
+						payment.target_exchange_rate = invoice.conversion_rate
+						payment.paid_amount = party_amount * invoice.conversion_rate + exchange_difference
+					if deduction:
+						payment.append(
+							"deductions",
+							{
+								"account": "_Test Write Off - _TC",
+								"cost_center": "_Test Cost Center - _TC",
+								"amount": deduction * (1 if payment.payment_type == "Receive" else -1),
+							},
+						)
+					payment.set_amounts()
+					expected_allocation = 50 if party_amount == 49 else total
+					for paid_amount_change in (False, True):
+						payment.references[0].allocated_amount = 0
+						payment.allocate_amount_to_references(party_amount, paid_amount_change, True)
+						self.assertEqual(payment.references[0].allocated_amount, expected_allocation)
+						payment.save()
+						self.assertEqual(payment.unallocated_amount, 0)
+						self.assertEqual(payment.difference_amount, 0)
+					payment.submit()
+					self.assertEqual(invoice.reload().outstanding_amount, total - expected_allocation)
+					entries = self.get_gle(payment.name)
+					self.assertEqual(sum(row.debit - row.credit for row in entries), 0)
+					self.assertEqual(
+						sum(row.debit + row.credit for row in entries if row.against_voucher == invoice.name),
+						expected_allocation * invoice.conversion_rate,
+					)
+					payment.cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, total)
+					invoice.cancel()
+
 	def test_payment_entry_exchange_gain_loss(self):
 		si = create_sales_invoice(
 			customer="_Test Customer USD",
@@ -1926,6 +2032,29 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer USD"))
 			self.assertFalse(frappe.has_permission("Journal Entry", "read", journal.name))
 			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
+
+	def test_outstanding_documents_need_payment_entry_and_voucher_read(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		readable_si = create_sales_invoice(qty=1, rate=500)
+		args = {
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"party": "_Test Customer",
+			"party_account": "Debtors - _TC",
+			"get_outstanding_invoices": True,
+			"get_orders_to_be_billed": True,
+		}
+
+		user = make_fenced_user("outstanding-docs@example.com", ["Stock User"])
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer"))
+			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
+
+		make_fenced_user(user, ["Accounts User"], [("Sales Invoice", readable_si.name)])
+		with as_user(user):
+			vouchers = {d.voucher_no for d in get_outstanding_reference_documents(args)}
+			self.assertIn(readable_si.name, vouchers)
+			self.assertNotIn(si.name, vouchers)
 
 	def test_exchange_gain_loss_split_accounts(self):
 		gain_account = create_account(

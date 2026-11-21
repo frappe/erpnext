@@ -5714,6 +5714,43 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual([d.basic_amount for d in entry.items if d.is_finished_item], [500, 500])
 
+	def test_repack_submitted_in_one_call_needs_manual_rates_for_two_finished_goods(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		first_output = make_item(properties={"is_stock_item": 1}).name
+		second_output = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"multiple finished goods",
+			self.make_entry_with_rows,
+			"Repack",
+			stock_entry_row(rm_item, 10, s_warehouse="_Test Warehouse - _TC"),
+			stock_entry_row(first_output, 1, t_warehouse="_Test Warehouse - _TC"),
+			stock_entry_row(second_output, 9, t_warehouse="_Test Warehouse - _TC"),
+			docstatus=1,
+		)
+
+	def test_repack_needs_manual_rates_on_every_row_of_two_finished_goods(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		first_output = make_item(properties={"is_stock_item": 1}).name
+		second_output = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		manual_rate = {"set_basic_rate_manually": 1, "basic_rate": 100}
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=10, basic_rate=100)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"multiple finished goods",
+			self.make_entry_with_rows,
+			"Repack",
+			stock_entry_row(rm_item, 10, s_warehouse=warehouse),
+			stock_entry_row(first_output, 1, t_warehouse=warehouse),
+			stock_entry_row(first_output, 1, t_warehouse=warehouse, **manual_rate),
+			stock_entry_row(second_output, 1, t_warehouse=warehouse),
+			stock_entry_row(second_output, 1, t_warehouse=warehouse, **manual_rate),
+		)
+
 	def test_finished_good_takes_the_share_of_a_co_product_not_made(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
@@ -5878,6 +5915,59 @@ class TestStockEntry(ERPNextTestSuite):
 
 		entry.insert()
 		return entry
+
+	def test_submit_locks_bins_before_validate(self):
+		from unittest.mock import patch
+
+		from frappe.utils import get_datetime
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+		from erpnext.stock.utils import lock_bins
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PTRB-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			do_not_submit=True,
+		)
+
+		calls = []
+		validate = StockEntry.validate
+		lock_time = get_datetime(f"{transfer.posting_date} 23:59:59.123456")
+		with (
+			patch(
+				"erpnext.stock.utils.lock_bins",
+				lambda item_warehouses: calls.append("lock_bins") or lock_bins(item_warehouses),
+			),
+			patch.object(StockEntry, "validate", lambda doc: calls.append("validate") or validate(doc)),
+			patch("erpnext.utilities.transaction_base.now_datetime", return_value=lock_time),
+		):
+			transfer.submit()
+
+		self.assertEqual(calls, ["lock_bins", "validate"])
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": transfer.name},
+			fields=["posting_datetime", "serial_and_batch_bundle"],
+		)
+		self.assertEqual(len(sles), 2)
+		for sle in sles:
+			self.assertEqual(get_datetime(sle.posting_datetime), lock_time)
+			bundle_time = frappe.db.get_value(
+				"Serial and Batch Bundle", sle.serial_and_batch_bundle, "posting_datetime"
+			)
+			self.assertEqual(get_datetime(bundle_time), lock_time)
 
 
 class TestStockEntryCoverage(ERPNextTestSuite):

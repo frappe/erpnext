@@ -376,6 +376,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_secondary_items()
 			self.set_bomless_secondary_valuation_types()
+			if self.purpose == "Repack":
+				# reads is_finished_item, so it must run after the rows are marked
+				self.purpose_cls(self).validate_repack_entry()
+
 			if not self.job_card:
 				self.validate_finished_goods()
 			else:
@@ -480,6 +484,22 @@ class StockEntry(StockController, SubcontractingInwardController):
 				references["Stock Entry"].add(row.against_stock_entry)
 
 		return references
+
+	def get_item_warehouses(self):
+		item_warehouses = super().get_item_warehouses()
+		if not self.subcontracting_order:
+			return item_warehouses
+
+		item_codes = {row.original_item or row.item_code for row in self.items}
+		supplied_items = frappe.get_all(
+			"Subcontracting Order Supplied Item",
+			filters={"parent": self.subcontracting_order, "rm_item_code": ("in", item_codes)},
+			fields=["rm_item_code", "reserve_warehouse"],
+		)
+		item_warehouses.update(
+			(row.rm_item_code, row.reserve_warehouse) for row in supplied_items if row.reserve_warehouse
+		)
+		return item_warehouses
 
 	def before_submit(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_submit"):
@@ -1754,6 +1774,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.pick_list:
 			return
 
+		if self.job_card and self.purpose == "Manufacture":
+			frappe.throw(
+				_(
+					"Items of this Stock Entry come from Job Card {0}. Use Record Output on the Job Card instead of Get Items."
+				).format(frappe.bold(self.job_card))
+			)
+
 		if self.purpose in ("Manufacture", "Repack") and self.from_bom and not flt(self.fg_completed_qty):
 			frappe.throw(_("Please set Finished Good Quantity before fetching items from the BOM."))
 
@@ -2016,14 +2043,28 @@ class StockEntry(StockController, SubcontractingInwardController):
 			for row in frappe.get_all(
 				"Pick List Item",
 				filters={"name": ("in", list(pick_list_items))},
-				fields=["name", "warehouse", "picked_qty", "transferred_qty"],
+				fields=["name", "item_code", "warehouse", "picked_qty", "transferred_qty"],
 			)
 		}
+		precision = frappe.get_precision("Pick List Item", "transferred_qty")
 		transfer_qty = defaultdict(float)
 		for d in self.items:
 			picked_row = picked_rows.get(d.pick_list_item)
 			if not picked_row:
 				continue
+
+			# validate_alternative_items checks original_item only for these entries
+			is_work_order_alternative = (
+				self.work_order
+				and self.purpose in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES
+				and d.original_item == picked_row.item_code
+			)
+			if d.item_code != picked_row.item_code and not is_work_order_alternative:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not the item {2} picked in {3}.").format(
+						d.idx, frappe.bold(d.item_code), frappe.bold(picked_row.item_code), self.pick_list
+					)
+				)
 
 			if d.s_warehouse and d.s_warehouse != picked_row.warehouse:
 				frappe.throw(
@@ -2035,8 +2076,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 					)
 				)
 
-			transfer_qty[d.pick_list_item] += flt(d.qty) * flt(d.conversion_factor or 1)
-			if flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item] > flt(picked_row.picked_qty):
+			transfer_qty[d.pick_list_item] += flt(d.transfer_qty)
+			transferred_qty = flt(flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item], precision)
+			if transferred_qty > flt(picked_row.picked_qty):
 				frappe.throw(
 					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
 						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list

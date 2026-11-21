@@ -420,6 +420,24 @@ class TestSalesOrder(ERPNextTestSuite):
 		dn.items[0].qty = 5
 		self.assertRaises(frappe.ValidationError, dn.submit)
 
+	def test_cancel_releases_components_of_a_disabled_bundle(self):
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=5, warehouse="_Test Warehouse - _TC")
+
+		def reserved_qty():
+			return frappe.db.get_value(
+				"Bin", {"item_code": component, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+			)
+
+		self.assertEqual(reserved_qty(), 10)
+
+		product_bundle.db_set("disabled", 1)
+		frappe.get_doc("Sales Order", so.name).cancel()
+		self.assertEqual(reserved_qty(), 0)
+
 	def test_over_delivery_keeps_whole_number_uom_qty(self):
 		item = make_item(
 			"_Test Over Delivery Whole Item",
@@ -567,6 +585,22 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertNotIn(so.name, [row.name for row in rows])
 
 			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_billable_orders_filtered_by_item_code(self):
+		so = make_sales_order(qty=10, rate=100)
+
+		def is_offered(item_code):
+			filters = [
+				["Sales Order", "docstatus", "=", 1],
+				["Sales Order", "company", "=", so.company],
+				["Sales Order", "customer", "=", so.customer],
+				["Sales Order Item", "item_code", "=", item_code],
+			]
+			rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+			return so.name in [row.name for row in rows]
+
+		self.assertTrue(is_offered(so.items[0].item_code))
+		self.assertFalse(is_offered("_Test Item 2"))
 
 	def test_full_qty_billed_below_amount_is_offered_with_zero_qty(self):
 		so = make_sales_order(qty=1, rate=1000)
@@ -2547,6 +2581,27 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.reload()
 		self.assertEqual(so.packed_items[0].ordered_qty, 2)
 		self.assertEqual(so.packed_items[1].ordered_qty, 2)
+
+	def test_make_purchase_order_from_overdue_sales_order(self):
+		so = make_sales_order(
+			item_code="_Test Item",
+			qty=10,
+			transaction_date=add_days(nowdate(), -20),
+			do_not_submit=True,
+		)
+		so.delivery_date = add_days(nowdate(), -10)
+		for item in so.items:
+			item.delivery_date = add_days(nowdate(), -10)
+		so.save()
+		so.submit()
+
+		selected_items = [
+			{"name": so.items[0].name, "item_code": so.items[0].item_code, "supplier": "_Test Supplier"}
+		]
+		po = make_purchase_order(so.name, selected_items=selected_items)[0]
+
+		self.assertEqual(getdate(po.items[0].schedule_date), getdate(nowdate()))
+		self.assertEqual(getdate(po.schedule_date), getdate(nowdate()))
 
 	def test_ordered_qty_is_reset_when_cancelled_sales_order_is_unlinked(self):
 		"""Cancelling a Sales Order unlinks its Purchase Orders, so `ordered_qty` must be recomputed."""

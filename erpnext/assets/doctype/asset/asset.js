@@ -188,9 +188,14 @@ frappe.ui.form.on("Asset", {
 					__("Actions")
 				);
 			} else if (frm.doc.status == "Scrapped") {
-				frm.add_custom_button(__("Restore Asset"), function () {
-					erpnext.asset.restore_asset(frm);
-				}).addClass("btn-primary");
+				frm.add_custom_button(
+					__("Restore Asset"),
+					function () {
+						erpnext.asset.restore_asset(frm);
+					},
+					null,
+					"primary"
+				);
 			}
 
 			if (await frm.events.should_show_accounting_ledger(frm)) {
@@ -759,8 +764,15 @@ frappe.ui.form.on("Asset", {
 	net_purchase_amount: function (frm) {
 		if (frm.doc.finance_books && frm.doc.finance_books.length) {
 			frm.doc.finance_books.forEach((d) => {
+				if (d.salvage_value_percentage) {
+					d.expected_value_after_useful_life = flt(
+						frm.doc.net_purchase_amount * (d.salvage_value_percentage / 100),
+						precision("net_purchase_amount")
+					);
+				}
 				frm.events.set_depreciation_rate(frm, d);
 			});
+			frm.refresh_field("finance_books");
 		} else if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
 			frm.trigger("set_finance_book");
 		}
@@ -829,6 +841,10 @@ frappe.ui.form.on("Asset", {
 	},
 
 	set_depreciation_rate: function (frm, row) {
+		if (row.depreciation_method === "Written Down Value" && row.is_rate_of_depreciation_entered) {
+			return;
+		}
+
 		if (
 			row.total_number_of_depreciations &&
 			row.frequency_of_depreciation &&
@@ -840,13 +856,17 @@ frappe.ui.form.on("Asset", {
 				args: row,
 				callback: function (r) {
 					if (r.message) {
-						frappe.flags.dont_change_rate = true;
-						frappe.model.set_value(
-							row.doctype,
-							row.name,
-							"rate_of_depreciation",
-							flt(r.message, precision("rate_of_depreciation", row))
-						);
+						const rate = flt(r.message, precision("rate_of_depreciation", row));
+						frappe.model
+							.set_value(row.doctype, row.name, "rate_of_depreciation", rate)
+							.then(() => {
+								frappe.model.set_value(
+									row.doctype,
+									row.name,
+									"is_rate_of_depreciation_entered",
+									0
+								);
+							});
 					}
 				},
 			});
@@ -931,11 +951,8 @@ frappe.ui.form.on("Asset Finance Book", {
 	},
 
 	rate_of_depreciation: function (frm, cdt, cdn) {
-		if (!frappe.flags.dont_change_rate) {
-			frappe.model.set_value(cdt, cdn, "expected_value_after_useful_life", 0);
-		}
-
-		frappe.flags.dont_change_rate = false;
+		const row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "is_rate_of_depreciation_entered", row.rate_of_depreciation ? 1 : 0);
 	},
 
 	depreciation_start_date: function (frm, cdt, cdn) {

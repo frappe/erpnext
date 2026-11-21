@@ -13,6 +13,37 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestMasterProductionSchedule(ERPNextTestSuite):
+	def test_fetch_sales_orders_is_limited_to_company(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		matching = make_sales_order(item_code=item, qty=10)
+		other = make_sales_order(item_code=item, qty=10, company="_Test Company 1", warehouse="Stores - _TC1")
+		mps = make_mps(to_date=add_days(today(), 30), select_items=[item])
+		mps.fetch_sales_orders()
+		orders = [row.sales_order for row in mps.sales_orders]
+		self.assertIn(matching.name, orders)
+		self.assertNotIn(other.name, orders)
+
+	def test_fetch_material_requests_is_limited_to_company(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		matching = make_material_request(item_code=item, uom="Nos", material_request_type="Manufacture")
+		other = make_material_request(
+			item_code=item,
+			uom="Nos",
+			material_request_type="Manufacture",
+			company="_Test Company 1",
+			warehouse="Stores - _TC1",
+			cost_center=frappe.db.get_value("Company", "_Test Company 1", "cost_center"),
+		)
+		mps = make_mps(to_date=add_days(today(), 30))
+		mps.fetch_materials_requests(material_request_type="Manufacture")
+		requests = [row.material_request for row in mps.material_requests]
+		self.assertIn(matching.name, requests)
+		self.assertNotIn(other.name, requests)
+
 	def test_to_date_is_kept_on_save(self):
 		mps = make_mps(to_date=add_days(today(), 30))
 		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 30)))
@@ -57,6 +88,26 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual([(row.item_code, row.planned_qty) for row in mps.items], [(item, 3)])
 
+	def test_fetch_buttons_clear_saved_rows_when_nothing_matches(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item("_Test MPS Refetch Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=5)
+		make_material_request(item_code=item, qty=5, material_request_type="Manufacture")
+		mps = make_mps(to_date=add_days(today(), 60), select_items=[item])
+		mps.fetch_sales_orders(customer=order.customer)
+		mps.fetch_materials_requests(material_request_type="Manufacture")
+		self.assertTrue(mps.sales_orders and mps.material_requests)
+
+		mps.fetch_sales_orders(customer="_Test Customer With No Orders")
+		mps.reload()
+		self.assertEqual(mps.sales_orders, [])
+
+		mps.fetch_materials_requests(from_date=add_days(today(), 30))
+		mps.reload()
+		self.assertEqual(mps.material_requests, [])
+
 	def test_demand_rows_keep_their_warehouse(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
@@ -74,6 +125,44 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 			sorted((row.warehouse, row.planned_qty) for row in mps.items),
 			[("Finished Goods - _TC", 4), ("Stores - _TC", 3)],
 		)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_actual_demand_leaves_out_closed_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test MPS Closed Row Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=5, do_not_submit=True)
+		order.append("items", {**order.items[0].as_dict(), "name": None, "qty": 7})
+		order.submit()
+		order.create_delivery_schedule(
+			order.items[1].as_dict(),
+			[
+				{"delivery_date": add_days(today(), 5), "qty": 3},
+				{"delivery_date": add_days(today(), 10), "qty": 4},
+			],
+		)
+		update_closed_status("Sales Order", order.name, [order.items[1].name], 1)
+
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+
+		self.assertEqual([row.planned_qty for row in mps.items], [5])
+
+	def test_actual_demand_clears_saved_rows_when_none_is_left(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test MPS Cleared Demand Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=5)
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+		self.assertEqual(len(mps.items), 1)
+
+		order.update_status("Closed")
+		mps.get_actual_demand()
+		mps.reload()
+
+		self.assertEqual(mps.items, [])
 
 	def test_delivery_schedules_leave_out_delivered_and_closed_orders(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import (
@@ -127,6 +216,20 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		mps.get_actual_demand()
 
 		self.assertEqual(mps.items, [])
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_get_sales_orders_lists_an_order_once(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test MPS Repeated Row Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=1, do_not_submit=True)
+		order.append("items", {**order.items[0].as_dict(), "name": None, "qty": 2})
+		order.submit()
+
+		mps = make_mps(to_date=add_days(today(), 30), select_items=[item])
+		mps.fetch_sales_orders(customer=order.customer)
+
+		self.assertEqual([row.sales_order for row in mps.sales_orders], [order.name])
 
 	def test_mps_details_need_read_permission(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user

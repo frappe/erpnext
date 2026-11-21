@@ -454,7 +454,11 @@ class TestItem(ERPNextTestSuite):
 			self.assertEqual(value, purchase_item_details.get(key))
 
 	def test_set_item_default_refreshes_cached_item(self):
-		item = make_item(properties={"item_defaults": [{"company": "_Test Company"}]})
+		item = make_item(
+			properties={
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+			}
+		)
 
 		set_item_default(item.name, "_Test Company", "income_account", "_Test Account Sales - _TC")
 
@@ -1441,6 +1445,22 @@ class TestItem(ERPNextTestSuite):
 			[(row.uom, row.conversion_factor) for row in item.uoms],
 			[("Nos", 1)],
 		)
+
+	def test_uom_used_by_item_price_cannot_be_removed(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item.name,
+				"price_list": "_Test Price List",
+				"uom": "Box",
+				"price_list_rate": 1200,
+			}
+		).insert()
+
+		item.reload()
+		item.uoms = [row for row in item.uoms if row.uom != "Box"]
+		self.assertRaises(frappe.ValidationError, item.save)
 
 	def test_validate_stock_item(self):
 		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")

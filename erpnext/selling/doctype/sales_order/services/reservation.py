@@ -49,11 +49,11 @@ class SalesOrderStockReservation:
 
 		for d in self.doc.get("items"):
 			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
-				if self.doc.has_product_bundle(d.item_code):
-					for p in self.doc.get("packed_items"):
-						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
-							_valid_for_reserve(p.item_code, p.warehouse)
-				else:
+				# the order's own packed rows, as the bundle may since be disabled
+				packed_items = [p for p in self.doc.get("packed_items") if p.parent_detail_docname == d.name]
+				for p in packed_items:
+					_valid_for_reserve(p.item_code, p.warehouse)
+				if not packed_items:
 					_valid_for_reserve(d.item_code, d.warehouse)
 
 		for item_code, warehouse in item_wh_list:
@@ -168,11 +168,12 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
 	if item.get("delivered_qty") is not None:
-		return (
+		unreserved_qty = (
 			item.stock_qty
 			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
 			- existing_reserved_qty
 		)
+		precision = item.precision("stock_qty")
 	else:
 		stock_qty, delivered_qty, conversion_factor = frappe.get_value(
 			"Sales Order Item",
@@ -183,4 +184,8 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 			item.qty / stock_qty
 		)  # ratio of packed item qty to main item qty in product bundle
 		delivered_qty = delivered_qty * conversion_factor * bundle_conversion_factor
-		return item.qty - delivered_qty - existing_reserved_qty
+		unreserved_qty = item.qty - delivered_qty - existing_reserved_qty
+		precision = item.precision("qty")
+
+	# a residue below stock qty precision, as a fractional conversion factor leaves, is not unreserved
+	return unreserved_qty if flt(unreserved_qty, precision) > 0 else 0

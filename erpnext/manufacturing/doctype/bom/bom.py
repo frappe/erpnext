@@ -1093,7 +1093,9 @@ class BOM(WebsiteGenerator):
 			self._append_bom_material_row(row, operation_row_id)
 
 	def _append_bom_material_row(self, row, operation_row_id):
+		# get_bom_items returns the qty in stock UOM
 		row.uom = row.stock_uom
+		row.conversion_factor = 1
 		row.operation_row_id = operation_row_id
 		row.idx = None
 		row.do_not_explode = 1
@@ -1173,6 +1175,15 @@ class BOM(WebsiteGenerator):
 
 				if act_pbom and act_pbom[0][0]:
 					frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
+
+			if subcontracting_bom := frappe.db.exists(
+				"Subcontracting BOM", {"finished_good_bom": self.name, "is_active": 1}
+			):
+				frappe.throw(
+					_(
+						"Cannot deactivate or cancel BOM as it is used in the active Subcontracting BOM {0}"
+					).format(get_link_to_form("Subcontracting BOM", subcontracting_bom))
+				)
 
 	def validate_transfer_against(self):
 		if not self.with_operations:

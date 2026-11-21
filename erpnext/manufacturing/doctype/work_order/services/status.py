@@ -157,7 +157,9 @@ class StatusService:
 
 		status = (
 			"In Process"
-			if flt(self.doc.material_transferred_for_manufacturing) > 0 or self._has_transferred_material()
+			if flt(self.doc.material_transferred_for_manufacturing) > 0
+			or self._has_transferred_material()
+			or self._has_consumed_material()
 			else "Not Started"
 		)
 		precision = frappe.get_precision("Work Order", "produced_qty")
@@ -194,6 +196,19 @@ class StatusService:
 			)
 		).run()[0][0]
 		return flt(qty) > 0
+
+	def _has_consumed_material(self):
+		"""True if a submitted Material Consumption entry exists, e.g. on a skip-transfer order."""
+		return bool(
+			frappe.db.exists(
+				"Stock Entry",
+				{
+					"work_order": self.doc.name,
+					"docstatus": 1,
+					"purpose": "Material Consumption for Manufacture",
+				},
+			)
+		)
 
 	def _is_partial_skip_transfer(self):
 		if not (self.doc.skip_transfer and self.doc.produced_qty):
@@ -512,15 +527,16 @@ class StatusService:
 			.left_join(plan_item)
 			.on(plan_item.name == wo.production_plan_item)
 			.select(Sum(qty_against_sales_order(wo, plan_item)))
-			.where((wo.sales_order == self.doc.sales_order) & (wo.docstatus == 1))
+			.where(
+				(wo.sales_order == self.doc.sales_order)
+				& (wo.sales_order_item == self.doc.sales_order_item)
+				& (wo.docstatus == 1)
+			)
 		)
 		if self.doc.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.doc.product_bundle_item)
 		else:
-			query = query.where(
-				(wo.production_item == self.doc.production_item)
-				& (wo.sales_order_item == self.doc.sales_order_item)
-			)
+			query = query.where(wo.production_item == self.doc.production_item)
 
 		qty = query.run(as_list=1)
 		return qty[0][0] if qty and qty[0][0] else 0

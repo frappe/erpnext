@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Max, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Max, NullIf, Sum
 from frappe.utils import cint, flt
 
 import erpnext
@@ -472,12 +472,25 @@ class LandedCostVoucher(Document):
 		self.update_project_purchase_cost()
 
 	def update_project_purchase_cost(self):
+		if not self.vendor_invoices:
+			return
 		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") != "Each Transaction":
 			return
 
-		receipts = {}
-		projects = {self.get_receipt_dimension(receipts, item, "project") for item in self.get("items")}
-		update_purchase_cost(projects - {None, ""})
+		invoices = {row.vendor_invoice for row in self.vendor_invoices}
+		invoice = frappe.qb.DocType("Purchase Invoice")
+		item = frappe.qb.DocType("Purchase Invoice Item")
+		projects = (
+			frappe.qb.from_(item)
+			.join(invoice)
+			.on(invoice.name == item.parent)
+			.select(Coalesce(NullIf(item.project, ""), invoice.project))
+			# A return takes the claim of the invoice it returns, so its project changes too.
+			.where(invoice.name.isin(invoices) | invoice.return_against.isin(invoices))
+			.distinct()
+			.run(pluck=True)
+		)
+		update_purchase_cost(set(projects) - {None, ""})
 
 	def update_claimed_landed_cost(self):
 		for vendor_invoice in {row.vendor_invoice for row in self.vendor_invoices}:
@@ -666,6 +679,10 @@ def get_pr_items(purchase_receipt):
 			pr_item.rate.as_("base_rate"),
 			pr_item.amount.as_("base_amount"),
 		)
+
+		# secondary items take their share of the cost from the finished good
+		query = query.where(IfNull(pr_item.secondary_item_type, "") == "")
+		query = query.where(IfNull(pr_item.valuation_type, "") == "")
 
 	elif purchase_receipt.receipt_document_type == "Stock Entry":
 		query = query.select(

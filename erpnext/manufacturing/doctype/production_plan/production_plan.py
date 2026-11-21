@@ -351,7 +351,46 @@ class ProductionPlan(Document):
 			self.update_bin_qty()
 
 	def before_submit(self):
+		self.validate_closed_sales_order_items()
 		self.validate_sales_order_planned_qty()
+
+	def validate_closed_sales_order_items(self):
+		so_items = {row.sales_order_item for row in self.po_items if row.sales_order_item}
+		precision = self.precision("qty", "prod_plan_references")
+		so_items.update(
+			row.sales_order_item for row in self.get_allocated_references() if flt(row.qty, precision)
+		)
+		if not so_items:
+			return
+
+		so_item = frappe.qb.DocType("Sales Order Item")
+		so = frappe.qb.DocType("Sales Order")
+		closed = (
+			frappe.qb.from_(so_item)
+			.join(so)
+			.on(so.name == so_item.parent)
+			.select(so_item.parent, so_item.idx, so_item.item_code)
+			.where(so_item.name.isin(list(so_items)) & ((so_item.closed == 1) | (so.status == "Closed")))
+			.orderby(so_item.parent, so_item.idx)
+			.limit(1)
+			.run(as_dict=True)
+		)
+		if closed:
+			frappe.throw(
+				_("Row #{0} ({1}) of Sales Order {2} is closed, so it cannot be planned.").format(
+					closed[0].idx, frappe.bold(closed[0].item_code), closed[0].parent
+				),
+				title=_("Sales Order Row Closed"),
+			)
+
+	def get_allocated_references(self):
+		"""Combined references with the qty this plan gives each."""
+		planned_qty = {}
+		for row in self.po_items:
+			key = (self.name, row.sales_order_item)
+			planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+
+		return allocate_reference_qty(self.prod_plan_references, planned_qty)
 
 	def validate_sales_order_planned_qty(self):
 		planned_qty = self.get_so_item_planned_qty()
@@ -555,7 +594,8 @@ class ProductionPlan(Document):
 					return
 
 	def update_requested_status(self):
-		if self.mr_items and all(flt(d.requested_qty) >= flt(d.quantity) for d in self.mr_items):
+		rows_to_request = [d for d in self.mr_items if flt(d.quantity) > 0]
+		if rows_to_request and all(flt(d.requested_qty) >= flt(d.quantity) for d in rows_to_request):
 			self.status = "Material Requested"
 
 	def get_production_items(self):
@@ -701,8 +741,11 @@ def get_planned_qty_of_references(sales_orders):
 		.where(reference.parent.isin(plans))
 		.orderby(reference.idx)
 	).run(as_dict=True)
-	planned_qty = get_planned_qty_by_order_row(plans)
+	return allocate_reference_qty(references, get_planned_qty_by_order_row(plans))
 
+
+def allocate_reference_qty(references, planned_qty):
+	"""Split the planned qty of each combined row over its references, in order."""
 	allocated = []
 	for row in references:
 		key = (row.parent, row.item_reference)

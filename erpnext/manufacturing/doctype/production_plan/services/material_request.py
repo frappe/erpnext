@@ -39,6 +39,7 @@ from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries
 	get_raw_materials_of_sub_assembly_items,
 	get_sub_assembly_items,
 )
+from erpnext.manufacturing.scheduling.plan_adapter import get_supplier_lead_times
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -187,8 +188,9 @@ def get_items_for_material_requests(
 	ignore_ordered_qty = _effective_ignore_ordered_qty(doc, po_items)
 	so_item_details = _collect_item_details(doc, po_items)
 	is_transfer = bool((ignore_ordered_qty or get_parent_warehouse_data) and warehouses)
+	transfer_warehouses = set(warehouses) if is_transfer else set()
 
-	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer)
+	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty, transfer_warehouses)
 	mr_items = _apply_other_locations(doc, mr_items, warehouses, is_transfer)
 	_set_default_suppliers(mr_items, doc.get("company"))
 	if doc.get("consider_minimum_order_qty"):
@@ -478,7 +480,7 @@ def _accumulate_so_items(so_item_details, sales_order, item_details, qty_precisi
 			so_item_details[sales_order][key] = details
 
 
-def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
+def _build_mr_items(doc, so_item_details, ignore_ordered_qty, transfer_warehouses):
 	mr_items = []
 	consumed_qty = defaultdict(float)
 	# raw_material_group_warehouse (optional, group) only widens the availability
@@ -501,7 +503,7 @@ def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
 				scope_warehouse or fallback,
 				target_warehouse or fallback,
 				consumed_qty,
-				is_transfer,
+				transfer_warehouses,
 			)
 			if row:
 				mr_items.append(row)
@@ -518,9 +520,9 @@ def _mr_item_for_details(
 	warehouse,
 	target_warehouse,
 	consumed_qty,
-	is_transfer,
+	transfer_warehouses,
 ):
-	"""When transferring, size the shortage on For Warehouse alone so group stock is not counted twice."""
+	"""When transferring, leave the stock to be transferred out of the shortage, so it is not counted twice."""
 	# _get_bin_details scopes to the warehouse's descendants, returning one row per
 	# child warehouse; sum them so a group warehouse reflects combined child stock.
 	bins = _get_bin_details(details, doc.company, warehouse)
@@ -528,9 +530,18 @@ def _mr_item_for_details(
 	if details.qty <= 0:
 		return None
 	shortage_warehouse, shortage_bin = warehouse, bin_dict
-	if is_transfer and warehouse != target_warehouse:
+	if transfer_warehouses and warehouse != target_warehouse:
 		shortage_warehouse = target_warehouse
 		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
+	elif transfer_warehouses and not warehouse:
+		# no warehouse: availability spans all warehouses, the selected ones included, so leave
+		# those out, but keep the item group's default warehouse, which receives the material
+		receiving_warehouse = get_item_group_defaults(details.item_code, company).get("default_warehouse")
+		shortage_bin = aggregate_bin_details(
+			row
+			for row in bins
+			if row.warehouse == receiving_warehouse or row.warehouse not in transfer_warehouses
+		)
 	return get_material_request_items(
 		doc,
 		details,
@@ -543,7 +554,7 @@ def _mr_item_for_details(
 		bin_dict,
 		consumed_qty,
 		shortage_bin,
-		is_transfer,
+		bool(transfer_warehouses),
 	)
 
 
@@ -574,9 +585,10 @@ def _get_transfer_locations(mr_items, warehouses, company):
 			0, flt(item.get("quantity")) * flt(item.get("conversion_factor"))
 		)
 
+	# keep all locations, so a skipped receiving warehouse does not crowd out the others
 	return {
 		item_code: get_available_item_locations(
-			item_code, warehouses, required_qty, company, ignore_validation=True
+			item_code, warehouses, required_qty, company, ignore_validation=True, keep_all_locations=True
 		)
 		if required_qty > 0
 		else []
@@ -606,16 +618,12 @@ def _set_default_suppliers(mr_items, company):
 
 
 def _get_default_lead_time_suppliers(items):
-	table = frappe.qb.DocType("Item Lead Time Supplier")
-	rows = (
-		frappe.qb.from_(table)
-		.select(table.parent, table.supplier)
-		.where(
-			table.parent.isin(list(items)) & (table.parenttype == "Item Lead Time") & (table.is_default == 1)
-		)
-		.run(as_dict=True)
-	)
-	return {row.parent: row.supplier for row in rows}
+	return {
+		item_code: row.supplier
+		for item_code, rows in get_supplier_lead_times(items).items()
+		for row in rows.values()
+		if row.is_default
+	}
 
 
 def _get_item_default_suppliers(items, company):
@@ -923,6 +931,10 @@ def _transfer_from_locations(item, locations, new_mr_items, required_qty):
 	for d in locations:
 		if flt(required_qty, precision) <= 0:
 			return required_qty
+
+		# stock is not transferred from the receiving warehouse to itself
+		if d.get("warehouse") == item.get("warehouse"):
+			continue
 
 		quantity = flt(min(required_qty, d.get("qty")), precision)
 		if quantity <= 0:

@@ -15,7 +15,7 @@ from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
 from erpnext import _refuse
-from erpnext.accounts.utils import get_company_default
+from erpnext.accounts.utils import _get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -434,7 +434,9 @@ class StockReconciliation(StockController):
 						}
 					)
 
-				if not item.valuation_rate:
+				# the form fills a zero rate for batch items, so keep zero only when it is allowed
+				keep_zero_rate = item.valuation_rate == 0 and item.allow_zero_valuation_rate
+				if not item.valuation_rate and not keep_zero_rate:
 					item.valuation_rate = item.current_valuation_rate
 				continue
 
@@ -1370,8 +1372,8 @@ class StockReconciliation(StockController):
 				flt(d.current_qty) * flt(d.current_valuation_rate), d.precision("current_amount")
 			)
 
-			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
-			d.amount_difference = flt(d.amount) - flt(d.current_amount)
+			d.quantity_difference = flt(flt(d.qty) - flt(d.current_qty), d.precision("qty"))
+			d.amount_difference = flt(flt(d.amount) - flt(d.current_amount), d.precision("amount_difference"))
 
 	def recalculate_difference_amount_from_ledger(self, voucher_detail_no: str | None = None):
 		"""Sync the displayed current qty/rate and difference amount with the (reposted) ledger.
@@ -1421,7 +1423,7 @@ class StockReconciliation(StockController):
 				"current_qty": current_qty,
 				"current_valuation_rate": current_valuation_rate,
 				"current_amount": current_amount,
-				"quantity_difference": flt(row.qty) - current_qty,
+				"quantity_difference": flt(flt(row.qty) - current_qty, row.precision("qty")),
 				"amount_difference": amount_difference,
 			},
 			update_modified=False,
@@ -2008,7 +2010,7 @@ def get_difference_account(purpose: str, company: str):
 	_require_reconciliation_permission("Company", company)
 
 	if purpose in ("Stock Reconciliation", ADJUSTMENT_ENTRY):
-		account = get_company_default(company, "stock_adjustment_account")
+		account = _get_company_default(company, "stock_adjustment_account")
 	else:
 		account = frappe.db.get_value(
 			"Account", {"is_group": 0, "company": company, "account_type": "Temporary"}, "name"

@@ -12,6 +12,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.crm.doctype.lead.mapper import validate_lead_is_enabled
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import validate_against_blanket_order
 
 from .mapper import (
 	get_existing_customer_name,
@@ -181,6 +182,7 @@ class Quotation(SellingController):
 			validate_coupon_code(self.coupon_code, customer)
 
 		self.set_customer_name()
+		validate_against_blanket_order(self)
 		if self.items:
 			self.with_items = 1
 

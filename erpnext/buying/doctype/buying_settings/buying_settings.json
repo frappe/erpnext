@@ -13,6 +13,8 @@
   "configure",
   "column_break_4",
   "supplier_group",
+  "supplier_overview_section",
+  "load_supplier_overview",
   "pricing_tab",
   "buying_price_list",
   "section_break_vwgg",
@@ -335,6 +337,18 @@
   {
    "fieldname": "column_break_kdcm",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier_overview_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Overview"
+  },
+  {
+   "default": "1",
+   "description": "When off, the Overview tab on a supplier shows a Load Overview button and loads only when clicked.",
+   "fieldname": "load_supplier_overview",
+   "fieldtype": "Check",
+   "label": "Enable Supplier Overview Dashboard"
   }
  ],
  "grid_page_length": 50,
@@ -343,7 +357,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-29 05:53:49.117423",
+ "modified": "2026-11-17 15:11:39.690569",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

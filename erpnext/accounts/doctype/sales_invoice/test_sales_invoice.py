@@ -2837,6 +2837,15 @@ class TestSalesInvoice(ERPNextTestSuite):
 		"""The receivable is posted at the base rounded total and the round off at the base
 		adjustment, so the entries balance without a second round off."""
 		frappe.db.set_value("Currency", "JPY", "enabled", 1)
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "JPY",
+				"to_currency": "INR",
+				"exchange_rate": 0.567,
+			}
+		).insert()
 		debit_to = create_account(
 			account_name="_Test Receivable JPY",
 			parent_account="Accounts Receivable - _TC",
@@ -6378,6 +6387,27 @@ class TestSalesInvoice(ERPNextTestSuite):
 		project.reload()
 		self.assertIsNone(si.items[2].project)
 		self.assertEqual(project.total_billed_amount, 300)
+
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"sales_update_frequency": "Each Transaction", "allow_multiple_items": 1}
+	)
+	def test_total_billed_amount_with_cleared_item_project(self):
+		"""A row whose project cell was cleared is saved with an empty string, and still takes the
+		invoice's project."""
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		project = make_project(
+			{"project_name": f"_Test Cleared Row Project {frappe.generate_hash(length=6)}"}
+		)
+		si = create_sales_invoice(rate=3000, do_not_save=True)
+		si.project = project.name
+		si.append("items", {**si.items[0].as_dict(no_default_fields=True), "rate": 2000, "project": ""})
+		si.items[0].project = project.name
+		si.insert()
+		si.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Invoice Item", si.items[1].name, "project"), "")
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_billed_amount"), 5000)
 
 	def test_pos_returns_with_party_account_currency(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return

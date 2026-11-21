@@ -25,7 +25,7 @@ frappe.ui.form.on("Delivery Note", {
 				if (doc.closed) {
 					return "gray";
 				}
-				return doc.docstatus == 1 || doc.qty <= doc.actual_qty ? "green" : "orange";
+				return doc.docstatus == 1 || doc.stock_qty <= doc.actual_qty ? "green" : "orange";
 			});
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {

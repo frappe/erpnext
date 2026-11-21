@@ -3,21 +3,17 @@
 
 import frappe
 from frappe import qb
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Extract, NullIf, Sum
 from frappe.utils import flt
 from pypika.enums import DatePart
-from pypika.queries import QueryBuilder, Table
+from pypika.queries import QueryBuilder, Selectable, Table
 from pypika.terms import Term
 
 CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
-
-# Receipt rows that carry capitalised landed cost, and the document each one belongs to.
-LANDED_COST_RECEIPTS = {
-	"Purchase Receipt Item": "Purchase Receipt",
-	"Purchase Invoice Item": "Purchase Invoice",
-	"Subcontracting Receipt Item": "Subcontracting Receipt",
-	"Stock Entry Detail": "Stock Entry",
-}
+VALUATION_ACCOUNT_TYPE = "Expenses Included In Valuation"
+# The invoice whose landed cost claim applies to a purchase row: its own, or the one a return returns.
+CLAIMED_INVOICE = "claimed_invoice"
 
 MonthlyAmounts = dict[str, float]
 
@@ -48,13 +44,8 @@ class ProjectCostQueries:
 		return sum_amount(self.time_logs(), detail.hours, work_date(detail), by_month)
 
 	def purchase_cost(self, by_month: bool = False) -> float | MonthlyAmounts:
-		"""Non-stock items bought for the project, less the landed cost capitalised into stock.
-
-		Stock items count once they are consumed, in `material_cost`.
-		"""
-		return combine(
-			self.non_stock_purchase_cost(by_month), self.capitalised_landed_cost(by_month), sign=-1
-		)
+		"""Purchase costs that are expensed directly. Capitalised costs count in material_cost."""
+		return self.non_stock_purchase_cost(by_month)
 
 	def material_cost(self, by_month: bool = False) -> float | MonthlyAmounts:
 		"""Stock consumed against the project, plus costs capitalised on its stock entries."""
@@ -78,10 +69,25 @@ class ProjectCostQueries:
 		return sum_amount(self.expense_claim_rows(), detail.sanctioned_amount, claim.posting_date, by_month)
 
 	def sales_order_amount(self) -> float:
-		"""Net total of the submitted Sales Orders that name the project."""
+		"""Net amount of submitted Sales Order items for the project, split by item as billing is."""
+		item = qb.DocType("Sales Order Item")
+		from_order, from_item = self.ordered_items()
+		return sum_amount(from_order, item.base_net_amount) + sum_amount(from_item, item.base_net_amount)
+
+	def ordered_items(self) -> tuple[QueryBuilder, QueryBuilder]:
+		"""Submitted Sales Order items for the project, in two parts: items that leave the project
+		empty and take their order's, and items that name the project themselves.
+
+		A cleared project cell is saved as an empty string, so it is empty too. Two parts, not one
+		condition, so each part can use the project index."""
 		order = qb.DocType("Sales Order")
-		query = qb.from_(order).where((order.project == self.project) & (order.docstatus == 1))
-		return sum_amount(query, order.base_net_total)
+		item = qb.DocType("Sales Order Item")
+		items = qb.from_(item).join(order).on(order.name == item.parent)
+		from_order = items.where(
+			NullIf(item.project, "").isnull() & (order.project == self.project) & (order.docstatus == 1)
+		)
+		from_item = items.where((item.project == self.project) & (item.docstatus == 1))
+		return from_order, from_item
 
 	def time_logs(self) -> QueryBuilder:
 		detail = qb.DocType("Timesheet Detail")
@@ -90,51 +96,67 @@ class ProjectCostQueries:
 
 	def non_stock_purchase_cost(self, by_month: bool) -> float | MonthlyAmounts:
 		invoice = qb.DocType("Purchase Invoice")
-		invoice_item = qb.DocType("Purchase Invoice Item")
-		query = self.non_stock_purchase_items()
-		return sum_amount(query, invoice_item.base_net_amount, invoice.posting_date, by_month)
+		return sum_amount(
+			self.non_stock_purchase_items(), non_stock_purchase_amount(), invoice.posting_date, by_month
+		)
 
 	def non_stock_purchase_items(self) -> QueryBuilder:
-		"""Purchase invoice items that never enter stock: non-stock and drop-shipped items, unless
-		they were bought on a subcontracting order."""
+		"""Non-stock and drop-shipped purchases outside subcontracting and stock valuation.
+
+		A return takes the landed cost claim of the invoice it returns."""
 		invoice = qb.DocType("Purchase Invoice")
 		invoice_item = qb.DocType("Purchase Invoice Item")
 		item = qb.DocType("Item")
 		purchase_order = qb.DocType("Purchase Order")
+		account = qb.DocType("Account")
+		claimed_invoice = qb.DocType("Purchase Invoice").as_(CLAIMED_INVOICE)
+		claimed = Coalesce(claimed_invoice.claimed_landed_cost_amount, 0)
 		never_stocked = (
 			item.is_stock_item.isnull()
 			| (item.is_stock_item == 0)
 			| (invoice_item.delivered_by_supplier == 1)
 		)
 		not_subcontracted = purchase_order.is_subcontracted.isnull() | (purchase_order.is_subcontracted == 0)
+		project_rows = self.purchase_invoice_rows()
 		query = (
-			qb.from_(invoice_item)
+			qb.from_(project_rows)
+			.join(invoice_item)
+			.on(invoice_item.name == project_rows.name)
 			.join(invoice)
 			.on(invoice.name == invoice_item.parent)
+			.join(claimed_invoice)
+			.on(claimed_invoice.name == Coalesce(NullIf(invoice.return_against, ""), invoice.name))
+			.left_join(account)
+			.on(account.name == invoice_item.expense_account)
 			.left_join(item)
 			.on(item.name == invoice_item.item_code)
 			.left_join(purchase_order)
 			.on(purchase_order.name == invoice_item.purchase_order)
-			.where((invoice_item.project == self.project) & (invoice_item.docstatus == 1))
+			.where(invoice_item.docstatus == 1)
 			.where(never_stocked & not_subcontracted)
+		)
+		query = query.where(Coalesce(account.account_type, "") != VALUATION_ACCOUNT_TYPE).where(
+			(claimed <= 0) | (claimed < claimed_invoice.base_net_total)
 		)
 		return self.keep_readable(query, invoice.name, "Purchase Invoice")
 
-	def capitalised_landed_cost(self, by_month: bool) -> float | MonthlyAmounts:
-		total = {} if by_month else 0.0
-		for row_doctype, parent_doctype in LANDED_COST_RECEIPTS.items():
-			row = qb.DocType(row_doctype)
-			parent = qb.DocType(parent_doctype)
-			query = (
-				qb.from_(row)
-				.join(parent)
-				.on(parent.name == row.parent)
-				.where((row.project == self.project) & (row.docstatus == 1))
-			)
-			total = combine(
-				total, sum_amount(query, row.landed_cost_voucher_amount, parent.posting_date, by_month)
-			)
-		return total
+	def purchase_invoice_rows(self) -> Selectable:
+		"""Names of the Purchase Invoice items for the project, in two parts: items that leave the
+		project empty and take their invoice's, and items that name the project themselves.
+
+		A cleared project cell is saved as an empty string, so it is empty too. Two parts, not one
+		condition, so each part can use the project index."""
+		invoice = qb.DocType("Purchase Invoice")
+		item = qb.DocType("Purchase Invoice Item")
+		from_invoice = (
+			qb.from_(item)
+			.join(invoice)
+			.on(invoice.name == item.parent)
+			.select(item.name)
+			.where(NullIf(item.project, "").isnull() & (invoice.project == self.project))
+		)
+		from_item = qb.from_(item).select(item.name).where(item.project == self.project)
+		return (from_invoice * from_item).as_("project_rows")
 
 	def stock_value_consumed(self, by_month: bool) -> float | MonthlyAmounts:
 		ledger = qb.DocType("Stock Ledger Entry")
@@ -176,12 +198,14 @@ class ProjectCostQueries:
 
 	def billed_items(self) -> tuple[QueryBuilder, QueryBuilder]:
 		"""Submitted Sales Invoice items billed to the project, in two parts: items that leave the
-		project empty and take their invoice's, and items that name the project themselves."""
+		project empty and take their invoice's, and items that name the project themselves.
+
+		A cleared project cell is saved as an empty string, so it is empty too."""
 		invoice = qb.DocType("Sales Invoice")
 		item = qb.DocType("Sales Invoice Item")
 		items = qb.from_(item).join(invoice).on(invoice.name == item.parent)
 		from_invoice = items.where(
-			item.project.isnull() & (invoice.project == self.project) & (invoice.docstatus == 1)
+			NullIf(item.project, "").isnull() & (invoice.project == self.project) & (invoice.docstatus == 1)
 		)
 		from_item = items.where((item.project == self.project) & (item.docstatus == 1))
 		return from_invoice, from_item
@@ -208,6 +232,45 @@ class ProjectCostQueries:
 			return query
 		readable = frappe.qb.get_query(doctype, fields=["name"], ignore_permissions=False)
 		return query.where(document.isin(readable))
+
+
+def non_stock_purchase_amount() -> Term:
+	"""Row amount less its part of the landed cost a Landed Cost Voucher claimed from the invoice."""
+	item = qb.DocType("Purchase Invoice Item")
+	return item.base_net_amount * expensed_share()
+
+
+def expensed_share() -> Term:
+	"""Share of the invoice's other rows that stays an expense after its landed cost claim.
+
+	The claim comes first out of the rows booked to a stock valuation account, which purchase cost
+	leaves out already. Only the rest of the claim is taken from the other rows."""
+	invoice = qb.DocType("Purchase Invoice").as_(CLAIMED_INVOICE)
+	claimed = Coalesce(invoice.claimed_landed_cost_amount, 0)
+	valuation = valuation_amount(invoice)
+	return (
+		Case()
+		.when(claimed <= 0, 1)
+		.when(
+			claimed > valuation,
+			(invoice.base_net_total - claimed) / NullIf(invoice.base_net_total - valuation, 0),
+		)
+		.else_(1)
+	)
+
+
+def valuation_amount(invoice: Table) -> Term:
+	"""Net amount of the invoice's rows booked to a stock valuation account."""
+	row = qb.DocType("Purchase Invoice Item").as_("valuation_row")
+	account = qb.DocType("Account").as_("valuation_account")
+	rows = (
+		qb.from_(row)
+		.join(account)
+		.on(account.name == row.expense_account)
+		.select(Sum(row.base_net_amount))
+		.where((row.parent == invoice.name) & (account.account_type == VALUATION_ACCOUNT_TYPE))
+	)
+	return Coalesce(rows, 0)
 
 
 def sum_by(query: QueryBuilder, group: Term, amount: Term) -> dict[str, float]:

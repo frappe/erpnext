@@ -553,7 +553,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not wo:
 			return
 		work_order_qty = flt(wo.material_transferred_for_manufacturing) or flt(wo.qty)
-		wo_qty_to_produce = work_order_qty - flt(wo.produced_qty)
+		wo_qty_to_produce = work_order_qty - flt(wo.produced_qty) - flt(wo.process_loss_qty)
 		alternative_items = self.get_alternative_items(wo.get("required_items"))
 		for item in wo.get("required_items"):
 			self._append_unconsumed_item(item, wo, wo_qty_to_produce, alternative_items)
@@ -1115,7 +1115,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def _get_pending_secondary_qty(self):
 		if self.doc.job_card:
 			return flt(self.doc.fg_completed_qty)
-		return flt(self.get_completed_job_card_qty()) - flt(self.wo_doc.produced_qty)
+		# completed qty leaves out the unbooked job card loss that For Quantity includes
+		return (
+			flt(self.get_completed_job_card_qty())
+			- flt(self.wo_doc.produced_qty)
+			+ flt(self.doc.get_pending_process_loss_qty())
+		)
 
 	def _adjust_secondary_item_qtys(self, secondary_items, used_secondary_items, pending_qty):
 		for row in secondary_items:
@@ -1217,7 +1222,6 @@ class RepackStockEntry(BaseManufactureStockEntry):
 
 	def validate(self):
 		self.validate_raw_materials_exists()
-		self.validate_repack_entry()
 
 	def validate_fg_conversion(self):
 		if not self.doc.is_fg_conversion:
@@ -1309,9 +1313,10 @@ class RepackStockEntry(BaseManufactureStockEntry):
 			)
 
 	def validate_repack_entry(self):
-		fg_items = {row.item_code: row for row in self.doc.items if row.is_finished_item}
+		fg_rows = [row for row in self.doc.items if row.is_finished_item]
+		fg_items = list(dict.fromkeys(row.item_code for row in fg_rows))
 
-		if len(fg_items) > 1 and not all(row.set_basic_rate_manually for row in fg_items.values()):
+		if len(fg_items) > 1 and not all(row.set_basic_rate_manually for row in fg_rows):
 			frappe.throw(
 				_(
 					"When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."

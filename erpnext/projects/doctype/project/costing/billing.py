@@ -13,7 +13,7 @@ INVOICE_PAGE = 20
 
 
 class ProjectBilling:
-	"""How a project is billed: its sales orders and the invoices billed to it, newest first.
+	"""How a project is billed: the sales orders and invoices for it, newest first.
 
 	The orders and invoices show only to users who can read those doctypes.
 	"""
@@ -22,29 +22,40 @@ class ProjectBilling:
 		self.project = project
 		self.queries = ProjectCostQueries(project)
 		self.access = access
-		# invoices whose items name the project, set while the amounts are worked out
+		# orders and invoices whose items name the project, set while the amounts are worked out
+		self.item_ordered_orders = set()
 		self.item_billed_invoices = set()
 
 	def build(self) -> dict:
 		orders = self.sales_orders()
 		invoices = self.invoices()
+		order_filter = self.order_filter(orders) if orders else None
+		# the card links to the rest through the filter; without one, it lists every order
+		listed_orders = orders[:LIST_LIMIT] if order_filter else orders
 		return {
-			"sales_orders": orders and orders[:LIST_LIMIT],
+			"sales_orders": listed_orders,
 			"sales_order_count": len(orders) if orders is not None else None,
+			"order_filter": order_filter,
 			"invoices": invoices and invoices[:LIST_LIMIT],
 			"invoice_count": len(invoices) if invoices is not None else None,
 			"invoice_filter": self.invoice_filter(invoices) if invoices else None,
 		}
 
 	def sales_orders(self) -> list[dict] | None:
+		"""Orders for the project that the user may read, newest first, each with the amount it adds
+		to this project's contract."""
 		if not self.access["sales_orders"]:
 			return None
-		return frappe.get_list(
+		amounts = self.ordered_by_order()
+		if not amounts:
+			return []
+		orders = frappe.get_list(
 			"Sales Order",
-			filters={"project": self.project, "docstatus": 1},
-			fields=["name", "transaction_date", "status", "base_net_total", "per_billed"],
-			order_by="transaction_date desc",
+			filters={"name": ["in", list(amounts)]},
+			fields=["name", "transaction_date", "status", "base_net_total", "per_billed", "project"],
+			order_by="transaction_date desc, name desc",
 		)
+		return [{**order, "amount": amounts[order.name]} for order in orders]
 
 	def invoices(self, start: int = 0, page_length: int | None = None) -> list[dict] | None:
 		"""Invoices billed to the project that the user may read, newest first, each with the amount
@@ -74,6 +85,23 @@ class ProjectBilling:
 		if {invoice["name"] for invoice in invoices} <= self.item_billed_invoices:
 			return {"Sales Invoice Item.project": self.project}
 		return None
+
+	def order_filter(self, orders: list[dict]) -> dict | None:
+		"""The Sales Order list filter that finds the orders counted here, as `invoice_filter` does
+		for invoices. None for a mix of orders that name the project on themselves and on items."""
+		if all(order["project"] == self.project for order in orders):
+			return {"project": self.project}
+		if {order["name"] for order in orders} <= self.item_ordered_orders:
+			return {"Sales Order Item.project": self.project}
+		return None
+
+	def ordered_by_order(self) -> dict[str, float]:
+		order = qb.DocType("Sales Order")
+		item = qb.DocType("Sales Order Item")
+		from_order, from_item = self.queries.ordered_items()
+		from_items = sum_by(from_item, order.name, item.base_net_amount)
+		self.item_ordered_orders = set(from_items)
+		return combine(sum_by(from_order, order.name, item.base_net_amount), from_items)
 
 	def billed_by_invoice(self) -> dict[str, float]:
 		invoice = qb.DocType("Sales Invoice")

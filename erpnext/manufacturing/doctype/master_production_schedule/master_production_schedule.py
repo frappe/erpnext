@@ -56,11 +56,9 @@ class MasterProductionSchedule(Document):
 
 		item_wise_data = self.get_item_wise_mps_data(actual_demand_data)
 
-		if not item_wise_data:
-			return []
-
-		self.update_item_details(item_wise_data)
-		self.add_mps_data(item_wise_data)
+		if item_wise_data:
+			self.update_item_details(item_wise_data)
+			self.add_mps_data(item_wise_data)
 
 		if not self.is_new():
 			self.save()
@@ -302,6 +300,7 @@ class MasterProductionSchedule(Document):
 				(doctype.docstatus == 1)
 				& (parent.company == self.company)
 				& parent.status.notin(["Closed", "Completed"])
+				& (doctype.closed == 0)
 				& (pending_qty > 0)
 			)
 			.orderby(doctype.delivery_date)
@@ -349,6 +348,7 @@ class MasterProductionSchedule(Document):
 				(parent.docstatus == 1)
 				& (parent.company == self.company)
 				& parent.status.notin(["Closed", "Completed"])
+				& (so_item.closed == 0)
 			)
 			.orderby(doctype.sales_order_item)
 			.orderby(doctype.delivery_date)
@@ -421,7 +421,6 @@ class MasterProductionSchedule(Document):
 				_("No open Material Requests found for the given criteria."),
 				alert=True,
 			)
-			return
 
 		for row in materials_requests:
 			self.append(
@@ -445,6 +444,7 @@ class MasterProductionSchedule(Document):
 				doctype.transaction_date,
 			)
 			.where((doctype.docstatus == 1) & (doctype.status.notin(["Closed", "Completed"])))
+			.where(doctype.company == self.company)
 			.orderby(doctype.schedule_date)
 		)
 
@@ -471,11 +471,7 @@ class MasterProductionSchedule(Document):
 			data = parse_json(data)
 
 		self.set("sales_orders", [])
-		sales_orders = self.get_sales_orders(data)
-		if not sales_orders:
-			return
-
-		for row in sales_orders:
+		for row in self.get_sales_orders(data):
 			self.append(
 				"sales_orders",
 				{
@@ -504,7 +500,9 @@ class MasterProductionSchedule(Document):
 				doctype.status,
 				doctype.grand_total,
 			)
+			.distinct()
 			.where((doctype.docstatus == 1) & (doctype.status.notin(["Closed", "Completed"])))
+			.where(doctype.company == self.company)
 			.orderby(doctype.delivery_date)
 		)
 
@@ -545,24 +543,6 @@ class MasterProductionSchedule(Document):
 
 	def after_delete(self):
 		update_sales_forecast_status(self.sales_forecast)
-
-	def on_submit(self):
-		self.enqueue_mrp_creation()
-
-	def enqueue_mrp_creation(self):
-		frappe.enqueue_doc(
-			"Master Production Schedule",
-			self.name,
-			"make_mrp",
-			queue="long",
-			timeout=1800,
-			enqueue_after_commit=True,
-		)
-
-		frappe.msgprint(
-			_("MRP Log documents are being created in the background."),
-			alert=True,
-		)
 
 
 def get_own_lead_time(lead_time, qty, is_manufactured):

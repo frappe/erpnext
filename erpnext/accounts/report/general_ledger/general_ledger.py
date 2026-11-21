@@ -440,6 +440,7 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	def add_total_to_data(totals, key):
 		row = totals[key]
 		row["account"] = labels[key]
+		row["is_total_row"] = 1
 		data.append(row)
 
 	labels = get_translated_labels_for_totals()

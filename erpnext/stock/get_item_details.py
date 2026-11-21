@@ -24,6 +24,7 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	set_transaction_type,
 	validate_pricing_context,
 )
+from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.utils import get_exchange_rate
@@ -209,7 +210,7 @@ def _get_item_details(
 		and not ctx.get("serial_and_batch_bundle")
 		and (ctx.get("use_serial_batch_fields") or ctx.get("doctype") == "POS Invoice")
 	):
-		update_stock(ctx, out, doc)
+		update_stock(ctx, out, doc, has_locked_rate=bool(source_row))
 
 	if ctx.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(ctx.transaction_date, item.lead_time_days)
@@ -332,7 +333,7 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 		out.update(_get_valuation_rate(ctx.item_code, ctx.company, out.get("warehouse")))
 
 
-def update_stock(ctx, out, doc=None):
+def update_stock(ctx, out, doc=None, has_locked_rate=False):
 	if (
 		(
 			ctx.get("doctype") in ["Delivery Note", "POS Invoice"]
@@ -370,12 +371,13 @@ def update_stock(ctx, out, doc=None):
 			batch_no = get_batch_no_covering_qty(kwargs, doc, out.stock_qty)
 			if batch_no:
 				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
-				rate = _get_batch_based_item_price(
-					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
-					out.item_code,
-				)
-				if rate:
-					out.update({"rate": rate, "price_list_rate": rate})
+				if not has_locked_rate:
+					rate = _get_batch_based_item_price(
+						{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
+						out.item_code,
+					)
+					if rate:
+						out.update({"rate": rate, "price_list_rate": rate})
 
 		if out.has_serial_no and needs_serial_nos(ctx, out):
 			set_serial_nos_for_outward(ctx, out, kwargs, doc)
@@ -477,14 +479,7 @@ def get_current_packed_items(doc):
 	if not isinstance(doc, Document):
 		doc = frappe.get_doc(doc)
 
-	precision = frappe.get_precision("Packed Item", "qty")
-	return [
-		frappe._dict(
-			packed_row.as_dict(),
-			qty=flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision),
-		)
-		for packed_row, item_row, qty_per_unit in get_kept_packed_items(doc)
-	]
+	return [frappe._dict(packed_row.as_dict(), qty=qty) for packed_row, qty in get_kept_packed_items(doc)]
 
 
 def get_bundle_row_stock_qty(item_row):
@@ -2142,9 +2137,7 @@ def get_serial_no(_args: Any, serial_nos: list | None = None, sales_order: str |
 
 def update_party_blanket_order(ctx: frappe._dict, out: frappe._dict):
 	if out["against_blanket_order"]:
-		blanket_order_details = _get_blanket_order_details(ctx)
-		if blanket_order_details:
-			out.update(blanket_order_details)
+		out.update(_get_blanket_order_details(ctx) or {"blanket_order": None, "blanket_order_rate": 0})
 
 
 @frappe.whitelist()
@@ -2186,10 +2179,13 @@ def _get_blanket_order_details(ctx: ItemDetailsCtx):
 			.limit(1)
 		)
 
-		if ctx.customer and ctx.doctype == "Sales Order":
-			query = query.where(bo.customer == ctx.customer)
-		elif ctx.supplier and ctx.doctype == "Purchase Order":
-			query = query.where(bo.supplier == ctx.supplier)
+		if ctx.doctype in ("Sales Order", "Quotation"):
+			customer = ctx.customer
+			if ctx.doctype == "Quotation":
+				customer = get_existing_customer_name(ctx.quotation_to, ctx.party_name or ctx.customer)
+			query = query.where((bo.blanket_order_type == "Selling") & (bo.customer == customer))
+		elif ctx.doctype == "Purchase Order":
+			query = query.where((bo.blanket_order_type == "Purchasing") & (bo.supplier == ctx.supplier))
 		if ctx.blanket_order:
 			query = query.where(bo.name == ctx.blanket_order)
 		if ctx.currency:

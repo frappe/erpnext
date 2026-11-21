@@ -75,10 +75,11 @@ class OperationsService:
 			self.doc.actual_operating_cost += flt(d.actual_operating_cost)
 
 		variable_cost = self.doc.actual_operating_cost or self.doc.planned_operating_cost
-		self.doc.total_operating_cost = (
+		self.doc.total_operating_cost = flt(
 			flt(self.doc.additional_operating_cost)
 			+ flt(variable_cost)
-			+ flt(self.doc.corrective_operation_cost)
+			+ flt(self.doc.corrective_operation_cost),
+			self.doc.precision("total_operating_cost"),
 		)
 
 	@staticmethod
@@ -127,9 +128,12 @@ class OperationsService:
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
 
-		planned_end_date = self.doc.operations and self.doc.operations[-1].planned_end_time
-		if planned_end_date:
-			self.doc.db_set("planned_end_date", planned_end_date)
+		# operations with the same Sequence ID run in parallel, so the last row may not end last
+		end_times = [
+			get_datetime(row.planned_end_time) for row in self.doc.operations if row.planned_end_time
+		]
+		if end_times:
+			self.doc.db_set("planned_end_date", max(end_times))
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)

@@ -87,9 +87,14 @@ frappe.ui.form.on("Repost Item Valuation", {
 
 	refresh: function (frm) {
 		if (frm.doc.status == "Failed" && frm.doc.docstatus == 1) {
-			frm.add_custom_button(__("Restart"), function () {
-				frm.trigger("restart_reposting");
-			}).addClass("btn-primary");
+			frm.add_custom_button(
+				__("Restart"),
+				function () {
+					frm.trigger("restart_reposting");
+				},
+				null,
+				"primary"
+			);
 		}
 
 		if (frm.doc.status !== "Completed") {

@@ -11,7 +11,7 @@ from pypika.enums import Order
 from pypika.queries import QueryBuilder
 from pypika.terms import Term
 
-from erpnext.projects.doctype.project.costing.queries import ProjectCostQueries
+from erpnext.projects.doctype.project.costing.queries import ProjectCostQueries, non_stock_purchase_amount
 
 DRIVER_LIMIT = 5
 # Unpriced hours at this share of all hours (in percent) leave labour cost understated.
@@ -67,10 +67,9 @@ class CostDrivers:
 
 	def suppliers(self) -> list[dict]:
 		invoice = qb.DocType("Purchase Invoice")
-		invoice_item = qb.DocType("Purchase Invoice Item")
 		measures = {
 			"label": Max(invoice.supplier_name),
-			"amount": Sum(invoice_item.base_net_amount),
+			"amount": Sum(non_stock_purchase_amount()),
 			"documents": Count(invoice.name).distinct(),
 		}
 		return grouped_rows(self.queries.non_stock_purchase_items(), invoice.supplier, measures)

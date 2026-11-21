@@ -15,6 +15,8 @@
   "column_break_4",
   "customer_group",
   "territory",
+  "customer_overview_section",
+  "load_customer_overview",
   "item_price_tab",
   "item_price_settings_section",
   "selling_price_list",
@@ -445,6 +447,18 @@
   {
    "fieldname": "transaction_naming_html",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "customer_overview_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Overview"
+  },
+  {
+   "default": "1",
+   "description": "When off, the Overview tab on a customer shows a Load Overview button and loads only when clicked.",
+   "fieldname": "load_customer_overview",
+   "fieldtype": "Check",
+   "label": "Enable Customer Overview Dashboard"
   }
  ],
  "grid_page_length": 50,
@@ -453,7 +467,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-23 12:00:00.000000",
+ "modified": "2026-11-17 15:11:39.690569",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

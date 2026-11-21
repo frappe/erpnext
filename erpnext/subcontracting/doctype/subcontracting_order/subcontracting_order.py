@@ -16,6 +16,7 @@ from erpnext.controllers.subcontracting_controller import SubcontractingControll
 from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
+	_get_stock_reservation_entries_for_voucher,
 	clear_reserve_stock_if_disabled,
 	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
@@ -116,8 +117,8 @@ class SubcontractingOrder(SubcontractingController):
 		)
 
 		if self.reserve_stock:
-			if self.has_unreserved_stock():
-				self.set_onload("has_unreserved_stock", True)
+			if unreserved_qty := self.get_unreserved_qty():
+				self.set_onload("unreserved_qty", unreserved_qty)
 
 			if has_reserved_stock(self.doctype, self.name):
 				self.set_onload("has_reserved_stock", True)
@@ -131,7 +132,6 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_uom_is_integer("stock_uom", "qty", "Subcontracting Order Item")
 		self.validate_item_stock_uom_is_integer("item_code", "qty", "Subcontracting Order Item")
 		self.validate_purchase_order_for_subcontracting()
-		self.validate_items()
 		self.validate_service_items()
 		self.validate_header_with_purchase_order()
 		self.validate_rows_with_purchase_order()
@@ -215,6 +215,15 @@ class SubcontractingOrder(SubcontractingController):
 			for service_item in self.service_items
 			if service_item.purchase_order_item in purchase_order_items
 		]
+
+		service_purchase_order_items = {
+			service_item.purchase_order_item for service_item in self.service_items
+		}
+		for item in self.items:
+			if item.purchase_order_item not in service_purchase_order_items:
+				frappe.throw(
+					_("Row {0}: Finished Good {1} has no Service Item row.").format(item.idx, item.item_code)
+				)
 
 		for service_item in self.service_items:
 			if frappe.get_value("Item", service_item.item_code, "is_stock_item"):
@@ -300,7 +309,7 @@ class SubcontractingOrder(SubcontractingController):
 	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("items"):
 			bom = frappe.get_doc("BOM", item.bom)
-			rm_cost = sum(flt(rm_item.amount) for rm_item in bom.items)
+			rm_cost = sum(flt(rm_item.base_rate) * flt(rm_item.qty) for rm_item in bom.items)
 			item.rm_cost_per_qty = flt(rm_cost / flt(bom.quantity), item.precision("rm_cost_per_qty"))
 
 	def calculate_items_qty_and_amount(self):
@@ -426,16 +435,7 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
 				else:
-					total_required_qty = total_supplied_qty = 0
-					for item in self.supplied_items:
-						total_required_qty += item.required_qty
-						total_supplied_qty += flt(item.total_supplied_qty)
-					if total_supplied_qty:
-						status = "Partial Material Transferred"
-						if total_supplied_qty >= total_required_qty:
-							status = "Material Transferred"
-					else:
-						status = "Open"
+					status = self.get_transfer_status()
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
@@ -450,6 +450,23 @@ class SubcontractingOrder(SubcontractingController):
 			self.update_ordered_qty_for_subcontracting()
 			self.update_reserved_qty_for_subcontracting()
 			self.update_subcontracted_qty_in_work_orders()
+
+	def get_transfer_status(self):
+		"""Material Transferred only when each raw material is fully supplied, counted across rows."""
+		required_qty, supplied_qty = defaultdict(float), defaultdict(float)
+		for item in self.supplied_items:
+			required_qty[item.rm_item_code] += flt(item.required_qty)
+			supplied_qty[item.rm_item_code] += flt(item.total_supplied_qty)
+
+		if not any(supplied_qty.values()):
+			return "Open"
+
+		precision = frappe.get_precision("Subcontracting Order Supplied Item", "total_supplied_qty")
+		for rm_item_code, qty in required_qty.items():
+			if flt(supplied_qty[rm_item_code], precision) < flt(qty, precision):
+				return "Partial Material Transferred"
+
+		return "Material Transferred"
 
 	def update_subcontracted_quantity_in_po(self):
 		po_items = [d.purchase_order_item for d in self.service_items if d.purchase_order_item]
@@ -557,12 +574,37 @@ class SubcontractingOrder(SubcontractingController):
 			elif StockReservation(self, items=reservation_items).make_stock_reservation_entries():
 				frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
 
-	def has_unreserved_stock(self) -> bool:
-		for item in self.get("supplied_items"):
-			if item.required_qty - flt(item.total_supplied_qty) - flt(item.stock_reserved_qty) > 0:
-				return True
+	def get_unreserved_qty(self) -> dict[str, float]:
+		"""Qty of each supplied item row that is neither supplied nor reserved, for rows that have some."""
+		held_qty = defaultdict(float)
+		for sre in _get_stock_reservation_entries_for_voucher(
+			self.doctype,
+			self.name,
+			fields=[
+				"voucher_detail_no",
+				"from_voucher_type",
+				"reserved_qty",
+				"delivered_qty",
+				"transferred_qty",
+				"consumed_qty",
+			],
+		):
+			# a transfer's reservation holds stock that total_supplied_qty already counts
+			if sre.from_voucher_type != "Stock Entry":
+				held_qty[sre.voucher_detail_no] += (
+					sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty
+				)
 
-		return False
+		unreserved_qty = {}
+		for item in self.supplied_items:
+			qty = flt(
+				item.required_qty - flt(item.total_supplied_qty) - held_qty[item.name],
+				item.precision("required_qty"),
+			)
+			if qty > 0:
+				unreserved_qty[item.name] = qty
+
+		return unreserved_qty
 
 	def release_stock_reservations(self):
 		sre_list = []

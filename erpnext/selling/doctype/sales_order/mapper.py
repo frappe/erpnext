@@ -11,7 +11,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, cint, flt, nowdate, strip_html
+from frappe.utils import add_days, cint, flt, getdate, nowdate, strip_html
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
 from erpnext.buying.utils import check_on_hold_or_closed_status, get_qty_to_order
@@ -787,7 +787,7 @@ def make_purchase_order(
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
-		target.schedule_date = source.delivery_date
+		target.schedule_date = max(getdate(source.delivery_date or nowdate()), getdate(nowdate()))
 		target.qty = qty_to_order[source.name]
 		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
@@ -913,7 +913,9 @@ def set_delivery_date(items: list, sales_order: str) -> None:
 
 	for item in items:
 		if item.product_bundle:
-			item.schedule_date = delivery_by_bundle.get(item.product_bundle)
+			item.schedule_date = max(
+				getdate(delivery_by_bundle.get(item.product_bundle) or nowdate()), getdate(nowdate())
+			)
 
 
 @frappe.whitelist(methods=["POST"])

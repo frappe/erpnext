@@ -1433,9 +1433,9 @@ class AccountsController(TransactionBase):
 			frappe.db.set_value("Sales Order Item", {"name": ["in", items]}, "ordered_qty", qty)
 
 	def get_company_default(self, fieldname, ignore_validation=False):
-		from erpnext.accounts.utils import get_company_default
+		from erpnext.accounts.utils import _get_company_default
 
-		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
+		return _get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
 		stock_items = []
