@@ -7614,7 +7614,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_landed_cost_keeps_what_internal_pr_took_out_of_transit(self):
 		"""A Landed Cost Voucher posts an internal receipt again with the qty it took out of transit."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
@@ -7673,7 +7673,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 	def test_landed_cost_keeps_internal_pr_that_rejects_into_transit(self):
 		"""A Landed Cost Voucher posts again what an internal receipt that rejects into transit moved."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
 		)
