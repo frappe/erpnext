@@ -1157,6 +1157,9 @@ class RowProcessor:
 		account_summary = self.context.raw_data.get("summary", {})
 		account_details = self.context.raw_data.get("account_details", {})
 
+		# check all Custom API rows first, so a rejected row stops the report before any method runs
+		self._validate_api_rows()
+
 		for row in processing_order:
 			row_data = self._process_single_row(row, account_summary, account_details)
 			processed_rows.append(row_data)
@@ -1191,10 +1194,16 @@ class RowProcessor:
 
 		return RowData(row=row, values=values, account_details=details)
 
+	def _validate_api_rows(self):
+		for row in self.context.template.rows:
+			if row.data_source == "Custom API":
+				get_valid_api_method(row.calculation_formula, row.idx)
+
 	def _process_api_row(self, row) -> RowData:
 		api_path = row.calculation_formula
 
-		method = get_valid_api_method(api_path)
+		# checked again here, outside the try block, so that a rejected method stops the report
+		method = get_valid_api_method(api_path, row.idx)
 
 		try:
 			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval

@@ -37,19 +37,44 @@ ALLOWED_FUNCTIONS = frozenset(FORMULA_FUNCTIONS) | frozenset(
 UNSUPPORTED_NODES = (ast.NamedExpr, ast.Lambda)
 
 
-def get_valid_api_method(api_path: str):
-	"""Resolve `api_path`, ensuring it is whitelisted and permits GET (i.e. read-only)."""
+API_METHODS_HOOK = "financial_report_template_methods"
+
+
+def get_valid_api_method(api_path: str, row_idx: int | None = None):
+	"""
+	Resolve `api_path` for a Custom API row.
+
+	The path must be registered by an installed app in the `financial_report_template_methods` hook.
+	The method must also be whitelisted and permit GET. The check runs before the method is imported.
+	"""
+	if not is_registered_api_method(api_path):
+		throw_api_method_error(
+			_("Method {0} is not registered in the {1} hook").format(
+				frappe.bold(escape_html(api_path)), frappe.bold(API_METHODS_HOOK)
+			),
+			row_idx,
+		)
+
 	method = frappe.get_attr(api_path)
 	is_whitelisted(method)
 
 	if "GET" not in frappe.allowed_http_methods_for_whitelisted_func.get(method, ()):
-		frappe.throw(
-			_("Method {0} must permit GET requests").format(frappe.bold(api_path)),
-			frappe.PermissionError,
-			title=_("Method Not Allowed"),
+		throw_api_method_error(
+			_("Method {0} must permit GET requests").format(frappe.bold(escape_html(api_path))), row_idx
 		)
 
 	return method
+
+
+def is_registered_api_method(api_path: str) -> bool:
+	return isinstance(api_path, str) and api_path in frappe.get_hooks(API_METHODS_HOOK)
+
+
+def throw_api_method_error(message: str, row_idx: int | None = None):
+	if row_idx:
+		message = _("Template row {0}: {1}", context="Financial Report Template").format(row_idx, message)
+
+	frappe.throw(message, frappe.PermissionError, title=_("Method Not Allowed"))
 
 
 def get_formula_field_label(data_source: str) -> str:
@@ -600,7 +625,9 @@ class FormulaValidator(Validator):
 			if isinstance(e, frappe.PermissionError):
 				message = _("[{0}] {1}", context="Financial Report Template").format(
 					get_formula_field_label(row.data_source),
-					_("Method '{0}' must be whitelisted and permit GET requests.").format(api_path),
+					_(
+						"Method '{0}' must be registered in the {1} hook, whitelisted and permit GET requests."
+					).format(api_path, API_METHODS_HOOK),
 				)
 			else:
 				message = _("Could not validate {0}: {1}.").format(
