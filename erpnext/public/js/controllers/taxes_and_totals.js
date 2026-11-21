@@ -14,16 +14,18 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	apply_pricing_rule_on_item(item) {
-		let effective_item_rate = item.price_list_rate;
+		let effective_item_rate = flt(item.price_list_rate);
 		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
 			effective_item_rate = flt(item.blanket_order_rate) * (flt(item.conversion_factor) || 1);
 		}
 
+		// a newly added row has no margin yet
+		const margin = flt(item.margin_rate_or_amount);
 		let rate_with_margin;
 		if (item.margin_type == "Percentage") {
-			rate_with_margin = effective_item_rate * (1 + item.margin_rate_or_amount / 100);
+			rate_with_margin = effective_item_rate * (1 + margin / 100);
 		} else {
-			rate_with_margin = effective_item_rate + item.margin_rate_or_amount;
+			rate_with_margin = effective_item_rate + margin;
 		}
 		item.rate_with_margin = flt(rate_with_margin, precision("rate_with_margin", item));
 
