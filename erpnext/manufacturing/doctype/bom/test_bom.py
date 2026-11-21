@@ -390,6 +390,42 @@ class TestBOM(ERPNextTestSuite):
 			(bom.base_raw_material_cost, bom.base_operating_cost, bom.base_total_cost), (120.1, 11.68, 131.78)
 		)
 
+	def test_parent_bom_follows_child_base_total_cost(self):
+		def make_usd_bom(item, rows):
+			return frappe.get_doc(
+				{
+					"doctype": "BOM",
+					"item": item,
+					"company": "_Test Company",
+					"currency": "USD",
+					"conversion_rate": 1.333,
+					"items": rows,
+				}
+			).submit()
+
+		rm_items = [make_item(properties={"is_stock_item": 0}).name for _ in range(2)]
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		child = make_usd_bom(sub_item, [{"item_code": item, "qty": 1, "rate": 1} for item in rm_items])
+		parent = make_usd_bom(
+			make_item(properties={"is_stock_item": 1}).name,
+			[
+				{
+					"item_code": sub_item,
+					"qty": 1,
+					"bom_no": child.name,
+					"set_rate_of_sub_assembly_item_based_on_bom": 1,
+				}
+			],
+		)
+
+		# the total stays 2 USD, the rounded base total goes from 2.66 to 2.67
+		child.items[0].db_set("rate", 0.99)
+		child.items[1].db_set("rate", 1.01)
+		child.update_cost()
+
+		self.assertEqual(frappe.db.get_value("BOM", child.name, ["total_cost", "base_total_cost"]), (2, 2.67))
+		self.assertAlmostEqual(frappe.db.get_value("BOM Item", parent.items[0].name, "rate"), 2.67 / 1.333)
+
 	@timeout
 	def test_subcontractor_sourced_item(self):
 		item_code = "_Test Subcontracted FG Item 1"
