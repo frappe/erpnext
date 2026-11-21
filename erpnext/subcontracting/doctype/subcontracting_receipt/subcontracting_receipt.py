@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.controllers.sales_and_purchase_return import (
 	get_already_returned_items,
 	get_rate_for_return,
@@ -20,6 +21,7 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
 
@@ -143,6 +145,9 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_items_qty()
 		self.set_items_bom()
 		self.set_items_received_qty()
+		self.set_items_accounting_defaults()
+
+	def set_items_accounting_defaults(self):
 		self.set_items_cost_center()
 
 		if self.company:
@@ -175,9 +180,11 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_missing_values()
 		# after set_missing_values, so the secondary rates are computed from the same
 		# calculated per-qty costs the Get Secondary Items button uses, and before
-		# validate_return, so a return validates the rows it saves
-		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
+		# validate_return, so a return validates the rows it saves, also when inserted as submitted
+		if self.is_new() and (self.get("_action") == "save" or self.is_return) and not frappe.in_test:
 			self.get_secondary_items(recalculate_rate=True)
+			# before_validate set them before the rows were rebuilt
+			self.set_items_accounting_defaults()
 
 		self.validate_with_previous_doc()
 		validate_return(self)
@@ -476,7 +483,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def get_secondary_items(self, recalculate_rate: bool | None = False):
-		self.remove_secondary_items()
+		sent_rows = self.remove_secondary_items()
 
 		original_rows = self.get_returned_receipt_rows()
 		# rejected goods yield no secondary items
@@ -490,6 +497,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.link_returned_secondary_items(original_rows)
 		self.set_remaining_secondary_qty(original_rows)
 		self.remove_returned_secondary_rows_without_qty()
+		self.keep_secondary_row_values(sent_rows)
 
 		if recalculate_rate:
 			self.set_additional_costs()
@@ -516,12 +524,14 @@ class SubcontractingReceipt(SubcontractingController):
 					"secondary_item_type",
 					"valuation_type",
 					"returned_qty",
+					"warehouse",
 				],
 			)
 		}
 
 	def link_returned_secondary_items(self, original_rows):
-		"""Link each rebuilt secondary row of a return to its row on the returned receipt."""
+		"""Link each rebuilt secondary row of a return to its row on the returned receipt,
+		and return it from the warehouse that row received it in."""
 		if not original_rows:
 			return
 
@@ -541,10 +551,15 @@ class SubcontractingReceipt(SubcontractingController):
 
 		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
 		for row in self.items:
-			if row.bom_secondary_item:
-				row.subcontracting_receipt_item = secondary_rows.get(
-					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
-				)
+			if not row.bom_secondary_item:
+				continue
+
+			original_row_name = secondary_rows.get(
+				(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
+			)
+			if original_row_name:
+				row.subcontracting_receipt_item = original_row_name
+				row.warehouse = original_rows[original_row_name].warehouse
 
 	@staticmethod
 	def pair_legacy_secondary_rows(fg_row, receipt_rows):
@@ -605,6 +620,72 @@ class SubcontractingReceipt(SubcontractingController):
 		return flt(original_row.returned_qty - flt(row.received_qty), precision) >= flt(
 			original_row.received_qty - original_row.process_loss_qty, precision
 		)
+
+	def keep_secondary_row_values(self, sent_rows):
+		"""Keep the accounts and dimensions set on a return's secondary rows before the rebuild,
+		and their serial nos and batches when they fit the rebuilt qty.
+		Rows sent for one receipt row, e.g. when its finished goods are split, are kept in their order."""
+		sent_by_receipt_row = defaultdict(list)
+		for row in sent_rows:
+			if row.subcontracting_receipt_item:
+				sent_by_receipt_row[row.subcontracting_receipt_item].append(row)
+		if not sent_by_receipt_row:
+			return
+
+		bundle_qty = self.get_bundle_qty(sent_rows)
+		kept_fields = [
+			"expense_account",
+			"cost_center",
+			"project",
+			*get_accounting_dimensions(),
+			*[dimension.source_fieldname for dimension in get_inventory_dimensions()],
+		]
+		for row in self.items:
+			if not (row.bom_secondary_item and sent_by_receipt_row.get(row.subcontracting_receipt_item)):
+				continue
+
+			sent = sent_by_receipt_row[row.subcontracting_receipt_item].pop(0)
+			fieldnames = kept_fields
+			# qty is the final one only after calculate_items_qty_and_amount
+			if self.has_picks_for_qty(sent, flt(row.received_qty) - flt(row.process_loss_qty), bundle_qty):
+				fieldnames = [
+					*fieldnames,
+					"use_serial_batch_fields",
+					"serial_no",
+					"batch_no",
+					"serial_and_batch_bundle",
+				]
+
+			for fieldname in fieldnames:
+				row.set(fieldname, sent.get(fieldname))
+
+	@staticmethod
+	def get_bundle_qty(rows) -> dict:
+		bundles = [row.serial_and_batch_bundle for row in rows if row.serial_and_batch_bundle]
+		if not bundles:
+			return {}
+
+		return dict(
+			frappe.get_all(
+				"Serial and Batch Bundle",
+				filters={"name": ["in", bundles]},
+				fields=["name", "total_qty"],
+				as_list=True,
+			)
+		)
+
+	@staticmethod
+	def has_picks_for_qty(row, qty, bundle_qty):
+		"""Whether the serial nos and batches on a row fit qty: a mapped return row has all the serial nos left to return."""
+		precision = row.precision("qty")
+		qty = flt(abs(qty), precision)
+		if row.serial_and_batch_bundle:
+			return flt(abs(flt(bundle_qty.get(row.serial_and_batch_bundle))), precision) == qty
+
+		if row.serial_no:
+			return len(get_serial_nos(row.serial_no)) == qty
+
+		return bool(row.batch_no)
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
@@ -745,11 +826,16 @@ class SubcontractingReceipt(SubcontractingController):
 		return (fg_item_cost * (cost_allocation_per / 100)) / qty if qty else 0.0
 
 	def remove_secondary_items(self):
+		"""Remove the secondary rows and return them."""
+		removed = []
 		for item in list(self.items):
 			if item.secondary_item_type or item.valuation_type:
 				self.remove(item)
+				removed.append(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
+
+		return removed
 
 	@frappe.whitelist()
 	def set_missing_values(self):

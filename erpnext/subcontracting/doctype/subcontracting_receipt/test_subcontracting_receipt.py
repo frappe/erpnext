@@ -504,6 +504,185 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.load_from_db()
 		self.assertEqual(scr.per_returned, 100)
 
+	def test_return_inserted_as_submitted_after_a_partial_return(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_partial_return(scr.name, 3)
+
+		# e.g. through the REST API, without a save first
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -7
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_return_inserted_as_submitted_sets_accounts_of_secondary_rows(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		secondary_row = scr_return.items[1]
+		self.assertTrue(secondary_row.bom_secondary_item)
+		self.assertTrue(secondary_row.expense_account)
+		self.assertTrue(secondary_row.cost_center)
+
+	def test_return_inserted_as_submitted_keeps_the_cost_center_set_on_a_secondary_row(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[1].cost_center = "_Test Cost Center 2 - _TC"
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		self.assertEqual(scr_return.items[1].cost_center, "_Test Cost Center 2 - _TC")
+
+	def test_return_split_over_two_rows_keeps_the_cost_center_of_each_secondary_row(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		fg_row, secondary_row = scr_return.items
+		fg_row.qty = -2
+		secondary_row.update({"qty": -1, "received_qty": -1, "cost_center": "_Test Cost Center - _TC"})
+		scr_return.append("items", fg_row.as_dict(no_default_fields=True))
+		split_secondary_row = scr_return.append("items", secondary_row.as_dict(no_default_fields=True))
+		split_secondary_row.cost_center = "_Test Cost Center 2 - _TC"
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		self.assertEqual(
+			[row.cost_center for row in scr_return.items if row.bom_secondary_item],
+			["_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"],
+		)
+
+	def test_rejected_return_leaves_out_secondary_items(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10, rejected_qty=4)
+
+		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual([row.item_code for row in scr_return.items], [fg_item])
+
+	def test_return_inserted_as_submitted_keeps_serial_nos_picked_on_secondary_rows(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(
+			fg_item,
+			secondary_qty=1,
+			secondary_properties={"has_serial_no": 1, "serial_no_series": "SCR-SEC-.####"},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 4)
+		serial_nos = frappe.get_all(
+			"Serial No",
+			filters={"item_code": scr.items[1].item_code},
+			order_by="serial_no",
+			pluck="serial_no",
+		)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.items[1].update(
+			{"qty": -2, "use_serial_batch_fields": 1, "serial_no": "\n".join(serial_nos[:2])}
+		)
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
+		self.assertEqual(sorted(returned), serial_nos[:2])
+
+	def test_partial_return_drops_the_serial_nos_its_secondary_rows_were_mapped_with(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(
+			fg_item,
+			secondary_qty=1,
+			secondary_properties={"has_serial_no": 1, "serial_no_series": "SCR-SEC-.####"},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 4)
+		serial_nos = frappe.get_all(
+			"Serial No", filters={"item_code": scr.items[1].item_code}, pluck="serial_no"
+		)
+
+		# make_return_doc maps a row received with serial no fields with all its serial nos
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.items[1].update({"use_serial_batch_fields": 1, "serial_no": "\n".join(serial_nos)})
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+		scr_return.submit()
+
+		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
+		self.assertEqual(len(returned), 2)
+
+	def test_secondary_items_of_a_saved_return_drop_a_bundle_picked_for_another_qty(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			add_serial_batch_ledgers,
+		)
+
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(
+			fg_item,
+			secondary_qty=1,
+			secondary_properties={"has_serial_no": 1, "serial_no_series": "SCR-SEC-.####"},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 4)
+		serial_nos = frappe.get_all("Serial No", filters={"item_code": scr.items[1].item_code}, pluck="name")
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+		secondary_row = scr_return.items[1]
+		bundle = add_serial_batch_ledgers(
+			[{"serial_no": serial_no, "qty": 1} for serial_no in serial_nos[:2]],
+			secondary_row.as_dict(),
+			scr_return.as_dict(),
+			secondary_row.warehouse,
+		)
+		secondary_row.serial_and_batch_bundle = bundle.name
+		scr_return.save()
+
+		scr_return.items[0].qty = scr_return.items[0].received_qty = -1
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.save()
+		scr_return.submit()
+
+		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
+		self.assertEqual(len(returned), 1)
+
+	def test_return_takes_secondary_items_from_the_warehouse_they_were_received_in(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10, secondary_warehouse="_Test Warehouse 1 - _TC")
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+
+		self.assertEqual(scr_return.items[1].warehouse, "_Test Warehouse 1 - _TC")
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
@@ -5836,10 +6015,19 @@ def make_receipt_with_rejected_qty_and_scrap():
 	return scr, scrap_item
 
 
-def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, secondary_item_types=("Scrap",)):
+def make_bom_with_secondary_item(
+	fg_item, quantity=1, secondary_qty=0.5, secondary_item_types=("Scrap",), secondary_properties=None
+):
 	"""BOM with one raw material per unit and a secondary item of each type."""
 	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
-	secondary_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+	secondary_item = make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Nos",
+			"valuation_rate": 10,
+			**(secondary_properties or {}),
+		}
+	).name
 
 	bom = make_bom(
 		item=fg_item,
@@ -5866,7 +6054,9 @@ def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, seconda
 	return bom
 
 
-def make_receipt_with_secondary_items(fg_item, qty, process_loss_qty=0):
+def make_receipt_with_secondary_items(
+	fg_item, qty, process_loss_qty=0, rejected_qty=0, secondary_warehouse=None
+):
 	"""Submitted receipt for qty of fg_item, with its secondary rows."""
 	set_backflush_based_on("BOM")
 	service_items = [
@@ -5890,8 +6080,16 @@ def make_receipt_with_secondary_items(fg_item, qty, process_loss_qty=0):
 	scr = make_subcontracting_receipt(sco.name)
 	scr.items[0].qty = qty - process_loss_qty
 	scr.items[0].process_loss_qty = process_loss_qty
+
+	if rejected_qty:
+		scr.items[0].qty -= rejected_qty
+		scr.items[0].rejected_qty = rejected_qty
+		scr.items[0].rejected_warehouse = "_Test Warehouse 1 - _TC"
 	scr.save()
 	scr.get_secondary_items()
+	for row in scr.items:
+		if secondary_warehouse and row.bom_secondary_item:
+			row.warehouse = secondary_warehouse
 	scr.save()
 	scr.submit()
 	return scr
