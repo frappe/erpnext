@@ -7875,6 +7875,74 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertFalse(pr.items[0].serial_and_batch_bundle)
 		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", package))
 
+	def test_internal_pr_of_several_batches_takes_its_own_qty(self):
+		"""An internal receipt of a delivery that took several batches gets a package of its own qty."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		company = "_Test Company with perpetual inventory"
+		source = create_warehouse("_Test Transfer From", company=company)
+		item = make_item(
+			"_Test Two Batch Transfer Item",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-TWOB-.####"},
+		)
+		for _ in range(2):
+			make_purchase_receipt(
+				item_code=item.name,
+				company=company,
+				warehouse=source,
+				qty=3,
+				rate=100,
+				posting_date=add_days(today(), -3),
+			)
+
+		dn = create_delivery_note(
+			item_code=item.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=100,
+			warehouse=source,
+			target_warehouse=create_warehouse("_Test Transfer Transit", company=company),
+			posting_date=add_days(today(), -2),
+		)
+
+		def make_receipt(qty, rejected_qty=0):
+			pr = make_inter_company_purchase_receipt(dn.name)
+			pr.items[0].update(
+				{
+					"warehouse": create_warehouse("_Test Transfer To", company=company),
+					"rejected_warehouse": create_warehouse("_Test Transfer Rejected", company=company),
+					"qty": qty,
+					"rejected_qty": rejected_qty,
+					"received_qty": qty + rejected_qty,
+				}
+			)
+			return pr.insert()
+
+		def get_package_qty(pr, bundle_field="serial_and_batch_bundle"):
+			return abs(
+				frappe.db.get_value("Serial and Batch Bundle", pr.items[0].get(bundle_field), "total_qty")
+			)
+
+		self.assertEqual(get_package_qty(make_receipt(4)), 4)
+
+		pr = make_receipt(5)
+		pr.items[0].update({"qty": 4, "received_qty": 4})
+		pr.save()
+		self.assertEqual(get_package_qty(pr), 4)
+
+		pr = make_receipt(1, rejected_qty=4)
+		pr.items[0].update({"rejected_qty": 3, "received_qty": 4})
+		pr.save()
+		self.assertEqual(get_package_qty(pr, "rejected_serial_and_batch_bundle"), 3)
+
+		# accepted and rejected material, and a later receipt, do not take the same batch twice
+		make_receipt(3, rejected_qty=1).submit()
+		make_receipt(1).submit()
+
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
