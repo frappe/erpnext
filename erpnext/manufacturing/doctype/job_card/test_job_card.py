@@ -4691,6 +4691,62 @@ class TestJobCard(ERPNextTestSuite):
 			str(frappe.db.get_value("Work Order", wo.name, "planned_end_date")), "2031-05-05 09:30:00"
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_workstation_type_card_waits_on_the_workstation_that_frees_first(self):
+		workstation_type, (first, second) = make_jc_review_type_workstations(2)
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 12, workstation=first)
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 6, workstation=second)
+
+		job_card = make_jc_review_scheduled_job_card(
+			"2031-03-03 08:30:00", 3, workstation_type=workstation_type
+		)
+		self.assertEqual(job_card.workstation, second)
+		self.assertEqual(
+			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
+			[("2031-03-03 09:10:00", "2031-03-03 09:40:00")],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_workstation_type_card_skips_the_workstation_booked_again(self):
+		workstation_type, (first, second) = make_jc_review_type_workstations(2)
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 12, workstation=first)
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 6, workstation=second)
+		make_jc_review_scheduled_job_card("2031-03-03 09:00:00", 11, workstation=second)
+
+		job_card = make_jc_review_scheduled_job_card(
+			"2031-03-03 08:30:00", 3, workstation_type=workstation_type
+		)
+		self.assertEqual(job_card.workstation, first)
+		self.assertEqual(
+			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
+			[("2031-03-03 10:10:00", "2031-03-03 10:40:00")],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "mins_between_operations": 10, "allow_overtime": 0},
+	)
+	def test_workstation_type_card_skips_a_workstation_whose_shift_ends(self):
+		workstation_type, (first, second) = make_jc_review_type_workstations(2)
+		shift = frappe.get_doc("Workstation", second)
+		shift.append("working_hours", {"start_time": "00:00:00", "end_time": "09:00:00"})
+		shift.save()
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 12, workstation=first)
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 6, workstation=second)
+
+		job_card = make_jc_review_scheduled_job_card(
+			"2031-03-03 08:30:00", 3, workstation_type=workstation_type
+		)
+		self.assertEqual(job_card.workstation, first)
+		self.assertEqual(
+			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
+			[("2031-03-03 10:10:00", "2031-03-03 10:40:00")],
+		)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_partial_sub_operation_cycles_keep_job_card_qty(self):
 		workstation = make_jc_review_workstation()
