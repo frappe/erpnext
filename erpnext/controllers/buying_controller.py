@@ -1969,13 +1969,19 @@ def get_stock_qty_status_args(round_total=True) -> dict:
 
 def get_received_stock_qty_status_args() -> dict:
 	"""Status updater args that add up receipts' stock qty. A receipt rounds the stock qty of each row whatever the
-	setting, so add up qty * conversion factor, rounded once at the total where the target rounds its stock qty too."""
-	return {"source_field": "qty * conversion_factor", "round_to_target_precision": rounds_stock_qty}
+	setting, so add up qty * conversion factor, rounded once at the total where the Material Request row has a
+	rounded stock qty, so parts add up to it."""
+	return {
+		"source_field": "qty * conversion_factor",
+		"round_to_target_precision": has_rounded_request_stock_qty,
+	}
 
 
-def rounds_stock_qty(row) -> bool:
-	"""Whether set_qty_as_per_stock_uom rounds the stock qty of a purchase row."""
-	return bool(
-		frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
-		or frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")
-	)
+def has_rounded_request_stock_qty(row) -> bool:
+	"""Whether the Material Request row of a receipt row has a rounded stock qty, as the setting was when it was saved."""
+	stock_qty = frappe.db.get_value("Material Request Item", row.material_request_item, "stock_qty")
+	return is_rounded_request_stock_qty(stock_qty)
+
+
+def is_rounded_request_stock_qty(stock_qty) -> bool:
+	return flt(stock_qty) == flt(stock_qty, frappe.get_precision("Material Request Item", "stock_qty"))

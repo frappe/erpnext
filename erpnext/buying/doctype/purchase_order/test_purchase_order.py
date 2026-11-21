@@ -261,6 +261,18 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
 		self.assertEqual(mr.per_received, 100)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_receipt_completes_a_material_request_made_before_the_setting_is_turned_off(self):
+		mr = receive_material_request_after_setting_change(allow_to_edit_stock_uom_qty=0)
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_received, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_receipt_completes_a_material_request_made_before_the_setting_is_turned_on(self):
+		mr = receive_material_request_after_setting_change(allow_to_edit_stock_uom_qty=1)
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_received, 100)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
 	def test_receipt_of_a_material_request_in_a_whole_number_uom_completes_it(self):
 		item = make_item(
@@ -3190,6 +3202,23 @@ def receive_material_request_in_parts():
 		pr = make_purchase_receipt(po.name)
 		pr.items[0].qty = pr.items[0].received_qty = 1
 		pr.submit()
+
+	mr.reload()
+	return mr
+
+
+def receive_material_request_after_setting_change(allow_to_edit_stock_uom_qty):
+	"""Material Request for 3 fractional Boxes, ordered, then received after the purchase stock UOM qty setting changes."""
+	item = make_item_with_fractional_box()
+	mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+	po = make_purchase_order(mr.name)
+	po.supplier = "_Test Supplier"
+	po.submit()
+
+	frappe.db.set_single_value(
+		"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase", allow_to_edit_stock_uom_qty
+	)
+	make_purchase_receipt(po.name).submit()
 
 	mr.reload()
 	return mr
