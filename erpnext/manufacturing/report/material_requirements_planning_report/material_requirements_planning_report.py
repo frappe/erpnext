@@ -84,7 +84,7 @@ class MaterialRequirementsPlanningReport:
 		self.dates = self.get_dates()
 		self.mps_data = self.get_mps_data(self.filters.from_date, self.filters.to_date)
 		items = self.get_items_from_mps(self.mps_data)
-		self.update_sales_forecast_data()
+		self.update_sales_forecast_data(items)
 
 		self.item_rm_details = self.get_raw_materials_data(items)
 
@@ -101,9 +101,6 @@ class MaterialRequirementsPlanningReport:
 		return data, chart
 
 	def add_non_planned_orders(self, items):
-		if not items:
-			return
-
 		orders = self.get_non_planned_orders(
 			items, self.mps_data, self.filters.get("from_date"), self.filters.get("to_date")
 		)
@@ -123,6 +120,9 @@ class MaterialRequirementsPlanningReport:
 
 	def get_non_planned_orders(self, items, mps_data, from_date, to_date):
 		"""Return the Sales Order demand of the items beyond the MPS, per item and delivery date."""
+		if not items:
+			return []
+
 		so = frappe.qb.DocType("Sales Order")
 		so_item = frappe.qb.DocType("Sales Order Item")
 
@@ -272,8 +272,8 @@ class MaterialRequirementsPlanningReport:
 				details.reserved_qty -= reserved_qty
 				details.projected_qty += reserved_qty
 
-	def update_sales_forecast_data(self):
-		sales_forecast_data = self.get_sales_forecast_data()
+	def update_sales_forecast_data(self, items):
+		sales_forecast_data = self.get_sales_forecast_data(items)
 
 		if not sales_forecast_data:
 			return
@@ -1212,7 +1212,7 @@ class MaterialRequirementsPlanningReport:
 			return False
 		return not (self.filters.to_date and date > getdate(self.filters.to_date))
 
-	def get_sales_forecast_data(self):
+	def get_sales_forecast_data(self, items):
 		forecast_doc = frappe.qb.DocType("Sales Forecast")
 		doctype = frappe.qb.DocType("Sales Forecast Item")
 
@@ -1251,7 +1251,7 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code == self.filters.item_code)
 
 		sales_data = query.run(as_dict=True)
-		self.consume_forecast(sales_data)
+		self.consume_forecast(sales_data, items)
 		sales_data = [row for row in sales_data if flt(row.qty, self.qty_precision)]
 
 		return [
@@ -1260,7 +1260,7 @@ class MaterialRequirementsPlanningReport:
 			if self.is_in_date_range(row.delivery_date)
 		]
 
-	def consume_forecast(self, forecast_rows):
+	def consume_forecast(self, forecast_rows, items):
 		"""Let the MPS and non-planned Sales Order demand of a forecast period use up its forecast."""
 		if not forecast_rows:
 			return
@@ -1269,7 +1269,6 @@ class MaterialRequirementsPlanningReport:
 		# the whole period counts, even the days outside the report dates
 		from_date, to_date = min(start for start, _ in periods), max(end for _, end in periods)
 		mps_data = self.get_mps_data(from_date, to_date)
-		items = list({row.item_code for row in forecast_rows})
 		orders = self.get_non_planned_orders(items, mps_data, from_date, to_date)
 
 		demand_by_item = {}
