@@ -76,6 +76,34 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 		self.assertEqual(costed(add_days(day, 2), add_days(day, 4)), [(90, 900)])
 		self.assertEqual(costed(add_to_date(day, hours=10, minutes=15), add_days(day, 1)), [(15, 150)])
 
+	def test_date_filter_counts_parallel_operators_once(self):
+		day = get_datetime(add_days(today(), -10))
+		start = add_to_date(day, hours=10)
+		# two operators over the same hour
+		corrective_jc, _operation, _workstation = self.create_corrective_job_card(
+			hour_rate=600, time_logs=[(start, 60, 1), (start, 60, 1)]
+		)
+
+		rows = self.run_report(
+			company="_Test Company",
+			name=corrective_jc.name,
+			from_date=add_days(day, -1),
+			to_date=add_days(day, 1),
+		)
+		self.assertEqual([(row.total_time_in_mins, row.operating_cost) for row in rows], [(60, 600)])
+
+	def test_date_filter_skips_open_time_logs(self):
+		day = get_datetime(add_days(today(), -10))
+		start = add_to_date(day, hours=10)
+		corrective_jc, _operation, _workstation = self.create_corrective_job_card(
+			hour_rate=600, time_logs=[(start, 60, 2)]
+		)
+		# started but never stopped
+		corrective_jc.append("time_logs", {"from_time": add_to_date(start, hours=2)}).db_insert()
+
+		rows = self.run_report(company="_Test Company", name=corrective_jc.name, from_date=add_days(day, -1))
+		self.assertEqual([(row.total_time_in_mins, row.operating_cost) for row in rows], [(60, 600)])
+
 	def test_costs_of_split_ranges_add_up_to_the_whole_log(self):
 		from unittest.mock import patch
 
