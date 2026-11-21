@@ -1372,12 +1372,14 @@ class BuyingController(SubcontractingController):
 
 	def get_rejected_stock_qty(self, row) -> float:
 		"""Rejected qty in the stock UOM. An internal receipt takes it out of the stock qty it
-		receives, so the accepted and rejected parts add up to what leaves the in-transit warehouse."""
-		if not self.is_internal_receipt():
-			return get_stock_qty(row, row.rejected_qty)
-
+		receives, so the accepted and rejected parts add up to what leaves the in-transit warehouse. A
+		return takes back no more than its receipt row put in the rejected warehouse, less the row's other
+		returns."""
 		if self.is_return:
 			return self.get_return_stock_qty(row, row.rejected_qty, row.rejected_warehouse)
+
+		if not self.is_internal_receipt():
+			return get_stock_qty(row, row.rejected_qty)
 
 		return flt(
 			get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty)) - get_stock_qty(row, row.qty),
