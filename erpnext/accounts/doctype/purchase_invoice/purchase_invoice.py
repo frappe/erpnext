@@ -39,7 +39,12 @@ from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
-from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_received_stock_qty_status_args,
+	get_stock_qty,
+	get_transit_amount,
+)
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock import get_warehouse_account_map
@@ -848,9 +853,9 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_dt": "Material Request",
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
-					"source_field": "stock_qty",
+					**get_received_stock_qty_status_args(),
 					"second_source_dt": "Purchase Receipt Item",
-					"second_source_field": "stock_qty",
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "material_request_item",
 					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
@@ -1183,6 +1188,11 @@ class PurchaseInvoice(BuyingController):
 						if self.is_internal_supplier and item.valuation_rate:
 							credit_amount = flt(item.valuation_rate * item.stock_qty)
 
+						rejected_amount = self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, warehouse_account
+						)
+						credit_amount += rejected_amount
+
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
 							self.get_gl_dict(
@@ -1219,6 +1229,10 @@ class PurchaseInvoice(BuyingController):
 							)
 
 					else:
+						self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, warehouse_account
+						)
+
 						if not self.is_internal_transfer():
 							gl_entries.append(
 								self.get_gl_dict(
@@ -1504,6 +1518,48 @@ class PurchaseInvoice(BuyingController):
 				},
 			)
 
+	def make_rejected_warehouse_gl_entry(
+		self, gl_entries, item, voucher_wise_stock_value, warehouse_account
+	) -> float:
+		"""Book the material the invoice moved into the rejected warehouse.
+
+		An internal transfer carries the value credited out of the in-transit warehouse along with
+		the accepted material, so the entry against it is that warehouse, and the caller credits it
+		for both. On an ordinary invoice the supplier entry already holds the cost.
+		"""
+		if not (item.rejected_warehouse and flt(item.rejected_qty)):
+			return 0.0
+
+		transfers_rejected_material = self.is_internal_transfer()
+
+		rejected_amount = flt(
+			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
+			item.precision("base_net_amount"),
+		)
+		if not rejected_amount:
+			return 0.0
+
+		rejected_account = warehouse_account[item.rejected_warehouse]
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": rejected_account["account"],
+					"against": item.expense_account if transfers_rejected_material else self.supplier,
+					"cost_center": item.cost_center,
+					"project": item.project or self.project,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": rejected_amount,
+					"debit_in_transaction_currency": flt(
+						rejected_amount / self.conversion_rate, item.precision("net_amount")
+					),
+				},
+				rejected_account["account_currency"],
+				item=item,
+			)
+		)
+
+		return rejected_amount if transfers_rejected_material else 0.0
+
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		net_amt_precision = item.precision("base_net_amount")
 
@@ -1514,15 +1570,23 @@ class PurchaseInvoice(BuyingController):
 
 		if self.is_return and self.update_stock and (self.is_internal_supplier or not self.return_against):
 			net_rate = item.base_net_amount
-			if item.sales_incoming_rate:  # for internal transfer
-				net_rate = item.qty * item.sales_incoming_rate
+			if item.sales_incoming_rate:
+				# Material of a transfer goes back at the rate it came in with, the rejected
+				# material along with the accepted.
+				net_rate = get_transit_amount(item, item.qty) + get_transit_amount(item, item.rejected_qty)
 
 			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 			warehouse_debit_amount = flt(
 				voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision
 			)
 
-			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
+			# The rejected warehouse carries the rest of what the invoice paid for, and is booked
+			# by its own entry, so it is not a variance.
+			returned_stock_value = warehouse_debit_amount + flt(
+				voucher_wise_stock_value.get((item.name, item.rejected_warehouse)), net_amt_precision
+			)
+
+			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed", ignore_validation=True)
 					if item.is_fixed_asset
@@ -1537,7 +1601,7 @@ class PurchaseInvoice(BuyingController):
 					self.get_company_default("default_expense_account", ignore_validation=True)
 					or fallback_account
 				)
-				stock_adjustment_amt = stock_amount - warehouse_debit_amount
+				stock_adjustment_amt = stock_amount - returned_stock_value
 
 				gl_entries.append(
 					self.get_gl_dict(
@@ -1885,6 +1949,9 @@ class PurchaseInvoice(BuyingController):
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
+		if self.is_return and self.is_internal_supplier:
+			# cancelling a return gives its qty back to the invoice it returned
+			self.validate_internal_transfer_qty()
 
 		super().on_cancel()
 

@@ -109,6 +109,41 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		self.addCleanup(frappe.db.delete, "Repost Item Valuation", repost.name)
 		return repost
 
+	def test_missing_or_corrupt_reposting_data_file_fails_loudly(self):
+		import gzip
+
+		from erpnext.stock.stock_ledger import get_reposting_data
+
+		self.assertRaises(
+			frappe.ValidationError, get_reposting_data, "/files/non-existent-repost-data.json.gz"
+		)
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+		).insert(ignore_permissions=True)
+
+		for index, content in enumerate(("not gzip content", gzip.compress(b"not json"))):
+			attached = frappe.get_doc(
+				{
+					"doctype": "File",
+					"file_name": f"corrupt_repost_data_{index}.json.gz",
+					"content": content,
+					"attached_to_doctype": riv.doctype,
+					"attached_to_name": riv.name,
+					"attached_to_field": "reposting_data_file",
+				}
+			).insert(ignore_permissions=True)
+
+			with self.assertRaisesRegex(frappe.ValidationError, "is corrupted"):
+				get_reposting_data(attached.file_url)
+
 	def test_repost_queued_after_start_is_not_skipped(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
@@ -446,6 +481,22 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		self.assertNotIn(call("gl_reposting_index", 1), doc.db_set.mock_calls)
 
+	def test_gl_repost_leaves_a_cancelled_voucher_alone(self):
+		company = "_Test Company with perpetual inventory"
+		stock_entry = make_stock_entry(company=company, qty=1, rate=2, target="Stores - TCP1")
+		stock_entry.cancel()
+		gl_entries = frappe.get_all("GL Entry", filters={"voucher_no": stock_entry.name}, pluck="name")
+
+		repost_gle_for_stock_vouchers(
+			stock_vouchers=[(stock_entry.doctype, stock_entry.name)], posting_date=today(), company=company
+		)
+
+		self.assertTrue(gl_entries)
+		self.assertEqual(
+			sorted(frappe.get_all("GL Entry", filters={"voucher_no": stock_entry.name}, pluck="name")),
+			sorted(gl_entries),
+		)
+
 	def test_gl_complete_gl_reposting(self):
 		from erpnext.accounts import utils
 
@@ -647,48 +698,61 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		# incoming rate after reposting should be 150
 		self.assertSLEs(pr, [{"incoming_rate": 150}])
 
-	def test_recalculate_valuation_rate_for_stock_entry(self):
+	def test_recalculate_valuation_rate_not_allowed_for_stock_entry(self):
 		item = self.make_item().name
-
-		# receive item at rate 100
-		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
-		self.assertSLEs(se, [{"incoming_rate": 100}])
-
-		# change the rate from 100 to 150
-		se.items[0].db_set("basic_rate", 150)
-
-		# repost with recalculate valuation rate
-		riv = frappe.get_doc(
-			doctype="Repost Item Valuation",
-			based_on="Transaction",
-			voucher_type=se.doctype,
-			voucher_no=se.name,
-			recalculate_valuation_rate=1,
-			posting_date=se.posting_date,
-			posting_time=se.posting_time,
-		)
-		riv.submit()
-
-		# incoming rate after reposting should be 150
-		self.assertSLEs(se, [{"incoming_rate": 150}])
-
-	def test_recalculate_valuation_rate_not_allowed_for_material_transfer(self):
-		item = self.make_item().name
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		receipt = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
 		transfer = make_stock_entry(
 			item_code=item, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
 		)
 
-		riv = frappe.get_doc(
+		for entry in (receipt, transfer):
+			riv = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Transaction",
+				voucher_type=entry.doctype,
+				voucher_no=entry.name,
+				recalculate_valuation_rate=1,
+				posting_date=entry.posting_date,
+				posting_time=entry.posting_time,
+			)
+			with self.subTest(purpose=entry.purpose):
+				self.assertRaises(frappe.ValidationError, riv.save)
+
+	def test_recalculate_valuation_rate_skips_later_vouchers(self):
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		receipt = make_purchase_receipt(item_code=item, qty=10, rate=100, posting_date=add_days(today(), -2))
+		transfer = make_stock_entry(
+			item_code=item,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=4,
+			posting_date=add_days(today(), -1),
+			do_not_submit=True,
+		)
+		transfer.append(
+			"additional_costs",
+			{"expense_account": "Stock Adjustment - _TC", "description": "freight", "amount": 40},
+		)
+		transfer.submit()
+
+		frappe.get_doc(
 			doctype="Repost Item Valuation",
 			based_on="Transaction",
-			voucher_type=transfer.doctype,
-			voucher_no=transfer.name,
+			voucher_type=receipt.doctype,
+			voucher_no=receipt.name,
 			recalculate_valuation_rate=1,
-			posting_date=transfer.posting_date,
-			posting_time=transfer.posting_time,
+			posting_date=receipt.posting_date,
+			posting_time=receipt.posting_time,
+		).submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": transfer.name, "actual_qty": ("<", 0), "is_cancelled": 0},
+				["outgoing_rate", "stock_value_difference"],
+			),
+			(0, -400),
 		)
-		self.assertRaises(frappe.ValidationError, riv.save)
 
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after

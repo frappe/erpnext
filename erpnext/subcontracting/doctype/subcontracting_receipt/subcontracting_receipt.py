@@ -163,7 +163,10 @@ class SubcontractingReceipt(SubcontractingController):
 			row_filter=lambda row: not row.is_scrap_item,
 		)
 
-		if self.is_new() and self.get("_action") == "save" and not frappe.flags.in_test:
+		# a return takes back the scrap rows of the receipt as they were received
+		if self.is_return:
+			self.set_scrap_item_references_for_return()
+		elif self.is_new() and self.get("_action") == "save" and not frappe.flags.in_test:
 			self.get_scrap_items()
 
 		self.set_missing_values()
@@ -172,6 +175,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_return_supplier_warehouse()
 
 		if self.get("_action") == "submit":
+			self.validate_returned_raw_materials()
 			self.validate_scrap_items()
 			self.validate_accepted_warehouse()
 			self.validate_rejected_warehouse()
@@ -401,6 +405,15 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def get_scrap_items(self, recalculate_rate=False):
+		# a return keeps the scrap rows of its receipt
+		if not self.is_return:
+			self.add_scrap_items()
+
+		if recalculate_rate:
+			self.set_additional_costs()
+			self.calculate_items_qty_and_amount()
+
+	def add_scrap_items(self):
 		self.remove_scrap_items()
 
 		for item in list(self.items):
@@ -439,9 +452,27 @@ class SubcontractingReceipt(SubcontractingController):
 						},
 					)
 
-		if recalculate_rate:
-			self.set_additional_costs()
-			self.calculate_items_qty_and_amount()
+	def set_scrap_item_references_for_return(self):
+		"""Point each returned scrap row at the return row of its finished good."""
+		scrap_rows = [row for row in self.items if row.is_scrap_item and row.subcontracting_receipt_item]
+		if not scrap_rows:
+			return
+
+		received_finished_goods = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"name": ("in", [row.subcontracting_receipt_item for row in scrap_rows])},
+				fields=["name", "reference_name"],
+				as_list=True,
+			)
+		)
+		returned_finished_goods = {
+			row.subcontracting_receipt_item: row.name for row in self.items if not row.is_scrap_item
+		}
+		for row in scrap_rows:
+			row.reference_name = returned_finished_goods.get(
+				received_finished_goods.get(row.subcontracting_receipt_item)
+			)
 
 	def remove_scrap_items(self, recalculate_rate=False):
 		for item in list(self.items):
@@ -570,14 +601,15 @@ class SubcontractingReceipt(SubcontractingController):
 					scrap_cost_map[item.reference_name] = item.amount
 
 		rejected_return_rows = self.get_rejected_return_rows()
-		returned_service_costs = self.get_returned_service_costs()
+		returned_costs = self.get_returned_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.is_scrap_item:
+				returned = returned_costs.get(item.name)
 				# rejected qty is received without service cost
-				if item.name in returned_service_costs:
+				if returned:
 					item.service_cost_per_qty = (
-						0.0 if item.name in rejected_return_rows else returned_service_costs[item.name]
+						0.0 if item.name in rejected_return_rows else returned.service_cost_per_qty
 					)
 
 				if item.qty:
@@ -586,7 +618,10 @@ class SubcontractingReceipt(SubcontractingController):
 						item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 						rm_cost_map.pop(item.name)
 
-					if item.name in scrap_cost_map:
+					# the stock ledger returns the finished good at its receipt rate
+					if returned and item.name not in rejected_return_rows:
+						item.scrap_cost_per_qty = returned.scrap_cost_per_qty
+					elif item.name in scrap_cost_map:
 						item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
 						scrap_cost_map.pop(item.name)
 					else:
@@ -608,23 +643,23 @@ class SubcontractingReceipt(SubcontractingController):
 			self.total_qty = total_qty
 			self.total = total_amount
 
-	def get_returned_service_costs(self) -> dict[str, float]:
-		"""Service cost per qty of the returned receipt row, for each return row."""
+	def get_returned_costs(self) -> dict[str, frappe._dict]:
+		"""Service and scrap cost per qty of the returned receipt row, for each return row."""
 		if not (self.is_return and self.return_against):
 			return {}
 
-		service_costs = dict(
-			frappe.get_all(
+		received_rows = {
+			row.name: row
+			for row in frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
-				fields=["name", "service_cost_per_qty"],
-				as_list=True,
+				fields=["name", "service_cost_per_qty", "scrap_cost_per_qty"],
 			)
-		)
+		}
 		return {
-			item.name: service_costs[item.subcontracting_receipt_item]
+			item.name: received_rows[item.subcontracting_receipt_item]
 			for item in self.items
-			if item.subcontracting_receipt_item in service_costs
+			if item.subcontracting_receipt_item in received_rows
 		}
 
 	def validate_scrap_items(self):
@@ -667,17 +702,19 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def validate_bom_required_qty(self):
-		if (
+		# a return takes back what the receipt consumed, not what the BOM needs
+		if self.is_return or (
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "Material Transferred for Subcontract"
-		) and not (frappe.db.get_single_value("Buying Settings", "validate_consumed_qty")):
+			and not frappe.db.get_single_value("Buying Settings", "validate_consumed_qty")
+		):
 			return
 
 		precision = frappe.get_precision("Subcontracting Receipt Item", "qty")
 		rm_consumed_dict = self.get_rm_wise_consumed_qty()
 
 		for rm_item_code, required in self.get_rm_wise_required_qty(precision).items():
-			diff = flt(rm_consumed_dict.get(rm_item_code, 0), precision) - flt(required.qty, precision)
+			diff = flt(rm_consumed_dict.get(rm_item_code, 0) - required.qty, precision)
 
 			if diff < 0:
 				msg = _(

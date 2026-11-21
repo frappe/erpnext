@@ -5,10 +5,12 @@
 import frappe
 from frappe import _, bold, json, msgprint
 from frappe.model.docstatus import DocStatus
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 
 import erpnext
+from erpnext import _refuse
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
@@ -20,6 +22,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import set_entry_header_values
 from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
 
 
@@ -110,8 +113,17 @@ class StockReconciliation(StockController):
 		self.make_bundle_for_current_qty()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
+		self.validate_future_batch_quantity()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+
+	def validate_future_batch_quantity(self):
+		"""Block a batch this reconciliation lowers from going negative in later entries."""
+		for row in self.items:
+			if row.current_serial_and_batch_bundle:
+				frappe.get_doc(
+					"Serial and Batch Bundle", row.current_serial_and_batch_bundle
+				).validate_future_batch_quantity()
 
 	def on_cancel(self):
 		self.validate_reserved_stock()
@@ -234,7 +246,9 @@ class StockReconciliation(StockController):
 						}
 					)
 
-				if not item.valuation_rate:
+				# the form fills a zero rate for batch items, so keep zero only when it is allowed
+				keep_zero_rate = item.valuation_rate == 0 and item.allow_zero_valuation_rate
+				if not item.valuation_rate and not keep_zero_rate:
 					item.valuation_rate = item.current_valuation_rate
 				continue
 
@@ -330,13 +344,13 @@ class StockReconciliation(StockController):
 					}
 				)
 
-				serial_and_batch_bundle.db_set(
-					{
-						"creation": creation,
-						"voucher_no": self.name,
-						"voucher_detail_no": voucher_detail_no,
-					}
-				)
+				values = {
+					"creation": creation,
+					"voucher_no": self.name,
+					"voucher_detail_no": voucher_detail_no,
+				}
+				serial_and_batch_bundle.db_set(values)
+				set_entry_header_values(serial_and_batch_bundle.name, values)
 
 	def get_bundle_for_specific_serial_batch(self, row) -> str:
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -1137,8 +1151,8 @@ class StockReconciliation(StockController):
 				flt(d.current_qty) * flt(d.current_valuation_rate), d.precision("current_amount")
 			)
 
-			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
-			d.amount_difference = flt(d.amount) - flt(d.current_amount)
+			d.quantity_difference = flt(flt(d.qty) - flt(d.current_qty), d.precision("qty"))
+			d.amount_difference = flt(flt(d.amount) - flt(d.current_amount), d.precision("amount_difference"))
 
 	def recalculate_difference_amount_from_ledger(self, voucher_detail_no: str | None = None):
 		"""Sync the displayed current qty/rate and difference amount with the (reposted) ledger.
@@ -1184,7 +1198,7 @@ class StockReconciliation(StockController):
 				"current_qty": current_qty,
 				"current_valuation_rate": current_valuation_rate,
 				"current_amount": current_amount,
-				"quantity_difference": flt(row.qty) - current_qty,
+				"quantity_difference": flt(flt(row.qty) - current_qty, row.precision("qty")),
 				"amount_difference": amount_difference,
 			},
 			update_modified=False,
@@ -1626,8 +1640,24 @@ def get_stock_balance_for(
 	}
 
 
+def _reconciliation_allowed_docs(doctype):
+	return get_allowed_docs_for_doctype(
+		get_user_permissions(frappe.session.user).get(doctype, []), "Stock Reconciliation"
+	)
+
+
+def _require_reconciliation_permission(doctype, name):
+	allowed_docs = _reconciliation_allowed_docs(doctype)
+	if allowed_docs and name not in allowed_docs:
+		_refuse()
+
+
 @frappe.whitelist()
 def get_difference_account(purpose, company):
+	frappe.has_permission("Stock Reconciliation", "read", throw=True)
+	frappe.has_permission("Company", "select", doc=company, throw=True)
+	_require_reconciliation_permission("Company", company)
+
 	if purpose == "Stock Reconciliation":
 		account = get_company_default(company, "stock_adjustment_account")
 	else:

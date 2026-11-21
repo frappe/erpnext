@@ -177,25 +177,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.toggle_get_items();
 
 		this.set_default_print_format();
-		if (
-			doc.docstatus == 1 &&
-			!doc.inter_company_invoice_reference &&
-			frappe.model.can_create("Purchase Invoice")
-		) {
+		if (doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
 			let internal = me.frm.doc.is_internal_customer;
 			if (internal) {
 				let button_label =
 					me.frm.doc.company === me.frm.doc.represents_company
 						? "Internal Purchase Invoice"
 						: "Inter Company Purchase Invoice";
-
-				me.frm.add_custom_button(
-					__(button_label),
-					function () {
-						me.make_inter_company_invoice();
-					},
-					__("Create")
-				);
 
 				frappe.call({
 					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
@@ -207,12 +195,25 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					callback: function (r) {
 						if (r.exc) return;
 						const received_items = r.message || {};
+						// A Sales Invoice made from a Purchase Invoice links it without item references.
+						const is_made_from_purchase_invoice =
+							doc.inter_company_invoice_reference && $.isEmptyObject(received_items);
 						const has_pending_qty = me.frm.doc.items.some(
-							(item) => flt(item.stock_qty) - flt(received_items[item.name] || 0) > 0
+							(item) =>
+								flt(
+									item.stock_qty - flt(received_items[item.name]),
+									precision("stock_qty", item)
+								) > 0
 						);
-						if (!has_pending_qty) {
-							me.frm.remove_custom_button(__(button_label), __("Create"));
-						}
+						if (is_made_from_purchase_invoice || !has_pending_qty) return;
+
+						me.frm.add_custom_button(
+							__(button_label),
+							function () {
+								me.make_inter_company_invoice();
+							},
+							__("Create")
+						);
 					},
 				});
 			}
@@ -550,18 +551,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	write_off_outstanding_amount_automatically() {
 		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
-			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
-			// this will make outstanding amount 0
-			this.frm.set_value(
-				"write_off_amount",
-				flt(
-					this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance,
-					precision("write_off_amount")
-				)
-			);
+			this.frm.doc.write_off_amount = 0;
+			this.frm.doc.base_write_off_amount = 0;
 		}
 
 		this.calculate_outstanding_amount(false);
+		this.calculate_write_off_amount();
 		this.frm.refresh_fields();
 	}
 

@@ -1527,6 +1527,9 @@ def repost_gle_for_stock_vouchers(
 		for voucher_type, voucher_no in stock_vouchers_chunk:
 			existing_gle = gle.get((voucher_type, voucher_no), [])
 			voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+			if voucher_obj.docstatus != 1:
+				continue
+
 			# Some transactions post credit as negative debit, this is handled while posting GLE
 			# but while comparing we need to make sure it's flipped so comparisons are accurate
 			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(warehouse_account))

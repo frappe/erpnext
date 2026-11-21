@@ -26,7 +26,10 @@ frappe.ui.form.on("Sales Order", {
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
-			} else if (doc.stock_qty - doc.delivered_qty <= doc.actual_qty) {
+			} else if (
+				flt(doc.stock_qty - doc.delivered_qty * doc.conversion_factor, precision("stock_qty", doc)) <=
+				doc.actual_qty
+			) {
 				color = "green";
 			} else {
 				color = "orange";
@@ -761,27 +764,17 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						this.frm.add_custom_button(__("Project"), () => this.make_project(), __("Create"));
 					}
 
-					if (
-						doc.docstatus === 1 &&
-						!doc.inter_company_order_reference &&
-						frappe.model.can_create("Purchase Order")
-					) {
-						let me = this;
-						let internal = me.frm.doc.is_internal_customer;
-						if (internal) {
-							let button_label =
-								me.frm.doc.company === me.frm.doc.represents_company
-									? __("Internal Purchase Order")
-									: __("Inter Company Purchase Order");
+					if (doc.docstatus === 1 && doc.is_internal_customer) {
+						let button_label =
+							doc.company === doc.represents_company
+								? __("Internal Purchase Order")
+								: __("Inter Company Purchase Order");
 
-							me.frm.add_custom_button(
-								button_label,
-								function () {
-									me.make_inter_company_order();
-								},
-								__("Create")
-							);
-						}
+						this.add_inter_company_order_button(
+							button_label,
+							"Purchase Order",
+							"sales_order_item"
+						);
 					}
 				}
 				// payment request
@@ -882,10 +875,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			},
 			freeze: true,
 			callback: function (r) {
-				if (!r.message) {
+				if (r.message.length === 0) {
 					frappe.msgprint({
 						title: __("Work Order not created"),
-						message: __("No Items with Bill of Materials to Manufacture"),
+						message: __(
+							"No Items with Bill of Materials to Manufacture or all items already manufactured"
+						),
 						indicator: "orange",
 					});
 					return;
@@ -895,13 +890,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							label: __("Items"),
 							fieldtype: "Table",
 							fieldname: "items",
+							cannot_add_rows: true,
 							description: __("Select BOM and Qty for Production"),
 							fields: [
 								{
-									fieldtype: "Read Only",
+									fieldtype: "Link",
 									fieldname: "item_code",
+									options: "Item",
 									label: __("Item Code"),
 									in_list_view: 1,
+									read_only: 1,
 								},
 								{
 									fieldtype: "Link",
@@ -927,6 +925,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 									reqd: 1,
 									label: __("Sales Order Item"),
 									hidden: 1,
+									read_only: 1,
 								},
 							],
 							data: r.message,

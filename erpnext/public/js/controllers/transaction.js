@@ -260,11 +260,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.fields_dict["items"].grid.get_field('blanket_order')) {
 			this.frm.set_query("blanket_order", "items", function(doc, cdt, cdn) {
 				var item = locals[cdt][cdn];
+				const is_selling = ["Sales Order", "Quotation"].includes(doc.doctype);
 				return {
 					query: "erpnext.controllers.queries.get_blanket_orders",
 					filters: {
 						"company": doc.company,
-						"blanket_order_type": doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
+						"blanket_order_type": is_selling ? "Selling" : "Purchasing",
+						"party": is_selling ? doc.customer || doc.party_name : doc.supplier,
+						"quotation_to": doc.quotation_to,
 						"item": item.item_code
 					}
 				}
@@ -516,6 +519,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
 			me.frm.doc.name);
+
+		// a return keeps the taxes of the document it is made against
+		if (this.frm.doc.is_return && this.frm.doc.return_against) return;
 
 		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
 			return;
@@ -909,6 +915,40 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	update_stock() {
 		this.frm.trigger('set_default_internal_warehouse');
+	}
+
+	add_inter_company_order_button(label, target_doctype, reference_fieldname) {
+		if (!frappe.model.can_create(target_doctype)) return;
+
+		frappe.call({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
+			args: {
+				reference_name: this.frm.doc.name,
+				doctype: target_doctype,
+				reference_fieldname: reference_fieldname,
+			},
+			callback: (r) => {
+				const received_items = r.message;
+				// An order made from its counterpart links it without item references.
+				const is_made_from_counterpart =
+					this.frm.doc.inter_company_order_reference && $.isEmptyObject(received_items);
+				const has_pending_qty = this.frm.doc.items.some(
+					(item) =>
+						!item.closed &&
+						flt(
+							(item.stock_qty - flt(received_items[item.name])) / item.conversion_factor,
+							precision("qty", item)
+						) > 0
+				);
+				if (is_made_from_counterpart || !has_pending_qty) return;
+
+				this.frm.add_custom_button(
+					label,
+					() => this.make_inter_company_order(this.frm),
+					__("Create")
+				);
+			},
+		});
 	}
 
 	set_default_internal_warehouse() {
@@ -1486,7 +1526,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item = frappe.get_doc(cdt, cdn);
 		item.conversion_factor = 1.0;
 		if (item.stock_qty) {
-			item.conversion_factor = flt(item.stock_qty) / flt(item.qty);
+			item.conversion_factor = flt(
+				flt(item.stock_qty) / flt(item.qty),
+				precision("conversion_factor", item)
+			);
 		}
 
 		refresh_field("conversion_factor", item.name, item.parentfield);

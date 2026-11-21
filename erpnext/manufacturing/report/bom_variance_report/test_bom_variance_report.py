@@ -13,6 +13,8 @@ from erpnext.manufacturing.report.bom_variance_report.bom_variance_report import
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 
+test_dependencies = ["BOM"]
+
 
 class TestBOMVarianceReport(FrappeTestCase):
 	def setUp(self):

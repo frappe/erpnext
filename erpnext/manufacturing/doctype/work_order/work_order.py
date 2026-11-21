@@ -24,6 +24,7 @@ from frappe.utils import (
 )
 from pypika import functions as fn
 
+from erpnext import get_company_currency
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_items_as_dict,
 	validate_production_bom,
@@ -419,8 +420,9 @@ class WorkOrder(Document):
 			self.actual_operating_cost if self.actual_operating_cost else self.planned_operating_cost
 		)
 
-		self.total_operating_cost = (
-			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost)
+		self.total_operating_cost = flt(
+			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost),
+			self.precision("total_operating_cost"),
 		)
 
 	@staticmethod
@@ -465,7 +467,7 @@ class WorkOrder(Document):
 			.where(
 				(wo.production_item == self.production_item)
 				& (wo.sales_order == self.sales_order)
-				& (wo.docstatus < 2)
+				& (wo.docstatus == 1)
 				& (wo.name != self.name)
 			)
 		).run()[0][0]
@@ -475,13 +477,13 @@ class WorkOrder(Document):
 		# get qty from Sales Order Item table
 		so_item_qty = frappe.db.sql(
 			"""select sum(stock_qty) from `tabSales Order Item`
-			where parent = %s and item_code = %s""",
+			where parent = %s and item_code = %s and docstatus = 1""",
 			(self.sales_order, self.production_item),
 		)[0][0]
 		# get qty from Packing Item table
 		dnpi_qty = frappe.db.sql(
 			"""select sum(qty) from `tabPacked Item`
-			where parent = %s and parenttype = 'Sales Order' and item_code = %s""",
+			where parent = %s and parenttype = 'Sales Order' and item_code = %s and docstatus = 1""",
 			(self.sales_order, self.production_item),
 		)[0][0]
 		# total qty in SO
@@ -493,8 +495,10 @@ class WorkOrder(Document):
 
 		if total_qty > so_qty + (allowance_percentage / 100 * so_qty):
 			frappe.throw(
-				_("Cannot produce more Item {0} than Sales Order quantity {1}").format(
-					self.production_item, so_qty
+				_("Cannot produce more Item {0} than Sales Order quantity {1} {2}").format(
+					get_link_to_form("Item", self.production_item),
+					frappe.bold(so_qty),
+					frappe.bold(frappe.get_value("Item", self.production_item, "stock_uom")),
 				),
 				OverProductionError,
 			)
@@ -635,9 +639,21 @@ class WorkOrder(Document):
 		)
 
 		if purpose == "Manufacture":
-			query = query.select(Sum(table.fg_completed_qty) - Sum(table.process_loss_qty))
+			child = frappe.qb.DocType("Stock Entry Detail")
+			query = (
+				query.join(child)
+				.on(table.name == child.parent)
+				.select(Sum(child.transfer_qty))
+				.where(child.is_finished_item == 1)
+			)
 		else:
-			query = query.select(Sum(table.fg_completed_qty))
+			job_card = frappe.qb.DocType("Job Card")
+			query = (
+				query.left_join(job_card)
+				.on(table.job_card == job_card.name)
+				.where(IfNull(job_card.is_corrective_job_card, 0) == 0)
+				.select(Sum(table.fg_completed_qty))
+			)
 
 		return flt(query.run()[0][0])
 
@@ -902,9 +918,10 @@ class WorkOrder(Document):
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
 
-		planned_end_date = self.operations and self.operations[-1].planned_end_time
-		if planned_end_date:
-			self.db_set("planned_end_date", planned_end_date)
+		# operations with the same Sequence ID run in parallel, so the last row may not end last
+		end_times = [get_datetime(row.planned_end_time) for row in self.operations if row.planned_end_time]
+		if end_times:
+			self.db_set("planned_end_date", max(end_times))
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
@@ -1109,14 +1126,16 @@ class WorkOrder(Document):
 		query = (
 			frappe.qb.from_(wo)
 			.select(Sum(qty_against_sales_order(wo, wo.qty)))
-			.where((wo.sales_order == self.sales_order) & (wo.docstatus == 1))
+			.where(
+				(wo.sales_order == self.sales_order)
+				& (wo.sales_order_item == self.sales_order_item)
+				& (wo.docstatus == 1)
+			)
 		)
 		if self.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.product_bundle_item)
 		else:
-			query = query.where(
-				(wo.production_item == self.production_item) & (wo.sales_order_item == self.sales_order_item)
-			)
+			query = query.where(wo.production_item == self.production_item)
 
 		return query.run(as_list=1)
 
@@ -1505,11 +1524,14 @@ class WorkOrder(Document):
 	def update_transferred_qty_for_required_items(self):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
@@ -1520,6 +1542,7 @@ class WorkOrder(Document):
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
 			)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
@@ -1596,7 +1619,8 @@ class WorkOrder(Document):
 		returned_dict = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
 		for row in self.required_items:
-			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
+			returned_qty = min(flt(returned_dict.get(row.item_code)), flt(row.transferred_qty))
+			row.db_set("returned_qty", returned_qty, update_modified=False)
 
 	def update_consumed_qty_for_required_items(self):
 		"""
@@ -1631,6 +1655,8 @@ class WorkOrder(Document):
 	def make_bom(self):
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
+		bom.company = self.company
+		bom.currency = get_company_currency(self.company)
 		bom.conversion_rate = 1
 		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 
@@ -2363,6 +2389,7 @@ def get_reserved_qty_for_production(
 			((wo.skip_transfer == 0) & (wo_item.transferred_qty > wo_item.required_qty)), 0.0
 		)
 		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+		qty_field = qty_field.when(wo_item.consumed_qty > wo_item.required_qty, 0.0)
 		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
 
 	query = (
@@ -2405,6 +2432,7 @@ def make_stock_return_entry(work_order):
 		return
 
 	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.company = wo_doc.company
 	stock_entry.from_bom = 1
 	stock_entry.is_return = 1
 	stock_entry.work_order = work_order

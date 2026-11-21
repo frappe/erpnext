@@ -5,9 +5,11 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.permissions import add_user_permission
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 
@@ -52,6 +54,41 @@ class TestQueries(unittest.TestCase):
 		query(txt="", filters={"supplier": None})
 		query(txt="", filters={"supplier": ""})
 
+	def test_item_manufacturer_query_requires_item_read_permission(self):
+		self.addCleanup(frappe.db.rollback)
+		item = make_item("Steel Sheet With Manufacturer", {"is_stock_item": 1})
+		if not frappe.db.exists("Manufacturer", "Northwind Steel"):
+			frappe.get_doc({"doctype": "Manufacturer", "short_name": "Northwind Steel"}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Item Manufacturer",
+				"item_code": item.name,
+				"manufacturer": "Northwind Steel",
+				"manufacturer_part_no": "NS-4242",
+			}
+		).insert()
+
+		query = add_default_params(queries.item_manufacturer_query, "Manufacturer")
+		purchase_user = create_user("item_manufacturer_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("item_manufacturer_website_manager@example.com", "Website Manager")
+
+		with as_user(purchase_user.name):
+			self.assertEqual(query(filters={"item_code": item.name}), (("Northwind Steel", "NS-4242"),))
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"item_code": item.name})
+
+	def test_item_manufacturer_query_needs_a_single_item_code(self):
+		self.addCleanup(frappe.db.rollback)
+		query = add_default_params(queries.item_manufacturer_query, "Manufacturer")
+		purchase_user = create_user("item_manufacturer_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("item_manufacturer_website_manager@example.com", "Website Manager")
+
+		for filters in ({}, {"item_code": None}, {"item_code": ""}, {"item_code": ["like", "%"]}):
+			for user in (purchase_user.name, website_manager.name):
+				with self.subTest(filters=filters, user=user), as_user(user):
+					self.assertEqual(query(filters=filters), [])
+
 	def test_item_query_with_percent_in_permitted_item_group(self):
 		if not frappe.db.exists("Item Group", "_Test 100% Item Group"):
 			frappe.get_doc(
@@ -81,6 +118,38 @@ class TestQueries(unittest.TestCase):
 
 		self.assertGreaterEqual(len(query(txt="_Test Project")), 1)
 
+	def test_tax_template_query_requires_item_read_permission(self):
+		query = add_default_params(queries.get_tax_template, "Item Tax Template")
+		item_code = "_Test Item Home Desktop 100"
+		sales_user = create_user("tax_template_sales_user@example.com", "Sales User")
+		website_manager = create_user("tax_template_website_manager@example.com", "Website Manager")
+
+		with as_user(sales_user.name):
+			templates = query(filters={"item_code": item_code, "company": "_Test Company"})
+			self.assertEqual([row[0] for row in templates], ["_Test Account Excise Duty @ 10 - _TC"])
+
+			with self.assertRaises(frappe.PermissionError):
+				query(filters={"item_code": {"name": item_code}, "company": "_Test Company"})
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"item_code": item_code, "company": "_Test Company"})
+
+	def test_tax_template_query_applies_company_user_permission(self):
+		query = add_default_params(queries.get_tax_template, "Item Tax Template")
+		filters = {"item_code": "_Test Item Home Desktop 100", "company": "_Test Company"}
+		user = make_fenced_user(
+			"tax_template_company_user@example.com", ["Sales User"], [("Company", "_Test Company 1")]
+		)
+		unrestricted_user = create_user("tax_template_sales_user@example.com", "Sales User")
+
+		with as_user(user):
+			self.assertFalse(query(filters=filters))
+
+		with as_user(unrestricted_user.name):
+			self.assertEqual(
+				[row[0] for row in query(filters=filters)], ["_Test Account Excise Duty @ 10 - _TC"]
+			)
+
 	def test_account_query(self):
 		query = add_default_params(queries.get_account_list, "Account")
 
@@ -97,11 +166,50 @@ class TestQueries(unittest.TestCase):
 
 		self.assertGreaterEqual(len(query(filters={"company": "_Test Company"})), 1)
 
+	def test_warehouse_address_query_requires_warehouse_read_permission(self):
+		self.addCleanup(frappe.db.rollback)
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Riverside Depot",
+				"address_type": "Shipping",
+				"address_line1": "12 River Road",
+				"city": "Pune",
+				"country": "India",
+				"links": [{"link_doctype": "Warehouse", "link_name": "Stores - _TC"}],
+			}
+		).insert()
+
+		query = add_default_params(queries.get_warehouse_address, "Address")
+		stock_user = create_user("warehouse_address_stock_user@example.com", "Stock User")
+		website_manager = create_user("warehouse_address_website_manager@example.com", "Website Manager")
+
+		with as_user(stock_user.name):
+			self.assertEqual(query(filters={"warehouse": "Stores - _TC"}), [[address.name]])
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"warehouse": "Stores - _TC"})
+
 	def test_warehouse_query(self):
 		query = add_default_params(queries.warehouse_query, "Account")
 
 		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
+
+	def test_warehouse_query_shows_stock_only_with_bin_permission(self):
+		query = add_default_params(queries.warehouse_query, "Warehouse")
+		stock_user = create_user("warehouse_query_stock_user@example.com", "Stock User")
+		website_manager = create_user("warehouse_query_website_manager@example.com", "Website Manager")
+
+		with as_user(stock_user.name):
+			rows = query(txt="_Test Warehouse - _TC", filters=[])
+			self.assertTrue(rows)
+			self.assertTrue(all(row[1].startswith("Actual Qty : ") for row in rows))
+
+		with as_user(website_manager.name):
+			rows = query(txt="_Test Warehouse - _TC", filters=[])
+			self.assert_nested_in("_Test Warehouse - _TC", rows)
+			self.assertTrue(all(len(row) == 1 for row in rows))
 
 	def test_get_delivery_notes_to_be_billed_skips_fully_returned(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
@@ -122,6 +230,75 @@ class TestQueries(unittest.TestCase):
 
 		self.assert_nested_in(open_dn.name, result)
 		self.assertNotIn(returned_dn.name, [row[0] for row in result])
+
+	def make_batches_in_stock(self, *batch_ids):
+		self.addCleanup(frappe.db.rollback)
+		item = make_item("_Test Batch Link Query Item", {"is_stock_item": 1, "has_batch_no": 1})
+		batches = []
+		for qty, batch_id in enumerate(batch_ids, start=2):
+			batch = frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item.name}).insert()
+			make_stock_entry(
+				item_code=item.name,
+				target="_Test Warehouse - _TC",
+				qty=qty,
+				basic_rate=100,
+				batch_no=batch.name,
+			)
+			batches.append(batch.name)
+		return item.name, batches
+
+	def test_batch_link_search_requires_batch_permission(self):
+		item_code, _batches = self.make_batches_in_stock("Link-Batch")
+		filters = {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}
+		website_manager = make_fenced_user("batch_query_website_manager@example.com", ["Website Manager"])
+		with as_user(website_manager), self.assertRaises(frappe.PermissionError):
+			queries.get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+
+	def test_batch_link_search_applies_batch_user_permissions(self):
+		item_code, (allowed, other) = self.make_batches_in_stock("Link-Batch-Allowed", "Link-Batch-Other")
+		filters = {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}
+		user = make_fenced_user("batch_query_stock_user@example.com", ["Stock User"])
+		with as_user(user):
+			rows = queries.get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+			self.assertCountEqual([row[0] for row in rows], [allowed, other])
+		add_user_permission("Batch", allowed, user, ignore_permissions=True)
+		with as_user(user):
+			rows = queries.get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+			self.assertEqual([row[:2] for row in rows], [(allowed, 2)])
+
+	def test_get_filtered_child_rows_checks_linked_document_permission(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(do_not_submit=True)
+		po = create_purchase_order(do_not_save=True)
+		po.items[0].sales_order = so.name
+		po.insert()
+
+		user = create_user("child_rows_purchase_user@example.com", "Purchase User")
+		params = {
+			"doctype": "Purchase Order Item",
+			"txt": "",
+			"searchfield": "name",
+			"start": 0,
+			"page_len": 20,
+		}
+
+		with as_user(user.name):
+			rows = queries.get_filtered_child_rows(**params, filters={"parent": po.name})
+			self.assertEqual([row[0] for row in rows], [po.items[0].name])
+
+			with self.assertRaises(frappe.PermissionError):
+				queries.get_filtered_child_rows(
+					**params, filters={"parent": po.name, "sales_order.grand_total": so.grand_total}
+				)
+
+		sales_user = create_user("child_rows_sales_purchase_user@example.com", "Purchase User", "Sales User")
+		with as_user(sales_user.name):
+			rows = queries.get_filtered_child_rows(
+				**params, filters={"parent": po.name, "sales_order.grand_total": so.grand_total}
+			)
+			self.assertEqual([row[0] for row in rows], [po.items[0].name])
 
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)

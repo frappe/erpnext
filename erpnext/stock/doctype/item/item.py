@@ -722,7 +722,7 @@ class Item(Document):
 			"Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 		).format(frappe.bold(old_name))
 
-		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
+		frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_properties_before_merge(self, new_name):
 		# Validate properties before merging
@@ -1349,39 +1349,17 @@ def validate_cancelled_item(item_code, docstatus=None):
 @frappe.request_cache
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
-	# get last purchase order item details
+	# the latest by date wins, a Purchase Order before a Receipt before an Invoice on the same date
+	last_purchases = []
+	for doctype in ("Purchase Order", "Purchase Receipt", "Purchase Invoice"):
+		if details := get_purchase_voucher_details(doctype, item_code, doc_name):
+			purchase_date = getdate(details[0].get("posting_date") or details[0].get("transaction_date"))
+			last_purchases.append((purchase_date, details[0]))
 
-	last_purchase_order = get_purchase_voucher_details("Purchase Order", item_code, doc_name)
+	if not last_purchases:
+		return frappe._dict()
 
-	# get last purchase receipt item details
-	last_purchase_receipt = get_purchase_voucher_details("Purchase Receipt", item_code, doc_name)
-
-	purchase_order_date = getdate(
-		last_purchase_order and last_purchase_order[0].transaction_date or "1900-01-01"
-	)
-	purchase_receipt_date = getdate(
-		last_purchase_receipt and last_purchase_receipt[0].posting_date or "1900-01-01"
-	)
-
-	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
-		# use purchase order
-
-		last_purchase = last_purchase_order[0]
-		purchase_date = purchase_order_date
-
-	elif last_purchase_receipt and (purchase_receipt_date > purchase_order_date or not last_purchase_order):
-		# use purchase receipt
-		last_purchase = last_purchase_receipt[0]
-		purchase_date = purchase_receipt_date
-
-	else:
-		last_purchase_invoice = get_purchase_voucher_details("Purchase Invoice", item_code, doc_name)
-
-		if last_purchase_invoice:
-			last_purchase = last_purchase_invoice[0]
-			purchase_date = getdate(last_purchase.posting_date)
-		else:
-			return frappe._dict()
+	purchase_date, last_purchase = max(last_purchases, key=lambda purchase: purchase[0])
 
 	conversion_factor = flt(last_purchase.conversion_factor)
 	out = frappe._dict(
@@ -1426,6 +1404,9 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 		)
 		.where(parent_doc.docstatus == 1)
 		.where(child_doc.item_code == item_code)
+		# skipped when the last purchase rate is updated on submit
+		.where(child_doc.is_free_item == 0)
+		.where(parent_doc.is_internal_supplier == 0)
 	)
 
 	if document_name:
@@ -1571,8 +1552,8 @@ def get_uom_conv_factor(uom, stock_uom):
 		["value"],
 		as_dict=1,
 	)
-	if inverse_match:
-		return 1 / inverse_match.value
+	if inverse_match and inverse_match.value:
+		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:
@@ -1581,7 +1562,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
 	first = frappe.qb.DocType("UOM Conversion Factor").as_("first")
 	second = frappe.qb.DocType("UOM Conversion Factor").as_("second")
-	intermediate_match = (
+	shared_source_match = (
 		frappe.qb.from_(first)
 		.join(second)
 		.on((first.from_uom == second.from_uom) & (first.category == second.category))
@@ -1589,12 +1570,27 @@ def get_uom_conv_factor(uom, stock_uom):
 		.where(
 			(first.to_uom == to_uom) & (second.to_uom == from_uom) & (first.value > 0) & (second.value > 0)
 		)
+		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
 	)
 
-	if intermediate_match:
-		return intermediate_match[0].value
+	if shared_source_match:
+		return flt(shared_source_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+
+	shared_target_match = (
+		frappe.qb.from_(first)
+		.join(second)
+		.on((first.to_uom == second.to_uom) & (first.category == second.category))
+		.select((first.value / second.value).as_("value"))
+		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
+		.orderby(first.name, second.name)
+		.limit(1)
+		.run(as_dict=1)
+	)
+
+	if shared_target_match:
+		return flt(shared_target_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 
 @frappe.whitelist()

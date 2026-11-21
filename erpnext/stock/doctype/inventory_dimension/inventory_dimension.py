@@ -85,10 +85,12 @@ class InventoryDimension(Document):
 			if field.fieldname not in allow_to_edit_fields and old_doc.get(field.fieldname) != self.get(
 				field.fieldname
 			):
-				msg = f"""The user can not change value of the field {bold(field.label)} because
-					stock transactions exists against the dimension {bold(self.name)}."""
-
-				frappe.throw(_(msg), DoNotChangeError)
+				frappe.throw(
+					_(
+						"The user can not change value of the field {0} because stock transactions exists against the dimension {1}."
+					).format(bold(_(field.label)), bold(self.name)),
+					DoNotChangeError,
+				)
 
 	def on_trash(self):
 		if self.has_stock_ledger():
@@ -120,8 +122,7 @@ class InventoryDimension(Document):
 		):
 			delete_dimension_custom_field(field.name)
 
-		msg = f"Deleted custom fields related to the dimension {self.name}"
-		frappe.msgprint(_(msg))
+		frappe.msgprint(_("Deleted custom fields related to the dimension {0}").format(self.name))
 
 	def get_dimension_doctypes(self):
 		if not self.apply_to_all_doctypes:
@@ -140,12 +141,18 @@ class InventoryDimension(Document):
 
 	def validate_reference_document(self):
 		if frappe.get_cached_value("DocType", self.reference_document, "istable") == 1:
-			msg = f"The reference document {self.reference_document} can not be child table."
-			frappe.throw(_(msg), CanNotBeChildDoc)
+			frappe.throw(
+				_("The reference document {0} can not be child table.").format(self.reference_document),
+				CanNotBeChildDoc,
+			)
 
 		if self.reference_document in ["Batch", "Serial No", "Warehouse", "Item"]:
-			msg = f"The reference document {self.reference_document} can not be an Inventory Dimension."
-			frappe.throw(_(msg), CanNotBeDefaultDimension)
+			frappe.throw(
+				_("The reference document {0} can not be an Inventory Dimension.").format(
+					self.reference_document
+				),
+				CanNotBeDefaultDimension,
+			)
 
 	def set_source_and_target_fieldname(self) -> None:
 		if not self.source_fieldname:
@@ -182,6 +189,13 @@ class InventoryDimension(Document):
 		if label_start_with:
 			label = f"{label_start_with} {self.dimension_name}"
 
+		mandatory_depends_on = self.mandatory_depends_on
+		if self.reqd:
+			if doctype == "Stock Entry Detail":
+				mandatory_depends_on = "eval:doc.s_warehouse"
+			elif doctype == "Packed Item":
+				mandatory_depends_on = "eval:doc.parent_detail_docname && ['Delivery Note', 'Sales Invoice', 'POS Invoice'].includes(parent.doctype)"
+
 		dimension_fields = [
 			dict(
 				fieldname="inventory_dimension",
@@ -199,11 +213,11 @@ class InventoryDimension(Document):
 				depends_on="eval:doc.s_warehouse" if doctype == "Stock Entry Detail" else "",
 				search_index=1,
 				reqd=1
-				if self.reqd and not self.mandatory_depends_on and doctype != "Stock Entry Detail"
+				if self.reqd
+				and not self.mandatory_depends_on
+				and doctype not in ["Stock Entry Detail", "Packed Item"]
 				else 0,
-				mandatory_depends_on="eval:doc.s_warehouse"
-				if self.reqd and doctype == "Stock Entry Detail"
-				else self.mandatory_depends_on,
+				mandatory_depends_on=mandatory_depends_on,
 			),
 		]
 
@@ -425,6 +439,8 @@ def delete_dimension(dimension):
 
 @frappe.whitelist()
 def get_parent_fields(child_doctype, dimension_name):
+	frappe.has_permission("Inventory Dimension", "read", throw=True)
+
 	parent_doctypes = frappe.get_all("DocField", fields=["parent"], filters={"options": child_doctype})
 
 	fields = []

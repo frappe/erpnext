@@ -26,6 +26,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 )
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
 from erpnext.accounts.utils import build_qb_match_conditions
+from erpnext.buying.utils import get_qty_to_order
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -587,11 +588,11 @@ class SalesOrder(SellingController):
 
 		for d in self.get("items"):
 			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
-				if self.has_product_bundle(d.item_code):
-					for p in self.get("packed_items"):
-						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
-							_valid_for_reserve(p.item_code, p.warehouse)
-				else:
+				# the order's own packed rows, as the bundle may since be disabled
+				packed_items = [p for p in self.get("packed_items") if p.parent_detail_docname == d.name]
+				for p in packed_items:
+					_valid_for_reserve(p.item_code, p.warehouse)
+				if not packed_items:
 					_valid_for_reserve(d.item_code, d.warehouse)
 
 		for item_code, warehouse in item_wh_list:
@@ -859,7 +860,12 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 	"""Returns the unreserved quantity for the Sales Order Item."""
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
-	return item.stock_qty - flt(item.delivered_qty) * item.get("conversion_factor", 1) - existing_reserved_qty
+	unreserved_qty = (
+		item.stock_qty - flt(item.delivered_qty) * item.get("conversion_factor", 1) - existing_reserved_qty
+	)
+
+	# a residue below stock qty precision, as a fractional conversion factor leaves, is not unreserved
+	return unreserved_qty if flt(unreserved_qty, item.precision("stock_qty")) > 0 else 0
 
 
 def get_list_context(context=None):
@@ -1283,7 +1289,7 @@ def make_sales_invoice(
 			target.set_advances()
 
 	def set_missing_values(source, target):
-		target.flags.ignore_permissions = True
+		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1447,8 +1453,13 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	from frappe.desk.calendar import get_event_conditions
+	from frappe.desk.reportview import get_match_cond
+
+	if frappe.only_has_select_perm("Sales Order"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	conditions = get_event_conditions("Sales Order", filters)
+	match_conditions = get_match_cond("Sales Order")
 
 	data = frappe.db.sql(
 		f"""
@@ -1464,6 +1475,7 @@ def get_events(start, end, filters=None):
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
 			{conditions}
+			{match_conditions}
 		""",
 		{"start": start, "end": end},
 		as_dict=True,
@@ -1503,7 +1515,6 @@ def make_purchase_order_for_default_supplier(
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
-		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
@@ -1539,8 +1550,8 @@ def make_purchase_order_for_default_supplier(
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
-		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target.qty = qty_to_order[source.name]
+		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
 
 	def update_item_for_packed_item(source, target, source_parent):
@@ -1550,6 +1561,7 @@ def make_purchase_order_for_default_supplier(
 	suppliers = list(dict.fromkeys(suppliers))  # remove duplicates while preserving order
 
 	items_to_map = get_purchase_order_item_map(source_name, selected_items)
+	qty_to_order = get_qty_to_order(frappe.get_doc("Sales Order", source_name).items, "sales_order_item")
 
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
@@ -1587,7 +1599,7 @@ def make_purchase_order_for_default_supplier(
 						"margin_rate_or_amount",
 					],
 					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.stock_qty
+					"condition": lambda doc: qty_to_order[doc.name] > 0
 					and doc.supplier == supplier
 					and doc.name in items_to_map
 					and not is_product_bundle(doc.item_code),
@@ -1622,7 +1634,6 @@ def make_purchase_order_for_default_supplier(
 
 		set_delivery_date(doc.items, source_name)
 		doc.insert()
-		frappe.db.commit()
 		purchase_orders.append(doc)
 
 	return purchase_orders
@@ -1639,6 +1650,7 @@ def make_purchase_order(
 		selected_items = json.loads(selected_items)
 
 	items_to_map = get_purchase_order_item_map(source_name, selected_items)
+	qty_to_order = get_qty_to_order(frappe.get_doc("Sales Order", source_name).items, "sales_order_item")
 
 	def is_drop_ship_order(target):
 		drop_ship = True
@@ -1684,8 +1696,8 @@ def make_purchase_order(
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
-		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target.qty = qty_to_order[source.name]
+		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
 
 	def update_item_for_packed_item(source, target, source_parent):
@@ -1722,7 +1734,7 @@ def make_purchase_order(
 					"pricing_rules",
 				],
 				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.stock_qty
+				"condition": lambda doc: qty_to_order[doc.name] > 0
 				and doc.name in items_to_map
 				and not is_product_bundle(doc.item_code),
 			},
@@ -1889,6 +1901,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			{
 				"item_code": item.get("item_code"),
 				"qty": item.get("quantity"),
+				"uom": item.get("uom"),
 				"schedule_date": schedule_date,
 				"warehouse": item_wh.get(item.get("main_bom_item")) or item.get("warehouse"),
 				"sales_order": sales_order,
@@ -2038,6 +2051,10 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 			)
 		]
 
+		overproduction_percentage_for_sales_order = (
+			frappe.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
+			/ 100
+		)
 		for table in [so.items, so.packed_items]:
 			for i in table:
 				bom = get_default_bom(i.item_code)
@@ -2051,7 +2068,7 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
 							& (wo.sales_order_item == i.name)
-							& (wo.docstatus.lt(2))
+							& (wo.docstatus == 1)
 						)
 						.run()[0][0]
 					)
@@ -2059,7 +2076,10 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 				else:
 					pending_qty = stock_qty
 
-				if pending_qty and i.item_code not in product_bundle_parents:
+				if not pending_qty:
+					pending_qty = stock_qty * overproduction_percentage_for_sales_order
+
+				if pending_qty > 0 and i.item_code not in product_bundle_parents:
 					items.append(
 						dict(
 							name=i.name,

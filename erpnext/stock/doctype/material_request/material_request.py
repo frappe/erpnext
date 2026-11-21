@@ -208,7 +208,11 @@ class MaterialRequest(BuyingController):
 			self.buying_price_list = default_price_list
 
 	def on_update(self):
-		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
+		if (
+			self.get_doc_before_save()
+			and self.buying_price_list
+			and self.has_value_changed("buying_price_list")
+		):
 			self.update_item_rates()
 
 	def update_item_rates(self):
@@ -231,7 +235,13 @@ class MaterialRequest(BuyingController):
 				item.item_code,
 			)
 			if rate is not None:
-				item.db_set({"rate": rate, "amount": flt(rate * item.qty, item.precision("amount"))})
+				item.db_set(
+					{
+						"price_list_rate": rate,
+						"rate": rate,
+						"amount": flt(rate * item.qty, item.precision("amount")),
+					}
+				)
 
 		frappe.msgprint(
 			_("Item rates have been updated based on the selected Buying Price List {0}").format(
@@ -425,6 +435,9 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
+		self.update_per_ordered(update_modified)
+
+	def update_per_ordered(self, update_modified=True):
 		self._update_percent_field(
 			{
 				"target_dt": "Material Request Item",
@@ -492,12 +505,15 @@ class MaterialRequest(BuyingController):
 			return
 
 		update_plan_item_requested_qty({d.material_request_plan_item for d in items_from_pp})
+		update_production_plan_status({d.production_plan for d in items_from_pp})
 
-		for production_plan in {d.production_plan for d in items_from_pp}:
-			doc = frappe.get_doc("Production Plan", production_plan)
-			doc.flags.ignore_permissions = True
-			doc.set_status()
-			doc.db_set("status", doc.status)
+
+def update_production_plan_status(production_plans):
+	for production_plan in production_plans:
+		doc = frappe.get_doc("Production Plan", production_plan)
+		doc.flags.ignore_permissions = True
+		doc.set_status()
+		doc.db_set("status", doc.status)
 
 
 def update_plan_item_requested_qty(plan_item_names):

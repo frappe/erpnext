@@ -594,7 +594,11 @@ def get_reposting_data(file_path) -> dict:
 	)
 
 	if not file_name:
-		return frappe._dict()
+		frappe.throw(
+			_(
+				"The reposting data file {0} is missing. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	attached_file = frappe.get_doc("File", file_name)
 
@@ -603,12 +607,13 @@ def get_reposting_data(file_path) -> dict:
 		content = content.encode("utf-8")
 
 	try:
-		data = gzip.decompress(content)
+		data = json.loads(gzip.decompress(content).decode("utf-8"))
 	except Exception:
-		return frappe._dict()
-
-	if data := json.loads(data.decode("utf-8")):
-		data = data
+		frappe.throw(
+			_(
+				"The reposting data file {0} is corrupted. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	return parse_json(data)
 
@@ -1199,16 +1204,6 @@ class update_entries_after:
 				and not has_dimensions
 			):
 				# assert
-				if (
-					sle.voucher_detail_no
-					and self.repost_doc
-					and self.repost_doc.get("recalculate_valuation_rate")
-				):
-					source_rate = frappe.get_cached_value(
-						"Stock Reconciliation Item", sle.voucher_detail_no, "valuation_rate"
-					)
-					if source_rate:
-						sle.valuation_rate = source_rate
 				self.wh_data.valuation_rate = sle.valuation_rate
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
 				self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
@@ -1527,7 +1522,7 @@ class update_entries_after:
 			or self.has_landed_cost_based_on_pi(sle)
 			or (sle.voucher_type == "Stock Entry" and sle.actual_qty > 0 and is_repack_entry(sle.voucher_no))
 			or is_manufactured_finished_good(sle)
-			or (self.repost_doc and self.repost_doc.get("recalculate_valuation_rate"))
+			or self.recalculates_voucher(sle)
 		):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 
@@ -1646,6 +1641,14 @@ class update_entries_after:
 
 		additional_cost = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "additional_cost")
 		return abs(flt(outward_value)) + flt(additional_cost)
+
+	def recalculates_voucher(self, sle):
+		return bool(
+			self.repost_doc
+			and self.repost_doc.get("recalculate_valuation_rate")
+			and sle.voucher_type == self.repost_doc.voucher_type
+			and sle.voucher_no == self.repost_doc.voucher_no
+		)
 
 	def has_landed_cost_based_on_pi(self, sle):
 		if sle.voucher_type == "Purchase Receipt" and frappe.db.get_single_value(
@@ -1868,13 +1871,13 @@ class update_entries_after:
 				sle.voucher_type + " Item", sle.voucher_detail_no, "incoming_rate", outgoing_rate
 			)
 		else:
-			# packed item
-			frappe.db.set_value(
-				"Packed Item",
-				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
-				"incoming_rate",
-				outgoing_rate,
-			)
+			# packed item; a component packed from several locations has a row per bundle or warehouse
+			filters = {"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code}
+			if sle.serial_and_batch_bundle:
+				filters["serial_and_batch_bundle"] = sle.serial_and_batch_bundle
+			else:
+				filters["warehouse"] = sle.warehouse
+			frappe.db.set_value("Packed Item", filters, "incoming_rate", outgoing_rate)
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
@@ -1987,7 +1990,8 @@ class update_entries_after:
 						actual_qty * sle.outgoing_rate
 					)
 
-					self.wh_data.valuation_rate = new_stock_value / new_stock_qty
+					# an outflow at a set rate, like a purchase return, takes out at most the stock value
+					self.wh_data.valuation_rate = max(new_stock_value, 0) / new_stock_qty
 				else:
 					self.wh_data.valuation_rate = sle.outgoing_rate
 		else:
@@ -2521,9 +2525,11 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
+		if voucher_no:
+			query = query.where((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
+
 		if posting_datetime:
 			query = query.where(get_prior_ledger_condition(table, posting_datetime, creation))
 
@@ -2563,12 +2569,16 @@ def get_valuation_rate(
 			& (sle_entry.warehouse == warehouse)
 			& (sle_entry.valuation_rate >= 0)
 			& (sle_entry.is_cancelled == 0)
-			& ~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
 		)
 		.orderby(sle_entry.posting_datetime, order=Order.desc)
 		.orderby(sle_entry.creation, order=Order.desc)
 		.limit(1)
 	)
+	if voucher_no:
+		last_sle_query = last_sle_query.where(
+			~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
+		)
+
 	if posting_datetime:
 		last_sle_query = last_sle_query.where(
 			get_prior_ledger_condition(sle_entry, posting_datetime, creation)
@@ -3088,11 +3098,18 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 
 	doctype = "Delivery Note Item" if sle.voucher_type == "Purchase Receipt" else "Sales Invoice Item"
 
-	reference_name = frappe.get_cached_value(sle.voucher_type + " Item", sle.voucher_detail_no, field)
+	# a return row reaches the delivery row through the receipt row it returns
+	child_doctype = sle.voucher_type + " Item"
+	detail_no = (
+		frappe.get_cached_value(child_doctype, sle.voucher_detail_no, frappe.scrub(child_doctype))
+		or sle.voucher_detail_no
+	)
+
+	reference_name = frappe.get_cached_value(child_doctype, detail_no, field)
 	if sle.voucher_type == "Purchase Receipt" and not reference_name:
 		doctype = "Packed Item"
 		reference_name = frappe.get_cached_value(
-			"Purchase Receipt Item", sle.voucher_detail_no, "delivery_note_packed_item"
+			"Purchase Receipt Item", detail_no, "delivery_note_packed_item"
 		)
 
 	if reference_name:
@@ -3103,9 +3120,7 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 		)
 
 	# add lcv amount in incoming_rate
-	lcv_amount = frappe.db.get_value(
-		f"{sle.voucher_type} Item", sle.voucher_detail_no, "landed_cost_voucher_amount"
-	)
+	lcv_amount = frappe.db.get_value(child_doctype, sle.voucher_detail_no, "landed_cost_voucher_amount")
 
 	if lcv_amount:
 		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
@@ -3164,16 +3179,6 @@ def get_stock_value_difference(
 
 	difference_amount = query.run()
 	return flt(difference_amount[0][0]) if difference_amount else 0
-
-
-@frappe.request_cache
-def is_transfer_stock_entry(voucher_no):
-	return bool(
-		frappe.db.exists(
-			"Stock Entry Detail",
-			{"parent": voucher_no, "s_warehouse": ("is", "set"), "t_warehouse": ("is", "set")},
-		)
-	)
 
 
 @frappe.request_cache

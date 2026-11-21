@@ -29,6 +29,7 @@ def execute(filters=None):
 		filters.period_end_date,
 		filters.filter_based_on,
 		filters.periodicity,
+		accumulated_values=filters.accumulated_values,
 		company=filters.company,
 	)
 

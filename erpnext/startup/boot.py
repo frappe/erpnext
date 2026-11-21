@@ -23,6 +23,12 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.allow_stale = cint(
 			frappe.db.get_single_value("Accounts Settings", "allow_stale")
 		)
+		bootinfo.sysdefaults.bill_for_rejected_quantity_in_purchase_invoice = cint(
+			frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice")
+		)
+		bootinfo.sysdefaults.set_valuation_rate_for_rejected_materials = cint(
+			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+		)
 		bootinfo.sysdefaults.over_billing_allowance = frappe.db.get_single_value(
 			"Accounts Settings", "over_billing_allowance"
 		)

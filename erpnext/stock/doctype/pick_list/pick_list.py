@@ -32,6 +32,7 @@ from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
+	set_bundle_header_values,
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -442,11 +443,7 @@ class PickList(TransactionBase):
 				and frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "docstatus")
 				== 1
 			):
-				frappe.db.set_value(
-					"Serial and Batch Bundle",
-					row.serial_and_batch_bundle,
-					{"is_cancelled": 1, "voucher_no": ""},
-				)
+				set_bundle_header_values(row.serial_and_batch_bundle, {"is_cancelled": 1, "voucher_no": ""})
 
 				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
 				row.db_set("serial_and_batch_bundle", None)
@@ -1969,14 +1966,21 @@ def create_stock_entry(pick_list: str | dict):
 	stock_entry.pick_list = pick_list.get("name")
 	stock_entry.purpose = pick_list.get("purpose")
 	stock_entry.company = pick_list.get("company")
-	stock_entry.set_stock_entry_type()
 
-	if pick_list.get("work_order"):
+	job_card = pick_list.get("material_request") and frappe.db.get_value(
+		"Material Request", pick_list.get("material_request"), "job_card"
+	)
+
+	if job_card:
+		stock_entry = update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card)
+	elif pick_list.get("work_order"):
 		stock_entry = update_stock_entry_based_on_work_order(pick_list, stock_entry)
 	elif pick_list.get("material_request"):
 		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
+
+	stock_entry.set_stock_entry_type()
 
 	if not stock_entry.get("items"):
 		return frappe.msgprint(_("All picked items have already been transferred against this Pick List"))
@@ -2065,9 +2069,59 @@ def stock_entry_exists(pick_list_name):
 	return frappe.db.exists("Stock Entry", {"pick_list": pick_list_name})
 
 
+def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
+	job_card = frappe.db.get_value(
+		"Job Card",
+		job_card,
+		["name", "work_order", "bom_no", "for_quantity", "transferred_qty", "wip_warehouse", "project"],
+		as_dict=True,
+	)
+
+	stock_entry.purpose = "Material Transfer for Manufacture"
+	stock_entry.job_card = job_card.name
+	stock_entry.work_order = job_card.work_order
+	stock_entry.from_bom = 1
+	stock_entry.bom_no = job_card.bom_no
+	stock_entry.fg_completed_qty = max(flt(job_card.for_quantity) - flt(job_card.transferred_qty), 0)
+	stock_entry.to_warehouse = job_card.wip_warehouse
+	stock_entry.project = job_card.project
+
+	job_card_items = get_job_card_items_by_material_request_item(pick_list)
+
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
+	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
+		item = frappe._dict()
+		update_common_item_properties(item, location, serial_nos_in_stock)
+		item.t_warehouse = job_card.wip_warehouse
+		item.job_card_item = job_card_items.get(location.material_request_item)
+		stock_entry.append("items", item)
+
+	return stock_entry
+
+
+def get_job_card_items_by_material_request_item(pick_list):
+	material_request_items = [
+		location.material_request_item for location in pick_list.locations if location.material_request_item
+	]
+	if not material_request_items:
+		return {}
+
+	return dict(
+		frappe.get_all(
+			"Material Request Item",
+			filters={"name": ["in", material_request_items]},
+			fields=["name", "job_card_item"],
+			as_list=True,
+		)
+	)
+
+
 def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	work_order = frappe.get_doc("Work Order", pick_list.get("work_order"))
 
+	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.work_order = work_order.name
 	stock_entry.company = work_order.company
 	stock_entry.from_bom = 1
@@ -2148,6 +2202,7 @@ def update_common_item_properties(item, location, serial_nos_in_stock):
 	item.material_request = location.material_request
 	item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock, "transferred_qty")
 	item.batch_no = location.batch_no
+	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name
 
@@ -2164,12 +2219,29 @@ def get_rejected_warehouses():
 	return frappe.local.rejected_warehouses
 
 
+def check_pick_list_company(company: str | None) -> None:
+	if company is not None and not isinstance(company, str):
+		frappe.throw(_("Company must be text"), frappe.ValidationError)
+
+	if not company:
+		return
+
+	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+	from frappe.permissions import get_allowed_docs_for_doctype
+
+	allowed_companies = get_allowed_docs_for_doctype(get_user_permissions().get("Company", []), "Pick List")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_pick_list_query(doctype, txt, searchfield, start, page_len, filters):
 	frappe.has_permission("Pick List", throw=True)
 
 	if not filters.get("company"):
 		frappe.throw(_("Please select a Company"))
+
+	check_pick_list_company(filters.get("company"))
 
 	PICK_LIST = frappe.qb.DocType("Pick List")
 	PICK_LIST_ITEM = frappe.qb.DocType("Pick List Item")

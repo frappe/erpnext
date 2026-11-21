@@ -127,6 +127,105 @@ class TestPurchaseOrder(FrappeTestCase):
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
 
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_orders_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+		item = make_item_with_fractional_box()
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+		self.assert_orders_for_parts_add_up(mr.items[0], lambda: make_purchase_order(mr.name))
+
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+		mr = receive_material_request_in_parts()
+		self.assertEqual(
+			mr.items[0].received_qty, flt(mr.items[0].stock_qty, mr.precision("stock_qty", "items"))
+		)
+		self.assertEqual(mr.per_received, 100)
+
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_receipts_for_parts_of_a_material_request_add_up_to_its_unrounded_stock_qty(self):
+		mr = receive_material_request_in_parts()
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_received, 100)
+
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_receipt_of_a_material_request_in_a_whole_number_uom_completes_it(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3333}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.3333)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+		make_purchase_receipt(po.name).submit()
+
+		mr.reload()
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_received, 100)
+
+	@change_settings(
+		"Stock Settings",
+		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
+	)
+	def test_orders_for_parts_of_a_sales_order_add_up_to_its_stock_qty(self):
+		so = make_sales_order_for_fractional_box()
+		self.assert_orders_for_parts_add_up(so.items[0], lambda: make_po_for_sales_order_row(so.items[0]))
+
+	@change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@change_settings(
+		"Stock Settings",
+		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
+	)
+	def test_removing_rows_ordered_for_a_sales_order_row_clears_its_ordered_qty(self):
+		so = make_sales_order_for_fractional_box()
+		po = make_po_for_sales_order_row(so.items[0])
+		po.items[0].qty = 1
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None})
+		po.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+		)
+		po.submit()
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"),
+			flt(2 * 0.666666667, so.items[0].precision("ordered_qty")),
+		)
+
+		unlinked_row = po.items[2]
+		trans_item = json.dumps(
+			[{"item_code": unlinked_row.item_code, "qty": 1, "rate": 100, "docname": unlinked_row.name}]
+		)
+		update_child_qty_rate("Purchase Order", trans_item, po.name)
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 0)
+
+	def assert_orders_for_parts_add_up(self, source_row, make_order):
+		"""Orders of 1 + 1 + 1 Box for a 3 Box source row add up to its stock qty; over-ordering fails."""
+		from erpnext.controllers.status_updater import OverAllowanceError
+
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+
+		def order(qty):
+			po = make_order()
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = qty
+			return po
+
+		order(1).submit()
+		order(1).submit()
+		frappe.db.savepoint("over_order")
+		self.assertRaises(OverAllowanceError, order(2).submit)
+		frappe.db.rollback(save_point="over_order")
+		order(1).submit()
+
+		self.assertEqual(
+			frappe.db.get_value(source_row.doctype, source_row.name, "ordered_qty"),
+			flt(source_row.stock_qty, source_row.precision("stock_qty")),
+		)
+
 	def test_update_remove_child_linked_to_mr(self):
 		"""Test impact on linked PO and MR on deleting/updating row."""
 		mr = make_material_request(qty=10)
@@ -338,6 +437,47 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		# ordered qty should decrease (back to initial) on row deletion
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
+
+	def test_update_child_cannot_remove_returned_item(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		po = create_purchase_order(do_not_save=1)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.schedule_date,
+			},
+		)
+		po.submit()
+		pr = make_purchase_receipt(po.name)
+		pr.submit()
+		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		purchase_return.items = purchase_return.items[1:]
+		purchase_return.submit()
+
+		kept_row = po.items[0]
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": kept_row.item_code,
+					"rate": kept_row.rate,
+					"qty": kept_row.qty,
+					"docname": kept_row.name,
+				}
+			]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already been received",
+			update_child_qty_rate,
+			"Purchase Order",
+			trans_item,
+			po.name,
+		)
 
 	def test_discount_amount_partial_purchase_receipt(self):
 		po = create_purchase_order(qty=4, rate=100, do_not_save=1)
@@ -551,6 +691,25 @@ class TestPurchaseOrder(FrappeTestCase):
 		po.reload()
 
 		self.assertEqual(po.items[0].last_purchase_rate, 120)
+
+	def test_last_purchase_rate_from_a_newer_purchase_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		item = make_item("_Test Last Purchase Rate From Invoice", {"is_stock_item": 1}).name
+		create_purchase_order(
+			item_code=item,
+			rate=100,
+			transaction_date=add_days(nowdate(), -10),
+			schedule_date=add_days(nowdate(), 1),
+		)
+		for days, rate in ((-1, 150), (-5, 120)):
+			invoice = make_purchase_invoice(
+				item_code=item, rate=rate, posting_date=add_days(nowdate(), days), do_not_save=True
+			)
+			invoice.set_posting_time = 1
+			invoice.submit()
+
+		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 150)
 
 	@change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
@@ -816,6 +975,47 @@ class TestPurchaseOrder(FrappeTestCase):
 		fractional.items[0].uom = "Kg"
 		fractional.items[0].conversion_factor = 0.6
 		self.assertRaises(UOMMustBeIntegerError, fractional.insert)
+
+	def test_min_order_qty_with_uom_conversion_dust(self):
+		item_doc = make_item(properties={"min_order_qty": 2000, "stock_uom": "Kg"})
+		item_doc.append("uoms", {"uom": "Litre", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+		po.items[0].uom = "Litre"
+		po.items[0].conversion_factor = 0.6
+		po.insert()
+
+		below_minimum = create_purchase_order(item_code=item, qty=3000, do_not_save=1)
+		below_minimum.items[0].uom = "Litre"
+		below_minimum.items[0].conversion_factor = 0.6
+		self.assertRaises(frappe.ValidationError, below_minimum.insert)
+
+	def test_marginal_min_order_qty_overage_toast(self):
+		original_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", "3")
+		self.addCleanup(frappe.db.set_default, "float_precision", original_precision)
+
+		if not frappe.db.exists("UOM", "Gram"):
+			frappe.get_doc({"doctype": "UOM", "uom_name": "Gram"}).insert()
+
+		item_doc = make_item(properties={"min_order_qty": 50000, "stock_uom": "Gram"})
+		item_doc.append("uoms", {"uom": "Pound", "conversion_factor": 453.592292197})
+		item_doc.save()
+		item = item_doc.name
+
+		def insert_po(qty):
+			po = create_purchase_order(item_code=item, qty=qty, do_not_save=1)
+			po.items[0].uom = "Pound"
+			po.items[0].conversion_factor = 453.592292197
+			frappe.clear_messages()
+			po.insert()
+			return any("minimum order qty" in d.get("message", "") for d in frappe.get_message_log())
+
+		self.assertTrue(insert_po(110.232))
+		self.assertFalse(insert_po(150))
 
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
@@ -1780,6 +1980,36 @@ class TestPurchaseOrder(FrappeTestCase):
 			frappe.db.get_value("Purchase Order", po.name, "inter_company_order_reference"), so.name
 		)
 
+	def test_row_linked_by_internal_sales_order_cannot_be_deleted(self):
+		po = make_internal_purchase_order(do_not_submit=True)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None})
+		po.submit()
+
+		so = make_inter_company_sales_order(po.name)
+		so.items = [row for row in so.items if row.purchase_order_item == po.items[0].name]
+		so.items[0].delivery_date = today()
+		so.submit()
+
+		kept_row = po.items[1]
+		trans_item = json.dumps(
+			[
+				{
+					"docname": kept_row.name,
+					"item_code": kept_row.item_code,
+					"qty": kept_row.qty,
+					"rate": kept_row.rate,
+				}
+			]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Sales Order",
+			update_child_qty_rate,
+			"Purchase Order",
+			trans_item,
+			po.name,
+		)
+
 	def test_internal_sales_order_drops_buying_only_terms(self):
 		frappe.get_doc(
 			doctype="Terms and Conditions", title="_Test Buy Only Terms", buying=1, selling=0, terms="FOB"
@@ -1805,6 +2035,60 @@ class TestPurchaseOrder(FrappeTestCase):
 		so.submit()
 		self.assertRaisesRegex(
 			frappe.ValidationError, "fully ordered", make_inter_company_sales_order, po.name
+		)
+
+	def test_no_internal_sales_order_from_purchase_order_made_from_one(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		prepare_data_for_internal_transfer()
+		so = make_sales_order(
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			qty=2,
+			rate=1,
+		)
+		po = make_inter_company_purchase_order(so.name)
+		set_missing_warehouse(po)
+		po.items[0].schedule_date = today()
+		po.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "was created from", make_inter_company_sales_order, po.name
+		)
+
+	def test_no_internal_purchase_order_from_sales_order_made_from_drop_ship_po(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_purchase_order_for_default_supplier as make_po_from_so,
+		)
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		prepare_data_for_internal_transfer()
+		customer_so = make_sales_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			qty=2,
+			rate=1,
+			do_not_submit=True,
+		)
+		customer_so.items[0].supplier = "_Test Internal Supplier 2"
+		customer_so.submit()
+		po = make_po_from_so(
+			customer_so.name,
+			selected_items=[{"name": customer_so.items[0].name, "supplier": "_Test Internal Supplier 2"}],
+		)[0]
+		po.items[0].from_warehouse = "_Test Internal Warehouse New 1 - TCP1"
+		po.submit()
+
+		so = make_inter_company_sales_order(po.name)
+		set_missing_warehouse(so)
+		so.items[0].delivery_date = today()
+		so.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "was created from", make_inter_company_purchase_order, so.name
 		)
 
 	def test_update_status_accepts_only_hold_close_and_reopen_on_submitted_po(self):
@@ -2107,6 +2391,49 @@ class TestPurchaseOrder(FrappeTestCase):
 			orders[1].cancel()
 			self.assertFalse(source.get_db_value("inter_company_order_reference"))
 
+	def test_supplier_from_first_item_default_found(self):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test Default Supplier Group",
+				"parent_item_group": "All Item Groups",
+				"item_group_defaults": [
+					{
+						"company": "_Test Company",
+						"default_supplier": "_Test Supplier 1",
+						"default_warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		).insert()
+		item_with_default = make_item(
+			"_Test Item With Default Supplier",
+			{
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"default_supplier": "_Test Supplier",
+						"default_warehouse": "_Test Warehouse - _TC",
+					}
+				]
+			},
+		)
+		item_from_group = make_item(
+			"_Test Item With Group Default Supplier",
+			{
+				"item_group": item_group.name,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			},
+		)
+
+		po = frappe.new_doc("Purchase Order")
+		po.company = "_Test Company"
+		po.append("items", {"item_code": item_with_default.name})
+		po.append("items", {"item_code": item_from_group.name})
+		po.set_supplier_from_item_default()
+
+		self.assertEqual(po.supplier, "_Test Supplier")
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
@@ -2357,3 +2684,50 @@ def set_missing_warehouse(order):
 		row.warehouse = row.warehouse or frappe.db.get_value(
 			"Warehouse", {"company": order.company, "is_group": 0}
 		)
+
+
+def make_sales_order_for_fractional_box():
+	"""Sales Order for 3 of a 2/3 Kg Box UOM that allows fractions, so orders can map the rest of it."""
+	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+	if not frappe.db.exists("UOM", "_Test Fractional Box"):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Fractional Box"}).insert()
+	item = make_item_with_fractional_box("_Test Fractional Box")
+	return make_sales_order(item_code=item, qty=3, uom="_Test Fractional Box")
+
+
+def make_po_for_sales_order_row(sales_order_row):
+	from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order as make_po_from_so
+
+	selected_items = [{"name": sales_order_row.name, "supplier": "_Test Supplier"}]
+	po = make_po_from_so(sales_order_row.parent, selected_items=selected_items)
+	po.supplier = "_Test Supplier"
+	return po
+
+
+def receive_material_request_in_parts():
+	"""Material Request for 3 fractional Boxes, ordered at once and received one Box at a time."""
+	item = make_item_with_fractional_box()
+	mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+	po = make_purchase_order(mr.name)
+	po.supplier = "_Test Supplier"
+	po.submit()
+
+	for _ in range(3):
+		pr = make_purchase_receipt(po.name)
+		pr.items[0].qty = pr.items[0].received_qty = 1
+		pr.submit()
+
+	mr.reload()
+	return mr
+
+
+def make_item_with_fractional_box(uom="Box"):
+	"""Stock item in Kg whose ``uom`` is 2/3 Kg, so the stock qty of ordered ``uom`` is rounded."""
+	return make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Kg",
+			"uoms": [{"uom": uom, "conversion_factor": 0.666666667}],
+		}
+	).name

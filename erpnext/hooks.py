@@ -64,6 +64,9 @@ after_install = "erpnext.setup.install.after_install"
 after_app_install = "erpnext.setup.install.after_app_install"
 after_app_uninstall = "erpnext.setup.install.after_app_uninstall"
 
+# patches that must stop the migration when they fail, even with `bench migrate --skip-failing`
+never_skip_patches = ["erpnext.patches.v16_0.update_serial_batch_entries"]
+
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
@@ -311,7 +314,6 @@ has_website_permission = {
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
 
 before_tests = "erpnext.setup.utils.before_tests"

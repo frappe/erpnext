@@ -347,6 +347,12 @@ class BOM(WebsiteGenerator):
 	@frappe.whitelist()
 	def get_routing(self):
 		if self.routing:
+			frappe.has_permission("Routing", "read", self.routing, throw=True)
+
+		self.set_operations_from_routing()
+
+	def set_operations_from_routing(self):
+		if self.routing:
 			self.set("operations", [])
 			fields = [
 				"sequence_id",
@@ -518,7 +524,7 @@ class BOM(WebsiteGenerator):
 			return
 
 		self.flags.cost_updated = False
-		existing_bom_cost = self.total_cost
+		existing_costs = (self.total_cost, self.base_total_cost)
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
@@ -530,7 +536,7 @@ class BOM(WebsiteGenerator):
 			self.db_update()
 
 		# update parent BOMs
-		if self.total_cost != existing_bom_cost and update_parent:
+		if update_parent and (self.total_cost, self.base_total_cost) != existing_costs:
 			parent_boms = frappe.db.sql_list(
 				"""select distinct parent from `tabBOM Item`
 				where bom_no = %s and docstatus=1 and parenttype='BOM'""",
@@ -784,8 +790,9 @@ class BOM(WebsiteGenerator):
 		old_cost = self.total_cost
 
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
-		self.base_total_cost = (
-			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
+		self.base_total_cost = flt(
+			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost,
+			self.precision("base_total_cost"),
 		)
 
 		if self.total_cost != old_cost:
@@ -814,7 +821,9 @@ class BOM(WebsiteGenerator):
 				self.get("operating_cost_per_bom_quantity")
 			)
 			self.operating_cost = total_operating_cost
-			self.base_operating_cost = flt(total_operating_cost * self.conversion_rate, 2)
+			self.base_operating_cost = total_operating_cost * self.conversion_rate
+
+		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		if not row.hour_rate or update_hour_rate:
@@ -826,13 +835,16 @@ class BOM(WebsiteGenerator):
 				)
 
 		if row.hour_rate:
-			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
+			row.base_hour_rate = flt(
+				flt(row.hour_rate) * flt(self.conversion_rate), row.precision("base_hour_rate")
+			)
 
 			if row.time_in_mins:
 				row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
-				row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+				base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+				row.base_operating_cost = flt(base_operating_cost, row.precision("base_operating_cost"))
 				row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
-				row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
+				row.base_cost_per_unit = base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate and save:
 			row.db_update()
@@ -844,7 +856,7 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
-			old_rate = d.rate
+			old_rate, old_base_amount = d.rate, d.base_amount
 			if d.is_stock_item:
 				d.rate = self.get_rm_rate(
 					{
@@ -864,18 +876,18 @@ class BOM(WebsiteGenerator):
 			d.amount = flt(
 				flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty")), d.precision("amount")
 			)
-			d.base_amount = d.amount * flt(self.conversion_rate)
+			d.base_amount = flt(d.amount * flt(self.conversion_rate), d.precision("base_amount"))
 			d.qty_consumed_per_unit = flt(d.stock_qty, d.precision("stock_qty")) / flt(
 				self.quantity, self.precision("quantity")
 			)
 
 			total_rm_cost += d.amount
 			base_total_rm_cost += d.base_amount
-			if save and (old_rate != d.rate):
+			if save and (old_rate != d.rate or old_base_amount != d.base_amount):
 				d.db_update()
 
 		self.raw_material_cost = total_rm_cost
-		self.base_raw_material_cost = base_total_rm_cost
+		self.base_raw_material_cost = flt(base_total_rm_cost, self.precision("base_raw_material_cost"))
 
 	def calculate_sm_cost(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
@@ -1083,7 +1095,7 @@ class BOM(WebsiteGenerator):
 	def set_routing_operations(self):
 		self.validate_routing()
 		if self.routing and self.with_operations and not self.operations:
-			self.get_routing()
+			self.set_operations_from_routing()
 
 	def validate_routing(self):
 		if not self.routing or not self.has_value_changed("routing"):
@@ -1156,6 +1168,7 @@ def get_bom_item_rate(args, bom_doc):
 				"transaction_type": "buying",
 				"company": bom_doc.company,
 				"currency": bom_doc.currency,
+				"transaction_date": today(),
 				"conversion_rate": 1,  # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 				"conversion_factor": args.get("conversion_factor") or 1,
 				"plc_conversion_rate": 1,
@@ -1303,14 +1316,18 @@ def get_bom_items_as_dict(
 
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 	else:
+		rate_col = "bom_item.base_rate"
+		if fetch_qty_in_stock_uom:
+			rate_col += " / ifnull(nullif(bom_item.conversion_factor, 0), 1)"
+
 		query = query.format(
 			table="BOM Item",
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
-			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
+			select_columns=f""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate """,
+				bom_item.description, {rate_col} as rate """,
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 
@@ -1439,7 +1456,6 @@ def get_children(doctype=None, parent=None, is_root=False, **filters):
 
 			bom_item.parent_bom_qty = bom_doc.quantity
 			bom_item.expandable = 0 if bom_item.value in ("", None) else 1
-			bom_item.image = frappe.db.escape(bom_item.image)
 
 		return bom_items
 

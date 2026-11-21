@@ -8,6 +8,7 @@
   "parent_item",
   "item_code",
   "item_name",
+  "delivered_by_supplier",
   "column_break_5",
   "description",
   "section_break_6",
@@ -23,7 +24,6 @@
   "use_serial_batch_fields",
   "column_break_11",
   "serial_and_batch_bundle",
-  "delivered_by_supplier",
   "section_break_bgys",
   "serial_no",
   "column_break_qlha",
@@ -119,6 +119,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!['Sales Order', 'Quotation'].includes(parent.doctype)",
    "fieldname": "section_break_9",
    "fieldtype": "Section Break"
   },
@@ -227,7 +228,8 @@
   {
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
-   "label": "Conversion Factor"
+   "label": "Conversion Factor",
+   "precision": "9"
   },
   {
    "fieldname": "rate",
@@ -296,7 +298,7 @@
    "label": "Use Serial No / Batch Fields"
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 1",
+   "depends_on": "eval:doc.use_serial_batch_fields === 1 && !['Sales Order', 'Quotation'].includes(parent.doctype)",
    "fieldname": "section_break_bgys",
    "fieldtype": "Section Break"
   },
