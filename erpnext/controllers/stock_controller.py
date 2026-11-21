@@ -293,6 +293,7 @@ class StockController(AccountsController):
 		include_bundle=None,
 		exclude_serial_nos=None,
 		total_qty=0,
+		from_last=False,
 	):
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
@@ -305,6 +306,7 @@ class StockController(AccountsController):
 			include_bundle,
 			exclude_serial_nos,
 			total_qty,
+			from_last,
 		)
 
 	def get_sl_entries(self, d, args):
@@ -1164,6 +1166,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 	bundle_doc = frappe.copy_doc(bundle_doc)
 	bundle_doc.docstatus = 0
+	bundle_doc.company = kwargs.company or bundle_doc.company
 	bundle_doc.warehouse = kwargs.warehouse
 	bundle_doc.type_of_transaction = kwargs.type_of_transaction
 	bundle_doc.voucher_type = kwargs.voucher_type
@@ -1180,20 +1183,20 @@ def make_bundle_for_material_transfer(**kwargs):
 		for idx, row in enumerate(keep, start=1):
 			row.idx = idx
 
-	qty = 0
 	if (
-		len(bundle_doc.entries) == 1
+		flt(kwargs.qty)
 		and abs(flt(kwargs.qty)) < abs(flt(bundle_doc.total_qty))
 		and not bundle_doc.has_serial_no
 	):
-		qty = kwargs.qty
+		entries = bundle_doc.entries[::-1] if kwargs.from_last else bundle_doc.entries
+		bundle_doc.entries = get_entries_up_to_qty(entries, kwargs.qty)
 
 	if kwargs.total_qty and not bundle_doc.has_serial_no:
 		set_entries_total_qty(bundle_doc.entries, kwargs.total_qty)
 
 	for row in bundle_doc.entries:
 		row.is_outward = 0
-		row.qty = abs(qty or row.qty)
+		row.qty = abs(row.qty)
 		row.stock_value_difference = abs(row.stock_value_difference)
 		if kwargs.type_of_transaction == "Outward":
 			row.qty *= -1
@@ -1247,6 +1250,23 @@ def add_transfer_to_reservation(sre_doc, transfer) -> None:
 
 	transfer.qty -= qty
 	sre_doc.transferred_qty = flt(flt(sre_doc.transferred_qty) + qty, sre_doc.precision("transferred_qty"))
+
+
+def get_entries_up_to_qty(entries, qty):
+	"""The entries, in order, that make up `qty`, the last one cut down to fit."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	remaining = abs(flt(qty))
+	kept = []
+	for row in entries:
+		if remaining <= 0:
+			break
+
+		row.qty = min(abs(flt(row.qty)), remaining)
+		remaining = flt(remaining - row.qty, precision)
+		row.idx = len(kept) + 1
+		kept.append(row)
+
+	return kept
 
 
 def set_entries_total_qty(entries, total_qty):

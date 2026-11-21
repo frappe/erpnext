@@ -152,7 +152,8 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.is_internal_transfer() and (
+		is_internal_transfer = self.is_internal_transfer()
+		if (is_internal_transfer or self.is_inter_company_receipt()) and (
 			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
 		):
 			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
@@ -177,11 +178,39 @@ class BuyingController(SubcontractingController):
 				if reference and not item.serial_and_batch_bundle and bundle_ids.get(reference):
 					item.serial_and_batch_bundle = self.make_accepted_package(item, bundle_ids.get(reference))
 
+				elif (
+					reference
+					and bundle_ids.get(reference)
+					and item.serial_and_batch_bundle
+					and self.has_stock_qty_changed(item)
+					and not frappe.db.get_value(
+						"Serial and Batch Bundle", item.serial_and_batch_bundle, "has_serial_no"
+					)
+				):
+					self.resize_accepted_package(item, bundle_ids.get(reference))
+
 				elif item.serial_and_batch_bundle:
 					self.resize_package(item, "serial_and_batch_bundle", "qty")
 
-				if item.get(field) and bundle_ids.get(item.get(field)):
+				if is_internal_transfer and item.get(field) and bundle_ids.get(item.get(field)):
 					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
+
+	def has_stock_qty_changed(self, row) -> bool:
+		if self.is_new():
+			return False
+
+		old_row = next((d for d in self.get_doc_before_save().items if d.name == row.name), None)
+		return bool(old_row) and get_stock_qty(old_row, old_row.qty) != get_stock_qty(row, row.qty)
+
+	def resize_accepted_package(self, row, package) -> None:
+		"""Rebuild the draft package of a row whose stock qty changed from the delivered package."""
+		old_package = row.serial_and_batch_bundle
+		row.serial_and_batch_bundle = self.make_accepted_package(row, package)
+		frappe.delete_doc("Serial and Batch Bundle", old_package, force=True, ignore_permissions=True)
+
+	def is_inter_company_receipt(self) -> bool:
+		"""A receipt from an internal supplier that represents another company."""
+		return bool(self.get("is_internal_supplier")) and not self.is_internal_transfer()
 
 	def make_accepted_package(self, row, package) -> str:
 		"""Package of the material the row accepts.
@@ -189,9 +218,10 @@ class BuyingController(SubcontractingController):
 		A row that rejects nothing keeps the package of the in-transit warehouse it came out of. A
 		row that rejects material needs a package of the accepted warehouse instead, since that is
 		the entry it belongs to; the material leaving the in-transit warehouse gets a package of its
-		own when the receipt is submitted.
+		own when the receipt is submitted. An inter-company receipt has no in-transit warehouse, so its
+		row gets a package of the accepted warehouse too.
 		"""
-		if not self.has_rejected_stock(row):
+		if not (self.has_rejected_stock(row) or self.is_inter_company_receipt()):
 			return self.make_package_for_transfer(
 				package,
 				row.from_warehouse,
@@ -283,6 +313,7 @@ class BuyingController(SubcontractingController):
 			do_not_submit=True,
 			qty=get_stock_qty(row, row.rejected_qty),
 			exclude_serial_nos=self.get_accepted_serial_nos(row),
+			from_last=True,
 		)
 
 		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
