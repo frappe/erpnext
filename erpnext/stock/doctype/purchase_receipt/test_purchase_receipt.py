@@ -8464,9 +8464,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		accepted_return.submit()
 
 		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		over_return = make_purchase_return_against_rejected_warehouse(pr.name)
 		rejected_return.submit()
 
-		over_return = make_purchase_return_against_rejected_warehouse(pr.name)
 		over_return.items[0].qty = -1
 		over_return.items[0].received_qty = -1
 		self.assertRaises(StockOverReturnError, over_return.save)
