@@ -1308,13 +1308,17 @@ class JobCard(Document):
 			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):
-		wo.corrective_operation_cost = 0.0
-		for row in frappe.get_all(
-			"Job Card",
-			fields=["total_time_in_mins", "hour_rate"],
-			filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
-		):
-			wo.corrective_operation_cost += flt(row.total_time_in_mins / 60) * flt(row.hour_rate)
+		corrective_operation_cost = sum(
+			flt(row.total_time_in_mins) / 60 * flt(row.hour_rate)
+			for row in frappe.get_all(
+				"Job Card",
+				fields=["total_time_in_mins", "hour_rate"],
+				filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
+			)
+		)
+		wo.corrective_operation_cost = flt(
+			corrective_operation_cost, wo.precision("corrective_operation_cost")
+		)
 
 		wo.calculate_operating_cost()
 		wo.flags.ignore_validate_update_after_submit = True
