@@ -66,10 +66,16 @@ def get_item_details(
 	for_validate: bool | str | None = False,
 	overwrite_warehouse: bool | str = True,
 ):
+<<<<<<< HEAD
 	args = frappe._dict(frappe.parse_json(args))
 	validate_pricing_context(args)
 	out = _get_item_details(args, doc, for_validate, overwrite_warehouse)
 	for warehouse in (out.warehouse, args.warehouse, args.from_warehouse):
+=======
+	validate_pricing_context(ctx)
+	out = _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
+	for warehouse in (out.warehouse, ctx.warehouse):
+>>>>>>> f7bff6d (fix(stock): allow a Material Request source warehouse the user cannot read)
 		if warehouse:
 			erpnext.require_user_permission("Warehouse", warehouse)
 
@@ -450,9 +456,16 @@ def get_filtered_serial_nos(serial_nos, doc, table=None):
 	return serial_nos
 
 
+<<<<<<< HEAD
 def process_args(args):
 	if isinstance(args, str):
 		args = json.loads(args)
+=======
+def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
+	if ctx.doctype == "Material Request" and ctx.material_request_type == "Material Transfer":
+		# Source Warehouse ignores user permissions, so hide only the stock of one the user cannot see
+		out.update(_get_bin_details(ctx.item_code, get_accessible_warehouse(ctx.from_warehouse)))
+>>>>>>> f7bff6d (fix(stock): allow a Material Request source warehouse the user cannot read)
 
 	args = frappe._dict(args)
 
