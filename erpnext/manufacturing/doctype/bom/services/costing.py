@@ -154,7 +154,7 @@ class BOMCostingService:
 			# not via doc event, table is not regenerated and needs updation
 			self.calculate_exploded_cost()
 
-		old_cost = self.doc.total_cost
+		old_costs = (self.doc.total_cost, self.doc.base_total_cost)
 
 		self.doc.total_cost = flt(
 			self.doc.operating_cost + self.doc.raw_material_cost - self.doc.secondary_items_cost,
@@ -167,7 +167,7 @@ class BOMCostingService:
 			self.doc.precision("base_total_cost"),
 		)
 
-		if self.doc.total_cost != old_cost:
+		if (self.doc.total_cost, self.doc.base_total_cost) != old_costs:
 			self.doc.flags.cost_updated = True
 
 	def calculate_op_cost(self, update_hour_rate=False, save=True):
