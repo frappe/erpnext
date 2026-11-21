@@ -3,6 +3,8 @@
 
 import frappe
 
+from erpnext.accounts.doctype.bank_clearance.test_bank_clearance import make_user_restricted_to_company
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -31,6 +33,16 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 			if row[1] == payment_entry:
 				return row
 		return None
+
+	def test_report_needs_access_to_the_account(self):
+		make_journal_entry(BANK_ACCOUNT, "Sales - _TC", 5000, submit=True, posting_date="2026-06-01")
+		user = make_user_restricted_to_company("_Test Company 1")
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(frappe.PermissionError, self.run_report)
+		finally:
+			frappe.set_user("Administrator")
 
 	def test_payment_entry_amount_after_taxes(self):
 		receipt = self.make_taxed_payment_entry(
