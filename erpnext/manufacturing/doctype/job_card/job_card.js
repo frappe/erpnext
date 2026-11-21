@@ -508,7 +508,6 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	for_quantity: function (frm) {
-		frm.doc.items = [];
 		frm.call({
 			method: "get_required_items",
 			doc: frm.doc,
