@@ -6424,6 +6424,77 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 50})
 		self.assertRaises(frappe.ValidationError, transfer.save)
 
+	def test_operating_cost_of_an_operation_planned_on_a_workstation_type(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+		from erpnext.manufacturing.doctype.workstation_type.test_workstation_type import (
+			create_workstation_type,
+		)
+
+		workstation_type = create_workstation_type(
+			workstation_type="_Test Costed Workstation Type",
+			workstation_costs=[{"operating_component": "Rent", "operating_cost": 1200}],
+		).name
+		uncosted_type = create_workstation_type(workstation_type="_Test Uncosted Workstation Type").name
+		workstations = {
+			"_Test Costed Operation 2": make_workstation(
+				workstation="_Test Costed Typed Workstation", workstation_type=workstation_type
+			).name,
+			"_Test Costed Operation 3": make_workstation(
+				workstation="_Test Uncosted Typed Workstation",
+				workstation_type=uncosted_type,
+				hour_rate_rent=300,
+			).name,
+		}
+		workstation = make_workstation(workstation="_Test Costed Workstation", hour_rate_rent=600).name
+		make_operation(operation="_Test Costed Operation 1", workstation=workstation)
+		make_operation(operation="_Test Costed Operation 2")
+		make_operation(operation="_Test Costed Operation 3")
+
+		rm_item = make_item("_Test Workstation Type Cost RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Workstation Type Cost FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_submit=True)
+		bom.append(
+			"operations",
+			{"operation": "_Test Costed Operation 1", "workstation": workstation, "time_in_mins": 6},
+		)
+		bom.append(
+			"operations",
+			{
+				"operation": "_Test Costed Operation 2",
+				"workstation_type": workstation_type,
+				"time_in_mins": 6,
+			},
+		)
+		bom.append(
+			"operations",
+			{"operation": "_Test Costed Operation 3", "workstation_type": uncosted_type, "time_in_mins": 6},
+		)
+		bom.submit()
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=10,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		for index, job_card in enumerate(
+			frappe.get_all("Job Card", {"work_order": work_order.name}, pluck="name", order_by="name")
+		):
+			job_card = frappe.get_doc("Job Card", job_card)
+			job_card.workstation = job_card.workstation or workstations[job_card.operation]
+			from_time = add_to_date("2024-04-01 08:00:00", hours=index)
+			job_card.append(
+				"time_logs",
+				{"from_time": from_time, "to_time": add_to_date(from_time, minutes=60), "completed_qty": 10},
+			)
+			job_card.submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 10))
+		self.assertEqual(sum(row.amount for row in manufacture.additional_costs), 2100)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
