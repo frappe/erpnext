@@ -1312,6 +1312,27 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
 
+	def test_return_of_accepted_qty_from_the_rejected_warehouse_needs_the_receipt_stock(self):
+		fg_item = make_subcontracted_fg_item("FIFO")
+		rejected_warehouse = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=fg_item, target=rejected_warehouse, qty=5, basic_rate=100)
+		scr = make_fg_receipt(fg_item, rm_rate=100, rejected_qty=2)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.rejected_warehouse = None
+		scr_return.items[0].update(
+			{
+				"qty": -2,
+				"received_qty": -2,
+				"rejected_qty": 0,
+				"warehouse": rejected_warehouse,
+				"rejected_warehouse": None,
+			}
+		)
+
+		# the rejected warehouse holds stock at 100 and the rejected qty at 0 only
+		self.assertRaisesRegex(frappe.ValidationError, "does not hold enough", scr_return.save().submit)
+
 	def test_return_sends_back_the_edited_consumed_qty(self):
 		sco = make_order_with_two_batches_transferred()
 		scr = make_subcontracting_receipt(sco.name)
