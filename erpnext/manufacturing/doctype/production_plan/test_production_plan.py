@@ -2492,6 +2492,24 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.get_open_sales_orders()
 		self.assertNotIn(so.name, [row.sales_order for row in plan.sales_orders])
 
+	def test_closed_product_bundle_row_is_not_planned(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		bundle = make_item("Test PP Bundle With BOM Component", {"is_stock_item": 0}).name
+		make_product_bundle(parent=bundle, items=["Test Production Item 1"])
+		so = make_sales_order(
+			item_list=[
+				{"item_code": bundle, "warehouse": "_Test Warehouse - _TC", "qty": qty, "rate": 100}
+				for qty in (3, 4)
+			]
+		)
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 1)
+		plan = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", do_not_save=True, skip_getting_mr_items=True
+		)
+		self.assertEqual([row.planned_qty for row in plan.po_items], [3])
+
 	def test_get_sales_order_items_for_product_bundle(self):
 		"""Testing the Planned Qty for Product Bundle Item"""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import (
