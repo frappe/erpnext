@@ -9,12 +9,7 @@ from frappe.utils import add_days, today
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.stock_ledger_audit import (
-	StockLedgerAudit,
-	audit_stock_ledger_entries,
-	audit_stock_ledger_entries_every_3_days,
-	audit_stock_ledger_entries_every_7_days,
-)
+from erpnext.stock.stock_ledger_audit import StockLedgerAudit, audit_stock_ledger_entries
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -53,16 +48,6 @@ class TestStockLedgerAudit(ERPNextTestSuite):
 			filters={"item_code": self.item, "warehouse": WAREHOUSE, "created_by_scheduler": 1},
 			fields=["name", "posting_date", "posting_time", "status"],
 		)
-
-	def assert_audit_is_queued_only_by(self, frequency, scheduled_audit, other_scheduled_audit):
-		frappe.db.set_single_value("Stock Reposting Settings", "stock_ledger_audit_frequency", frequency)
-
-		with patch("frappe.enqueue") as enqueue:
-			other_scheduled_audit()
-			self.assertFalse(enqueue.called)
-			scheduled_audit()
-
-		self.assertEqual(enqueue.call_count, frappe.db.count("Company"))
 
 	def test_incorrect_entry_is_reposted_from_its_posting_time(self):
 		sle = self.make_incorrect_entry()
@@ -137,17 +122,17 @@ class TestStockLedgerAudit(ERPNextTestSuite):
 		self.assertEqual(log_error.call_args.kwargs["reference_name"], sle)
 
 	def test_audit_is_queued_for_every_company(self):
+		frappe.db.set_single_value("Stock Reposting Settings", "repost_incorrect_valuation_entries", 1)
+
 		with patch("frappe.enqueue") as enqueue:
 			audit_stock_ledger_entries()
 
 		self.assertEqual(enqueue.call_count, frappe.db.count("Company"))
 
-	def test_audit_is_queued_every_3_days_when_selected(self):
-		self.assert_audit_is_queued_only_by(
-			"Every 3 Days", audit_stock_ledger_entries_every_3_days, audit_stock_ledger_entries_every_7_days
-		)
+	def test_audit_is_not_queued_when_disabled(self):
+		frappe.db.set_single_value("Stock Reposting Settings", "repost_incorrect_valuation_entries", 0)
 
-	def test_audit_is_queued_every_7_days_when_selected(self):
-		self.assert_audit_is_queued_only_by(
-			"Every 7 Days", audit_stock_ledger_entries_every_7_days, audit_stock_ledger_entries_every_3_days
-		)
+		with patch("frappe.enqueue") as enqueue:
+			audit_stock_ledger_entries()
+
+		self.assertFalse(enqueue.called)
