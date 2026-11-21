@@ -265,6 +265,9 @@ class BuyingController(SubcontractingController):
 		"""Submitted rows that receive the same delivered row as `row`, and the rows that return them."""
 		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 		reference = row.get(field) or row.get("delivery_note_packed_item")
+		if not reference:
+			return []
+
 		fields = [field, "delivery_note_packed_item"] if self.doctype == "Purchase Receipt" else [field]
 		rows = frappe.get_all(
 			row.doctype,
