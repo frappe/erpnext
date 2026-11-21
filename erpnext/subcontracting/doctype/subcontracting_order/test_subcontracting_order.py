@@ -1397,6 +1397,20 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			self.assertEqual(status, "Delivered")
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_used_reservations_are_not_reserved_stock(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
+
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.reserve_stock = 1
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		sco.submit()
+
+		frappe.get_doc(make_rm_stock_entry(sco.name)).submit()
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertFalse(has_reserved_stock(sco.doctype, sco.name))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_releases_stock_reservations(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
 
