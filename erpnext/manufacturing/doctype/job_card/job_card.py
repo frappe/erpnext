@@ -824,11 +824,9 @@ class JobCard(Document):
 		if last_row and args.get("complete_time"):
 			for row in self.time_logs:
 				if not row.to_time:
-					to_time = get_datetime(args.get("complete_time"))
-					row.db_set(
+					row.update(
 						{
-							"to_time": to_time,
-							"time_in_mins": time_diff_in_minutes(to_time, row.from_time),
+							"to_time": get_datetime(args.get("complete_time")),
 							"operation": args.get("sub_operation"),
 							"completed_qty": (args.get("completed_qty") if last_row.idx == row.idx else 0.0),
 						}
@@ -845,16 +843,9 @@ class JobCard(Document):
 			if employees:
 				for name in employees:
 					new_args.employee = name.get("employee")
-					self.add_start_time_log(new_args)
+					self.append("time_logs", new_args)
 			else:
-				self.add_start_time_log(new_args)
-
-	def add_start_time_log(self, args):
-		if args.from_time and args.to_time:
-			args.time_in_mins = time_diff_in_minutes(args.to_time, args.from_time)
-
-		row = self.append("time_logs", args)
-		row.db_update()
+				self.append("time_logs", new_args)
 
 	def update_sub_operation_status(self):
 		if not self.sub_operations:
@@ -2406,7 +2397,8 @@ def make_time_log(kwargs: str | dict):
 	doc.validate_docstatus()
 	doc.validate_sequence_id()
 	doc.add_time_log(kwargs)
-	doc.set_status(update_status=True)
+	# save runs the time log validations: overlaps and From/To order
+	doc.save()
 
 
 @frappe.whitelist()
