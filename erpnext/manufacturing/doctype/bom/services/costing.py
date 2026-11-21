@@ -85,7 +85,7 @@ class BOMCostingService:
 			return
 
 		self.doc.flags.cost_updated = False
-		existing_bom_cost = self.doc.total_cost
+		existing_base_cost = self.doc.base_total_cost
 
 		if self.doc.docstatus == 1:
 			self.doc.flags.ignore_validate_update_after_submit = True
@@ -96,7 +96,7 @@ class BOMCostingService:
 		if save:
 			self.doc.db_update()
 
-		if self.doc.total_cost != existing_bom_cost and update_parent:
+		if self.doc.base_total_cost != existing_base_cost and update_parent:
 			self._update_parent_boms()
 
 		if not from_child_bom:
