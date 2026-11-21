@@ -578,9 +578,10 @@ def _get_transfer_locations(mr_items, warehouses, company):
 			0, flt(item.get("quantity")) * flt(item.get("conversion_factor"))
 		)
 
+	# keep all locations, so a skipped receiving warehouse does not crowd out the others
 	return {
 		item_code: get_available_item_locations(
-			item_code, warehouses, required_qty, company, ignore_validation=True
+			item_code, warehouses, required_qty, company, ignore_validation=True, keep_all_locations=True
 		)
 		if required_qty > 0
 		else []
