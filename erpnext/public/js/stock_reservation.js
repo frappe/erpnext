@@ -155,11 +155,6 @@ $.extend(erpnext.stock_reservation, {
 
 		let qty_field = parms.qty_field;
 		let dispatch_qty_field = parms.dispatch_qty_field;
-
-		if (frm.doc.doctype === "Work Order" && frm.doc.skip_transfer) {
-			dispatch_qty_field = "consumed_qty";
-		}
-
 		let item_code_field = parms.item_code_field || "item_code";
 		let warehouse_field = parms.warehouse_field || "warehouse";
 
@@ -169,6 +164,10 @@ $.extend(erpnext.stock_reservation, {
 				(item.stock_reserved_qty
 					? flt(item.stock_reserved_qty)
 					: flt(item[dispatch_qty_field]) * flt(item.conversion_factor || 1));
+
+			if (frm.doc.doctype === "Work Order") {
+				unreserved_qty = erpnext.stock_reservation.get_work_order_unreserved_qty(item);
+			}
 
 			if (unreserved_qty > 0) {
 				let args = {
@@ -185,6 +184,18 @@ $.extend(erpnext.stock_reservation, {
 
 		dialog.fields_dict.items.grid.refresh();
 		dialog.show();
+	},
+
+	get_work_order_unreserved_qty(item) {
+		// stock moved to WIP, consumed or taken over by a Subcontracting Order needs no reservation
+		let covered_qty = Math.max(
+			flt(item.stock_reserved_qty) + flt(item.consumed_qty),
+			flt(item.transferred_qty)
+		);
+		return flt(
+			flt(item.required_qty) - flt(item.subcontracted_qty) - covered_qty,
+			precision("required_qty", item)
+		);
 	},
 
 	reserve_stock(frm, table_name, parms) {
