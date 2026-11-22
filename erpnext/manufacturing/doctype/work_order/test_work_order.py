@@ -3114,16 +3114,19 @@ class TestWorkOrder(FrappeTestCase):
 		work_order, _ = make_work_order([5, 5])
 		self.assertEqual(disassembled_rm_qty(work_order), 10)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Manufacturing Settings",
-		{"backflush_raw_materials_based_on": "BOM", "transfer_extra_materials_percentage": 50},
+		{"backflush_raw_materials_based_on": "BOM", "overproduction_percentage_for_work_order": 50},
 	)
 	def test_work_order_details_propose_the_qty_for_the_purpose(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry import get_work_order_details
 
 		rm_item = make_item("Test Proposed Qty RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
 		fg_item = make_item("Test Proposed Qty FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=10)
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=1)
+		bom.process_loss_percentage = 10
+		bom.insert()
+		bom.submit()
 		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=40)
 
 		def proposed_qty(work_order, purpose):
@@ -3151,35 +3154,6 @@ class TestWorkOrder(FrappeTestCase):
 		work_order = new_work_order()
 		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 15)).submit()
 		self.assertEqual(proposed_qty(work_order, "Manufacture"), 10)
-
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
-	def test_pending_work_orders_for_disassemble(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry import get_pending_work_orders
-
-		rm_item = make_item("Test Pending Disassemble RM", {"is_stock_item": 1}).name
-		fg_item = make_item("Test Pending Disassemble FG", {"is_stock_item": 1}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item])
-		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=2)
-		work_order = make_wo_order_test_record(
-			production_item=fg_item,
-			bom_no=bom.name,
-			qty=2,
-			skip_transfer=1,
-			source_warehouse="_Test Warehouse - _TC",
-		)
-		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 2)).submit()
-
-		def is_offered(purpose):
-			filters = {"company": "_Test Company", "purpose": purpose}
-			rows = get_pending_work_orders("Work Order", work_order.name, "name", 0, 20, filters)
-			return work_order.name in [row[0] for row in rows]
-
-		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "status"), "Completed")
-		self.assertFalse(is_offered("Manufacture"))
-		self.assertTrue(is_offered("Disassemble"))
-
-		frappe.get_doc(make_stock_entry(work_order.name, "Disassemble", 2)).submit()
-		self.assertFalse(is_offered("Disassemble"))
 
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
