@@ -1771,6 +1771,63 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		doc.update(overrides)
 		return doc
 
+<<<<<<< HEAD
+=======
+	def test_all_mandatory_fields_are_required(self):
+		self.make_sre().validate_mandatory()  # everything set -> passes
+		# clearing any single mandatory field is rejected
+		mandatory = [
+			"item_code",
+			"warehouse",
+			"voucher_type",
+			"voucher_no",
+			"voucher_detail_no",
+			"available_qty",
+			"voucher_qty",
+			"stock_uom",
+			"reserved_qty",
+			"company",
+		]
+		for field in mandatory:
+			with self.subTest(field=field):
+				self.assertRaises(frappe.ValidationError, self.make_sre(**{field: None}).validate_mandatory)
+
+	def test_amended_document_is_rejected(self):
+		self.assertRaises(frappe.ValidationError, self.make_sre(amended_from="SRE-0001").validate_amended_doc)
+		self.make_sre().validate_amended_doc()  # not amended -> passes
+
+	def test_can_be_updated_guards(self):
+		self.make_sre().can_be_updated()  # a fresh entry can be updated
+		self.assertRaises(frappe.ValidationError, self.make_sre(status="Delivered").can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(status="Partially Delivered").can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(from_voucher_type="Pick List").can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(delivered_qty=5).can_be_updated)
+
+	def test_consumed_or_transferred_entry_cannot_be_updated(self):
+		for field in ("consumed_qty", "transferred_qty"):
+			with self.subTest(field=field):
+				self.assertRaises(frappe.ValidationError, self.make_sre(**{field: 5}).can_be_updated)
+
+	def test_group_warehouse_cannot_be_reserved(self):
+		group_wh = frappe.db.get_value("Warehouse", {"company": "_Test Company", "is_group": 1}, "name")
+		self.assertTrue(group_wh, "need a group warehouse for _Test Company")
+		self.assertRaises(frappe.ValidationError, self.make_sre(warehouse=group_wh).validate_group_warehouse)
+		self.make_sre().validate_group_warehouse()  # leaf warehouse -> passes
+
+	def test_get_serial_batch_entries_aggregates(self):
+		doc = self.make_sre(reservation_based_on="Serial and Batch")
+		doc.append("sb_entries", {"serial_no": "SN1", "qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN2", "qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN3", "qty": 1, "delivered_qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN4", "qty": 0})
+		doc.append("sb_entries", {"batch_no": "B1", "qty": 5})
+		doc.append("sb_entries", {"batch_no": "B1", "qty": 3})
+
+		result = doc.get_serial_batch_entries()
+		self.assertEqual(result.serial_nos, ["SN1", "SN2"])
+		self.assertEqual(result.batches["B1"], 8)
+
+>>>>>>> 567c708 (test: consumed or transferred stock reservation entry cannot be updated)
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
 	)
