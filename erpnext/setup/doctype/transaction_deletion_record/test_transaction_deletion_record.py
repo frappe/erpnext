@@ -815,6 +815,14 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		tdr.generate_to_delete_list()
 		self.assertFalse(expected & {row.doctype_name for row in tdr.doctypes_to_delete})
 
+		email_doctypes = {"Email Account", "Communication"}
+		tdr.set(
+			"doctypes_to_be_ignored",
+			[row for row in tdr.doctypes_to_be_ignored if row.doctype_name not in email_doctypes],
+		)
+		tdr.generate_to_delete_list()
+		self.assertFalse(email_doctypes - {row.doctype_name for row in tdr.doctypes_to_delete})
+
 	def test_partial_deletion_preserves_stock_and_sales_order_reservation(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
