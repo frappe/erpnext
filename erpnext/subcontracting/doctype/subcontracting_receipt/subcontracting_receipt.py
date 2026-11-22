@@ -657,7 +657,11 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def get_returned_allocated_per(self) -> dict:
 		"""% allocated to the secondary rows of the returned receipt, by finished good row of the return."""
-		original_rows = [row for row in self.get_returned_receipt_rows().values() if flt(row.qty)]
+		original_rows = [
+			row
+			for row in self.get_returned_receipt_rows().values()
+			if flt(row.qty) and row.valuation_type not in ("Valuation Rate", "Manual")
+		]
 		allocation_map = self.get_cost_allocation_map(original_rows)
 		allocated_per = defaultdict(float)
 		for row in original_rows:
