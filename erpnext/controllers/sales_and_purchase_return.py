@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method, getdate
+from erpnext.stock.valuation import round_rate
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -63,10 +64,8 @@ def validate_return_warehouse_stock(doc):
 	moved_rows = get_moved_rows(doc)
 	qty_left = {}
 	for row in get_rows_taking_moved_stock(doc, moved_rows):
-		rate = flt(
-			get_rate_for_return(doc.doctype, doc.name, row.item_code, doc.return_against, item_row=row),
-			9,
-			rounding_method="Commercial Rounding",
+		rate = round_rate(
+			get_rate_for_return(doc.doctype, doc.name, row.item_code, doc.return_against, item_row=row)
 		)
 		key = (row.item_code, row.warehouse, rate)
 		if key not in qty_left:
@@ -158,9 +157,7 @@ def get_qty_held_at_rate(doc, row, rate) -> float:
 		}
 	)
 	queue = json.loads(previous_sle.get("stock_queue") or "[]")
-	return sum(
-		flt(qty) for qty, bin_rate in queue if flt(bin_rate, 9, rounding_method="Commercial Rounding") == rate
-	)
+	return sum(flt(qty) for qty, bin_rate in queue if round_rate(bin_rate) == rate)
 
 
 def validate_return_against(doc):
