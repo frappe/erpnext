@@ -1469,6 +1469,8 @@ class JobCard(Document):
 				continue
 
 			transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item, 0.0))
+			if flt(transferred_qty, 6) < 0:
+				self.throw_components_already_returned()
 
 			if not allow_excess:
 				self.validate_over_transfer(ste_doc, row, transferred_qty)
@@ -1523,13 +1525,25 @@ class JobCard(Document):
 			)
 
 	def set_transferred_qty(self, update_status=False):
-		self.db_set("transferred_qty", self.get_transferred_qty_from_stock_entry())
+		transferred_qty = self.get_transferred_qty_from_stock_entry()
+		if flt(transferred_qty, 6) < 0:
+			self.throw_components_already_returned()
+
+		self.db_set("transferred_qty", transferred_qty)
 		self.set_status(update_status)
 
 		if self.work_order and not frappe.get_cached_value(
 			"Work Order", self.work_order, "track_semi_finished_goods"
 		):
 			self.set_transferred_qty_in_work_order()
+
+	def throw_components_already_returned(self):
+		frappe.throw(
+			_(
+				"Job Card {0} has more components returned than transferred. Cancel its return entries first."
+			).format(get_link_to_form("Job Card", self.name)),
+			title=_("Components Returned"),
+		)
 
 	def get_transferred_qty_from_stock_entry(self):
 		from frappe.query_builder.functions import Sum

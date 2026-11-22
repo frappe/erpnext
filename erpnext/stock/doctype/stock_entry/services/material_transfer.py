@@ -290,6 +290,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_job_card_for_semi_finished_goods()
 		self.validate_work_order_status_for_return()
 		self.validate_returned_qty_within_work_order()
+		self.validate_returned_fg_qty_within_job_card()
 		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
 		self.validate_alternative_items()
@@ -352,6 +353,23 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 					),
 					title=_("Excess Return"),
 				)
+
+	def validate_returned_fg_qty_within_job_card(self):
+		if not (self.doc.is_return and self.doc.job_card):
+			return
+
+		transferred_qty = frappe.db.get_value("Job Card", self.doc.job_card, "transferred_qty")
+		if flt(self.doc.fg_completed_qty, 6) > flt(transferred_qty, 6):
+			frappe.throw(
+				_(
+					"Return quantity {0} is more than the quantity {1} transferred against Job Card {2}."
+				).format(
+					flt(self.doc.fg_completed_qty),
+					flt(transferred_qty),
+					get_link_to_form("Job Card", self.doc.job_card),
+				),
+				title=_("Excess Return"),
+			)
 
 	def get_returnable_qty(self) -> dict:
 		from .manufacturing import ManufactureStockEntry
