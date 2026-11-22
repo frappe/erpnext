@@ -33,8 +33,9 @@ class StatusService:
 		doc.set_status(update=True, status=status)
 		doc.update_requested_qty()
 		doc.update_ordered_qty()
-		if status == "Closed" or was_closed:
-			SubcontractingService(doc).update_subcontracting_order_status()
+		# reopening leaves the Subcontracting Orders closed: a user may have closed them on purpose
+		if status == "Closed":
+			SubcontractingService(doc).close_subcontracting_orders()
 		doc.update_blanket_order()
 		doc.notify_update()
 		clear_doctype_notifications(doc)
