@@ -46,7 +46,7 @@ class StatusService:
 		doc.update_reserved_qty()
 		# hold and reopen leave the inward orders as they are: a user may have closed them on purpose
 		if status == "Closed":
-			SubcontractingService(doc).update_subcontracting_order_status()
+			SubcontractingService(doc).close_inward_orders()
 		doc.notify_update()
 		clear_doctype_notifications(doc)
 		doc.update_blanket_order()
