@@ -714,6 +714,15 @@ class StockReservationEntry(Document):
 			if is_packed_item:
 				# the row's delivered qty is in bundle units; scale it to component units
 				voucher_delivered_qty *= flt(self.voucher_qty) / (flt(stock_qty) or 1)
+		elif (
+			self.voucher_type == "Work Order"
+			and not self.from_voucher_type
+			and self.get("_action") == "submit"
+		):
+			# a Subcontracting Order reserves and sends what it took over, so new reservations leave it out
+			voucher_delivered_qty = flt(
+				frappe.db.get_value("Work Order Item", self.voucher_detail_no, "subcontracted_qty")
+			)
 
 		allowed_qty = min(self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty))
 		allowed_qty = flt(allowed_qty, self.precision("reserved_qty"))
