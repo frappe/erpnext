@@ -9703,8 +9703,8 @@ def make_transfer_based_work_order(components, process_loss_percentage=0):
 
 def make_transferred_consumption_work_order(rm_qty=2, transferred_rm_qty=None, process_loss_percentage=0):
 	"""Work Order for 10 FG with its materials transferred, or `transferred_rm_qty` of them."""
-	rm_item = make_item(properties={"is_stock_item": 1}).name
-	fg_item = make_item(properties={"is_stock_item": 1}).name
+	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+	fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
 	bom = make_bom(
 		item=fg_item, raw_materials=[rm_item], rm_qty=rm_qty, process_loss_percentage=process_loss_percentage
 	)
