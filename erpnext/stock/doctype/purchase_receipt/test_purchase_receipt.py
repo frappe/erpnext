@@ -6796,6 +6796,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(stock_value["Finished Goods - TCP1"], -stock_value["Work In Progress - TCP1"])
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 
+	@change_settings("System Settings", {"float_precision": 2})
 	def test_landed_cost_keeps_what_internal_pr_took_out_of_transit(self):
 		"""A Landed Cost Voucher posts an internal receipt again with the qty it took out of transit."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -6856,6 +6857,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		self.assertEqual(taken_qty, -1.0)
 
+	@change_settings("System Settings", {"float_precision": 2})
 	def test_landed_cost_keeps_internal_pr_that_rejects_into_transit(self):
 		"""A Landed Cost Voucher posts again what an internal receipt that rejects into transit moved."""
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
