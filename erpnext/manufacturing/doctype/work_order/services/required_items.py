@@ -263,6 +263,7 @@ class RequiredItemsService:
 				"docstatus": 1,
 				"purpose": "Material Transfer for Manufacture",
 				"is_return": 0,
+				"is_additional_transfer_entry": 0,
 				"fg_completed_qty": 0,
 				"job_card": ("is", "not set"),
 			},
