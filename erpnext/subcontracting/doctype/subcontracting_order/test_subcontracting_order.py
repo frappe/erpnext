@@ -33,7 +33,7 @@ from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
-	get_serial_numbers_from_bundle,
+	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -1158,7 +1158,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.items[0].qty = scr.items[0].received_qty = 2
 		scr.submit()
 
-		consumed = get_serial_numbers_from_bundle(scr.supplied_items[0].serial_and_batch_bundle)
+		consumed = get_serial_nos_from_bundle(scr.supplied_items[0].serial_and_batch_bundle)
 		self.assertEqual(consumed, sorted(received.serial_no[1:]))
 
 	@ERPNextTestSuite.change_settings(
