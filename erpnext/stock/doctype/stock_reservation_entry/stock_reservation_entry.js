@@ -94,10 +94,11 @@ frappe.ui.form.on("Stock Reservation Entry", {
 		// Qty will always be 1 for Serial No.
 		frm.fields_dict.sb_entries.grid.update_docfield_property("qty", "read_only", frm.doc.has_serial_no);
 
+		const is_used = frm.doc.delivered_qty || frm.doc.consumed_qty || frm.doc.transferred_qty;
 		frm.set_df_property(
 			"sb_entries",
 			"allow_on_submit",
-			frm.doc.from_voucher_type == "Pick List" ? 0 : 1
+			frm.doc.from_voucher_type == "Pick List" || is_used ? 0 : 1
 		);
 	},
 
