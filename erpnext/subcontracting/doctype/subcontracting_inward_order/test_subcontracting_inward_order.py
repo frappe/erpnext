@@ -1980,7 +1980,6 @@ def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
 	return so, scio
 
 
-<<<<<<< HEAD
 def create_test_data():
 	make_subcontracted_items()
 	make_raw_materials()
@@ -2139,7 +2138,8 @@ def make_subcontracting_boms():
 			)
 			doc.insert()
 			doc.save()
-=======
+
+
 def cancel_one_of_two_deliveries(index):
 	"""Deliver 3 and then 2, cancel delivery `index`; return each reservation's delivered qty."""
 	scio = make_scio_with_two_manufactures()
@@ -2179,4 +2179,3 @@ def get_delivered_reservations(scio):
 		as_list=True,
 	)
 	return [tuple(reservation) for reservation in reservations]
->>>>>>> 5a25dae (test: cancelling the first receipt or delivery reopens only its own reservation)

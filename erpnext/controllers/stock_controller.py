@@ -7,19 +7,9 @@ from itertools import chain
 
 import frappe
 from frappe import _, bold
-<<<<<<< HEAD
-<<<<<<< HEAD
 from frappe.model.utils.mask import mask_dict_results
-from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Count, Min, Sum
-=======
-from frappe.query_builder import Criterion, Order, Tuple
-from frappe.query_builder.functions import Count, Min
->>>>>>> 353da64 (fix(subcontracting): rebuild a receipt's reservations from the remaining receipts on cancel)
-=======
-from frappe.query_builder import Case, Criterion, Order, Tuple
-from frappe.query_builder.functions import Count, Max, Min
->>>>>>> f4a3af2 (fix(stock): replay earlier cancelled vouchers on a reservation's cancel rebuild)
+from frappe.query_builder import Case, Criterion, Tuple
+from frappe.query_builder.functions import Count, Max, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
