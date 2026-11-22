@@ -5866,12 +5866,12 @@ def jc_review_log(from_time, minutes, completed_qty=0, employee=None, **values):
 	}
 
 
-<<<<<<< HEAD
 def make_jc_review_employee():
 	from erpnext.setup.doctype.employee.test_employee import make_employee
 
 	return make_employee(f"jc-review-{frappe.generate_hash(length=8)}@example.com", company="_Test Company")
-=======
+
+
 def make_partly_completed_job_card_transfer_order(name, operation_count):
 	"""Work Order for 10 FG, 1 RM per FG in each operation; each Job Card moves 10 RM and completes 6."""
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -5924,4 +5924,3 @@ def make_partly_completed_job_card_transfer_order(name, operation_count):
 		job_card.submit()
 
 	return work_order, rm
->>>>>>> 99dd40e (test: partial Manufacture leaves the pending share of a Job Card transfer in WIP)

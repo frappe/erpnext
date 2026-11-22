@@ -1163,32 +1163,6 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(get_bin(raw_materials[0], work_order.wip_warehouse).actual_qty, 0)
 
 	@ERPNextTestSuite.change_settings(
-		"Manufacturing Settings",
-		{
-<<<<<<< HEAD
-=======
-			"backflush_raw_materials_based_on": "BOM",
-			"material_consumption": 1,
-			"get_rm_cost_from_consumption_entry": 0,
-		},
-	)
-	def test_bom_backflush_consumes_full_rate_after_process_loss(self):
-		work_order, raw_materials = make_transfer_based_work_order(1, 10)
-		for _ in range(2):
-			entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5))
-			self.assertEqual(
-				{row.item_code: row.qty for row in entry.items if row.s_warehouse},
-				{raw_materials[0]: 5},
-			)
-			entry.submit()
-
-		work_order.reload()
-		self.assertEqual(work_order.status, "Completed")
-		self.assertEqual(work_order.produced_qty, 9)
-		self.assertEqual(work_order.process_loss_qty, 1)
-		self.assertEqual(get_bin(raw_materials[0], work_order.wip_warehouse).actual_qty, 0)
-
-	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
 	)
 	def test_transfer_based_manufacture_keeps_whole_number_share_below_precision(self):
@@ -1209,7 +1183,6 @@ class TestWorkOrder(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{
->>>>>>> b837454 (test: transfer based Manufacture keeps a whole number share below qty precision)
 			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
 			"material_consumption": 1,
 		},

@@ -4567,6 +4567,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				"produced_qty",
 				"process_loss_qty",
 				"material_transferred_for_manufacturing as trans_qty",
+				"transfer_material_against",
 			],
 			as_dict=1,
 		)
@@ -4579,16 +4580,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
-		for _key, row in available_materials.items():
-			# a material is only covered by the entries that consumed it
-			pending_qty = transferred_qty - sum(row.consumed_for.values())
-			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, fg_precision) <= 0:
+		for key, row in available_materials.items():
+			pending_qty, covered_qty = self.get_material_pending_qty(
+				key, available_materials, wo_data, pending_qty_to_mfg
+			)
+			if flt(covered_qty - fg_completed_qty, fg_precision) <= 0:
 				# an entry for all that is pending consumes what is left
 				pending_qty = fg_completed_qty
 
 			qty = flt(row.qty)
 			if not self.is_return:
-				qty = (flt(row.qty) * fg_completed_qty) / pending_qty
+				# drop float noise only, so 7.000000000000001 is not ceiled to 8 and 0.004 still is to 1
+				qty = flt(flt(row.qty) * fg_completed_qty / pending_qty, 9)
 
 			item = row.item_details
 			if cint(frappe.get_cached_value("UOM", item.stock_uom, "must_be_whole_number")):
@@ -4605,6 +4608,69 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if flt(qty, precision) != 0.0:
 				self.update_item_in_stock_entry_detail(row, item, qty)
+
+	def get_material_pending_qty(self, key, available_materials, wo_data, pending_qty_to_mfg):
+		"""Qty the material left in WIP is for, and the part of it that is ready to manufacture."""
+		transferred_qty = flt(wo_data.trans_qty)
+		if wo_data.transfer_material_against == "Job Card":
+			pending_qty = self.get_job_card_material_pending_qty(key, available_materials, transferred_qty)
+			return pending_qty, pending_qty
+
+		# a material is only covered by the entries that consumed it
+		pending_qty = transferred_qty - sum(available_materials[key].consumed_for.values())
+		return pending_qty, min(pending_qty_to_mfg, pending_qty)
+
+	def get_job_card_material_pending_qty(self, key, available_materials, transferred_qty):
+		"""The Work Order's transferred qty follows the completed operations, not the moved material,
+		so use the item's moved share of its required qty, over its alternatives and warehouses."""
+		item_code = key[2] or key[0]
+		consumed_for = {}
+		for material_key, row in available_materials.items():
+			if (material_key[2] or material_key[0]) == item_code:
+				consumed_for.update(row.consumed_for)
+
+		# material moved in excess is spread over the order qty
+		transferred_for_qty = min(
+			self.get_material_transferred_for_qty(item_code), max(flt(self.pro_doc.qty), transferred_qty)
+		)
+		return transferred_for_qty - sum(consumed_for.values())
+
+	def get_material_transferred_for_qty(self, item_code):
+		"""Finished goods qty the item moved to WIP is for, as its share of the required qty."""
+		required_qty = sum(
+			flt(d.required_qty) for d in self.pro_doc.required_items if d.item_code == item_code
+		)
+		if not required_qty:
+			return flt(self.pro_doc.qty)
+
+		return self.transferred_qty_by_item[item_code] * flt(self.pro_doc.qty) / required_qty
+
+	@cached_property
+	def transferred_qty_by_item(self):
+		stock_entry = frappe.qb.DocType("Stock Entry")
+		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+		rows = (
+			frappe.qb.from_(stock_entry)
+			.inner_join(stock_entry_detail)
+			.on(stock_entry.name == stock_entry_detail.parent)
+			.select(
+				stock_entry_detail.item_code,
+				stock_entry_detail.original_item,
+				stock_entry_detail.transfer_qty,
+			)
+			.where(
+				(stock_entry.work_order == self.work_order)
+				& (stock_entry.purpose == "Material Transfer for Manufacture")
+				& (stock_entry.is_return == 0)
+				& (stock_entry.docstatus == 1)
+			)
+		).run(as_dict=True)
+
+		qty = defaultdict(float)
+		for row in rows:
+			qty[row.original_item or row.item_code] += flt(row.transfer_qty)
+
+		return qty
 
 	def get_batches_to_consume(self, row, qty):
 		"""Batch qty not reserved by other vouchers when it covers the qty, else the transferred batches."""
