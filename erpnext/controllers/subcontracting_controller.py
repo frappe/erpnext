@@ -1617,20 +1617,28 @@ class SubcontractingController(StockController):
 	def __update_consumed_qty_in_subcontract_order(self, itemwise_consumed_qty):
 		fields = ["main_item_code", "parent", "name"]
 		filters = {"docstatus": 1, "parent": ("in", self.subcontract_orders)}
+		rows = frappe.get_all(
+			self.subcontract_data.order_supplied_items_field, fields=fields, filters=filters, order_by="idx"
+		)
 		items_sent = self.get_items_sent_on_order_rows()
+		consumed_without_row = get_consumed_qty_without_order_row(rows, items_sent, itemwise_consumed_qty)
 		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
 
-		for row in frappe.get_all(
-			self.subcontract_data.order_supplied_items_field, fields=fields, filters=filters, order_by="idx"
-		):
+		for row in rows:
 			# a row consumes the items sent on it: its raw material or an alternative
 			consumed_qty = 0
 			for item_code, sent_qty in items_sent.get(row.name, {}).items():
-				key = (item_code, row.main_item_code, row.parent)
 				# a return of components books an item's return on one of its rows, so a row can net below 0
-				qty = min(itemwise_consumed_qty.get(key, 0), max(sent_qty, 0))
-				consumed_qty += qty
-				itemwise_consumed_qty[key] -= qty
+				qty_left = max(sent_qty, 0)
+				# its own finished good's consumption first, then one no row was sent the item for
+				for consumption, key in (
+					(itemwise_consumed_qty, (item_code, row.main_item_code, row.parent)),
+					(consumed_without_row, (item_code, row.parent)),
+				):
+					qty = min(consumption.get(key, 0), qty_left)
+					consumption[key] -= qty
+					qty_left -= qty
+					consumed_qty += qty
 
 			frappe.db.set_value(
 				self.subcontract_data.order_supplied_items_field,
@@ -1910,6 +1918,21 @@ def update_serial_nos_at_supplier(details, serial_nos, is_return):
 	for serial_no in serial_nos:
 		if serial_no in details.serial_no:
 			details.serial_no.remove(serial_no)
+
+
+def get_consumed_qty_without_order_row(rows, items_sent, itemwise_consumed_qty):
+	"""Consumption, by item and order, for a finished good that no order row was sent the item for."""
+	sent_for = {
+		(item_code, row.main_item_code, row.parent)
+		for row in rows
+		for item_code in items_sent.get(row.name, {})
+	}
+	consumed_qty = defaultdict(float)
+	for (item_code, finished_good, order), qty in itemwise_consumed_qty.items():
+		if (item_code, finished_good, order) not in sent_for:
+			consumed_qty[(item_code, order)] += qty
+
+	return consumed_qty
 
 
 def get_item_details(items):
