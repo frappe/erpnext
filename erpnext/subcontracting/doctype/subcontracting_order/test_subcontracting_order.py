@@ -914,21 +914,26 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 				}
 			)
 
-		sco = get_subcontracting_order(service_items=service_items)
-		fg_a_row = sco.supplied_items[0]
-		make_stock_entry(item_code=rm_item, target=fg_a_row.reserve_warehouse, qty=16, basic_rate=100)
-		# all 16 sent on FG A's row
-		transfer = make_supplied_item_transfer(sco, fg_a_row)
-		transfer.items[0].qty = 16
-		transfer.submit()
+		# 16 sent on FG A's and FG B's rows, then a receipt of 6 FG B
+		for sent, consumed in (((16, 0), [6, 0]), ((14, 2), [4, 2])):
+			sco = get_subcontracting_order(service_items=service_items)
+			make_stock_entry(
+				item_code=rm_item, target=sco.supplied_items[0].reserve_warehouse, qty=16, basic_rate=100
+			)
+			for row, qty in zip(sco.supplied_items, sent, strict=True):
+				if qty:
+					transfer = make_supplied_item_transfer(sco, row)
+					transfer.items[0].qty = qty
+					transfer.submit()
 
-		receipt = make_subcontracting_receipt(sco.name)
-		receipt.remove(receipt.items[0])
-		receipt.submit()
+			receipt = make_subcontracting_receipt(sco.name)
+			receipt.remove(receipt.items[0])
+			receipt.submit()
 
-		self.assertEqual(
-			[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items], [6, 0]
-		)
+			self.assertEqual(
+				[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items],
+				consumed,
+			)
 
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
