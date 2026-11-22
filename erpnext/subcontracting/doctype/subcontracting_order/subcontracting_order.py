@@ -442,6 +442,18 @@ class SubcontractingOrder(SubcontractingController):
 
 			frappe.db.set_value("Purchase Order Item", po_item, "subcontracted_quantity", qty)
 
+	def get_raw_material_qty_at_supplier(self) -> dict:
+		"""Qty of each raw material sent for this order and not yet consumed or returned."""
+		self.initialized_fields()
+		self.subcontract_orders = [self.name]
+		self.get_available_materials()
+
+		qty_at_supplier = defaultdict(float)
+		for (rm_item_code, _finished_good, _order), details in self.available_materials.items():
+			qty_at_supplier[rm_item_code] += flt(details.qty)
+
+		return qty_at_supplier
+
 
 @frappe.whitelist()
 def make_subcontracting_receipt(source_name, target_doc=None):
