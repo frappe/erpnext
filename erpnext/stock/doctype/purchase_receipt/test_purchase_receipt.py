@@ -2283,6 +2283,54 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertFalse(pr.tc_name)
 		self.assertFalse(pr.terms)
 
+	def test_inter_company_receipt_keeps_delivered_batches(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		seller = "_Test Company with perpetual inventory"
+		customer = create_internal_customer(represents_company="_Test Company")
+		allow_party_to_transact_with("Customer", customer, seller)
+		allow_party_to_transact_with("Supplier", "_Test Internal Supplier 2", "_Test Company")
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=5, basic_rate=100, company=seller)
+		dn = create_delivery_note(
+			item_code=item,
+			company=seller,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			do_not_submit=True,
+		)
+		dn.selling_price_list = "_Test Price List"
+		dn.submit()
+		batch_no = get_batch_from_bundle(dn.items[0].serial_and_batch_bundle)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": "Stores - _TC",
+				"rejected_warehouse": create_warehouse("_Test Rejected", company="_Test Company"),
+				"qty": 3,
+				"rejected_qty": 2,
+				"received_qty": 5,
+			}
+		)
+		pr.insert().submit()
+
+		for bundle, qty in (
+			(pr.items[0].serial_and_batch_bundle, 3),
+			(pr.items[0].rejected_serial_and_batch_bundle, 2),
+		):
+			package = frappe.get_doc("Serial and Batch Bundle", bundle)
+			self.assertEqual(package.company, "_Test Company")
+			self.assertEqual([(d.batch_no, d.qty) for d in package.entries], [(batch_no, qty)])
+
 	def test_lcv_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -10676,3 +10724,10 @@ def make_purchase_receipt(**args):
 		pr.load_from_db()
 
 	return pr
+
+
+def allow_party_to_transact_with(doctype, party, company):
+	doc = frappe.get_doc(doctype, party)
+	if company not in [d.company for d in doc.companies]:
+		doc.append("companies", {"company": company})
+		doc.save()
