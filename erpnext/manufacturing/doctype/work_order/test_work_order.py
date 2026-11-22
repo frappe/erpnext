@@ -4849,6 +4849,23 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture = submit_manufacture_of_one(work_order)
 		self.assertEqual(sum(row.qty for row in manufacture.items if row.item_code == rm_item), 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_without_raw_materials_value_scrap_at_zero(self):
+		"""An entry whose whole-number share was consumed earlier values nothing, its scrap included."""
+		scrap_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=1, scrap_item=scrap_item)
+
+		rates = []
+		for _ in range(4):
+			manufacture = submit_manufacture_of_one(work_order)
+			fg_row = next(row for row in manufacture.items if row.is_finished_item)
+			scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
+			rates.append((fg_row.valuation_rate, scrap_row.valuation_rate))
+
+		self.assertEqual(rates, [(90, 10), (0, 0), (0, 0), (0, 0)])
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
@@ -10206,12 +10223,26 @@ def make_multi_level_manufacture_entry(fg_item, bom_no):
 	return se_doc
 
 
-def make_whole_number_partial_work_order(rm_qty):
-	"""Work Order for 4 Nos of a finished good that needs rm_qty Nos of a whole-number raw material."""
+def make_whole_number_partial_work_order(rm_qty, scrap_item=None):
+	"""Work Order for 4 Nos of a finished good that needs rm_qty Nos of a whole-number raw material,
+	and makes 1 Nos of scrap_item per finished good, valued at its valuation rate."""
 	frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
-	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 100}).name
 	fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
-	bom = make_bom(item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=rm_qty)
+	bom = make_bom(item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=rm_qty, do_not_save=True)
+	if scrap_item:
+		bom.append(
+			"secondary_items",
+			{
+				"secondary_item_type": "Scrap",
+				"item_code": scrap_item,
+				"qty": 4,
+				"uom": "Nos",
+				"valuation_type": "Valuation Rate",
+			},
+		)
+	bom.insert()
+	bom.submit()
 	test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=4, basic_rate=100)
 	work_order = make_wo_order_test_record(
 		production_item=fg_item, bom_no=bom.name, qty=4, skip_transfer=1, source_warehouse="Stores - _TC"
