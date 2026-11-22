@@ -109,11 +109,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				item_args["set_basic_rate_manually"] = 1
 				item_args["basic_rate"] = flt(row.get("manual_rate"))
 
-			if row.secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
-				item_args["t_warehouse"] = self.wo_doc.scrap_warehouse
-			else:
-				item_args["t_warehouse"] = self.doc.to_warehouse
-
+			item_args["t_warehouse"] = self.get_secondary_item_warehouse(row.secondary_item_type)
 			if not item_args.get("t_warehouse"):
 				item_args["t_warehouse"] = frappe.get_cached_value(
 					"BOM", self.doc.bom_no, "default_target_warehouse"
@@ -128,6 +124,11 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
 			item_args["transfer_qty"] = item_args["qty"]
 			self.doc.append("items", item_args)
+
+	def get_secondary_item_warehouse(self, secondary_item_type):
+		if secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
+			return self.wo_doc.scrap_warehouse
+		return self.doc.to_warehouse
 
 	def get_bom_secondary_items(self):
 		return get_secondary_items(self.doc.bom_no, self.doc.work_order)
@@ -1127,7 +1128,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.qty = ceil_qty_if_uom_has_whole_number(row.stock_qty, row.stock_uom)
 			row.transfer_qty = row.qty
 			row.s_warehouse = None
-			row.t_warehouse = row.warehouse or self.doc.to_warehouse
+			row.t_warehouse = self.get_secondary_item_warehouse(row.secondary_item_type)
 			bom_row = bom_rows.get(row.bom_secondary_item, frappe._dict())
 			row.valuation_type = bom_row.get("valuation_type")
 			if row.valuation_type == "Manual":
