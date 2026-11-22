@@ -688,6 +688,9 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(delivery.items[0].qty, 6)
 		delivery.submit()
 
+		scio.reload()
+		self.assertEqual((scio.per_delivered, scio.status), (120, "Delivered"))
+
 		frappe.db.set_single_value("Selling Settings", "allow_delivery_of_overproduced_qty", 0)
 		delivery.cancel()
 		scio.reload()
@@ -696,17 +699,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery.items[0].qty = 6
 		self.assertRaises(frappe.ValidationError, delivery.submit)
 
-<<<<<<< HEAD
-=======
-		with self.change_settings("Selling Settings", allow_delivery_of_overproduced_qty=1):
-			delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
-			self.assertEqual(delivery.items[0].qty, 6)
-			delivery.submit()
-
-		scio.reload()
-		self.assertEqual((scio.per_delivered, scio.status), (120, "Delivered"))
-
->>>>>>> 16a2a6f (test: inward order status after overproduction and over-delivery)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
 		scio, wo = create_scio_with_secondary_item()
