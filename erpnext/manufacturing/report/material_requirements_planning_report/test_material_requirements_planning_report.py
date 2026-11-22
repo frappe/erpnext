@@ -70,7 +70,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		):
 			report.update_sales_forecast_data()
 
-		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
+		self.assertEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
 		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [4, 6])
 
 	def test_forecasts_of_one_date_are_added_before_splitting(self):
