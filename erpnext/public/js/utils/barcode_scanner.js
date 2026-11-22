@@ -283,7 +283,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			fields.push({
 				fieldtype: "Link",
 				fieldname: "batch_no",
-				options: "Batch No",
+				options: "Batch",
 				label: __("Batch No"),
 				default: batch_no,
 				read_only: 1,
