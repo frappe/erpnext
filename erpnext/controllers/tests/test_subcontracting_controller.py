@@ -75,6 +75,25 @@ class TestSubcontractingController(ERPNextTestSuite):
 		sco.create_raw_materials_supplied_or_received()
 		self.assertIsNotNone(sco.supplied_items)
 
+	def test_additional_cost_account_must_be_in_company_currency(self):
+		account = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": "_Test USD Additional Cost",
+				"account_currency": "USD",
+				"company": "_Test Company",
+				"parent_account": "Indirect Expenses - _TC",
+				"account_type": "Expense Account",
+			}
+		).insert(ignore_if_duplicate=True)
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.append(
+			"additional_costs",
+			{"expense_account": account.name, "description": "Test", "amount": 10, "exchange_rate": 83},
+		)
+
+		self.assertRaises(frappe.ValidationError, sco.save)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_sco_with_bom(self):
 		"""
