@@ -10,7 +10,10 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, cint, flt, get_link_to_form, getdate, parse_json
 
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
-from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import (
+	get_forecast_period,
+	update_sales_forecast_status,
+)
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
@@ -119,20 +122,18 @@ class MasterProductionSchedule(Document):
 			self.to_date = max(getdate(date) for date in dates)
 
 	def get_sales_forecast_data(self):
+		"""Return the last day of each forecast period."""
 		if not self.sales_forecast:
 			return []
 
-		filters = {"parent": self.sales_forecast}
+		filters = {"parent": self.sales_forecast, "parentfield": "items"}
 		if self.select_items:
 			items = [d.item_code for d in self.select_items if d.item_code]
 			filters["item_code"] = ("in", items)
 
-		return frappe.get_all(
-			"Sales Forecast Item",
-			filters=filters,
-			pluck="delivery_date",
-			order_by="delivery_date asc",
-		)
+		frequency = frappe.db.get_value("Sales Forecast", self.sales_forecast, "frequency")
+		rows = frappe.get_all("Sales Forecast Item", filters=filters, fields=["delivery_date"])
+		return [add_days(get_forecast_period(frappe._dict(row, frequency=frequency))[1], -1) for row in rows]
 
 	def update_item_details(self, data):
 		items = [item[0] for item in data if item[0]]
