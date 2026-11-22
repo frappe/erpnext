@@ -20,11 +20,8 @@ from frappe.utils import (
 	today,
 )
 
-<<<<<<< HEAD
+from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
 from erpnext.manufacturing.doctype.bom.test_bom import make_usd_bom
-=======
-from erpnext.manufacturing.doctype.bom.services.operations_cost import add_additional_cost
->>>>>>> 8bb1dd2 (test: record semi-finished output after the finished good is produced)
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry as make_stock_entry_from_jc
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
