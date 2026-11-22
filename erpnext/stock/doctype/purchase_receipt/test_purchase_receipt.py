@@ -3840,7 +3840,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		}
 
 		self.assertEqual(moved_value[transit_warehouse], -1000)
-		self.assertEqual(moved_value[to_warehouse], 784)
+		self.assertEqual(moved_value[to_warehouse], 820)
 		self.assertEqual(moved_value[rejected_warehouse], 300)
 
 		booked = {}
@@ -3853,6 +3853,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			booked[entry.account] += flt(entry.debit) - flt(entry.credit)
 
 		self.assertEqual(flt(sum(booked.values()), 2), 0)
+		self.assertNotIn("Cost of Goods Sold - TCP1", booked)
 
 	def test_return_of_a_fully_rejected_receipt(self):
 		"""A receipt that rejected every unit can be sent back."""
