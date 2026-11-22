@@ -10,6 +10,7 @@ callers and the whitelisted entry point keep working unchanged.
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, flt
 from pypika import functions as fn
@@ -372,7 +373,7 @@ class RequiredItemsService:
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
+				fn.Sum(self._signed_transfer_qty(ste, ste_child)).as_("qty"),
 			)
 			.where(self._material_transfer_filter(ste, is_return))
 			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
@@ -402,9 +403,11 @@ class RequiredItemsService:
 				ste_child.item_code,
 				ste_child.original_item,
 				ste_child.s_warehouse,
+				ste_child.t_warehouse,
+				ste.is_return,
 				job_card.operation_row_id,
 				job_card.operation,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
+				fn.Sum(self._signed_transfer_qty(ste, ste_child)).as_("qty"),
 			)
 			.where(self._material_transfer_filter(ste, 0))
 			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
@@ -412,13 +415,16 @@ class RequiredItemsService:
 				ste_child.item_code,
 				ste_child.original_item,
 				ste_child.s_warehouse,
+				ste_child.t_warehouse,
+				ste.is_return,
 				job_card.operation_row_id,
 				job_card.operation,
 			)
 		)
 		qty_by_key = {}
 		for d in query.run(as_dict=1) or []:
-			key = (d.original_item or d.item_code, d.s_warehouse, d.operation_row_id, d.operation)
+			warehouse = d.t_warehouse if d.is_return else d.s_warehouse
+			key = (d.original_item or d.item_code, warehouse, d.operation_row_id, d.operation)
 			qty_by_key[key] = qty_by_key.get(key, 0.0) + flt(d.qty)
 
 		return qty_by_key
@@ -435,12 +441,22 @@ class RequiredItemsService:
 		)
 
 	def _material_transfer_filter(self, ste, is_return):
+		has_job_card = IfNull(ste.job_card, "") != ""
+		if is_return:
+			return_filter = (ste.is_return == 1) & ~has_job_card
+		else:
+			return_filter = (ste.is_return == 0) | has_job_card
+
 		return (
 			(ste.docstatus == 1)
 			& (ste.work_order == self.doc.name)
 			& (ste.purpose == "Material Transfer for Manufacture")
-			& (ste.is_return == is_return)
+			& return_filter
 		)
+
+	def _signed_transfer_qty(self, ste, ste_child):
+		is_job_card_return = (ste.is_return == 1) & (IfNull(ste.job_card, "") != "")
+		return Case().when(is_job_card_return, -ste_child.transfer_qty).else_(ste_child.transfer_qty)
 
 	def update_consumed_qty_for_required_items(self):
 		"""

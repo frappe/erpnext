@@ -839,6 +839,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		for row in self._transfer_entries:
 			qty[row.original_item or row.item_code] += flt(row.transfer_qty)
 
+		for row in getattr(self, "_consumption_entries", None) or []:
+			if row.purpose == "Material Transfer for Manufacture" and row.job_card:
+				qty[row.original_item or row.item_code] -= flt(row.transfer_qty)
+
 		return qty
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
@@ -974,7 +978,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
 
-		return (
+		query = (
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
@@ -988,7 +992,14 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.orderby(stock_entry.creation)
 			.orderby(stock_entry.name)
 			.orderby(stock_entry_detail.idx)
-		).run(as_dict=1)
+		)
+		return self.filter_job_card_return(query, stock_entry).run(as_dict=1)
+
+	def filter_job_card_return(self, query, stock_entry):
+		if self.doc.get("is_return") and self.doc.job_card:
+			return query.where(stock_entry.job_card == self.doc.job_card)
+
+		return query
 
 	def add_materials_from_transfer(self):
 		for row in self._transfer_entries:
@@ -1018,11 +1029,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
 
-		return (
+		query = (
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.select(stock_entry_detail.star, stock_entry.fg_completed_qty, stock_entry.purpose)
+			.select(
+				stock_entry_detail.star,
+				stock_entry.fg_completed_qty,
+				stock_entry.purpose,
+				stock_entry.job_card,
+			)
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (IfNull(stock_entry_detail.s_warehouse, "") != "")
@@ -1036,7 +1052,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				& (stock_entry.docstatus == 1)
 			)
 			.orderby(stock_entry_detail.idx)
-		).run(as_dict=1)
+		)
+		return self.filter_job_card_return(query, stock_entry).run(as_dict=1)
 
 	def remove_consumed_materials_from_available(self):
 		for row in self._consumption_entries:

@@ -195,6 +195,35 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 
 
 @frappe.whitelist()
+def make_stock_return_entry(job_card: str):
+	from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
+
+	frappe.has_permission("Stock Entry", "create", throw=True)
+	job_card_doc = frappe.get_doc("Job Card", job_card, check_permission="read")
+
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.from_bom = 1
+	stock_entry.is_return = 1
+	stock_entry.work_order = job_card_doc.work_order
+	stock_entry.job_card = job_card_doc.name
+	stock_entry.company = job_card_doc.company
+	stock_entry.purpose = "Material Transfer for Manufacture"
+	stock_entry.bom_no = job_card_doc.semi_fg_bom or job_card_doc.bom_no
+	stock_entry.fg_completed_qty = job_card_doc.transferred_qty
+	stock_entry.set_stock_entry_type()
+
+	ste_cls = ManufactureStockEntry(stock_entry)
+	ste_cls.add_raw_materials_based_on_transfer()
+	ste_cls.return_available_materials_in_source_wh()
+
+	job_card_items = {row.item_code: row.name for row in job_card_doc.items}
+	for row in stock_entry.items:
+		row.job_card_item = job_card_items.get(row.original_item or row.item_code)
+
+	return stock_entry
+
+
+@frappe.whitelist()
 def make_corrective_job_card(
 	source_name: str,
 	operation: str | None = None,

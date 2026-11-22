@@ -8,7 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.model import default_fields
 from frappe.model.document import Document
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import IfNull, Max, Min, Sum
 from frappe.utils import (
 	add_days,
@@ -1491,7 +1491,10 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.transfer_qty))
+			.select(
+				sed.job_card_item,
+				Sum(Case().when(se.is_return == 1, -sed.transfer_qty).else_(sed.transfer_qty)),
+			)
 			.where(
 				(sed.job_card_item.isin(job_card_items))
 				& (se.docstatus == 1)
@@ -1535,7 +1538,13 @@ class JobCard(Document):
 
 		result = (
 			frappe.qb.from_(stock_entry)
-			.select(Sum(stock_entry.fg_completed_qty))
+			.select(
+				Sum(
+					Case()
+					.when(stock_entry.is_return == 1, -stock_entry.fg_completed_qty)
+					.else_(stock_entry.fg_completed_qty)
+				)
+			)
 			.where(
 				(stock_entry.job_card == self.name)
 				& (stock_entry.docstatus == 1)
