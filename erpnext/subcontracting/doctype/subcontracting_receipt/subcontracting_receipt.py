@@ -22,6 +22,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.utils import get_combine_datetime
 
 from .mapper import (
 	can_combine_purchase_orders,
@@ -672,15 +673,20 @@ class SubcontractingReceipt(SubcontractingController):
 	def get_secondary_item_valuation_rate(self, item):
 		"""Valuation at the row's warehouse; keeps the stored rate when none is found."""
 		return (
-			get_valuation_rate(
-				item.item_code,
-				item.warehouse or self.set_warehouse,
-				self.doctype,
-				self.name,
-				currency=erpnext.get_company_currency(self.company),
-				company=self.company,
-			)
+			self.get_valuation_rate_at_posting(item.item_code, item.warehouse or self.set_warehouse)
 			or item.rate
+		)
+
+	def get_valuation_rate_at_posting(self, item_code, warehouse):
+		return get_valuation_rate(
+			item_code,
+			warehouse,
+			self.doctype,
+			self.name,
+			currency=erpnext.get_company_currency(self.company),
+			company=self.company,
+			posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
+			creation=self.first_sle_creation,
 		)
 
 	def add_secondary_items_of_fg_row(self, item, fg_qty_before=0.0):
@@ -756,14 +762,7 @@ class SubcontractingReceipt(SubcontractingController):
 			return flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
 
 		if secondary_item.valuation_type == "Valuation Rate":
-			rate = get_valuation_rate(
-				secondary_item.item_code,
-				warehouse,
-				self.doctype,
-				self.name,
-				currency=erpnext.get_company_currency(self.company),
-				company=self.company,
-			)
+			rate = self.get_valuation_rate_at_posting(secondary_item.item_code, warehouse)
 			if not rate and secondary_item.stock_qty:
 				rate = flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
 			return rate
@@ -901,6 +900,12 @@ class SubcontractingReceipt(SubcontractingController):
 			else:
 				rm_cost_map[item.reference_name] = item.amount
 
+		# before the percentage rows, which are priced from it
+		for item in self.get("items") or []:
+			if item.qty and item.name in rm_cost_map:
+				item.rm_supp_cost = rm_cost_map[item.name]
+				item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
+
 		# own-cost rows first: they are deducted from the finished good, and the
 		# percentage rows reprice from the basis net of them
 		secondary_items_cost_map = {}
@@ -944,11 +949,6 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 
 				if item.qty:
-					if item.name in rm_cost_map:
-						item.rm_supp_cost = rm_cost_map[item.name]
-						item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
-						rm_cost_map.pop(item.name)
-
 					# the stock ledger returns the finished good at its receipt rate
 					if returned and item.name not in rejected_return_rows:
 						item.secondary_items_cost_per_qty = returned.secondary_items_cost_per_qty
