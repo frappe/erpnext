@@ -260,6 +260,7 @@ class StockEntry(StockController):
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_returned_qty_within_work_order()
+		self.validate_returned_fg_qty_within_job_card()
 		self.validate_alternative_items()
 		self.validate_work_order_status_for_return()
 		self.validate_source_stock_entry()
@@ -1291,6 +1292,23 @@ class StockEntry(StockController):
 					),
 					title=_("Excess Return"),
 				)
+
+	def validate_returned_fg_qty_within_job_card(self):
+		if not (self.is_return and self.job_card and self.purpose == "Material Transfer for Manufacture"):
+			return
+
+		transferred_qty = frappe.db.get_value("Job Card", self.job_card, "transferred_qty")
+		if flt(self.fg_completed_qty, 6) > flt(transferred_qty, 6):
+			frappe.throw(
+				_(
+					"Return quantity {0} is more than the quantity {1} transferred against Job Card {2}."
+				).format(
+					flt(self.fg_completed_qty),
+					flt(transferred_qty),
+					get_link_to_form("Job Card", self.job_card),
+				),
+				title=_("Excess Return"),
+			)
 
 	def get_returnable_qty(self) -> dict:
 		from pypika import Case
