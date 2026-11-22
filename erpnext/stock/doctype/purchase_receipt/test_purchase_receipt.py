@@ -2284,31 +2284,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertFalse(pr.terms)
 
 	def test_inter_company_receipt_keeps_delivered_batches(self):
-		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-		seller = "_Test Company with perpetual inventory"
-		customer = create_internal_customer(represents_company="_Test Company")
-		allow_party_to_transact_with("Customer", customer, seller)
-		allow_party_to_transact_with("Supplier", "_Test Internal Supplier 2", "_Test Company")
-
-		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
-		make_stock_entry(item_code=item, target="Stores - TCP1", qty=5, basic_rate=100, company=seller)
-		dn = create_delivery_note(
-			item_code=item,
-			company=seller,
-			customer=customer,
-			cost_center="Main - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			qty=5,
-			rate=500,
-			warehouse="Stores - TCP1",
-			do_not_submit=True,
-		)
-		dn.selling_price_list = "_Test Price List"
-		dn.submit()
+		dn = make_inter_company_delivery_note(stock=[(5, 100)])
 		batch_no = get_batch_from_bundle(dn.items[0].serial_and_batch_bundle)
 
 		pr = make_inter_company_purchase_receipt(dn.name)
@@ -2330,6 +2308,39 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			package = frappe.get_doc("Serial and Batch Bundle", bundle)
 			self.assertEqual(package.company, "_Test Company")
 			self.assertEqual([(d.batch_no, d.qty) for d in package.entries], [(batch_no, qty)])
+
+	def test_inter_company_receipt_values_delivered_batches_at_receipt_rate(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+
+		dn = make_inter_company_delivery_note(stock=[(3, 100), (2, 120)])
+		delivered = frappe.get_doc("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle)
+		self.assertEqual(len(delivered.entries), 2)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "_Test Warehouse - _TC"
+		pr.insert()
+		# the package follows a later change of the accepted warehouse
+		pr.items[0].warehouse = "Stores - _TC"
+		pr.save()
+		pr.submit()
+
+		package = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
+		self.assertEqual((package.warehouse, package.company), ("Stores - _TC", "_Test Company"))
+		self.assertEqual(
+			sorted((d.batch_no, d.qty) for d in package.entries),
+			sorted((d.batch_no, abs(d.qty)) for d in delivered.entries),
+		)
+		self.assertEqual({d.incoming_rate for d in package.entries}, {500})
+
+		sle = frappe.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": pr.name, "is_cancelled": 0},
+			["warehouse", "actual_qty", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual(
+			(sle.warehouse, sle.actual_qty, sle.stock_value_difference), ("Stores - _TC", 5, 2500)
+		)
 
 	def test_lcv_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
@@ -10724,6 +10735,37 @@ def make_purchase_receipt(**args):
 		pr.load_from_db()
 
 	return pr
+
+
+def make_inter_company_delivery_note(stock):
+	"""Delivery of a new batch item to _Test Company; stock is the (qty, rate) of each received batch."""
+	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+	seller = "_Test Company with perpetual inventory"
+	customer = create_internal_customer(represents_company="_Test Company")
+	allow_party_to_transact_with("Customer", customer, seller)
+	allow_party_to_transact_with("Supplier", "_Test Internal Supplier 2", "_Test Company")
+
+	item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
+	for qty, rate in stock:
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=qty, basic_rate=rate, company=seller)
+
+	dn = create_delivery_note(
+		item_code=item,
+		company=seller,
+		customer=customer,
+		cost_center="Main - TCP1",
+		expense_account="Cost of Goods Sold - TCP1",
+		qty=sum(qty for qty, _ in stock),
+		rate=500,
+		warehouse="Stores - TCP1",
+		do_not_submit=True,
+	)
+	dn.selling_price_list = "_Test Price List"
+	dn.submit()
+	return dn
 
 
 def allow_party_to_transact_with(doctype, party, company):
