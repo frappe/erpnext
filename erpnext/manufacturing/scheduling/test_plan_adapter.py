@@ -838,3 +838,20 @@ class TestPlanAdapter(ERPNextTestSuite):
 		for row in plan.sub_assembly_items:
 			self.assertIn(get_datetime(row.schedule_date), sub_starts)
 			self.assertIsNotNone(row.schedule_end_date)
+
+	def test_batch_based_operation_is_scheduled_per_batch(self):
+		operation = "Test PPS Op Per Batch"
+		if not frappe.db.exists("Operation", operation):
+			make_operation(operation=operation, workstation=self.workstation)
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+
+		item = "Test PPS FG 6"
+		create_item(item, valuation_rate=100)
+		self.make_bom_with_operation(
+			item, ["Test PPS RM"], time_in_mins=60, operations=[operation], batch_size=10
+		)
+		bom_no = frappe.db.get_value("BOM", {"item": item, "docstatus": 1})
+
+		# 60 mins per batch of 10, as the Work Order plans it
+		tasks, _terminal_keys = loaders.build_bom_operation_tasks(bom_no, 10, "row")
+		self.assertEqual(tasks[0].duration_mins, 60)
