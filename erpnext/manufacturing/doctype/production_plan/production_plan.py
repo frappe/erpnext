@@ -1177,16 +1177,17 @@ def get_mr_item_planned_qty_query(mr_item):
 	)
 
 
-def get_requested_sub_assemblies(doc):
-	requested_sub_assemblies = {}
+def _get_sub_assemblies_by_plan_row(doc):
+	"""(item, BOM) of each plan row's sub-assemblies: the ones to request, and the type of the others."""
+	requested, planned = defaultdict(set), defaultdict(dict)
 	for row in doc.get("sub_assembly_items") or []:
 		row = frappe._dict(row)
+		key = (row.production_item, row.bom_no)
 		if row.type_of_manufacturing == "Material Request":
-			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
-				(row.production_item, row.bom_no)
-			)
-
-	return requested_sub_assemblies
+			requested[row.production_plan_item].add(key)
+		else:
+			planned[row.production_plan_item][key] = row.type_of_manufacturing
+	return requested, planned
 
 
 def round_up_whole_uom(quantity, uom):
@@ -1495,10 +1496,15 @@ def get_subitems(
 		if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
 			continue
 
+		# a planned sub-assembly is made or subcontracted, so only its components are requested
+		sub_assembly_type = (data.get("planned_sub_assemblies") or {}).get((d.item_code, d.line_bom_no))
+		if sub_assembly_type == "Subcontract" and not include_subcontracted_items:
+			continue
+
 		explode = (
 			data.get("include_exploded_items")
 			and child_bom
-			and _should_explode_subitem(d, include_subcontracted_items)
+			and (sub_assembly_type or _should_explode_subitem(d, include_subcontracted_items))
 			and d.qty > 0
 		)
 		if not explode:
@@ -1981,16 +1987,19 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 			sub_assembly_items[(d.get("production_item"), d.get("bom_no"))] += d.get("qty")
 
-	requested_sub_assemblies = get_requested_sub_assemblies(doc)
+	requested_sub_assemblies, planned_sub_assemblies = _get_sub_assemblies_by_plan_row(doc)
 	all_requested = set().union(*requested_sub_assemblies.values())
+	all_planned = {key: value for rows in planned_sub_assemblies.values() for key, value in rows.items()}
+	combined = doc.get("combine_sub_items")
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
 
 		data["requested_sub_assemblies"] = (
-			all_requested
-			if doc.get("combine_sub_items")
-			else requested_sub_assemblies.get(data.get("name"), set())
+			all_requested if combined else requested_sub_assemblies.get(data.get("name"), set())
+		)
+		data["planned_sub_assemblies"] = (
+			all_planned if combined else planned_sub_assemblies.get(data.get("name"), {})
 		)
 
 		planned_qty = data.get("required_qty") or data.get("planned_qty")
