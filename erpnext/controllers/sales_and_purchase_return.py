@@ -65,8 +65,9 @@ def validate_return_warehouse_stock(doc):
 		if key not in qty_left:
 			qty_left[key] = get_qty_held_at_rate(doc, row, rate)
 
-		# stock_qty is set later in validate
-		qty_left[key] -= abs(flt(flt(row.qty) * flt(row.conversion_factor or 1), row.precision("stock_qty")))
+		# stock_qty and the factor reset to 1 for the stock UOM come later in validate
+		conversion_factor = 1 if row.uom == row.stock_uom else flt(row.conversion_factor) or 1
+		qty_left[key] -= abs(flt(flt(row.qty) * conversion_factor, row.precision("stock_qty")))
 		if row.idx in moved_rows and flt(qty_left[key], row.precision("stock_qty")) < 0:
 			frappe.throw(
 				_(
