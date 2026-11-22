@@ -762,6 +762,28 @@ class TestGetItemDetail(FrappeTestCase):
 		self.assertEqual(pi.items[0].rate, 28)
 		self.assertEqual(pi.items[1].rate, 275)  # used to collapse onto the first row (28)
 
+	@change_settings("Buying Settings", {"maintain_same_rate": 1})
+	def test_rate_lock_for_inter_company_supplier(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import get_rate_locked_source_row
+
+		supplier = create_internal_supplier("_Test Sister Supplier", "_Test Company 1", "_Test Company")
+		po = create_purchase_order(supplier=supplier, rate=90)
+		args = frappe._dict(
+			doctype="Purchase Receipt", is_internal_supplier=1, purchase_order_item=po.items[0].name
+		)
+		pr_doc = {
+			"doctype": "Purchase Receipt",
+			"company": po.company,
+			"represents_company": "_Test Company 1",
+		}
+
+		self.assertEqual(get_rate_locked_source_row(args.copy(), pr_doc).rate, 90)
+
+		pr_doc["represents_company"] = po.company
+		self.assertIsNone(get_rate_locked_source_row(args.copy(), pr_doc))
+
 	def make_batched_item_with_stock(self, quantities, uoms=None, **properties):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
