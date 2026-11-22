@@ -22,6 +22,7 @@ from frappe.utils import (
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.report.utils import validate_date_range
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import get_forecast_period
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
@@ -1177,6 +1178,11 @@ class MaterialRequirementsPlanningReport:
 		end_of_week = input_date + timedelta(days=(6 - input_date.weekday()))
 		return end_of_week.strftime("%Y-%m-%d")
 
+	def is_in_date_range(self, date):
+		if self.filters.from_date and date < getdate(self.filters.from_date):
+			return False
+		return not (self.filters.to_date and date > getdate(self.filters.to_date))
+
 	def get_sales_forecast_data(self):
 		forecast_doc = frappe.qb.DocType("Sales Forecast")
 		doctype = frappe.qb.DocType("Sales Forecast Item")
@@ -1202,7 +1208,8 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(forecast_doc.name == forecast)
 
 		if self.filters.from_date:
-			query = query.where(doctype.delivery_date >= self.filters.from_date)
+			# a period that starts in the month before From Date still runs into it
+			query = query.where(doctype.delivery_date >= add_months(self.filters.from_date, -1))
 
 		if self.filters.to_date:
 			query = query.where(doctype.delivery_date <= self.filters.to_date)
@@ -1220,7 +1227,11 @@ class MaterialRequirementsPlanningReport:
 
 		sales_data = query.run(as_dict=True)
 
-		return convert_to_daily_bucket_data(sales_data)
+		return [
+			row
+			for row in convert_to_daily_bucket_data(sales_data)
+			if self.is_in_date_range(row.delivery_date)
+		]
 
 
 def get_stock_reserved_for_work_orders(items, warehouses=None):
@@ -1380,41 +1391,21 @@ def convert_to_daily_bucket_data(data):
 	bucketed_data = []
 
 	for row in data:
-		if row.frequency == "Monthly":
-			# Convert monthly data to daily buckets
-			start_date = get_first_day(row.delivery_date)
-			no_of_days = days_diff(add_months(start_date, 1), start_date)
-
-			for i in range(no_of_days):  # Assuming 30 days in a month
-				bucketed_data.append(
-					frappe._dict(
-						{
-							"frequency": "Daily",
-							"item_code": row.item_code,
-							"delivery_date": add_days(start_date, i),
-							"sales_forecast": row.sales_forecast,
-							"stock_uom": row.stock_uom,
-							"qty": row.qty / no_of_days,  # Assuming equal distribution across days
-						}
-					)
+		start_date, end_date = get_forecast_period(row)
+		no_of_days = days_diff(end_date, start_date)
+		for i in range(no_of_days):
+			bucketed_data.append(
+				frappe._dict(
+					{
+						"frequency": "Daily",
+						"item_code": row.item_code,
+						"delivery_date": add_days(start_date, i),
+						"sales_forecast": row.sales_forecast,
+						"stock_uom": row.stock_uom,
+						"qty": row.qty / no_of_days,
+					}
 				)
-
-		elif row.frequency == "Weekly":
-			# Convert weekly data to daily buckets
-			start_date = getdate(row.delivery_date)
-			for i in range(7):
-				bucketed_data.append(
-					frappe._dict(
-						{
-							"frequency": "Daily",
-							"item_code": row.item_code,
-							"delivery_date": add_days(start_date, i),
-							"sales_forecast": row.sales_forecast,
-							"stock_uom": row.stock_uom,
-							"qty": row.qty / 7,  # Assuming equal distribution across days
-						}
-					)
-				)
+			)
 
 	return bucketed_data
 
