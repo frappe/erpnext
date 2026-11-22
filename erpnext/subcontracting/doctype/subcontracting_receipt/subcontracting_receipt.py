@@ -1220,6 +1220,7 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 			)
 
+		received_qty_ratios = self.get_received_qty_ratios_for_return(self.get_rejected_return_rows())
 		for item in self.items:
 			if flt(item.rate) and flt(item.qty):
 				_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
@@ -1251,9 +1252,13 @@ class SubcontractingReceipt(SubcontractingController):
 						item=item,
 					)
 
-					service_cost = flt(
-						flt(item.service_cost_per_qty) * flt(item.qty), item.precision("amount")
-					)
+					# the stock value holds the service cost of rejected and lost units too
+					if item.name in received_qty_ratios:
+						service_qty = flt(item.qty) * received_qty_ratios[item.name]
+					else:
+						service_qty = self.get_qty_for_costing(item)
+
+					service_cost = flt(flt(item.service_cost_per_qty) * service_qty, item.precision("amount"))
 					# Expense Account (Credit)
 					self.add_gl_entry(
 						gl_entries=gl_entries,
