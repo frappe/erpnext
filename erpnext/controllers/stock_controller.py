@@ -798,70 +798,57 @@ class StockController(AccountsController):
 		)
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
-		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
-		submitted_at, cancelled_at = get_ledger_entry_times(detail.name, stock_entry.docstatus)
 		return (
-			frappe.qb.from_(detail)
-			.join(stock_entry)
-			.on(stock_entry.name == detail.parent)
-			.left_join(bundle_entry)
-			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
-			.select(
-				detail.name,
-				detail.parent.as_("voucher"),
-				detail[detail_field].as_("key"),
-				detail.transfer_qty.as_("qty"),
-				submitted_at,
-				cancelled_at,
-				bundle_entry.serial_no,
-				bundle_entry.batch_no,
-				bundle_entry.qty.as_("bundle_qty"),
-			)
+			self.get_usage_query(stock_entry, detail, "transfer_qty")
+			.select(detail[detail_field].as_("key"))
 			.where(
-				(stock_entry.docstatus > 0)
-				& (stock_entry.purpose == self.purpose)
+				(stock_entry.purpose == self.purpose)
 				& (stock_entry[order_field] == self.get(order_field))
 				& detail[detail_field].isin(details)
 			)
-			.orderby(submitted_at)
 		).run(as_dict=True)
 
 	def get_receipt_consumption(self, keys: list[tuple[str, str]]) -> list[dict]:
 		receipt = frappe.qb.DocType("Subcontracting Receipt")
 		supplied = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
-		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
-		submitted_at, cancelled_at = get_ledger_entry_times(supplied.name, receipt.docstatus)
 		rows = (
-			frappe.qb.from_(supplied)
-			.join(receipt)
-			.on(receipt.name == supplied.parent)
+			self.get_usage_query(receipt, supplied, "consumed_qty")
+			.select(supplied.subcontracting_order, supplied.rm_item_code)
+			.where(
+				(receipt.is_return == 0)
+				& (receipt.supplier_warehouse == self.supplier_warehouse)
+				& (supplied.consumed_qty > 0)
+				& Tuple(supplied.subcontracting_order, supplied.rm_item_code).isin(keys)
+			)
+		).run(as_dict=True)
+
+		for row in rows:
+			row.key = (row.subcontracting_order, row.rm_item_code)
+		return rows
+
+	def get_usage_query(self, parent, child, qty_field: str):
+		"""Rows of the submitted and cancelled `parent` vouchers, with their bundle entries, oldest first."""
+		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		submitted_at, cancelled_at = get_ledger_entry_times(child.name, parent.docstatus)
+		return (
+			frappe.qb.from_(child)
+			.join(parent)
+			.on(parent.name == child.parent)
 			.left_join(bundle_entry)
-			.on(bundle_entry.parent == supplied.serial_and_batch_bundle)
+			.on(bundle_entry.parent == child.serial_and_batch_bundle)
 			.select(
-				supplied.name,
-				supplied.parent.as_("voucher"),
-				supplied.subcontracting_order,
-				supplied.rm_item_code,
-				supplied.consumed_qty.as_("qty"),
+				child.name,
+				child.parent.as_("voucher"),
+				child[qty_field].as_("qty"),
 				submitted_at,
 				cancelled_at,
 				bundle_entry.serial_no,
 				bundle_entry.batch_no,
 				bundle_entry.qty.as_("bundle_qty"),
 			)
-			.where(
-				(receipt.docstatus > 0)
-				& (receipt.is_return == 0)
-				& (receipt.supplier_warehouse == self.supplier_warehouse)
-				& (supplied.consumed_qty > 0)
-				& Tuple(supplied.subcontracting_order, supplied.rm_item_code).isin(keys)
-			)
+			.where(parent.docstatus > 0)
 			.orderby(submitted_at)
-		).run(as_dict=True)
-
-		for row in rows:
-			row.key = (row.subcontracting_order, row.rm_item_code)
-		return rows
+		)
 
 	def check_for_on_hold_or_closed_status(
 		self, ref_doctype: str, ref_fieldname: str, exclude_if_field: str | None = None
