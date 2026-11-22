@@ -2936,9 +2936,7 @@ def get_valuation_rate(
 		if rate := (
 			frappe.db.get_value("Item", item_code, "valuation_rate")
 			or frappe.db.get_value("Item", item_code, "standard_rate")
-			or frappe.db.get_value(
-				"Item Price", dict(item_code=item_code, buying=1, currency=currency), "price_list_rate"
-			)
+			or get_buying_price_per_stock_uom(item_code, currency)
 		):
 			return flt(rate)
 
@@ -2979,6 +2977,22 @@ def get_valuation_rate(
 		msg = message + solutions + sub_solutions + "</li>"
 
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
+
+
+def get_buying_price_per_stock_uom(item_code, currency):
+	"""A buying Item Price of the item, converted from the price's UOM to the stock UOM."""
+	from erpnext.stock.get_item_details import get_conversion_factor
+
+	price = frappe.db.get_value(
+		"Item Price",
+		{"item_code": item_code, "buying": 1, "currency": currency},
+		["price_list_rate", "uom"],
+		as_dict=True,
+	)
+	if not price:
+		return 0.0
+
+	return flt(price.price_list_rate) / get_conversion_factor(item_code, price.uom)["conversion_factor"]
 
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
