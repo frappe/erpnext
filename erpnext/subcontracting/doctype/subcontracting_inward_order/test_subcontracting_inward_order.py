@@ -70,6 +70,22 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Stock Reservation Entry", reservation))
 
+	def test_delivery_cancel_reopens_only_its_own_reservation(self):
+		self.assertEqual(cancel_one_of_two_deliveries(-1), [(3, 3), (2, 0)])
+
+	def test_first_delivery_cancel_reopens_only_its_own_reservation(self):
+		self.assertEqual(cancel_one_of_two_deliveries(0), [(3, 0), (2, 2)])
+
+	def test_delivery_cancel_replays_an_earlier_cancelled_delivery(self):
+		scio = make_scio_with_two_manufactures()
+		first = make_delivery_of_qty(scio, 3)
+		second = make_delivery_of_qty(scio, 2)
+		first.cancel()
+		make_delivery_of_qty(scio, 3)
+		second.cancel()
+
+		self.assertEqual(get_delivered_reservations(scio), [(3, 3), (2, 0)])
+
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
 
@@ -2122,3 +2138,44 @@ def make_subcontracting_boms():
 			)
 			doc.insert()
 			doc.save()
+
+
+def cancel_one_of_two_deliveries(index):
+	"""Deliver 3 and then 2, cancel delivery `index`; return each reservation's delivered qty."""
+	scio = make_scio_with_two_manufactures()
+	deliveries = [make_delivery_of_qty(scio, qty) for qty in (3, 2)]
+	deliveries[index].cancel()
+	return get_delivered_reservations(scio)
+
+
+def make_scio_with_two_manufactures():
+	"""Order with 3 and then 2 manufactured, each reserved for delivery."""
+	so, scio = create_so_scio()
+	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+	for qty in (3, 2):
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", qty)).submit()
+
+	return scio
+
+
+def make_delivery_of_qty(scio, qty):
+	scio.reload()
+	delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+	delivery.items[0].qty = qty
+	return delivery.submit()
+
+
+def get_delivered_reservations(scio):
+	reservations = frappe.get_all(
+		"Stock Reservation Entry",
+		filters={"voucher_detail_no": scio.items[0].name, "docstatus": 1},
+		fields=["reserved_qty", "delivered_qty"],
+		order_by="creation",
+		as_list=True,
+	)
+	return [tuple(reservation) for reservation in reservations]
