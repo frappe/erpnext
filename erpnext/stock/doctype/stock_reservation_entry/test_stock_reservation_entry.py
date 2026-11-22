@@ -1864,6 +1864,11 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, self.make_sre(from_voucher_type="Pick List").can_be_updated)
 		self.assertRaises(frappe.ValidationError, self.make_sre(delivered_qty=5).can_be_updated)
 
+	def test_consumed_or_transferred_entry_cannot_be_updated(self):
+		for field in ("consumed_qty", "transferred_qty"):
+			with self.subTest(field=field):
+				self.assertRaises(frappe.ValidationError, self.make_sre(**{field: 5}).can_be_updated)
+
 	def test_group_warehouse_cannot_be_reserved(self):
 		group_wh = frappe.db.get_value("Warehouse", {"company": "_Test Company", "is_group": 1}, "name")
 		self.assertTrue(group_wh, "need a group warehouse for _Test Company")
