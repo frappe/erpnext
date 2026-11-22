@@ -2084,10 +2084,6 @@ class TestBOM(ERPNextTestSuite):
 		# the source warehouse has no Bin, so the last valuation rate is used
 		self.assertEqual(bom.items[0].rate, 50)
 
-<<<<<<< HEAD
-	def test_valuation_rate_ignores_stock_of_other_company(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-=======
 	def test_currency_change_fetches_conversion_rate(self):
 		set_inr_exchange_rate("EUR", 90)
 		bom = frappe.get_doc(
@@ -2105,7 +2101,8 @@ class TestBOM(ERPNextTestSuite):
 		bom.save()
 		self.assertEqual(bom.conversion_rate, 90)
 
->>>>>>> bdd6a32 (test: changing BOM currency fetches its conversion rate)
+	def test_valuation_rate_ignores_stock_of_other_company(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
