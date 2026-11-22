@@ -955,22 +955,32 @@ class TestSubcontractingOrder(FrappeTestCase):
 		)
 
 	def test_return_of_material_sent_in_another_uom_is_in_stock_uom(self):
-		sco = make_reserving_order_with_new_items(
-			"Box Return", rm_properties={"uoms": [{"uom": "Box", "conversion_factor": 2}]}
-		)
-		sco.reserve_stock = 0
+		service_item = make_item("Subcontracted Service Item Box Return", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item Box Return", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item(
+			"Subcontracted RM Item Box Return",
+			{"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 2}]},
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 4,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 4,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
 		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
-		sco.submit()
 		transfer = frappe.get_doc(make_rm_stock_entry(sco.name))
 		transfer.items[0].update({"uom": "Box", "conversion_factor": 2, "qty": 2})
 		transfer.submit()
 
-		frappe.flags.args = frappe._dict(
-			subcontract_order=sco.name,
-			rm_details=[d.name for d in sco.supplied_items],
-			order_doctype=sco.doctype,
-		)
-		ste = get_materials_from_supplier(sco.name)
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
 
 		self.assertEqual((ste.items[0].qty, ste.items[0].uom), (4, ste.items[0].stock_uom))
 
