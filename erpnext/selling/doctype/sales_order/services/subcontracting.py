@@ -56,7 +56,7 @@ class SubcontractingService:
 
 		return result
 
-	def update_subcontracting_order_status(self) -> None:
+	def close_inward_orders(self) -> None:
 		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
 			set_subcontracting_inward_order_status as update_scio_status,
 		)
@@ -66,4 +66,4 @@ class SubcontractingService:
 			for scio in frappe.get_all(
 				"Subcontracting Inward Order", {"sales_order": doc.name, "docstatus": 1}, pluck="name"
 			):
-				update_scio_status(scio, "Closed" if doc.status == "Closed" else None)
+				update_scio_status(scio, "Closed")
