@@ -2026,6 +2026,44 @@ class TestBOM(ERPNextTestSuite):
 		bom.save()
 		self.assertEqual(bom.process_loss_qty, 0)
 
+	def test_exploded_item_used_at_two_rates_merges_at_weighted_rate(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, qty=100, rate=10, target="_Test Warehouse - _TC")
+		make_stock_entry(item_code=rm_item, qty=10, rate=50, target="_Test Warehouse 1 - _TC")
+		sub_bom = make_bom(item=sub_item, raw_materials=[rm_item], currency="INR", do_not_save=True)
+		sub_bom.items[0].source_warehouse = "_Test Warehouse - _TC"
+		sub_bom.insert()
+		sub_bom.submit()
+
+		bom = make_bom(
+			item=make_item(properties={"is_stock_item": 1}).name,
+			raw_materials=[rm_item],
+			currency="INR",
+			do_not_save=True,
+		)
+		bom.items[0].source_warehouse = "_Test Warehouse 1 - _TC"
+		bom.append("items", {"item_code": sub_item, "qty": 1, "bom_no": sub_bom.name})
+		bom.insert()
+		bom.submit()
+		self.assertEqual(bom.raw_material_cost, 60)
+
+		def assert_exploded_row(rate, amount):
+			row = bom.exploded_items[0]
+			self.assertEqual(
+				(len(bom.exploded_items), row.stock_qty, row.rate, row.amount), (1, 2, rate, amount)
+			)
+
+		assert_exploded_row(30, 60)
+		make_stock_entry(item_code=rm_item, qty=10, rate=150, target="_Test Warehouse 1 - _TC")
+		bom.update_cost()
+		bom.reload()
+		self.assertEqual(bom.raw_material_cost, 110)
+		assert_exploded_row(55, 110)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
