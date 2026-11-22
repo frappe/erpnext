@@ -4894,6 +4894,21 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(amounts[(fg_item, 0)], 1360)
 		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
 
+		entry.submit()
+		ledger = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": entry.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		for row in entry.items:
+			if row.t_warehouse:
+				self.assertEqual(ledger[row.name], row.basic_amount)
+		# in equals out, so nothing is left for Stock Adjustment
+		self.assertEqual(sum(ledger.values()), 0)
+
 	def test_repack_co_product_keeps_its_share_when_every_finished_good_is_manual(self):
 		"""With no automatic finished good, the co-product takes its percentage of the whole cost."""
 		entry, fg_item, co_product = self.make_co_product_repack()
