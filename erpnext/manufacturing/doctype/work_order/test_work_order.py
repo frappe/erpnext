@@ -5817,6 +5817,11 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo = self.send_reserved_cloth_to_subcontractor(4)
 		self.assertEqual(wo.required_items[0].stock_reserved_qty, 6)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reservation_partly_sent_to_subcontractor_can_be_updated(self):
+		wo = self.send_reserved_cloth_to_subcontractor(4)
+		frappe.get_doc("Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}).save()
+
 	def send_reserved_cloth_to_subcontractor(self, qty):
 		"""A skip-transfer Work Order that reserved its cloth and sent qty of it to a subcontractor."""
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
