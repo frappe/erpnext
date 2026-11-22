@@ -671,11 +671,7 @@ def get_doctypes_to_be_ignored():
 		"Accounting Period",
 		"Asset Maintenance Team",
 		"Authorization Rule",
-<<<<<<< HEAD
-=======
-		"Bank Transaction Rule",
 		"Communication",
->>>>>>> 9efa546 (chore: keep deletion ignore list sorted)
 		"Dunning Type",
 		"Email Account",
 		"Email Digest",
