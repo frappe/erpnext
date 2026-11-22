@@ -825,6 +825,7 @@ class SubcontractingController(StockController):
 			self.subcontract_data.receipt_supplied_items_field,
 			fields=fields,
 			filters={"docstatus": 1, "reference_name": ("in", list(receipt_items)), "parenttype": doctype},
+			order_by="creation",
 		)
 
 	def __update_consumed_materials(self, doctype, return_consumed_items=False):
@@ -857,11 +858,8 @@ class SubcontractingController(StockController):
 		def get_key(row):
 			return (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
 
-		# a finished good's own consumption first, so another's only takes what it left; returns after
-		def get_order(row):
-			return (not self.available_materials.get(get_key(row)), row.consumed_qty < 0)
-
-		for row in sorted(consumed_materials, key=get_order):
+		# a finished good's own consumption first, so another's only takes what it left
+		for row in sorted(consumed_materials, key=lambda row: not self.available_materials.get(get_key(row))):
 			keys = self.get_transfer_keys(get_key(row))
 			if not keys:
 				continue
