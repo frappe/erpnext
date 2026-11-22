@@ -191,7 +191,7 @@ class BuyingController(SubcontractingController):
 		own when the receipt is submitted. An inter-company receipt has no in-transit warehouse, so it
 		always gets a package of the accepted warehouse.
 		"""
-		if self.is_internal_transfer() and not self.has_rejected_stock(row):
+		if self.keeps_transit_package(row):
 			return self.make_package_for_transfer(
 				package,
 				row.from_warehouse,
@@ -336,9 +336,10 @@ class BuyingController(SubcontractingController):
 
 		A row that rejects material carries the package of its accepted warehouse; a row that
 		rejects nothing carries the package of the in-transit warehouse it came out of. Editing the
-		split moves the package from one to the other.
+		split or the accepted warehouse rebuilds the package. An inter-company row always carries the
+		package of its accepted warehouse.
 		"""
-		if not self.is_internal_receipt() or self.is_return:
+		if not (self.get("is_internal_supplier") and self.is_stock_receipt()) or self.is_return:
 			return
 
 		for row in self.get("items"):
@@ -355,10 +356,10 @@ class BuyingController(SubcontractingController):
 			if not details or details.docstatus != 0:
 				continue
 
-			if self.has_rejected_stock(row):
-				wanted = (row.warehouse, "Inward")
-			else:
+			if self.keeps_transit_package(row):
 				wanted = (row.from_warehouse, "Outward")
+			else:
+				wanted = (row.warehouse, "Inward")
 
 			if (details.warehouse, details.type_of_transaction) == wanted:
 				continue
@@ -1179,6 +1180,10 @@ class BuyingController(SubcontractingController):
 
 	def is_internal_receipt(self) -> bool:
 		return self.is_internal_transfer() and self.is_stock_receipt()
+
+	def keeps_transit_package(self, row) -> bool:
+		"""An internal transfer row that rejects nothing keeps the package of the in-transit warehouse."""
+		return self.is_internal_transfer() and not self.has_rejected_stock(row)
 
 	def has_rejected_stock(self, row) -> bool:
 		"""An internal receipt row whose rejected qty doesn't round to 0 in the stock UOM."""
