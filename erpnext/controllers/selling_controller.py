@@ -11,7 +11,12 @@ from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController, add_picked_batches
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
+<<<<<<< HEAD
 from erpnext.stock.doctype.item.item import set_item_default
+=======
+from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
+from erpnext.stock.doctype.packed_item.packed_item import get_bundle_version_for_row
+>>>>>>> 5f26275 (fix(selling): check a bundle row's selling price from the version it is packed from)
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
@@ -440,7 +445,8 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			is_bundle = check_bundles and self.has_product_bundle(item.item_code)
+			# a bundle row is valued from the version it is packed from, so match that one
+			is_bundle = check_bundles and not is_stock_item and get_bundle_version_for_row(item, self)
 			if is_internal_customer or not (is_stock_item or is_bundle):
 				continue
 
