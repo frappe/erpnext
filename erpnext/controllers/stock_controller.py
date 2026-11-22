@@ -8,6 +8,7 @@ from itertools import chain
 import frappe
 from frappe import _, bold
 <<<<<<< HEAD
+<<<<<<< HEAD
 from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count, Min, Sum
@@ -15,6 +16,10 @@ from frappe.query_builder.functions import Count, Min, Sum
 from frappe.query_builder import Criterion, Order, Tuple
 from frappe.query_builder.functions import Count, Min
 >>>>>>> 353da64 (fix(subcontracting): rebuild a receipt's reservations from the remaining receipts on cancel)
+=======
+from frappe.query_builder import Case, Criterion, Order, Tuple
+from frappe.query_builder.functions import Count, Max, Min
+>>>>>>> f4a3af2 (fix(stock): replay earlier cancelled vouchers on a reservation's cancel rebuild)
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
@@ -2491,9 +2496,10 @@ class StockController(AccountsController):
 					qty -= working_qty
 
 	def rebuild_reservation_usage(self, field: str, sre_lists: dict):
-		"""Replay all usage as on submit, this cancelled voucher's too, then take off only its share."""
+		"""Replay all usage as it happened, this cancelled voucher's too, then take off only its share."""
 		usages = group_reservation_usage(self.get_reservation_usage(list(sre_lists)))
 		self.set_own_serial_batch_usage(usages)
+		self.set_cancelled_serial_batch_usage(usages)
 		for key, sre_list in sre_lists.items():
 			sre_docs = [frappe.get_doc("Stock Reservation Entry", sre) for sre in sre_list]
 			for sre_doc in sre_docs:
@@ -2502,8 +2508,8 @@ class StockController(AccountsController):
 					entry.delivered_qty = 0
 
 			# the cancelled share stays in place during the replay, so later usage lands where it did on submit
-			for sre_doc, share in replay_reservation_usage(sre_docs, usages.get(key, []), field, self.name):
-				apply_reservation_share(sre_doc, share, field, sign=-1)
+			for usage in replay_reservation_usage(sre_docs, usages.get(key, []), field, self.name):
+				give_back_reservation_usage(usage, field)
 
 			for sre_doc in sre_docs:
 				for entry in sre_doc.sb_entries:
@@ -2524,8 +2530,33 @@ class StockController(AccountsController):
 				serial_nos, batch_qty = get_delivered_serial_batch_for_reservation(rows[usage.row])
 				usage.serial_nos, usage.batch_qty = set(serial_nos), defaultdict(float, batch_qty)
 
+	def set_cancelled_serial_batch_usage(self, usages: dict) -> None:
+		"""Read the serial and batch nos of earlier cancelled vouchers from their cancelled bundles."""
+		cancelled = {
+			usage.row: usage
+			for usage in chain.from_iterable(usages.values())
+			if usage.cancelled_at and usage.voucher != self.name
+		}
+		if not cancelled:
+			return
+
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={
+				"voucher_detail_no": ("in", list(cancelled)),
+				"docstatus": 2,
+				# a transfer's inward bundle shares its row
+				"type_of_transaction": "Outward",
+			},
+			fields=["voucher_detail_no", "serial_no", "batch_no", "qty"],
+		)
+		for entry in entries:
+			add_serial_batch_to_usage(
+				cancelled[entry.voucher_detail_no], entry.serial_no, entry.batch_no, entry.qty
+			)
+
 	def get_reservation_usage(self, keys: list) -> list[dict]:
-		"""Rows of the submitted vouchers and this cancelled one that used the reservations, oldest first."""
+		"""Rows of the submitted and cancelled vouchers that used the reservations, oldest first."""
 		if self.doctype == "Subcontracting Receipt":
 			return self.get_receipt_consumption(keys)
 
@@ -2540,7 +2571,7 @@ class StockController(AccountsController):
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
-		submitted_at = get_first_ledger_entry_time(detail.name)
+		submitted_at, cancelled_at = get_ledger_entry_times(detail.name, stock_entry.docstatus)
 		return (
 			frappe.qb.from_(detail)
 			.join(stock_entry)
@@ -2553,12 +2584,13 @@ class StockController(AccountsController):
 				detail[detail_field].as_("key"),
 				detail.transfer_qty.as_("qty"),
 				submitted_at,
+				cancelled_at,
 				bundle_entry.serial_no,
 				bundle_entry.batch_no,
 				bundle_entry.qty.as_("bundle_qty"),
 			)
 			.where(
-				((stock_entry.docstatus == 1) | (stock_entry.name == self.name))
+				(stock_entry.docstatus > 0)
 				& (stock_entry.purpose == self.purpose)
 				& (stock_entry[order_field] == self.get(order_field))
 				& detail[detail_field].isin(details)
@@ -2570,7 +2602,7 @@ class StockController(AccountsController):
 		receipt = frappe.qb.DocType("Subcontracting Receipt")
 		supplied = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
-		submitted_at = get_first_ledger_entry_time(supplied.name)
+		submitted_at, cancelled_at = get_ledger_entry_times(supplied.name, receipt.docstatus)
 		rows = (
 			frappe.qb.from_(supplied)
 			.join(receipt)
@@ -2584,12 +2616,13 @@ class StockController(AccountsController):
 				supplied.rm_item_code,
 				supplied.consumed_qty.as_("qty"),
 				submitted_at,
+				cancelled_at,
 				bundle_entry.serial_no,
 				bundle_entry.batch_no,
 				bundle_entry.qty.as_("bundle_qty"),
 			)
 			.where(
-				((receipt.docstatus == 1) | (receipt.name == self.name))
+				(receipt.docstatus > 0)
 				& (receipt.is_return == 0)
 				& (receipt.supplier_warehouse == self.supplier_warehouse)
 				& (supplied.consumed_qty > 0)
@@ -3176,14 +3209,22 @@ def make_bundle_for_material_transfer(**kwargs):
 	return bundle_doc.name
 
 
-def get_first_ledger_entry_time(voucher_detail_no):
-	"""Creation of a voucher row's first stock ledger entry, which recreating its ledgers does not move."""
+def get_ledger_entry_times(voucher_detail_no, docstatus):
+	"""When a voucher row was submitted and, if cancelled, cancelled: its first and last stock ledger entries.
+
+	Recreating a row's ledgers does not move the first, and the cancel's reverse entries are the last."""
 	ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+
+	def get_entry_time(aggregate):
+		return (
+			frappe.qb.from_(ledger_entry)
+			.select(aggregate(ledger_entry.creation))
+			.where(ledger_entry.voucher_detail_no == voucher_detail_no)
+		)
+
 	return (
-		frappe.qb.from_(ledger_entry)
-		.select(Min(ledger_entry.creation))
-		.where(ledger_entry.voucher_detail_no == voucher_detail_no)
-		.as_("submitted_at")
+		get_entry_time(Min).as_("submitted_at"),
+		Case().when(docstatus == 2, get_entry_time(Max)).as_("cancelled_at"),
 	)
 
 
@@ -3198,29 +3239,54 @@ def group_reservation_usage(rows: list[dict]) -> dict[str, list]:
 				row=row.name,
 				voucher=row.voucher,
 				submitted_at=row.submitted_at,
+				cancelled_at=row.cancelled_at,
 				serial_nos=set(),
 				batch_qty=defaultdict(float),
+				shares=[],
 			)
-		if row.serial_no:
-			usage.serial_nos.add(row.serial_no)
-		if row.batch_no:
-			usage.batch_qty[row.batch_no] += abs(flt(row.bundle_qty))
+		add_serial_batch_to_usage(usage, row.serial_no, row.batch_no, row.bundle_qty)
 
 	return {key: list(row_usages.values()) for key, row_usages in usages.items()}
 
 
-def replay_reservation_usage(sre_docs, usages, field: str, cancelled_voucher: str) -> list[tuple]:
-	"""Count each usage on the reservations made before it; return the shares of `cancelled_voucher`."""
-	cancelled_shares = []
-	for usage in usages:
-		for sre_doc in sre_docs:
-			if sre_doc.creation < usage.submitted_at:
-				share = take_reservation_share(sre_doc, usage, field)
-				apply_reservation_share(sre_doc, share, field)
-				if usage.voucher == cancelled_voucher:
-					cancelled_shares.append((sre_doc, share))
+def add_serial_batch_to_usage(usage, serial_no, batch_no, qty) -> None:
+	if serial_no:
+		usage.serial_nos.add(serial_no)
+	if batch_no:
+		usage.batch_qty[batch_no] += abs(flt(qty))
 
-	return cancelled_shares
+
+def replay_reservation_usage(sre_docs, usages, field: str, cancelled_voucher: str) -> list:
+	"""Replay submits and earlier cancels in the order they happened; return the usage of `cancelled_voucher`.
+
+	Each usage takes what was free at its submit and gives it back at its cancel."""
+	submits = [(usage.submitted_at, False, usage) for usage in usages]
+	cancels = [
+		(usage.cancelled_at, True, usage)
+		for usage in usages
+		if usage.cancelled_at and usage.voucher != cancelled_voucher
+	]
+	for _time, is_cancel, usage in sorted(submits + cancels, key=lambda event: event[:2]):
+		if is_cancel:
+			give_back_reservation_usage(usage, field)
+		else:
+			take_reservation_usage(sre_docs, usage, field)
+
+	return [usage for usage in usages if usage.voucher == cancelled_voucher]
+
+
+def take_reservation_usage(sre_docs, usage, field: str) -> None:
+	"""Count `usage` on the reservations made before it."""
+	for sre_doc in sre_docs:
+		if sre_doc.creation < usage.submitted_at:
+			share = take_reservation_share(sre_doc, usage, field)
+			apply_reservation_share(sre_doc, share, field)
+			usage.shares.append((sre_doc, share))
+
+
+def give_back_reservation_usage(usage, field: str) -> None:
+	for sre_doc, share in usage.shares:
+		apply_reservation_share(sre_doc, share, field, sign=-1)
 
 
 def take_reservation_share(sre_doc, usage, field: str) -> frappe._dict:
