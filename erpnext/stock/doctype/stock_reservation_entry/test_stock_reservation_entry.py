@@ -1071,7 +1071,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		},
 	)
 	def test_delivery_note_fills_partial_reservation_with_unreserved_serial_nos(self) -> None:
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		item = make_item(properties=SR_ITEM_PROPERTIES["serial"])
 		create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=2)
 		so = make_sales_order(item_code=item.name, warehouse=self.warehouse, qty=5, rate=100)
 		so.create_stock_reservation_entries()
@@ -1091,7 +1091,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
 	)
 	def test_delivery_note_picks_serial_nos_reserved_for_each_sales_order_row(self) -> None:
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		item = make_item(properties=SR_ITEM_PROPERTIES["serial"])
 		create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=4)
 		so = make_sales_order(
 			item_code=item.name, warehouse=self.warehouse, qty=2, rate=100, do_not_submit=True
@@ -1134,7 +1134,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
 	)
 	def test_delivery_note_picks_serial_nos_reserved_for_bundle_component(self) -> None:
-		component = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		component = make_item(properties=SR_ITEM_PROPERTIES["serial"])
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		frappe.get_doc(
 			{
