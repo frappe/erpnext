@@ -5407,6 +5407,41 @@ class TestWorkOrder(ERPNextTestSuite):
 		sco = self.subcontract_work_order(wo, 10)
 		self.assertEqual([row.reserve_warehouse for row in sco.supplied_items], ["Stores - _TC"])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_stock_sent_to_subcontractor_is_not_reserved_again(self):
+		wo = self.send_reserved_cloth_to_subcontractor(10)
+		items = [{**get_unreserved_items(wo)[0], "required_qty": 10}]
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot reserve more than Allowed Qty",
+			make_stock_reservation_entries,
+			wo.as_dict(),
+			items=items,
+			is_transfer=0,
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_stock_sent_to_subcontractor_leaves_the_work_order_row_reservation(self):
+		wo = self.send_reserved_cloth_to_subcontractor(4)
+		self.assertEqual(wo.required_items[0].stock_reserved_qty, 6)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reservation_partly_sent_to_subcontractor_can_be_updated(self):
+		wo = self.send_reserved_cloth_to_subcontractor(4)
+		frappe.get_doc("Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}).save()
+
+	def send_reserved_cloth_to_subcontractor(self, qty):
+		"""A skip-transfer Work Order that reserved its cloth and sent qty of it to a subcontractor."""
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		cloth = make_item("Test SOI Cloth", {"is_stock_item": 1}).name
+		test_stock_entry.make_stock_entry(item_code=cloth, target="Stores - _TC", qty=20, basic_rate=100)
+		wo = self.make_subcontracted_operation_work_order(skip_transfer=1, reserve_stock=1)
+		sco = self.subcontract_work_order(wo, qty)
+		frappe.new_doc("Stock Entry").update(make_rm_stock_entry(sco.name)).submit()
+		wo.reload()
+		return wo
+
 	def make_subcontracted_operation_work_order(self, **kwargs):
 		"""A Work Order for 10 shirts whose only operation, a subcontracted dyeing, uses 10 cloth."""
 		company = "_Test Company"
