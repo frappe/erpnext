@@ -8,6 +8,9 @@ from frappe.query_builder.functions import Coalesce, IfNull, Max, Min, NullIf, S
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -445,8 +448,13 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 		# lock on submit so concurrent Manufacture entries see each other's produced qty
+		is_submitting = self.doc.docstatus == 1
+		if is_submitting and wo.production_plan:
+			# plan row before Work Order, the order update_work_order_qty locks them in
+			ProductionPlanWorkOrderQuantities(wo.production_plan).lock_plan_row(wo)
+
 		produced_qty, process_loss_qty = frappe.db.get_value(
-			"Work Order", wo.name, ["produced_qty", "process_loss_qty"], for_update=self.doc.docstatus == 1
+			"Work Order", wo.name, ["produced_qty", "process_loss_qty"], for_update=is_submitting
 		)
 		precision = self.doc.precision("fg_completed_qty")
 		allowed_qty = flt(
