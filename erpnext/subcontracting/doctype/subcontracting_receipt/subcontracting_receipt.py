@@ -864,7 +864,10 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def get_amount_for_costing(self, item):
 		"""Row amount without the additional costs it took last time, so a re-save keeps the same weights."""
-		return flt(item.amount) - self.get_qty_for_costing(item) * flt(item.additional_cost_per_qty)
+		# the amount holds only the finished good's allocated share of its cost
+		allocation = flt(frappe.get_value("BOM", item.bom, "cost_allocation_per")) / 100 if item.bom else 1
+		additional_cost = self.get_qty_for_costing(item) * flt(item.additional_cost_per_qty) * allocation
+		return flt(item.amount) - additional_cost
 
 	def set_additional_costs_base_amount(self):
 		for row in self.get("additional_costs"):
