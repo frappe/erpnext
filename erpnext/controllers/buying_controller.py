@@ -153,9 +153,7 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.is_internal_transfer() and (
-			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
-		):
+		if self.get("is_internal_supplier") and self.is_stock_receipt():
 			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 
 			doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
@@ -190,9 +188,10 @@ class BuyingController(SubcontractingController):
 		A row that rejects nothing keeps the package of the in-transit warehouse it came out of. A
 		row that rejects material needs a package of the accepted warehouse instead, since that is
 		the entry it belongs to; the material leaving the in-transit warehouse gets a package of its
-		own when the receipt is submitted.
+		own when the receipt is submitted. An inter-company receipt has no in-transit warehouse, so it
+		always gets a package of the accepted warehouse.
 		"""
-		if not self.has_rejected_stock(row):
+		if self.is_internal_transfer() and not self.has_rejected_stock(row):
 			return self.make_package_for_transfer(
 				package,
 				row.from_warehouse,
@@ -263,10 +262,10 @@ class BuyingController(SubcontractingController):
 	def set_rejected_package(self, row, package) -> None:
 		"""Package of the material the row rejects.
 
-		A receipt of an internal transfer builds no package for it on its own, so rejected material
+		A receipt from an internal supplier builds no package for it on its own, so rejected material
 		of a tracked item would have nothing to say where it came from.
 		"""
-		if not self.has_rejected_stock(row):
+		if not get_stock_qty(row, row.rejected_qty):
 			self.remove_package(row, "rejected_serial_and_batch_bundle")
 			return
 
