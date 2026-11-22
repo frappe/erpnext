@@ -188,16 +188,9 @@ def _get_item_details(
 	if args.get("is_subcontracted"):
 		out.bom = args.get("bom") or get_default_bom(args.item_code)
 
-<<<<<<< HEAD
-	get_gross_profit(out)
 	if args.doctype == "Material Request":
 		out.rate = args.rate or out.price_list_rate
 		out.amount = flt(args.qty) * flt(out.rate)
-=======
-	if ctx.doctype == "Material Request":
-		out.rate = ctx.rate or out.price_list_rate
-		out.amount = flt(ctx.qty) * flt(out.rate)
->>>>>>> c194109 (fix(selling): drop the item details gross profit made before the row has a rate)
 
 	out = remove_standard_fields(out)
 	return out
@@ -1934,16 +1927,6 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 		return {"valuation_rate": 0.0}
 
 
-<<<<<<< HEAD
-def get_gross_profit(out):
-	if out.valuation_rate:
-		out.update({"gross_profit": ((out.base_rate - out.valuation_rate) * out.stock_qty)})
-
-	return out
-
-
-=======
->>>>>>> c194109 (fix(selling): drop the item details gross profit made before the row has a rate)
 @frappe.whitelist()
 def get_serial_no(args, serial_nos=None, sales_order=None):
 	serial_nos = serial_nos or []

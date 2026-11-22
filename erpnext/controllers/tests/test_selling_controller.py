@@ -6,6 +6,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -35,44 +36,7 @@ class TestSellingController(FrappeTestCase):
 			target_warehouse="Goods In Transit - TCP1",
 		)
 
-<<<<<<< HEAD
 		self.assertEqual(dn.docstatus, 1)
-=======
-	def test_item_selection_sets_gross_profit(self):
-		item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "Nos"},
-			uoms=[{"uom": "Box", "conversion_factor": 12}],
-		)
-		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=24, basic_rate=80)
-		frappe.get_doc(
-			{
-				"doctype": "Item Price",
-				"item_code": item.name,
-				"price_list": "Standard Selling",
-				"price_list_rate": 100,
-			}
-		).insert()
-
-		so = make_sales_order(
-			item_code=item.name, qty=1, uom="Box", selling_price_list="Standard Selling", do_not_save=True
-		)
-		so.process_item_selection(item_idx=1)
-
-		self.assertEqual(so.items[0].rate, 1200)
-		self.assertEqual(so.items[0].gross_profit, 240)
-
-	def test_maximum_discount_for_percentage_amount_and_rate(self):
-		item = make_item(properties={"is_stock_item": 0, "max_discount": 10})
-		item_price = frappe.get_doc(
-			{
-				"doctype": "Item Price",
-				"item_code": item.name,
-				"price_list": "Standard Selling",
-				"price_list_rate": 100,
-			}
-		).insert()
-		user = make_fenced_user("max-discount@example.com", ["Sales User"])
->>>>>>> 60bc4fa (test: gross profit set on item selection for a row in another UOM)
 
 	@change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_inter_company_sale_keeps_the_last_purchase_rate_check(self):
@@ -98,3 +62,14 @@ class TestSellingController(FrappeTestCase):
 		)
 
 		self.assertRaisesRegex(frappe.ValidationError, "last purchase rate", si.save)
+
+	def test_gross_profit_for_a_row_in_another_uom(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Nos"},
+			uoms=[{"uom": "Box", "conversion_factor": 12}],
+		)
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=24, basic_rate=80)
+
+		so = make_sales_order(item_code=item.name, qty=1, uom="Box", rate=1200)
+
+		self.assertEqual(so.items[0].gross_profit, 240)
