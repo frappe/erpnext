@@ -264,6 +264,19 @@ frappe.ui.form.on("Job Card", {
 				__("Create")
 			);
 		}
+
+		const to_return =
+			doc.docstatus === 0 &&
+			has_items &&
+			doc.items.some((row) => flt(row.transferred_qty) > flt(row.consumed_qty));
+
+		if (to_return) {
+			frm.add_custom_button(
+				__("Return Components"),
+				() => frm.trigger("make_stock_return_entry"),
+				__("Create")
+			);
+		}
 	},
 
 	keep_one_primary_button(frm) {
@@ -1038,6 +1051,18 @@ frappe.ui.form.on("Job Card", {
 			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_entry",
 			frm: frm,
 			run_link_triggers: true,
+		});
+	},
+
+	make_stock_return_entry(frm) {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_return_entry",
+			args: { job_card: frm.doc.name },
+			callback(r) {
+				if (r.exc) return;
+				const doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			},
 		});
 	},
 
