@@ -326,26 +326,16 @@ def update_stock(ctx, out, doc=None):
 			batch_no = get_batch_no_covering_qty(kwargs, doc, out.stock_qty)
 			if batch_no:
 				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
-<<<<<<< HEAD
 				rate = _get_batch_based_item_price(
-					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
+					{
+						"price_list": doc.get("selling_price_list") if doc else ctx.price_list,
+						"uom": out.uom,
+						"batch_no": batch_no,
+					},
 					out.item_code,
 				)
 				if rate:
 					out.update({"rate": rate, "price_list_rate": rate})
-=======
-				if not has_locked_rate:
-					rate = _get_batch_based_item_price(
-						{
-							"price_list": doc.get("selling_price_list") if doc else ctx.price_list,
-							"uom": out.uom,
-							"batch_no": batch_no,
-						},
-						out.item_code,
-					)
-					if rate:
-						out.update({"rate": rate, "price_list_rate": rate})
->>>>>>> 04f3346 (fix(stock): get batch and serial item details without a doc)
 
 		if out.has_serial_no and needs_serial_nos(ctx, out):
 			set_serial_nos_for_outward(ctx, out, kwargs, doc)
@@ -368,17 +358,10 @@ def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	if out.has_batch_no and batch_no:
 		kwargs["batches"] = [batch_no]
 
-<<<<<<< HEAD
-	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
-	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
-=======
-	used_serial_nos = get_used_serial_nos(doc) if doc else []
-	kwargs["ignore_serial_nos"] = [*(kwargs.get("ignore_serial_nos") or []), *used_serial_nos]
 	serial_nos = get_serial_nos_for_outward(kwargs)
-	out["serial_no"] = "\n".join(
-		SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
-	)
->>>>>>> 04f3346 (fix(stock): get batch and serial item details without a doc)
+	if doc:
+		serial_nos = get_filtered_serial_nos(serial_nos, doc)
+	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
 
 
 def has_incorrect_serial_nos(ctx, out):
