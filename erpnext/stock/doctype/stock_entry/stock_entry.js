@@ -852,7 +852,9 @@ frappe.ui.form.on("Stock Entry", {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
 
-		if (item.set_basic_rate_manually) {
+		// on a receipt the user gives the rate, as the server keeps it
+		const has_receipt_rate = frm.doc.purpose == "Material Receipt" && flt(item.basic_rate);
+		if (item.set_basic_rate_manually || has_receipt_rate) {
 			frm.events.calculate_basic_amount(frm, item);
 			return;
 		}
@@ -1255,8 +1257,10 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	item_code(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
-		// since some items may not have image, so empty the image field to avoid setting the image of previous item
+		// empty the fields the new item may not set, so the previous item's values do not stick
 		d.image = "";
+		d.basic_rate = 0;
+		frm.events.calculate_basic_amount(frm, d);
 
 		if (d.item_code) {
 			var args = {
