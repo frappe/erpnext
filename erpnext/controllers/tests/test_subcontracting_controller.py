@@ -1220,6 +1220,148 @@ class TestSubcontractingController(FrappeTestCase):
 			itemwise_details.get(doc.items[0].item_code)["serial_no"][5:6],
 		)
 
+<<<<<<< HEAD
+=======
+	def test_return_of_components_split_over_the_rows_it_was_sent_on(self):
+		"""5 + 5 of a raw material sent on two rows of the same finished good; the first row consumed 2."""
+		set_backflush_based_on("BOM")
+		rm_item = make_item("Subcontracted RM Sent On Two Rows", {"is_stock_item": 1}).name
+		fg_item = "Subcontracted FG Sent On Two Rows"
+		make_subcontracted_item(item_code=fg_item, raw_materials=[rm_item])
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+			for service_item in ("Subcontracted Service Item 2", "Subcontracted Service Item 3")
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=10, basic_rate=100)
+		frappe.get_doc(make_rm_stock_entry(sco.name)).submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 2
+		scr.remove(scr.items[1])
+		scr.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+		self.assertEqual([row.qty for row in ste.items], [3, 5])
+		ste.submit()
+
+		sco.load_from_db()
+		self.assertEqual([row.total_supplied_qty for row in sco.supplied_items], [2, 0])
+
+	def test_phantom_bom_explosion(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
+
+		make_item("Top Level Parent", {"is_stock_item": 1, "is_sub_contracted_item": 1})
+		expected = create_tree_for_phantom_bom_tests()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": "Top Level Parent",
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=True)
+		sco.items[0].include_exploded_items = 0
+		sco.save()
+		sco.submit()
+		sco.reload()
+
+		self.assertEqual([item.rm_item_code for item in sco.supplied_items], expected)
+
+	def test_phantom_item_materials_scale_with_phantom_qty(self):
+		phantom_item = make_item(properties={"is_stock_item": 1}).name
+		phantom_bom = make_bom(
+			item=phantom_item, raw_materials=["Subcontracted SRM Item 8"], rm_qty=2, do_not_save=True
+		)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		fg_bom = make_bom(item=fg_item, raw_materials=[phantom_item], rm_qty=3, do_not_save=True)
+		fg_bom.items[0].bom_no = phantom_bom.name
+		fg_bom.save()
+		fg_bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0, do_not_submit=1)
+
+		self.assertEqual(sco.supplied_items[0].rm_item_code, "Subcontracted SRM Item 8")
+		self.assertEqual(sco.supplied_items[0].required_qty, 30)
+
+	def test_co_by_product(self):
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+		fg_item = make_item("FG Item", properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item = make_item("RM Item", properties={"is_stock_item": 1}).name
+		scrap_item = make_item("Scrap Item", properties={"is_stock_item": 1}).name
+		make_bom(
+			item=fg_item, raw_materials=[rm_item], scrap_items=[scrap_item], process_loss_percentage=10
+		).name
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.get_secondary_items()
+		scr1.save()
+
+		self.assertEqual(scr1.items[0].received_qty, 5)
+		self.assertEqual(scr1.items[0].process_loss_qty, 0.5)
+		self.assertEqual(scr1.items[0].qty, 4.5)
+		self.assertEqual(scr1.items[0].rate, 200)
+		self.assertEqual(scr1.items[0].amount, 900)
+
+		self.assertEqual(scr1.items[1].item_code, scrap_item)
+		self.assertEqual(scr1.items[1].received_qty, 5)
+		self.assertEqual(scr1.items[1].process_loss_qty, 0.5)
+		self.assertEqual(scr1.items[1].qty, 4.5)
+		self.assertEqual(flt(scr1.items[1].rate, 3), 11.111)
+		self.assertEqual(scr1.items[1].amount, 50)
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
+
+>>>>>>> 52ea9fe (test: Return of Components split over the rows it was sent on)
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
