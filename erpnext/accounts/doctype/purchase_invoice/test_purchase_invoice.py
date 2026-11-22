@@ -4266,7 +4266,10 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		first_return.items[0].qty = -4
 		first_return.save().submit()
 
-		self.assertEqual(first_return.items[0].received_qty, -10)
+		self.assertEqual(first_return.items[0].received_qty, 0)
+
+		# received_qty left on rows saved before it was reset without Update Stock
+		frappe.db.set_value("Purchase Invoice Item", first_return.items[0].name, "received_qty", -10)
 
 		second_return = make_return_doc(invoice.doctype, invoice.name)
 		second_return.items[0].qty = -6
@@ -4421,6 +4424,21 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.posting_date = add_days(today(), -1)
 		pi.save()
 		self.assertEqual(pi.discount_amount, discount_amount)
+
+	def test_purchase_receipt_from_invoice_after_update_stock_turned_off(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+
+		pi = make_purchase_invoice(update_stock=1, qty=5, do_not_submit=True)
+		self.assertEqual(pi.items[0].received_qty, 5)
+
+		pi.update_stock = 0
+		pi.save()
+		pi.submit()
+
+		pr = make_purchase_receipt_from_pi(pi.name)
+		self.assertEqual(pr.items[0].qty, 5)
 
 
 def set_advance_flag(company, flag, default_account):
