@@ -1164,6 +1164,24 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(get_bin(raw_materials[0], work_order.wip_warehouse).actual_qty, 0)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_transfer_based_manufacture_keeps_whole_number_share_below_precision(self):
+		"""1 Nos for 250 FG: a Manufacture for 1 takes the whole unit, not 0.004 rounded to 0."""
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], quantity=250)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=1, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=250, source_warehouse="Stores - _TC"
+		)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 250)).submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		self.assertEqual([row.qty for row in manufacture.items if row.item_code == rm_item], [1])
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{
 			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
