@@ -2359,6 +2359,9 @@ class StockEntry(StockController):
 								)
 							)
 		elif backflush_raw_materials_based_on == "Material Transferred for Subcontract":
+			finished_goods = self.get_order_finished_goods()
+			finished_good_of_rows = self.get_finished_good_of_order_rows()
+			rm_detail_field = self.subcontract_data.rm_detail_field
 			for row in self.items:
 				if not row.subcontracted_item:
 					frappe.throw(
@@ -2366,7 +2369,18 @@ class StockEntry(StockController):
 							row.idx, frappe.bold(row.item_code)
 						)
 					)
-				elif not row.get(self.subcontract_data.rm_detail_field):
+
+				if row.subcontracted_item not in finished_goods:
+					frappe.throw(
+						_("Row {0}: Subcontracted Item {1} is not a finished good of {2} {3}").format(
+							row.idx,
+							frappe.bold(row.subcontracted_item),
+							self.subcontract_data.order_doctype,
+							self.get(self.subcontract_data.order_field),
+						)
+					)
+
+				if finished_good_of_rows.get(row.get(rm_detail_field)) != row.subcontracted_item:
 					filters = {
 						"parent": self.get(self.subcontract_data.order_field),
 						"docstatus": 1,
@@ -2377,8 +2391,28 @@ class StockEntry(StockController):
 					order_rm_detail = frappe.db.get_value(
 						self.subcontract_data.order_supplied_items_field, filters, "name"
 					)
-					if order_rm_detail:
-						row.db_set(self.subcontract_data.rm_detail_field, order_rm_detail)
+					if order_rm_detail != row.get(rm_detail_field):
+						row.db_set(rm_detail_field, order_rm_detail)
+
+	def get_order_finished_goods(self):
+		return set(
+			frappe.get_all(
+				f"{self.subcontract_data.order_doctype} Item",
+				filters={"parent": self.get(self.subcontract_data.order_field)},
+				pluck="item_code",
+			)
+		)
+
+	def get_finished_good_of_order_rows(self):
+		"""Finished good of each raw material row of the order."""
+		return dict(
+			frappe.get_all(
+				self.subcontract_data.order_supplied_items_field,
+				filters={"parent": self.get(self.subcontract_data.order_field)},
+				fields=["name", "main_item_code"],
+				as_list=True,
+			)
+		)
 
 	def validate_bom(self):
 		for d in self.get("items"):
