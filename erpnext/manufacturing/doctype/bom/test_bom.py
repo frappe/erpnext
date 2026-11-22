@@ -2185,6 +2185,36 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.secondary_items_cost, 40)
 		self.assertEqual(bom.total_cost, 60)
 
+	def test_valuation_rate_secondary_item_cost_uses_rounded_process_loss_qty(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 20000}).name
+		scrap_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10000}
+		).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 20000}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 1,
+						"process_loss_per": 33.33,
+					}
+				],
+			}
+		).insert()
+
+		# cost must match the stored (rounded) process loss qty
+		row = bom.secondary_items[0]
+		self.assertEqual(row.cost, flt(10000 * (row.stock_qty - row.process_loss_qty), row.precision("cost")))
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
