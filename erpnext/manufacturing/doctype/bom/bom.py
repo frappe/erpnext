@@ -925,37 +925,18 @@ class BOM(WebsiteGenerator):
 		self.base_scrap_material_cost = base_total_sm_cost
 
 	def calculate_exploded_cost(self):
-		"Set exploded row cost from it's parent BOM."
-		rm_rate_map = self.get_rm_rate_map()
+		"Set exploded row cost from the BOM rows and sub-assembly BOMs."
+		self.get_exploded_items()
 
 		for row in self.get("exploded_items"):
 			old_rate = flt(row.rate)
-			row.rate = rm_rate_map.get(row.item_code)
+			current = self.cur_exploded_items.get(row.item_code)
+			row.rate = current.rate if current else 0
 			row.amount = flt(row.stock_qty) * flt(row.rate)
 
 			if old_rate != row.rate:
 				# Only db_update if changed
 				row.db_update()
-
-	def get_rm_rate_map(self) -> dict[str, float]:
-		"Create Raw Material-Rate map for Exploded Items. Fetch rate from Items table or Subassembly BOM."
-		rm_rate_map = {}
-
-		for item in self.get("items"):
-			if item.bom_no:
-				# Get Item-Rate from Subassembly BOM
-				explosion_items = frappe.get_all(
-					"BOM Explosion Item",
-					filters={"parent": item.bom_no},
-					fields=["item_code", "rate"],
-					order_by=None,  # to avoid sort index creation at db level (granular change)
-				)
-				explosion_item_rate = {item.item_code: flt(item.rate) for item in explosion_items}
-				rm_rate_map.update(explosion_item_rate)
-			else:
-				rm_rate_map[item.item_code] = flt(item.base_rate) / flt(item.conversion_factor or 1.0)
-
-		return rm_rate_map
 
 	def update_exploded_items(self, save=True):
 		"""Update Flat BOM, following will be correct data"""
@@ -991,10 +972,15 @@ class BOM(WebsiteGenerator):
 		return erpnext.get_company_currency(self.company)
 
 	def add_to_cur_exploded_items(self, args):
-		if self.cur_exploded_items.get(args.item_code):
-			self.cur_exploded_items[args.item_code]["stock_qty"] += args.stock_qty
-		else:
+		existing = self.cur_exploded_items.get(args.item_code)
+		if not existing:
 			self.cur_exploded_items[args.item_code] = args
+			return
+
+		# the same item at another rate, e.g. from a sub-assembly: merge at the weighted rate
+		amount = flt(existing.stock_qty) * flt(existing.rate) + flt(args.stock_qty) * flt(args.rate)
+		existing.stock_qty += args.stock_qty
+		existing.rate = amount / existing.stock_qty
 
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		"""Add all items from Flat BOM of child BOM"""
