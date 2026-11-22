@@ -875,6 +875,10 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "left unconsumed", return_entry.insert)
 
 		return_entry = make_stock_return_entry(job_card.name)
+		return_entry.fg_completed_qty += 1
+		self.assertRaisesRegex(frappe.ValidationError, "transferred against Job Card", return_entry.insert)
+
+		return_entry = make_stock_return_entry(job_card.name)
 		return_entry.items[0].qty -= 1
 		return_entry.fg_completed_qty = 0
 		return_entry.insert()
@@ -883,6 +887,38 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.reload()
 		returned_item = job_card.get("items", {"item_code": return_entry.items[0].item_code})[0]
 		self.assertEqual(returned_item.transferred_qty, 1)
+
+	def test_cancel_transfer_after_components_returned(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.insert()
+		transfer_entry.submit()
+		for row in transfer_entry.items:
+			make_stock_entry(item_code=row.item_code, target=row.t_warehouse, qty=row.qty, basic_rate=100)
+
+		return_entry = make_stock_return_entry(job_card.name)
+		return_entry.items[0].qty -= 1
+		return_entry.fg_completed_qty = 1
+		return_entry.insert()
+		return_entry.submit()
+
+		transfer_entry.reload()
+		frappe.db.savepoint("cancel_transfer")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Cancel its return entries first", transfer_entry.cancel
+		)
+		frappe.db.rollback(save_point="cancel_transfer")
+
+		return_entry.cancel()
+		transfer_entry.reload()
+		transfer_entry.cancel()
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 0)
+		self.assertEqual([row.transferred_qty for row in job_card.items], [0, 0])
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
