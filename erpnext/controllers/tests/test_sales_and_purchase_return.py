@@ -248,6 +248,26 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 		)
 		self.assertEqual(stock_value_difference, -1500)
 
+	def test_purchase_return_from_another_warehouse_counts_stock_uom_at_factor_one(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("_Test FIFO Return Stock UOM Factor Item", {"valuation_method": "FIFO"}).name
+		receipt_warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=other_warehouse, qty=10, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item, warehouse=receipt_warehouse, qty=10, rate=300)
+		make_stock_entry(item_code=item, source=receipt_warehouse, target=other_warehouse, qty=5)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		# the factor is reset to 1 later in validate, so the row takes 10, not 5
+		return_pr.items[0].update(
+			{"qty": -10, "received_qty": -10, "warehouse": other_warehouse, "conversion_factor": 0.5}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not hold enough", return_pr.submit)
+
 	def test_purchase_return_from_another_receipt_row_warehouse_needs_the_stock_of_both_rows(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.item.test_item import make_item
