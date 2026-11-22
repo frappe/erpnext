@@ -1510,7 +1510,7 @@ def get_item_price(
 	ip = frappe.qb.DocType("Item Price")
 	query = (
 		frappe.qb.from_(ip)
-		.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit)
+		.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit, ip.customer, ip.supplier)
 		.where(
 			(ip.item_code == item_code)
 			& (ip.price_list == pctx.price_list)
@@ -1614,6 +1614,8 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 	if price_list_rate:
 		if desired_qty := ctx.get("qty"):
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
+			if not is_party_price(item_price_data):
+				item_price_data = get_party_price_in_stock_uom(ctx, pctx, item_code) or item_price_data
 	else:
 		# Without ignore_party this repeats the query above, which found nothing
 		general_price_list_rate = ctx.get("ignore_party") and get_item_price(
@@ -1634,6 +1636,26 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 			return flt(item_price_data[0].price_list_rate * flt(ctx.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0].price_list_rate
+
+
+def get_party_price_in_stock_uom(ctx, pctx, item_code):
+	"""A party's own price in the stock UOM comes before a general price in the row UOM."""
+	if not (pctx.customer or pctx.supplier) or ctx.get("uom") == ctx.get("stock_uom"):
+		return None
+
+	prices = get_item_price(frappe._dict(pctx, uom=ctx.get("stock_uom")), item_code, limit=None)
+	# apply_price_list passes the row doctype, get_item_details the parent
+	row_doctype = ctx.doctype if frappe.get_meta(ctx.doctype).istable else f"{ctx.doctype} Item"
+	stock_qty = flt(
+		flt(ctx.get("qty")) * flt(ctx.get("conversion_factor", 1)),
+		frappe.get_precision(row_doctype, "stock_qty"),
+	)
+	prices = get_prices_fitting_packing_unit(prices, stock_qty)
+	return prices if is_party_price(prices) else None
+
+
+def is_party_price(item_prices):
+	return bool(item_prices) and bool(item_prices[0].customer or item_prices[0].supplier)
 
 
 def get_prices_fitting_packing_unit(item_prices, desired_qty):
@@ -2007,6 +2029,10 @@ def _apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document |
 
 def apply_price_list_on_item(ctx, doc=None):
 	item_doc = frappe.get_cached_doc("Item", ctx.item_code)
+	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
+		"conversion_factor", 1
+	)
+	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
 
 	source_row = get_rate_locked_source_row(ctx, doc)
 	if source_row:
@@ -2014,11 +2040,6 @@ def apply_price_list_on_item(ctx, doc=None):
 		lock_source_rate(item_details, source_row)
 	else:
 		item_details = get_price_list_rate(ctx, item_doc)
-
-	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
-		"conversion_factor", 1
-	)
-	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
 
 	if not source_row:
 		item_details.update(get_pricing_rule_for_item(ctx, doc=doc))
