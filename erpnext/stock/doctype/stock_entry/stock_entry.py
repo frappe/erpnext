@@ -999,7 +999,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 				for_update=True,
 			)
 
-<<<<<<< HEAD
 			reset_fields = ("stock_uom", "item_name")
 			for field in reset_fields:
 				item.set(field, item_details.get(field))
@@ -1023,9 +1022,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 				item.transfer_qty = flt(
 					flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 				)
-
-			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
-				item.expense_account = frappe.get_value("Company", self.company, "default_expense_account")
 
 	def validate_fg_completed_qty(self):
 		if self.purpose != "Manufacture" or not self.from_bom:
@@ -1095,9 +1091,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			and not row.s_warehouse
 			and bom_item in (row.item_code, frappe.get_cached_value("Item", row.item_code, "variant_of"))
 		)
-=======
-			item.validate_and_update_item_details(item_details)
->>>>>>> 5b56de6 (fix(subcontracting): keep the Difference Account set on a Subcontracting Delivery row)
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
