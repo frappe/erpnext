@@ -9,7 +9,7 @@ delegating stubs so external callers (bom_update_log, etc.) keep working.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 
 class BOMCostingService:
@@ -202,18 +202,36 @@ class BOMCostingService:
 		self.doc.base_operating_cost = total * self.doc.conversion_rate
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
+		self.update_stale_hour_rate(row)
+
 		if not row.hour_rate or update_hour_rate:
 			self._set_row_hour_rate(row)
 
-		if row.hour_rate:
-			row.base_hour_rate = flt(
-				flt(row.hour_rate) * flt(self.doc.conversion_rate), row.precision("base_hour_rate")
-			)
-			if row.time_in_mins:
-				self._set_row_operating_costs(row)
+		row.base_hour_rate = flt(
+			flt(row.hour_rate) * flt(self.doc.conversion_rate), row.precision("base_hour_rate")
+		)
+		if row.time_in_mins:
+			self._set_row_operating_costs(row)
 
 		if update_hour_rate and save:
 			row.db_update()
+
+	def update_stale_hour_rate(self, row):
+		"""Workstation or conversion rate changed but the hour rate did not, e.g. through the API."""
+		before = self.doc.get_doc_before_save()
+		previous = before and before.get("operations", {"name": row.name})
+		if not previous or flt(previous[0].hour_rate) != flt(row.hour_rate):
+			return
+
+		old_rate, new_rate = flt(before.conversion_rate), flt(self.doc.conversion_rate)
+		if any(
+			cstr(previous[0].get(field)) != cstr(row.get(field))
+			for field in ("workstation", "workstation_type")
+		):
+			row.hour_rate = 0
+		elif old_rate and new_rate and old_rate != new_rate:
+			# keeps the rate in company currency, also a manual one
+			row.hour_rate = flt(flt(row.hour_rate) * old_rate / new_rate, row.precision("hour_rate"))
 
 	def _set_row_hour_rate(self, row):
 		hour_rate = 0
@@ -223,9 +241,7 @@ class BOMCostingService:
 			hour_rate = flt(frappe.get_cached_value("Workstation Type", row.workstation_type, "hour_rate"))
 
 		if hour_rate:
-			row.hour_rate = (
-				hour_rate / flt(self.doc.conversion_rate) if self.doc.conversion_rate else hour_rate
-			)
+			row.hour_rate = flt(hour_rate / (flt(self.doc.conversion_rate) or 1), row.precision("hour_rate"))
 
 	def _set_row_operating_costs(self, row):
 		row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
