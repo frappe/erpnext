@@ -1889,10 +1889,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.is_return:
 			return
 
-		if (
-			frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
-			== "Material Transferred for Manufacture"
-		):
+		if self.get_backflush_based_on() == "Material Transferred for Manufacture":
 			return
 
 		wo = self.pro_doc
