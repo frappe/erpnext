@@ -2260,16 +2260,20 @@ class TestBOM(ERPNextTestSuite):
 		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 
 		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
-		operation = make_operation(operation="_Test BOM Batch Op Update Cost", workstation=workstation)
-		bom = make_batch_operation_bom(operation.name, workstation)
-		self.assertEqual(bom.operating_cost, 100)
+		# Replace BOM recalculates without refreshing hour rates, which does not save the rows
+		for update_hour_rate in (1, 0):
+			operation = make_operation(
+				operation=f"_Test BOM Batch Op Update Cost {update_hour_rate}", workstation=workstation
+			)
+			bom = make_batch_operation_bom(operation.name, workstation)
+			self.assertEqual(bom.operating_cost, 100)
 
-		operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
-		operation.save()
-		bom.update_cost()
-		bom.reload()
-		self.assertEqual(bom.operating_cost, 10)
-		self.assertTrue(bom.operations[0].set_cost_based_on_bom_qty)
+			operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
+			operation.save()
+			bom.update_cost(update_hour_rate=update_hour_rate)
+			bom.reload()
+			self.assertEqual(bom.operating_cost, 10)
+			self.assertTrue(bom.operations[0].set_cost_based_on_bom_qty)
 
 	def test_fixed_time_operation_is_not_costed_per_batch(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
