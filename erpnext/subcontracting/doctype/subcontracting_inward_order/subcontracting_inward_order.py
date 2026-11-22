@@ -133,11 +133,11 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if self.docstatus == 1:
 				if self.status == "Draft":
 					status = "Open"
-				elif self.per_returned == 100:
+				elif self.per_returned >= 100:
 					status = "Returned"
-				elif self.per_delivered == 100:
+				elif self.per_delivered >= 100:
 					status = "Delivered"
-				elif self.per_produced == 100:
+				elif self.per_produced >= 100:
 					status = "Produced"
 				elif total_received:
 					status = "Ongoing"

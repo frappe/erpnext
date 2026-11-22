@@ -1540,8 +1540,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		make_accepted_return(-3).submit()
 		self.assertRaises(StockOverReturnError, make_accepted_return(-1).save)
 
-		make_subcontract_return_against_rejected_warehouse(scr.name).submit()
+		rejected_return = make_subcontract_return_against_rejected_warehouse(scr.name)
 		over_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		rejected_return.submit()
+
 		over_return.items[0].qty = -2
 		self.assertRaises(StockOverReturnError, over_return.save)
 
@@ -4026,6 +4028,21 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.grand_total, 1000)
 		self.assertEqual(pr.base_grand_total, 80000)
 
+	def test_no_rejected_warehouse_return_after_all_rejected_qty_is_returned(self):
+		scr, _scrap_item = make_receipt_with_rejected_qty_and_scrap()
+		self.assertTrue(scr.has_rejected_qty_to_return())
+
+		make_return_doc("Subcontracting Receipt", scr.name, return_against_rejected_qty=True).submit()
+
+		self.assertFalse(scr.has_rejected_qty_to_return())
+		self.assertRaises(
+			frappe.ValidationError,
+			make_return_doc,
+			"Subcontracting Receipt",
+			scr.name,
+			return_against_rejected_qty=True,
+		)
+
 	def test_return_of_rejected_qty_gets_no_secondary_items(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
@@ -4313,6 +4330,30 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		for sco in orders:
 			self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "per_received"), 100)
+
+	def test_purchase_receipt_receives_the_service_for_process_loss_qty(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 9
+		scr.items[0].process_loss_qty = 1
+		scr.save()
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		pr.submit()
+
+		self.assertEqual(pr.items[0].qty, 10)
+		self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "per_received"), 100)
 
 	def test_purchase_receipt_only_once_from_submitted_receipt(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (

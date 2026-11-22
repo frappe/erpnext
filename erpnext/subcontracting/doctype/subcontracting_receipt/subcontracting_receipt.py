@@ -134,6 +134,31 @@ class SubcontractingReceipt(SubcontractingController):
 					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
 				),
 			)
+			if not self.is_return:
+				self.set_onload("has_rejected_qty_to_return", self.has_rejected_qty_to_return())
+
+	def has_rejected_qty_to_return(self) -> bool:
+		rejected_rows = {row.name: row for row in self.items if flt(row.rejected_qty)}
+		if not rejected_rows:
+			return False
+
+		item = frappe.qb.DocType("Subcontracting Receipt Item")
+		returned_qty = frappe._dict(
+			frappe.qb.from_(item)
+			.select(item.subcontracting_receipt_item, Sum(item.qty))
+			.where(
+				item.subcontracting_receipt_item.isin(list(rejected_rows))
+				& (item.return_qty_from_rejected_warehouse == 1)
+				& (item.docstatus == 1)
+			)
+			.groupby(item.subcontracting_receipt_item)
+			.run()
+		)
+		# return qty is negative
+		return any(
+			flt(row.rejected_qty + flt(returned_qty.get(name)), row.precision("rejected_qty")) > 0
+			for name, row in rejected_rows.items()
+		)
 
 	def before_validate(self):
 		self.save_inventory_dimensions()
@@ -157,6 +182,7 @@ class SubcontractingReceipt(SubcontractingController):
 		if not self.get("is_return"):
 			self.validate_inspection()
 			self.validate_purchase_orders_share_terms()
+			self.validate_additional_cost_accounts()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be future date"))
@@ -1501,7 +1527,8 @@ def make_purchase_receipt(
 
 		target.update(
 			{
-				"qty": ratio * sum(flt(item.qty) for item in sr_items),
+				# the job worker did the work on the units lost in process too
+				"qty": ratio * sum(flt(item.qty) + flt(item.process_loss_qty) for item in sr_items),
 				"rejected_qty": ratio * sum(flt(item.rejected_qty) for item in sr_items),
 				"warehouse": sr_items[0].warehouse,
 				"rejected_warehouse": next(
