@@ -1274,7 +1274,9 @@ class MaterialRequirementsPlanningReport:
 			demand = frappe._dict(date=getdate(row.delivery_date), qty=flt(row.planned_qty))
 			demand_by_item.setdefault(row.item_code, []).append(demand)
 
-		for row, (start_date, end_date) in zip(forecast_rows, periods, strict=True):
+		# periods that end first go first, so overlapping periods use up as much demand as they can
+		rows_by_period_end = sorted(zip(forecast_rows, periods, strict=True), key=lambda pair: pair[1][1])
+		for row, (start_date, end_date) in rows_by_period_end:
 			for demand in demand_by_item.get(row.item_code, []):
 				if start_date <= demand.date < end_date:
 					consumed_qty = min(row.qty, demand.qty)
