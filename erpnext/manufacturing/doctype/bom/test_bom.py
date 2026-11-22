@@ -2220,6 +2220,11 @@ class TestBOM(ERPNextTestSuite):
 		row = bom.secondary_items[0]
 		self.assertEqual(row.cost, flt(10000 * (row.stock_qty - row.process_loss_qty), row.precision("cost")))
 
+		# Update Cost saves the loss its cost is net of, over a loss stored at another precision
+		frappe.db.set_value("BOM Secondary Item", row.name, "process_loss_qty", 0.333)
+		bom.update_cost()
+		self.assertEqual(frappe.db.get_value("BOM Secondary Item", row.name, "process_loss_qty"), 0.33)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
