@@ -121,20 +121,6 @@ def get_sub_assembly_secondary_qty(bom_no) -> dict:
 	return qty
 
 
-@frappe.request_cache
-def get_sub_assembly_boms(bom_no) -> set:
-	"""BOMs of the sub-assemblies under the BOM, at every level."""
-	boms = set()
-	for child_bom in frappe.get_all(
-		"BOM Item",
-		filters={"parent": bom_no, "parenttype": "BOM", "bom_no": ("is", "set")},
-		pluck="bom_no",
-	):
-		boms |= {child_bom, *get_sub_assembly_boms(child_bom)}
-
-	return boms
-
-
 class StockEntry(StockController, SubcontractingInwardController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -732,7 +718,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				cint(row.is_finished_item),
 				cint(not self.is_costed_out(row)),
 				cint(not is_costed_out_of_finished_item(row)),
-				self.count_sub_assemblies_under(row),
+				self.count_secondary_items_under(row),
 			),
 		)
 		for d in finished_items_last:
@@ -1106,13 +1092,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return total
 
-	def count_sub_assemblies_under(self, row) -> int:
-		"""Sub-assembly BOMs under the BOM a sub-assembly secondary row comes from: fewer for inner BOMs."""
+	def count_secondary_items_under(self, row) -> int:
+		"""Secondary rows under the BOM a sub-assembly secondary row comes from: fewer for inner BOMs."""
 		if not self.is_sub_assembly_secondary_item(row):
 			return 0
 
 		bom_no = frappe.get_cached_value("BOM Secondary Item", row.bom_secondary_item, "parent")
-		return len(get_sub_assembly_boms(bom_no))
+		return len(get_sub_assembly_secondary_qty(bom_no))
 
 	def get_basic_rate_for_manufactured_item(
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
