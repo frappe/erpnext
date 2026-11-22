@@ -5846,8 +5846,6 @@ def make_jc_review_scheduled_job_card(planned_start, time_in_mins, workstation=N
 	return get_jc_review_job_cards(wo.name)[0]
 
 
-<<<<<<< HEAD
-=======
 def make_jc_review_corrective_job_card_on_new_workstation():
 	"""Return a Work Order and an unsaved corrective card moved from a 600 to a 1,500 per hour workstation."""
 	workstation = make_jc_review_workstation(hour_rate=600)
@@ -5870,13 +5868,6 @@ def make_jc_review_corrective_job_card_on_new_workstation():
 	return wo, corrective_job_card
 
 
-def make_jc_review_employee():
-	from erpnext.setup.doctype.employee.test_employee import make_employee
-
-	return make_employee(f"jc-review-{frappe.generate_hash(length=8)}@example.com", company="_Test Company")
-
-
->>>>>>> c0b64f0 (test: amended corrective Job Card keeps its manual hour rate)
 def get_jc_review_job_cards(work_order):
 	return [
 		frappe.get_doc("Job Card", name)
