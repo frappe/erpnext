@@ -1535,15 +1535,16 @@ def get_secondary_items(bom_no, work_order=None):
 		return get_bom_items(bom_no, fetch_secondary_items=True)
 
 
-def get_secondary_items_from_sub_assemblies(bom_no):
+def get_secondary_items_from_sub_assemblies(bom_no, qty=1):
+	"""Secondary items of the sub-assembly BOMs at every level, for qty of the BOM's item."""
 	items = []
-	bom_items = get_bom_items(bom_no)
+	bom_items = get_bom_items(bom_no, qty=qty)
 	for row in bom_items:
 		if not row.bom_no:
 			continue
 
 		items.extend(get_bom_items(row.bom_no, qty=row.qty, fetch_secondary_items=True))
-		items.extend(get_secondary_items_from_sub_assemblies(row.bom_no))
+		items.extend(get_secondary_items_from_sub_assemblies(row.bom_no, row.qty))
 
 	return items
 

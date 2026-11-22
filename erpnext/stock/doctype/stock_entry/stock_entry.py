@@ -734,14 +734,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 		secondary_items_cost_basis = self.get_secondary_items_cost_basis(outgoing_items_cost)
 
 		zero_valuation_items = []
-		# Own-cost rows first, then sub-assembly percentage rows: their value is deducted from
-		# the basis the other percentage rows and the finished good split.
+		# Own-cost rows first, then sub-assembly percentage rows, inner BOMs first: their value is
+		# deducted from the basis the outer BOMs' rows and the finished good split.
 		finished_items_last = sorted(
 			self.get("items"),
 			key=lambda row: (
 				cint(row.is_finished_item),
 				cint(not self.is_costed_out(row)),
 				cint(not is_costed_out_of_finished_item(row)),
+				self.count_secondary_items_under(row),
 			),
 		)
 		for d in finished_items_last:
@@ -1063,7 +1064,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		component_cost = sum(
 			flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components
 		)
-		return component_cost - self.get_own_cost_secondary_items_cost(bom_no)
+		return component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made)
 
 	def get_consumed_rates(self) -> dict:
 		"""Average consumed rate of each component, keyed by the BOM item it was consumed for."""
@@ -1084,15 +1085,34 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return {item_code: value[item_code] / qty[item_code] for item_code in qty if qty[item_code]}
 
-	def get_own_cost_secondary_items_cost(self, bom_no) -> float:
-		"""Value of the BOM's Valuation Rate and Manual secondary rows, which its percentages exclude."""
-		return sum(
-			flt(d.basic_amount)
-			for d in self.get("items")
-			if d.bom_secondary_item
-			and is_costed_out_of_finished_item(d)
-			and frappe.get_cached_value("BOM Secondary Item", d.bom_secondary_item, "parent") == bom_no
-		)
+	def get_secondary_items_cost_within(self, bom_no, qty) -> float:
+		"""Value of the BOM's Valuation Rate and Manual secondary rows, and of what its sub-assemblies
+		make of every sub-assembly secondary row for qty of its item, which its percentages exclude."""
+		qty_within = get_sub_assembly_secondary_qty(bom_no)
+		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no)
+		total = 0.0
+		for d in self.get("items"):
+			if qty_within.get(d.bom_secondary_item):
+				# the finished good may also make the row through other sub-assemblies
+				total_qty = qty_per_finished_good.get(d.bom_secondary_item, 0) * flt(self.fg_completed_qty)
+				if total_qty:
+					total += flt(d.basic_amount) * qty_within[d.bom_secondary_item] * qty / total_qty
+			elif (
+				d.bom_secondary_item
+				and is_costed_out_of_finished_item(d)
+				and frappe.get_cached_value("BOM Secondary Item", d.bom_secondary_item, "parent") == bom_no
+			):
+				total += flt(d.basic_amount)
+
+		return total
+
+	def count_secondary_items_under(self, row) -> int:
+		"""Secondary rows under the BOM a sub-assembly secondary row comes from: fewer for inner BOMs."""
+		if not self.is_sub_assembly_secondary_item(row):
+			return 0
+
+		bom_no = frappe.get_cached_value("BOM Secondary Item", row.bom_secondary_item, "parent")
+		return len(get_sub_assembly_secondary_qty(bom_no))
 
 	def get_basic_rate_for_manufactured_item(
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
