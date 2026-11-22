@@ -39,6 +39,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	get_mapped_subcontracting_receipt,
 	make_subcontracting_receipt,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
@@ -498,20 +499,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(stock_value_difference, co_product.amount)
 
 	def test_partial_receipts_take_the_order_additional_costs_once(self):
-		set_backflush_based_on("BOM")
-		sco = get_subcontracting_order(do_not_submit=1)
-		sco.append(
-			"additional_costs",
-			{"expense_account": "Cost of Goods Sold - _TC", "description": "Freight", "amount": 1000},
-		)
-		sco.submit()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
+		sco = make_order_with_additional_cost_and_transfer(1000)
 
 		first = make_subcontracting_receipt(sco.name)
 		first.items[0].qty = 4
@@ -522,6 +510,19 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		second.submit()
 
 		self.assertEqual(first.total_additional_costs + second.total_additional_costs, 1000)
+
+	def test_receipt_mapped_for_selected_qty_takes_its_share_of_order_additional_costs(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 4}])
+		first.save()
+		first.submit()
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+		second.submit()
+
+		self.assertEqual(first.total_additional_costs, 400)
+		self.assertEqual(second.total_additional_costs, 600)
 
 	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
 		set_backflush_based_on("BOM")
@@ -5093,3 +5094,81 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	scr = make_subcontracting_receipt(sco.name)
 	scr.submit()
 	return scr
+<<<<<<< HEAD
+=======
+
+
+def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None):
+	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate, and an optional co-product."""
+	set_backflush_based_on("BOM")
+	rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+	secondary_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+	fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+	bom = make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR", do_not_submit=True)
+	bom.append(
+		"secondary_items",
+		{
+			"item_code": secondary_item,
+			"secondary_item_type": "Scrap",
+			"qty": 1,
+			"stock_qty": 1,
+			"valuation_type": valuation_type,
+		},
+	)
+	if co_product_allocation:
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": make_item(properties={"is_stock_item": 1}).name,
+				"secondary_item_type": "Co-Product",
+				"qty": 1,
+				"stock_qty": 1,
+				"valuation_type": "% of Component Cost",
+				"cost_allocation_per": co_product_allocation,
+			},
+		)
+	bom.save()
+	bom.submit()
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 2,
+			"rate": 100,
+			"fg_item": fg_item,
+			"fg_item_qty": 2,
+		}
+	]
+	sco = get_subcontracting_order(service_items=service_items)
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+	)
+	scr = make_subcontracting_receipt(sco.name)
+	scr.save()
+	scr.get_secondary_items(recalculate_rate=True)
+	if scrap_rate:
+		scr.items[1].rate = scrap_rate
+	scr.save()
+	scr.submit()
+	return scr
+
+
+def make_order_with_additional_cost_and_transfer(amount):
+	set_backflush_based_on("BOM")
+	sco = get_subcontracting_order(do_not_submit=1)
+	sco.append(
+		"additional_costs",
+		{"expense_account": "Cost of Goods Sold - _TC", "description": "Freight", "amount": amount},
+	)
+	sco.submit()
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name,
+		rm_items=rm_items,
+		itemwise_details=copy.deepcopy(itemwise_details),
+	)
+	return sco
+>>>>>>> b4fd4c3 (test: a receipt mapped for a selected qty takes its share of the order's additional costs)
