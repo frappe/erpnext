@@ -2730,6 +2730,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertAlmostEqual(rate, 500)
 
 	def test_standalone_debit_note_rate_is_in_the_row_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
