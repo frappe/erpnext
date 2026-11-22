@@ -2722,10 +2722,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(rate, 500)
 
-<<<<<<< HEAD
-	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
-=======
 	def test_standalone_debit_note_rate_is_in_the_row_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -2750,8 +2749,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			returned_inv.insert()
 			self.assertEqual(returned_inv.items[0].rate, rate)
 
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
->>>>>>> 8fb69b0 (test: standalone debit note rate in the row UOM)
+	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
