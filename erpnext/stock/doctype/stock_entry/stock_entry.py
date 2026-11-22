@@ -748,6 +748,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for d in finished_items_last:
 			if d.s_warehouse or d.set_basic_rate_manually:
 				if d.set_basic_rate_manually:
+					if is_costed_out_of_finished_item(d) and self.has_raw_materials_consumed_earlier():
+						d.basic_rate = 0.0
 					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 				continue
 
