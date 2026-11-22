@@ -3076,6 +3076,12 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			[row.subcontracting_receipt_item for row in scr_return.items], [row.name for row in scr.items]
 		)
 
+	def test_scrap_item_without_its_finished_good_row_cannot_be_submitted(self):
+		scr = make_receipt_with_scrap_item()
+		scr.items[1].reference_name = "not-a-row-of-this-receipt"
+
+		self.assertRaises(frappe.ValidationError, scr.submit)
+
 	def test_scrap_items_for_subcontracting_receipt(self):
 		set_backflush_based_on("BOM")
 

@@ -663,6 +663,7 @@ class SubcontractingReceipt(SubcontractingController):
 		}
 
 	def validate_scrap_items(self):
+		fg_rows = {item.name for item in self.items if not item.is_scrap_item}
 		for item in self.items:
 			if item.is_scrap_item:
 				if not item.qty:
@@ -682,6 +683,13 @@ class SubcontractingReceipt(SubcontractingController):
 						_("Row #{0}: Finished Good reference is mandatory for Scrap Item {1}.").format(
 							item.idx, frappe.bold(item.item_code)
 						),
+					)
+
+				if item.reference_name not in fg_rows:
+					frappe.throw(
+						_(
+							"Row #{0}: The Finished Good row of Scrap Item {1} is not on this receipt. Remove the Scrap Item row."
+						).format(item.idx, frappe.bold(item.item_code)),
 					)
 
 	def validate_accepted_warehouse(self):
