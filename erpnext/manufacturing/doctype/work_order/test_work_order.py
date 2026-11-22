@@ -3458,6 +3458,31 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(rows[fg_item], (1, 1028))
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_outer_sub_assembly_co_product_nets_only_its_own_inner_co_product(self):
+		# FG: 1 SA2 + 1 SA1 + 1 RMB at 900; SA2: 1 SA1, 20% co-product; SA1: 1 RMA at 100, 20% co-product
+		rm_a, rm_b = make_co_product_raw_materials()
+		inner, outer, fg_item, inner_co_product, outer_co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(5)
+		)
+		inner_bom = make_co_product_bom(inner, [(rm_a, 1, None)], inner_co_product)
+		outer_bom = make_co_product_bom(outer, [(inner, 1, inner_bom)], outer_co_product)
+		bom = make_co_product_bom(fg_item, [(outer, 1, outer_bom), (inner, 1, inner_bom), (rm_b, 1, None)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		# as BOM costing: SA1 80 (co-product 20), SA2 64 (co-product 16 of 80), FG 64 + 80 + 900
+		rows = defaultdict(lambda: [0, 0])
+		for d in se_doc.items:
+			if not d.s_warehouse:
+				rows[d.item_code][0] += d.qty
+				rows[d.item_code][1] += d.amount
+
+		self.assertEqual(rows[inner_co_product], [2, 40])
+		self.assertEqual(rows[outer_co_product], [1, 16])
+		self.assertEqual(rows[fg_item], [1, 1044])
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
 	def test_get_rm_cost_from_consumption_entry(self):
