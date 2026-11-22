@@ -56,6 +56,16 @@ class TestValuationPools(ERPNextTestSuite):
 		self.assertEqual(pool.issue(4, preferred_rate=120), 4 * 120)
 		self.assertEqual(pool.layers, [[10, 100], [6, 120]])
 
+	def test_lifo_return_takes_newest_layer_of_its_receipt_rate(self):
+		pool = QueuePool(last_in_first_out=True)
+		pool.receive(10, 100)
+		pool.receive(10, 120)
+		pool.receive(10, 100)
+		pool.receive(10, 150)
+
+		self.assertEqual(pool.issue(4, preferred_rate=100), 4 * 100)
+		self.assertEqual(pool.layers, [[10, 100], [10, 120], [6, 100], [10, 150]])
+
 	def test_queue_goes_negative_and_receipt_makes_up_the_shortfall(self):
 		pool = QueuePool()
 		pool.receive(5, 100)
@@ -285,6 +295,22 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		issue = get_expected_valuation(item, WAREHOUSE)[-1][1]
 		self.assertEqual(issue.stock_value_difference, -4 * 150)
 		self.assertEqual(issue.basis, BASIS_PURCHASE_RETURN)
+
+	def test_lifo_purchase_return_goes_out_at_the_returned_receipt_rate(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "LIFO"}).name
+
+		first = make_purchase_receipt(item_code=item, warehouse=WAREHOUSE, qty=10, rate=100)
+		make_purchase_receipt(item_code=item, warehouse=WAREHOUSE, qty=10, rate=200)
+
+		purchase_return = make_purchase_return(first.name)
+		purchase_return.items[0].qty = -5
+		purchase_return.items[0].received_qty = -5
+		purchase_return.submit()
+
+		self.assertNoDifferences(item)
+
+		issue = get_expected_valuation(item, WAREHOUSE)[-1][1]
+		self.assertEqual(issue.stock_value_difference, -5 * 100)
 
 	def test_stock_reconciliation_sets_qty_and_rate(self):
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
