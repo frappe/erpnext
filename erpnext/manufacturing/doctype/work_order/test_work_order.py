@@ -4854,17 +4854,23 @@ class TestWorkOrder(ERPNextTestSuite):
 	)
 	def test_partial_manufactures_without_raw_materials_value_scrap_at_zero(self):
 		"""An entry whose whole-number share was consumed earlier values nothing, its scrap included."""
-		scrap_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
-		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=1, scrap_item=scrap_item)
+		for valuation_type in ("Valuation Rate", "Manual"):
+			with self.subTest(valuation_type=valuation_type):
+				scrap_item = make_item(
+					properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}
+				).name
+				work_order, rm_item = make_whole_number_partial_work_order(
+					rm_qty=1, scrap_item=scrap_item, scrap_valuation_type=valuation_type
+				)
 
-		rates = []
-		for _ in range(4):
-			manufacture = submit_manufacture_of_one(work_order)
-			fg_row = next(row for row in manufacture.items if row.is_finished_item)
-			scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
-			rates.append((fg_row.valuation_rate, scrap_row.valuation_rate))
+				rates = []
+				for _ in range(4):
+					manufacture = submit_manufacture_of_one(work_order)
+					fg_row = next(row for row in manufacture.items if row.is_finished_item)
+					scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
+					rates.append((fg_row.valuation_rate, scrap_row.valuation_rate))
 
-		self.assertEqual(rates, [(90, 10), (0, 0), (0, 0), (0, 0)])
+				self.assertEqual(rates, [(90, 10), (0, 0), (0, 0), (0, 0)])
 
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
@@ -10223,9 +10229,9 @@ def make_multi_level_manufacture_entry(fg_item, bom_no):
 	return se_doc
 
 
-def make_whole_number_partial_work_order(rm_qty, scrap_item=None):
+def make_whole_number_partial_work_order(rm_qty, scrap_item=None, scrap_valuation_type="Valuation Rate"):
 	"""Work Order for 4 Nos of a finished good that needs rm_qty Nos of a whole-number raw material,
-	and makes 1 Nos of scrap_item per finished good, valued at its valuation rate."""
+	and makes 1 Nos of scrap_item per finished good, valued at 10 each."""
 	frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 100}).name
 	fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
@@ -10238,7 +10244,8 @@ def make_whole_number_partial_work_order(rm_qty, scrap_item=None):
 				"item_code": scrap_item,
 				"qty": 4,
 				"uom": "Nos",
-				"valuation_type": "Valuation Rate",
+				"valuation_type": scrap_valuation_type,
+				"cost": 40 if scrap_valuation_type == "Manual" else 0,
 			},
 		)
 	bom.insert()
