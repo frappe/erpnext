@@ -3583,6 +3583,63 @@ class TestProductionPlan(ERPNextTestSuite):
 		bin.reload()
 		self.assertEqual(bin.reserved_qty_for_production_plan, 0)
 
+	def test_work_order_closed_short_leaves_its_rest_to_order_again(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		warehouse = "_Test Warehouse - _TC"
+		properties = {"is_stock_item": 1, "valuation_rate": 10, "stock_uom": "Kg"}
+		rm_item = make_item(properties=properties).name
+		fg_item = make_item(properties=properties).name
+		make_bom(
+			item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, process_loss_percentage=10
+		)
+		make_stock_entry(item_code=rm_item, qty=10, rate=10, target=warehouse)
+
+		plan = create_production_plan(item_code=fg_item, planned_qty=10, warehouse=warehouse, stock_uom="Kg")
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.update({"skip_transfer": 1, "source_warehouse": warehouse, "fg_warehouse": warehouse})
+		work_order.submit()
+		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 6)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		# 6 made with 10% unplanned loss leaves 5.4 good, so 4.6 is ordered again
+		pending = ProductionPlanWorkOrderQuantities(plan.name).get_pending_quantities(plan)
+		self.assertEqual(pending["production_plan_item"][plan.po_items[0].name], 4.6)
+
+	def test_closed_work_order_that_made_all_good_output_leaves_nothing_pending(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(
+			item=fg_item,
+			raw_materials=[rm_item],
+			quantity=10,
+			rm_qty=10,
+			process_loss_percentage=10,
+			source_warehouse=warehouse,
+		)
+		make_stock_entry(item_code=rm_item, qty=20, rate=10, target=warehouse)
+
+		# 10 Nos with 10% planned loss orders 12
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=10, warehouse=warehouse, consider_process_loss=1
+		)
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.update({"skip_transfer": 1, "source_warehouse": warehouse, "fg_warehouse": warehouse})
+		work_order.submit()
+		# made with no loss, so 10 of the 12 already cover the plan
+		bom.db_set("process_loss_percentage", 0)
+		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 10)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		pending = ProductionPlanWorkOrderQuantities(plan.name).get_pending_quantities(plan)
+		self.assertEqual(pending["production_plan_item"][plan.po_items[0].name], 0)
+
 	def test_plan_reserves_sub_assembly_taken_from_stock(self):
 		warehouse = "_Test Warehouse - _TC"
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
