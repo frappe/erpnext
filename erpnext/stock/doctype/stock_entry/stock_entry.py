@@ -1064,7 +1064,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		component_cost = sum(
 			flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components
 		)
-		return component_cost - self.get_secondary_items_cost_within(bom_no)
+		return component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made)
 
 	def get_consumed_rates(self) -> dict:
 		"""Average consumed rate of each component, keyed by the BOM item it was consumed for."""
@@ -1085,17 +1085,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return {item_code: value[item_code] / qty[item_code] for item_code in qty if qty[item_code]}
 
-	def get_secondary_items_cost_within(self, bom_no) -> float:
-		"""Value of the BOM's Valuation Rate and Manual secondary rows and of every secondary row of
-		its sub-assemblies, which its percentages exclude."""
-		sub_assembly_boms = get_sub_assembly_boms(bom_no)
+	def get_secondary_items_cost_within(self, bom_no, qty) -> float:
+		"""Value of the BOM's Valuation Rate and Manual secondary rows, and of what its sub-assemblies
+		make of every sub-assembly secondary row for qty of its item, which its percentages exclude."""
+		qty_within = get_sub_assembly_secondary_qty(bom_no)
+		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no)
 		total = 0.0
 		for d in self.get("items"):
-			if not d.bom_secondary_item:
-				continue
-
-			parent = frappe.get_cached_value("BOM Secondary Item", d.bom_secondary_item, "parent")
-			if parent in sub_assembly_boms or (parent == bom_no and is_costed_out_of_finished_item(d)):
+			if qty_within.get(d.bom_secondary_item):
+				# the finished good may also make the row through other sub-assemblies
+				total_qty = qty_per_finished_good.get(d.bom_secondary_item, 0) * flt(self.fg_completed_qty)
+				if total_qty:
+					total += flt(d.basic_amount) * qty_within[d.bom_secondary_item] * qty / total_qty
+			elif (
+				d.bom_secondary_item
+				and is_costed_out_of_finished_item(d)
+				and frappe.get_cached_value("BOM Secondary Item", d.bom_secondary_item, "parent") == bom_no
+			):
 				total += flt(d.basic_amount)
 
 		return total
