@@ -701,14 +701,16 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	else:
 		party_type = "customer"
 
+	def sum_in_stock_uom(column):
+		table = f"`tab{child_doctype}`"
+		return {
+			"SUM": [{"MUL": [{"ABS": f"{table}.{column}"}, f"{table}.conversion_factor"]}],
+			"as": f"{column}_in_stock_uom",
+		}
+
 	fields = [
 		{"SUM": [{"ABS": f"`tab{child_doctype}`.qty"}], "as": "qty"},
-		{
-			"SUM": [
-				{"MUL": [{"ABS": f"`tab{child_doctype}`.qty"}, f"`tab{child_doctype}`.conversion_factor"]}
-			],
-			"as": "qty_in_stock_uom",
-		},
+		sum_in_stock_uom("qty"),
 	]
 
 	if doctype != "Subcontracting Receipt":
@@ -719,6 +721,7 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		fields += [
 			{"SUM": [{"ABS": f"`tab{child_doctype}`.rejected_qty"}], "as": "rejected_qty"},
+			sum_in_stock_uom("rejected_qty"),
 		]
 
 		if doctype == "Purchase Receipt":
@@ -742,10 +745,10 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	return data[0]
 
 
-def get_qty_left_to_return(source_row, returned_qty_in_stock_uom) -> float:
+def get_qty_left_to_return(source_row, returned_qty_in_stock_uom, fieldname="qty") -> float:
 	"""Qty of the source row left to return, in its UOM; earlier returns may be in another UOM."""
 	returned_qty = flt(returned_qty_in_stock_uom) / flt(source_row.conversion_factor or 1)
-	return flt(flt(source_row.qty) - returned_qty, source_row.precision("qty"))
+	return flt(flt(source_row.get(fieldname)) - returned_qty, source_row.precision(fieldname))
 
 
 def make_return_doc(doctype: str, source_name: str, target_doc=None, return_against_rejected_qty=False):
@@ -917,8 +920,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
-			target_doc.rejected_qty = -1 * flt(
-				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
+			target_doc.rejected_qty = -1 * get_qty_left_to_return(
+				source_doc, returned_qty_map.get("rejected_qty_in_stock_uom"), "rejected_qty"
 			)
 			target_doc.qty = -1 * get_qty_left_to_return(source_doc, returned_qty_map.get("qty_in_stock_uom"))
 			# debit notes without Update Stock store no received qty, so derive it
