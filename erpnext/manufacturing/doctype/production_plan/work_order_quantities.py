@@ -109,12 +109,8 @@ class ProductionPlanWorkOrderQuantities:
 		)
 
 	def get_pending_quantities(self, plan):
-<<<<<<< HEAD:erpnext/manufacturing/doctype/production_plan/work_order_quantities.py
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-=======
-		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 			get_qty_before_process_loss,
->>>>>>> d614a33 (fix(manufacturing): count a closed Work Order as its made qty in the Production Plan):erpnext/manufacturing/doctype/production_plan/services/work_order_quantities.py
 			round_up_to_whole_unit,
 		)
 
@@ -163,6 +159,7 @@ class ProductionPlanWorkOrderQuantities:
 				table.qty,
 				table.produced_qty,
 				table.process_loss_qty,
+				table.status,
 			)
 			.where(table.production_plan == self.production_plan)
 			.where((table.docstatus < 2) if include_drafts else (table.docstatus == 1))
@@ -171,31 +168,11 @@ class ProductionPlanWorkOrderQuantities:
 		if exclude_work_order:
 			query = query.where(table.name != exclude_work_order)
 		if reference_field:
-<<<<<<< HEAD:erpnext/manufacturing/doctype/production_plan/work_order_quantities.py
 			query = query.where(table[reference_field] == reference_name)
 		# Use a current locking read so concurrent submissions see committed quantities.
 		if for_update:
 			query = query.for_update()
 		work_orders = query.run(as_dict=True)
-=======
-			filters[reference_field] = reference_name
-
-		# Read rows instead of an aggregate so MariaDB uses a current locking read on submit.
-		work_orders = frappe.qb.get_query(
-			"Work Order",
-			fields=[
-				"production_plan_item",
-				"production_plan_sub_assembly_item",
-				"qty",
-				"produced_qty",
-				"process_loss_qty",
-				"status",
-			],
-			filters=filters,
-			for_update=for_update,
-			order_by="name",
-		).run(as_dict=True)
->>>>>>> d614a33 (fix(manufacturing): count a closed Work Order as its made qty in the Production Plan):erpnext/manufacturing/doctype/production_plan/services/work_order_quantities.py
 		loss_percentages = self.get_planned_loss_percentages()
 		quantities = {
 			"production_plan_item": defaultdict(float),
