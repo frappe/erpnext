@@ -846,15 +846,15 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if row.original_item:
 			item_args["original_item"] = row.original_item
 		is_return = self.doc.get("is_return")
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		# drop float noise only, so 7.000000000000001 is not ceiled to 8 and 0.004 still is to 1
 		qty = (
 			row.qty
 			if is_return
-			else flt(flt(row.qty) * flt(self.doc.fg_completed_qty) / pending_qty_to_mfg, precision)
+			else flt(flt(row.qty) * flt(self.doc.fg_completed_qty) / pending_qty_to_mfg, 9)
 		)
 		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.uom)
 		item_args["transfer_qty"] = item_args["qty"]
-		if not flt(item_args["qty"], precision):
+		if not flt(item_args["qty"], frappe.get_precision("Stock Entry Detail", "qty")):
 			return
 		if is_return:
 			item_args["s_warehouse"], item_args["t_warehouse"] = row.s_warehouse, row.t_warehouse
