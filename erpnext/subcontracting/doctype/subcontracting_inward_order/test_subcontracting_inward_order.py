@@ -524,15 +524,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 	def test_part_rm_return_of_batch_received_in_two_lots(self):
 		so, scio = create_so_scio()
-		first_rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		next(item for item in first_rm_in.items if item.item_code == "RM with Batch").qty = 3
-		first_rm_in.submit()
-		scio.reload()
-		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
-		rm_in.submit()
-
-		scio.reload()
+		receive_batch_in_two_lots(scio)
 		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
 		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
 		rm_return.items[0].qty = 2
@@ -567,6 +559,53 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		reserved = StockEntrySABB(fg_return).get_reserved_entries_by_scio_detail()
 		_, picked = take_reserved_entries(reserved["_FG Return Row"], 3)
 		self.assertEqual(picked, {first: 1, second: 2})
+
+	def test_rm_return_rows_of_one_batch_item_share_reserved_batches(self):
+		from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+		so, scio = create_so_scio()
+		first_batch, second_batch = receive_batch_in_two_lots(scio)
+		rm_item = next(item for item in scio.received_items if item.rm_item_code == "RM with Batch")
+		# unreserved stock of the first batch must not be returned while reserved stock is pending
+		make_stock_entry(
+			item_code="RM with Batch",
+			qty=1,
+			to_warehouse=rm_item.warehouse,
+			purpose="Material Receipt",
+			batch_no=first_batch,
+			basic_rate=10,
+		)
+
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.items[0].qty = 2
+		rm_return.append("items", rm_return.items[0].as_dict(no_default_fields=True))
+		rm_return.submit()
+
+		picked = [
+			{batch_no: abs(d.qty) for batch_no, d in get_batch_nos(row.serial_and_batch_bundle).items()}
+			for row in rm_return.items
+		]
+		self.assertEqual(picked, [{first_batch: 2}, {first_batch: 1, second_batch: 1}])
+		reserved = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={
+				"parenttype": "Stock Reservation Entry",
+				"parent": [
+					"in",
+					frappe.get_all(
+						"Stock Reservation Entry",
+						{"voucher_detail_no": rm_item.name, "docstatus": 1},
+						pluck="name",
+					),
+				],
+			},
+			fields=["batch_no", "qty", "delivered_qty"],
+		)
+		self.assertEqual(
+			sorted((d.batch_no, d.qty, d.delivered_qty) for d in reserved),
+			sorted([(first_batch, 3, 3), (second_batch, 2, 1)]),
+		)
 
 	def test_consumed_serial_and_batch_reservation(self):
 		so, scio = create_so_scio()
@@ -2191,6 +2230,22 @@ def make_work_order_with_extra_material():
 	wo.required_items[-1].source_warehouse = "Stores - _TC"
 	wo.submit()
 	return scio, wo
+
+
+def receive_batch_in_two_lots(scio):
+	"""Receive the batch raw material as 3, then the other 2 in a new batch; return both batches."""
+	from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+	batches = []
+	for qty in (3, 2):
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+		rm_in.items[0].qty = qty
+		rm_in.submit()
+		batches.append(next(iter(get_batch_nos(rm_in.items[0].serial_and_batch_bundle))))
+		scio.reload()
+
+	return batches
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
