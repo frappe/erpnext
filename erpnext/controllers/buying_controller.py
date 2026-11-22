@@ -404,7 +404,7 @@ class BuyingController(SubcontractingController):
 							"warehouse": row.warehouse,
 							"posting_date": self.get("posting_date"),
 							"posting_time": self.get("posting_time"),
-							"qty": flt(row.qty) * conversion_factor,
+							"qty": flt(flt(row.qty) * conversion_factor, row.precision("stock_qty")),
 							"serial_and_batch_bundle": row.get("serial_and_batch_bundle"),
 							"company": self.company,
 							"voucher_type": self.doctype,
