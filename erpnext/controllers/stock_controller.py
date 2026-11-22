@@ -3,12 +3,13 @@
 
 import json
 from collections import defaultdict
+from itertools import chain
 
 import frappe
 from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
-from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Count, Min, Sum
+from frappe.query_builder import Case, Criterion, Tuple
+from frappe.query_builder.functions import Count, Max, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
@@ -2360,6 +2361,12 @@ class StockController(AccountsController):
 
 			return query.run(pluck="name")
 
+		def get_row_key(item):
+			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
+				return item.get(reference_field)
+			if item.get("subcontracting_order"):
+				return (item.subcontracting_order, item.rm_item_code)
+
 		def get_data_map():
 			return {
 				"Subcontracting Delivery": {
@@ -2395,12 +2402,16 @@ class StockController(AccountsController):
 		):
 			data_map = get_data_map()
 
-			if purpose == "Send to Subcontractor" and self._action == "cancel":
-				rows = {item.sco_rm_detail: item for item in self.items if item.sco_rm_detail}
-				self.rebuild_subcontracting_transfers({row: get_sre_list(item) for row, item in rows.items()})
+			field = data_map[purpose or self.doctype]["field"]
+			if self._action == "cancel":
+				rows = {
+					get_row_key(item): item
+					for item in self.get(data_map[purpose or self.doctype]["table_name"])
+				}
+				rows.pop(None, None)
+				self.rebuild_reservation_usage(field, {key: get_sre_list(item) for key, item in rows.items()})
 				return
 
-			field = data_map[purpose or self.doctype]["field"]
 			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
 				sre_list = get_sre_list(item)
 
@@ -2474,20 +2485,21 @@ class StockController(AccountsController):
 
 					qty -= working_qty
 
-	def rebuild_subcontracting_transfers(self, sre_lists: dict[str, list[str]]):
-		"""Replay the remaining transfers oldest first, each on the reservations made before it, as on submit."""
-		transfers = self.get_subcontracting_transfers(list(sre_lists))
-		for sco_rm_detail, sre_list in sre_lists.items():
+	def rebuild_reservation_usage(self, field: str, sre_lists: dict):
+		"""Replay all usage as it happened, this cancelled voucher's too, then take off only its share."""
+		usages = group_reservation_usage(self.get_reservation_usage(list(sre_lists)))
+		self.set_own_serial_batch_usage(usages)
+		self.set_cancelled_serial_batch_usage(usages)
+		for key, sre_list in sre_lists.items():
 			sre_docs = [frappe.get_doc("Stock Reservation Entry", sre) for sre in sre_list]
 			for sre_doc in sre_docs:
-				sre_doc.transferred_qty = 0
+				sre_doc.set(field, 0)
 				for entry in sre_doc.sb_entries:
 					entry.delivered_qty = 0
 
-			for transfer in transfers.get(sco_rm_detail, []):
-				for sre_doc in sre_docs:
-					if sre_doc.creation < transfer.submitted_at:
-						add_transfer_to_reservation(sre_doc, transfer)
+			# the cancelled share stays in place during the replay, so later usage lands where it did on submit
+			for usage in replay_reservation_usage(sre_docs, usages.get(key, []), field, self.name):
+				give_back_reservation_usage(usage, field)
 
 			for sre_doc in sre_docs:
 				for entry in sre_doc.sb_entries:
@@ -2497,19 +2509,60 @@ class StockController(AccountsController):
 				sre_doc.update_status()
 				sre_doc.update_reserved_stock_in_bin()
 
-	def get_subcontracting_transfers(self, sco_rm_details: list[str]) -> dict[str, list]:
-		"""Remaining transfers of each supplied row, oldest first, timed by their first stock ledger entry."""
+	def set_own_serial_batch_usage(self, usages: dict) -> None:
+		"""Read this voucher's serial and batch nos from its rows, as the ledger cancel unlinks its bundles."""
+		from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
+
+		table_name = "supplied_items" if self.doctype == "Subcontracting Receipt" else "items"
+		rows = {row.name: row for row in self.get(table_name)}
+		for usage in chain.from_iterable(usages.values()):
+			if usage.voucher == self.name:
+				serial_nos, batch_qty = get_delivered_serial_batch_for_reservation(rows[usage.row])
+				usage.serial_nos, usage.batch_qty = set(serial_nos), defaultdict(float, batch_qty)
+
+	def set_cancelled_serial_batch_usage(self, usages: dict) -> None:
+		"""Read the serial and batch nos of earlier cancelled vouchers from their cancelled bundles."""
+		cancelled = {
+			usage.row: usage
+			for usage in chain.from_iterable(usages.values())
+			if usage.cancelled_at and usage.voucher != self.name
+		}
+		if not cancelled:
+			return
+
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={
+				"voucher_detail_no": ("in", list(cancelled)),
+				"docstatus": 2,
+				# a transfer's inward bundle shares its row
+				"type_of_transaction": "Outward",
+			},
+			fields=["voucher_detail_no", "serial_no", "batch_no", "qty"],
+		)
+		for entry in entries:
+			add_serial_batch_to_usage(
+				cancelled[entry.voucher_detail_no], entry.serial_no, entry.batch_no, entry.qty
+			)
+
+	def get_reservation_usage(self, keys: list) -> list[dict]:
+		"""Rows of the submitted and cancelled vouchers that used the reservations, oldest first."""
+		if self.doctype == "Subcontracting Receipt":
+			return self.get_receipt_consumption(keys)
+
+		return self.get_stock_entry_usage(keys)
+
+	def get_stock_entry_usage(self, details: list[str]) -> list[dict]:
+		order_field, detail_field = (
+			("subcontracting_inward_order", "scio_detail")
+			if self.purpose == "Subcontracting Delivery"
+			else ("subcontracting_order", "sco_rm_detail")
+		)
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
-		ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
-		submitted_at = (
-			frappe.qb.from_(ledger_entry)
-			.select(Min(ledger_entry.creation))
-			.where(ledger_entry.voucher_detail_no == detail.name)
-			.as_("submitted_at")
-		)
-		rows = (
+		submitted_at, cancelled_at = get_ledger_entry_times(detail.name, stock_entry.docstatus)
+		return (
 			frappe.qb.from_(detail)
 			.join(stock_entry)
 			.on(stock_entry.name == detail.parent)
@@ -2517,34 +2570,60 @@ class StockController(AccountsController):
 			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
 			.select(
 				detail.name,
-				detail.sco_rm_detail,
-				detail.transfer_qty,
+				detail.parent.as_("voucher"),
+				detail[detail_field].as_("key"),
+				detail.transfer_qty.as_("qty"),
 				submitted_at,
+				cancelled_at,
 				bundle_entry.serial_no,
 				bundle_entry.batch_no,
-				bundle_entry.qty,
+				bundle_entry.qty.as_("bundle_qty"),
 			)
 			.where(
-				(stock_entry.docstatus == 1)
-				& (stock_entry.purpose == "Send to Subcontractor")
-				& (stock_entry.subcontracting_order == self.subcontracting_order)
-				& detail.sco_rm_detail.isin(sco_rm_details)
+				(stock_entry.docstatus > 0)
+				& (stock_entry.purpose == self.purpose)
+				& (stock_entry[order_field] == self.get(order_field))
+				& detail[detail_field].isin(details)
 			)
 			.orderby(submitted_at)
 		).run(as_dict=True)
 
-		transfers = defaultdict(dict)
-		for row in rows:
-			transfer = transfers[row.sco_rm_detail].get(row.name)
-			if not transfer:
-				transfer = transfers[row.sco_rm_detail][row.name] = new_reservation_transfer()
-				transfer.qty, transfer.submitted_at = flt(row.transfer_qty), row.submitted_at
-			if row.serial_no:
-				transfer.serial_nos.add(row.serial_no)
-			if row.batch_no:
-				transfer.batch_qty[row.batch_no] += abs(flt(row.qty))
+	def get_receipt_consumption(self, keys: list[tuple[str, str]]) -> list[dict]:
+		receipt = frappe.qb.DocType("Subcontracting Receipt")
+		supplied = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		submitted_at, cancelled_at = get_ledger_entry_times(supplied.name, receipt.docstatus)
+		rows = (
+			frappe.qb.from_(supplied)
+			.join(receipt)
+			.on(receipt.name == supplied.parent)
+			.left_join(bundle_entry)
+			.on(bundle_entry.parent == supplied.serial_and_batch_bundle)
+			.select(
+				supplied.name,
+				supplied.parent.as_("voucher"),
+				supplied.subcontracting_order,
+				supplied.rm_item_code,
+				supplied.consumed_qty.as_("qty"),
+				submitted_at,
+				cancelled_at,
+				bundle_entry.serial_no,
+				bundle_entry.batch_no,
+				bundle_entry.qty.as_("bundle_qty"),
+			)
+			.where(
+				(receipt.docstatus > 0)
+				& (receipt.is_return == 0)
+				& (receipt.supplier_warehouse == self.supplier_warehouse)
+				& (supplied.consumed_qty > 0)
+				& Tuple(supplied.subcontracting_order, supplied.rm_item_code).isin(keys)
+			)
+			.orderby(submitted_at)
+		).run(as_dict=True)
 
-		return {row: list(row_transfers.values()) for row, row_transfers in transfers.items()}
+		for row in rows:
+			row.key = (row.subcontracting_order, row.rm_item_code)
+		return rows
 
 	def check_for_on_hold_or_closed_status(
 		self, ref_doctype: str, ref_fieldname: str, exclude_if_field: str | None = None
@@ -3120,31 +3199,115 @@ def make_bundle_for_material_transfer(**kwargs):
 	return bundle_doc.name
 
 
-def new_reservation_transfer():
-	return frappe._dict(qty=0, serial_nos=set(), batch_qty=defaultdict(float))
+def get_ledger_entry_times(voucher_detail_no, docstatus):
+	"""When a voucher row was submitted and, if cancelled, cancelled: its first and last stock ledger entries.
+
+	Recreating a row's ledgers does not move the first, and the cancel's reverse entries are the last."""
+	ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+
+	def get_entry_time(aggregate):
+		return (
+			frappe.qb.from_(ledger_entry)
+			.select(aggregate(ledger_entry.creation))
+			.where(ledger_entry.voucher_detail_no == voucher_detail_no)
+		)
+
+	return (
+		get_entry_time(Min).as_("submitted_at"),
+		Case().when(docstatus == 2, get_entry_time(Max)).as_("cancelled_at"),
+	)
 
 
-def add_transfer_to_reservation(sre_doc, transfer) -> None:
-	"""Count on `sre_doc` the part of `transfer` it has room for, and take it off `transfer`."""
+def group_reservation_usage(rows: list[dict]) -> dict[str, list]:
+	"""Usage of each reservation key, one per voucher row, in the order of `rows`."""
+	usages = defaultdict(dict)
+	for row in rows:
+		usage = usages[row.key].get(row.name)
+		if not usage:
+			usage = usages[row.key][row.name] = frappe._dict(
+				qty=flt(row.qty),
+				row=row.name,
+				voucher=row.voucher,
+				submitted_at=row.submitted_at,
+				cancelled_at=row.cancelled_at,
+				serial_nos=set(),
+				batch_qty=defaultdict(float),
+				shares=[],
+			)
+		add_serial_batch_to_usage(usage, row.serial_no, row.batch_no, row.bundle_qty)
+
+	return {key: list(row_usages.values()) for key, row_usages in usages.items()}
+
+
+def add_serial_batch_to_usage(usage, serial_no, batch_no, qty) -> None:
+	if serial_no:
+		usage.serial_nos.add(serial_no)
+	if batch_no:
+		usage.batch_qty[batch_no] += abs(flt(qty))
+
+
+def replay_reservation_usage(sre_docs, usages, field: str, cancelled_voucher: str) -> list:
+	"""Replay submits and earlier cancels in the order they happened; return the usage of `cancelled_voucher`.
+
+	Each usage takes what was free at its submit and gives it back at its cancel."""
+	submits = [(usage.submitted_at, False, usage) for usage in usages]
+	cancels = [
+		(usage.cancelled_at, True, usage)
+		for usage in usages
+		if usage.cancelled_at and usage.voucher != cancelled_voucher
+	]
+	for _time, is_cancel, usage in sorted(submits + cancels, key=lambda event: event[:2]):
+		if is_cancel:
+			give_back_reservation_usage(usage, field)
+		else:
+			take_reservation_usage(sre_docs, usage, field)
+
+	return [usage for usage in usages if usage.voucher == cancelled_voucher]
+
+
+def take_reservation_usage(sre_docs, usage, field: str) -> None:
+	"""Count `usage` on the reservations made before it."""
+	for sre_doc in sre_docs:
+		if sre_doc.creation < usage.submitted_at:
+			share = take_reservation_share(sre_doc, usage, field)
+			apply_reservation_share(sre_doc, share, field)
+			usage.shares.append((sre_doc, share))
+
+
+def give_back_reservation_usage(usage, field: str) -> None:
+	for sre_doc, share in usage.shares:
+		apply_reservation_share(sre_doc, share, field, sign=-1)
+
+
+def take_reservation_share(sre_doc, usage, field: str) -> frappe._dict:
+	"""The part of `usage` that `sre_doc` has room for, taken off `usage`."""
+	share = frappe._dict(qty=0, entries={})
 	if sre_doc.reservation_based_on != "Serial and Batch":
-		qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.transferred_qty), transfer.qty)
+		share.qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.get(field)), usage.qty)
 	else:
-		qty = 0
 		for entry in sre_doc.sb_entries:
 			if sre_doc.has_serial_no:
 				entry_qty = 0
-				if not flt(entry.delivered_qty) and entry.serial_no in transfer.serial_nos:
+				if not flt(entry.delivered_qty) and entry.serial_no in usage.serial_nos:
 					entry_qty = 1
-					transfer.serial_nos.discard(entry.serial_no)
+					usage.serial_nos.discard(entry.serial_no)
 			else:
-				entry_qty = min(flt(entry.qty) - flt(entry.delivered_qty), transfer.batch_qty[entry.batch_no])
-				transfer.batch_qty[entry.batch_no] -= entry_qty
+				entry_qty = min(flt(entry.qty) - flt(entry.delivered_qty), usage.batch_qty[entry.batch_no])
+				usage.batch_qty[entry.batch_no] -= entry_qty
 
-			entry.delivered_qty = flt(flt(entry.delivered_qty) + entry_qty, entry.precision("delivered_qty"))
-			qty += entry_qty
+			share.entries[entry.name] = entry_qty
+			share.qty += entry_qty
 
-	transfer.qty -= qty
-	sre_doc.transferred_qty = flt(flt(sre_doc.transferred_qty) + qty, sre_doc.precision("transferred_qty"))
+	usage.qty -= share.qty
+	return share
+
+
+def apply_reservation_share(sre_doc, share, field: str, sign: int = 1) -> None:
+	for entry in sre_doc.sb_entries:
+		entry_qty = sign * share.entries.get(entry.name, 0)
+		entry.delivered_qty = flt(flt(entry.delivered_qty) + entry_qty, entry.precision("delivered_qty"))
+
+	sre_doc.set(field, flt(flt(sre_doc.get(field)) + sign * share.qty, sre_doc.precision(field)))
 
 
 def set_entries_total_qty(entries, total_qty):

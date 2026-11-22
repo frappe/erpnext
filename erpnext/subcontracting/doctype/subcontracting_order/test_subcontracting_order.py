@@ -1925,6 +1925,31 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
 	)
+	def test_receipt_cancel_reopens_only_its_own_consumption(self):
+		self.assertEqual(cancel_one_of_two_receipts(-1), [(6, 6), (4, 0)])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
+	def test_first_receipt_cancel_reopens_only_its_own_consumption(self):
+		self.assertEqual(cancel_one_of_two_receipts(0), [(6, 0), (4, 4)])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
+	def test_receipt_cancel_replays_an_earlier_cancelled_receipt(self):
+		sco = make_order_with_two_batch_transfers()
+		first = make_receipt_of_qty(sco, 6)
+		second = make_receipt_of_qty(sco, 4)
+		first.cancel()
+		make_receipt_of_qty(sco, 6)
+		second.cancel()
+
+		self.assertEqual(get_supplier_warehouse_consumption(sco), [(6, 6), (4, 0)])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
 	def test_transfer_takes_every_batch_the_order_reserved(self):
 		sco = make_reserving_order_with_new_items(
 			"Reserved Batches",
@@ -2621,3 +2646,45 @@ def make_subcontracted_purchase_order(project):
 	po.submit()
 
 	return po
+
+
+def cancel_one_of_two_receipts(index):
+	"""Receive 6 and then 4, cancel receipt `index`; return each reservation's consumption."""
+	sco = make_order_with_two_batch_transfers()
+	receipts = [make_receipt_of_qty(sco, qty) for qty in (6, 4)]
+	receipts[index].cancel()
+	return get_supplier_warehouse_consumption(sco)
+
+
+def make_order_with_two_batch_transfers():
+	"""Order of 10 with 6 and then 4 of one batch transferred, each reserved in the supplier warehouse."""
+	sco = make_reserving_order_with_new_items(
+		"Receipt Cancel",
+		qty=10,
+		rm_properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCORC-.####"},
+	)
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	sco.submit()
+	for qty in (6, 4):
+		rm_items[0]["qty"] = qty
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+	return sco
+
+
+def make_receipt_of_qty(sco, qty):
+	receipt = make_subcontracting_receipt(sco.name)
+	receipt.items[0].qty = qty
+	return receipt.submit()
+
+
+def get_supplier_warehouse_consumption(sco):
+	reservations = frappe.get_all(
+		"Stock Reservation Entry",
+		filters={"voucher_no": sco.name, "docstatus": 1, "warehouse": sco.supplier_warehouse},
+		fields=["reserved_qty", "consumed_qty"],
+		order_by="creation",
+		as_list=True,
+	)
+	return [tuple(reservation) for reservation in reservations]
