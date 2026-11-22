@@ -3251,8 +3251,24 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual(plan.po_items, [])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_work_order_output_of_a_plan_leaves_the_rest_to_plan(self):
+		sales_order = self.make_sales_order_with_reserved_work_order_output(
+			"_Test FG For Planned WO Output", link_sales_order_item=True, from_production_plan=True
+		)
+		fg_item = sales_order.items[0].item_code
+		rows = sales_order_query(filters={"company": sales_order.company, "item_code": fg_item})
+		self.assertEqual([row[0] for row in rows], [sales_order.name])
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = sales_order.company
+		plan.item_code = fg_item
+		self.assertEqual([row.name for row in get_sales_orders(plan)], [sales_order.name])
+
+		self.assert_plan_pulls_the_unmade_qty(sales_order).submit()
+
 	def make_sales_order_with_reserved_work_order_output(
-		self, fg_item, link_sales_order_item, reserved_stock_qty=0
+		self, fg_item, link_sales_order_item, reserved_stock_qty=0, from_production_plan=False
 	):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
@@ -3289,6 +3305,17 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		if link_sales_order_item:
 			work_order.sales_order_item = sales_order.items[0].name
+		if from_production_plan:
+			plan = create_production_plan(
+				get_items_from="Sales Order",
+				sales_order=sales_order,
+				skip_getting_mr_items=True,
+				do_not_save=1,
+			)
+			plan.po_items[0].planned_qty = work_order.qty
+			plan.submit()
+			work_order.production_plan = plan.name
+			work_order.production_plan_item = plan.po_items[0].name
 		work_order.submit()
 		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 6)).submit()
 		self.assertEqual(
@@ -3302,6 +3329,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
 		)
 		self.assertEqual([row.planned_qty for row in plan.po_items], [4])
+		return plan
 
 	def test_production_plan_cannot_exceed_sales_order_qty(self):
 		so = make_sales_order(
