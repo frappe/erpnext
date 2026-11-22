@@ -5501,10 +5501,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		rm_items[0]["qty"] = 2
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		ste_dict = make_rm_stock_entry(sco.name)
-		doc = frappe.get_doc(ste_dict)
-		self.assertEqual(doc.items[0].qty, 0)
-		doc.items[0].qty = 2
+		self.assertFalse(frappe.get_doc(make_rm_stock_entry(sco.name)).items)
+		row = sco.supplied_items[0]
+		doc = frappe.get_doc(make_rm_stock_entry(sco.name, [{**row.as_dict(), "qty": 2}]))
 		doc.submit()
 
 		frappe.flags["args"] = {"items": [{"name": sco.items[0].name, "qty": 2}]}
