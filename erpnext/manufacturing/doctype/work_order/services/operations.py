@@ -365,7 +365,7 @@ class OperationsService:
 
 	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
 		if not d.fixed_time:
-			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
+			d.time_in_mins = get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
 
 		d.status = "Pending"
 		d.output_qty = self._operation_output_qty(d, qty, exploded)
@@ -489,7 +489,7 @@ class OperationsService:
 			)
 
 
-def _operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
+def get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
 	if batch_size_flags.get(d.operation) and flt(d.batch_size):
 		return d.time_in_mins * flt(units) / flt(d.batch_size)
 	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)

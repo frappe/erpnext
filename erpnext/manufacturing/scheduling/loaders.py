@@ -8,8 +8,8 @@ from frappe.utils import cint, flt, get_datetime, get_time
 
 from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty, get_upstream_process_loss
 from erpnext.manufacturing.doctype.work_order.services.operations import (
-	_operation_time_per_unit,
 	get_batch_size_flags,
+	get_operation_time_per_unit,
 )
 from erpnext.manufacturing.scheduling.models import Interval, Resource, ResourceCalendar, Task
 
@@ -256,7 +256,7 @@ def get_operation_duration(row, qty, bom_qty, batch_size_flags):
 	"""Operation time for qty, per batch where the Work Order plans it per batch."""
 	if row.fixed_time:
 		return flt(row.time_in_mins)
-	return _operation_time_per_unit(row, bom_qty, 1, False, batch_size_flags) * qty
+	return get_operation_time_per_unit(row, bom_qty, 1, False, batch_size_flags) * qty
 
 
 def build_operation_task(row, duration, prefix, previous_group, earliest_start, priority):
