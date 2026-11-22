@@ -4502,6 +4502,30 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			frappe.copy_doc(purchase_receipt).insert,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_subcontracted_service_cannot_be_received_beyond_the_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt as make_po_receipt,
+		)
+		from erpnext.controllers.status_updater import OverAllowanceError
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		make_po_receipt(sco.purchase_order).submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		self.assertRaises(OverAllowanceError, make_purchase_receipt(scr.name).submit)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
