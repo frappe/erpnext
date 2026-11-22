@@ -1321,20 +1321,17 @@ class TestBOM(FrappeTestCase):
 
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		sub_item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item_code=rm_item, qty=100, rate=10, target="_Test Warehouse - _TC")
-		make_stock_entry(item_code=rm_item, qty=10, rate=50, target="_Test Warehouse 1 - _TC")
-		sub_bom = make_bom(item=sub_item, raw_materials=[rm_item], currency="INR", do_not_save=True)
-		sub_bom.items[0].source_warehouse = "_Test Warehouse - _TC"
-		sub_bom.insert()
-		sub_bom.submit()
+		# version-15 values BOM rows across all warehouses, so the rate moves between the BOMs
+		make_stock_entry(item_code=rm_item, qty=10, rate=10, target="_Test Warehouse - _TC")
+		sub_bom = make_bom(item=sub_item, raw_materials=[rm_item], currency="INR")
 
+		make_stock_entry(item_code=rm_item, qty=10, rate=90, target="_Test Warehouse - _TC")
 		bom = make_bom(
 			item=make_item(properties={"is_stock_item": 1}).name,
 			raw_materials=[rm_item],
 			currency="INR",
 			do_not_save=True,
 		)
-		bom.items[0].source_warehouse = "_Test Warehouse 1 - _TC"
 		bom.append("items", {"item_code": sub_item, "qty": 1, "bom_no": sub_bom.name})
 		bom.insert()
 		bom.submit()
@@ -1347,7 +1344,7 @@ class TestBOM(FrappeTestCase):
 			)
 
 		assert_exploded_row(30, 60)
-		make_stock_entry(item_code=rm_item, qty=10, rate=150, target="_Test Warehouse 1 - _TC")
+		make_stock_entry(item_code=rm_item, qty=20, rate=150, target="_Test Warehouse - _TC")
 		bom.update_cost()
 		bom.reload()
 		self.assertEqual(bom.raw_material_cost, 110)
