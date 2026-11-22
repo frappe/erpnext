@@ -1306,14 +1306,9 @@ class TestBOM(FrappeTestCase):
 
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
 		sub_item = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(
-			item=sub_item,
-			raw_materials=[rm_item],
-			quantity=10,
-			rm_qty=10,
-			process_loss_percentage=10,
-			do_not_submit=True,
-		)
+		bom = make_bom(item=sub_item, raw_materials=[rm_item], quantity=10, rm_qty=10, do_not_save=True)
+		bom.process_loss_percentage = 10
+		bom.insert()
 		self.assertEqual(bom.process_loss_qty, 1)
 
 		bom.process_loss_percentage = 0
