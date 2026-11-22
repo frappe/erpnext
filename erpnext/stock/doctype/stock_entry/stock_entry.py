@@ -685,6 +685,7 @@ class StockEntry(StockController):
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
+		self.validate_consumed_qty_is_still_supplied()
 		self.update_subcontracting_order_status()
 		self.update_pick_list_status()
 
@@ -4174,6 +4175,33 @@ class StockEntry(StockController):
 						frappe.throw(
 							_("Batch {0} of Item {1} is disabled.").format(item.batch_no, item.item_code)
 						)
+
+	def validate_consumed_qty_is_still_supplied(self):
+		"""Receipts of the order must not have consumed the material this cancelled entry supplied."""
+		if not (self.purpose == "Send to Subcontractor" and self.get(self.subcontract_data.order_field)):
+			return
+
+		rm_detail_field = self.subcontract_data.rm_detail_field
+		order_rows = frappe.get_all(
+			self.subcontract_data.order_supplied_items_field,
+			filters={"name": ["in", [row.get(rm_detail_field) for row in self.items]]},
+			fields=["idx", "rm_item_code", "total_supplied_qty", "consumed_qty"],
+		)
+		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
+		for row in order_rows:
+			if flt(row.consumed_qty, precision) > flt(row.total_supplied_qty, precision):
+				frappe.throw(
+					_(
+						"Cannot cancel: receipts of {0} {1} already consumed {2} of Item {3} (row {4}), more than the {5} it would still have supplied."
+					).format(
+						self.subcontract_data.order_doctype,
+						self.get(self.subcontract_data.order_field),
+						row.consumed_qty,
+						row.rm_item_code,
+						row.idx,
+						row.total_supplied_qty,
+					)
+				)
 
 	def update_subcontract_order_supplied_items(self):
 		if self.get(self.subcontract_data.order_field) and (
