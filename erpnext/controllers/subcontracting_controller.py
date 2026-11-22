@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import ceil, cint, cstr, escape_html, flt, get_link_to_form
 
@@ -1627,22 +1628,54 @@ class SubcontractingController(StockController):
 				item.rm_supp_cost = 0.0
 
 	def __update_consumed_qty_in_subcontract_order(self, itemwise_consumed_qty):
-		fields = ["main_item_code", "rm_item_code", "parent", "supplied_qty", "name"]
+		fields = ["main_item_code", "parent", "name"]
 		filters = {"docstatus": 1, "parent": ("in", self.subcontract_orders)}
+		items_sent = self.get_items_sent_on_order_rows()
+		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
 
 		for row in frappe.get_all(
 			self.subcontract_data.order_supplied_items_field, fields=fields, filters=filters, order_by="idx"
 		):
-			key = (row.rm_item_code, row.main_item_code, row.parent)
-			consumed_qty = itemwise_consumed_qty.get(key, 0)
+			# a row consumes the items sent on it: its raw material or an alternative
+			consumed_qty = 0
+			for item_code, sent_qty in items_sent.get(row.name, {}).items():
+				key = (item_code, row.main_item_code, row.parent)
+				# a return of components books an item's return on one of its rows, so a row can net below 0
+				qty = min(itemwise_consumed_qty.get(key, 0), max(sent_qty, 0))
+				consumed_qty += qty
+				itemwise_consumed_qty[key] -= qty
 
-			if row.supplied_qty < consumed_qty:
-				consumed_qty = row.supplied_qty
-
-			itemwise_consumed_qty[key] -= consumed_qty
 			frappe.db.set_value(
-				self.subcontract_data.order_supplied_items_field, row.name, "consumed_qty", consumed_qty
+				self.subcontract_data.order_supplied_items_field,
+				row.name,
+				"consumed_qty",
+				flt(consumed_qty, precision),
 			)
+
+	def get_items_sent_on_order_rows(self):
+		"""Net qty of each item sent to the subcontractor, by the order's supplied row it was sent on."""
+		se = frappe.qb.DocType("Stock Entry")
+		se_detail = frappe.qb.DocType("Stock Entry Detail")
+		rm_detail = se_detail[self.subcontract_data.rm_detail_field]
+		qty = Case().when(se.is_return == 1, -se_detail.transfer_qty).else_(se_detail.transfer_qty)
+		rows = (
+			frappe.qb.from_(se)
+			.inner_join(se_detail)
+			.on(se.name == se_detail.parent)
+			.select(rm_detail, se_detail.item_code, Sum(qty))
+			.where(
+				(se.docstatus == 1)
+				& se[self.subcontract_data.order_field].isin(self.subcontract_orders)
+				& (Coalesce(rm_detail, "") != "")
+			)
+			.groupby(rm_detail, se_detail.item_code)
+		).run()
+
+		items_sent = defaultdict(dict)
+		for order_row, item_code, sent_qty in rows:
+			items_sent[order_row][item_code] = sent_qty
+
+		return items_sent
 
 	def set_consumed_qty_in_subcontract_order(self):
 		# Update consumed qty back in the subcontract order
