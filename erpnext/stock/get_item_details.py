@@ -327,7 +327,11 @@ def update_stock(ctx, out, doc=None):
 			if batch_no:
 				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
 				rate = _get_batch_based_item_price(
-					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
+					{
+						"price_list": doc.get("selling_price_list") if doc else ctx.price_list,
+						"uom": out.uom,
+						"batch_no": batch_no,
+					},
 					out.item_code,
 				)
 				if rate:
@@ -354,7 +358,9 @@ def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	if out.has_batch_no and batch_no:
 		kwargs["batches"] = [batch_no]
 
-	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
+	serial_nos = get_serial_nos_for_outward(kwargs)
+	if doc:
+		serial_nos = get_filtered_serial_nos(serial_nos, doc)
 	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
 
 
