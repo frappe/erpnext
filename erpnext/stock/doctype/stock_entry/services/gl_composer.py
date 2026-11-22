@@ -26,11 +26,7 @@ class StockEntryGLComposer(BaseStockGLComposer):
 		doc = self.doc
 		gl_entries = super().compose(inventory_account_map)
 
-		incoming_items, basis, divide_based_on = doc.get_additional_cost_allocation()
-
-		item_account_wise_additional_cost = self._build_additional_cost_per_item_account(
-			incoming_items, basis, divide_based_on
-		)
+		item_account_wise_additional_cost = self._build_additional_cost_per_item_account()
 		if item_account_wise_additional_cost:
 			self._append_additional_cost_gl_entries(gl_entries, item_account_wise_additional_cost)
 
@@ -175,24 +171,13 @@ class StockEntryGLComposer(BaseStockGLComposer):
 			)
 		)
 
-	def _build_additional_cost_per_item_account(
-		self, incoming_items: list, basis: str, divide_based_on: float
-	) -> dict:
+	def _build_additional_cost_per_item_account(self) -> dict:
 		item_account_wise_additional_cost = {}
-		if not divide_based_on:
-			return item_account_wise_additional_cost
-
-		for t in self.doc.get("additional_costs"):
-			for d in incoming_items:
-				item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
-				item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(
-					t.expense_account, {"amount": 0.0, "base_amount": 0.0}
-				)
-
-				multiply_based_on = flt(d.get(basis))
-				entry = item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]
-				entry["amount"] += flt(t.amount * multiply_based_on) / divide_based_on
-				entry["base_amount"] += flt(t.base_amount * multiply_based_on) / divide_based_on
+		for d, account, amount, base_amount in self.doc.get_additional_cost_split():
+			item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})[account] = {
+				"amount": amount,
+				"base_amount": base_amount,
+			}
 
 		return item_account_wise_additional_cost
 
