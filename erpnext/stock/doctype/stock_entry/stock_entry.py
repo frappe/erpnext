@@ -260,6 +260,7 @@ class StockEntry(StockController):
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_returned_qty_within_work_order()
+		self.validate_returned_qty_within_subcontracting_order()
 		self.validate_alternative_items()
 		self.validate_work_order_status_for_return()
 		self.validate_source_stock_entry()
@@ -1284,6 +1285,25 @@ class StockEntry(StockController):
 						flt(returnable_qty[item_code]),
 					),
 					title=_("Excess Return"),
+				)
+
+	def validate_returned_qty_within_subcontracting_order(self):
+		"""A Return of Components takes back at most what the order still has at the supplier."""
+		if not (self.purpose == "Material Transfer" and self.is_return and self.get("subcontracting_order")):
+			return
+
+		order = frappe.get_doc("Subcontracting Order", self.subcontracting_order)
+		qty_at_supplier = order.get_raw_material_qty_at_supplier()
+		returned_qty = defaultdict(float)
+		for row in self.items:
+			precision = row.precision("transfer_qty")
+			returned_qty[row.item_code] += flt(row.transfer_qty, precision)
+			allowed_qty = flt(qty_at_supplier[row.item_code], precision)
+			if flt(returned_qty[row.item_code], precision) > allowed_qty:
+				frappe.throw(
+					_(
+						"Row #{0}: Only {1} of Item {2} can be returned against Subcontracting Order {3}"
+					).format(row.idx, allowed_qty, row.item_code, order.name)
 				)
 
 	def get_returnable_qty(self) -> dict:
