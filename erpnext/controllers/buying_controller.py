@@ -870,7 +870,10 @@ class BuyingController(SubcontractingController):
 				d.rejected_warehouse = None
 
 	def set_received_qty(self):
-		if self.doctype != "Purchase Receipt" and not self.get("update_stock"):
+		if not (
+			self.doctype == "Purchase Receipt"
+			or (self.doctype == "Purchase Invoice" and self.get("update_stock"))
+		):
 			return
 
 		for d in self.get("items"):
