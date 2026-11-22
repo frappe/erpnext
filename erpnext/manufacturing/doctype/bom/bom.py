@@ -1278,37 +1278,18 @@ class BOM(WebsiteGenerator):
 		}
 
 	def calculate_exploded_cost(self):
-		"Set exploded row cost from it's parent BOM."
-		rm_rate_map = self.get_rm_rate_map()
+		"Set exploded row cost from the BOM rows and sub-assembly BOMs."
+		self.get_exploded_items()
 
 		for row in self.get("exploded_items"):
 			old_rate = flt(row.rate)
-			row.rate = rm_rate_map.get(row.item_code)
+			current = self.cur_exploded_items.get(self.get_key(row))
+			row.rate = current.rate if current else 0
 			row.amount = flt(row.stock_qty) * flt(row.rate)
 
 			if old_rate != row.rate:
 				# Only db_update if changed
 				row.db_update()
-
-	def get_rm_rate_map(self) -> dict[str, float]:
-		"Create Raw Material-Rate map for Exploded Items. Fetch rate from Items table or Subassembly BOM."
-		rm_rate_map = {}
-
-		for item in self.get("items"):
-			if item.bom_no:
-				# Get Item-Rate from Subassembly BOM
-				explosion_items = frappe.get_all(
-					"BOM Explosion Item",
-					filters={"parent": item.bom_no},
-					fields=["item_code", "rate"],
-					order_by=None,  # to avoid sort index creation at db level (granular change)
-				)
-				explosion_item_rate = {item.item_code: flt(item.rate) for item in explosion_items}
-				rm_rate_map.update(explosion_item_rate)
-			else:
-				rm_rate_map[item.item_code] = flt(item.base_rate) / flt(item.conversion_factor or 1.0)
-
-		return rm_rate_map
 
 	def update_exploded_items(self, save=True):
 		"""Update Flat BOM, following will be correct data"""
@@ -1344,15 +1325,21 @@ class BOM(WebsiteGenerator):
 	def company_currency(self):
 		return erpnext.get_company_currency(self.company)
 
-	def add_to_cur_exploded_items(self, args):
-		key = args.item_code
-		if args.operation:
-			key = (args.item_code, args.operation)
+	@staticmethod
+	def get_key(row):
+		return (row.item_code, row.operation) if row.operation else row.item_code
 
-		if self.cur_exploded_items.get(key):
-			self.cur_exploded_items[key]["stock_qty"] += args.stock_qty
-		else:
+	def add_to_cur_exploded_items(self, args):
+		key = self.get_key(args)
+		existing = self.cur_exploded_items.get(key)
+		if not existing:
 			self.cur_exploded_items[key] = args
+			return
+
+		# the same item at another rate, e.g. from a sub-assembly: merge at the weighted rate
+		amount = flt(existing.stock_qty) * flt(existing.rate) + flt(args.stock_qty) * flt(args.rate)
+		existing.stock_qty += args.stock_qty
+		existing.rate = amount / existing.stock_qty
 
 	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
 		"""Add all items from Flat BOM of child BOM"""
@@ -1557,86 +1544,6 @@ class BOM(WebsiteGenerator):
 			for d in self.get("secondary_items")
 		)
 
-<<<<<<< HEAD
-=======
-	def validate_bom_currency(self, item):
-		return BOMCostingService(self).validate_bom_currency(item)
-
-	def get_rm_rate(self, arg, notify=True):
-		return BOMCostingService(self).get_rm_rate(arg, notify)
-
-	@frappe.whitelist()
-	def update_cost(
-		self,
-		update_parent: bool = True,
-		from_child_bom: bool = False,
-		update_hour_rate: bool = True,
-		save: bool = True,
-	):
-		if cint(save) and not self.is_new():
-			self.load_from_db()
-			self.check_permission("write")
-
-		return BOMCostingService(self).update_cost(
-			update_parent=cint(update_parent) and cint(save),
-			from_child_bom=from_child_bom,
-			update_hour_rate=update_hour_rate,
-			save=cint(save),
-		)
-
-	def update_parent_cost(self):
-		return BOMCostingService(self).update_parent_cost()
-
-	def get_bom_unitcost(self, bom_no):
-		return BOMCostingService(self).get_bom_unitcost(bom_no)
-
-	def calculate_cost(self, save_updates=False, update_hour_rate=False):
-		return BOMCostingService(self).calculate_cost(save_updates, update_hour_rate)
-
-	def calculate_op_cost(self, update_hour_rate=False):
-		return BOMCostingService(self).calculate_op_cost(update_hour_rate)
-
-	def update_rate_and_time(self, row, update_hour_rate=False):
-		return BOMCostingService(self).update_rate_and_time(row, update_hour_rate)
-
-	def calculate_rm_cost(self, save=False):
-		return BOMCostingService(self).calculate_rm_cost(save)
-
-	def calculate_secondary_items_costs(self, save=False):
-		return BOMCostingService(self).calculate_secondary_items_costs(save)
-
-	def calculate_exploded_cost(self):
-		return BOMCostingService(self).calculate_exploded_cost()
-
-	def update_exploded_items(self, save=True):
-		return BOMExplodedItemsService(self).update_exploded_items(save)
-
-	def get_exploded_items(self):
-		return BOMExplodedItemsService(self).get_exploded_items()
-
-	def add_to_cur_exploded_items(self, args):
-		return BOMExplodedItemsService(self).add_to_cur_exploded_items(args)
-
-	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
-		return BOMExplodedItemsService(self).get_child_exploded_items(bom_no, stock_qty, operation)
-
-	def add_exploded_items(self, save=True):
-		return BOMExplodedItemsService(self).add_exploded_items(save)
-
-
-def _get_bom_children(bom_no):
-	children = frappe.cache().hget("bom_children", bom_no)
-	if children is None:
-		bom_item = frappe.qb.DocType("BOM Item")
-		children = (
-			frappe.qb.from_(bom_item)
-			.select(bom_item.bom_no)
-			.where((bom_item.parent == bom_no) & (bom_item.bom_no != "") & (bom_item.parenttype == "BOM"))
-		).run(pluck=True)
-		frappe.cache().hset("bom_children", bom_no, children)
-	return children
-
->>>>>>> 23f518b (fix(manufacturing): merge an exploded item used at two rates at the weighted rate)
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == "Valuation Rate":

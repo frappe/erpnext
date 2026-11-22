@@ -2026,51 +2026,6 @@ class TestBOM(ERPNextTestSuite):
 		bom.save()
 		self.assertEqual(bom.process_loss_qty, 0)
 
-<<<<<<< HEAD
-=======
-	def test_valuation_rate_from_source_warehouse_without_bin(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 0}).name
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item_code=rm_item, qty=10, rate=50, target="_Test Warehouse - _TC")
-
-		bom = frappe.get_doc(
-			{
-				"doctype": "BOM",
-				"item": fg_item,
-				"company": "_Test Company",
-				"currency": "INR",
-				"rm_cost_as_per": "Valuation Rate",
-				"items": [{"item_code": rm_item, "qty": 1, "source_warehouse": "_Test Warehouse 1 - _TC"}],
-			}
-		).insert()
-
-		# the source warehouse has no Bin, so the last valuation rate is used
-		self.assertEqual(bom.items[0].rate, 50)
-
-	def test_valuation_rate_ignores_stock_of_other_company(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(
-			item_code=rm_item, qty=10, rate=70, target="Stores - _TC1", company="_Test Company 1"
-		)
-
-		bom = frappe.get_doc(
-			{
-				"doctype": "BOM",
-				"item": fg_item,
-				"company": "_Test Company",
-				"currency": "INR",
-				"rm_cost_as_per": "Valuation Rate",
-				"items": [{"item_code": rm_item, "qty": 1}],
-			}
-		).insert()
-
-		self.assertEqual(bom.items[0].rate, 5)
-
 	def test_exploded_item_used_at_two_rates_merges_at_weighted_rate(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -2109,7 +2064,6 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.raw_material_cost, 110)
 		assert_exploded_row(55, 110)
 
->>>>>>> 220704d (test: BOM exploded item used at two rates keeps the raw material cost)
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
