@@ -772,6 +772,7 @@ class SubcontractingController(StockController):
 				se_detail.t_warehouse,
 				se_detail.item_group,
 				se_detail[self.subcontract_data.rm_detail_field],
+				se.is_return,
 			)
 			.where(
 				(se.docstatus == 1)
@@ -781,6 +782,7 @@ class SubcontractingController(StockController):
 					| ((se.purpose == "Material Transfer") & (se.is_return == 1))
 				)
 			)
+			.orderby(se.posting_date, se.posting_time, se.creation)
 		)
 
 		if self.backflush_based_on == "BOM":
@@ -939,7 +941,7 @@ class SubcontractingController(StockController):
 			)
 
 			if row.serial_no:
-				details.serial_no.extend(get_serial_nos(row.serial_no))
+				update_serial_nos_at_supplier(details, get_serial_nos(row.serial_no), row.is_return)
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty
 
@@ -948,7 +950,7 @@ class SubcontractingController(StockController):
 
 				bundle_data = voucher_bundle_data.get(bundle_key, frappe._dict())
 				if bundle_data.serial_nos:
-					details.serial_no.extend(bundle_data.serial_nos)
+					update_serial_nos_at_supplier(details, bundle_data.serial_nos, row.is_return)
 					bundle_data.serial_nos = []
 
 				if bundle_data.batch_nos:
@@ -957,7 +959,7 @@ class SubcontractingController(StockController):
 							qty = abs(qty)
 
 						if qty > 0:
-							details.batch_no[batch_no] += qty
+							details.batch_no[batch_no] += -qty if row.is_return else qty
 							bundle_data.batch_nos[batch_no] -= qty
 
 			self.__set_alternative_item_details(row)
@@ -1547,17 +1549,16 @@ class SubcontractingController(StockController):
 			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
 
 	def __validate_serial_no(self, row, key, bundle_entries):
-		if self.__transferred_items.get(key).get("serial_no"):
-			serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
-			incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
+		serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
+		incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
 
-			if incorrect_sn:
-				incorrect_sn = "\n".join(incorrect_sn)
-				link = get_link_to_form(
-					self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
-				)
-				msg = f"The Serial Nos {incorrect_sn} has not supplied against the {self.subcontract_data.order_doctype} {link}"
-				frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
+		if incorrect_sn:
+			incorrect_sn = "\n".join(incorrect_sn)
+			link = get_link_to_form(
+				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
+			)
+			msg = f"The Serial Nos {incorrect_sn} has not supplied against the {self.subcontract_data.order_doctype} {link}"
+			frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
 
 	def __validate_supplied_or_received_items(self):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
@@ -1898,6 +1899,17 @@ class SubcontractingController(StockController):
 					)
 
 				mr_obj.update_requested_qty(mr_item_rows)
+
+
+def update_serial_nos_at_supplier(details, serial_nos, is_return):
+	"""Add the serial nos a transfer sent to the supplier, or take out those a return brought back."""
+	if not is_return:
+		details.serial_no.extend(serial_nos)
+		return
+
+	for serial_no in serial_nos:
+		if serial_no in details.serial_no:
+			details.serial_no.remove(serial_no)
 
 
 def get_item_details(items):
