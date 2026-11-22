@@ -1643,9 +1643,11 @@ def get_party_price_in_stock_uom(ctx, pctx, item_code):
 		return None
 
 	prices = get_item_price(frappe._dict(pctx, uom=ctx.get("stock_uom")), item_code, limit=None)
+	# apply_price_list passes the row doctype, get_item_details the parent
+	row_doctype = ctx.doctype if frappe.get_meta(ctx.doctype).istable else f"{ctx.doctype} Item"
 	stock_qty = flt(
 		flt(ctx.get("qty")) * flt(ctx.get("conversion_factor", 1)),
-		frappe.get_precision("Item Price", "packing_unit"),
+		frappe.get_precision(row_doctype, "stock_qty"),
 	)
 	prices = get_prices_fitting_packing_unit(prices, stock_qty)
 	return prices if is_party_price(prices) else None
