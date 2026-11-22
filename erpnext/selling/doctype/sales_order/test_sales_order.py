@@ -319,8 +319,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		frappe.get_doc("Sales Order", so.name).cancel()
 		self.assertEqual(reserved_qty(), 0)
 
-<<<<<<< HEAD
-=======
 	def test_deleting_a_disabled_bundle_row_releases_its_components(self):
 		component = make_item(properties={"is_stock_item": 1}).name
 		bundle = make_item(properties={"is_stock_item": 0}).name
@@ -351,38 +349,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
 		self.assertEqual(reserved_qty(), 0)
 
-	def test_over_delivery_keeps_whole_number_uom_qty(self):
-		item = make_item(
-			"_Test Over Delivery Whole Item",
-			{"is_stock_item": 1, "stock_uom": "_Test UOM", "over_delivery_receipt_allowance": 50},
-		).name
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, rate=100)
-		so = make_sales_order(item_code=item, qty=3)
-		make_delivery_note(so.name).submit()
-
-		self.assertEqual([row.qty for row in make_delivery_note(so.name).items], [1])
-
-	def test_make_production_plan(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		fg_item = make_item("Test PP FG Item", {"is_stock_item": 1}).name
-		make_bom(item=fg_item, rate=100, raw_materials=["_Test Item"])
-
-		so = make_sales_order(item_code=fg_item, do_not_submit=True)
-		self.assertRaises(frappe.ValidationError, make_production_plan, so.name)
-
-		so.submit()
-		pp = make_production_plan(so.name)
-
-		self.assertEqual(pp.doctype, "Production Plan")
-		self.assertGreater(len(pp.get("po_items")), 0)
-		self.assertEqual(pp.get("po_items")[0].sales_order, so.name)
-		self.assertEqual(pp.get("sales_orders")[0].sales_order, so.name)
-		self.assertEqual(getdate(pp.get("sales_orders")[0].sales_order_date), getdate(so.transaction_date))
-		self.assertEqual(pp.get("sales_orders")[0].customer, so.customer)
-		self.assertEqual(pp.get("sales_orders")[0].grand_total, so.base_grand_total)
-
->>>>>>> 75adfc0 (test: deleting a disabled bundle's row with Update Items releases its components)
 	def test_make_sales_invoice(self):
 		so = make_sales_order(do_not_submit=True)
 
