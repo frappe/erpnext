@@ -539,6 +539,28 @@ class TestDeliveryNote(FrappeTestCase):
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_last_part_of_a_delivery_returned_without_dn_detail_counts_at_its_stored_stock_qty(self):
+		"""A row without dn_detail posts its rounded stock qty, so it cannot return more than was delivered."""
+		item = make_item(
+			"_Test Item For Unlinked Return Of Parts",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		dn = create_delivery_note(item_code=item, qty=6, rate=100, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		dn.submit()
+
+		first_return = make_sales_return(dn.name)
+		first_return.items[0].qty = -3
+		first_return.submit()
+
+		# 1.0068 Kg returned + 1.01 Kg stored by this row is more than the 2.01 Kg delivered
+		last_return = make_sales_return(dn.name)
+		last_return.items[0].dn_detail = None
+		self.assertRaises(StockOverReturnError, last_return.submit)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_return_of_a_bundle_whose_stock_qty_rounds(self):
 		"""A bundle row whose stock qty rounds returns its components at the qty they were packed at."""
 		bundle = make_item(
