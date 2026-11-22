@@ -2299,14 +2299,19 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"received_qty": 5,
 			}
 		)
-		pr.insert().submit()
+		pr.insert()
+		# the package follows a later change of the rejected warehouse
+		rejected_warehouse = create_warehouse("_Test Rejected Two", company="_Test Company")
+		pr.items[0].rejected_warehouse = rejected_warehouse
+		pr.save()
+		pr.submit()
 
-		for bundle, qty in (
-			(pr.items[0].serial_and_batch_bundle, 3),
-			(pr.items[0].rejected_serial_and_batch_bundle, 2),
+		for bundle, warehouse, qty in (
+			(pr.items[0].serial_and_batch_bundle, "Stores - _TC", 3),
+			(pr.items[0].rejected_serial_and_batch_bundle, rejected_warehouse, 2),
 		):
 			package = frappe.get_doc("Serial and Batch Bundle", bundle)
-			self.assertEqual(package.company, "_Test Company")
+			self.assertEqual((package.warehouse, package.company), (warehouse, "_Test Company"))
 			self.assertEqual([(d.batch_no, d.qty) for d in package.entries], [(batch_no, qty)])
 
 	def test_inter_company_receipt_values_delivered_batches_at_receipt_rate(self):
