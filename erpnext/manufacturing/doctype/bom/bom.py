@@ -1980,6 +1980,7 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_consumed_operating_cost
 
 	cost_added = False
+	without_components = []
 	for row in work_order.operations:
 		if job_card and job_card.operation_id != row.name:
 			continue
@@ -1987,16 +1988,11 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 		if not row.actual_operation_time:
 			continue
 
-		workstation_cost = frappe.get_all(
-			"Workstation Cost",
-			fields=["operating_component", "operating_cost"],
-			filters={
-				"parent": row.workstation,
-				"parenttype": "Workstation",
-			},
-		)
-
+		workstation_cost = _get_operating_components(row)
 		total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
+		if not total_component_rate:
+			without_components.append(row)
+
 		if not (flt(row.actual_operating_cost) and total_component_rate):
 			continue
 
@@ -2044,7 +2040,23 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 
 				cost_added = True
 
+	if cost_added:
+		for row in without_components:
+			_add_operation_cost(stock_entry, work_order, row, op_expense_account)
+
 	return cost_added
+
+
+def _get_operating_components(row):
+	# an operation planned on a Workstation Type has no workstation
+	parent, parenttype = (
+		(row.workstation, "Workstation") if row.workstation else (row.workstation_type, "Workstation Type")
+	)
+	return frappe.get_all(
+		"Workstation Cost",
+		fields=["operating_component", "operating_cost"],
+		filters={"parent": parent, "parenttype": parenttype},
+	)
 
 
 def _add_operation_cost(stock_entry, work_order, operation, expense_account):
