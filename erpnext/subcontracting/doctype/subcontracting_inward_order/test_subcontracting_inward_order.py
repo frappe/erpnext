@@ -633,8 +633,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(picked, {first: 1, second: 2})
 
 	def test_rm_return_rows_of_one_batch_item_share_reserved_batches(self):
-		from erpnext.stock.serial_batch_bundle import get_batch_nos
-
 		so, scio = create_so_scio()
 		first_batch, second_batch = receive_batch_in_two_lots(scio)
 		rm_item = next(item for item in scio.received_items if item.rm_item_code == "RM with Batch")
@@ -654,11 +652,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return.append("items", rm_return.items[0].as_dict(no_default_fields=True))
 		rm_return.submit()
 
-		picked = [
-			{batch_no: abs(d.qty) for batch_no, d in get_batch_nos(row.serial_and_batch_bundle).items()}
-			for row in rm_return.items
-		]
-		self.assertEqual(picked, [{first_batch: 2}, {first_batch: 1, second_batch: 1}])
+		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 2}, {first_batch: 1, second_batch: 1}])
 		reserved = frappe.get_all(
 			"Serial and Batch Entry",
 			filters={
@@ -678,6 +672,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			sorted((d.batch_no, d.qty, d.delivered_qty) for d in reserved),
 			sorted([(first_batch, 3, 3), (second_batch, 2, 1)]),
 		)
+
+	def test_rm_return_row_with_reduced_bundle_releases_reserved_batches(self):
+		so, scio = create_so_scio()
+		first_batch, second_batch = receive_batch_in_two_lots(scio)
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.items[0].qty = 4
+		rm_return.insert()
+		StockEntrySABB(rm_return).make_serial_and_batch_bundle_for_outward()
+		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 3, second_batch: 1}])
+
+		# the bundled row gives back 3 of its reserved qty to the new row
+		rm_return.items[0].qty = 1
+		new_row = rm_return.items[0].as_dict(no_default_fields=True)
+		new_row.update({"qty": 4, "serial_and_batch_bundle": None, "use_serial_batch_fields": 1})
+		rm_return.append("items", new_row)
+		rm_return.submit()
+
+		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 1}, {first_batch: 2, second_batch: 2}])
 
 	def test_consumed_serial_and_batch_reservation(self):
 		so, scio = create_so_scio()
@@ -2277,6 +2290,16 @@ def make_work_order_with_extra_material():
 	wo.required_items[-1].source_warehouse = "Stores - _TC"
 	wo.submit()
 	return scio, wo
+
+
+def get_picked_batches(stock_entry):
+	"""Batch qty in the bundle of each row."""
+	from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+	return [
+		{batch_no: abs(d.qty) for batch_no, d in get_batch_nos(row.serial_and_batch_bundle).items()}
+		for row in stock_entry.items
+	]
 
 
 def receive_batch_in_two_lots(scio):
