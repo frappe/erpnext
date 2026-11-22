@@ -2747,10 +2747,18 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 	def test_standalone_debit_note_rate_is_in_the_row_uom(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
-		item = make_item(properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]})
-		make_purchase_invoice(item_code=item.name, qty=24, rate=100, uom=item.stock_uom, update_stock=True)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_method": "FIFO",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		)
+		make_purchase_invoice(item_code=item.name, qty=6, rate=100, uom=item.stock_uom, update_stock=True)
+		make_purchase_invoice(item_code=item.name, qty=18, rate=200, uom=item.stock_uom, update_stock=True)
 
-		for uom, conversion_factor, rate in (("Box", 12, 1200), (item.stock_uom, 1, 100)):
+		# a Box takes 6 at 100 and 6 at 200; a missing factor comes from the item
+		for uom, conversion_factor, rate in (("Box", 12, 1800), ("Box", 0, 1800), (item.stock_uom, 1, 100)):
 			returned_inv = make_purchase_invoice(
 				item_code=item.name,
 				qty=-1,
