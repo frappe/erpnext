@@ -94,6 +94,21 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(filtered_locations[0].serial_nos, ["SN-1", "SN-3"])
 
+	def test_filter_locations_offers_no_more_qty_than_free_serial_nos(self):
+		"""A partly transferred row still lists both picked serial nos while it holds only 1."""
+		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
+
+		warehouse = "Test Warehouse"
+		locations = [
+			_dict(warehouse=warehouse, batch_no=None, qty=4, serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"])
+		]
+		picked_item_details = {warehouse: {"picked_qty": 1, "serial_no": ["SN-1", "SN-2"]}}
+
+		filtered_locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+		self.assertEqual(filtered_locations[0].qty, 2)
+		self.assertEqual(filtered_locations[0].serial_nos, ["SN-3", "SN-4"])
+
 	def test_get_items_with_location_trims_allocated_serial_nos(self):
 		from erpnext.stock.doctype.pick_list.pick_list import get_items_with_location_and_quantity
 
@@ -4736,6 +4751,38 @@ class TestPickList(ERPNextTestSuite):
 		self.assertRaises(
 			frappe.ValidationError, get_pending_work_orders, "Work Order", "", "name", 0, 20, filters
 		)
+
+	def test_transferred_qty_is_no_longer_held_by_the_pick_list(self):
+		"""Stock a Stock Entry moved out for a Material Transfer pick list is not held there any more."""
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_holders
+
+		warehouse = "_Test Warehouse - _TC"
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, qty=10, rate=10, to_warehouse=warehouse)
+		row = {
+			"item_code": item_code,
+			"qty": 10,
+			"stock_qty": 10,
+			"picked_qty": 10,
+			"warehouse": warehouse,
+			"conversion_factor": 1,
+		}
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [row],
+			}
+		).submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.items[0].qty = 6
+		stock_entry.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		stock_entry.submit()
+
+		(holder,) = get_pick_list_holders([item_code], [warehouse])
+		self.assertEqual(holder.holding_qty, 4)
 
 
 def make_work_order_pick_list_with_reserved_serials():
