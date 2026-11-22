@@ -817,7 +817,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				"main_item_code": "Finished Item",
 				"stock_uom": self.item.stock_uom,
 				"rate": 10,
-				"stock_uom": self.item.stock_uom,
 				"s_warehouse": "_Test Warehouse - _TC",
 				"t_warehouse": "_Test Warehouse 1 - _TC",
 			},
