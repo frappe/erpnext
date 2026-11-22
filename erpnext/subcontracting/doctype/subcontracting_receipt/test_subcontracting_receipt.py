@@ -1307,8 +1307,10 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		make_accepted_return(-3).submit()
 		self.assertRaises(StockOverReturnError, make_accepted_return(-1).save)
 
-		make_subcontract_return_against_rejected_warehouse(scr.name).submit()
+		rejected_return = make_subcontract_return_against_rejected_warehouse(scr.name)
 		over_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		rejected_return.submit()
+
 		over_return.items[0].qty = -2
 		self.assertRaises(StockOverReturnError, over_return.save)
 
@@ -3367,6 +3369,35 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		# Verify that the original document's rejected quantity is not affected
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
+
+	def test_no_rejected_warehouse_return_after_all_rejected_qty_is_returned(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.submit()
+		self.assertTrue(scr.has_rejected_qty_to_return())
+
+		make_return_doc("Subcontracting Receipt", scr.name, return_against_rejected_qty=True).submit()
+
+		self.assertFalse(scr.has_rejected_qty_to_return())
+		self.assertRaises(
+			frappe.ValidationError,
+			make_return_doc,
+			"Subcontracting Receipt",
+			scr.name,
+			return_against_rejected_qty=True,
+		)
 
 	def test_accepted_return_from_the_rejected_warehouse_brings_back_raw_materials_at_their_rate(self):
 		sco = get_subcontracting_order(
