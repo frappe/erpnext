@@ -5,10 +5,6 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
-=======
-from frappe.query_builder.functions import IfNull, Sum
->>>>>>> c5f5a53 (fix(buying): don't receive a subcontracted service beyond its Purchase Order qty)
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
 # Percentages at this threshold count as complete.
@@ -305,11 +301,16 @@ class StatusUpdater(Document):
 						item["idx"] = d.idx
 						item["target_ref_field"] = args["target_ref_field"].replace("_", " ")
 
-						# skip qty over-allowance check for non-stock items
+						# skip qty over-allowance check for non-stock items, except a subcontracted
+						# service row, which is received with its finished goods
 						if (
 							"qty" in args.get("target_ref_field", "")
 							and not is_installation
 							and not frappe.get_cached_value("Item", item["item_code"], "is_stock_item")
+							and not (
+								args["target_dt"] == "Purchase Order Item"
+								and frappe.db.get_value("Purchase Order Item", args["name"], "fg_item")
+							)
 						):
 							continue
 
@@ -328,60 +329,6 @@ class StatusUpdater(Document):
 							item["reduce_by"] = flt(item[args["target_field"]])
 							self.limits_crossed_error(args, item, "qty")
 
-<<<<<<< HEAD
-=======
-	def fetch_items_with_pending_qty(self, args, item_field, items):
-		doctype = frappe.qb.DocType(args["target_dt"])
-		item_field_col = doctype[item_field]
-		target_field = doctype[args["target_field"]]
-
-		is_qty_check = "qty" in args["target_ref_field"]
-		is_installation = args.get("overflow_type") == "installation"
-
-		# installation consumes delivered-minus-returned qty, not the raw delivered qty
-		# (returned_qty is in stock UOM, so bring it back to the row's sales UOM)
-		if is_installation:
-			target_ref_value = (
-				doctype[args["target_ref_field"]] - doctype.returned_qty / doctype.conversion_factor
-			)
-		else:
-			target_ref_value = doctype[args["target_ref_field"]]
-
-		query = (
-			frappe.qb.from_(doctype)
-			.select(
-				doctype.name,
-				item_field_col.as_("item_code"),
-				target_ref_value.as_(args["target_ref_field"]),
-				target_field,
-				doctype.parenttype,
-				doctype.parent,
-			)
-			.where(target_ref_value < target_field)
-			.where(doctype.name.isin(items))
-			.where(doctype.docstatus == 1)
-		)
-
-		# installation is not a stock movement, so bundles and non-stock items are installable too
-		if is_qty_check and not is_installation:
-			item_table = frappe.qb.DocType("Item")
-			bundle = frappe.qb.DocType("Product Bundle")
-			# a bundle parent is non-stock, but its packed items move real stock, so limit it like a stock item
-			active_bundle_items = (
-				frappe.qb.from_(bundle)
-				.select(bundle.new_item_code)
-				.where((bundle.is_active == 1) & (bundle.docstatus == 1) & (bundle.disabled == 0))
-			)
-			is_limited = (item_table.is_stock_item == 1) | item_field_col.isin(active_bundle_items)
-			if args["target_dt"] == "Purchase Order Item":
-				# a subcontracted service row is received with its finished goods, so limit it too
-				is_limited |= IfNull(doctype.fg_item, "") != ""
-
-			query = query.join(item_table).on(item_table.name == item_field_col).where(is_limited)
-
-		return query.run(as_dict=True)
-
->>>>>>> c5f5a53 (fix(buying): don't receive a subcontracted service beyond its Purchase Order qty)
 	def check_overflow_with_allowance(self, item, args):
 		"""
 		Checks if there is overflow condering a relaxation allowance
