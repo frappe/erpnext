@@ -71,33 +71,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Stock Reservation Entry", reservation))
 
 	def test_delivery_cancel_reopens_only_its_own_reservation(self):
-		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
-		scio.reload()
-		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
-		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
-		wo.submit()
-		for qty in (3, 2):
-			frappe.new_doc("Stock Entry").update(
-				make_stock_entry_from_wo(wo.name, "Manufacture", qty)
-			).submit()
+		self.assertEqual(cancel_one_of_two_deliveries(-1), [(3, 3), (2, 0)])
 
-		for qty in (3, 2):
-			scio.reload()
-			delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
-			delivery.items[0].qty = qty
-			delivery.submit()
-		delivery.cancel()
-
-		reservations = frappe.get_all(
-			"Stock Reservation Entry",
-			filters={"voucher_detail_no": scio.items[0].name, "docstatus": 1},
-			fields=["reserved_qty", "delivered_qty"],
-			order_by="creation",
-			as_list=True,
-		)
-		self.assertEqual([tuple(reservation) for reservation in reservations], [(3, 3), (2, 0)])
+	def test_first_delivery_cancel_reopens_only_its_own_reservation(self):
+		self.assertEqual(cancel_one_of_two_deliveries(0), [(3, 0), (2, 2)])
 
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
@@ -1993,6 +1970,7 @@ def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
 	return so, scio
 
 
+<<<<<<< HEAD
 def create_test_data():
 	make_subcontracted_items()
 	make_raw_materials()
@@ -2151,3 +2129,33 @@ def make_subcontracting_boms():
 			)
 			doc.insert()
 			doc.save()
+=======
+def cancel_one_of_two_deliveries(index):
+	"""Manufacture and deliver 3 and then 2, cancel delivery `index`; return each reservation's delivered qty."""
+	so, scio = create_so_scio()
+	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+	for qty in (3, 2):
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", qty)).submit()
+
+	deliveries = []
+	for qty in (3, 2):
+		scio.reload()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.items[0].qty = qty
+		deliveries.append(delivery.submit())
+	deliveries[index].cancel()
+
+	reservations = frappe.get_all(
+		"Stock Reservation Entry",
+		filters={"voucher_detail_no": scio.items[0].name, "docstatus": 1},
+		fields=["reserved_qty", "delivered_qty"],
+		order_by="creation",
+		as_list=True,
+	)
+	return [tuple(reservation) for reservation in reservations]
+>>>>>>> 5a25dae (test: cancelling the first receipt or delivery reopens only its own reservation)
