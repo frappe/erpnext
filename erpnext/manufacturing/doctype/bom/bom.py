@@ -1262,7 +1262,7 @@ class BOM(WebsiteGenerator):
 
 		for item in self.secondary_items:
 			item.process_loss_qty = flt(
-				item.stock_qty * (item.process_loss_per / 100), self.precision("quantity")
+				item.stock_qty * (item.process_loss_per / 100), item.precision("process_loss_qty")
 			)
 
 	def validate_uoms(self):
