@@ -1412,6 +1412,24 @@ class TestSubcontractingController(ERPNextTestSuite):
 			[(row.qty, row.serial_no) for row in doc.available_materials.values()], [(1, ["S1"]), (0, [])]
 		)
 
+	def test_serial_no_returned_over_other_transfers_goes_back_to_the_one_that_sent_it(self):
+		"""FG C consumed S2 and S3, sent for FG A and B, and a return of C brings S3 back."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc._SubcontractingController__transferred_items = {
+			("RM", "A", "SCO"): frappe._dict(qty=2, serial_no=["S1", "S2"]),
+			("RM", "B", "SCO"): frappe._dict(qty=2, serial_no=["S3", "S4"]),
+		}
+		doc.available_materials = {
+			("RM", "A", "SCO"): frappe._dict(qty=1, serial_no=["S1"]),
+			("RM", "B", "SCO"): frappe._dict(qty=1, serial_no=["S4"]),
+		}
+		keys = doc.get_transfer_keys(("RM", "C", "SCO"))
+		doc.update_consumed_serial_nos(keys, ["S3"], is_return=True, change_qty=True)
+		self.assertEqual(
+			[(row.qty, sorted(row.serial_no)) for row in doc.available_materials.values()],
+			[(1, ["S1"]), (2, ["S3", "S4"])],
+		)
+
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
