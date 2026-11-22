@@ -2203,7 +2203,9 @@ class update_entries_after:
 					as_dict=True,
 				)
 				if details.is_internal_supplier or (details.is_return and not details.return_against):
-					rate = outgoing_rate if details.is_return else sle.outgoing_rate
+					rate = (
+						outgoing_rate if details.is_return else self.get_internal_receipt_valuation_rate(sle)
+					)
 
 					frappe.db.set_value(
 						f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", rate
@@ -2219,6 +2221,15 @@ class update_entries_after:
 			doc.update_valuation_rate(reset_outgoing_rate=False)
 			for d in doc.items + doc.supplied_items:
 				d.db_update()
+
+	def get_internal_receipt_valuation_rate(self, sle):
+		"""Rate of the stock an internal receipt row accepted: what its transit leg gives back plus
+		the landed cost over the accepted qty, as the receipt itself values it."""
+		child_doctype = sle.voucher_type + " Item"
+		stock_qty = frappe.db.get_value(child_doctype, sle.voucher_detail_no, "stock_qty")
+		return flt(sle.outgoing_rate) + get_landed_cost_rate(
+			child_doctype, sle.voucher_detail_no, flt(stock_qty)
+		)
 
 	def update_rate_on_subcontracting_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists("Subcontracting Receipt Item", sle.voucher_detail_no):
@@ -3453,7 +3464,6 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	For inter company transfer, incoming rate is the average of the outgoing rate
 	"""
 	rate = 0.0
-	lcv_rate = 0.0
 
 	field = "delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
 
@@ -3484,13 +3494,16 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	if sle.actual_qty < 0:
 		return rate
 
-	# add lcv amount in incoming_rate
-	lcv_amount = frappe.db.get_value(child_doctype, sle.voucher_detail_no, "landed_cost_voucher_amount")
+	return rate + get_landed_cost_rate(child_doctype, sle.voucher_detail_no, abs(sle.actual_qty))
 
-	if lcv_amount:
-		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
 
-	return rate + lcv_rate
+def get_landed_cost_rate(child_doctype, voucher_detail_no, stock_qty) -> float:
+	"""Landed cost of a receipt row per unit of stock_qty."""
+	if not stock_qty:
+		return 0.0
+
+	lcv_amount = frappe.db.get_value(child_doctype, voucher_detail_no, "landed_cost_voucher_amount")
+	return flt(lcv_amount) / stock_qty
 
 
 def is_internal_transfer(sle):
