@@ -1068,10 +1068,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const stock_qty = item.qty * item.conversion_factor;
 		// a delivery takes the stock out, so ask for its outgoing rate as the server does
 		const is_outgoing = this.frm.doc.is_internal_customer && !this.frm.doc.is_return;
+		// an internal purchase is valued at the sending warehouse, as handle_internal_parties does
+		const is_internal_purchase = ["Purchase Receipt", "Purchase Invoice"].includes(voucher_type);
 
 		let item_args = {
 			item_code: item.item_code,
-			warehouse: item.warehouse,
+			warehouse: is_internal_purchase ? item.from_warehouse : item.warehouse,
 			posting_date: posting_date,
 			posting_time: posting_time,
 			qty: is_outgoing ? -stock_qty : stock_qty,
