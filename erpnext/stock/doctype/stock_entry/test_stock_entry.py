@@ -6073,6 +6073,12 @@ class TestStockEntry(ERPNextTestSuite):
 			entry = new_stock_entry(purpose="Manufacture", work_order=other_work_order.name)
 			self.assertRaises(frappe.PermissionError, entry.get_stock_and_rate)
 
+	def test_ceil_qty_ignores_float_noise(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import ceil_qty_if_uom_has_whole_number
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(0.07 * 100, "Nos"), 7)
+
 	def test_disassemble_get_items_checks_manufacture_entry_permission(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
@@ -6082,7 +6088,6 @@ class TestStockEntry(ERPNextTestSuite):
 			make_stock_entry as make_wo_stock_entry,
 		)
 
-<<<<<<< HEAD
 		warehouse = "_Test Warehouse - _TC"
 		fg_item = make_item("_Test Disassembled Steel Frame", {"is_stock_item": 1}).name
 		rm_item = make_item("_Test Disassembled Steel Sheet", {"is_stock_item": 1}).name
@@ -6090,23 +6095,6 @@ class TestStockEntry(ERPNextTestSuite):
 		receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=9, basic_rate=7.33)
 		work_order = make_wo_order_test_record(
 			production_item=fg_item, bom_no=bom.name, qty=2, skip_transfer=1, source_warehouse=warehouse
-=======
-		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
-		self.assertEqual(ceil_qty_if_uom_has_whole_number(2.3, "Nos"), 3)
-		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
-
-	def test_ceil_qty_ignores_float_noise(self):
-		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
-			ceil_qty_if_uom_has_whole_number,
-		)
-
-		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
-		self.assertEqual(ceil_qty_if_uom_has_whole_number(0.07 * 100, "Nos"), 7)
-
-	def test_ceil_qty_no_rounding_for_decimal_uom(self):
-		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
-			ceil_qty_if_uom_has_whole_number,
->>>>>>> 0a6792f (test: whole number rounding ignores float noise)
 		)
 
 		def manufacture():
