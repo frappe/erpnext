@@ -854,17 +854,21 @@ class SubcontractingController(StockController):
 			else {}
 		)
 
-		for row in consumed_materials:
-			keys = self.get_transfer_keys(
-				(row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
-			)
+		def get_key(row):
+			return (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
+
+		# a finished good's own consumption first, so another's only takes what it left
+		for row in sorted(consumed_materials, key=lambda row: not self.available_materials.get(get_key(row))):
+			keys = self.get_transfer_keys(get_key(row))
 			if not keys:
 				continue
 
-			self.deduct_consumed_qty(keys, row.consumed_qty)
-
 			bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
 			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
+
+			# a batch spread over transfers takes the qty from those that sent it
+			if len(keys) == 1 or not (consumed_bundles.batch_nos or row.batch_no):
+				self.deduct_consumed_qty(keys, row.consumed_qty)
 
 			if consumed_bundles.serial_nos:
 				self.remove_consumed_serial_nos(keys, consumed_bundles.serial_nos)
@@ -872,10 +876,8 @@ class SubcontractingController(StockController):
 			if consumed_bundles.batch_nos:
 				for batch_no, qty in consumed_bundles.batch_nos.items():
 					if qty:
-						# Conumed qty is negative therefore added it instead of subtracting
-						self.available_materials[self.get_batch_key(keys, batch_no)]["batch_no"][
-							batch_no
-						] += qty
+						# consumed qty is negative
+						self.deduct_consumed_batch_qty(keys, batch_no, abs(qty))
 						consumed_bundles.batch_nos[batch_no] += abs(qty)
 
 			# Will be deprecated in v16
@@ -893,9 +895,7 @@ class SubcontractingController(StockController):
 				from erpnext.deprecation_dumpster import deprecation_warning
 
 				deprecation_warning("unknown", "v16", "No instructions.")
-				self.available_materials[self.get_batch_key(keys, row.batch_no)]["batch_no"][
-					row.batch_no
-				] -= row.consumed_qty
+				self.deduct_consumed_batch_qty(keys, row.batch_no, row.consumed_qty)
 
 	def get_transfer_keys(self, key):
 		"""Transfers a consumption counts against: its own, else the order's other transfers of the raw material."""
@@ -905,22 +905,31 @@ class SubcontractingController(StockController):
 		rm_item_code, _finished_good, order = key
 		return [k for k in self.available_materials if (k[0], k[2]) == (rm_item_code, order)]
 
-	def deduct_consumed_qty(self, keys, qty):
-		"""Take the qty from the transfers in turn, each up to what it has left; the last takes the rest."""
+	def deduct_consumed_qty(self, keys, qty, batch_no=None):
+		"""Take the qty from the transfers in turn, each up to what it has left (of the batch, if given);
+		the last takes the rest."""
 		for key in keys:
 			details = self.available_materials[key]
-			deducted = qty if key == keys[-1] else min(qty, max(details.qty, 0))
+			left = details.batch_no[batch_no] if batch_no else details.qty
+			deducted = qty if key == keys[-1] else min(qty, max(left, 0))
 			details.qty -= deducted
+			if batch_no:
+				details.batch_no[batch_no] -= deducted
 			qty -= deducted
+
+	def deduct_consumed_batch_qty(self, keys, batch_no, qty):
+		"""Take the batch from the transfers that sent it, and over several transfers their qty too."""
+		if len(keys) == 1:
+			self.available_materials[keys[0]].batch_no[batch_no] -= qty
+			return
+
+		sent_on = [key for key in keys if self.available_materials[key].batch_no.get(batch_no)]
+		self.deduct_consumed_qty(sent_on or keys[:1], qty, batch_no)
 
 	def remove_consumed_serial_nos(self, keys, serial_nos):
 		for key in keys:
 			details = self.available_materials[key]
 			details.serial_no = list(set(details.serial_no) - set(serial_nos))
-
-	def get_batch_key(self, keys, batch_no):
-		"""The transfer the batch was sent on, else the first one."""
-		return next((key for key in keys if self.available_materials[key].batch_no.get(batch_no)), keys[0])
 
 	def get_available_materials(self):
 		"""Get the available raw materials which has been transferred to the supplier.
