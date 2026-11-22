@@ -5,10 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
-=======
-from frappe.query_builder.functions import IfNull, Sum
->>>>>>> c5f5a53 (fix(buying): don't receive a subcontracted service beyond its Purchase Order qty)
+from frappe.query_builder.functions import IfNull
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
 # Percentages at this threshold count as complete.

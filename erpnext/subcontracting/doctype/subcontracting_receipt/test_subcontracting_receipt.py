@@ -4383,13 +4383,15 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			frappe.copy_doc(purchase_receipt).insert,
 		)
 
-<<<<<<< HEAD
-=======
 	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
 	def test_subcontracted_service_cannot_be_received_beyond_the_order(self):
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_po_receipt
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt as make_po_receipt,
+		)
 		from erpnext.controllers.status_updater import OverAllowanceError
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
 
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
@@ -4405,51 +4407,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertRaises(OverAllowanceError, make_purchase_receipt(scr.name).submit)
 
-	def test_purchase_receipt_keeps_purchase_order_currency(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
-
-		po = create_purchase_order(
-			rm_items=[
-				{
-					"warehouse": "_Test Warehouse - _TC",
-					"item_code": "Subcontracted Service Item 1",
-					"qty": 10,
-					"rate": 100,
-					"fg_item": "Subcontracted Item SA1",
-					"fg_item_qty": 10,
-				},
-			],
-			is_subcontracted=1,
-			supplier="_Test Supplier USD",
-			currency="USD",
-			supplier_warehouse="_Test Warehouse 1 - _TC",
-			do_not_submit=True,
-		)
-		po.conversion_rate = 80
-		po.save()
-		po.submit()
-
-		sco = get_subcontracting_order(po_name=po.name)
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr = make_subcontracting_receipt(sco.name)
-		scr.save()
-		scr.submit()
-
-		pr = make_purchase_receipt(scr.name, save=True)
-
-		self.assertEqual(pr.currency, "USD")
-		self.assertEqual(pr.conversion_rate, 80)
-		self.assertEqual(pr.grand_total, 1000)
-		self.assertEqual(pr.base_grand_total, 80000)
-
->>>>>>> c4fc40c (test: subcontracted service cannot be received beyond its Purchase Order qty)
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
