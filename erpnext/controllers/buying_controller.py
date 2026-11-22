@@ -316,7 +316,9 @@ class BuyingController(SubcontractingController):
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate, converted to the row's UOM
-					conversion_factor = flt(row.conversion_factor) or 1
+					conversion_factor = flt(row.conversion_factor) or get_conversion_factor(
+						row.item_code, row.uom
+					).get("conversion_factor")
 					valuation_rate = _get_incoming_rate(
 						{
 							"item_code": row.item_code,
