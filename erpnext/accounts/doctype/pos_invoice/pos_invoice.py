@@ -13,7 +13,10 @@ from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form, getdate
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext import _refuse
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+	is_loyalty_program_enabled,
+	validate_loyalty_points,
+)
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -250,11 +253,11 @@ class POSInvoice(SalesInvoice):
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
-		if not self.is_return and self.loyalty_program:
+		if not self.is_return and self.loyalty_program and is_loyalty_program_enabled():
 			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			LoyaltyService(self).apply_loyalty_points()
@@ -306,10 +309,10 @@ class POSInvoice(SalesInvoice):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
 		if not self.is_return and self.loyalty_program:
-			LoyaltyService(self).delete_loyalty_point_entry()
+			LoyaltyService(self).reverse_loyalty_point_entries()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).reverse_loyalty_point_entries()
 			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
 
 		self.db_set("status", "Cancelled")
@@ -625,6 +628,9 @@ class POSInvoice(SalesInvoice):
 		self.outstanding_amount = flt(total - paid_amount, precision) if total > paid_amount else 0
 
 	def validate_loyalty_transaction(self):
+		if self.customer and not (self.loyalty_program or self.is_return):
+			LoyaltyService(self).set_loyalty_program()
+
 		if self.redeem_loyalty_points and (
 			not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center
 		):

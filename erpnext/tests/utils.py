@@ -2650,6 +2650,7 @@ class BootStrapTestData:
 			},
 		]
 		self.make_records(["loyalty_program_name"], records)
+		frappe.db.set_single_value("Accounts Settings", "enable_loyalty_point_program", 1)
 
 	def make_item_price(self):
 		records = [
