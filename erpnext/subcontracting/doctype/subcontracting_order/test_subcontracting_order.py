@@ -1175,8 +1175,9 @@ class TestSubcontractingOrder(FrappeTestCase):
 		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
 		for row in ste.items:
 			row.subcontracted_item = "Subcontracted Item SA1"
+		ste.insert()
 
-		self.assertRaisesRegex(frappe.ValidationError, "is not a finished good", ste.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "is not a finished good", ste.submit)
 
 	@change_settings(
 		"Buying Settings",
@@ -1210,6 +1211,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 		ste.items[0].subcontracted_item = fg_item
 
 		ste.insert()
+		ste.submit()
 
 	def test_subcontracting_order_rm_required_items_for_precision(self):
 		item_code = "Subcontracted Item SA9"
