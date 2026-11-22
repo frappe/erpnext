@@ -3683,57 +3683,20 @@ class TestJobCard(ERPNextTestSuite):
 
 		return frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 10))
 
+	def test_partial_manufacture_consumes_completed_share_of_job_card_transfer(self):
+		"""A Job Card moves 10 RM and completes 6, so the Manufacture for 6 leaves 4 RM in WIP."""
+		from erpnext.stock.utils import get_bin
+
+		work_order, rm = make_partly_completed_job_card_transfer_order("JC Transfer Completed", 1)
+		manufacture = frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 6))
+		self.assertEqual(sum(row.transfer_qty for row in manufacture.items if row.item_code == rm), 6)
+
+		manufacture.submit()
+		self.assertEqual(get_bin(rm, work_order.wip_warehouse).actual_qty, 4)
+
 	def test_partial_manufacture_consumes_its_share_of_job_card_transfer(self):
 		"""The RM is used in two operations, so each Job Card moves its own share of it."""
-		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
-		from erpnext.stock.doctype.item.test_item import make_item
-
-		warehouse = "Stores - _TC"
-		rm = make_item("JC Transfer Share RM", {"is_stock_item": 1, "valuation_rate": 50}).name
-		fg = make_item("JC Transfer Share FG", {"is_stock_item": 1}).name
-		bom = frappe.new_doc(
-			"BOM",
-			company="_Test Company",
-			item=fg,
-			quantity=1,
-			with_operations=1,
-			transfer_material_against="Job Card",
-			backflush_based_on="Material Transferred for Manufacture",
-		)
-		for idx in (1, 2):
-			operation = {
-				"operation": f"JC Transfer Share Op {idx}",
-				"workstation": f"JC Transfer Share WS {idx}",
-				"time_in_mins": 6,
-			}
-			make_workstation(operation)
-			make_operation(operation)
-			bom.append("items", {"item_code": rm, "qty": 1, "operation": operation["operation"]})
-			bom.append("operations", operation)
-		bom.insert()
-		bom.submit()
-
-		make_stock_entry(item_code=rm, target=warehouse, qty=20, basic_rate=50)
-		work_order = make_wo_order_test_record(
-			item=fg, qty=10, bom_no=bom.name, source_warehouse=warehouse, transfer_material_against="Job Card"
-		)
-		job_cards = frappe.get_all(
-			"Job Card", {"work_order": work_order.name}, pluck="name", order_by="sequence_id, creation"
-		)
-		for hour, name in enumerate(job_cards, start=8):
-			frappe.get_doc(make_stock_entry_from_jc(name)).submit()
-			job_card = frappe.get_doc("Job Card", name)
-			job_card.append(
-				"time_logs",
-				{
-					"from_time": f"2024-06-01 {hour:02d}:00:00",
-					"to_time": f"2024-06-01 {hour:02d}:36:00",
-					"completed_qty": 6,
-				},
-			)
-			job_card.pending_qty = 4
-			job_card.submit()
-
+		work_order, rm = make_partly_completed_job_card_transfer_order("JC Transfer Share", 2)
 		manufacture = frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 6))
 		self.assertEqual(sum(row.transfer_qty for row in manufacture.items if row.item_code == rm), 12)
 
@@ -5903,7 +5866,62 @@ def jc_review_log(from_time, minutes, completed_qty=0, employee=None, **values):
 	}
 
 
+<<<<<<< HEAD
 def make_jc_review_employee():
 	from erpnext.setup.doctype.employee.test_employee import make_employee
 
 	return make_employee(f"jc-review-{frappe.generate_hash(length=8)}@example.com", company="_Test Company")
+=======
+def make_partly_completed_job_card_transfer_order(name, operation_count):
+	"""Work Order for 10 FG, 1 RM per FG in each operation; each Job Card moves 10 RM and completes 6."""
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	warehouse = "Stores - _TC"
+	rm = make_item(f"{name} RM", {"is_stock_item": 1, "valuation_rate": 50}).name
+	fg = make_item(f"{name} FG", {"is_stock_item": 1}).name
+	bom = frappe.new_doc(
+		"BOM",
+		company="_Test Company",
+		item=fg,
+		quantity=1,
+		with_operations=1,
+		transfer_material_against="Job Card",
+		backflush_based_on="Material Transferred for Manufacture",
+	)
+	for idx in range(1, operation_count + 1):
+		operation = {
+			"operation": f"{name} Op {idx}",
+			"workstation": f"{name} WS {idx}",
+			"time_in_mins": 6,
+		}
+		make_workstation(operation)
+		make_operation(operation)
+		bom.append("items", {"item_code": rm, "qty": 1, "operation": operation["operation"]})
+		bom.append("operations", operation)
+	bom.insert()
+	bom.submit()
+
+	make_stock_entry(item_code=rm, target=warehouse, qty=10 * operation_count, basic_rate=50)
+	work_order = make_wo_order_test_record(
+		item=fg, qty=10, bom_no=bom.name, source_warehouse=warehouse, transfer_material_against="Job Card"
+	)
+	job_cards = frappe.get_all(
+		"Job Card", {"work_order": work_order.name}, pluck="name", order_by="sequence_id, creation"
+	)
+	for hour, job_card_name in enumerate(job_cards, start=8):
+		frappe.get_doc(make_stock_entry_from_jc(job_card_name)).submit()
+		job_card = frappe.get_doc("Job Card", job_card_name)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": f"2024-06-01 {hour:02d}:00:00",
+				"to_time": f"2024-06-01 {hour:02d}:36:00",
+				"completed_qty": 6,
+			},
+		)
+		job_card.pending_qty = 4
+		job_card.submit()
+
+	return work_order, rm
+>>>>>>> 99dd40e (test: partial Manufacture leaves the pending share of a Job Card transfer in WIP)
