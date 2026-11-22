@@ -965,12 +965,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 		scr.items[0].qty -= 5
 		scr.submit()
 
-		frappe.flags.args = frappe._dict(
-			subcontract_order=sco.name,
-			rm_details=[d.name for d in sco.supplied_items],
-			order_doctype=sco.doctype,
-		)
-		ste = get_materials_from_supplier(sco.name)
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
 		row = next(
 			row
 			for row in ste.items
@@ -1002,17 +997,72 @@ class TestSubcontractingOrder(FrappeTestCase):
 		send.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 10})
 		send.submit()
 
-		frappe.flags.args = frappe._dict(
-			subcontract_order=sco.name,
-			rm_details=[d.name for d in sco.supplied_items],
-			order_doctype=sco.doctype,
-		)
-		ste = get_materials_from_supplier(sco.name)
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
 		self.assertEqual((ste.items[0].qty, ste.items[0].conversion_factor), (10, 1))
 		ste.submit()
 
 		sco.load_from_db()
 		self.assertEqual(sco.supplied_items[0].total_supplied_qty, 0)
+
+	def test_return_of_material_sent_in_another_uom_is_in_stock_uom(self):
+		service_item = make_item("Subcontracted Service Item Box Return", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item Box Return", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item(
+			"Subcontracted RM Item Box Return",
+			{"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 2}]},
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 4,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 4,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		transfer = frappe.get_doc(make_rm_stock_entry(sco.name))
+		transfer.items[0].update({"uom": "Box", "conversion_factor": 2, "qty": 2})
+		transfer.submit()
+
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+
+		self.assertEqual((ste.items[0].qty, ste.items[0].uom), (4, ste.items[0].stock_uom))
+
+	def test_transfer_cannot_be_cancelled_after_its_material_was_consumed(self):
+		service_item = make_item("Subcontracted Service Item Consumed Cancel", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item Consumed Cancel", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item("Subcontracted RM Item Consumed Cancel", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 4,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 4,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		transfer = make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		# stock of other orders at the same supplier
+		make_stock_entry(
+			target=sco.supplier_warehouse, item_code=rm_items[0]["item_code"], qty=10, basic_rate=100
+		)
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfer.cancel)
 
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
@@ -1213,31 +1263,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 		self.assertEqual(own_transfer.docstatus, 1)
 
 	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
-		make_subcontracted_item(
-			item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
-		)
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 7",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item SA7",
-				"fg_item_qty": 10,
-			},
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 8",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item Shared RM",
-				"fg_item_qty": 10,
-			},
-		]
-		sco = get_subcontracting_order(service_items=service_items)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
-		)
+		sco = get_subcontracting_order_sharing_a_raw_material()
 
 		def transfer_20_for(fg_item):
 			ste = frappe.get_doc(make_rm_stock_entry(sco.name))
@@ -1248,6 +1274,54 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		transfer_20_for("Subcontracted Item SA7")
 		self.assertRaises(frappe.ValidationError, transfer_20_for, "Subcontracted Item Shared RM")
+
+	@change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_refuses_a_subcontracted_item_not_on_the_order(self):
+		sco = get_subcontracting_order()
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for row in ste.items:
+			row.subcontracted_item = "Subcontracted Item SA1"
+		ste.insert()
+
+		self.assertRaisesRegex(frappe.ValidationError, "is not a finished good", ste.submit)
+
+	@change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_relinks_a_row_moved_to_another_finished_good(self):
+		sco = get_subcontracting_order_sharing_a_raw_material()
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.items = [row for row in ste.items if row.subcontracted_item == "Subcontracted Item SA7"]
+		ste.items[0].subcontracted_item = "Subcontracted Item Shared RM"
+		ste.insert()
+		ste.submit()
+
+		sco.reload()
+		supplied_qty = {row.main_item_code: row.supplied_qty for row in sco.supplied_items}
+		self.assertEqual(supplied_qty, {"Subcontracted Item SA7": 0, "Subcontracted Item Shared RM": 10})
+
+	@change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_accepts_a_finished_good_without_supplied_items(self):
+		fg_item = make_item("Subcontracted Item Supplier Sourced", {"is_sub_contracted_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=["Subcontracted SRM Item 1"], do_not_submit=True)
+		bom.items[0].sourced_by_supplier = 1
+		bom.submit()
+
+		sco = get_subcontracting_order_with_sa7_and(fg_item, "Subcontracted Service Item 9")
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.items[0].subcontracted_item = fg_item
+
+		ste.insert()
+		ste.submit()
 
 	def test_subcontracting_order_rm_required_items_for_precision(self):
 		item_code = "Subcontracted Item SA9"
@@ -1317,6 +1391,41 @@ def make_supplied_item_transfer(sco, row, link=True):
 	if link:
 		rm_item["name"] = row.name
 	return frappe.get_doc(make_rm_stock_entry(sco.name, [rm_item]))
+
+
+def get_subcontracting_order_sharing_a_raw_material():
+	make_subcontracted_item(
+		item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
+	)
+	sco = get_subcontracting_order_with_sa7_and(
+		"Subcontracted Item Shared RM", "Subcontracted Service Item 8"
+	)
+	make_stock_entry(
+		target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+	)
+	return sco
+
+
+def get_subcontracting_order_with_sa7_and(fg_item, service_item):
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": service_item,
+			"qty": 10,
+			"rate": 100,
+			"fg_item": fg_item,
+			"fg_item_qty": 10,
+		},
+	]
+	return get_subcontracting_order(service_items=service_items)
 
 
 def create_subcontracting_order(**args):
