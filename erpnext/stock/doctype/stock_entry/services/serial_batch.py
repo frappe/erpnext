@@ -159,20 +159,23 @@ class StockEntrySABB(BaseStockEntry):
 		return reserved
 
 	def take_bundled_entries(self, reserved):
-		"""Take from reserved what rows with a bundle already hold."""
+		"""Take from reserved what rows with a bundle already hold, up to the row qty."""
 		rows = {row.serial_and_batch_bundle: row for row in self.doc.items if row.serial_and_batch_bundle}
 		if not rows:
 			return
 
+		pending_qty = {bundle: abs(row.transfer_qty) for bundle, row in rows.items()}
 		for entry in frappe.get_all(
 			"Serial and Batch Entry",
 			filters={"parent": ["in", list(rows)]},
 			fields=["parent", "serial_no", "batch_no", "qty"],
 			order_by="idx",
 		):
+			qty = min(abs(entry.qty), pending_qty[entry.parent])
+			pending_qty[entry.parent] -= qty
 			take_reserved_entries(
 				reserved[rows[entry.parent].scio_detail],
-				abs(entry.qty),
+				qty,
 				[entry.serial_no] if entry.serial_no else None,
 				entry.batch_no,
 			)
