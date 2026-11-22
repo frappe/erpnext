@@ -6029,6 +6029,31 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([row.qty for row in proposal.items], [4])
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "backflush_raw_materials_based_on": "BOM"}
+	)
+	def test_material_consumption_proposal_after_process_loss(self):
+		"""The Manufacture also takes the unconsumed 5 Kg, so 5 Kg is left for 2.5 FG."""
+		consumption = "Material Consumption for Manufacture"
+		work_order = make_transferred_consumption_work_order(process_loss_percentage=10)
+		frappe.get_doc(make_stock_entry(work_order.name, consumption, 5)).submit()
+		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5)).submit()
+
+		proposal = frappe.get_doc(make_stock_entry(work_order.name, consumption))
+		self.assertEqual(proposal.fg_completed_qty, 2.5)
+		self.assertEqual([row.qty for row in proposal.items], [5])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "backflush_raw_materials_based_on": "BOM"}
+	)
+	def test_material_consumption_proposal_rounds_down(self):
+		"""20 Kg left at 3 Kg per FG proposes 6.66 FG (19.98 Kg), not 6.67 (20.01 Kg)."""
+		work_order = make_transferred_consumption_work_order(rm_qty=3, transferred_rm_qty=20)
+
+		proposal = frappe.get_doc(make_stock_entry(work_order.name, "Material Consumption for Manufacture"))
+		self.assertEqual(proposal.fg_completed_qty, 6.66)
+		self.assertEqual([row.qty for row in proposal.items], [19.98])
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{
 			"material_consumption": 1,
@@ -9676,15 +9701,23 @@ def make_transfer_based_work_order(components, process_loss_percentage=0):
 	return work_order, raw_materials
 
 
-def make_transferred_consumption_work_order():
+def make_transferred_consumption_work_order(rm_qty=2, transferred_rm_qty=None, process_loss_percentage=0):
+	"""Work Order for 10 FG with its materials transferred, or `transferred_rm_qty` of them."""
 	rm_item = make_item(properties={"is_stock_item": 1}).name
 	fg_item = make_item(properties={"is_stock_item": 1}).name
-	bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
-	test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100)
+	bom = make_bom(
+		item=fg_item, raw_materials=[rm_item], rm_qty=rm_qty, process_loss_percentage=process_loss_percentage
+	)
+	test_stock_entry.make_stock_entry(
+		item_code=rm_item, target="Stores - _TC", qty=rm_qty * 10, basic_rate=100
+	)
 	work_order = make_wo_order_test_record(
 		production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
 	)
-	frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
+	transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10))
+	if transferred_rm_qty:
+		transfer.items[0].qty = transferred_rm_qty
+	transfer.submit()
 	return work_order
 
 
