@@ -1749,8 +1749,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "cost_center"]);
 		}
 
-		// a duplicated row keeps its own warehouses; a user default can fill item_code, never stock_uom
-		if (!row.stock_uom) {
+		// a duplicated row keeps its own warehouses; defaults can fill stock_uom, never item_name
+		if (!row.item_name) {
 			if (this.frm.doc.from_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 			if (this.frm.doc.to_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 		}
