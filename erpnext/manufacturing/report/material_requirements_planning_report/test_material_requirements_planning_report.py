@@ -130,6 +130,29 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertFalse([row for row in rows if row.item_code == item])
 
+	def test_overlapping_forecast_periods_use_up_demand_in_any_row_order(self):
+		start_date = getdate(today())
+		mps_data = [
+			frappe._dict(item_code="_Test Item", delivery_date=add_days(start_date, days), planned_qty=100)
+			for days in (10, 33)
+		]
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+
+		for offsets in ((0, 7), (7, 0)):
+			forecast = [
+				frappe._dict(
+					item_code="_Test Item",
+					delivery_date=add_days(start_date, offset),
+					frequency="Monthly",
+					qty=100,
+				)
+				for offset in offsets
+			]
+			with patch.object(MaterialRequirementsPlanningReport, "get_mps_data", return_value=mps_data):
+				report.consume_forecast(forecast)
+
+			self.assertEqual([row.qty for row in forecast], [0, 0])
+
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
 			delivery_dates = ["2026-08-15", "2027-08-15"]
