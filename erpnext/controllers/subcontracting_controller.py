@@ -855,52 +855,77 @@ class SubcontractingController(StockController):
 			else {}
 		)
 
-		def get_key(row):
-			return (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
+		consumptions = []
+		for row in consumed_materials:
+			key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
+			if consumption := self.get_consumption(row, key, voucher_bundle_data):
+				consumptions.append(consumption)
 
+		self.deduct_consumptions(consumptions)
+
+	def get_consumption(self, row, key, voucher_bundle_data):
+		"""A consumed row with the transfers it counts against and how it changes their qty."""
+		keys = self.get_transfer_keys(key)
+		if not keys:
+			return None
+
+		bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
+		bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
+		serial_nos = bundles.serial_nos or []
+		# Will be deprecated in v16
+		if row.serial_no and not serial_nos:
+			from erpnext.deprecation_dumpster import deprecation_warning
+
+			deprecation_warning("unknown", "v16", "No instructions.")
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+			)
+
+		# over several transfers, a batch or serial no changes the qty of those that sent it
+		spread = len(keys) > 1
+		by_batch = spread and bool(bundles.batch_nos or row.batch_no)
+		return frappe._dict(
+			row=row,
+			keys=keys,
+			bundles=bundles,
+			serial_nos=serial_nos,
+			is_own=keys == [key],
+			is_return=row.consumed_qty < 0,
+			by_batch=by_batch,
+			by_serial=spread and not by_batch and bool(serial_nos),
+		)
+
+	def deduct_consumptions(self, consumptions):
+		"""Deduct the consumptions from the transfers they count against."""
 		# a finished good's own consumption first, so another's only takes what it left
-		for row in sorted(consumed_materials, key=lambda row: not self.available_materials.get(get_key(row))):
-			keys = self.get_transfer_keys(get_key(row))
-			if not keys:
-				continue
+		for consumption in sorted(consumptions, key=lambda consumption: not consumption.is_own):
+			self.deduct_consumed_qty_and_batches(consumption)
 
-			bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
-			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
-
-			# over several transfers, a batch or serial no changes the qty of those that sent it
-			spread = len(keys) > 1
-			by_batch = spread and bool(consumed_bundles.batch_nos or row.batch_no)
-			by_serial = spread and not by_batch and bool(consumed_bundles.serial_nos or row.serial_no)
-			is_return = row.consumed_qty < 0
-			if not (by_batch or by_serial):
-				self.deduct_consumed_qty(keys, row.consumed_qty)
-
-			if consumed_bundles.serial_nos:
-				self.update_consumed_serial_nos(keys, consumed_bundles.serial_nos, is_return, by_serial)
-
-			if consumed_bundles.batch_nos:
-				for batch_no, qty in consumed_bundles.batch_nos.items():
-					if qty:
-						# consumed qty is negative
-						self.deduct_consumed_batch_qty(keys, batch_no, abs(qty))
-						consumed_bundles.batch_nos[batch_no] += abs(qty)
-
-			# Will be deprecated in v16
-			if row.serial_no and not consumed_bundles.serial_nos:
-				from erpnext.deprecation_dumpster import deprecation_warning
-
-				deprecation_warning("unknown", "v16", "No instructions.")
-				consumed_serials = SerialBatchIdentity("Serial No").resolve(
-					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+		# serial nos go out and come back in the order they were consumed and returned
+		for consumption in consumptions:
+			if consumption.serial_nos:
+				self.update_consumed_serial_nos(
+					consumption.keys, consumption.serial_nos, consumption.is_return, consumption.by_serial
 				)
-				self.update_consumed_serial_nos(keys, consumed_serials, is_return, by_serial)
 
-			# Will be deprecated in v16
-			if row.batch_no and not consumed_bundles.batch_nos:
-				from erpnext.deprecation_dumpster import deprecation_warning
+	def deduct_consumed_qty_and_batches(self, consumption):
+		row, keys, bundles = consumption.row, consumption.keys, consumption.bundles
+		if not (consumption.by_batch or consumption.by_serial):
+			self.deduct_consumed_qty(keys, row.consumed_qty)
 
-				deprecation_warning("unknown", "v16", "No instructions.")
-				self.deduct_consumed_batch_qty(keys, row.batch_no, row.consumed_qty)
+		if bundles.batch_nos:
+			for batch_no, qty in bundles.batch_nos.items():
+				if qty:
+					# consumed qty is negative
+					self.deduct_consumed_batch_qty(keys, batch_no, abs(qty))
+					bundles.batch_nos[batch_no] += abs(qty)
+
+		# Will be deprecated in v16
+		if row.batch_no and not bundles.batch_nos:
+			from erpnext.deprecation_dumpster import deprecation_warning
+
+			deprecation_warning("unknown", "v16", "No instructions.")
+			self.deduct_consumed_batch_qty(keys, row.batch_no, row.consumed_qty)
 
 	def get_transfer_keys(self, key):
 		"""Transfers a consumption counts against: its own, else the order's other transfers of the raw material."""
