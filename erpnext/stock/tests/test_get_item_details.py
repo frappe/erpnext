@@ -872,191 +872,6 @@ class TestGetItemDetail(FrappeTestCase):
 		self.assertEqual(details.stock_qty, 57)
 		self.assertEqual(len(details.serial_no.split()), 57)
 
-<<<<<<< HEAD
-=======
-	def test_reserved_serial_nos_follow_selected_batch(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
-		item_code, batches = self.make_batched_item_with_stock(
-			[2, 2], has_serial_no=1, serial_no_series="SRB-SN-.#####"
-		)
-
-		with self.change_settings(
-			"Stock Settings",
-			{
-				"pick_serial_and_batch_based_on": "FIFO",
-				"auto_create_serial_and_batch_bundle_for_outward": 1,
-				"enable_stock_reservation": 1,
-				"allow_negative_stock": 0,
-			},
-		):
-			so = make_sales_order(
-				item_code=item_code, warehouse="_Test Warehouse - _TC", qty=4, rate=100, do_not_submit=True
-			)
-			so.reserve_stock = 1
-			so.items[0].reserve_stock = 1
-			so.submit()
-
-			dn = make_delivery_note(so.name)
-			dn.items[0].update(
-				{"qty": 2, "use_serial_batch_fields": 1, "batch_no": batches[1], "serial_no": None}
-			)
-			dn.insert()
-			dn.submit()
-
-			picked_batches = frappe.get_all(
-				"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, pluck="batch_no"
-			)
-			self.assertEqual(picked_batches, [batches[1], batches[1]])
-
-	def test_item_row_and_product_bundle_get_different_serial_nos(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.item.test_item import make_item
-
-		item_code, batches = self.make_batched_item_with_stock(
-			[3], has_serial_no=1, serial_no_series="SPB-SN-.#####"
-		)
-		bundle_item = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle_item, [item_code])
-
-		with self.change_settings(
-			"Stock Settings",
-			{
-				"pick_serial_and_batch_based_on": "FIFO",
-				"auto_create_serial_and_batch_bundle_for_outward": 1,
-				"use_serial_batch_fields": 1,
-			},
-		):
-			dn = create_delivery_note(
-				item_code=item_code, qty=1, use_serial_batch_fields=1, do_not_submit=True
-			)
-			first_row = dn.items[0].as_dict()
-			dn.append(
-				"items",
-				{k: v for k, v in first_row.items() if k not in ("name", "idx", "batch_no", "serial_no")}
-				| {"item_code": bundle_item, "item_name": bundle_item},
-			)
-			dn.save()
-			dn.submit()
-			dn.reload()
-
-			bundles = [
-				row.serial_and_batch_bundle
-				for row in dn.items + dn.packed_items
-				if row.serial_and_batch_bundle
-			]
-			picked = frappe.get_all("Serial and Batch Entry", {"parent": ("in", bundles)}, pluck="serial_no")
-			self.assertEqual(len(picked), 2)
-			self.assertEqual(len(set(picked)), 2)
-
-	def test_same_document_rows_reduce_batch_by_stock_qty(self):
-		item_code, batches = self.make_batched_item_with_stock(
-			[10], uoms=[{"uom": "Box", "conversion_factor": 5}]
-		)
-		box_row = [{"batch_no": batches[0], "uom": "Box", "qty": 1, "stock_qty": 5}]
-
-		with self.change_settings(
-			"Stock Settings",
-			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
-		):
-			self.assertEqual(self.get_picked_batch_no(item_code, 5, items=box_row), batches[0])
-			self.assertIsNone(self.get_picked_batch_no(item_code, 6, items=box_row))
-
-	def test_price_not_uom_dependent_is_applied_to_item_rows(self):
-		"""An Item Price saved for the stock UOM is scaled to the row UOM unless the Price List
-		is marked Price Not UOM Dependent."""
-		item_code = self.make_multi_uom_item()
-		price_list = self.make_selling_price_list("_Test UOM Price List")
-		self.make_item_price(item_code, price_list.name, 100)
-
-		for not_uom_dependent, expected_rate in ((0, 1000), (1, 100)):
-			with self.subTest(price_not_uom_dependent=not_uom_dependent):
-				price_list.price_not_uom_dependent = not_uom_dependent
-				price_list.save()
-				details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
-				self.assertEqual(details.price_list_rate, expected_rate)
-
-	def test_fallback_price_list_uses_its_own_uom_setting(self):
-		item_code = self.make_multi_uom_item()
-		selected_list = self.make_selling_price_list("_Test UOM Price List", not_uom_dependent=1)
-		default_list = self.make_selling_price_list("_Test UOM Default Price List", not_uom_dependent=0)
-		self.make_item_price(item_code, default_list.name, 100)
-
-		with self.change_settings(
-			"Selling Settings",
-			{"fallback_to_default_price_list": 1, "selling_price_list": default_list.name},
-		):
-			details = get_item_details(self.get_uom_rate_context(item_code, selected_list.name))
-
-		self.assertEqual(details.price_list_rate, 1000)
-
-	def test_last_purchase_rate_fallback_in_row_uom(self):
-		item_code = self.make_item_with_last_purchase_fallback()
-
-		details = get_item_details(
-			{
-				"item_code": item_code,
-				"company": "_Test Company",
-				"supplier": "_Test Supplier 1",
-				"doctype": "Purchase Order",
-				"currency": "INR",
-				"conversion_rate": 1,
-				"price_list": "Standard Buying",
-				"price_list_currency": "INR",
-				"plc_conversion_rate": 1,
-				"uom": "_Test UOM 1",
-				"conversion_factor": 10,
-				"qty": 1,
-			}
-		)
-
-		self.assertEqual(details.rate, 100)
-
-<<<<<<< HEAD
->>>>>>> 010bfc6 (test: last purchase rate fallback in the row UOM)
-=======
-	def test_apply_price_list_fallback_without_conversion_factor(self):
-		from erpnext.stock.get_item_details import apply_price_list
-
-		item_code = self.make_item_with_last_purchase_fallback()
-
-		details = apply_price_list(
-			{
-				"doctype": "Purchase Order",
-				"company": "_Test Company",
-				"supplier": "_Test Supplier 1",
-				"currency": "INR",
-				"conversion_rate": 1,
-				"buying_price_list": "Standard Buying",
-				"price_list_currency": "INR",
-				"plc_conversion_rate": 1,
-				"items": [
-					{
-						"doctype": "Purchase Order Item",
-						"item_code": item_code,
-						"uom": "_Test UOM 1",
-						"stock_uom": "_Test UOM",
-						"qty": 1,
-					}
-				],
-			}
-		)
-
-		self.assertEqual(details["children"][0].rate, 100)
-
-	def make_item_with_last_purchase_fallback(self) -> str:
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-
-		item_code = self.make_multi_uom_item()
-		create_purchase_order(item_code=item_code, qty=10, rate=10)
-		# a zero price makes the row fall back to the last purchase rate
-		frappe.db.delete("Item Price", {"item_code": item_code})
-		self.make_item_price(item_code, "Standard Buying", 0)
-		return item_code
-
->>>>>>> f36cd81 (test: last purchase rate fallback in apply_price_list without a conversion factor)
 	def test_supplier_quotation_uses_buying_price_list_exchange_rate(self):
 		for exchange_rate, for_buying in ((90, 1), (95, 0)):
 			frappe.get_doc(
@@ -1274,6 +1089,67 @@ class TestGetItemDetail(FrappeTestCase):
 			details = get_item_details(self.get_uom_rate_context(item_code, selected_list.name))
 
 		self.assertEqual(details.price_list_rate, 1000)
+
+	def test_last_purchase_rate_fallback_in_row_uom(self):
+		item_code = self.make_item_with_last_purchase_fallback()
+
+		details = get_item_details(
+			{
+				"item_code": item_code,
+				"company": "_Test Company",
+				"supplier": "_Test Supplier 1",
+				"doctype": "Purchase Order",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"price_list": "Standard Buying",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1,
+				"uom": "_Test UOM 1",
+				"conversion_factor": 10,
+				"qty": 1,
+			}
+		)
+
+		self.assertEqual(details.rate, 100)
+
+	def test_apply_price_list_fallback_without_conversion_factor(self):
+		from erpnext.stock.get_item_details import apply_price_list
+
+		item_code = self.make_item_with_last_purchase_fallback()
+
+		details = apply_price_list(
+			{
+				"doctype": "Purchase Order",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier 1",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"buying_price_list": "Standard Buying",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1,
+				"items": [
+					{
+						"doctype": "Purchase Order Item",
+						"item_code": item_code,
+						"uom": "_Test UOM 1",
+						"stock_uom": "_Test UOM",
+						"qty": 1,
+					}
+				],
+			}
+		)
+
+		self.assertEqual(details["children"][0].rate, 100)
+
+	def make_item_with_last_purchase_fallback(self) -> str:
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		item_code = self.make_multi_uom_item()
+		create_purchase_order(item_code=item_code, qty=10, rate=10)
+		# a zero price makes the row fall back to the last purchase rate
+		frappe.db.delete("Item Price", {"item_code": item_code})
+		self.make_item_price(item_code, "Standard Buying", 0)
+		return item_code
 
 	def make_multi_uom_item(self) -> str:
 		from erpnext.stock.doctype.item.test_item import make_item

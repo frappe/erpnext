@@ -1203,13 +1203,9 @@ def get_price_list_rate(args, item_doc, out=None):
 		):
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
-<<<<<<< HEAD
-			out.update(get_last_purchase_details(item_doc.name, args.name, args.conversion_rate))
-=======
 			out.update(
-				get_last_purchase_details(item_doc.name, ctx.name, ctx.conversion_rate, ctx.conversion_factor)
+				get_last_purchase_details(item_doc.name, args.name, args.conversion_rate, args.conversion_factor)
 			)
->>>>>>> 1a81351 (fix(buying): convert the last purchase rate fallback to the row UOM)
 
 	return out
 
@@ -1840,32 +1836,19 @@ def _apply_price_list(args, as_doc=False, doc=None):
 		return {"parent": parent, "children": children}
 
 
-<<<<<<< HEAD
 def apply_price_list_on_item(args, doc=None):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	args.conversion_factor = flt(args.conversion_factor) or get_conversion_factor(
 		args.item_code, args.uom
 	).get("conversion_factor", 1)
 	args.stock_qty = flt(args.qty) * flt(args.conversion_factor)
-=======
-def apply_price_list_on_item(ctx, doc=None):
-	item_doc = frappe.get_cached_doc("Item", ctx.item_code)
-	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
-		"conversion_factor", 1
-	)
-	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
->>>>>>> 0affb2d (fix: resolve the row conversion factor before pricing in apply_price_list)
 
 	source_row = get_rate_locked_source_row(args, doc)
 	if source_row:
 		item_details = frappe._dict()
 		lock_source_rate(item_details, source_row)
 	else:
-<<<<<<< HEAD
 		item_details = get_price_list_rate(args, item_doc)
-=======
-		item_details = get_price_list_rate(ctx, item_doc)
->>>>>>> 0affb2d (fix: resolve the row conversion factor before pricing in apply_price_list)
 
 	if not source_row:
 		item_details.update(get_pricing_rule_for_item(args, doc=doc))
