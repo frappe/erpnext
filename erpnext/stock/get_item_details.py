@@ -93,7 +93,7 @@ def get_item_details(
 ) -> ItemDetails:
 	validate_pricing_context(ctx)
 	out = _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
-	for warehouse in (out.warehouse, ctx.warehouse, ctx.from_warehouse):
+	for warehouse in (out.warehouse, ctx.warehouse):
 		if warehouse:
 			erpnext.require_user_permission("Warehouse", warehouse)
 
@@ -492,7 +492,9 @@ def get_used_serial_nos(doc, table=None):
 
 def update_bin_details(ctx: ItemDetailsCtx, out: ItemDetails, doc):
 	if ctx.doctype == "Material Request" and ctx.material_request_type == "Material Transfer":
-		out.update(_get_bin_details(ctx.item_code, ctx.from_warehouse))
+		# Source Warehouse ignores user permissions, so hide only the stock of one the user cannot see
+		is_permitted = erpnext._is_within_user_permissions("Warehouse", ctx.from_warehouse)
+		out.update(_get_bin_details(ctx.item_code, ctx.from_warehouse if is_permitted else None))
 
 	elif out.get("warehouse"):
 		bin_details = _get_bin_details(
