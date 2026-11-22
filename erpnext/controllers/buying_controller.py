@@ -394,14 +394,17 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
 			for row in self.items:
 				if row.rate <= 0:
-					# override the rate with valuation rate
-					row.rate = _get_incoming_rate(
+					# override the rate with valuation rate, converted to the row's UOM
+					conversion_factor = flt(row.conversion_factor) or get_conversion_factor(
+						row.item_code, row.uom
+					).get("conversion_factor")
+					valuation_rate = _get_incoming_rate(
 						{
 							"item_code": row.item_code,
 							"warehouse": row.warehouse,
 							"posting_date": self.get("posting_date"),
 							"posting_time": self.get("posting_time"),
-							"qty": row.qty,
+							"qty": flt(flt(row.qty) * conversion_factor, row.precision("stock_qty")),
 							"serial_and_batch_bundle": row.get("serial_and_batch_bundle"),
 							"company": self.company,
 							"voucher_type": self.doctype,
@@ -410,6 +413,7 @@ class BuyingController(SubcontractingController):
 						},
 						raise_error_if_no_rate=False,
 					)
+					row.rate = flt(valuation_rate * conversion_factor, row.precision("rate"))
 
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
