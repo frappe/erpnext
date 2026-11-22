@@ -179,8 +179,8 @@ class BuyingController(SubcontractingController):
 				elif item.serial_and_batch_bundle:
 					self.resize_package(item, "serial_and_batch_bundle", "qty")
 
-				if item.get(field) and bundle_ids.get(item.get(field)):
-					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
+				if reference and bundle_ids.get(reference):
+					self.set_rejected_package(item, bundle_ids.get(reference))
 
 	def make_accepted_package(self, row, package) -> str:
 		"""Package of the material the row accepts.
