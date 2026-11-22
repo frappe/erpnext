@@ -4425,81 +4425,8 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.save()
 		self.assertEqual(pi.discount_amount, discount_amount)
 
-<<<<<<< HEAD
-=======
-	def test_returned_item_purchase_receipt(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
-			make_purchase_receipt as make_purchase_receipt_from_pi,
-		)
-
-		item = create_item("_Test Returned Item Purchase Receipt", is_stock_item=1)
-
-		pi = make_purchase_invoice(item_code=item.name, qty=5, rate=100)
-
-		return_pi = make_purchase_invoice(
-			item_code=item.name,
-			is_return=1,
-			return_against=pi.name,
-			qty=-5,
-			do_not_submit=True,
-		)
-
-		return_pi.items[0].purchase_invoice_item = pi.items[0].name
-		return_pi.submit()
-
-		pr = make_purchase_receipt_from_pi(pi.name)
-		self.assertFalse(pr.items)
-
-	def test_receipt_is_net_of_debit_notes_at_a_fractional_conversion_factor(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
-			make_purchase_receipt as make_purchase_receipt_from_pi,
-		)
-
-		conversion_factor = 0.083333333
-		item_code = make_item(
-			properties={
-				"is_stock_item": 1,
-				"stock_uom": "_Test UOM 1",
-				"uoms": [{"uom": "Nos", "conversion_factor": conversion_factor}],
-			}
-		).name
-		pi = make_purchase_invoice(item_code=item_code, update_stock=0, do_not_submit=True)
-		pi.items[0].update({"uom": "Nos", "conversion_factor": conversion_factor, "qty": 12})
-		pi.submit()
-		debit_note = make_debit_note(pi.name)
-		debit_note.items[0].qty = -5
-		debit_note.submit()
-
-		receipt = make_purchase_receipt_from_pi(pi.name)
-		self.assertEqual((receipt.items[0].qty, receipt.items[0].received_qty), (7, 7))
-
-	def test_purchase_receipt_maps_qty_left_after_receipt_and_debit_note(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
-			make_purchase_receipt as make_purchase_receipt_from_pi,
-		)
-
-		item = create_item("_Test Over Received Item Purchase Receipt", is_stock_item=1)
-		pi = make_purchase_invoice(item_code=item.name, qty=10, rate=100)
-
-		pr = make_purchase_receipt_from_pi(pi.name)
-		pr.items[0].qty = pr.items[0].received_qty = 3
-		pr.submit()
-
-		debit_note = make_debit_note(pi.name)
-		debit_note.items[0].qty = debit_note.items[0].received_qty = -4
-		debit_note.submit()
-
-		pr = make_purchase_receipt_from_pi(pi.name)
-		self.assertEqual((pr.items[0].qty, pr.items[0].received_qty), (3, 3))
-
-		pr.items[0].qty = pr.items[0].received_qty = 4
-		pr.submit()
-		self.assertFalse(make_purchase_receipt_from_pi(pi.name).items)
-
 	def test_purchase_receipt_from_invoice_after_update_stock_turned_off(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
 		)
 
@@ -4513,53 +4440,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertEqual(pr.items[0].qty, 5)
 
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
-	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
-		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
-			make_customer,
-		)
-		from erpnext.accounts.doctype.party_link.party_link import create_party_link
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-
-		customer = make_customer(customer="_Test Common Party Return PI")
-		supplier = create_supplier(supplier_name="_Test Common Party Return PI").name
-		# Supplier must be secondary so get_common_party_link finds it via the PI's party_type
-		party_link = create_party_link("Customer", customer, supplier)
-
-		pi = make_purchase_invoice(supplier=supplier, parent_cost_center="_Test Cost Center - _TC")
-
-		return_pi = make_return_doc(pi.doctype, pi.name)
-		return_pi.submit()
-
-		# JE for the return should credit the supplier (secondary/reconciliation) account
-		# and debit the customer (primary) account — all positive amounts
-		jv_accounts = frappe.get_all(
-			"Journal Entry Account",
-			filters={"reference_type": return_pi.doctype, "reference_name": return_pi.name, "docstatus": 1},
-			fields=["debit_in_account_currency", "credit_in_account_currency", "account"],
-		)
-
-		self.assertTrue(jv_accounts, "Expected a Journal Entry for the return invoice")
-		for row in jv_accounts:
-			self.assertGreaterEqual(
-				row.debit_in_account_currency,
-				0,
-				f"Negative debit on account {row.account}",
-			)
-			self.assertGreaterEqual(
-				row.credit_in_account_currency,
-				0,
-				f"Negative credit on account {row.account}",
-			)
-
-		# Supplier (secondary) account must be credited, not debited
-		supplier_row = next(r for r in jv_accounts if r.account == pi.credit_to)
-		self.assertGreater(supplier_row.credit_in_account_currency, 0)
-		self.assertEqual(supplier_row.debit_in_account_currency, 0)
-
-		party_link.delete()
-
->>>>>>> d7302d4 (test: purchase receipt from invoice maps items after update stock is turned off)
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
