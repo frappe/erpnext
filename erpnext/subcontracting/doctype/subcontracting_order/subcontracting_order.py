@@ -725,6 +725,18 @@ def make_subcontracting_receipt(source_name: str, target_doc: str | dict | Docum
 	return get_mapped_subcontracting_receipt(source_name, target_doc, items=items)
 
 
+def get_mapped_process_loss_qty(row, received_before: float, process_loss_per: float) -> float:
+	"""For a whole-number UOM, whole units rounded on the order row's running received qty,
+	so that the receipts together lose the BOM's process loss."""
+	if not frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"):
+		return flt(row.qty * (process_loss_per / 100), row.precision("process_loss_qty"))
+
+	def whole_loss_on(received_qty):
+		return flt(received_qty * process_loss_per / 100, 0)
+
+	return whole_loss_on(received_before + flt(row.qty)) - whole_loss_on(received_before)
+
+
 def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 	def update_item(source, target, source_parent):
 		target.purchase_order = source_parent.purchase_order
@@ -732,8 +744,8 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 		target.qty = items.get(source.name) or (flt(source.qty) - flt(source.received_qty))
 		target.received_qty = target.qty
 		if process_loss_per := frappe.get_value("BOM", source.bom, "process_loss_percentage"):
-			target.process_loss_qty = flt(
-				target.qty * (process_loss_per / 100), target.precision("process_loss_qty")
+			target.process_loss_qty = get_mapped_process_loss_qty(
+				target, flt(source.received_qty), process_loss_per
 			)
 			target.qty -= target.process_loss_qty
 
