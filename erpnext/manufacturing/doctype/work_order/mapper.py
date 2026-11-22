@@ -322,7 +322,9 @@ def get_pending_consumption_qty_based_on_bom(work_order):
 		default=0,
 	)
 	pending_to_produce = flt(work_order.qty) - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
-	return max(flt(min(left_for_qty, pending_to_produce), work_order.precision("qty")), 0)
+	# round down, so the proposal never needs more than is left
+	step = 10 ** work_order.precision("qty")
+	return max(math.floor(flt(min(left_for_qty, pending_to_produce) * step, 9)) / step, 0)
 
 
 def get_pending_consumption_qty_based_on_transfer(work_order):
