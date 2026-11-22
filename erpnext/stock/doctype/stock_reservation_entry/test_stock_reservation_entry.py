@@ -757,6 +757,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		self.assertEqual(len(delivered), 5)
 		self.assertTrue(set(get_reserved_serial_nos(so)) <= set(delivered))
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
