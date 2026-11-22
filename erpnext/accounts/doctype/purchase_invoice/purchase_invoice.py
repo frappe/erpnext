@@ -330,10 +330,6 @@ class PurchaseInvoice(BuyingController):
 		if self.on_hold:
 			self.validate_invoice_hold()
 
-<<<<<<< HEAD
-=======
-		pre_submit_validation(self, check_prev_docstatus=True)
-
 	def reset_receipt_qty(self):
 		"""Clear qty left over from Update Stock once it is turned off."""
 		if self.update_stock:
@@ -344,7 +340,6 @@ class PurchaseInvoice(BuyingController):
 				row.received_qty = 0
 				row.rejected_qty = 0
 
->>>>>>> 3496853 (fix: reset received and rejected qty when update stock is off on purchase invoice)
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
 		total_received_qty = 0.0

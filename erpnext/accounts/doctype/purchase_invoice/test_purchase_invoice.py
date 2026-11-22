@@ -4605,7 +4605,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertFalse(make_purchase_receipt_from_pi(pi.name).items)
 
 	def test_purchase_receipt_from_invoice_after_update_stock_turned_off(self):
-		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
 		)
 
