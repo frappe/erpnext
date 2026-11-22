@@ -286,6 +286,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_posting_date_with_po()
 
 		super().validate()
+		self.reset_receipt_qty()
 
 		if not self.is_return:
 			self.po_required()
@@ -328,6 +329,16 @@ class PurchaseInvoice(BuyingController):
 
 		if self.on_hold:
 			self.validate_invoice_hold()
+
+	def reset_receipt_qty(self):
+		"""Clear qty left over from Update Stock once it is turned off."""
+		if self.update_stock:
+			return
+
+		for row in self.items:
+			if not row.pr_detail:
+				row.received_qty = 0
+				row.rejected_qty = 0
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
