@@ -863,7 +863,7 @@ def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
 
 
 def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
-	"""Qty based Work Order reservations taken from these inward order rows, newest first."""
+	"""Qty based Work Order reservations taken from these inward order rows, newest first, locked for update."""
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	wo_item = frappe.qb.DocType("Work Order Item")
 	return (
@@ -888,6 +888,7 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 			& (sre.from_voucher_detail_no.isin(scio_details))
 		)
 		.orderby(sre.creation, order=Order.desc)
+		.for_update()
 	).run(as_dict=True)
 
 
