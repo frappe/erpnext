@@ -277,21 +277,21 @@ class BuyingController(SubcontractingController):
 			self.resize_package(row, "rejected_serial_and_batch_bundle", "rejected_qty")
 			return
 
-		# the rejected warehouse changed
+		# the rejected warehouse changed: the selected rejected batches move with it
+		new_package = None
+		if row.rejected_warehouse:
+			new_package = self.make_package_for_transfer(
+				rejected_package or package,
+				row.rejected_warehouse,
+				type_of_transaction="Inward",
+				do_not_submit=True,
+				qty=get_stock_qty(row, row.rejected_qty),
+				exclude_serial_nos=self.get_accepted_serial_nos(row),
+			)
+			frappe.db.set_value("Serial and Batch Bundle", new_package, "is_rejected", 1)
+
 		self.remove_package(row, "rejected_serial_and_batch_bundle")
-		if not row.rejected_warehouse:
-			return
-
-		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
-			package,
-			row.rejected_warehouse,
-			type_of_transaction="Inward",
-			do_not_submit=True,
-			qty=get_stock_qty(row, row.rejected_qty),
-			exclude_serial_nos=self.get_accepted_serial_nos(row),
-		)
-
-		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
+		row.rejected_serial_and_batch_bundle = new_package
 
 	def remove_package(self, row, bundle_field) -> None:
 		"""Drop the draft package of a row that no longer moves that material."""
@@ -342,8 +342,8 @@ class BuyingController(SubcontractingController):
 
 		A row that rejects material carries the package of its accepted warehouse; a row that
 		rejects nothing carries the package of the in-transit warehouse it came out of. Editing the
-		split or the accepted warehouse rebuilds the package. An inter-company row always carries the
-		package of its accepted warehouse.
+		split rebuilds the package from the delivered one; a change of warehouse only moves the
+		package's batches. An inter-company row always carries the package of its accepted warehouse.
 		"""
 		if not (self.get("is_internal_supplier") and self.is_stock_receipt()) or self.is_return:
 			return
@@ -370,9 +370,12 @@ class BuyingController(SubcontractingController):
 			if (details.warehouse, details.type_of_transaction) == wanted:
 				continue
 
-			row.serial_and_batch_bundle = self.make_accepted_package(
-				row, self.get_delivered_package(row) or package
-			)
+			if details.type_of_transaction != wanted[1]:
+				source = self.get_delivered_package(row) or package
+			else:
+				source = package
+
+			row.serial_and_batch_bundle = self.make_accepted_package(row, source)
 			frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
 	def get_internal_transfer_qty(self, row) -> float:
