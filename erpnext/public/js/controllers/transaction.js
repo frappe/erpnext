@@ -1804,8 +1804,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				return;
 			}
 
-			if (!dont_fetch_price_list_rate && frappe.meta.has_field(doc.doctype, "price_list_currency")) {
-				this.apply_price_list(item, true);
+			if (!dont_fetch_price_list_rate) {
+				frappe.run_serially([
+					() =>
+						frappe.meta.has_field(doc.doctype, "price_list_currency") &&
+						this.apply_price_list(item, true),
+					// an internal rate is per stock UOM, so it changes with the conversion factor
+					() => this.set_internal_valuation_rate(item),
+				]);
 			}
 			this.calculate_stock_uom_rate(doc, cdt, cdn);
 		}
