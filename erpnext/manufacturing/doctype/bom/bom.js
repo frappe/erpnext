@@ -73,6 +73,11 @@ frappe.ui.form.on("BOM", {
 		}
 	},
 
+	quantity(frm) {
+		erpnext.bom.calculate_op_cost(frm.doc);
+		erpnext.bom.calculate_total(frm.doc);
+	},
+
 	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
 		if (frm.doc.routing && frm.doc.with_operations && !frm.doc.operations.length) {
@@ -539,6 +544,8 @@ cur_frm.cscript.hour_rate = function (doc) {
 };
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
+cur_frm.cscript.batch_size = cur_frm.cscript.hour_rate;
+cur_frm.cscript.set_cost_based_on_bom_qty = cur_frm.cscript.hour_rate;
 
 cur_frm.cscript.bom_no = function (doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn, false);
@@ -620,13 +627,21 @@ erpnext.bom.calculate_op_cost = function (doc) {
 
 	if (doc.with_operations) {
 		doc.operations.forEach((item) => {
-			let operating_cost = flt((flt(item.hour_rate) * flt(item.time_in_mins)) / 60, 2);
-			let base_operating_cost = flt(operating_cost * doc.conversion_rate, 2);
+			let operating_cost = (flt(item.hour_rate) * flt(item.time_in_mins)) / 60;
+			let base_operating_cost = operating_cost * flt(doc.conversion_rate);
+			let cost_per_unit = operating_cost / (flt(item.batch_size) || 1);
+			let base_cost_per_unit = base_operating_cost / (flt(item.batch_size) || 1);
 			frappe.model.set_value("BOM Operation", item.name, {
-				operating_cost: operating_cost,
-				base_operating_cost: base_operating_cost,
+				operating_cost: flt(operating_cost, precision("operating_cost", item)),
+				base_operating_cost: flt(base_operating_cost, precision("base_operating_cost", item)),
+				cost_per_unit: cost_per_unit,
+				base_cost_per_unit: base_cost_per_unit,
 			});
 
+			if (item.set_cost_based_on_bom_qty) {
+				operating_cost = cost_per_unit * flt(doc.quantity);
+				base_operating_cost = base_cost_per_unit * flt(doc.quantity);
+			}
 			doc.operating_cost += operating_cost;
 			doc.base_operating_cost += base_operating_cost;
 		});

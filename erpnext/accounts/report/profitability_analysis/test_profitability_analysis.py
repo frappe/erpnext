@@ -204,6 +204,7 @@ def make_restricted_user(user, doctype, value, roles=("Accounts User",)):
 		frappe.get_doc(
 			{
 				"doctype": "User",
+				"send_welcome_email": 0,
 				"email": user,
 				"first_name": "Profitability Analysis",
 				"roles": [{"role": role} for role in roles],

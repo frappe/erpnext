@@ -18,8 +18,9 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import find_party_account, get_party_account
 from erpnext.accounts.utils import get_account_currency, get_currency_precision
+from erpnext.controllers.website_list_for_contact import has_website_permission
 from erpnext.utilities import payment_app_import_guard
 
 ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
@@ -30,6 +31,9 @@ ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"POS Invoice",
 	"Fees",
 ]
+
+
+PORTAL_PAYABLE_DOCTYPES = ("Sales Order", "Sales Invoice")
 
 
 @contextmanager
@@ -122,7 +126,8 @@ class PaymentRequest(Document):
 			self.status = "Draft"
 		self.validate_reference_document()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		ref_doc.check_permission("read")
+		if not self.flags.portal_payment:
+			ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
 		self.validate_party(ref_doc)
 		self.validate_bank_account()
@@ -666,6 +671,13 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+	is_portal_payment = (
+		args.order_type == "Shopping Cart"
+		and "Customer" in frappe.get_roles()
+		and not frappe.has_permission("Payment Request", "create")
+	)
+	if is_portal_payment:
+		args = get_portal_payment_args(args.dt, args.dn, args.submit_doc)
 
 	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
 		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
@@ -673,8 +685,9 @@ def make_payment_request(**args):
 	if args.dn and not isinstance(args.dn, str):
 		frappe.throw(_("Invalid parameter. 'dn' should be of type str"))
 
-	frappe.has_permission("Payment Request", "create", throw=True)
-	frappe.has_permission(args.dt, "read", args.dn, throw=True)
+	if not is_portal_payment:
+		frappe.has_permission("Payment Request", "create", throw=True)
+		frappe.has_permission(args.dt, "read", args.dn, throw=True)
 
 	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
 	if not args.get("company"):
@@ -705,11 +718,14 @@ def make_payment_request(**args):
 				grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
 			else:
 				# If PR's are processed, cancel all of them.
-				cancel_old_payment_requests(ref_doc.doctype, ref_doc.name)
+				cancel_old_payment_requests(
+					ref_doc.doctype, ref_doc.name, ignore_permissions=is_portal_payment
+				)
 		else:
 			grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
 
-	draft_payment_request = frappe.db.get_value(
+	# Portal payments must not reuse a draft prepared by staff.
+	draft_payment_request = not is_portal_payment and frappe.db.get_value(
 		"Payment Request",
 		{"reference_doctype": ref_doc.doctype, "reference_name": ref_doc.name, "docstatus": 0},
 	)
@@ -736,7 +752,8 @@ def make_payment_request(**args):
 		party_account_currency = ref_doc.get("party_account_currency")
 
 		if not party_account_currency:
-			party_account = get_party_account(party_type, party, ref_doc.company)
+			find_account = find_party_account if is_portal_payment else get_party_account
+			party_account = find_account(party_type, party, ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
 
 		pr.update(
@@ -778,12 +795,13 @@ def make_payment_request(**args):
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True
 
+		pr.flags.portal_payment = is_portal_payment
 		if frappe.db.get_single_value("Accounts Settings", "create_pr_in_draft_status", cache=True):
 			pr.insert(ignore_permissions=True)
 		if args.submit_doc:
 			if pr.get("__unsaved"):
 				pr.insert(ignore_permissions=True)
-			pr.flags.ignore_permissions = False
+			pr.flags.ignore_permissions = is_portal_payment
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
@@ -795,6 +813,23 @@ def make_payment_request(**args):
 		return pr
 
 	return pr.as_dict()
+
+
+def get_portal_payment_args(doctype, docname, submit_doc):
+	if doctype not in PORTAL_PAYABLE_DOCTYPES or not isinstance(docname, str):
+		_refuse()
+
+	if not frappe.db.exists(doctype, docname):
+		_refuse()
+
+	ref_doc = frappe.get_doc(doctype, docname)
+	if ref_doc.docstatus != 1 or not has_website_permission(ref_doc, "read", frappe.session.user):
+		_refuse()
+
+	# Payment details must come from the authorized document, not request arguments.
+	return frappe._dict(
+		dt=doctype, dn=docname, order_type="Shopping Cart", submit_doc=submit_doc, ref_doc=ref_doc
+	)
 
 
 def apply_loyalty_points(sales_order, loyalty_points: int) -> float:

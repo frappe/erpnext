@@ -19,6 +19,7 @@ from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotati
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.exceptions import PartyDisabled
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
@@ -63,6 +64,16 @@ class TestRequestforQuotation(FrappeTestCase):
 		with change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1}):
 			rfq.save()
 			self.assertEqual(rfq.items[0].qty, 0)
+
+	def test_item_change_on_material_request_row_is_blocked(self):
+		other_item = make_item("_Test RFQ Item Swap").name
+		mr = make_material_request(qty=5)
+		rfq = make_request_for_quotation(do_not_save=True)
+		rfq.items[0].material_request = mr.name
+		rfq.items[0].material_request_item = mr.items[0].name
+		# swapping the fetched item would leave a stale link to the MR row
+		rfq.items[0].item_code = other_item
+		self.assertRaises(frappe.ValidationError, rfq.insert)
 
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()
@@ -342,10 +353,62 @@ class TestRequestforQuotation(FrappeTestCase):
 		parsed_link = urlparse(rfq.get_link())
 		self.assertEqual(parsed_link.path, f"/rfq/{rfq.name}")
 
+	def test_send_supplier_emails_needs_write_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+			RequestforQuotation,
+			send_supplier_emails,
+		)
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		rfq = make_request_for_quotation()
+		email_id = "rfq-send-email-supplier@example.com"
+		rfq.suppliers[0].db_set({"email_id": email_id, "send_email": 1})
+		reader = make_fenced_user("rfq-send-email-reader@example.com", ["Stock User"])
+		manager = make_fenced_user("rfq-send-email-manager@example.com", ["Purchase Manager"])
+
+		with patch.object(RequestforQuotation, "send_email") as send_email:
+			with as_user(reader):
+				self.assertRaises(frappe.PermissionError, send_supplier_emails, rfq.name)
+			self.assertFalse(frappe.db.exists("User", email_id))
+			send_email.assert_not_called()
+
+			with as_user(manager):
+				send_supplier_emails(rfq.name)
+			send_email.assert_called_once()
+
+		self.assertTrue(frappe.db.exists("User", email_id))
+		self.assertEqual(
+			frappe.db.get_value("Request for Quotation Supplier", rfq.suppliers[0].name, "email_sent"), 1
+		)
+
 	def test_get_pdf(self):
 		rfq = make_request_for_quotation()
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
 		self.assertEqual(frappe.local.response.type, "pdf")
+
+	def test_email_preview_keeps_formatting_and_drops_event_handlers(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[
+				{
+					"supplier": "_Test Supplier",
+					"supplier_name": "_Test Supplier",
+					"email_id": "rfq-preview-supplier@example.com",
+				}
+			],
+			do_not_submit=True,
+		)
+		rfq.use_html = 1
+		rfq.mfs_html = '<p>Dear {{ supplier_name }}</p><b onclick="return false">Steel Sheet</b>'
+		rfq.save()
+
+		supplier = rfq.suppliers[0]
+		preview = rfq.get_supplier_email_preview(supplier.supplier)
+
+		self.assertIn(f"<p>Dear {supplier.supplier_name}</p>", preview["message"])
+		self.assertIn("<b>Steel Sheet</b>", preview["message"])
+		self.assertNotIn("onclick", preview["message"])
 
 	def test_portal_user_with_new_supplier(self):
 		supplier_doc = frappe.get_doc(

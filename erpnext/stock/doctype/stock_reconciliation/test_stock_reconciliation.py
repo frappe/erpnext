@@ -22,6 +22,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	StockReconciliation,
+	get_difference_account,
 	get_items,
 	get_stock_balance_for,
 )
@@ -159,6 +160,44 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(
 			["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100, "_Test UOM"],
 			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"], items[0]["stock_uom"]],
+		)
+
+	def test_difference_account_needs_company_and_reconciliation_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		users = {}
+		for company in ("_Test Company 1", "_Test Company"):
+			users[company] = create_user(
+				f"reco-account-{frappe.scrub(company)}@example.com", "Stock Manager"
+			).name
+			if not frappe.db.exists("User Permission", {"user": users[company], "allow": "Company"}):
+				add_user_permission("Company", company, users[company])
+		projects_user = create_user("reco-account-projects@example.com", "Projects User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		for user in (projects_user, users["_Test Company 1"]):
+			frappe.set_user(user)
+			self.assertRaises(
+				frappe.PermissionError, get_difference_account, "Opening Stock", "_Test Company"
+			)
+
+		frappe.set_user(users["_Test Company"])
+		self.assertEqual(get_difference_account("Opening Stock", "_Test Company"), "Temporary Opening - _TC")
+
+	def test_difference_account_applies_company_permission_for_stock_reconciliation(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		user = create_user("reco-account-scoped@example.com", "Stock Manager").name
+		if not frappe.db.exists("User Permission", {"user": user, "allow": "Company"}):
+			add_user_permission("Company", "_Test Company 1", user, applicable_for="Stock Reconciliation")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(user)
+		self.assertRaises(frappe.PermissionError, get_difference_account, "Opening Stock", "_Test Company")
+		self.assertEqual(
+			get_difference_account("Opening Stock", "_Test Company 1"), "Temporary Opening - _TC1"
 		)
 
 	def test_stock_reco_for_serialized_item(self):
@@ -2256,6 +2295,39 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			),
 		).name
 
+	def _save_zero_rate_reco_with_batch_bundle(self, allow_zero_valuation_rate):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self._make_batch_item("Test Stock Reco Zero Rate Batch Bundle", "TSRZRBB-.#####")
+		warehouse = "_Test Warehouse - _TC"
+
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=50)
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=5,
+			rate=0,
+			batch_no=get_batch_from_bundle(se.items[0].serial_and_batch_bundle),
+			reconcile_all_serial_batch=0,
+			do_not_save=1,
+		)
+		sr.items[0].allow_zero_valuation_rate = allow_zero_valuation_rate
+		sr.save()
+		return sr.items[0]
+
+	def test_zero_rate_kept_on_a_row_with_a_selected_batch_bundle(self):
+		row = self._save_zero_rate_reco_with_batch_bundle(allow_zero_valuation_rate=1)
+
+		self.assertEqual(row.valuation_rate, 0)
+		self.assertEqual(row.amount_difference, -250)
+
+	def test_form_filled_zero_rate_takes_the_bundle_rate(self):
+		"""The form fills a zero rate for batch items; without Allow Zero Valuation Rate it is not a write-down."""
+		row = self._save_zero_rate_reco_with_batch_bundle(allow_zero_valuation_rate=0)
+
+		self.assertEqual(row.valuation_rate, 50)
+		self.assertEqual(row.amount_difference, 0)
+
 	def test_zeroing_a_batch_does_not_make_an_adjustment_entry(self):
 		"""Emptying a batch that holds stock is an ordinary outward entry, not a value write-off."""
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -2737,6 +2809,47 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 				[(0.0, 0.0), (4.0, 480.0)],
 			)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_backdated_reconciliation_cannot_take_batch_qty_a_later_entry_used(self):
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item = make_item(properties={"has_batch_no": 1}).name
+		batch = make_new_batch(item_code=item, batch_id=frappe.generate_hash(length=10)).name
+		other_batch = make_new_batch(item_code=item, batch_id=frappe.generate_hash(length=10)).name
+		warehouse = "_Test Warehouse - _TC"
+		batch_args = {"item_code": item, "batch_no": batch, "use_serial_batch_fields": 1}
+
+		# the other batch keeps the warehouse total positive and the second warehouse keeps the batch total
+		# positive, so only the batch in this warehouse goes negative
+		for batch_no, target in (
+			(batch, warehouse),
+			(other_batch, warehouse),
+			(batch, "_Test Warehouse 1 - _TC"),
+		):
+			make_stock_entry(
+				**{**batch_args, "batch_no": batch_no},
+				target=target,
+				qty=10,
+				rate=100,
+				posting_date=add_days(nowdate(), -3),
+			)
+		make_stock_entry(**batch_args, source=warehouse, qty=6, posting_date=add_days(nowdate(), -1))
+
+		reconcile = {
+			**batch_args,
+			"warehouse": warehouse,
+			"rate": 100,
+			"reconcile_all_serial_batch": 0,
+			"posting_date": add_days(nowdate(), -2),
+		}
+		create_stock_reconciliation(**reconcile, qty=6)
+
+		reco = create_stock_reconciliation(**reconcile, qty=5, do_not_submit=True)
+		self.assertRaises(NegativeStockError, reco.submit)
+
 	def test_stock_balance_lookup_without_valuation_rate(self):
 		item_code = create_item(f"_Test Reco Balance Without Rate {frappe.generate_hash(length=8)}").name
 		create_stock_reconciliation(item_code=item_code, qty=7, rate=100)
@@ -2934,6 +3047,14 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(queue_action.call_count, 2)
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation", sr.name, "docstatus"), 0)
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation Item", sr.items[0].name, "qty"), 20)
+
+	def test_quantity_difference_is_rounded_for_fractional_qty(self):
+		item_code = self.make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		create_stock_reconciliation(item_code=item_code, qty=10.1, rate=100)
+
+		sr = create_stock_reconciliation(item_code=item_code, qty=10.3, rate=100, do_not_submit=True)
+
+		self.assertEqual(flt(sr.items[0].quantity_difference), 0.2)
 
 
 def create_batch_item_with_batch(item_name, batch_id):

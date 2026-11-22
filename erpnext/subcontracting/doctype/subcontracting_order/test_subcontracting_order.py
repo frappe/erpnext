@@ -5,7 +5,7 @@ import copy
 from collections import defaultdict
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
@@ -29,7 +29,7 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.stock.utils import get_bin
+from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 	update_subcontracting_order_status,
@@ -182,6 +182,30 @@ class TestSubcontractingOrder(FrappeTestCase):
 			change(sco)
 			self.assertRaises(frappe.ValidationError, sco.insert)
 
+	def test_finished_good_needs_its_service_item_row(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 200,
+				"fg_item": "Subcontracted Item SA1",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_save=1)
+		sco.service_items.pop(0)
+
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
 	def test_purchase_order_is_fully_subcontracted_with_a_non_integer_ratio(self):
 		service_items = [
 			{
@@ -270,6 +294,40 @@ class TestSubcontractingOrder(FrappeTestCase):
 		sco.items[0].bom = draft_bom.name
 
 		self.assertRaises(frappe.ValidationError, sco.insert)
+
+	def test_warehouses_must_belong_to_the_order_company(self):
+		other_company_warehouse = "_Test Warehouse 2 - _TC1"
+		for fieldname in ("warehouse", "set_reserve_warehouse", "supplier_warehouse"):
+			sco = get_subcontracting_order(do_not_save=1)
+			if fieldname == "warehouse":
+				sco.set_warehouse = None
+				sco.items[0].warehouse = other_company_warehouse
+			else:
+				sco.set(fieldname, other_company_warehouse)
+			self.assertRaises(InvalidWarehouseCompany, sco.insert)
+
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.set_reserve_warehouse = "_Test Warehouse - _TC"
+		sco.insert()
+		self.assertEqual(sco.supplied_items[0].reserve_warehouse, "_Test Warehouse - _TC")
+
+	def test_receipt_supplier_warehouse_must_belong_to_the_receipt_company(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.supplier_warehouse = "_Test Warehouse 1 - _TC"
+		scr.reset_raw_materials()
+		raw_material = scr.supplied_items[0].rm_item_code
+		make_stock_entry(item_code=raw_material, qty=7, target="_Test Warehouse 1 - _TC", basic_rate=100)
+		scr.get_current_stock()
+		expected = frappe.db.get_value(
+			"Bin", {"item_code": raw_material, "warehouse": "_Test Warehouse 1 - _TC"}, "actual_qty"
+		)
+		self.assertEqual(scr.supplied_items[0].current_stock, expected)
+
+		scr.supplier_warehouse = "_Test Warehouse 2 - _TC1"
+		self.assertRaises(InvalidWarehouseCompany, scr.get_current_stock)
+		self.assertRaises(InvalidWarehouseCompany, scr.reset_raw_materials)
 
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
@@ -872,6 +930,30 @@ class TestSubcontractingOrder(FrappeTestCase):
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
 
+	@change_settings("Buying Settings", {"over_transfer_allowance": 20})
+	def test_status_stays_partial_while_one_raw_material_is_short(self):
+		make_subcontracted_item(item_code="Subcontracted Item Two RM")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Two RM",
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] += 1
+		rm_items[1]["qty"] -= 1
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+		self.assertEqual(
+			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
+		)
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
@@ -1128,6 +1210,33 @@ class TestSubcontractingOrder(FrappeTestCase):
 		sco.reload()
 
 		self.assertEqual(sco.supplied_items[0].required_qty, 210.149)
+
+	def test_raw_material_cost_is_converted_from_bom_currency(self):
+		service_item = make_item("Subcontracted Service Item USD BOM", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item USD BOM", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item("Subcontracted RM Item USD BOM", {"is_stock_item": 1, "valuation_rate": 800}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], currency="USD", do_not_submit=True)
+		bom.conversion_rate = 80
+		bom.save()
+		bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0)
+
+		self.assertEqual(sco.items[0].rm_cost_per_qty, 800)
+		self.assertEqual(sco.supplied_items[0].rate, 800)
+		self.assertEqual(sco.supplied_items[0].amount, 4000)
 
 
 def set_alternative_item(item_code, alternative_item_code):

@@ -892,6 +892,7 @@ class TestMaterialRequest(FrappeTestCase):
 				frappe.get_doc(
 					{
 						"doctype": "User",
+						"send_welcome_email": 0,
 						"email": user,
 						"first_name": user,
 						"send_notifications": 0,
@@ -1134,6 +1135,37 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.save()
 
 		self.assertIsNone(mr.customer)
+
+	def test_item_rates_refresh_only_on_price_list_change(self):
+		item_code = create_item("_Test MR Typed Rate Item").name
+		for price_list, rate in (("Standard Buying", 0.16), ("_Test Buying Price List", 9)):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": price_list,
+					"price_list_rate": rate,
+				}
+			).insert()
+
+		mr = frappe.new_doc("Material Request")
+		mr.update({"company": "_Test Company", "buying_price_list": "Standard Buying"})
+		mr.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": 1,
+				"rate": 6,
+				"schedule_date": today(),
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		)
+		mr.insert()
+		self.assertEqual(mr.items[0].rate, 6)
+
+		mr.buying_price_list = "_Test Buying Price List"
+		mr.save()
+		self.assertEqual(mr.items[0].rate, 9)
 
 	def test_manufacture_request_from_sales_order_updates_requested_qty(self):
 		from erpnext.selling.doctype.sales_order.sales_order import (

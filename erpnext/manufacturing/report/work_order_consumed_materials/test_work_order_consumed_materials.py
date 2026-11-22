@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, nowdate
 
@@ -96,3 +98,23 @@ class TestWorkOrderConsumedMaterials(FrappeTestCase):
 
 		self.assertEqual(len(rows), len(wo.required_items))
 		self.assertEqual(rows[0].status, "Closed")
+
+	def test_company_user_permission_limits_work_orders(self):
+		wo = make_wo_order_test_record(production_item="_Test FG Item", qty=1, company="_Test Company")
+		for item in wo.required_items:
+			test_stock_entry.make_stock_entry(
+				item_code=item.item_code, target=item.source_warehouse, qty=item.required_qty, basic_rate=100
+			)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1)).submit()
+		restricted_user = create_user("wo_consumed_other_company@example.com", "Manufacturing User")
+		add_user_permission("Company", "_Test Company 1", restricted_user.name)
+		permitted_user = create_user("wo_consumed_same_company@example.com", "Manufacturing User")
+		add_user_permission("Company", "_Test Company", permitted_user.name)
+
+		with self.set_user(restricted_user.name):
+			self.assertNotIn(wo.name, {row.get("parent") for row in self.run_report()})
+			self.assertNotIn(wo.name, {row.get("parent") for row in self.run_report(company=None)})
+
+		with self.set_user(permitted_user.name):
+			self.assertIn(wo.name, {row.get("parent") for row in self.run_report()})

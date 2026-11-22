@@ -24,6 +24,7 @@ class TestInactiveSalesItems(FrappeTestCase):
 		auditor = frappe.get_doc(
 			{
 				"doctype": "User",
+				"send_welcome_email": 0,
 				"email": "test_inactive_sales_auditor@example.com",
 				"first_name": "Auditor",
 				"roles": [{"role": "Auditor"}],

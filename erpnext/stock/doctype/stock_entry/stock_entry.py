@@ -8,8 +8,10 @@ from math import floor
 
 import frappe
 from frappe import _, bold
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce, IfNull, Max, NullIf, Sum
 from frappe.utils import (
@@ -53,6 +55,7 @@ from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_empty_batches_based_work_order,
 	get_serial_or_batch_items,
+	set_entry_header_values,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import _get_incoming_rate, get_bin, get_combine_datetime
@@ -242,6 +245,8 @@ class StockEntry(StockController):
 			)
 
 	def validate(self):
+		self.validate_reference_companies()
+		self.validate_row_reference_parents()
 		self.pro_doc = frappe._dict()
 		if self.work_order:
 			self.pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -252,8 +257,6 @@ class StockEntry(StockController):
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
-		self.validate_uom_is_integer("uom", "qty")
-		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_returned_qty_within_work_order()
@@ -282,6 +285,8 @@ class StockEntry(StockController):
 		self.validate_against_pick_list()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_finished_good_qty_against_fg_completed_qty()
 		self.validate_difference_account()
 		self.set_job_card_data()
@@ -308,6 +313,66 @@ class StockEntry(StockController):
 
 		self.validate_same_source_target_warehouse_during_material_transfer()
 		self.validate_raw_materials_exists()
+
+	def validate_reference_companies(self):
+		for doctype, names in self.get_referenced_documents().items():
+			if other_company_document := frappe.get_all(
+				doctype,
+				filters={"name": ("in", list(names)), "company": ("!=", self.company)},
+				pluck="name",
+				limit=1,
+			):
+				frappe.throw(
+					_("{0} {1} does not belong to Company {2}").format(
+						_(doctype), other_company_document[0], self.company
+					)
+				)
+
+	def validate_row_reference_parents(self):
+		for row_field, child_doctype, parent_field in (
+			("pick_list_item", "Pick List Item", "pick_list"),
+			("job_card_item", "Job Card Item", "job_card"),
+		):
+			names = {row.get(row_field) for row in self.items if row.get(row_field)}
+			parent = self.get(parent_field) or ""
+			if names and (
+				other_parent_row := frappe.get_all(
+					child_doctype,
+					filters={"name": ("in", list(names)), "parent": ("!=", parent)},
+					pluck="name",
+					limit=1,
+				)
+			):
+				frappe.throw(
+					_("{0} {1} does not belong to {2} {3}").format(
+						_(child_doctype),
+						other_parent_row[0],
+						_(self.meta.get_label(parent_field)),
+						parent,
+					)
+				)
+
+	def get_referenced_documents(self):
+		references = defaultdict(set)
+		for fieldname in (
+			"work_order",
+			"job_card",
+			"pick_list",
+			"purchase_order",
+			"subcontracting_order",
+			"outgoing_stock_entry",
+			"source_stock_entry",
+		):
+			if name := self.get(fieldname):
+				references[self.meta.get_options(fieldname)].add(name)
+
+		for row in self.get("items"):
+			if row.material_request:
+				references["Material Request"].add(row.material_request)
+			if row.against_stock_entry:
+				references["Stock Entry"].add(row.against_stock_entry)
+
+		return references
 
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
@@ -743,13 +808,13 @@ class StockEntry(StockController):
 				)
 
 				doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
-				doc.db_set(
-					{
-						"voucher_type": "Asset Repair",
-						"voucher_no": self.asset_repair,
-						"voucher_detail_no": voucher_detail_no,
-					}
-				)
+				values = {
+					"voucher_type": "Asset Repair",
+					"voucher_no": self.asset_repair,
+					"voucher_detail_no": voucher_detail_no,
+				}
+				doc.db_set(values)
+				set_entry_header_values(doc.name, values)
 
 	def set_transfer_qty(self):
 		self.validate_qty_is_not_zero()
@@ -821,11 +886,15 @@ class StockEntry(StockController):
 			for d in self.items:
 				if d.is_finished_item:
 					if self.process_loss_qty:
-						d.qty = self.fg_completed_qty - self.process_loss_qty
+						d.transfer_qty = flt(
+							self.fg_completed_qty - self.process_loss_qty, d.precision("transfer_qty")
+						)
+						d.qty = flt(d.transfer_qty / flt(d.conversion_factor), d.precision("qty"))
 
-					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
+					# Finished Good Quantity is in the stock UOM
+					item_wise_qty.setdefault(d.item_code, []).append(d.transfer_qty)
 
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for item_code, qty_list in item_wise_qty.items():
 			total = flt(sum(qty_list), precision)
 
@@ -1387,7 +1456,11 @@ class StockEntry(StockController):
 
 	def get_source_fg_qty(self) -> float:
 		if self.source_stock_entry:
-			return flt(frappe.db.get_value("Stock Entry", self.source_stock_entry, "fg_completed_qty"))
+			# the finished good the entry put in stock, as produced qty does for a Work Order
+			fg_completed_qty, process_loss_qty = frappe.db.get_value(
+				"Stock Entry", self.source_stock_entry, ["fg_completed_qty", "process_loss_qty"]
+			)
+			return flt(fg_completed_qty) - flt(process_loss_qty)
 		if self.work_order:
 			return flt(frappe.db.get_value("Work Order", self.work_order, "produced_qty"))
 		return 0.0
@@ -1740,7 +1813,10 @@ class StockEntry(StockController):
 		Updates rate and availability of all the items.
 		Called from Update Rate and Availability button.
 		"""
+		self.check_source_documents_permission()
 		self.set_work_order_details()
+		if self.bom_no:
+			erpnext.require_permission("BOM", self.bom_no)
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
@@ -2871,8 +2947,9 @@ class StockEntry(StockController):
 					"docstatus": 1,
 				},
 				pluck="name",
-				limit_page_length=2,
 			)
+			for name in manufacture_entries:
+				erpnext.require_permission("Stock Entry", name)
 			if len(manufacture_entries) == 1:
 				self.source_stock_entry = manufacture_entries[0]
 
@@ -3000,7 +3077,6 @@ class StockEntry(StockController):
 			SED.description,
 			SED.stock_uom,
 			SED.uom,
-			SED.basic_rate,
 			SED.conversion_factor,
 			SED.is_finished_item,
 			SED.is_scrap_item,
@@ -3014,14 +3090,20 @@ class StockEntry(StockController):
 
 		if self.source_stock_entry:
 			return (
-				query.select(SED.name, SED.qty, SED.transfer_qty, *common_fields)
+				query.select(SED.name, SED.qty, SED.transfer_qty, SED.basic_rate, *common_fields)
 				.where(SE.name == self.source_stock_entry)
 				.orderby(SED.idx)
 				.run(as_dict=True)
 			)
 
 		return (
-			query.select(Sum(SED.qty).as_("qty"), Sum(SED.transfer_qty).as_("transfer_qty"), *common_fields)
+			query.select(
+				Sum(SED.qty).as_("qty"),
+				Sum(SED.transfer_qty).as_("transfer_qty"),
+				# basic_rate is per stock UOM, so weight it by transfer_qty
+				(Sum(SED.basic_rate * SED.transfer_qty) / NullIf(Sum(SED.transfer_qty), 0)).as_("basic_rate"),
+				*common_fields,
+			)
 			.where(SE.purpose == "Manufacture")
 			.where(SE.work_order == self.work_order)
 			.groupby(SED.item_code)
@@ -3034,6 +3116,7 @@ class StockEntry(StockController):
 		if self.pick_list:
 			return
 
+		self.check_source_documents_permission()
 		self.set("items", [])
 		self.validate_work_order()
 
@@ -3044,6 +3127,8 @@ class StockEntry(StockController):
 			frappe.throw(_("Posting date and posting time is mandatory"))
 
 		self.set_work_order_details()
+		if self.bom_no:
+			erpnext.require_permission("BOM", self.bom_no)
 		self.flags.backflush_based_on = frappe.db.get_single_value(
 			"Manufacturing Settings", "backflush_raw_materials_based_on"
 		)
@@ -3210,6 +3295,15 @@ class StockEntry(StockController):
 			self.process_loss_percentage = flt(
 				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
+
+	def check_source_documents_permission(self):
+		for doctype, name in (
+			("Work Order", self.work_order),
+			("BOM", self.bom_no),
+			("Stock Entry", self.source_stock_entry),
+		):
+			if name:
+				erpnext.require_permission(doctype, name)
 
 	def set_work_order_details(self):
 		if not getattr(self, "pro_doc", None):
@@ -3506,6 +3600,8 @@ class StockEntry(StockController):
 		return item_dict
 
 	def get_scrap_items_from_job_card(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
+
 		if not getattr(self, "pro_doc", None):
 			self.set_work_order_details()
 
@@ -3534,7 +3630,12 @@ class StockEntry(StockController):
 			.groupby(job_card_scrap_item.item_code)
 		).run(as_dict=1)
 
-		pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
+		# completed qty leaves out the unbooked job card loss that For Quantity includes
+		pending_qty = (
+			flt(self.get_completed_job_card_qty())
+			- flt(self.pro_doc.produced_qty)
+			+ max(get_upstream_process_loss(self.pro_doc) - flt(self.pro_doc.process_loss_qty), 0)
+		)
 
 		used_scrap_items = self.get_used_scrap_items()
 		for row in scrap_items:
@@ -3974,7 +4075,7 @@ class StockEntry(StockController):
 			for row in frappe.get_all(
 				"Pick List Item",
 				filters={"name": ("in", list(pick_list_items))},
-				fields=["name", "warehouse", "picked_qty", "transferred_qty"],
+				fields=["name", "item_code", "warehouse", "picked_qty", "transferred_qty"],
 			)
 		}
 		transfer_qty = defaultdict(float)
@@ -3982,6 +4083,19 @@ class StockEntry(StockController):
 			picked_row = picked_rows.get(d.pick_list_item)
 			if not picked_row:
 				continue
+
+			# validate_alternative_items checks original_item only for these entries
+			is_work_order_alternative = (
+				self.work_order
+				and self.purpose in WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES
+				and d.original_item == picked_row.item_code
+			)
+			if d.item_code != picked_row.item_code and not is_work_order_alternative:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not the item {2} picked in {3}.").format(
+						d.idx, frappe.bold(d.item_code), frappe.bold(picked_row.item_code), self.pick_list
+					)
+				)
 
 			if d.s_warehouse and d.s_warehouse != picked_row.warehouse:
 				frappe.throw(
@@ -4758,9 +4872,10 @@ def get_warehouse_details(args):
 
 	args = frappe._dict(args)
 
-	# `select`, not `read`: reached from stock_entry.js:740, and the desk roles that open that form
-	# clear select through the Desk User row while holding no Item read.
 	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Stock Entry", "read", throw=True)
+	if args.warehouse:
+		check_stock_entry_warehouse_permission(args.warehouse)
 
 	ret = {}
 	if args.warehouse and args.item_code:
@@ -4775,6 +4890,15 @@ def get_warehouse_details(args):
 			"basic_rate": _get_incoming_rate(args),
 		}
 	return ret
+
+
+def check_stock_entry_warehouse_permission(warehouse: str) -> None:
+	user_permissions = get_user_permissions()
+	company = frappe.get_cached_value("Warehouse", warehouse, "company")
+	for doctype, name in (("Warehouse", warehouse), ("Company", company)):
+		allowed_docs = get_allowed_docs_for_doctype(user_permissions.get(doctype, []), "Stock Entry")
+		if allowed_docs and name not in allowed_docs:
+			frappe.throw(_("Not permitted for {0}").format(name), frappe.PermissionError)
 
 
 @frappe.whitelist()
@@ -4866,74 +4990,143 @@ def get_items_from_subcontract_order(source_name, target_doc=None):
 
 def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 	data = get_stock_entry_data(work_order, stock_entry_doc=stock_entry_doc)
+	is_disassembly = stock_entry_doc and stock_entry_doc.purpose == "Disassemble"
 
 	available_materials = {}
 	for row in data:
-		key = (row.item_code, row.warehouse)
+		warehouse = row.warehouse
 		if row.purpose != "Material Transfer for Manufacture":
-			key = (row.item_code, row.s_warehouse)
-
-		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-			key = _get_disassembly_material_key(row)
-
-		if key not in available_materials:
-			available_materials.setdefault(
-				key,
-				frappe._dict(
-					{
-						"item_details": row,
-						"batch_details": defaultdict(float),
-						"qty": 0,
-						"serial_nos": [],
-						"consumed_for": {},
-					}
-				),
-			)
-
-		item_data = available_materials[key]
+			warehouse = row.s_warehouse
 
 		if row.purpose == "Material Transfer for Manufacture" or (
-			stock_entry_doc and stock_entry_doc.purpose == "Disassemble" and row.purpose == "Manufacture"
+			is_disassembly and row.purpose == "Manufacture"
 		):
-			item_data.qty += row.qty
-			if row.batch_no:
-				item_data.batch_details[row.batch_no] += row.qty
-
-			elif row.batch_nos:
-				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += abs(qty)
-
-			if row.serial_no:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
-				item_data.serial_nos.sort()
-
-			elif row.serial_nos:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
-				item_data.serial_nos.sort()
+			key = (
+				_get_disassembly_material_key(row)
+				if is_disassembly
+				else (row.item_code, warehouse, row.original_item or None)
+			)
+			item_data = available_materials.setdefault(key, get_available_material_bucket(row))
+			add_transferred_material(item_data, row)
 		else:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
+			if is_disassembly:
+				key = _get_disassembly_material_key(row)
+				buckets = [available_materials.setdefault(key, get_available_material_bucket(row))]
+			else:
+				buckets = get_available_buckets(available_materials, row, warehouse)
 
-			item_data.qty -= row.qty
-			if row.qty:
-				item_data.consumed_for[row.name] = flt(row.fg_completed_qty)
-			if row.batch_no:
-				item_data.batch_details[row.batch_no] -= row.qty
-
-			elif row.batch_nos:
-				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] -= abs(qty)
-
-			if row.serial_no:
-				for serial_no in get_serial_nos(row.serial_no):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
-
-			elif row.serial_nos:
-				for serial_no in get_serial_nos(row.serial_nos):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
+			available_qty = [bucket.qty for bucket in buckets]
+			deduct_consumed_material(buckets, row)
+			for bucket, qty in zip(buckets, available_qty, strict=True):
+				if bucket.qty != qty:
+					bucket.consumed_for[row.name] = flt(row.fg_completed_qty)
 
 	return available_materials
+
+
+def get_available_material_bucket(row):
+	return frappe._dict(
+		{
+			"item_details": row,
+			"batch_details": defaultdict(float),
+			"qty": 0,
+			"serial_nos": [],
+			"consumed_for": {},
+		}
+	)
+
+
+def add_transferred_material(item_data, row):
+	item_data.qty += row.qty
+	if row.batch_no:
+		item_data.batch_details[row.batch_no] += row.qty
+
+	elif row.batch_nos:
+		for batch_no, qty in row.batch_nos.items():
+			item_data.batch_details[batch_no] += abs(qty)
+
+	if row.serial_no:
+		item_data.serial_nos.extend(get_serial_nos(row.serial_no))
+		item_data.serial_nos.sort()
+
+	elif row.serial_nos:
+		item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
+		item_data.serial_nos.sort()
+
+
+def get_available_buckets(available_materials, row, warehouse):
+	"""Use exact attribution when present; otherwise drain the direct item first."""
+	key = (row.item_code, warehouse, row.original_item or None)
+	if row.original_item and key in available_materials:
+		return [available_materials[key]]
+
+	buckets = [available_materials[key]] if key in available_materials else []
+	buckets.extend(
+		bucket
+		for material_key, bucket in available_materials.items()
+		if material_key[:2] == key[:2] and material_key != key
+	)
+	if not buckets:
+		key = (row.item_code, warehouse, None)
+		buckets = [available_materials.setdefault(key, get_available_material_bucket(row))]
+
+	return buckets
+
+
+def deduct_consumed_material(buckets, row):
+	remaining_qty = flt(row.qty)
+	if row.batch_no:
+		batches = {row.batch_no: flt(row.qty)}
+	else:
+		batches = {batch_no: abs(flt(qty)) for batch_no, qty in (row.batch_nos or {}).items()}
+
+	for batch_no, qty in batches.items():
+		remaining_qty = deduct_consumed_batch_qty(buckets, batch_no, qty, remaining_qty)
+
+	for serial_no in get_serial_nos(row.serial_no or row.serial_nos):
+		bucket = get_serial_no_bucket(buckets, serial_no)
+		if serial_no not in bucket.serial_nos:
+			continue
+
+		bucket.serial_nos.remove(serial_no)
+		if not batches and remaining_qty > 0:
+			bucket.qty -= 1
+			remaining_qty -= 1
+
+	deduct_consumed_qty(buckets, remaining_qty)
+
+
+def deduct_consumed_qty(buckets, consumed_qty):
+	for bucket in buckets[:-1]:
+		deducted = min(max(flt(bucket.qty), 0.0), consumed_qty)
+		bucket.qty -= deducted
+		consumed_qty -= deducted
+	buckets[-1].qty -= consumed_qty
+
+
+def get_serial_no_bucket(buckets, serial_no):
+	for bucket in buckets:
+		if serial_no in bucket.serial_nos:
+			return bucket
+	return buckets[-1]
+
+
+def deduct_consumed_batch_qty(buckets, batch_no, consumed_qty, remaining_qty):
+	holders = [bucket for bucket in buckets if batch_no in bucket.batch_details] or buckets[-1:]
+	for bucket in holders:
+		deducted = consumed_qty
+		if bucket is not holders[-1]:
+			deducted = min(max(flt(bucket.batch_details[batch_no]), 0.0), consumed_qty)
+
+		bucket.batch_details[batch_no] -= deducted
+		consumed_qty -= deducted
+
+		qty = max(min(deducted, remaining_qty), 0.0)
+		bucket.qty -= qty
+		remaining_qty -= qty
+
+	return remaining_qty
 
 
 def _get_disassembly_material_key(row):

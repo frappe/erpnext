@@ -13,6 +13,7 @@ from frappe.query_builder.functions import CombineDatetime, Max
 from frappe.utils import (
 	add_days,
 	cint,
+	get_datetime,
 	get_link_to_form,
 	get_weekday,
 	getdate,
@@ -31,9 +32,10 @@ from erpnext.projects.doctype.project.project import update_consumed_material_co
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_stock_frozen_date
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
+	get_item_wh_reposted_till_from_reposting_data,
 	get_items_to_be_repost,
+	get_reposted_till_condition,
 	get_reposting_data,
-	is_transfer_stock_entry,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -69,6 +71,7 @@ class RepostItemValuation(Document):
 		recreate_stock_ledgers: DF.Check
 		reposting_data_file: DF.Attach | None
 		reposting_reference: DF.Data | None
+		skip_unchanged_entries: DF.Check
 		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed", "Cancelled"]
 		total_reposting_count: DF.Int
 		total_vouchers: DF.Int
@@ -127,7 +130,7 @@ class RepostItemValuation(Document):
 		if self.recalculate_valuation_rate and not self.can_recalculate_valuation_rate():
 			frappe.throw(
 				_(
-					"Recalculate Valuation Rate is only allowed for a Purchase Receipt, a Purchase Invoice with Update Stock or a Stock Entry with no row that has both a Source and Target Warehouse"
+					"Recalculate Valuation Rate is only allowed for a Purchase Receipt or a Purchase Invoice with Update Stock"
 				)
 			)
 
@@ -140,9 +143,6 @@ class RepostItemValuation(Document):
 
 		if self.voucher_type == "Purchase Invoice":
 			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
-
-		if self.voucher_type == "Stock Entry":
-			return not is_transfer_stock_entry(self.voucher_no)
 
 		return False
 
@@ -406,30 +406,32 @@ class RepostItemValuation(Document):
 		if self.based_on != "Item and Warehouse":
 			return
 
-		filters = {
-			"item_code": self.item_code,
-			"warehouse": self.warehouse,
-			"name": self.name,
-			"posting_date": self.posting_date,
-			"posting_time": self.posting_time,
-			"repost_started_at": self.get_repost_started_at(),
-		}
-
-		frappe.db.sql(
-			"""
-			update `tabRepost Item Valuation`
-			set status = 'Skipped'
-			WHERE item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and name != %(name)s
-				and TIMESTAMP(posting_date, posting_time) > TIMESTAMP(%(posting_date)s, %(posting_time)s)
-				and docstatus = 1
-				and status = 'Queued'
-				and based_on = 'Item and Warehouse'
-				and creation <= %(repost_started_at)s
-				""",
-			filters,
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		query = (
+			frappe.qb.update(riv)
+			.set(riv.status, "Skipped")
+			.where(
+				(riv.item_code == self.item_code)
+				& (riv.warehouse == self.warehouse)
+				& (riv.name != self.name)
+				& (
+					CombineDatetime(riv.posting_date, riv.posting_time)
+					> get_combine_datetime(self.posting_date, self.posting_time)
+				)
+				& (riv.docstatus == 1)
+				& (riv.status == "Queued")
+				& (riv.based_on == "Item and Warehouse")
+				& (riv.creation <= self.get_repost_started_at())
+			)
 		)
+
+		if reposted_till := self.get_item_wh_reposted_till().get((self.item_code, self.warehouse)):
+			query = query.where(get_reposted_till_condition(riv, reposted_till))
+
+		query.run()
+
+	def get_item_wh_reposted_till(self):
+		return self.flags.item_wh_reposted_till or {}
 
 	def get_repost_started_at(self):
 		return self.flags.repost_started_at or now()
@@ -534,6 +536,7 @@ def get_mergeable_item_reposts(doc):
 			& (riv.creation <= doc.get_repost_started_at())
 			& (riv.allow_negative_stock == doc.allow_negative_stock)
 			& (riv.allow_zero_rate == doc.allow_zero_rate)
+			& (riv.skip_unchanged_entries == doc.skip_unchanged_entries)
 			& (riv.via_landed_cost_voucher == 0)
 			& (riv.recalculate_valuation_rate == 0)
 			& (riv.recreate_stock_ledgers == 0)
@@ -575,16 +578,14 @@ def repost(doc):
 			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
-		if (
-			doc.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"]
-			and doc.recalculate_valuation_rate
-		):
+		if doc.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and doc.recalculate_valuation_rate:
 			doc._recalculate_valuation_rate()
 
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()
 
 		repost_sl_entries(doc)
+		doc.flags.item_wh_reposted_till = get_item_wh_reposted_till_from_reposting_data(doc)
 		vouchers = get_reposted_vouchers(doc)
 		repost_gl_entries(doc, vouchers)
 		update_consumed_material_cost_for_vouchers(vouchers)
@@ -707,15 +708,12 @@ def _get_directly_dependent_vouchers(doc):
 		items.update(doc_items)
 		warehouses.update(doc_warehouses)
 
-		sles = get_items_to_be_repost(doc.voucher_type, doc.voucher_no)
-		sle_items = {sle.item_code for sle in sles}
-		sle_warehouses = {sle.warehouse for sle in sles}
-		items.update(sle_items)
-		warehouses.update(sle_warehouses)
+		repost_items = get_items_to_be_repost(doc.voucher_type, doc.voucher_no)
 	else:
-		for row in doc.get_item_reposts():
-			items.add(row.item_code)
-			warehouses.add(row.warehouse)
+		repost_items = doc.get_item_reposts()
+
+	items.update(row.item_code for row in repost_items)
+	warehouses.update(row.warehouse for row in repost_items)
 
 	affected_vouchers = get_future_stock_vouchers(
 		posting_date=doc.posting_date,
@@ -723,8 +721,20 @@ def _get_directly_dependent_vouchers(doc):
 		for_warehouses=list(warehouses),
 		for_items=list(items),
 		company=doc.company,
+		to_datetime=get_reposted_till(doc, repost_items),
 	)
 	return affected_vouchers
+
+
+def get_reposted_till(doc, repost_items):
+	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
+		return
+
+	reposted_till = [
+		doc.get_item_wh_reposted_till().get((row.item_code, row.warehouse)) for row in repost_items
+	]
+	if reposted_till and all(reposted_till):
+		return max(get_datetime(till) for till in reposted_till)
 
 
 def notify_error_to_stock_managers(doc, traceback):

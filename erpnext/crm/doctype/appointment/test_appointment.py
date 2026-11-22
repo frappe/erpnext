@@ -552,7 +552,12 @@ class TestAppointment(FrappeTestCase):
 		agent_email = "appointment_agent@example.com"
 		if not frappe.db.exists("User", agent_email):
 			frappe.get_doc(
-				{"doctype": "User", "email": agent_email, "first_name": "Appointment Agent"}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": agent_email,
+					"first_name": "Appointment Agent",
+				}
 			).insert(ignore_permissions=True)
 
 		self._configure_booking_settings(agents=["Administrator", agent_email])
@@ -587,9 +592,14 @@ class TestAppointment(FrappeTestCase):
 
 		agent_email = "appointment_employee_agent@example.com"
 		if not frappe.db.exists("User", agent_email):
-			frappe.get_doc({"doctype": "User", "email": agent_email, "first_name": "Employee Agent"}).insert(
-				ignore_permissions=True
-			)
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": agent_email,
+					"first_name": "Employee Agent",
+				}
+			).insert(ignore_permissions=True)
 		frappe.get_doc("User", agent_email).add_roles("Employee")
 
 		appointment = create_test_appointment(customer_email="assigned_before@example.com")
@@ -615,7 +625,12 @@ class TestAppointment(FrappeTestCase):
 		agent_email = "appointment_agent@example.com"
 		if not frappe.db.exists("User", agent_email):
 			frappe.get_doc(
-				{"doctype": "User", "email": agent_email, "first_name": "Appointment Agent"}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": agent_email,
+					"first_name": "Appointment Agent",
+				}
 			).insert(ignore_permissions=True)
 		self._configure_booking_settings(agents=["Administrator", agent_email])
 		busy = create_test_appointment(customer_email="busy_agent@example.com", scheduled_time=slot_on(2, 10))

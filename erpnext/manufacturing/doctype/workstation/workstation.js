@@ -159,7 +159,7 @@ class WorkstationDashboard {
 					label: __("Start Time"),
 					fieldname: "start_time",
 					reqd: 1,
-					default: frappe.datetime.now_datetime(),
+					default: frappe.datetime.system_datetime(),
 				},
 				{
 					label: __("Operator"),
@@ -206,7 +206,7 @@ class WorkstationDashboard {
 				fieldtype: "Datetime",
 				label: __("End Time"),
 				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
+				default: frappe.datetime.system_datetime(),
 			},
 		];
 
@@ -332,7 +332,7 @@ class WorkstationDashboard {
 					current_time += this.get_seconds_diff(d.to_time, d.from_time);
 				}
 			} else {
-				current_time += this.get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+				current_time += this.get_seconds_diff(frappe.datetime.system_datetime(), d.from_time);
 			}
 		});
 

@@ -13,34 +13,27 @@ from pypika.terms import ExistsCriterion
 
 @frappe.request_cache
 @deprecated
-def has_legacy_batch_ledgers(item_code: str, warehouse: str) -> bool:
-	"""`False` when no Stock Ledger Entry of the item and warehouse uses the
-	denormalized `batch_no` field.
+def has_legacy_batch_ledgers(batch_nos: tuple[str, ...]) -> bool:
+	"""`False` when no Stock Ledger Entry of these batches uses the denormalized
+	`batch_no` field.
 
 	Batches are tracked through the Serial and Batch Bundle since v15, so this is
-	`False` for most of the item and warehouse combinations and the expensive
-	aggregates (`FOR UPDATE`) below can be skipped without reading the ledger. The
-	probe is an index only scan on the `batch_no, item_code, warehouse` index,
-	`is_cancelled` is intentionally left out of it to keep it so, an item with only
-	cancelled legacy ledgers simply falls back to the aggregate.
+	`False` for most batches and the expensive aggregates (`FOR UPDATE`) below can be
+	skipped without reading the ledger. The probe is an equality lookup on the
+	`batch_no` index, covered by it and stopping at the first row; `item_code`,
+	`warehouse` and `is_cancelled` are intentionally left out of it to keep it that
+	way, a batch with only cancelled legacy ledgers simply falls back to the
+	aggregate.
 
 	Cached for the request, nothing creates a legacy ledger midway.
 	"""
 
+	if not batch_nos:
+		return False
+
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	return bool(
-		frappe.qb.from_(sle)
-		.select(sle.batch_no)
-		.where(
-			sle.batch_no.isnotnull()
-			& (sle.batch_no != "")
-			& (sle.item_code == item_code)
-			& (sle.warehouse == warehouse)
-		)
-		.limit(1)
-		.run()
-	)
+	return bool(frappe.qb.from_(sle).select(sle.batch_no).where(sle.batch_no.isin(batch_nos)).limit(1).run())
 
 
 class DeprecatedSerialNoValuation:
@@ -74,8 +67,14 @@ class DeprecatedSerialNoValuation:
 		if not posting_datetime and self.sle.posting_date:
 			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
 
+		serial_no_details = {
+			d.name.lower(): d
+			for d in frappe.get_all(
+				"Serial No", filters={"name": ("in", serial_nos)}, fields=["name", "purchase_rate", "company"]
+			)
+		}
 		for serial_no in serial_nos:
-			sn_details = frappe.db.get_value("Serial No", serial_no, ["purchase_rate", "company"], as_dict=1)
+			sn_details = serial_no_details.get(serial_no.lower())
 			if (
 				sn_details
 				and sn_details.purchase_rate
@@ -129,7 +128,7 @@ class DeprecatedBatchNoValuation:
 		from erpnext.stock.utils import get_combine_datetime
 
 		if not self.batchwise_valuation_batches or not has_legacy_batch_ledgers(
-			self.sle.item_code, self.sle.warehouse
+			tuple(sorted(self.batchwise_valuation_batches))
 		):
 			return []
 
@@ -276,7 +275,7 @@ class DeprecatedBatchNoValuation:
 	def set_balance_value_from_sl_entries(self) -> None:
 		from erpnext.stock.utils import get_combine_datetime
 
-		if not has_legacy_batch_ledgers(self.sle.item_code, self.sle.warehouse):
+		if not has_legacy_batch_ledgers(tuple(sorted(self.non_batchwise_valuation_batches))):
 			return
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -393,7 +392,6 @@ class DeprecatedBatchNoValuation:
 	def set_balance_value_from_bundle(self) -> None:
 		from erpnext.stock.utils import get_combine_datetime
 
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
@@ -416,7 +414,7 @@ class DeprecatedBatchNoValuation:
 			# are summed as of two different points in time
 			posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
 
-		timestamp_condition = bundle.posting_datetime < posting_datetime
+		timestamp_condition = bundle_child.posting_datetime < posting_datetime
 
 		if sle_creation:
 			sle_table = frappe.qb.DocType("Stock Ledger Entry")
@@ -424,20 +422,18 @@ class DeprecatedBatchNoValuation:
 			# a bundle can be created long before the SLE that consumes it, so the two
 			# creation timestamps are different timelines; break the tie on the creation
 			# of the bundle's own SLE instead
-			timestamp_condition |= (bundle.posting_datetime == posting_datetime) & ExistsCriterion(
+			timestamp_condition |= (bundle_child.posting_datetime == posting_datetime) & ExistsCriterion(
 				frappe.qb.from_(sle_table)
 				.select(sle_table.name)
 				.where(
-					(sle_table.serial_and_batch_bundle == bundle.name)
+					(sle_table.serial_and_batch_bundle == bundle_child.parent)
 					& (sle_table.is_cancelled == 0)
 					& (sle_table.creation < sle_creation)
 				)
 			)
 
 		query = (
-			frappe.qb.from_(bundle)
-			.inner_join(bundle_child)
-			.on(bundle.name == bundle_child.parent)
+			frappe.qb.from_(bundle_child)
 			.inner_join(batch)
 			.on(bundle_child.batch_no == batch.name)
 			.select(
@@ -446,12 +442,12 @@ class DeprecatedBatchNoValuation:
 				Sum(bundle_child.stock_value_difference).as_("batch_value"),
 			)
 			.where(
-				(bundle.item_code == self.sle.item_code)
-				& (bundle.warehouse == self.sle.warehouse)
+				(bundle_child.item_code == self.sle.item_code)
+				& (bundle_child.warehouse == self.sle.warehouse)
 				& (bundle_child.batch_no.isnotnull())
-				& (bundle.is_cancelled == 0)
-				& (bundle.docstatus == 1)
-				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
+				& (bundle_child.is_cancelled == 0)
+				& (bundle_child.docstatus == 1)
+				& (bundle_child.type_of_transaction.isin(["Inward", "Outward"]))
 				& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
 			.for_update()
@@ -460,9 +456,9 @@ class DeprecatedBatchNoValuation:
 		)
 
 		if self.sle.serial_and_batch_bundle:
-			query = query.where(bundle.name != self.sle.serial_and_batch_bundle)
+			query = query.where(bundle_child.parent != self.sle.serial_and_batch_bundle)
 
-		query = query.where(bundle.voucher_type != "Pick List")
+		query = query.where(bundle_child.voucher_type != "Pick List")
 
 		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
 		moving_avg_item_non_batch_value = self.use_batch_pool_for_moving_average()

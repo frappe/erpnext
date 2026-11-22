@@ -64,6 +64,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
+		frappe.db.rollback()
 
 	def test_maximum_discount_for_percentage_amount_and_rate(self):
 		frappe.db.set_value("Price List", "Standard Selling", "currency", "INR")
@@ -299,6 +300,24 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		self.assertEqual(dn.doctype, "Delivery Note")
 		self.assertEqual(len(dn.get("items")), len(so.get("items")))
+
+	def test_cancel_releases_components_of_a_disabled_bundle(self):
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=5, warehouse="_Test Warehouse - _TC")
+
+		def reserved_qty():
+			return frappe.db.get_value(
+				"Bin", {"item_code": component, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+			)
+
+		self.assertEqual(reserved_qty(), 10)
+
+		product_bundle.db_set("disabled", 1)
+		frappe.get_doc("Sales Order", so.name).cancel()
+		self.assertEqual(reserved_qty(), 0)
 
 	def test_make_sales_invoice(self):
 		so = make_sales_order(do_not_submit=True)
@@ -1216,6 +1235,24 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.items[0].rate, 200.34669)
 		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
+	def test_sales_invoice_does_not_show_an_address_the_user_cannot_read(self):
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		allowed, restricted = (make_address(address_title=title).name for title in ("Allowed", "Restricted"))
+		test_user = create_user("test_so_address_perms@example.com", "Sales User", "Accounts User")
+		frappe.permissions.add_user_permission("Address", allowed, test_user.name, applicable_for="Address")
+		so = make_sales_order(customer=make_customer(frappe.generate_hash(length=10)))
+
+		with self.set_user(test_user.name):
+			self.assertTrue(make_sales_invoice(so.name).items)
+			self.assertRaises(
+				frappe.PermissionError,
+				make_sales_invoice,
+				so.name,
+				target_doc=json.dumps({"doctype": "Sales Invoice", "shipping_address_name": restricted}),
+			)
+
 	def test_update_child_perm(self):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 
@@ -1231,6 +1268,68 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		# add new item
 		trans_item = json.dumps([{"item_code": "_Test Item", "rate": 100, "qty": 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+
+	def test_update_child_cannot_remove_item_linked_by_draft_purchase_order(self):
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 5, "rate": 1000},
+				{"item_code": "_Test Item 2", "qty": 2, "rate": 500},
+			]
+		)
+		po = make_purchase_order(
+			so.name,
+			selected_items=[
+				{"name": so.items[0].name, "item_code": "_Test Item", "supplier": "_Test Supplier"}
+			],
+		)
+		po.supplier = "_Test Supplier"
+		po.insert()
+
+		kept_row = so.items[1]
+		trans_item = json.dumps(
+			[{"item_code": kept_row.item_code, "qty": 2, "rate": 500, "docname": kept_row.name}]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Purchase Order",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_item,
+			so.name,
+		)
+
+	def test_update_child_cannot_remove_bundle_row_ordered_on_purchase_order(self):
+		make_item("_Test Ordered Bundle", {"is_stock_item": 0})
+		make_item("_Test Ordered Bundle Component", {"is_stock_item": 1})
+		make_product_bundle("_Test Ordered Bundle", ["_Test Ordered Bundle Component"])
+		bundle_row = {
+			"item_code": "_Test Ordered Bundle",
+			"warehouse": "",
+			"qty": 2,
+			"rate": 400,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[bundle_row, {"item_code": "_Test Item", "qty": 1, "rate": 100}])
+		purchase_order = make_purchase_order(
+			so.name, selected_items=[{**bundle_row, "name": so.items[0].name}]
+		)
+		purchase_order.supplier = "_Test Supplier"
+		purchase_order.set_warehouse = "_Test Warehouse - _TC"
+		purchase_order.submit()
+
+		kept_row = so.items[1]
+		trans_item = json.dumps(
+			[{"item_code": kept_row.item_code, "qty": 1, "rate": 100, "docname": kept_row.name}]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Purchase Order",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_item,
+			so.name,
+		)
 
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
@@ -1892,6 +1991,30 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		po2.cancel()
 		so.load_from_db()
 		so.cancel()
+
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_purchase_order_for_rest_of_row_ordered_in_parts(self):
+		item = make_item(
+			properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 0.666666667}]
+		)
+		so = make_sales_order(item_code=item.name, qty=3, do_not_submit=True)
+		so.items[0].update({"uom": "Box", "conversion_factor": 0.666666667})
+		so.submit()
+
+		selected_items = [{"name": so.items[0].name, "item_code": item.name}]
+		for _ in range(2):
+			po = make_purchase_order(so.name, selected_items=selected_items)
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = 1
+			po.submit()
+
+		po = make_purchase_order(so.name, selected_items=selected_items)
+		self.assertEqual(po.items[0].qty, 1)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].ordered_qty, so.items[0].stock_qty)
 
 	def test_drop_shipping_full_for_default_suppliers(self):
 		"""Test if multiple POs are generated in one go against different default suppliers."""
@@ -2555,6 +2678,36 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		)[0]
 		mr_doc = frappe.get_doc("Material Request", mr.get("name"))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
+
+	def test_request_for_raw_materials_keeps_planned_uom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(
+			"_Test SO Fraction Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+				"item_defaults": [{"default_warehouse": "_Test Warehouse - _TC", "company": "_Test Company"}],
+			},
+		).name
+		fg_item = make_item("_Test SO Fraction Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
+
+		so = make_sales_order(
+			item_list=[{"item_code": fg_item, "qty": 1, "rate": 1000, "warehouse": "_Test Warehouse - _TC"}]
+		)
+		so.submit()
+		mr_dict = frappe._dict(
+			items=get_work_order_items(so.name, 1), include_exploded_items=0, ignore_existing_ordered_qty=1
+		)
+		mr = make_raw_material_request(mr_dict, so.company, so.name)
+
+		self.assertEqual((mr.items[0].qty, mr.items[0].uom, mr.items[0].stock_qty), (13, "Nos", 13))
 
 	def test_so_optional_blanket_order(self):
 		"""
@@ -3574,6 +3727,33 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_sales_invoice, so.name)
 		finally:
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+
+	@change_settings("Selling Settings", {"dont_reserve_sales_order_qty_on_sales_return": 1})
+	def test_replacement_delivery_after_return_reserves_nothing(self):
+		"""A row delivered again after a return must not take its negative share off other orders."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=100, basic_rate=10)
+		make_sales_order(item_code=item_code, qty=5)
+		so = make_sales_order(item_code=item_code, qty=10)
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		sales_return = make_sales_return(dn.name)
+		sales_return.items[0].qty = -4
+		sales_return.submit()
+		make_delivery_note(so.name).submit()
+
+		reserved_qty = frappe.db.get_value(
+			"Bin", {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+		)
+		self.assertEqual(reserved_qty, 5)
+
+	def test_sales_order_without_items_raises_mandatory_error(self):
+		so = make_sales_order(do_not_save=True)
+		so.items = []
+		self.assertRaises(frappe.MandatoryError, so.insert)
 
 
 def compare_payment_schedules(doc, doc1, doc2):

@@ -205,12 +205,12 @@ class SellingController(StockController):
 
 		if self.meta.get_field("base_in_words"):
 			base_amount = abs(
-				self.base_grand_total if self.is_rounded_total_disabled() else self.base_rounded_total
+				flt(self.base_grand_total if self.is_rounded_total_disabled() else self.base_rounded_total)
 			)
 			self.base_in_words = money_in_words(base_amount, self.company_currency)
 
 		if self.meta.get_field("in_words"):
-			amount = abs(self.grand_total if self.is_rounded_total_disabled() else self.rounded_total)
+			amount = abs(flt(self.grand_total if self.is_rounded_total_disabled() else self.rounded_total))
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
@@ -415,6 +415,10 @@ class SellingController(StockController):
 		if self.get("is_return") or not frappe.db.get_single_value(
 			"Selling Settings", "validate_selling_price"
 		):
+			return
+
+		# an internal transfer is not a sale, so neither rate applies
+		if self.is_internal_transfer():
 			return
 
 		is_internal_customer = self.get("is_internal_customer")
@@ -683,7 +687,10 @@ class SellingController(StockController):
 				and not item_details.has_batch_no
 			):
 				# Get incoming rate based on original item cost based on valuation method
-				qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
+				if d.doctype == "Packed Item":
+					qty = flt(d.qty)
+				else:
+					qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
 
 				if old_doc:
 					reset_incoming_rate()
@@ -740,14 +747,7 @@ class SellingController(StockController):
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
 					if self.doctype == "Delivery Note" or self.get("update_stock"):
-						if d.doctype == "Packed Item":
-							incoming_rate = flt(
-								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
-								d.precision("incoming_rate"),
-							)
-							if d.incoming_rate != incoming_rate:
-								d.incoming_rate = incoming_rate
-						else:
+						if d.doctype != "Packed Item":
 							if allow_at_arms_length_price:
 								continue
 
@@ -1103,6 +1103,11 @@ class SellingController(StockController):
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_qty_to_undeliver,
+			get_qty_up_to_rounding,
+		)
+
 		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			return
 
@@ -1157,8 +1162,9 @@ class SellingController(StockController):
 							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in delivered_batch_qty:
-									delivered_qty = min(
-										(entry.qty - entry.delivered_qty), delivered_batch_qty[entry.batch_no]
+									pending_qty = entry.qty - entry.delivered_qty
+									delivered_qty = get_qty_up_to_rounding(
+										min(pending_qty, delivered_batch_qty[entry.batch_no]), pending_qty
 									)
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
@@ -1225,8 +1231,8 @@ class SellingController(StockController):
 						else:
 							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-								if entry.batch_no in batch_qty_to_undelivered:
-									undelivered_qty = min(
+								if batch_qty_to_undelivered.get(entry.batch_no, 0) > 0:
+									undelivered_qty = get_qty_to_undeliver(
 										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
 									)
 									entry.delivered_qty -= undelivered_qty

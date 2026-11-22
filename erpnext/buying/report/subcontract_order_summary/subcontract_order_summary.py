@@ -119,6 +119,10 @@ def prepare_subcontracted_data(orders, supplied_items):
 def get_subcontracted_data(order_details, data):
 	for _key, details in order_details.items():
 		res = details.order_item
+		# all materials sourced by the job worker: show the order row alone
+		if not details.supplied_items:
+			data.append(res)
+
 		for index, row in enumerate(details.supplied_items):
 			if index != 0:
 				res = {"order_id": details.order_item.order_id}

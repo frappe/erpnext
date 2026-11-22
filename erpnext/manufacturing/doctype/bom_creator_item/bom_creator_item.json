@@ -143,7 +143,8 @@
   {
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
-   "label": "Conversion Factor"
+   "label": "Conversion Factor",
+   "precision": "9"
   },
   {
    "fetch_from": "item_code.stock_uom",
