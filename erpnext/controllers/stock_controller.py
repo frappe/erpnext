@@ -3,6 +3,7 @@
 
 import json
 from collections import defaultdict
+from itertools import chain
 
 import frappe
 from frappe import _, bold
@@ -2490,8 +2491,9 @@ class StockController(AccountsController):
 					qty -= working_qty
 
 	def rebuild_reservation_usage(self, field: str, sre_lists: dict):
-		"""Replay the remaining usage oldest first, each on the reservations made before it, as on submit."""
-		usages = group_reservation_usage(self.get_remaining_reservation_usage(list(sre_lists)))
+		"""Replay all usage as on submit, this cancelled voucher's too, then take off only its share."""
+		usages = group_reservation_usage(self.get_reservation_usage(list(sre_lists)))
+		self.set_own_serial_batch_usage(usages)
 		for key, sre_list in sre_lists.items():
 			sre_docs = [frappe.get_doc("Stock Reservation Entry", sre) for sre in sre_list]
 			for sre_doc in sre_docs:
@@ -2499,10 +2501,9 @@ class StockController(AccountsController):
 				for entry in sre_doc.sb_entries:
 					entry.delivered_qty = 0
 
-			for usage in usages.get(key, []):
-				for sre_doc in sre_docs:
-					if sre_doc.creation < usage.submitted_at:
-						add_usage_to_reservation(sre_doc, usage, field)
+			# the cancelled share stays in place during the replay, so later usage lands where it did on submit
+			for sre_doc, share in replay_reservation_usage(sre_docs, usages.get(key, []), field, self.name):
+				apply_reservation_share(sre_doc, share, field, sign=-1)
 
 			for sre_doc in sre_docs:
 				for entry in sre_doc.sb_entries:
@@ -2512,14 +2513,25 @@ class StockController(AccountsController):
 				sre_doc.update_status()
 				sre_doc.update_reserved_stock_in_bin()
 
-	def get_remaining_reservation_usage(self, keys: list) -> list[dict]:
-		"""Rows of the remaining vouchers that used the reservations, oldest first."""
+	def set_own_serial_batch_usage(self, usages: dict) -> None:
+		"""Read this voucher's serial and batch nos from its rows, as the ledger cancel unlinks its bundles."""
+		from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
+
+		table_name = "supplied_items" if self.doctype == "Subcontracting Receipt" else "items"
+		rows = {row.name: row for row in self.get(table_name)}
+		for usage in chain.from_iterable(usages.values()):
+			if usage.voucher == self.name:
+				serial_nos, batch_qty = get_delivered_serial_batch_for_reservation(rows[usage.row])
+				usage.serial_nos, usage.batch_qty = set(serial_nos), defaultdict(float, batch_qty)
+
+	def get_reservation_usage(self, keys: list) -> list[dict]:
+		"""Rows of the submitted vouchers and this cancelled one that used the reservations, oldest first."""
 		if self.doctype == "Subcontracting Receipt":
-			return self.get_remaining_consumption(keys)
+			return self.get_receipt_consumption(keys)
 
-		return self.get_remaining_stock_entries(keys)
+		return self.get_stock_entry_usage(keys)
 
-	def get_remaining_stock_entries(self, details: list[str]) -> list[dict]:
+	def get_stock_entry_usage(self, details: list[str]) -> list[dict]:
 		order_field, detail_field = (
 			("subcontracting_inward_order", "scio_detail")
 			if self.purpose == "Subcontracting Delivery"
@@ -2537,6 +2549,7 @@ class StockController(AccountsController):
 			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
 			.select(
 				detail.name,
+				detail.parent.as_("voucher"),
 				detail[detail_field].as_("key"),
 				detail.transfer_qty.as_("qty"),
 				submitted_at,
@@ -2545,7 +2558,7 @@ class StockController(AccountsController):
 				bundle_entry.qty.as_("bundle_qty"),
 			)
 			.where(
-				(stock_entry.docstatus == 1)
+				((stock_entry.docstatus == 1) | (stock_entry.name == self.name))
 				& (stock_entry.purpose == self.purpose)
 				& (stock_entry[order_field] == self.get(order_field))
 				& detail[detail_field].isin(details)
@@ -2553,7 +2566,7 @@ class StockController(AccountsController):
 			.orderby(submitted_at)
 		).run(as_dict=True)
 
-	def get_remaining_consumption(self, keys: list[tuple[str, str]]) -> list[dict]:
+	def get_receipt_consumption(self, keys: list[tuple[str, str]]) -> list[dict]:
 		receipt = frappe.qb.DocType("Subcontracting Receipt")
 		supplied = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
@@ -2566,6 +2579,7 @@ class StockController(AccountsController):
 			.on(bundle_entry.parent == supplied.serial_and_batch_bundle)
 			.select(
 				supplied.name,
+				supplied.parent.as_("voucher"),
 				supplied.subcontracting_order,
 				supplied.rm_item_code,
 				supplied.consumed_qty.as_("qty"),
@@ -2575,7 +2589,7 @@ class StockController(AccountsController):
 				bundle_entry.qty.as_("bundle_qty"),
 			)
 			.where(
-				(receipt.docstatus == 1)
+				((receipt.docstatus == 1) | (receipt.name == self.name))
 				& (receipt.is_return == 0)
 				& (receipt.supplier_warehouse == self.supplier_warehouse)
 				& (supplied.consumed_qty > 0)
@@ -3181,6 +3195,8 @@ def group_reservation_usage(rows: list[dict]) -> dict[str, list]:
 		if not usage:
 			usage = usages[row.key][row.name] = frappe._dict(
 				qty=flt(row.qty),
+				row=row.name,
+				voucher=row.voucher,
 				submitted_at=row.submitted_at,
 				serial_nos=set(),
 				batch_qty=defaultdict(float),
@@ -3193,12 +3209,26 @@ def group_reservation_usage(rows: list[dict]) -> dict[str, list]:
 	return {key: list(row_usages.values()) for key, row_usages in usages.items()}
 
 
-def add_usage_to_reservation(sre_doc, usage, field: str) -> None:
-	"""Count on `sre_doc` the part of `usage` it has room for, and take it off `usage`."""
+def replay_reservation_usage(sre_docs, usages, field: str, cancelled_voucher: str) -> list[tuple]:
+	"""Count each usage on the reservations made before it; return the shares of `cancelled_voucher`."""
+	cancelled_shares = []
+	for usage in usages:
+		for sre_doc in sre_docs:
+			if sre_doc.creation < usage.submitted_at:
+				share = take_reservation_share(sre_doc, usage, field)
+				apply_reservation_share(sre_doc, share, field)
+				if usage.voucher == cancelled_voucher:
+					cancelled_shares.append((sre_doc, share))
+
+	return cancelled_shares
+
+
+def take_reservation_share(sre_doc, usage, field: str) -> frappe._dict:
+	"""The part of `usage` that `sre_doc` has room for, taken off `usage`."""
+	share = frappe._dict(qty=0, entries={})
 	if sre_doc.reservation_based_on != "Serial and Batch":
-		qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.get(field)), usage.qty)
+		share.qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.get(field)), usage.qty)
 	else:
-		qty = 0
 		for entry in sre_doc.sb_entries:
 			if sre_doc.has_serial_no:
 				entry_qty = 0
@@ -3209,11 +3239,19 @@ def add_usage_to_reservation(sre_doc, usage, field: str) -> None:
 				entry_qty = min(flt(entry.qty) - flt(entry.delivered_qty), usage.batch_qty[entry.batch_no])
 				usage.batch_qty[entry.batch_no] -= entry_qty
 
-			entry.delivered_qty = flt(flt(entry.delivered_qty) + entry_qty, entry.precision("delivered_qty"))
-			qty += entry_qty
+			share.entries[entry.name] = entry_qty
+			share.qty += entry_qty
 
-	usage.qty -= qty
-	sre_doc.set(field, flt(flt(sre_doc.get(field)) + qty, sre_doc.precision(field)))
+	usage.qty -= share.qty
+	return share
+
+
+def apply_reservation_share(sre_doc, share, field: str, sign: int = 1) -> None:
+	for entry in sre_doc.sb_entries:
+		entry_qty = sign * share.entries.get(entry.name, 0)
+		entry.delivered_qty = flt(flt(entry.delivered_qty) + entry_qty, entry.precision("delivered_qty"))
+
+	sre_doc.set(field, flt(flt(sre_doc.get(field)) + sign * share.qty, sre_doc.precision(field)))
 
 
 def set_entries_total_qty(entries, total_qty):
