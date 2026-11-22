@@ -2129,8 +2129,8 @@ def add_return_items(ste_doc, row, qty, qty_left, rm_details, rm_detail_field, b
 	precision = frappe.get_precision("Stock Entry Detail", "qty")
 	serial_nos = row.serial_no
 	for order_row in order_rows:
-		row_qty = (
-			qty if order_row == order_rows[-1] else flt(min(qty, max(qty_left[order_row], 0)), precision)
+		row_qty = flt(
+			qty if order_row == order_rows[-1] else min(qty, max(qty_left[order_row], 0)), precision
 		)
 		if row_qty <= 0:
 			continue
