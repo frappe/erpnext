@@ -7226,6 +7226,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		over_return = make_purchase_return_against_rejected_warehouse(pr.name)
 		rejected_return.submit()
 
 		accepted_return = make_purchase_return(pr.name)
@@ -7234,7 +7235,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		accepted_return.items[0].received_qty = -5
 		accepted_return.submit()
 
-		over_return = make_purchase_return_against_rejected_warehouse(pr.name)
 		over_return.items[0].qty = -1
 		over_return.items[0].received_qty = -1
 		self.assertRaises(StockOverReturnError, over_return.save)
