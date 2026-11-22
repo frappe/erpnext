@@ -198,6 +198,34 @@ def get_item_or_template_bom_query(bom, so_item):
 	)
 
 
+def get_reserved_qty_from_stock(so_item):
+	"""Reserved qty of a Sales Order Item, less the Work Order output that work_order_qty already counts."""
+	return so_item.stock_reserved_qty - get_reserved_work_order_output_qty(so_item)
+
+
+def get_reserved_work_order_output_qty(so_item):
+	"""Open reservations of the output of a Sales Order Item's own Work Orders."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	work_order = frappe.qb.DocType("Work Order")
+	work_order_output_qty = (
+		frappe.qb.from_(sre)
+		.inner_join(stock_entry)
+		.on(stock_entry.name == sre.from_voucher_no)
+		.inner_join(work_order)
+		.on(work_order.name == stock_entry.work_order)
+		.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_detail_no == so_item.name)
+			& (sre.from_voucher_type == "Stock Entry")
+			& (work_order.sales_order_item == so_item.name)
+		)
+	)
+	return IfNull(work_order_output_qty, 0)
+
+
 def _open_so_base_query(plan, so, so_item):
 	return (
 		frappe.qb.from_(so)
@@ -210,7 +238,7 @@ def _open_so_base_query(plan, so, so_item):
 			& (so_item.closed == 0)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == plan.company)
-			& (so_item.stock_qty > so_item.production_plan_qty)
+			& ((so_item.stock_qty - get_reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 		)
 	)
 
