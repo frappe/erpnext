@@ -4315,7 +4315,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "per_received"), 100)
 
 	def test_purchase_receipt_receives_the_service_for_process_loss_qty(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
 
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
