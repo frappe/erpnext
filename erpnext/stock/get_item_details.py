@@ -1430,24 +1430,10 @@ def get_item_price(
 	        optional fields transaction_date, customer, supplier
 	:param item_code: str, Item Doctype field item_code
 	"""
-<<<<<<< HEAD
 	pctx: ItemPriceCtx = frappe._dict(pctx)
 	query, ip = _get_item_price_query(pctx, [item_code], ignore_party, force_batch_no)
-	query = query.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit)
+	query = query.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit, ip.customer, ip.supplier)
 	query = _order_item_prices(query, ip, pctx)
-=======
-	ip = frappe.qb.DocType("Item Price")
-	query = (
-		frappe.qb.from_(ip)
-		.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit, ip.customer, ip.supplier)
-		.where(
-			(ip.item_code == item_code)
-			& (ip.price_list == pctx.price_list)
-			& (IfNull(ip.uom, "").isin(["", pctx.uom]))
-		)
-	)
-
->>>>>>> 4b287d6 (fix(stock): prefer a party's price in the stock UOM over a general price in the row UOM)
 	if limit:
 		query = query.limit(limit)
 
