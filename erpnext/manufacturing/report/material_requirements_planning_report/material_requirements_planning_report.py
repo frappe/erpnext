@@ -1275,7 +1275,9 @@ class MaterialRequirementsPlanningReport:
 			demand_by_item.setdefault(row.item_code, []).append(demand)
 
 		# periods that end first go first, so overlapping periods use up as much demand as they can
-		rows_by_period_end = sorted(zip(forecast_rows, periods, strict=True), key=lambda pair: pair[1][1])
+		rows_by_period_end = sorted(
+			zip(forecast_rows, periods, strict=True), key=lambda pair: (pair[1][1], pair[1][0])
+		)
 		for row, (start_date, end_date) in rows_by_period_end:
 			for demand in demand_by_item.get(row.item_code, []):
 				if start_date <= demand.date < end_date:
