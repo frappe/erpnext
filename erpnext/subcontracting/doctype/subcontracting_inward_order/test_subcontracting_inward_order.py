@@ -1588,12 +1588,11 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		for name in scio_names:
 			self.assertEqual(frappe.db.get_value("Subcontracting Inward Order", name, "status"), "Closed")
 
-<<<<<<< HEAD
 	def test_work_order_qty_not_editable_after_submit(self):
 		so, scio = create_so_scio()
 		scio.received_items[0].work_order_qty = 5
 		self.assertRaises(frappe.UpdateAfterSubmitError, scio.save)
-=======
+
 	def test_holding_sales_order_keeps_a_closed_inward_order_closed(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status
 		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
@@ -1620,7 +1619,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		update_status("Closed", so.name)
 		update_status("Draft", so.name)
 		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Closed")
->>>>>>> e5ab206 (test: holding or reopening a Sales Order keeps a closed inward order closed)
 
 	def test_inward_order_from_closed_sales_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status
