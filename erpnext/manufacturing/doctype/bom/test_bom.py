@@ -2186,6 +2186,11 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.total_cost, 60)
 
 	def test_valuation_rate_secondary_item_cost_uses_rounded_process_loss_qty(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		# loss qty precision differs from the BOM quantity precision
+		make_property_setter("BOM Secondary Item", "process_loss_qty", "precision", 2, "Select")
+
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 20000}).name
 		scrap_item = make_item(
