@@ -248,7 +248,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
-		bundle_stock_qty = get_packed_stock_qty(row)
+		bundle_stock_qty = get_stored_stock_qty(row)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component, so_packed_item in get_component_order_rows(
 			doc, row.item_code, components[bundle], so_packed_items
@@ -368,6 +368,9 @@ def add_returned_row(doc, key, row, already_returned_items):
 	"""Count a validated row so that the next rows of the same return see it."""
 	conversion_factor = flt(row.conversion_factor or 1)
 	stock_qty = get_returned_stock_qty(row)
+	if doc.doctype == "Delivery Note" and not row.get("dn_detail"):
+		# no delivered row caps what it posts, so count the stock qty it stores
+		stock_qty = get_stored_stock_qty(row)
 	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
 		rejected_qty += stock_qty
@@ -386,8 +389,8 @@ def get_returned_stock_qty(row):
 	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
 
 
-def get_packed_stock_qty(row):
-	"""Stock qty of a returned bundle row as packing reads it, rounded when the row rounds its stock qty."""
+def get_stored_stock_qty(row):
+	"""Stock qty of a sales return row as it stores it, rounded when the row rounds its stock qty."""
 	stock_qty = get_returned_stock_qty(row)
 	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
@@ -442,6 +445,9 @@ def get_already_returned_items(doc):
 	field = frappe.scrub(doc.doctype) + "_item" if doc.doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
 
 	stock_qty = Abs(child.qty) * child.conversion_factor
+	if doc.doctype == "Delivery Note":
+		# as in add_returned_row, a row without dn_detail counts at its stored stock qty
+		stock_qty = Case().when(IfNull(child.dn_detail, "") == "", Abs(child.stock_qty)).else_(stock_qty)
 
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES:
