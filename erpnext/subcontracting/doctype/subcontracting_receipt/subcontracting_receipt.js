@@ -90,13 +90,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 						});
 					};
 
-					let has_rejected_items = frm.doc.items.filter((item) => {
-						if (item.rejected_qty > 0) {
-							return true;
-						}
-					});
-
-					if (has_rejected_items && has_rejected_items.length > 0) {
+					if (frm.doc.__onload?.has_rejected_qty_to_return) {
 						frappe.prompt(
 							[
 								{

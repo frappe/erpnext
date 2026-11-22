@@ -1540,8 +1540,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		make_accepted_return(-3).submit()
 		self.assertRaises(StockOverReturnError, make_accepted_return(-1).save)
 
-		make_subcontract_return_against_rejected_warehouse(scr.name).submit()
+		rejected_return = make_subcontract_return_against_rejected_warehouse(scr.name)
 		over_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		rejected_return.submit()
+
 		over_return.items[0].qty = -2
 		self.assertRaises(StockOverReturnError, over_return.save)
 
@@ -4025,6 +4027,21 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.conversion_rate, 80)
 		self.assertEqual(pr.grand_total, 1000)
 		self.assertEqual(pr.base_grand_total, 80000)
+
+	def test_no_rejected_warehouse_return_after_all_rejected_qty_is_returned(self):
+		scr, _scrap_item = make_receipt_with_rejected_qty_and_scrap()
+		self.assertTrue(scr.has_rejected_qty_to_return())
+
+		make_return_doc("Subcontracting Receipt", scr.name, return_against_rejected_qty=True).submit()
+
+		self.assertFalse(scr.has_rejected_qty_to_return())
+		self.assertRaises(
+			frappe.ValidationError,
+			make_return_doc,
+			"Subcontracting Receipt",
+			scr.name,
+			return_against_rejected_qty=True,
+		)
 
 	def test_return_of_rejected_qty_gets_no_secondary_items(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
