@@ -549,8 +549,9 @@ class PurchaseOrder(BuyingController):
 		self.update_requested_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
-		if status == "Closed" or was_closed:
-			self.update_subcontracting_order_status()
+		# reopening leaves the Subcontracting Orders closed: a user may have closed them on purpose
+		if status == "Closed":
+			self.close_subcontracting_orders()
 		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -814,7 +815,7 @@ class PurchaseOrder(BuyingController):
 			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
 				make_subcontracting_order(self.name, save=True, notify=True)
 
-	def update_subcontracting_order_status(self):
+	def close_subcontracting_orders(self):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			set_subcontracting_order_status as update_sco_status,
 		)
@@ -823,7 +824,7 @@ class PurchaseOrder(BuyingController):
 			for sco in frappe.get_all(
 				"Subcontracting Order", {"purchase_order": self.name, "docstatus": 1}, pluck="name"
 			):
-				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
+				update_sco_status(sco, "Closed")
 
 
 @frappe.request_cache
