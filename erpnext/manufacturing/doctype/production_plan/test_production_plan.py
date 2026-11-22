@@ -2397,67 +2397,13 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual((row.ordered_qty, row.received_qty), (10, 0))
 
-<<<<<<< HEAD
-=======
-	def test_visualizer_shows_subcontracted_sub_assembly_received_qty(self):
-		from erpnext.manufacturing.page.production_plan_visualizer.production_plan_visualizer import (
-			get_plan_overview,
-		)
-		from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import (
-			execute as execute_summary,
-		)
-		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			make_subcontracting_receipt,
-		)
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
-			make_subcontract_return,
-			make_subcontract_return_against_rejected_warehouse,
-		)
-
-		plan, po, sco = make_plan_with_subcontracted_sub_assembly()
-
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 3
-		scr.items[0].rejected_qty = 1
-		scr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
-		scr.items[0].process_loss_qty = 1
-		scr.submit()
-
-		# Subcontracting Receipt does not update the Purchase Order Item's received_qty
-		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "received_qty"), 0)
-
-		# rejected and process loss qty are not counted as produced
-		sub_assembly = get_plan_overview(plan.name)["sub_assemblies"][0]
-		self.assertEqual(sub_assembly["produced_qty"], 3)
-		self.assertEqual(sub_assembly["pending_qty"], 2)
-		self.assertEqual(sub_assembly["documents"][0]["produced_qty"], 3)
-		summary = execute_summary(frappe._dict(production_plan=plan.name))[1]
-		self.assertEqual(
-			next(r for r in summary if r.get("document_type") == "Purchase Order")["produced_qty"], 3
-		)
-
-		# returning accepted qty reduces the produced qty
-		scr_return = make_subcontract_return(scr.name)
-		scr_return.items[0].qty = -1
-		scr_return.items[0].received_qty = -1
-		scr_return.submit()
-
-		sub_assembly = get_plan_overview(plan.name)["sub_assemblies"][0]
-		self.assertEqual(sub_assembly["produced_qty"], 2)
-		self.assertEqual(sub_assembly["pending_qty"], 3)
-
-		# returning rejected qty does not change the produced qty
-		make_subcontract_return_against_rejected_warehouse(scr.name).submit()
-
-		sub_assembly = get_plan_overview(plan.name)["sub_assemblies"][0]
-		self.assertEqual(sub_assembly["produced_qty"], 2)
-		self.assertEqual(sub_assembly["pending_qty"], 3)
-
 	def test_subcontracting_receipt_sets_the_accepted_sub_assembly_received_qty(self):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			make_subcontracting_receipt,
 		)
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
 
 		plan, _po, sco = make_plan_with_subcontracted_sub_assembly()
 		scr = make_subcontracting_receipt(sco.name)
@@ -2484,7 +2430,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		scr.cancel()
 		self.assertEqual(get_received_qty(), 0)
 
->>>>>>> 6d8a3f4 (test: Subcontracting Receipt sets a plan's sub-assembly received qty)
 	def test_partial_material_request_keeps_the_plan_open_for_requests(self):
 		plan = create_production_plan(
 			item_code="Test Production Item 1", planned_qty=10, for_warehouse="_Test Warehouse - _TC"
@@ -6599,21 +6544,10 @@ def make_plan_with_sub_assembly():
 	return plan, work_order
 
 
-<<<<<<< HEAD
-=======
-def receive_items_for_reservation(item_codes, warehouse):
-	return make_material_receipt(
-		[
-			{"item_code": item_code, "target": warehouse, "qty": 5, "basic_rate": 100}
-			for item_code in item_codes
-		]
-	)
-
-
 def make_plan_with_subcontracted_sub_assembly():
 	"""Submitted plan for 5 of a finished good whose sub-assembly is subcontracted, with the
 	Subcontracting Order's raw materials sent to the supplier."""
-	from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+	from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
 	from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
 	rm_item = make_item("_Test PPV Subcontract RM", {"is_stock_item": 1}).name
@@ -6669,7 +6603,6 @@ def make_plan_with_subcontracted_sub_assembly():
 	return plan, po, sco
 
 
->>>>>>> 6d8a3f4 (test: Subcontracting Receipt sets a plan's sub-assembly received qty)
 def make_bom(**args):
 	args = frappe._dict(args)
 

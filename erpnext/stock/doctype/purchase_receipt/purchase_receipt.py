@@ -9,14 +9,10 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
-<<<<<<< HEAD
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Abs, CombineDatetime, IfNull, Sum
-from frappe.utils import cint, flt, get_datetime, getdate, now, nowdate
+from frappe.utils import cint, flt, get_datetime, getdate, nowdate
 from pypika import functions as fn
-=======
-from frappe.utils import cint, flt, getdate, nowdate
->>>>>>> 957943c (refactor(stock): drop the Purchase Receipt's plan sub-assembly received qty update)
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -418,64 +414,7 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
-<<<<<<< HEAD
 		self.reserve_stock()
-		self.update_received_qty_if_from_pp()
-
-	def update_received_qty_if_from_pp(self):
-		from frappe.query_builder.functions import Coalesce, Sum
-
-		items_from_po = [item.purchase_order_item for item in self.items if item.purchase_order_item]
-		if items_from_po:
-			table = frappe.qb.DocType("Purchase Order Item")
-			subquery = (
-				frappe.qb.from_(table)
-				.select(table.production_plan_sub_assembly_item)
-				.distinct()
-				.where(
-					table.name.isin(items_from_po)
-					& Coalesce(table.production_plan_sub_assembly_item, "").ne("")
-					# a Subcontracting Receipt sets the qty of a subcontracted row
-					& Coalesce(table.fg_item, "").eq("")
-				)
-			)
-			result = subquery.run(as_dict=True)
-			if result:
-				result = [item.production_plan_sub_assembly_item for item in result]
-				production_plan_names = set(
-					frappe.db.get_all(
-						"Production Plan Sub Assembly Item",
-						filters={"name": ("in", result)},
-						pluck="parent",
-					)
-				)
-				query = (
-					frappe.qb.from_(table)
-					.select(
-						table.production_plan_sub_assembly_item,
-						Sum(table.received_qty / (table.qty / table.fg_item_qty)).as_("received_qty"),
-					)
-					.where(table.production_plan_sub_assembly_item.isin(result))
-					.groupby(table.production_plan_sub_assembly_item)
-				)
-				for row in query.run(as_dict=True):
-					frappe.db.set_value(
-						"Production Plan Sub Assembly Item",
-						row.production_plan_sub_assembly_item,
-						"received_qty",
-						row.received_qty,
-					)
-
-				for production_plan_name in production_plan_names:
-					frappe.db.set_value(
-						"Production Plan",
-						production_plan_name,
-						{"modified": now(), "modified_by": frappe.session.user},
-						update_modified=False,
-					)
-=======
-		PurchaseReceiptStockReservation(self).reserve_stock()
->>>>>>> 957943c (refactor(stock): drop the Purchase Receipt's plan sub-assembly received qty update)
 
 	def on_cancel(self):
 		super().on_cancel()

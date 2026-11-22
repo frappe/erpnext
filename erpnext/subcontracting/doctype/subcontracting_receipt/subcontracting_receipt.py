@@ -340,7 +340,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.check_for_on_hold_or_closed_status("Subcontracting Order", "subcontracting_order")
 
 	def update_production_plan_received_qty(self):
-		from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			update_subcontracted_received_qty,
 		)
 
