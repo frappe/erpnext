@@ -1463,6 +1463,55 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
 		self.assertEqual([(item.item_code, item.qty) for item in rm_return.items], [("Basic RM", 2)])
 
+<<<<<<< HEAD
+=======
+	def test_rm_return_counts_every_row_of_one_received_item(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		make_stock_entry(
+			item_code="Basic RM", qty=5, to_warehouse=scio.customer_warehouse, purpose="Material Receipt"
+		)
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "Basic RM"]
+		rm_return.append("items", rm_return.items[0].as_dict(no_default_fields=True))
+		self.assertRaises(frappe.ValidationError, rm_return.submit)
+
+		rm_return.items[0].qty = 3
+		rm_return.items[1].qty = 2
+		rm_return.submit()
+		scio.reload()
+		self.assertEqual(scio.received_items[0].returned_qty, 5)
+
+	def test_patch_recounts_returned_qty_of_split_returns(self):
+		from erpnext.patches.v16_0.recalculate_returned_qty_of_customer_material_returned_in_parts import (
+			execute,
+		)
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "Basic RM"]
+		rm_return.append("items", rm_return.items[0].as_dict(no_default_fields=True))
+		rm_return.items[0].qty = 3
+		rm_return.items[1].qty = 2
+		rm_return.submit()
+		row = rm_return.items[0].scio_detail
+		doctype = "Subcontracting Inward Order Received Item"
+
+		# stored before split returns were summed
+		frappe.db.set_value(doctype, row, "returned_qty", 2)
+		execute()
+		self.assertEqual(frappe.db.get_value(doctype, row, "returned_qty"), 5)
+
+		# cancelled after the sum was deployed but before the patch ran
+		rm_return.cancel()
+		frappe.db.set_value(doctype, row, "returned_qty", -3)
+		execute()
+		self.assertEqual(frappe.db.get_value(doctype, row, "returned_qty"), 0)
+
+>>>>>>> a3a5f06 (test: patch recounts Returned Qty of a split return, and resets it after a cancel)
 	def test_partly_subcontracted_service_item_in_larger_uom(self):
 		item_list = [
 			{
