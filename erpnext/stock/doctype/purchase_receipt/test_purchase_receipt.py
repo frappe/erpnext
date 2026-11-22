@@ -1174,6 +1174,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pr2.status, "Completed")
 
 	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
+	def test_maintain_same_rate_for_inter_company_supplier(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_receipt as make_receipt_from_order,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		supplier = create_internal_supplier("_Test Sister Supplier", "_Test Company 1", "_Test Company")
+		po = create_purchase_order(supplier=supplier, rate=100)
+		pr = frappe.get_doc(make_receipt_from_order(po.name))
+		pr.items[0].rate = 150
+
+		self.assertRaisesRegex(frappe.ValidationError, "Rate must be same as Purchase Order", pr.insert)
+
+	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
 	)
 	def test_per_billed_by_qty_when_landed_cost_follows_invoice_rate(self):
