@@ -18,6 +18,7 @@
   "operation_id",
   "qty",
   "operating_component",
+  "item_row",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -113,6 +114,15 @@
    "read_only": 1
   },
   {
+   "description": "The finished good row that takes all of this cost",
+   "fieldname": "item_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Item Row",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -138,7 +148,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-04 10:00:00.000000",
+ "modified": "2026-11-22 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",
