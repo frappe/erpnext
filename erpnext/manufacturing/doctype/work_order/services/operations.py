@@ -349,7 +349,7 @@ class OperationsService:
 		groups.append((self._bom_operations(self.doc.bom_no), bom_qty, 1, False))
 
 		all_rows = [d for rows, _qty, _units, _exploded in groups for d in rows]
-		batch_size_flags = self._get_batch_size_flags(d.operation for d in all_rows)
+		batch_size_flags = get_batch_size_flags(d.operation for d in all_rows)
 
 		operations = []
 		for rows, qty, units, exploded in groups:
@@ -363,23 +363,9 @@ class OperationsService:
 			"BOM Operation", filters={"parent": bom_no}, fields=_BOM_OPERATION_FIELDS, order_by="idx"
 		)
 
-	def _get_batch_size_flags(self, operation_names):
-		names = {name for name in operation_names if name}
-		if not names:
-			return {}
-		return dict(
-			frappe.get_all(
-				"Operation",
-				filters={"name": ["in", list(names)]},
-				fields=["name", "create_job_card_based_on_batch_size"],
-				as_list=True,
-				limit_page_length=0,
-			)
-		)
-
 	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
 		if not d.fixed_time:
-			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
+			d.time_in_mins = get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
 
 		d.status = "Pending"
 		d.output_qty = self._operation_output_qty(d, qty, exploded)
@@ -503,7 +489,7 @@ class OperationsService:
 			)
 
 
-def _operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
+def get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
 	if batch_size_flags.get(d.operation) and flt(d.batch_size):
 		return d.time_in_mins * flt(units) / flt(d.batch_size)
 	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
@@ -512,3 +498,18 @@ def _operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
 @frappe.request_cache
 def get_hour_rate(workstation):
 	return frappe.get_cached_value("Workstation", workstation, "hour_rate") or 0.0
+
+
+def get_batch_size_flags(operation_names):
+	names = {name for name in operation_names if name}
+	if not names:
+		return {}
+	return dict(
+		frappe.get_all(
+			"Operation",
+			filters={"name": ["in", list(names)]},
+			fields=["name", "create_job_card_based_on_batch_size"],
+			as_list=True,
+			limit_page_length=0,
+		)
+	)
