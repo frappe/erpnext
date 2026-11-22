@@ -6,16 +6,8 @@ import json
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-<<<<<<< HEAD
-<<<<<<< HEAD
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Criterion
-=======
-from frappe.query_builder import Case, Criterion
->>>>>>> f2fe397 (fix(manufacturing): count running time logs in the workstation overlap check)
-=======
-from frappe.query_builder import Criterion
->>>>>>> caa7472 (fix(manufacturing): keep time log columns typed in the running overlap check)
 from frappe.query_builder.functions import IfNull, Max, Min, Sum
 from frappe.utils import (
 	add_days,
