@@ -1386,7 +1386,11 @@ erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
 			bom_no: "",
 		},
 		callback(r) {
-			const produced_qty = flt(row.stock_qty) * (1 - flt(row.process_loss_per) / 100);
+			const loss_qty = flt(
+				(flt(row.stock_qty) * flt(row.process_loss_per)) / 100,
+				precision("process_loss_qty", row)
+			);
+			const produced_qty = flt(row.stock_qty) - loss_qty;
 			const cost = flt(r.message.rate) * produced_qty;
 			frappe.model
 				.set_value(cdt, cdn, {

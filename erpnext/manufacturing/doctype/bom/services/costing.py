@@ -343,7 +343,10 @@ class BOMCostingService:
 		for d in self.doc.get("secondary_items"):
 			if d.valuation_type == "Valuation Rate":
 				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
-				produced_qty = flt(d.stock_qty) * (1 - flt(d.process_loss_per) / 100)
+				loss_qty = flt(
+					flt(d.stock_qty) * flt(d.process_loss_per) / 100, d.precision("process_loss_qty")
+				)
+				produced_qty = flt(d.stock_qty) - loss_qty
 				d.cost = flt(flt(rate) * produced_qty, precision)
 			elif d.valuation_type == "Manual":
 				d.cost = flt(d.cost, precision)
