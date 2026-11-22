@@ -1430,6 +1430,46 @@ class TestSubcontractingController(ERPNextTestSuite):
 			[(1, ["S1"]), (2, ["S3", "S4"])],
 		)
 
+	def test_serial_no_consumed_again_after_its_return_stays_consumed(self):
+		"""FG C consumes S1, sent for FG A, its receipt is returned, and then FG A consumes S1."""
+		doc = make_receipt_with_two_serial_transfers()
+		bundles = {}
+		consumptions = []
+		for voucher_no, fg_item, consumed_qty in (("SCR-1", "C", 1), ("SCR-2", "C", -1), ("SCR-3", "A", 1)):
+			bundles[("RM", fg_item, doc.supplier_warehouse, voucher_no)] = frappe._dict(serial_nos=["S1"])
+			row = frappe._dict(
+				rm_item_code="RM", main_item_code=fg_item, voucher_no=voucher_no, consumed_qty=consumed_qty
+			)
+			consumptions.append(doc.get_consumption(row, ("RM", fg_item, "SCO"), bundles))
+
+		doc.deduct_consumptions(consumptions)
+		self.assertEqual(
+			[(row.qty, sorted(row.serial_no)) for row in doc.available_materials.values()],
+			[(1, ["S2"]), (2, ["S3", "S4"])],
+		)
+
+	def test_serial_nos_of_a_batch_consumed_on_other_transfers_keep_their_batches_in_step(self):
+		"""FG A and B are sent 2 serial nos each of batch X, and FG C consumes S3, sent for FG B."""
+		doc = make_receipt_with_two_serial_transfers()
+		keys = doc.get_transfer_keys(("RM", "C", "SCO"))
+		doc.update_consumed_serial_nos(
+			keys, ["S3"], is_return=False, change_qty=True, serial_batches={"S3": "X"}
+		)
+		self.assertEqual(
+			[(row.qty, row.batch_no["X"]) for row in doc.available_materials.values()], [(2, 2), (1, 1)]
+		)
+
+
+def make_receipt_with_two_serial_transfers():
+	"""A receipt whose order sent S1 and S2 for FG A, and S3 and S4 for FG B, all of batch X."""
+	doc = frappe.new_doc("Subcontracting Receipt")
+	doc.available_materials = {
+		("RM", "A", "SCO"): frappe._dict(qty=2, serial_no=["S1", "S2"], batch_no=defaultdict(float, X=2)),
+		("RM", "B", "SCO"): frappe._dict(qty=2, serial_no=["S3", "S4"], batch_no=defaultdict(float, X=2)),
+	}
+	doc._SubcontractingController__transferred_items = copy.deepcopy(doc.available_materials)
+	return doc
+
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
