@@ -3567,8 +3567,9 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			"incoming_rate",
 		)
 
-	# the landed cost is added to the stock received, not to what leaves transit
-	if sle.actual_qty < 0:
+	# the landed cost is added to the stock accepted, not to what leaves transit or was rejected
+	rejected_warehouse = frappe.get_cached_value(child_doctype, sle.voucher_detail_no, "rejected_warehouse")
+	if sle.actual_qty < 0 or sle.warehouse == rejected_warehouse:
 		return rate
 
 	return rate + get_landed_cost_rate(child_doctype, sle.voucher_detail_no, abs(sle.actual_qty))
