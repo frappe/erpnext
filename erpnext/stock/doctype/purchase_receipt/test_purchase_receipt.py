@@ -2347,6 +2347,25 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			(sle.warehouse, sle.actual_qty, sle.stock_value_difference), ("Stores - _TC", 5, 2500)
 		)
 
+	def test_inter_company_receipt_keeps_picked_batches_when_warehouse_changes(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+
+		dn = make_inter_company_delivery_note(stock=[(3, 100), (2, 120)])
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update({"warehouse": "_Test Warehouse - _TC", "qty": 3, "received_qty": 3})
+		pr.insert()
+		# a partial receipt picks 1 of the first batch and all of the second
+		package = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Serial and Batch Entry", package.entries[0].name, "qty", 1)
+		picked = [(package.entries[0].batch_no, 1), (package.entries[1].batch_no, package.entries[1].qty)]
+
+		pr.items[0].warehouse = "Stores - _TC"
+		pr.save()
+
+		package = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
+		self.assertEqual(package.warehouse, "Stores - _TC")
+		self.assertEqual([(d.batch_no, d.qty) for d in package.entries], picked)
+
 	def test_lcv_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
