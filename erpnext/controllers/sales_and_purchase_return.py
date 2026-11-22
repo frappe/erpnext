@@ -931,6 +931,16 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		set_missing_values,
 	)
 
+	if return_against_rejected_qty:
+		# rows whose rejected qty is all returned already
+		for row in [row for row in doclist.items if not flt(row.qty, row.precision("qty"))]:
+			doclist.remove(row)
+
+		if not doclist.items:
+			frappe.throw(
+				_("All rejected qty of {0} {1} is already returned.").format(_(doctype), source_name)
+			)
+
 	return doclist
 
 

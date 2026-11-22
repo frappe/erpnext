@@ -1011,6 +1011,27 @@ class TestProductionPlan(ERPNextTestSuite):
 			[(sales_order.items[0].name, 5)],
 		)
 
+	def test_combining_fetched_items_keeps_sales_order_links(self):
+		item = "Test Production Item 1"
+		sales_orders = [make_sales_order(item_code=item, qty=qty) for qty in (5, 3)]
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = sales_orders[0].company
+		plan.get_items_from = "Sales Order"
+		for sales_order in sales_orders:
+			plan.append("sales_orders", {"sales_order": sales_order.name})
+		plan.get_items()
+		plan.combine_items = 1
+		plan.combine_so_items()
+		plan.submit()
+
+		so_items = [sales_order.items[0].name for sales_order in sales_orders]
+		self.assertCountEqual([row.sales_order_item for row in plan.prod_plan_references], so_items)
+		self.assertEqual(
+			[frappe.db.get_value("Sales Order Item", name, "production_plan_qty") for name in so_items],
+			[5, 3],
+		)
+
 	def test_production_plan_subassembly_default_supplier(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 

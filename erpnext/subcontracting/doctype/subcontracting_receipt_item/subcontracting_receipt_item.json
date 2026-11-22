@@ -442,7 +442,8 @@
    "label": "Subcontracting Receipt Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "collapsible": 1,
@@ -654,7 +655,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-06 06:08:35.073317",
+ "modified": "2026-11-18 04:20:00.000000",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

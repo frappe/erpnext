@@ -12,6 +12,8 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import ceil, cint, cstr, flt, get_link_to_form
 
+import erpnext
+from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
 	is_rejected_subcontracting_return,
@@ -87,6 +89,18 @@ class SubcontractingController(StockController):
 			self.set_valuation_rate_for_rm()
 		else:
 			super().validate()
+
+	def validate_additional_cost_accounts(self):
+		"""Additional costs are valued and posted in the company currency only."""
+		company_currency = erpnext.get_company_currency(self.company)
+		for row in self.get("additional_costs"):
+			if row.expense_account and get_account_currency(row.expense_account) != company_currency:
+				frappe.throw(
+					_(
+						"Row #{0}: Additional Costs account {1} is not in the company currency {2}. Select an account in {2}."
+					).format(row.idx, frappe.bold(row.expense_account), company_currency),
+					title=_("Invalid Account Currency"),
+				)
 
 	def validate_company_of_warehouses(self):
 		warehouses = {
@@ -738,8 +752,11 @@ class SubcontractingController(StockController):
 				se_detail.description,
 				(
 					frappe.qb.terms.Case()
-					.when(((se.purpose == "Material Transfer") & (se.is_return == 1)), -1 * se_detail.qty)
-					.else_(se_detail.qty)
+					.when(
+						((se.purpose == "Material Transfer") & (se.is_return == 1)),
+						-1 * se_detail.transfer_qty,
+					)
+					.else_(se_detail.transfer_qty)
 				).as_("qty"),
 				se_detail.basic_rate.as_("rate"),
 				se_detail.amount,
@@ -2005,6 +2022,8 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 	item.update(
 		{
 			"qty": qty,
+			"uom": row.item_details["stock_uom"],
+			"conversion_factor": 1,
 			"batch_no": batch_no,
 			"basic_rate": row.item_details["rate"],
 			rm_detail_field: rm_detail[0] if rm_detail else "",

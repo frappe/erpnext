@@ -302,6 +302,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "project_details",
    "fieldtype": "Section Break",
    "label": "Costing and Billing",
@@ -373,6 +374,7 @@
    "options": "Cost Center"
   },
   {
+   "collapsible": 1,
    "fieldname": "margin",
    "fieldtype": "Section Break",
    "label": "Margin",
@@ -566,7 +568,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-11-19 12:00:00.000000",
+ "modified": "2026-11-22 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
