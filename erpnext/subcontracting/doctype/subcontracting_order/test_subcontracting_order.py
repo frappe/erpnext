@@ -1455,6 +1455,51 @@ class TestSubcontractingOrder(FrappeTestCase):
 			[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items], [0, 2]
 		)
 
+	def test_consumption_for_a_finished_good_counts_on_the_row_its_material_was_sent_on(self):
+		set_backflush_based_on("BOM")
+		rm_item = make_item("Subcontracted RM Item Sent For Other FG", {"is_stock_item": 1}).name
+		service_items = []
+		for code, service_item, qty in (
+			("A", "Subcontracted Service Item 2", 10),
+			("B", "Subcontracted Service Item 3", 6),
+		):
+			fg_item = make_item(
+				f"Subcontracted FG Item Sent For Other FG {code}",
+				{"is_stock_item": 1, "is_sub_contracted_item": 1},
+			).name
+			make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+			service_items.append(
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": qty,
+					"rate": 100,
+					"fg_item": fg_item,
+					"fg_item_qty": qty,
+				}
+			)
+
+		# 16 sent on FG A's and FG B's rows, then a receipt of 6 FG B
+		for sent, consumed in (((16, 0), [6, 0]), ((14, 2), [4, 2])):
+			sco = get_subcontracting_order(service_items=service_items)
+			make_stock_entry(
+				item_code=rm_item, target=sco.supplied_items[0].reserve_warehouse, qty=16, basic_rate=100
+			)
+			for row, qty in zip(sco.supplied_items, sent, strict=True):
+				if qty:
+					transfer = make_supplied_item_transfer(sco, row)
+					transfer.items[0].qty = qty
+					transfer.submit()
+
+			receipt = make_subcontracting_receipt(sco.name)
+			receipt.remove(receipt.items[0])
+			receipt.submit()
+
+			self.assertEqual(
+				[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items],
+				consumed,
+			)
+
 	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
 		sco = get_subcontracting_order_sharing_a_raw_material()
 
