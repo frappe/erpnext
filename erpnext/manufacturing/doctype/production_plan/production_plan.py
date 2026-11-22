@@ -33,54 +33,7 @@ import erpnext
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
-<<<<<<< HEAD
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
-=======
-
-# Backward-compatible re-exports (moved to mapper.py / services/).
-from erpnext.manufacturing.doctype.production_plan.mapper import (
-	get_so_details,
-	sales_order_query,
-)
-from erpnext.manufacturing.doctype.production_plan.services.material_request import (
-	MaterialRequestService,
-	download_raw_materials,
-	get_exploded_items,
-	get_item_data,
-	get_items_for_material_requests,
-	get_material_request_items,
-	get_materials_from_other_locations,
-	get_raw_materials_of_sub_assembly_items,
-	get_sales_orders,
-	get_subitems,
-	get_uom_conversion_factor,
-	get_warehouse_list,
-	set_default_warehouses,
-)
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
-	get_bin_details,
-	get_plan_process_loss_percentage,
-	get_reserved_qty_from_stock,
-)
-from erpnext.manufacturing.doctype.production_plan.services.reservation import (
-	ProductionPlanStockReservation,
-	cancel_stock_reservation_entries,
-	get_reserved_qty_for_production_plan,
-	get_reserved_qty_for_sub_assembly,
-	make_stock_reservation_entries,
-	reserve_stock_for_production_plan,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
-	SalesOrderSourcingService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
-	SubAssemblyService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
-	WorkOrderCreationService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
->>>>>>> fa2f5b6 (fix(manufacturing): count reserved Work Order output once in the Sales Order search and submit check)
 	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -484,7 +437,6 @@ class ProductionPlan(Document):
 				(so_item.stock_qty - _reserved_qty_from_stock(so_item)).as_("qty"),
 				_reserved_work_order_output_qty(so_item).as_("reserved_work_order_output_qty"),
 				so_item.work_order_qty,
-				so_item.stock_qty,
 				so_item.production_plan_qty,
 				so_item.delivered_qty,
 				so_item.conversion_factor,
@@ -497,7 +449,7 @@ class ProductionPlan(Document):
 				(so_item.parent.isin(so_list))
 				& (so_item.docstatus == 1)
 				& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
-				& (so_item.stock_qty > so_item.production_plan_qty)
+				& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 			)
 		)
 
@@ -518,9 +470,7 @@ class ProductionPlan(Document):
 				item.reserved_work_order_output_qty
 			)
 			pending_qty = flt(item.qty) - max(item.work_order_qty, delivered_or_reserved_qty, 0)
-			item.pending_qty = flt(
-				min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty)), precision
-			)
+			item.pending_qty = flt(min(pending_qty, flt(item.qty) - flt(item.production_plan_qty)), precision)
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -772,7 +722,7 @@ class ProductionPlan(Document):
 				so_item.name,
 				so_item.item_code,
 				so_item.stock_qty,
-				get_reserved_qty_from_stock(so_item).as_("reserved_qty"),
+				_reserved_qty_from_stock(so_item).as_("reserved_qty"),
 				so_item.stock_uom,
 			)
 			.where(so_item.name.isin(so_items))
@@ -2122,7 +2072,7 @@ def get_sales_orders(self):
 			& (so.docstatus == 1)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == self.company)
-			& (so_item.stock_qty > so_item.production_plan_qty)
+			& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 		)
 	)
 
@@ -3016,7 +2966,10 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 		.on(table.parent == so_table.name)
 		.select(table.parent)
 		.distinct()
-		.where((table.stock_qty > table.production_plan_qty) & (table.docstatus == 1))
+		.where(
+			((table.stock_qty - _reserved_qty_from_stock(table)) > table.production_plan_qty)
+			& (table.docstatus == 1)
+		)
 	)
 
 	if filters.get("company"):

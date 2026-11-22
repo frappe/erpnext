@@ -7,13 +7,13 @@ import frappe
 from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
-from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_non_completed_production_plans,
 	get_pooled_bin_details,
 	get_sales_orders,
 	get_warehouse_list,
+	sales_order_query,
 )
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
@@ -6420,11 +6420,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(pln.status, "Material Requested")
 
 	def test_sales_order_query_follows_company_user_permission(self):
-<<<<<<< HEAD
-		from erpnext.manufacturing.doctype.production_plan.production_plan import sales_order_query
-
-=======
->>>>>>> 745b994 (test: reserved part of a Sales Order is left out of the search and the submit check)
 		item = make_item(properties={"is_stock_item": 1}).name
 		sales_order = make_sales_order(item_code=item, qty=5, rate=100).name
 		other_company_planner = create_manufacturing_user("planner-tc1@example.com", "_Test Company 1")
@@ -6440,11 +6435,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual([row[0] for row in rows], [sales_order])
 
 	def test_sales_order_query_without_user_permission_lists_all_open_orders(self):
-<<<<<<< HEAD
-		from erpnext.manufacturing.doctype.production_plan.production_plan import sales_order_query
-
-=======
->>>>>>> 745b994 (test: reserved part of a Sales Order is left out of the search and the submit check)
 		item = make_item(properties={"is_stock_item": 1}).name
 		sales_order = make_sales_order(item_code=item, qty=5, rate=100).name
 		planner = create_manufacturing_user("planner-unrestricted@example.com")
