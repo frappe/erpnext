@@ -4,6 +4,7 @@
 
 import hashlib
 import json
+from itertools import groupby
 
 import frappe
 from frappe import _
@@ -202,8 +203,6 @@ class POSInvoiceMergeLog(Document):
 			credit_note.is_consolidated = 1
 			credit_note.flags.is_consolidated = True
 			credit_note.set_posting_time = 1
-			credit_note.posting_date = getdate(self.posting_date)
-			credit_note.posting_time = get_time(self.posting_time)
 			# TODO: return could be against multiple sales invoice which could also have been consolidated?
 			# credit_note.return_against = self.consolidated_invoice
 			credit_note.save()
@@ -592,78 +591,53 @@ def unconsolidate_pos_invoices(closing_entry):
 
 
 def split_invoices(invoices):
-	"""
-	Splits invoices into multiple groups
-	Use-case:
-	If a serial no is sold and later it is returned
-	then split the invoices such that the selling entry is merged first and then the return entry
-	"""
-	# Input
-	# invoices = [
-	# 	{'pos_invoice': 'Invoice with SR#1 & SR#2', 'is_return': 0},
-	# 	{'pos_invoice': 'Invoice with SR#1', 'is_return': 1},
-	# 	{'pos_invoice': 'Invoice with SR#2', 'is_return': 0}
-	# ]
-	# Output
-	# _invoices = [
-	# 	[{'pos_invoice': 'Invoice with SR#1 & SR#2', 'is_return': 0}],
-	# 	[{'pos_invoice': 'Invoice with SR#1', 'is_return': 1}, {'pos_invoice': 'Invoice with SR#2', 'is_return': 0}],
-	# ]
-
-	_invoices = []
-	special_invoices = []
-	pos_return_docs = [
-		frappe.get_cached_doc("POS Invoice", d.pos_invoice)
-		for d in invoices
-		if d.is_return and d.return_against
+	"""Keep returns before later sales that can consume the returned stock."""
+	invoice_rows = {invoice.pos_invoice: invoice for invoice in invoices}
+	ordered_invoices = frappe.get_all(
+		"POS Invoice",
+		filters={"name": ["in", list(invoice_rows)]},
+		fields=["name", "is_return"],
+		order_by="posting_date, posting_time, creation, name",
+	)
+	return [
+		[invoice_rows[invoice.name] for invoice in group]
+		for is_return, group in groupby(ordered_invoices, key=lambda invoice: invoice.is_return)
 	]
-
-	for pos_invoice in pos_return_docs:
-		for item in pos_invoice.items:
-			if not item.serial_no and not item.serial_and_batch_bundle:
-				continue
-
-			return_against_is_added = any(
-				d for d in _invoices if d and d[0].pos_invoice == pos_invoice.return_against
-			)
-			if return_against_is_added:
-				break
-
-			return_against_is_consolidated = (
-				frappe.db.get_value("POS Invoice", pos_invoice.return_against, "status", cache=True)
-				== "Consolidated"
-			)
-			if return_against_is_consolidated:
-				break
-
-			pos_invoice_row = [d for d in invoices if d.pos_invoice == pos_invoice.return_against]
-			_invoices.append(pos_invoice_row)
-			special_invoices.append(pos_invoice.return_against)
-			break
-
-	_invoices.append([d for d in invoices if d.pos_invoice not in special_invoices])
-
-	return _invoices
 
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	def merge_and_close():
-		for customer, invoices_acc_dim in invoice_by_customer.items():
-			for invoices in invoices_acc_dim.values():
-				for _invoices in split_invoices(invoices):
-					merge_log = frappe.new_doc("POS Invoice Merge Log")
-					merge_log.posting_date = (
-						getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
-					)
-					merge_log.posting_time = (
-						get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
-					)
-					merge_log.company = closing_entry.get("company") if closing_entry else None
-					merge_log.customer = customer
-					merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
-					merge_log.set("pos_invoices", _invoices)
-					merge_log.save(ignore_permissions=True)
-					merge_log.submit()
+		invoice_groups = {
+			invoice.pos_invoice: (customer, dimension)
+			for customer, dimensions in invoice_by_customer.items()
+			for dimension, invoices in dimensions.items()
+			for invoice in invoices
+		}
+		invoices = [
+			invoice
+			for dimensions in invoice_by_customer.values()
+			for invoices in dimensions.values()
+			for invoice in invoices
+		]
+		for batch in split_invoices(invoices):
+			grouped_invoices = {}
+			for invoice in batch:
+				grouped_invoices.setdefault(invoice_groups[invoice.pos_invoice], []).append(invoice)
+
+			for group, invoices in grouped_invoices.items():
+				merge_log = frappe.new_doc("POS Invoice Merge Log")
+				merge_log.posting_date = (
+					getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
+				)
+				merge_log.posting_time = (
+					get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
+				)
+				merge_log.company = closing_entry.get("company") if closing_entry else None
+				merge_log.customer = group[0]
+				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
+				merge_log.set("pos_invoices", [{"pos_invoice": invoice.pos_invoice} for invoice in invoices])
+				merge_log.save(ignore_permissions=True)
+				merge_log.submit()
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Submitted")
 			closing_entry.db_set("error_message", "")
@@ -690,6 +664,14 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 
 
 def cancel_merge_logs(merge_logs, closing_entry=None):
+	# Undo later resales before their stock returns and the original sales.
+	merge_logs = frappe.get_all(
+		"POS Invoice Merge Log",
+		filters={"name": ["in", merge_logs]},
+		order_by="creation desc, name desc",
+		pluck="name",
+	)
+
 	def merge_cancel_and_close():
 		for log in merge_logs:
 			merge_log = frappe.get_doc("POS Invoice Merge Log", log)
