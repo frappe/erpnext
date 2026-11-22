@@ -2007,7 +2007,6 @@ class TestJobCard(FrappeTestCase):
 		first_card.append("time_logs", jc_review_log("2031-03-04 08:00:00", 60, 0, employee))
 		self.assertRaisesRegex(OverlapError, "is already working", first_card.save)
 
-<<<<<<< HEAD
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_employee_overlap_hides_a_job_card_the_user_cannot_read(self):
 		from frappe.permissions import add_user_permission
@@ -2067,13 +2066,15 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(len(job_card.time_logs), 1)
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
-=======
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_running_job_keeps_its_workstation_busy(self):
 		running_card, second_card = make_jc_review_job_cards(make_jc_review_workstation(capacity=1), 2)
 
-		running_card.start_timer(
-			start_time="2031-03-04 08:00:00", employees=[{"employee": make_jc_review_employee()}]
+		running_card.add_time_log(
+			frappe._dict(
+				start_time="2031-03-04 08:00:00",
+				employees=[{"employee": make_jc_review_employee()}],
+				status="Work In Progress",
+			)
 		)
 		second_card.append(
 			"time_logs", {"from_time": "2031-03-04 08:30:00", "employee": make_jc_review_employee()}
@@ -2090,21 +2091,22 @@ class TestJobCard(FrappeTestCase):
 		second_card.save()
 
 		running_card.reload()
-		running_card.complete_job_card(
-			qty=10, for_quantity=10, pending_qty=0, process_loss_qty=0, end_time="2031-03-04 09:30:00"
+		running_card.add_time_log(
+			frappe._dict(complete_time="2031-03-04 09:30:00", completed_qty=10, status="Complete")
 		)
 		self.assertEqual(frappe.db.get_value("Job Card", running_card.name, "total_completed_qty"), 10)
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
-<<<<<<< HEAD
->>>>>>> bcc5221 (test: running job card keeps its workstation busy)
-=======
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_running_job_takes_one_slot_of_its_workstation(self):
 		running_card, first_card, second_card = make_jc_review_job_cards(
 			make_jc_review_workstation(capacity=2), 3
 		)
-		running_card.start_timer(
-			start_time="2031-03-05 08:00:00", employees=[{"employee": make_jc_review_employee()}]
+		running_card.add_time_log(
+			frappe._dict(
+				start_time="2031-03-05 08:00:00",
+				employees=[{"employee": make_jc_review_employee()}],
+				status="Work In Progress",
+			)
 		)
 		first_card.append("time_logs", jc_review_log("2031-03-05 08:00:00", 60))
 		first_card.save()
@@ -2116,8 +2118,7 @@ class TestJobCard(FrappeTestCase):
 		second_card.append("time_logs", jc_review_log("2031-03-05 09:00:00", 60))
 		second_card.save()
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
->>>>>>> cb2fdf5 (test: running job card takes one slot of a multi-capacity workstation)
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_two_operators_on_one_job_charge_the_workstation_once(self):
 		workstation = make_jc_review_workstation(hour_rate=600, capacity=1)
 		operation = make_jc_review_operation(workstation)
