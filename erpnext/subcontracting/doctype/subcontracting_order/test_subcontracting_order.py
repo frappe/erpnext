@@ -35,6 +35,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	get_mapped_subcontracting_receipt,
 	make_subcontracting_receipt,
 	update_subcontracting_order_status,
 )
@@ -360,6 +361,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.supplier_warehouse = "_Test Warehouse 2 - _TC1"
 		self.assertRaises(InvalidWarehouseCompany, scr.get_current_stock)
 		self.assertRaises(InvalidWarehouseCompany, scr.reset_raw_materials)
+
+	def test_partial_receipts_map_bom_process_loss_in_whole_units(self):
+		sco = get_subcontracting_order()
+		frappe.db.set_value("BOM", sco.items[0].bom, "process_loss_percentage", 10)
+		frappe.db.set_value("UOM", sco.items[0].stock_uom, "must_be_whole_number", 1)
+
+		losses = []
+		for _ in range(2):
+			scr = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 5}])
+			row = scr.items[0]
+			self.assertEqual(row.qty + row.process_loss_qty, 5)
+			self.assertEqual(row.process_loss_qty, int(row.process_loss_qty))
+			losses.append(row.process_loss_qty)
+			# as if this receipt was submitted
+			sco.items[0].db_set("received_qty", flt(sco.items[0].received_qty) + 5)
+
+		# together the receipts lose the BOM's 10% of 10
+		self.assertEqual(sum(losses), 1)
 
 	def test_variant_without_bom_uses_template_bom(self):
 		variant, template_bom = make_subcontracted_variant()
