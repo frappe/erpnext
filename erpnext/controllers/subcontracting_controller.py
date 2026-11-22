@@ -1853,14 +1853,6 @@ def make_rm_stock_entry(
 
 				target_doc.set_stock_entry_type()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-				pending_qty = get_pending_qty_by_material(rm_items)
-<<<<<<< HEAD
->>>>>>> af04ced (fix(subcontracting): map only the raw material qty still pending across the order to Material to Supplier)
-=======
-=======
 				per_finished_good = (
 					order_doctype != "Subcontracting Order"
 					or frappe.db.get_single_value(
@@ -1869,9 +1861,7 @@ def make_rm_stock_entry(
 					!= "BOM"
 				)
 				pending_qty = get_pending_qty_by_material(subcontract_order.supplied_items, per_finished_good)
->>>>>>> cf04b5e (fix(subcontracting): count a raw material per finished good for transfer based backflush in Material to Supplier)
 				precision = target_doc.precision("qty", "items")
->>>>>>> b905981 (fix(subcontracting): round the mapped Material to Supplier qty to its precision)
 				for fg_item_code in fg_item_code_list:
 					for rm_item in rm_items:
 						if (
@@ -1879,18 +1869,6 @@ def make_rm_stock_entry(
 							or rm_item.get("item_code") == fg_item_code
 						):
 							rm_item_code = rm_item.get("rm_item_code")
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-							qty = rm_item.get("qty")
-							if not qty:
-								row_pending_qty = flt(rm_item.get("required_qty")) - flt(
-									rm_item.get("total_supplied_qty")
-								)
-								qty = max(flt(min(row_pending_qty, pending_qty[rm_item_code]), precision), 0)
-								pending_qty[rm_item_code] -= qty
-
-=======
 							material = (rm_item_code, fg_item_code if per_finished_good else None)
 							qty = rm_item.get("qty") or flt(
 								min(
@@ -1899,10 +1877,8 @@ def make_rm_stock_entry(
 								),
 								precision,
 							)
->>>>>>> cf04b5e (fix(subcontracting): count a raw material per finished good for transfer based backflush in Material to Supplier)
 							if qty <= 0:
 								continue
->>>>>>> af04ced (fix(subcontracting): map only the raw material qty still pending across the order to Material to Supplier)
 
 							pending_qty[material] -= qty
 
@@ -1912,10 +1888,7 @@ def make_rm_stock_entry(
 									"item_name": rm_item.get("item_name")
 									or item_wh.get(rm_item_code, {}).get("item_name", ""),
 									"description": item_wh.get(rm_item_code, {}).get("description", ""),
-									"qty": rm_item.get("qty")
-									or max(
-										rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0
-									),
+									"qty": qty,
 									"from_warehouse": rm_item.get("warehouse")
 									or rm_item.get("reserve_warehouse"),
 									"to_warehouse": source_doc.supplier_warehouse,
