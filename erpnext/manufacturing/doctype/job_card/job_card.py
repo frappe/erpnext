@@ -449,10 +449,13 @@ class JobCard(Document):
 			)
 =======
 	def link_secondary_items_to_bom(self):
-		"""Link a secondary item added by hand to the BOM row of its item and type, so it keeps that row's valuation."""
+		"""Link a secondary item added or changed by hand to the BOM row of its item and type, so it keeps that row's valuation."""
 		bom_no = self.semi_fg_bom or self.bom_no
-		unlinked_rows = [row for row in self.secondary_items if not row.bom_secondary_item]
-		if not bom_no or not unlinked_rows:
+		if not bom_no:
+			return
+
+		unlinked_rows = self.get_secondary_items_without_bom_row()
+		if not unlinked_rows:
 			return
 
 		bom_rows = {
@@ -465,6 +468,26 @@ class JobCard(Document):
 		}
 		for row in unlinked_rows:
 			row.bom_secondary_item = bom_rows.get((row.item_code, row.secondary_item_type))
+
+	def get_secondary_items_without_bom_row(self):
+		"""Rows with no BOM row, or whose item or type no longer matches the BOM row they link."""
+		links = [row.bom_secondary_item for row in self.secondary_items if row.bom_secondary_item]
+		if not links:
+			return self.secondary_items
+
+		linked_rows = {
+			row.name: (row.item_code, row.secondary_item_type)
+			for row in frappe.get_all(
+				"BOM Secondary Item",
+				filters={"name": ("in", links)},
+				fields=["name", "item_code", "secondary_item_type"],
+			)
+		}
+		return [
+			row
+			for row in self.secondary_items
+			if linked_rows.get(row.bom_secondary_item) != (row.item_code, row.secondary_item_type)
+		]
 
 	def append_secondary_item(self, item_code, values):
 		secondary_item = {
