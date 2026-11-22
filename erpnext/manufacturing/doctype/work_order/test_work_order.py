@@ -5799,6 +5799,26 @@ class TestWorkOrder(ERPNextTestSuite):
 		sco = self.subcontract_work_order(wo, 10)
 		self.assertEqual([row.reserve_warehouse for row in sco.supplied_items], ["Stores - _TC"])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_stock_sent_to_subcontractor_is_not_reserved_again(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		cloth = make_item("Test SOI Cloth", {"is_stock_item": 1}).name
+		test_stock_entry.make_stock_entry(item_code=cloth, target="Stores - _TC", qty=20, basic_rate=100)
+		wo = self.make_subcontracted_operation_work_order(skip_transfer=1, reserve_stock=1)
+		sco = self.subcontract_work_order(wo, 10)
+		frappe.new_doc("Stock Entry").update(make_rm_stock_entry(sco.name)).submit()
+
+		items = [{**get_unreserved_items(wo)[0], "required_qty": 10}]
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot reserve more than Allowed Qty",
+			make_stock_reservation_entries,
+			wo.as_dict(),
+			items=items,
+			is_transfer=0,
+		)
+
 	def make_subcontracted_operation_work_order(self, **kwargs):
 		"""A Work Order for 10 shirts whose only operation, a subcontracted dyeing, uses 10 cloth."""
 		company = "_Test Company"
