@@ -171,8 +171,6 @@ class JobCard(Document):
 		else:
 			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
-<<<<<<< HEAD
-=======
 	def set_corrective_hour_rate(self):
 		"""Keep a manual rate until the workstation changes, starting from the amended or source card's."""
 		previous = self.get_doc_before_save()
@@ -184,115 +182,6 @@ class JobCard(Document):
 		if self.workstation and self.workstation != previous_workstation:
 			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
-	def validate_semi_finished_goods(self):
-		if not self.track_semi_finished_goods or self.is_subcontracted:
-			return
-
-		if self.items and not self.transferred_qty and not self.skip_material_transfer:
-			self.throw_materials_not_moved()
-
-		if self.docstatus == 1 and not (
-			self.total_completed_qty or self.process_loss_qty or self.pending_qty
-		):
-			frappe.throw(
-				_(
-					"Job Card {0} has no completed quantity yet. Click Start Job when the work begins, then click Complete Job and enter the quantity made. After that you can submit it."
-				).format(bold(self.name)),
-				title=_("Job Not Done Yet"),
-			)
-
-	def throw_materials_not_moved(self):
-		still_to_move = [
-			_("{0}: {1} moved out of {2}").format(
-				bold(row.item_code),
-				self.get_qty_with_uom(row.transferred_qty, row.item_code),
-				self.get_qty_with_uom(row.required_qty, row.item_code),
-			)
-			for row in self.get_rows_to_move()
-		]
-
-		message = _(
-			"Move the raw materials to the Work In Progress warehouse {0} first. Click Move Materials on Job Card {1} and submit the Stock Entry it opens. Then click Start Job."
-		).format(bold(self.wip_warehouse), bold(self.name))
-
-		frappe.throw(
-			message + "<br><br>" + "<br>".join(still_to_move),
-			title=_("Raw Materials Not Moved"),
-		)
-
-	def get_rows_to_move(self):
-		return [row for row in self.items if flt(row.transferred_qty) < flt(row.required_qty)]
-
-	@frappe.whitelist()
-	def get_material_shortages(self):
-		rows = [row for row in self.get_rows_to_move() if row.source_warehouse]
-		in_stock = get_actual_qty_map(rows)
-
-		shortages = []
-		for row in rows:
-			key = (row.item_code, row.source_warehouse)
-			qty_to_move = flt(row.required_qty) - flt(row.transferred_qty)
-			available = max(flt(in_stock.get(key)), 0)
-			in_stock[key] = available - qty_to_move
-
-			if available < qty_to_move:
-				shortages.append(
-					{
-						"name": row.name,
-						"item_code": row.item_code,
-						"warehouse": row.source_warehouse,
-						"qty_to_move": qty_to_move,
-						"available_qty": available,
-						"shortage_qty": qty_to_move - available,
-						"uom": row.stock_uom or row.uom,
-					}
-				)
-
-		return shortages
-
-	def on_update(self):
-		self.validate_job_card_qty()
-
-	def validate_on_hold(self):
-		if not self.is_paused or (self.time_logs and self.has_qty_left_to_make()):
-			return
-
-		self.is_paused = 0
-		self.set_status()
-		self.update_sub_operation_status()
-
-	def has_qty_left_to_make(self):
-		precision = self.precision("total_completed_qty")
-		made_qty = flt(self.total_completed_qty) + flt(self.process_loss_qty)
-		return flt(made_qty, precision) < flt(self.for_quantity, precision)
-
-	def set_manufactured_qty(self):
-		self.manufactured_qty = flt(self.get_manufactured_qty())
-		self.db_set("manufactured_qty", self.manufactured_qty)
-
-		self.update_semi_finished_good_details()
-		self.set_status(update_status=True)
-
-	def get_manufactured_qty(self):
-		table_name = "Subcontracting Receipt Item" if self.is_subcontracted else "Stock Entry"
-
-		table = frappe.qb.DocType(table_name)
-		query = frappe.qb.from_(table).where((table.job_card == self.name) & (table.docstatus == 1))
-
-		if self.is_subcontracted:
-			query = query.select(Sum(table.qty))
-		else:
-			child = frappe.qb.DocType("Stock Entry Detail")
-			query = (
-				query.join(child)
-				.on(table.name == child.parent)
-				.select(Sum(child.transfer_qty))
-				.where((table.purpose == "Manufacture") & (child.is_finished_item == 1))
-			)
-
-		return query.run()[0][0] or 0.0
-
->>>>>>> 51abb93 (fix(manufacturing): take the corrective Job Card hour rate from its new workstation)
 	def validate_job_card_qty(self):
 		if self.is_corrective_job_card or not (self.operation_id and self.work_order):
 			return
