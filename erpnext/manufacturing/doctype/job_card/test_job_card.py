@@ -3750,6 +3750,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		warehouse = "Stores - _TC"
 		rm = make_item("Per Op Service RM", {"is_stock_item": 1, "valuation_rate": 50}).name
+		service_a = make_item("Per Op Service A Item", {"is_stock_item": 0, "valuation_rate": 30}).name
 		service = make_item("Per Op Service", {"is_stock_item": 0, "valuation_rate": 100}).name
 		unassigned = make_item("Per Op Unassigned Service", {"is_stock_item": 0, "valuation_rate": 40}).name
 		sfg = make_item("Per Op Service SFG", {"is_stock_item": 1}).name
@@ -3784,10 +3785,12 @@ class TestJobCard(ERPNextTestSuite):
 			make_operation(operation)
 			fg_bom.append("operations", operation)
 		fg_bom.append("items", {"item_code": sfg, "qty": 1, "operation_row_id": 2})
+		fg_bom.append("items", {"item_code": service_a, "qty": 1, "operation_row_id": 1})
 		fg_bom.append("items", {"item_code": service, "qty": 1, "operation_row_id": 2})
 		fg_bom.append("items", {"item_code": unassigned, "qty": 1})
 		fg_bom.insert()
 		fg_bom.submit()
+		service_a_amount = next(row.base_amount for row in fg_bom.items if row.item_code == service_a)
 		service_amount = sum(
 			row.base_amount for row in fg_bom.items if row.item_code in (service, unassigned)
 		)
@@ -3820,7 +3823,7 @@ class TestJobCard(ERPNextTestSuite):
 			)
 			stock_entry.submit()
 
-		self.assertEqual(non_stock_costs, [0, flt(service_amount * 10)])
+		self.assertEqual(non_stock_costs, [flt(service_a_amount * 10), flt(service_amount * 10)])
 
 	def test_secondary_items_from_multiple_boms_stay_separate(self):
 		"""Rows linked to different BOM rows keep their own quantity and valuation mode."""
