@@ -6094,6 +6094,23 @@ class TestWorkOrder(ERPNextTestSuite):
 			[("Freight", 10), ("Additional Operating Cost", 40)],
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 0}
+	)
+	def test_work_order_cost_keeps_the_account_picked(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 4
+		scr.save()
+
+		scr.additional_costs[0].expense_account = "Expenses Included In Valuation - _TC"
+		scr.save()
+		self.assertEqual(scr.additional_costs[0].expense_account, "Expenses Included In Valuation - _TC")
+
 	def make_subcontracted_work_order_with_costs(self):
 		"""Subcontracting Order for all of a Work Order with 100 additional and 50 corrective operation cost."""
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
