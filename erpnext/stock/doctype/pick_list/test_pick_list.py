@@ -4568,8 +4568,6 @@ class TestPickList(ERPNextTestSuite):
 
 	def test_transferred_qty_is_no_longer_held_by_the_pick_list(self):
 		"""Stock a Stock Entry moved out for a Material Transfer pick list is not held there any more."""
-		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_holders
-
 		warehouse = "_Test Warehouse - _TC"
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item_code=item_code, qty=10, rate=10, to_warehouse=warehouse)
@@ -4595,8 +4593,8 @@ class TestPickList(ERPNextTestSuite):
 		stock_entry.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
 		stock_entry.submit()
 
-		(holder,) = get_pick_list_holders([item_code], [warehouse])
-		self.assertEqual(holder.holding_qty, 4)
+		(held,) = frappe.new_doc("Pick List")._get_pick_list_items([_dict(item_code=item_code)])
+		self.assertEqual(held.picked_qty, 4)
 
 
 def make_work_order_pick_list_with_reserved_serials():
