@@ -123,10 +123,16 @@ class OperationsService:
 
 		for idx, row in enumerate(self.doc.operations):
 			qty = get_operation_qty(self.doc, row)
+			card_times = []
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self.doc, row, qty)
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
+					card_times.append(
+						(get_datetime(row.planned_start_time), get_datetime(row.planned_end_time))
+					)
+
+			self.set_batch_operation_time(row, card_times)
 
 		# operations with the same Sequence ID run in parallel, so the last row may not end last
 		end_times = [
@@ -134,6 +140,18 @@ class OperationsService:
 		]
 		if end_times:
 			self.doc.db_set("planned_end_date", max(end_times))
+
+	@staticmethod
+	def set_batch_operation_time(row, card_times):
+		"""Batch cards can be scheduled out of order, so the operation spans all of them."""
+		if len(card_times) < 2:
+			return
+
+		start = min(start for start, _end in card_times)
+		end = max(end for _start, end in card_times)
+		if (start, end) != card_times[-1]:
+			row.planned_start_time, row.planned_end_time = start, end
+			row.db_update()
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
