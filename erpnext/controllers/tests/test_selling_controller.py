@@ -5,6 +5,7 @@ import frappe
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -32,7 +33,6 @@ class TestSellingController(ERPNextTestSuite):
 
 		self.assertEqual(dn.docstatus, 1)
 
-<<<<<<< HEAD
 	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_inter_company_sale_keeps_the_last_purchase_rate_check(self):
 		item_code = make_item(properties={"is_stock_item": 0}).name
@@ -42,7 +42,22 @@ class TestSellingController(ERPNextTestSuite):
 			represents_company="_Test Company 1",
 			allowed_to_interact_with="Wind Power LLC",
 		)
-=======
+
+		si = create_sales_invoice(
+			item_code=item_code,
+			company="Wind Power LLC",
+			customer=customer,
+			debit_to="Debtors - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			rate=90,
+			do_not_save=True,
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "last purchase rate", si.save)
+
 	def test_item_selection_sets_gross_profit(self):
 		item = make_item(
 			properties={"is_stock_item": 1, "stock_uom": "Nos"},
@@ -65,31 +80,3 @@ class TestSellingController(ERPNextTestSuite):
 
 		self.assertEqual(so.items[0].rate, 1200)
 		self.assertEqual(so.items[0].gross_profit, 240)
-
-	def test_maximum_discount_for_percentage_amount_and_rate(self):
-		item = make_item(properties={"is_stock_item": 0, "max_discount": 10})
-		item_price = frappe.get_doc(
-			{
-				"doctype": "Item Price",
-				"item_code": item.name,
-				"price_list": "Standard Selling",
-				"price_list_rate": 100,
-			}
-		).insert()
-		user = make_fenced_user("max-discount@example.com", ["Sales User"])
->>>>>>> 60bc4fa (test: gross profit set on item selection for a row in another UOM)
-
-		si = create_sales_invoice(
-			item_code=item_code,
-			company="Wind Power LLC",
-			customer=customer,
-			debit_to="Debtors - WP",
-			income_account="Sales - WP",
-			expense_account="Cost of Goods Sold - WP",
-			cost_center="Main - WP",
-			currency="USD",
-			rate=90,
-			do_not_save=True,
-		)
-
-		self.assertRaisesRegex(frappe.ValidationError, "last purchase rate", si.save)

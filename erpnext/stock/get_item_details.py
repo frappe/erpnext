@@ -221,22 +221,6 @@ def _get_item_details(
 	if ctx.is_subcontracted:
 		out.bom = ctx.bom or get_default_bom(ctx.item_code)
 
-<<<<<<< HEAD
-	get_gross_profit(out)
-=======
-	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-	active_bundle = get_active_product_bundle(ctx.item_code)
-	# flag bundle rows so the version field stays visible regardless of its value
-	out.is_product_bundle = 1 if active_bundle else 0
-	if not active_bundle:
-		out.product_bundle = None
-	elif not ctx.get("product_bundle"):
-		# prefill the active version so a freshly added bundle row defaults to it
-		# (guarded so re-fetches never overwrite a version the user picked)
-		out.product_bundle = active_bundle
-
->>>>>>> c194109 (fix(selling): drop the item details gross profit made before the row has a rate)
 	if ctx.doctype == "Material Request":
 		out.rate = ctx.rate or out.price_list_rate
 		out.amount = flt(ctx.qty) * flt(out.rate)
@@ -2102,16 +2086,6 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 		return {"valuation_rate": 0.0}
 
 
-<<<<<<< HEAD
-def get_gross_profit(out: ItemDetails):
-	if out.valuation_rate:
-		out.update({"gross_profit": ((out.base_rate - out.valuation_rate) * out.stock_qty)})
-
-	return out
-
-
-=======
->>>>>>> c194109 (fix(selling): drop the item details gross profit made before the row has a rate)
 @frappe.whitelist()
 def get_serial_no(_args, serial_nos=None, sales_order=None):
 	serial_nos = serial_nos or []
