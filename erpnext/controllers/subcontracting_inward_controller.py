@@ -239,9 +239,10 @@ class SubcontractingInwardController:
 			else:
 				if wo_item := wo_item_dict.get(item.item_code):
 					qty_by_item[item.item_code] += item.transfer_qty
-					if flt(
-						wo_item.transferred_qty + qty_by_item[item.item_code], item.precision("transfer_qty")
-					) > max(wo_item.required_qty, wo_item.stock_reserved_qty):
+					precision = item.precision("transfer_qty")
+					if flt(wo_item.transferred_qty + qty_by_item[item.item_code], precision) > flt(
+						max(wo_item.required_qty, wo_item.stock_reserved_qty), precision
+					):
 						frappe.throw(
 							_(
 								"Row #{0}: Overconsumption of Customer Provided Item {1} against Work Order {2} is not allowed in the Subcontracting Inward process."
@@ -399,9 +400,9 @@ class SubcontractingInwardController:
 				on_missing(item)
 
 			qty_by_item[item.item_code] += item.transfer_qty
-			if (
-				flt(record.consumed_qty + qty_by_item[item.item_code], item.precision("transfer_qty"))
-				> record.available_qty
+			precision = item.precision("transfer_qty")
+			if flt(record.consumed_qty + qty_by_item[item.item_code], precision) > flt(
+				record.available_qty, precision
 			):
 				on_overconsumption(item)
 			elif extra_check:
