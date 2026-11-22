@@ -804,8 +804,12 @@ class SubcontractingReceipt(SubcontractingController):
 		"""Take back the original receipt's additional costs allocated to the accepted qty returned."""
 		original = frappe.get_doc("Subcontracting Receipt", self.return_against, check_permission="read")
 		original_rows = {row.name: row for row in original.items if row.bom}
-		basis = "amount" if original.distribute_additional_costs_based_on == "Amount" else "qty"
-		total_basis = sum(flt(row.get(basis)) for row in original_rows.values())
+		based_on_amount = original.distribute_additional_costs_based_on == "Amount"
+		basis = {
+			name: self.get_amount_for_costing(row) if based_on_amount else flt(row.qty)
+			for name, row in original_rows.items()
+		}
+		total_basis = sum(basis.values())
 		total_cost = sum(
 			self.get_qty_for_costing(row) * flt(row.additional_cost_per_qty) for row in original_rows.values()
 		)
@@ -827,7 +831,7 @@ class SubcontractingReceipt(SubcontractingController):
 				costing_qty = self.get_qty_for_costing(row)
 				row.additional_cost_per_qty = row_returned_cost / costing_qty if costing_qty else 0.0
 				returned_cost += row_returned_cost
-				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
+				returned_basis += flt(row.qty) * basis[original_row.name] / flt(original_row.qty)
 				returned_ratios[original_row.name] += flt(row.qty) / flt(original_row.qty)
 
 		# a targeted row is taken back with its item row, the others share what is left
@@ -857,6 +861,10 @@ class SubcontractingReceipt(SubcontractingController):
 				},
 			)
 		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
+
+	def get_amount_for_costing(self, item):
+		"""Row amount without the additional costs it took last time, so a re-save keeps the same weights."""
+		return flt(item.amount) - self.get_qty_for_costing(item) * flt(item.additional_cost_per_qty)
 
 	def set_additional_costs_base_amount(self):
 		for row in self.get("additional_costs"):

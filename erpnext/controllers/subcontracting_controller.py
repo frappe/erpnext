@@ -1842,7 +1842,8 @@ class SubcontractingController(StockController):
 		"""Share of the cost per finished good row, by qty or amount."""
 		based_on_amount = self.distribute_additional_costs_based_on == "Amount"
 		weights = [
-			flt(item.amount) if based_on_amount else self.get_qty_for_costing(item) for item in fg_rows
+			self.get_amount_for_costing(item) if based_on_amount else self.get_qty_for_costing(item)
+			for item in fg_rows
 		]
 		total_weight = sum(weights)
 		if not total_weight:
@@ -1861,6 +1862,10 @@ class SubcontractingController(StockController):
 			shares.append(flt(cumulative_share - allocated, precision))
 			allocated = cumulative_share
 		return shares
+
+	def get_amount_for_costing(self, item):
+		"""Amount a row's share of the additional costs is weighted by."""
+		return flt(item.amount)
 
 	def get_qty_for_costing(self, item):
 		"""Qty a row's cost is spread over: accepted, rejected and process loss qty."""
