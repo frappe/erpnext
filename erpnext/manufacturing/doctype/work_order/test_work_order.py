@@ -7801,8 +7801,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, excess_entry.insert)
 		frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 4)).submit()
 
+		# FG stock from elsewhere must not let this Work Order disassemble more
+		test_stock_entry.make_stock_entry(
+			item_code=wo_order.production_item, target=wo_order.fg_warehouse, qty=1, basic_rate=100
+		)
 		disassembly = frappe.get_doc(make_stock_entry(wo_order.name, "Disassemble", 1))
-		self.assertRaises(frappe.ValidationError, disassembly.submit)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "not converted to an alternative item", disassembly.submit
+		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
 	def test_last_fraction_of_produced_qty_can_be_converted(self):
