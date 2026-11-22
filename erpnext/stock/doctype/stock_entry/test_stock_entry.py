@@ -6050,6 +6050,8 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		self.assertEqual(ceil_qty_if_uom_has_whole_number(2.3, "Nos"), 3)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(3 * 0.1 / 0.3, "Nos"), 1)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(1 / 2500, "Nos"), 1)
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
 
 	def test_ceil_qty_ignores_float_noise(self):
