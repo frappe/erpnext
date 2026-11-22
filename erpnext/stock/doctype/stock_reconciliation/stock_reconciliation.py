@@ -27,19 +27,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
-<<<<<<< HEAD
-from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
-=======
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import (
-	_get_incoming_rate,
-	_get_stock_balance,
-	check_company,
-	check_warehouse_company,
-	get_valuation_method,
-)
->>>>>>> 3fd6aee (fix(stock): convert a buying Item Price to the stock UOM for a reconciliation rate)
+from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
 
 
