@@ -474,6 +474,36 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 
 		self.assertEqual(make_purchase_return(pr.name).items[0].qty, -3)
 
+	def test_purchase_invoice_return_maps_received_qty_after_return_in_another_uom(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		pi = make_purchase_invoice(item_code=item_code, uom="Nos", update_stock=1, do_not_save=True)
+		pi.items[0].update(
+			{"uom": "Box", "conversion_factor": 12, "qty": 10, "received_qty": 10, "rate": 120}
+		)
+		pi.submit()
+
+		first_return = make_return_doc(pi.doctype, pi.name)
+		first_return.items[0].update(
+			{"uom": "Nos", "conversion_factor": 1, "qty": -6, "received_qty": -6, "rate": 10}
+		)
+		first_return.submit()
+
+		# 114 Nos are left, mapped in the invoiced row's UOM
+		second_return = make_return_doc(pi.doctype, pi.name)
+		self.assertEqual(second_return.items[0].qty, -9.5)
+		self.assertEqual(second_return.items[0].received_qty, -9.5)
+		second_return.insert()
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
