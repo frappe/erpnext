@@ -1634,32 +1634,13 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
 	)
 	def test_receipt_cancel_reopens_only_its_own_consumption(self):
-		sco = make_reserving_order_with_new_items(
-			"Receipt Cancel",
-			qty=10,
-			rm_properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCORC-.####"},
-		)
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		sco.submit()
-		for qty in (6, 4):
-			rm_items[0]["qty"] = qty
-			make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+		self.assertEqual(cancel_one_of_two_receipts(-1), [(6, 6), (4, 0)])
 
-		for qty in (6, 4):
-			receipt = make_subcontracting_receipt(sco.name)
-			receipt.items[0].qty = qty
-			receipt.submit()
-		receipt.cancel()
-
-		reservations = frappe.get_all(
-			"Stock Reservation Entry",
-			filters={"voucher_no": sco.name, "docstatus": 1, "warehouse": sco.supplier_warehouse},
-			fields=["reserved_qty", "consumed_qty"],
-			order_by="creation",
-			as_list=True,
-		)
-		self.assertEqual([tuple(reservation) for reservation in reservations], [(6, 6), (4, 0)])
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
+	def test_first_receipt_cancel_reopens_only_its_own_consumption(self):
+		self.assertEqual(cancel_one_of_two_receipts(0), [(6, 0), (4, 4)])
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
@@ -2308,3 +2289,34 @@ def make_subcontracted_purchase_order(project):
 	po.submit()
 
 	return po
+
+
+def cancel_one_of_two_receipts(index):
+	"""Transfer and receive 6 and then 4 of one batch, cancel receipt `index`; return each reservation's consumption."""
+	sco = make_reserving_order_with_new_items(
+		"Receipt Cancel",
+		qty=10,
+		rm_properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCORC-.####"},
+	)
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	sco.submit()
+	for qty in (6, 4):
+		rm_items[0]["qty"] = qty
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+	receipts = []
+	for qty in (6, 4):
+		receipt = make_subcontracting_receipt(sco.name)
+		receipt.items[0].qty = qty
+		receipts.append(receipt.submit())
+	receipts[index].cancel()
+
+	reservations = frappe.get_all(
+		"Stock Reservation Entry",
+		filters={"voucher_no": sco.name, "docstatus": 1, "warehouse": sco.supplier_warehouse},
+		fields=["reserved_qty", "consumed_qty"],
+		order_by="creation",
+		as_list=True,
+	)
+	return [tuple(reservation) for reservation in reservations]
