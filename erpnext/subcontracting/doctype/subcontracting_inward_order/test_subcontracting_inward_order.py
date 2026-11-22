@@ -1110,24 +1110,22 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		make_stock_entry(
 			item_code="_Test Item", qty=6, to_warehouse="Stores - _TC", purpose="Material Receipt"
 		)
-		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
-		scio.reload()
-		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
-		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
-		wo.submit()
-
-		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
-		for _ in range(2):
-			manufacture.append("items", {"item_code": "_Test Item", "qty": 3, "s_warehouse": "Stores - _TC"})
-		manufacture.submit()
+		scio, manufacture = make_manufacture_with_extra_material([3, 3])
 
 		scio.reload()
 		row = next(row for row in scio.received_items if row.rm_item_code == "_Test Item")
 		self.assertEqual(row.consumed_qty, 6)
 		frappe.db.set_value(row.doctype, row.name, "billed_qty", 3)
 		self.assertRaises(frappe.ValidationError, manufacture.cancel)
+
+	def test_extra_material_of_another_order_does_not_block_cancel(self):
+		make_stock_entry(
+			item_code="_Test Item", qty=11, to_warehouse="Stores - _TC", purpose="Material Receipt"
+		)
+		_scio, manufacture = make_manufacture_with_extra_material([3, 3])
+		make_manufacture_with_extra_material([5])
+
+		manufacture.cancel()
 
 	def test_extra_items_reservation_transfer(self):
 		so, scio = create_so_scio()
@@ -2483,6 +2481,22 @@ def receive_batch_in_two_lots(scio):
 		scio.reload()
 
 	return batches
+
+
+def make_manufacture_with_extra_material(extra_qtys):
+	_so, scio = create_so_scio()
+	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+
+	manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+	for qty in extra_qtys:
+		manufacture.append("items", {"item_code": "_Test Item", "qty": qty, "s_warehouse": "Stores - _TC"})
+	manufacture.submit()
+	return scio, manufacture
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
