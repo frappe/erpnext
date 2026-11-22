@@ -1339,24 +1339,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 		"""16 of a shared raw material are sent for FG A only, and a receipt of 6 FG B consumes 6 of them."""
 		rm_item = make_item("Subcontracted RM Shared By Two FGs", {"is_stock_item": 1}).name
 		fg_a, fg_b = "Subcontracted FG Sharing RM A", "Subcontracted FG Sharing RM B"
-		service_items = []
-		for fg_item, service_item, qty in (
-			(fg_a, "Subcontracted Service Item 2", 10),
-			(fg_b, "Subcontracted Service Item 3", 6),
-		):
-			make_subcontracted_item(item_code=fg_item, raw_materials=[rm_item])
-			service_items.append(
-				{
-					"warehouse": "_Test Warehouse - _TC",
-					"item_code": service_item,
-					"qty": qty,
-					"rate": 100,
-					"fg_item": fg_item,
-					"fg_item_qty": qty,
-				}
-			)
-
-		sco = get_subcontracting_order(service_items=service_items)
+		sco = make_order_sharing_raw_material(rm_item, {fg_a: 10, fg_b: 6})
 		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=16, basic_rate=100)
 		send = frappe.get_doc(make_rm_stock_entry(sco.name))
 		send.remove(next(row for row in send.items if row.subcontracted_item == fg_b))
@@ -1379,6 +1362,42 @@ class TestSubcontractingController(ERPNextTestSuite):
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 		self.assertEqual(scr.supplied_items[0].consumed_qty, 10)
+
+	def test_own_consumption_counts_before_another_finished_goods(self):
+		"""5 each are sent for FG A and B; receipts consume 5 for A, then 5 for C, which has no transfer."""
+		rm_item = make_item("Subcontracted RM Shared By Three FGs", {"is_stock_item": 1}).name
+		fg_a, fg_b, fg_c = (f"Subcontracted FG Sharing RM 3{fg}" for fg in "ABC")
+		sco = make_order_sharing_raw_material(rm_item, {fg_a: 5, fg_b: 5, fg_c: 5})
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=10, basic_rate=100)
+		send = frappe.get_doc(make_rm_stock_entry(sco.name))
+		send.remove(next(row for row in send.items if row.subcontracted_item == fg_c))
+		send.submit()
+
+		set_backflush_based_on("BOM")
+		for fg_item in (fg_a, fg_c):
+			scr = make_subcontracting_receipt(sco.name)
+			for row in [row for row in scr.items if row.item_code != fg_item]:
+				scr.remove(row)
+			scr.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		self.assertEqual(get_materials_from_supplier(sco.name).items, [])
+
+	def test_batch_consumed_on_other_transfers_keeps_their_qty_in_step(self):
+		"""The same batch is sent 5 each for FG A and B, and FG C consumes 6 of it."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {
+			key: frappe._dict(qty=5, batch_no=defaultdict(float, {"B1": 5}))
+			for key in (("RM", "A", "SCO"), ("RM", "B", "SCO"))
+		}
+		doc.deduct_consumed_batch_qty(doc.get_transfer_keys(("RM", "C", "SCO")), "B1", 6)
+		self.assertEqual(
+			[(row.qty, row.batch_no["B1"]) for row in doc.available_materials.values()], [(0, 0), (4, 4)]
+		)
 
 
 def add_second_row_in_scr(scr):
@@ -1594,6 +1613,25 @@ def get_rm_items(supplied_items):
 		)
 
 	return rm_items
+
+
+def make_order_sharing_raw_material(rm_item, fg_qtys):
+	"""A Subcontracting Order for the finished goods and qtys given, each made of 1 rm_item."""
+	service_items = []
+	for idx, (fg_item, qty) in enumerate(fg_qtys.items(), start=2):
+		make_subcontracted_item(item_code=fg_item, raw_materials=[rm_item])
+		service_items.append(
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": f"Subcontracted Service Item {idx}",
+				"qty": qty,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": qty,
+			}
+		)
+
+	return get_subcontracting_order(service_items=service_items)
 
 
 def make_subcontracted_item(**args):
