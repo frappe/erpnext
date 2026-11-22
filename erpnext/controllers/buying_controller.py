@@ -56,11 +56,7 @@ class BuyingController(SubcontractingController):
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 
 		self.validate_items()
-<<<<<<< HEAD
-=======
-		validate_item_uoms(self.get("items"))
 		self.set_received_qty()
->>>>>>> c882ab6 (fix(buying): fill Received Quantity before converting it to the stock UOM)
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_deduct_with_valuation_taxes()
