@@ -2151,32 +2151,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			creation=self.first_sle_creation,
 		)
 
-<<<<<<< HEAD
-	@property
-	def first_sle_creation(self):
-		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
-		return frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
-			"creation",
-			order_by="creation asc",
-		)
-
 	def has_consumption_basis(self) -> bool:
 		"""Whether the cost of the consumed items is known, even when that cost is zero."""
 		if any(d.s_warehouse for d in self.get("items")):
 			return True
-=======
-	def _notify_zero_valuation_rate(self, items):
-		if len(items) > 1:
-			message = _(
-				"Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
-			).format(", ".join(frappe.bold(item) for item in items))
-		else:
-			message = _(
-				"Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
-			).format(frappe.bold(items[0]))
->>>>>>> 6c8fa3a (refactor(stock): move first_sle_creation to StockController)
 
 		return self.is_rm_cost_from_consumption_entries()
 
