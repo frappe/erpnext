@@ -46,6 +46,29 @@ class TestSellingControllerConversions(ERPNextTestSuite):
 						self.assertEqual(doc.items[0].stock_qty, 2 * conversion_factor)
 						self.assertEqual(doc.items[0].gross_profit, 6200 * conversion_factor)
 
+	def test_item_selection_sets_gross_profit(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Nos"},
+			uoms=[{"uom": "Box", "conversion_factor": 12}],
+		)
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=24, basic_rate=80)
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item.name,
+				"price_list": "Standard Selling",
+				"price_list_rate": 100,
+			}
+		).insert()
+
+		so = make_sales_order(
+			item_code=item.name, qty=1, uom="Box", selling_price_list="Standard Selling", do_not_save=True
+		)
+		so.process_item_selection(item_idx=1)
+
+		self.assertEqual(so.items[0].rate, 1200)
+		self.assertEqual(so.items[0].gross_profit, 240)
+
 	def test_maximum_discount_for_percentage_amount_and_rate(self):
 		item = make_item(properties={"is_stock_item": 0, "max_discount": 10})
 		item_price = frappe.get_doc(
