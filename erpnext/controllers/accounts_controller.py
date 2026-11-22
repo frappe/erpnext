@@ -4382,27 +4382,23 @@ def validate_child_on_delete(row, parent, ordered_item=None):
 			frappe.throw(_("Cannot delete an item which has been ordered"))
 
 
-def update_bin_on_delete(row, doctype):
-	"""Update bin for deleted item (row)."""
-	from erpnext.stock.stock_balance import (
-		get_indented_qty,
-		get_ordered_qty,
-		get_reserved_qty,
-		update_bin_qty,
-	)
+def update_bin_on_delete(rows, parent):
+	"""Update bin quantities after child item rows are deleted."""
+	row_names = [row.name for row in rows]
+	if parent.doctype == "Sales Order":
+		# covers a bundle row's components too
+		parent.update_reserved_qty(row_names)
+		return
 
-	qty_dict = {}
-
-	if doctype == "Sales Order":
-		qty_dict["reserved_qty"] = get_reserved_qty(row.item_code, row.warehouse)
-	else:
+	parent.update_ordered_qty(row_names)
+	# the request's warehouse, which the order row may have changed
+	request_items = {}
+	for row in rows:
 		if row.material_request_item:
-			qty_dict["indented_qty"] = get_indented_qty(row.item_code, row.warehouse)
+			request_items.setdefault(row.material_request, []).append(row.material_request_item)
 
-		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
-
-	if row.warehouse:
-		update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	for material_request, items in request_items.items():
+		frappe.get_doc("Material Request", material_request).update_requested_qty(items)
 
 
 def validate_blanket_order_changes(parent, data) -> None:
@@ -4534,8 +4530,8 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 	# bin uses Material Request Items to recalculate & update
 	if parent.doctype not in ["Quotation", "Supplier Quotation"]:
 		parent.update_prevdoc_status()
-		for d in deleted_children:
-			update_bin_on_delete(d, parent.doctype)
+		if deleted_children:
+			update_bin_on_delete(deleted_children, parent)
 
 	return bool(deleted_children)
 
