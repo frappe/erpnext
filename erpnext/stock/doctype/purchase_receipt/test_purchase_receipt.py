@@ -8290,6 +8290,30 @@ class TestPurchaseReceipt(FrappeTestCase):
 			},
 		)
 
+	def test_received_stock_qty_set_on_first_save_without_received_qty(self):
+		item = make_item(
+			properties={
+				"stock_uom": "_Test UOM",
+				"uoms": [
+					{"uom": "_Test UOM", "conversion_factor": 1},
+					{"uom": "_Test UOM 1", "conversion_factor": 12},
+				],
+			}
+		)
+		receipt = make_purchase_receipt(
+			item_code=item.name,
+			qty=2,
+			rejected_qty=1,
+			uom="_Test UOM 1",
+			conversion_factor=12,
+			do_not_save=True,
+		)
+		receipt.items[0].received_qty = 0
+		receipt.insert()
+
+		self.assertEqual(receipt.items[0].received_qty, 3)
+		self.assertEqual(receipt.items[0].received_stock_qty, 36)
+
 
 def create_company_without_ledger_entries():
 	return (
