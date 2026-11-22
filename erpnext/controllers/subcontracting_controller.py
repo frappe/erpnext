@@ -864,17 +864,9 @@ class SubcontractingController(StockController):
 			)
 
 			if row.serial_no:
-<<<<<<< HEAD
-				details.serial_no.extend(get_serial_nos(row.serial_no))
+				update_serial_nos_at_supplier(details, get_serial_nos(row.serial_no), row.is_return)
 
 			elif row.batch_no:
-=======
-				serial_nos = SerialBatchIdentity("Serial No").resolve(
-					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
-				)
-				update_serial_nos_at_supplier(details, serial_nos, row.is_return)
-			if row.batch_no:
->>>>>>> 120e7e1 (fix(subcontracting): take a serial no returned by the supplier out of the order's material at the supplier)
 				details.batch_no[row.batch_no] += row.qty
 
 			elif voucher_bundle_data:
@@ -1429,26 +1421,13 @@ class SubcontractingController(StockController):
 		serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
 		incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
 
-<<<<<<< HEAD
-			if incorrect_sn:
-				incorrect_sn = "\n".join(incorrect_sn)
-				link = get_link_to_form(
-					self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
-				)
-				msg = f"The Serial Nos {incorrect_sn} has not supplied against the {self.subcontract_data.order_doctype} {link}"
-				frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
-=======
 		if incorrect_sn:
-			numbers = SerialBatchIdentity("Serial No").get_number_map(incorrect_sn)
-			incorrect_sn = "\n".join(escape_html(numbers.get(name, name)) for name in incorrect_sn)
+			incorrect_sn = "\n".join(incorrect_sn)
 			link = get_link_to_form(
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
-			msg = _("The Serial Nos {0} have not been supplied against the {1} {2}").format(
-				incorrect_sn, self.subcontract_data.order_doctype, link
-			)
-			frappe.throw(msg, title=_("Incorrect Serial Number Consumed"))
->>>>>>> cf8d89f (fix(subcontracting): validate consumed serial nos when none are left at the supplier)
+			msg = f"The Serial Nos {incorrect_sn} has not supplied against the {self.subcontract_data.order_doctype} {link}"
+			frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
 
 	def __validate_supplied_items(self):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
