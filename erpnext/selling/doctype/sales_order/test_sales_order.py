@@ -352,6 +352,36 @@ class TestSalesOrder(ERPNextTestSuite):
 		frappe.get_doc("Sales Order", so.name).cancel()
 		self.assertEqual(reserved_qty(), 0)
 
+	def test_deleting_a_disabled_bundle_row_releases_its_components(self):
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=5, warehouse="_Test Warehouse - _TC", do_not_submit=True)
+		so.append("items", dict(so.items[0].as_dict(), name=None, item_code="_Test Item"))
+		so.submit()
+
+		def reserved_qty():
+			return frappe.db.get_value(
+				"Bin", {"item_code": component, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+			)
+
+		self.assertEqual(reserved_qty(), 10)
+
+		product_bundle.db_set("disabled", 1)
+		row = so.items[1]
+		trans_item = [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": row.qty,
+				"rate": row.rate,
+				"conversion_factor": row.conversion_factor,
+			}
+		]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+		self.assertEqual(reserved_qty(), 0)
+
 	def test_make_production_plan(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
