@@ -10,15 +10,10 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, cint, flt, get_link_to_form, getdate, parse_json
 
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
-<<<<<<< HEAD
-from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
-=======
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import (
 	get_forecast_period,
 	update_sales_forecast_status,
 )
-from erpnext.manufacturing.scheduling.plan_adapter import get_days_needed
->>>>>>> 9e86e74 (fix(manufacturing): cover the last forecast period in the MPS To Date)
 from erpnext.stock.get_item_details import get_conversion_factor
 
 

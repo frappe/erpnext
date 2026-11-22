@@ -21,14 +21,8 @@ from frappe.utils import (
 )
 from frappe.utils.nestedset import get_descendants_of
 
-<<<<<<< HEAD
 from erpnext.accounts.report.utils import validate_date_range
-=======
-from erpnext.accounts.report.utils import get_filter_values, validate_date_range
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import get_forecast_period
-from erpnext.manufacturing.scheduling.plan_adapter import get_material_lead_days, get_supplier_lead_times
-from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
->>>>>>> 9e86e74 (fix(manufacturing): cover the last forecast period in the MPS To Date)
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
@@ -1397,42 +1391,6 @@ def convert_to_daily_bucket_data(data):
 	bucketed_data = []
 
 	for row in data:
-<<<<<<< HEAD
-		if row.frequency == "Monthly":
-			# Convert monthly data to daily buckets
-			start_date = get_first_day(row.delivery_date)
-			no_of_days = days_diff(add_months(start_date, 1), start_date)
-
-			for i in range(no_of_days):  # Assuming 30 days in a month
-				bucketed_data.append(
-					frappe._dict(
-						{
-							"frequency": "Daily",
-							"item_code": row.item_code,
-							"delivery_date": add_days(start_date, i),
-							"sales_forecast": row.sales_forecast,
-							"stock_uom": row.stock_uom,
-							"qty": row.qty / no_of_days,  # Assuming equal distribution across days
-						}
-					)
-				)
-
-		elif row.frequency == "Weekly":
-			# Convert weekly data to daily buckets
-			start_date = getdate(row.delivery_date)
-			for i in range(7):
-				bucketed_data.append(
-					frappe._dict(
-						{
-							"frequency": "Daily",
-							"item_code": row.item_code,
-							"delivery_date": add_days(start_date, i),
-							"sales_forecast": row.sales_forecast,
-							"stock_uom": row.stock_uom,
-							"qty": row.qty / 7,  # Assuming equal distribution across days
-						}
-					)
-=======
 		start_date, end_date = get_forecast_period(row)
 		no_of_days = days_diff(end_date, start_date)
 		for i in range(no_of_days):
@@ -1444,10 +1402,8 @@ def convert_to_daily_bucket_data(data):
 						"delivery_date": add_days(start_date, i),
 						"sales_forecast": row.sales_forecast,
 						"stock_uom": row.stock_uom,
-						"parent_warehouse": row.parent_warehouse,
 						"qty": row.qty / no_of_days,
 					}
->>>>>>> 96faf77 (fix(manufacturing): spread a monthly forecast from its own date in the MRP report)
 				)
 			)
 

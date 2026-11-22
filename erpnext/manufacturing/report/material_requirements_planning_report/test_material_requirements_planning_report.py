@@ -14,6 +14,7 @@ from erpnext.manufacturing.doctype.sales_forecast.test_sales_forecast import mak
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
 	MaterialRequirementsPlanningReport,
+	convert_to_daily_bucket_data,
 	execute,
 	get_item_lead_time,
 	make_order,
@@ -806,59 +807,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual((rm_row.po_ordered_qty, rm_row.required_qty), (8, 2))
 
-<<<<<<< HEAD
-=======
-	def test_mps_data_matches_any_selected_warehouse(self):
-		plan = make_mrp_plan(self)
-		mps = frappe.get_doc("Master Production Schedule", plan.mps)
-
-		for warehouses, expected in (([WAREHOUSE, WIP_WAREHOUSE], [plan.fg_item]), ([WIP_WAREHOUSE], [])):
-			with self.subTest(warehouses=warehouses):
-				report = MaterialRequirementsPlanningReport(
-					{
-						"from_date": mps.from_date,
-						"to_date": mps.to_date,
-						"warehouse": warehouses,
-						"mps": mps.name,
-					}
-				)
-				self.assertEqual([row.item_code for row in report.get_mps_data()], expected)
-
-	def test_rows_carry_a_single_warehouse_with_multiple_selected(self):
-		# a list in the hidden Link column breaks the link title lookup of the whole report
-		from frappe.desk.query_report import run
-
-		plan = make_mrp_plan(self)
-		mps = frappe.get_doc("Master Production Schedule", plan.mps)
-		result = run(
-			"Material Requirements Planning Report",
-			filters={
-				"company": COMPANY,
-				"from_date": mps.from_date,
-				"to_date": mps.to_date,
-				"warehouse": [WAREHOUSE, WIP_WAREHOUSE],
-				"mps": mps.name,
-				"type_of_material": "All",
-				"add_safety_stock": 0,
-			},
-		)
-		rows = {row.item_code: row for row in result["result"] if row.get("item_code")}
-		self.assertEqual(rows[plan.rm_item].warehouse, WAREHOUSE)
-
-	def test_daily_forecast_buckets_keep_the_forecast_warehouse(self):
-		for frequency in ("Monthly", "Weekly"):
-			with self.subTest(frequency=frequency):
-				row = frappe._dict(
-					frequency=frequency,
-					item_code="_Test Item",
-					delivery_date=today(),
-					qty=30,
-					parent_warehouse=WAREHOUSE,
-				)
-				buckets = convert_to_daily_bucket_data([row])
-				self.assertTrue(buckets)
-				self.assertEqual({bucket.parent_warehouse for bucket in buckets}, {WAREHOUSE})
-
 	def test_monthly_forecast_is_spread_from_its_own_date(self):
 		row = frappe._dict(frequency="Monthly", item_code="_Test Item", delivery_date="2026-10-27", qty=31)
 
@@ -868,9 +816,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(getdate(buckets[-1].delivery_date), getdate("2026-11-26"))
 		self.assertAlmostEqual(sum(bucket.qty for bucket in buckets), 31)
 
-<<<<<<< HEAD
->>>>>>> 5368f09 (test: spread a monthly forecast from its own date in the MRP report)
-=======
 	def test_forecast_is_limited_to_the_report_dates(self):
 		forecast = make_sales_forecast(from_date=add_days(today(), 10), demand_number=1)
 		from_date, to_date = add_days(today(), 20), add_days(today(), 30)
@@ -885,7 +830,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(min(dates), getdate(from_date))
 		self.assertEqual(max(dates), getdate(to_date))
 
->>>>>>> 284ed4d (test: MRP report keeps only the forecast within its dates)
 	def test_float_noise_in_qty_does_not_round_up_chart_and_lead_time(self):
 		qty = 7 / 3 * 27  # 63.00000000000001
 		report = MaterialRequirementsPlanningReport(frappe._dict())
