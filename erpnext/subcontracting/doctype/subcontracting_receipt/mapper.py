@@ -68,7 +68,8 @@ def make_purchase_receipt(
 
 		target.update(
 			{
-				"qty": ratio * sum(flt(item.qty) for item in sr_items),
+				# the job worker did the work on the units lost in process too
+				"qty": ratio * sum(flt(item.qty) + flt(item.process_loss_qty) for item in sr_items),
 				"rejected_qty": ratio * sum(flt(item.rejected_qty) for item in sr_items),
 				"warehouse": sr_items[0].warehouse,
 				"rejected_warehouse": next(
