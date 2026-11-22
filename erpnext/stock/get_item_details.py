@@ -214,7 +214,7 @@ def get_rate_locked_source_row(args, doc):
 		doc = json.loads(doc)
 
 	source_fields = maintain_same_rate_source_fields.get(args.parenttype or args.doctype)
-	if not source_fields or not doc or args.get("is_return") or not maintain_same_rate_enabled(args):
+	if not source_fields or not doc or args.get("is_return") or not maintain_same_rate_enabled(args, doc):
 		return None
 
 	row = (
@@ -237,13 +237,14 @@ def get_rate_locked_source_row(args, doc):
 	return None
 
 
-def maintain_same_rate_enabled(transaction_args):
+def maintain_same_rate_enabled(transaction_args, doc):
+	is_internal_transfer = doc.get("represents_company") == doc.get("company")
 	if (transaction_args.parenttype or transaction_args.doctype) in purchase_doctypes:
-		if transaction_args.get("is_internal_supplier"):
+		if transaction_args.get("is_internal_supplier") and is_internal_transfer:
 			return False
 		return bool(cint(frappe.get_cached_value("Buying Settings", "Buying Settings", "maintain_same_rate")))
 
-	if transaction_args.get("is_internal_customer"):
+	if transaction_args.get("is_internal_customer") and is_internal_transfer:
 		return False
 	return bool(
 		cint(frappe.get_cached_value("Selling Settings", "Selling Settings", "maintain_same_sales_rate"))
