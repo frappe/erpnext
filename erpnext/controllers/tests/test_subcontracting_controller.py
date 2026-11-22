@@ -1399,6 +1399,18 @@ class TestSubcontractingController(ERPNextTestSuite):
 			[(row.qty, row.batch_no["B1"]) for row in doc.available_materials.values()], [(0, 0), (4, 4)]
 		)
 
+	def test_serial_nos_consumed_on_other_transfers_keep_their_qty_in_step(self):
+		"""FG A and B are sent 2 serial nos each, and FG C consumes one of A's and both of B's."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {
+			("RM", "A", "SCO"): frappe._dict(qty=2, serial_no=["S1", "S2"]),
+			("RM", "B", "SCO"): frappe._dict(qty=2, serial_no=["S3", "S4"]),
+		}
+		doc.remove_consumed_serial_nos(doc.get_transfer_keys(("RM", "C", "SCO")), ["S2", "S3", "S4"], True)
+		self.assertEqual(
+			[(row.qty, row.serial_no) for row in doc.available_materials.values()], [(1, ["S1"]), (0, [])]
+		)
+
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
