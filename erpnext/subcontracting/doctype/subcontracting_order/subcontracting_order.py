@@ -563,24 +563,15 @@ class SubcontractingOrder(SubcontractingController):
 
 				reservation_items.append(data)
 
-<<<<<<< HEAD
-			sre = StockReservation(self, items=reservation_items)
-			if is_transfer:
-				sre.transfer_reservation_entries_to(
+			if plan_items:
+				StockReservation(self, items=plan_items).transfer_reservation_entries_to(
 					self.production_plan, from_doctype="Production Plan", to_doctype="Subcontracting Order"
 				)
-			else:
-				if sre.make_stock_reservation_entries():
-					frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
-=======
-			if plan_items:
-				hand_off_reserved_stock(self.production_plan, self.doctype, plan_items)
 			if (
 				reservation_items
 				and StockReservation(self, items=reservation_items).make_stock_reservation_entries()
 			):
 				frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
->>>>>>> 4b88681 (fix(subcontracting): hand off only plan-backed rows, reserve the rest from stock)
 
 	def get_unreserved_qty(self) -> dict[str, float]:
 		"""Qty of each supplied item row that is neither supplied nor reserved, for rows that have some."""
