@@ -869,16 +869,16 @@ class SubcontractingController(StockController):
 			bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
 			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
 
-			# over several transfers, a batch or a consumed serial no takes the qty from those that sent it
+			# over several transfers, a batch or serial no changes the qty of those that sent it
 			spread = len(keys) > 1
 			by_batch = spread and bool(consumed_bundles.batch_nos or row.batch_no)
-			has_serial_nos = bool(consumed_bundles.serial_nos or row.serial_no)
-			by_serial = spread and not by_batch and row.consumed_qty > 0 and has_serial_nos
+			by_serial = spread and not by_batch and bool(consumed_bundles.serial_nos or row.serial_no)
+			is_return = row.consumed_qty < 0
 			if not (by_batch or by_serial):
 				self.deduct_consumed_qty(keys, row.consumed_qty)
 
 			if consumed_bundles.serial_nos:
-				self.remove_consumed_serial_nos(keys, consumed_bundles.serial_nos, by_serial)
+				self.update_consumed_serial_nos(keys, consumed_bundles.serial_nos, is_return, by_serial)
 
 			if consumed_bundles.batch_nos:
 				for batch_no, qty in consumed_bundles.batch_nos.items():
@@ -895,7 +895,7 @@ class SubcontractingController(StockController):
 				consumed_serials = SerialBatchIdentity("Serial No").resolve(
 					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
 				)
-				self.remove_consumed_serial_nos(keys, consumed_serials, by_serial)
+				self.update_consumed_serial_nos(keys, consumed_serials, is_return, by_serial)
 
 			# Will be deprecated in v16
 			if row.batch_no and not consumed_bundles.batch_nos:
@@ -933,13 +933,21 @@ class SubcontractingController(StockController):
 		sent_on = [key for key in keys if self.available_materials[key].batch_no.get(batch_no)]
 		self.deduct_consumed_qty(sent_on or keys[:1], qty, batch_no)
 
-	def remove_consumed_serial_nos(self, keys, serial_nos, deduct_qty=False):
-		"""Take the serial nos out of the transfers, and with deduct_qty each transfer's qty by its own."""
+	def update_consumed_serial_nos(self, keys, serial_nos, is_return, change_qty):
+		"""Take consumed serial nos out of the transfers, or put returned ones back on those that sent them;
+		with change_qty, each transfer's qty changes by its own."""
 		for key in keys:
 			details = self.available_materials[key]
-			if deduct_qty:
-				details.qty -= len(set(details.serial_no) & set(serial_nos))
-			details.serial_no = list(set(details.serial_no) - set(serial_nos))
+			if is_return:
+				sent = self.__transferred_items[key].serial_no
+				moved = set(serial_nos).intersection(sent) - set(details.serial_no)
+				details.serial_no.extend(moved)
+			else:
+				moved = set(details.serial_no) & set(serial_nos)
+				details.serial_no = list(set(details.serial_no) - moved)
+
+			if change_qty:
+				details.qty += len(moved) if is_return else -len(moved)
 
 	def get_available_materials(self):
 		"""Get the available raw materials which has been transferred to the supplier.

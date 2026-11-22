@@ -1406,7 +1406,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 			("RM", "A", "SCO"): frappe._dict(qty=2, serial_no=["S1", "S2"]),
 			("RM", "B", "SCO"): frappe._dict(qty=2, serial_no=["S3", "S4"]),
 		}
-		doc.remove_consumed_serial_nos(doc.get_transfer_keys(("RM", "C", "SCO")), ["S2", "S3", "S4"], True)
+		keys = doc.get_transfer_keys(("RM", "C", "SCO"))
+		doc.update_consumed_serial_nos(keys, ["S2", "S3", "S4"], is_return=False, change_qty=True)
 		self.assertEqual(
 			[(row.qty, row.serial_no) for row in doc.available_materials.values()], [(1, ["S1"]), (0, [])]
 		)
