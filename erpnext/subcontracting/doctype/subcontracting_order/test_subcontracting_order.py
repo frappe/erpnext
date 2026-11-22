@@ -985,8 +985,23 @@ class TestSubcontractingOrder(FrappeTestCase):
 		self.assertEqual((ste.items[0].qty, ste.items[0].uom), (4, ste.items[0].stock_uom))
 
 	def test_transfer_cannot_be_cancelled_after_its_material_was_consumed(self):
-		sco = make_reserving_order_with_new_items("Consumed Cancel")
-		sco.reserve_stock = 0
+		service_item = make_item("Subcontracted Service Item Consumed Cancel", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item Consumed Cancel", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item("Subcontracted RM Item Consumed Cancel", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 4,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 4,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
 		rm_items = get_rm_items(sco.supplied_items)
 		make_stock_in_entry(rm_items=rm_items)
 		sco.submit()
