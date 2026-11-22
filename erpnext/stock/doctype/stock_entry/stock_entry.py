@@ -1023,9 +1023,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 					flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 				)
 
-			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
-				item.expense_account = frappe.get_value("Company", self.company, "default_expense_account")
-
 	def validate_fg_completed_qty(self):
 		if self.purpose != "Manufacture" or not self.from_bom:
 			return
@@ -3491,6 +3488,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.purpose == "Material Issue":
 			ret["expense_account"] = item.get("expense_account") or item_group_defaults.get("expense_account")
+		elif self.purpose in ("Subcontracting Delivery", "Subcontracting Return"):
+			ret["expense_account"] = frappe.get_cached_value(
+				"Company", self.company, "default_expense_account"
+			)
 
 		if not ret.get("expense_account"):
 			ret["expense_account"] = frappe.get_cached_value(
