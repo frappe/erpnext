@@ -66,16 +66,10 @@ def get_item_details(
 	for_validate: bool | str | None = False,
 	overwrite_warehouse: bool | str = True,
 ):
-<<<<<<< HEAD
 	args = frappe._dict(frappe.parse_json(args))
 	validate_pricing_context(args)
 	out = _get_item_details(args, doc, for_validate, overwrite_warehouse)
-	for warehouse in (out.warehouse, args.warehouse, args.from_warehouse):
-=======
-	validate_pricing_context(ctx)
-	out = _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
-	for warehouse in (out.warehouse, ctx.warehouse):
->>>>>>> f7bff6d (fix(stock): allow a Material Request source warehouse the user cannot read)
+	for warehouse in (out.warehouse, args.warehouse):
 		if warehouse:
 			erpnext.require_user_permission("Warehouse", warehouse)
 
@@ -287,7 +281,9 @@ def set_valuation_rate(out, args):
 
 def update_bin_details(args, out, doc):
 	if args.get("doctype") == "Material Request" and args.get("material_request_type") == "Material Transfer":
-		out.update(_get_bin_details(args.item_code, args.get("from_warehouse")))
+		# Source Warehouse ignores user permissions, so hide only the stock of one the user cannot see
+		is_permitted = erpnext._is_within_user_permissions("Warehouse", args.get("from_warehouse"))
+		out.update(_get_bin_details(args.item_code, args.get("from_warehouse") if is_permitted else None))
 
 	elif out.get("warehouse"):
 		bin_details = _get_bin_details(
@@ -456,21 +452,9 @@ def get_filtered_serial_nos(serial_nos, doc, table=None):
 	return serial_nos
 
 
-<<<<<<< HEAD
 def process_args(args):
 	if isinstance(args, str):
 		args = json.loads(args)
-=======
-def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
-	if ctx.doctype == "Material Request" and ctx.material_request_type == "Material Transfer":
-		# Source Warehouse ignores user permissions, so hide only the stock of one the user cannot see
-<<<<<<< HEAD
-		out.update(_get_bin_details(ctx.item_code, get_accessible_warehouse(ctx.from_warehouse)))
->>>>>>> f7bff6d (fix(stock): allow a Material Request source warehouse the user cannot read)
-=======
-		is_permitted = erpnext._is_within_user_permissions("Warehouse", ctx.from_warehouse)
-		out.update(_get_bin_details(ctx.item_code, ctx.from_warehouse if is_permitted else None))
->>>>>>> 67fe2bf (fix(stock): hide the stock of a source warehouse outside the user's company permissions)
 
 	args = frappe._dict(args)
 
