@@ -444,12 +444,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
+		# lock on submit so concurrent Manufacture entries see each other's produced qty
+		produced_qty, process_loss_qty = frappe.db.get_value(
+			"Work Order", wo.name, ["produced_qty", "process_loss_qty"], for_update=self.doc.docstatus == 1
+		)
 		precision = self.doc.precision("fg_completed_qty")
 		allowed_qty = flt(
 			flt(wo.material_transferred_for_manufacturing)
 			+ flt(wo.qty) * allowance_percentage / 100
-			- flt(wo.produced_qty)
-			- flt(wo.process_loss_qty),
+			- flt(produced_qty)
+			- flt(process_loss_qty),
 			precision,
 		)
 		if flt(self.doc.fg_completed_qty, precision) > allowed_qty:
