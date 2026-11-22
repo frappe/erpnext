@@ -2151,16 +2151,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			creation=self.first_sle_creation,
 		)
 
-	@property
-	def first_sle_creation(self):
-		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
-		return frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
-			"creation",
-			order_by="creation asc",
-		)
-
 	def has_consumption_basis(self) -> bool:
 		"""Whether the cost of the consumed items is known, even when that cost is zero."""
 		if any(d.s_warehouse for d in self.get("items")):
