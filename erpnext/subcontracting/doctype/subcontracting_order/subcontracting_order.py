@@ -521,8 +521,7 @@ class SubcontractingOrder(SubcontractingController):
 				item_dict = {d["name"]: d for d in items}
 				items = [item for item in self.supplied_items if item.name in item_dict]
 
-			reservation_items = []
-			is_transfer = False
+			reservation_items, plan_items = [], []
 			for item in items or self.supplied_items:
 				data = frappe._dict(
 					{
@@ -547,7 +546,7 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.production_plan:
 					fg_item = next(i for i in self.items if i.name == item.reference_name)
 					if production_plan_sub_assembly_item := fg_item.production_plan_sub_assembly_item:
-						from_voucher_detail_no, reserved_qty = frappe.get_value(
+						plan_item = frappe.get_value(
 							"Material Request Plan Item",
 							{
 								"parent": self.production_plan,
@@ -557,22 +556,27 @@ class SubcontractingOrder(SubcontractingController):
 								"docstatus": 1,
 							},
 							["name", "stock_reserved_qty"],
+							as_dict=True,
 						)
-						if flt(item.stock_reserved_qty) < reserved_qty:
-							is_transfer = True
+						if plan_item and flt(item.stock_reserved_qty) < flt(plan_item.stock_reserved_qty):
 							data.update(
 								{
 									"from_voucher_no": self.production_plan,
 									"from_voucher_type": "Production Plan",
-									"from_voucher_detail_no": from_voucher_detail_no,
+									"from_voucher_detail_no": plan_item.name,
 								}
 							)
+							plan_items.append(data)
+							continue
 
 				reservation_items.append(data)
 
-			if is_transfer:
-				hand_off_reserved_stock(self.production_plan, self.doctype, reservation_items)
-			elif StockReservation(self, items=reservation_items).make_stock_reservation_entries():
+			if plan_items:
+				hand_off_reserved_stock(self.production_plan, self.doctype, plan_items)
+			if (
+				reservation_items
+				and StockReservation(self, items=reservation_items).make_stock_reservation_entries()
+			):
 				frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
 
 	def get_unreserved_qty(self) -> dict[str, float]:
