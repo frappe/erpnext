@@ -298,6 +298,8 @@ class TestTransactionDeletionRecord(FrappeTestCase):
 			"Journal Entry Template",
 			"Dunning Type",
 			"Payment Gateway Account",
+			"Email Account",
+			"Communication",
 			"Email Digest",
 			"UAE VAT Settings",
 			"South Africa VAT Settings",
@@ -315,6 +317,14 @@ class TestTransactionDeletionRecord(FrappeTestCase):
 		self.assertEqual(tdr.db_get("status"), "Completed")
 		self.assertTrue(frappe.db.exists("Project", project.name))
 		self.assertFalse(expected & {row.doctype_name for row in tdr.doctypes})
+
+		email_doctypes = {"Email Account", "Communication"}
+		tdr.set(
+			"doctypes_to_be_ignored",
+			[row for row in tdr.doctypes_to_be_ignored if row.doctype_name not in email_doctypes],
+		)
+		owned = tdr.get_doctypes_with_company_field(tdr.get_doctypes_to_be_ignored_list())
+		self.assertFalse(email_doctypes - {row.parent for row in owned})
 
 	def test_deletion_removes_ancillary_references_only_for_deleted_documents(self):
 		from frappe.desk.doctype.tag.tag import add_tag
