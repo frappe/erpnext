@@ -7,10 +7,14 @@ from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from erpnext.selling.doctype.sales_order.sales_order import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 <<<<<<< HEAD
+<<<<<<< HEAD
 from erpnext.stock.doctype.item.test_item import make_item
 =======
 from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
 >>>>>>> 7592539 (test: FG return takes batches up to their delivered qty)
+=======
+from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB, take_reserved_entries
+>>>>>>> 090ec73 (fix(subcontracting): rows of one inward order row share its reserved serial nos and batches)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.serial_batch_bundle import get_batch_nos
@@ -558,9 +562,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			entry.parent = reservation.name
 			entry.db_insert()
 
-		_, picked = StockEntrySABB(frappe.new_doc("Stock Entry")).get_serial_nos_and_batches_from_sres(
-			"_FG Return Row", 3, only_pending=False
-		)
+		fg_return = frappe.new_doc("Stock Entry", purpose="Subcontracting Return")
+		fg_return.append("items", {"scio_detail": "_FG Return Row"})
+		reserved = StockEntrySABB(fg_return).get_reserved_entries_by_scio_detail()
+		_, picked = take_reserved_entries(reserved["_FG Return Row"], 3)
 		self.assertEqual(picked, {first: 1, second: 2})
 
 	def test_consumed_serial_and_batch_reservation(self):
