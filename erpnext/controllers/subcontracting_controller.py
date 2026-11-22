@@ -881,9 +881,9 @@ class SubcontractingController(StockController):
 				row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
 			)
 
-		# over several transfers, a batch or serial no changes the qty of those that sent it
+		# over several transfers, a serial no (else a batch) changes the qty of the one that sent it
 		spread = len(keys) > 1
-		by_batch = spread and bool(bundles.batch_nos or row.batch_no)
+		by_serial = spread and bool(serial_nos)
 		return frappe._dict(
 			row=row,
 			keys=keys,
@@ -891,8 +891,8 @@ class SubcontractingController(StockController):
 			serial_nos=serial_nos,
 			is_own=keys == [key],
 			is_return=row.consumed_qty < 0,
-			by_batch=by_batch,
-			by_serial=spread and not by_batch and bool(serial_nos),
+			by_serial=by_serial,
+			by_batch=spread and not by_serial and bool(bundles.batch_nos or row.batch_no),
 		)
 
 	def deduct_consumptions(self, consumptions):
@@ -902,15 +902,24 @@ class SubcontractingController(StockController):
 			self.deduct_consumed_qty_and_batches(consumption)
 
 		# serial nos go out and come back in the order they were consumed and returned
+		serial_batches = self.get_serial_batches(consumptions)
 		for consumption in consumptions:
 			if consumption.serial_nos:
 				self.update_consumed_serial_nos(
-					consumption.keys, consumption.serial_nos, consumption.is_return, consumption.by_serial
+					consumption.keys,
+					consumption.serial_nos,
+					consumption.is_return,
+					consumption.by_serial,
+					serial_batches,
 				)
 
 	def deduct_consumed_qty_and_batches(self, consumption):
 		row, keys, bundles = consumption.row, consumption.keys, consumption.bundles
-		if not (consumption.by_batch or consumption.by_serial):
+		if consumption.by_serial:
+			# its serial nos change the qty and batches of the transfers that sent them
+			return
+
+		if not consumption.by_batch:
 			self.deduct_consumed_qty(keys, row.consumed_qty)
 
 		if bundles.batch_nos:
@@ -926,6 +935,21 @@ class SubcontractingController(StockController):
 
 			deprecation_warning("unknown", "v16", "No instructions.")
 			self.deduct_consumed_batch_qty(keys, row.batch_no, row.consumed_qty)
+
+	def get_serial_batches(self, consumptions) -> dict:
+		"""Batch of each serial no that changes the qty of the transfer that sent it."""
+		serial_nos = {serial_no for c in consumptions if c.by_serial for serial_no in c.serial_nos}
+		if not serial_nos:
+			return {}
+
+		return dict(
+			frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", list(serial_nos)), "batch_no": ("is", "set")},
+				fields=["name", "batch_no"],
+				as_list=True,
+			)
+		)
 
 	def get_transfer_keys(self, key):
 		"""Transfers a consumption counts against: its own, else the order's other transfers of the raw material."""
@@ -956,9 +980,9 @@ class SubcontractingController(StockController):
 		sent_on = [key for key in keys if self.available_materials[key].batch_no.get(batch_no)]
 		self.deduct_consumed_qty(sent_on or keys[:1], qty, batch_no)
 
-	def update_consumed_serial_nos(self, keys, serial_nos, is_return, change_qty):
+	def update_consumed_serial_nos(self, keys, serial_nos, is_return, change_qty, serial_batches=None):
 		"""Take consumed serial nos out of the transfers, or put returned ones back on those that sent them;
-		with change_qty, each transfer's qty changes by its own."""
+		with change_qty, each transfer's qty and batches (from serial_batches) change by its own."""
 		for key in keys:
 			details = self.available_materials[key]
 			if is_return:
@@ -970,7 +994,11 @@ class SubcontractingController(StockController):
 				details.serial_no = list(set(details.serial_no) - moved)
 
 			if change_qty:
-				details.qty += len(moved) if is_return else -len(moved)
+				sign = 1 if is_return else -1
+				details.qty += sign * len(moved)
+				for serial_no in moved:
+					if batch_no := (serial_batches or {}).get(serial_no):
+						details.batch_no[batch_no] += sign
 
 	def get_available_materials(self):
 		"""Get the available raw materials which has been transferred to the supplier.
