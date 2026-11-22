@@ -213,13 +213,8 @@ def get_rate_locked_source_row(args, doc):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
-<<<<<<< HEAD
 	source_fields = maintain_same_rate_source_fields.get(args.parenttype or args.doctype)
-	if not source_fields or not doc or args.get("is_return") or not maintain_same_rate_enabled(args):
-=======
-	source_fields = maintain_same_rate_source_fields.get(ctx.parenttype or ctx.doctype)
-	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx, doc):
->>>>>>> 2de31e7 (fix(stock): keep the source rate on re-fetch for inter company parties)
+	if not source_fields or not doc or args.get("is_return") or not maintain_same_rate_enabled(args, doc):
 		return None
 
 	row = (
@@ -242,24 +237,14 @@ def get_rate_locked_source_row(args, doc):
 	return None
 
 
-<<<<<<< HEAD
-def maintain_same_rate_enabled(transaction_args):
-	if (transaction_args.parenttype or transaction_args.doctype) in purchase_doctypes:
-		if transaction_args.get("is_internal_supplier"):
-			return False
-		return bool(cint(frappe.get_cached_value("Buying Settings", "Buying Settings", "maintain_same_rate")))
-
-	if transaction_args.get("is_internal_customer"):
-=======
-def maintain_same_rate_enabled(ctx: ItemDetailsCtx, doc) -> bool:
+def maintain_same_rate_enabled(transaction_args, doc):
 	is_internal_transfer = doc.get("represents_company") == doc.get("company")
-	if (ctx.parenttype or ctx.doctype) in purchase_doctypes:
-		if ctx.get("is_internal_supplier") and is_internal_transfer:
+	if (transaction_args.parenttype or transaction_args.doctype) in purchase_doctypes:
+		if transaction_args.get("is_internal_supplier") and is_internal_transfer:
 			return False
 		return bool(cint(frappe.get_cached_value("Buying Settings", "Buying Settings", "maintain_same_rate")))
 
-	if ctx.get("is_internal_customer") and is_internal_transfer:
->>>>>>> 2de31e7 (fix(stock): keep the source rate on re-fetch for inter company parties)
+	if transaction_args.get("is_internal_customer") and is_internal_transfer:
 		return False
 	return bool(
 		cint(frappe.get_cached_value("Selling Settings", "Selling Settings", "maintain_same_sales_rate"))

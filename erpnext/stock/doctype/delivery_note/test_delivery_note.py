@@ -265,12 +265,10 @@ class TestDeliveryNote(FrappeTestCase):
 					400 * conversion_factor,
 				)
 
-	@ERPNextTestSuite.change_settings(
-		"Selling Settings", {"maintain_same_sales_rate": 1, "maintain_same_rate_action": "Stop"}
-	)
+	@change_settings("Selling Settings", {"maintain_same_sales_rate": 1, "maintain_same_rate_action": "Stop"})
 	def test_maintain_same_rate_for_inter_company_customer(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note as make_note_from_order
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as make_note_from_order
 
 		customer = create_internal_customer("_Test Sister Customer", "_Test Company 1", "_Test Company")
 		so = make_sales_order(customer=customer, rate=100)
