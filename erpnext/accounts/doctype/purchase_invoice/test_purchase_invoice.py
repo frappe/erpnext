@@ -2726,8 +2726,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 =======
 	def test_standalone_debit_note_rate_is_in_the_row_uom(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
