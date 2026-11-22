@@ -5591,6 +5591,15 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], [10.0, 70.0])
 
+	def test_resave_keeps_amount_based_split_with_targeted_additional_cost(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.save()
+		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items]
+		scr.save()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], costs)
+
 	def test_return_takes_back_targeted_additional_cost_with_its_row(self):
 		scr = self.make_receipt_with_targeted_additional_cost()
 		scr.submit()
