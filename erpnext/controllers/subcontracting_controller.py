@@ -857,8 +857,11 @@ class SubcontractingController(StockController):
 		def get_key(row):
 			return (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
 
-		# a finished good's own consumption first, so another's only takes what it left
-		for row in sorted(consumed_materials, key=lambda row: not self.available_materials.get(get_key(row))):
+		# a finished good's own consumption first, so another's only takes what it left; returns after
+		def get_order(row):
+			return (not self.available_materials.get(get_key(row)), row.consumed_qty < 0)
+
+		for row in sorted(consumed_materials, key=get_order):
 			keys = self.get_transfer_keys(get_key(row))
 			if not keys:
 				continue
@@ -866,10 +869,11 @@ class SubcontractingController(StockController):
 			bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
 			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
 
-			# over several transfers, a batch or serial no takes the qty from those that sent it
+			# over several transfers, a batch or a consumed serial no takes the qty from those that sent it
 			spread = len(keys) > 1
 			by_batch = spread and bool(consumed_bundles.batch_nos or row.batch_no)
-			by_serial = spread and not by_batch and bool(consumed_bundles.serial_nos or row.serial_no)
+			has_serial_nos = bool(consumed_bundles.serial_nos or row.serial_no)
+			by_serial = spread and not by_batch and row.consumed_qty > 0 and has_serial_nos
 			if not (by_batch or by_serial):
 				self.deduct_consumed_qty(keys, row.consumed_qty)
 
