@@ -192,7 +192,10 @@ $.extend(erpnext.stock_reservation, {
 			flt(item.stock_reserved_qty) + flt(item.consumed_qty),
 			flt(item.transferred_qty)
 		);
-		return flt(item.required_qty) - flt(item.subcontracted_qty) - covered_qty;
+		return flt(
+			flt(item.required_qty) - flt(item.subcontracted_qty) - covered_qty,
+			precision("required_qty", item)
+		);
 	},
 
 	reserve_stock(frm, table_name, parms) {
