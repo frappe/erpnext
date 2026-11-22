@@ -158,7 +158,11 @@ class JobCard(Document):
 		self.validate_job_card_qty()
 
 	def set_hour_rate(self):
-		if self.is_corrective_job_card or not (self.workstation and self.operation_id):
+		if self.is_corrective_job_card:
+			self.set_corrective_hour_rate()
+			return
+
+		if not (self.workstation and self.operation_id):
 			return
 
 		operation = frappe.db.get_value(
@@ -167,6 +171,17 @@ class JobCard(Document):
 		if operation and operation.workstation == self.workstation and flt(operation.hour_rate):
 			self.hour_rate = operation.hour_rate
 		else:
+			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
+
+	def set_corrective_hour_rate(self):
+		"""Keep a manual rate until the workstation changes, starting from the amended or source card's."""
+		previous = self.get_doc_before_save()
+		previous_workstation = (
+			previous.workstation
+			if previous
+			else frappe.db.get_value("Job Card", self.amended_from or self.for_job_card, "workstation")
+		)
+		if self.workstation and self.workstation != previous_workstation:
 			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
 	def validate_job_card_qty(self):
