@@ -44,7 +44,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let qty = this.item.stock_qty || this.item.transfer_qty || this.item.qty;
 
 		if (this.item?.is_rejected) {
-			qty = this.item.rejected_qty;
+			qty = flt(
+				this.item.rejected_qty * flt(this.item.conversion_factor || 1),
+				precision("stock_qty", this.item)
+			);
 		}
 
 		qty = Math.abs(qty);
