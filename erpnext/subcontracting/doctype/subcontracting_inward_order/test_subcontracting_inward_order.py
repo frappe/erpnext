@@ -1840,6 +1840,60 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(fg_return.items[0].expense_account, delivery_account)
 
+	def test_subcontracting_delivery_keeps_the_chosen_difference_account(self):
+		so, scio = create_manufactured_so_scio()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.save()
+		self.assertEqual(
+			delivery.items[0].expense_account,
+			frappe.get_cached_value("Company", delivery.company, "default_expense_account"),
+		)
+
+		delivery.items[0].expense_account = "Freight and Forwarding Charges - _TC"
+		delivery.save()
+		self.assertEqual(delivery.items[0].expense_account, "Freight and Forwarding Charges - _TC")
+
+	def test_subcontracting_return_uses_the_chosen_delivery_account(self):
+		so, scio = create_manufactured_so_scio()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.items[0].expense_account = "Freight and Forwarding Charges - _TC"
+		delivery.submit()
+
+		scio.reload()
+		fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+		self.assertEqual(fg_return.items[0].expense_account, "Freight and Forwarding Charges - _TC")
+
+	def test_subcontracting_return_account_over_several_deliveries(self):
+		freight, marketing = "Freight and Forwarding Charges - _TC", "Marketing Expenses - _TC"
+		so, scio = create_manufactured_so_scio()
+
+		def deliver(qty, account):
+			delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+			delivery.items[0].update({"qty": qty, "expense_account": account})
+			delivery.submit()
+			scio.reload()
+			return delivery
+
+		def return_account():
+			scio.reload()
+			fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+			fg_return.items[0].update({"qty": 1, "t_warehouse": "_Test Warehouse - _TC"})
+			fg_return.save()
+			return fg_return.items[0].expense_account
+
+		deliver(3, freight)
+		second = deliver(2, freight)
+		self.assertEqual(return_account(), freight)
+
+		second.cancel()
+		third = deliver(2, marketing)
+		self.assertEqual(
+			return_account(), frappe.get_cached_value("Company", scio.company, "default_expense_account")
+		)
+
+		third.cancel()
+		self.assertEqual(return_account(), freight)
+
 	def test_extra_receipt_of_bom_item_uses_existing_row(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
@@ -1911,7 +1965,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			)
 
 
-def create_delivered_so_scio():
+def create_manufactured_so_scio():
 	so, scio = create_so_scio()
 	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
 	scio.reload()
@@ -1921,6 +1975,11 @@ def create_delivered_so_scio():
 	wo.submit()
 	frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
 	scio.reload()
+	return so, scio
+
+
+def create_delivered_so_scio():
+	so, scio = create_manufactured_so_scio()
 	frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
 	scio.reload()
 	return so, scio
