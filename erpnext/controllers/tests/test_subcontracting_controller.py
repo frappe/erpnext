@@ -69,6 +69,40 @@ class TestSubcontractingController(ERPNextTestSuite):
 		self.assertEqual(rate_without_additional_cost, sco.items[0].rate)
 		self.assertEqual(amount_without_additional_cost, sco.items[0].amount)
 
+	def test_additional_costs_split_by_amount_use_the_cost_before_them(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 500,
+				"fg_item": "Subcontracted Item SA1",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.distribute_additional_costs_based_on = "Qty"
+		sco.append(
+			"additional_costs",
+			{"expense_account": "Cost of Goods Sold - _TC", "description": "Test", "amount": 1200},
+		)
+		sco.save()
+
+		sco.distribute_additional_costs_based_on = "Amount"
+		for _ in range(2):
+			sco.save()
+			costs = [item.qty * (item.rm_cost_per_qty + item.service_cost_per_qty) for item in sco.items]
+			for item, cost in zip(sco.items, costs, strict=True):
+				self.assertAlmostEqual(item.additional_cost_per_qty * item.qty, 1200 * cost / sum(costs))
+
 	def test_create_raw_materials_supplied(self):
 		sco = get_subcontracting_order()
 		sco.supplied_items = None
