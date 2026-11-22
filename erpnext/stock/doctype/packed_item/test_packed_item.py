@@ -5,12 +5,8 @@
 import frappe
 from frappe.utils import add_to_date, nowdate
 
-<<<<<<< HEAD
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-=======
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
->>>>>>> 87eb5b6 (test: import make_product_bundle at the top)
+from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
@@ -497,7 +493,7 @@ class TestPackedItem(ERPNextTestSuite):
 
 	def test_return_keeps_bundle_rate_of_original(self):
 		"""A return credits its original's bundle rate, not one rebuilt from component rates."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=1, rate=100)
 		dn = make_delivery_note(so.name)
