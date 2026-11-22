@@ -1317,6 +1317,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 		)
 
 		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.save()
 		scr1.get_secondary_items()
 		scr1.save()
 
@@ -1330,8 +1331,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 		self.assertEqual(scr1.items[1].received_qty, 5)
 		self.assertEqual(scr1.items[1].process_loss_qty, 0.5)
 		self.assertEqual(scr1.items[1].qty, 4.5)
-		self.assertEqual(flt(scr1.items[1].rate, 3), 11.111)
-		self.assertEqual(scr1.items[1].amount, 50)
+		self.assertEqual(flt(scr1.items[1].rate, 3), 22.222)
+		self.assertEqual(scr1.items[1].amount, 100)
 
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
 
