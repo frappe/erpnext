@@ -1133,8 +1133,9 @@ class BOM(WebsiteGenerator):
 		return BOMTree(self.name)
 
 	def set_process_loss_qty(self):
-		if self.process_loss_percentage:
-			self.process_loss_qty = flt(self.quantity) * flt(self.process_loss_percentage) / 100
+		self.process_loss_qty = flt(
+			flt(self.quantity) * flt(self.process_loss_percentage) / 100, self.precision("process_loss_qty")
+		)
 
 	def validate_scrap_items(self):
 		must_be_whole_number = frappe.get_value("UOM", self.uom, "must_be_whole_number")
