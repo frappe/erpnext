@@ -248,6 +248,20 @@ class TestDeliveryNote(ERPNextTestSuite):
 					400 * conversion_factor,
 				)
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"maintain_same_sales_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
+	def test_maintain_same_rate_for_inter_company_customer(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as make_note_from_order
+
+		customer = create_internal_customer("_Test Sister Customer", "_Test Company 1", "_Test Company")
+		so = make_sales_order(customer=customer, rate=100)
+		dn = frappe.get_doc(make_note_from_order(so.name))
+		dn.items[0].rate = 150
+
+		self.assertRaisesRegex(frappe.ValidationError, "Rate must be same as Sales Order", dn.insert)
+
 	def test_over_billing_against_dn(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
