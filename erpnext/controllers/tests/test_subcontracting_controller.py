@@ -1335,6 +1335,51 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
 
+	def test_consumption_counts_against_a_transfer_for_another_finished_good(self):
+		"""16 of a shared raw material are sent for FG A only, and a receipt of 6 FG B consumes 6 of them."""
+		rm_item = make_item("Subcontracted RM Shared By Two FGs", {"is_stock_item": 1}).name
+		fg_a, fg_b = "Subcontracted FG Sharing RM A", "Subcontracted FG Sharing RM B"
+		service_items = []
+		for fg_item, service_item, qty in (
+			(fg_a, "Subcontracted Service Item 2", 10),
+			(fg_b, "Subcontracted Service Item 3", 6),
+		):
+			make_subcontracted_item(item_code=fg_item, raw_materials=[rm_item])
+			service_items.append(
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": qty,
+					"rate": 100,
+					"fg_item": fg_item,
+					"fg_item_qty": qty,
+				}
+			)
+
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=16, basic_rate=100)
+		send = frappe.get_doc(make_rm_stock_entry(sco.name))
+		send.remove(next(row for row in send.items if row.subcontracted_item == fg_b))
+		send.items[0].qty = 16
+		send.submit()
+
+		set_backflush_based_on("BOM")
+		scr = make_subcontracting_receipt(sco.name)
+		scr.remove(next(row for row in scr.items if row.item_code == fg_a))
+		scr.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		self.assertEqual(get_materials_from_supplier(sco.name).items[0].qty, 10)
+
+		set_backflush_based_on("Material Transferred for Subcontract")
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 10)
+
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
