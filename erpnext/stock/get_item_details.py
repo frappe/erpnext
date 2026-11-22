@@ -1203,7 +1203,11 @@ def get_price_list_rate(args, item_doc, out=None):
 		):
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
-			out.update(get_last_purchase_details(item_doc.name, args.name, args.conversion_rate))
+			out.update(
+				get_last_purchase_details(
+					item_doc.name, args.name, args.conversion_rate, args.conversion_factor
+				)
+			)
 
 	return out
 
