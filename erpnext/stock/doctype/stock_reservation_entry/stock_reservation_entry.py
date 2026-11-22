@@ -673,8 +673,11 @@ class StockReservationEntry(Document):
 			)
 			frappe.throw(msg)
 
-		if self.delivered_qty > 0:
-			msg = _("Stock Reservation Entry cannot be updated as it has been delivered.")
+		used_qty = flt(self.delivered_qty) + flt(self.consumed_qty) + flt(self.transferred_qty)
+		if flt(used_qty, self.precision("reserved_qty")) > 0:
+			msg = _(
+				"Stock Reservation Entry cannot be updated as it has already been delivered, consumed or transferred."
+			)
 			frappe.throw(msg)
 
 	def validate_with_allowed_qty(self, qty_to_be_reserved: float) -> None:
