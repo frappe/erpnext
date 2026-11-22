@@ -1180,6 +1180,21 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual((ste.items[0].qty, ste.items[0].uom), (4, ste.items[0].stock_uom))
 
+	def test_transfer_cannot_be_cancelled_after_its_material_was_consumed(self):
+		sco = make_reserving_order_with_new_items("Consumed Cancel")
+		sco.reserve_stock = 0
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		transfer = make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		# stock of other orders at the same supplier
+		make_stock_entry(
+			target=sco.supplier_warehouse, item_code=rm_items[0]["item_code"], qty=10, basic_rate=100
+		)
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfer.cancel)
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
