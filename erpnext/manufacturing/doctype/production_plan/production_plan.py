@@ -33,7 +33,54 @@ import erpnext
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
+<<<<<<< HEAD
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+=======
+
+# Backward-compatible re-exports (moved to mapper.py / services/).
+from erpnext.manufacturing.doctype.production_plan.mapper import (
+	get_so_details,
+	sales_order_query,
+)
+from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+	MaterialRequestService,
+	download_raw_materials,
+	get_exploded_items,
+	get_item_data,
+	get_items_for_material_requests,
+	get_material_request_items,
+	get_materials_from_other_locations,
+	get_raw_materials_of_sub_assembly_items,
+	get_sales_orders,
+	get_subitems,
+	get_uom_conversion_factor,
+	get_warehouse_list,
+	set_default_warehouses,
+)
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_bin_details,
+	get_plan_process_loss_percentage,
+	get_reserved_qty_from_stock,
+)
+from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+	ProductionPlanStockReservation,
+	cancel_stock_reservation_entries,
+	get_reserved_qty_for_production_plan,
+	get_reserved_qty_for_sub_assembly,
+	make_stock_reservation_entries,
+	reserve_stock_for_production_plan,
+)
+from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
+	SalesOrderSourcingService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
+	SubAssemblyService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
+	WorkOrderCreationService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+>>>>>>> fa2f5b6 (fix(manufacturing): count reserved Work Order output once in the Sales Order search and submit check)
 	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -691,14 +738,7 @@ class ProductionPlan(Document):
 			return
 
 		already_planned = self.get_so_wise_planned_qty(list({key[0] for key in planned_qty}))
-		so_items = {
-			row.name: row
-			for row in frappe.get_all(
-				"Sales Order Item",
-				filters={"name": ("in", [key[1] for key in planned_qty])},
-				fields=["name", "item_code", "stock_qty", "stock_reserved_qty", "stock_uom"],
-			)
-		}
+		so_items = self.get_so_items_to_validate([key[1] for key in planned_qty])
 		allowance = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
@@ -708,7 +748,7 @@ class ProductionPlan(Document):
 			row = so_items[so_item]
 			unplanned_qty = flt(
 				flt(row.stock_qty) * (1 + allowance / 100)
-				- flt(row.stock_reserved_qty)
+				- flt(row.reserved_qty)
 				- flt(already_planned.get((sales_order, so_item))),
 				precision,
 			)
@@ -721,6 +761,24 @@ class ProductionPlan(Document):
 					),
 					title=_("Sales Order Qty Exceeded"),
 				)
+
+	@staticmethod
+	def get_so_items_to_validate(so_items):
+		"""Sales Order Items by name, with the reserved qty that is not their own Work Order output."""
+		so_item = frappe.qb.DocType("Sales Order Item")
+		rows = (
+			frappe.qb.from_(so_item)
+			.select(
+				so_item.name,
+				so_item.item_code,
+				so_item.stock_qty,
+				get_reserved_qty_from_stock(so_item).as_("reserved_qty"),
+				so_item.stock_uom,
+			)
+			.where(so_item.name.isin(so_items))
+			.run(as_dict=True)
+		)
+		return {row.name: row for row in rows}
 
 	def get_so_item_planned_qty(self):
 		"""Planned qty per Sales Order line, excluding product bundle components."""
