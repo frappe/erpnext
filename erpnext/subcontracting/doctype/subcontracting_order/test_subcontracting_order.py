@@ -2175,6 +2175,58 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual([tuple(reservation) for reservation in reservations], [(5, 0), (0, 0)])
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 50})
+	def test_first_receipt_cancel_keeps_the_later_returns_and_receipts(self):
+		sco = make_reserving_order_with_new_items(
+			"Return Resend",
+			qty=10,
+			rm_properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCORR-.####"},
+		)
+		row = sco.supplied_items[0]
+		rm_items = get_rm_items(sco.supplied_items)
+		batches = []
+		for qty in (10, 5, 5):
+			rm_items[0]["qty"] = qty
+			batches.append(next(iter(make_stock_in_entry(rm_items=rm_items)[row.rm_item_code].batch_no)))
+		a, b, c = batches
+		sco.submit()
+
+		def send(*batch_nos):
+			itemwise_details = {
+				row.rm_item_code: frappe._dict(
+					{"qty": 10, "serial_no": [], "batch_no": defaultdict(float, dict.fromkeys(batch_nos, 5))}
+				)
+			}
+			rows = [{**rm_items[0], "qty": 5} for _batch_no in batch_nos]
+			make_stock_transfer_entry(sco_no=sco.name, rm_items=rows, itemwise_details=itemwise_details)
+
+		def receive(batch_no):
+			receipt = make_subcontracting_receipt(sco.name)
+			receipt.items[0].qty = 5
+			receipt.save()
+			receipt.supplied_items[0].batch_no = batch_no
+			receipt.save()
+			return receipt.submit()
+
+		send(a, b)
+		first_receipt = receive(a)
+		make_return_of_components(sco, qty=5)
+		send(a, c)
+		second_receipt = receive(c)
+		make_return_of_components(sco, qty=5)
+
+		first_receipt.cancel()
+
+		self.assertEqual(
+			get_supplier_warehouse_reservations(sco),
+			[(5, 0, {a: 0, b: 5}), (5, 5, {a: 5, c: 5})],
+		)
+
+		second_receipt.cancel()
+
+		self.assertEqual([reservation[1] for reservation in get_supplier_warehouse_reservations(sco)], [0, 0])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
 			{
@@ -2568,9 +2620,37 @@ def make_return_of_components(sco, qty, do_not_submit=False):
 	)
 	return_entry = get_materials_from_supplier(sco.name)
 	return_entry.items[0].qty = qty
+	# the mapped warehouses come from any earlier transfer or return, so set them
+	return_entry.items[0].s_warehouse = sco.supplier_warehouse
+	return_entry.items[0].t_warehouse = sco.supplied_items[0].reserve_warehouse
 	if not do_not_submit:
 		return_entry.submit()
 	return return_entry
+
+
+def get_supplier_warehouse_reservations(sco):
+	"""Transferred qty, consumed qty and used qty per batch of each supplier warehouse reservation, oldest first."""
+	reservations = frappe.get_all(
+		"Stock Reservation Entry",
+		filters={"voucher_no": sco.name, "docstatus": 1, "warehouse": sco.supplier_warehouse},
+		fields=["name", "transferred_qty", "consumed_qty"],
+		order_by="creation",
+	)
+	return [
+		(
+			reservation.transferred_qty,
+			reservation.consumed_qty,
+			dict(
+				frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": reservation.name, "parenttype": "Stock Reservation Entry"},
+					fields=["batch_no", "delivered_qty"],
+					as_list=True,
+				)
+			),
+		)
+		for reservation in reservations
+	]
 
 
 def get_reserved_stock(item_code, warehouses):
