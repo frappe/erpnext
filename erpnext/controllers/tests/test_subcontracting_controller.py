@@ -75,8 +75,6 @@ class TestSubcontractingController(FrappeTestCase):
 		sco.create_raw_materials_supplied()
 		self.assertIsNotNone(sco.supplied_items)
 
-<<<<<<< HEAD
-=======
 	def test_additional_cost_account_must_be_in_company_currency(self):
 		account = frappe.get_doc(
 			{
@@ -96,8 +94,6 @@ class TestSubcontractingController(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, sco.save)
 
-	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
->>>>>>> 61da41a (test: additional cost account must be in the company currency)
 	def test_sco_with_bom(self):
 		"""
 		- Set backflush based on BOM.
