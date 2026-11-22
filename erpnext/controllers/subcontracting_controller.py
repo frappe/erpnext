@@ -855,25 +855,27 @@ class SubcontractingController(StockController):
 		)
 
 		for row in consumed_materials:
-			key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
-			if not self.available_materials.get(key):
+			keys = self.get_transfer_keys(
+				(row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
+			)
+			if not keys:
 				continue
 
-			self.available_materials[key]["qty"] -= row.consumed_qty
+			self.deduct_consumed_qty(keys, row.consumed_qty)
 
 			bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
 			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
 
 			if consumed_bundles.serial_nos:
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(consumed_bundles.serial_nos)
-				)
+				self.remove_consumed_serial_nos(keys, consumed_bundles.serial_nos)
 
 			if consumed_bundles.batch_nos:
 				for batch_no, qty in consumed_bundles.batch_nos.items():
 					if qty:
 						# Conumed qty is negative therefore added it instead of subtracting
-						self.available_materials[key]["batch_no"][batch_no] += qty
+						self.available_materials[self.get_batch_key(keys, batch_no)]["batch_no"][
+							batch_no
+						] += qty
 						consumed_bundles.batch_nos[batch_no] += abs(qty)
 
 			# Will be deprecated in v16
@@ -884,16 +886,41 @@ class SubcontractingController(StockController):
 				consumed_serials = SerialBatchIdentity("Serial No").resolve(
 					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
 				)
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(consumed_serials)
-				)
+				self.remove_consumed_serial_nos(keys, consumed_serials)
 
 			# Will be deprecated in v16
 			if row.batch_no and not consumed_bundles.batch_nos:
 				from erpnext.deprecation_dumpster import deprecation_warning
 
 				deprecation_warning("unknown", "v16", "No instructions.")
-				self.available_materials[key]["batch_no"][row.batch_no] -= row.consumed_qty
+				self.available_materials[self.get_batch_key(keys, row.batch_no)]["batch_no"][
+					row.batch_no
+				] -= row.consumed_qty
+
+	def get_transfer_keys(self, key):
+		"""Transfers a consumption counts against: its own, else the order's other transfers of the raw material."""
+		if self.available_materials.get(key):
+			return [key]
+
+		rm_item_code, _finished_good, order = key
+		return [k for k in self.available_materials if (k[0], k[2]) == (rm_item_code, order)]
+
+	def deduct_consumed_qty(self, keys, qty):
+		"""Take the qty from the transfers in turn, each up to what it has left; the last takes the rest."""
+		for key in keys:
+			details = self.available_materials[key]
+			deducted = qty if key == keys[-1] else min(qty, max(details.qty, 0))
+			details.qty -= deducted
+			qty -= deducted
+
+	def remove_consumed_serial_nos(self, keys, serial_nos):
+		for key in keys:
+			details = self.available_materials[key]
+			details.serial_no = list(set(details.serial_no) - set(serial_nos))
+
+	def get_batch_key(self, keys, batch_no):
+		"""The transfer the batch was sent on, else the first one."""
+		return next((key for key in keys if self.available_materials[key].batch_no.get(batch_no)), keys[0])
 
 	def get_available_materials(self):
 		"""Get the available raw materials which has been transferred to the supplier.
