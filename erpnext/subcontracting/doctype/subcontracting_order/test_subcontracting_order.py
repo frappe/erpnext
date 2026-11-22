@@ -968,7 +968,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
 	)
 	def test_material_to_supplier_counts_shared_raw_material_per_finished_good(self):
-		sco = make_order_sharing_a_raw_material()
+		sco = get_subcontracting_order_sharing_a_raw_material()
 		transfer_shared_raw_material(sco, "Subcontracted Item SA7", 15)
 
 		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
