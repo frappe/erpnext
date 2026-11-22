@@ -27,7 +27,11 @@ def add_additional_cost(stock_entry, work_order, job_card=None):
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=None):
 	bom = frappe.get_doc("BOM", work_order.bom_no)
-	item_amounts = _non_phantom_item_amounts(bom, _bom_items_table(work_order, job_card))
+	table = _bom_items_table(work_order, job_card)
+	rows = bom.get(table)
+	if job_card:
+		rows = [row for row in rows if _is_job_card_row(row, job_card, work_order)]
+	item_amounts = _non_phantom_item_amounts(rows, table)
 	cost = _non_stock_items_cost(item_amounts, stock_entry, bom)
 
 	if cost:
@@ -37,15 +41,22 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 		)
 
 
+def _is_job_card_row(row, job_card, work_order):
+	"""Whether the row is charged on this card's output; rows of no operation go to the last one."""
+	if row.operation_row_id or row.operation:
+		return job_card.is_own_material(row)
+	return job_card.finished_good == work_order.production_item
+
+
 def _bom_items_table(work_order, job_card):
 	if work_order and not job_card:
 		return "exploded_items" if work_order.get("use_multi_level_bom") else "items"
 	return "items"
 
 
-def _non_phantom_item_amounts(bom, table):
+def _non_phantom_item_amounts(rows, table):
 	items = frappe._dict()
-	for d in bom.get(table):
+	for d in rows:
 		# Phantom item is exploded, so its cost is considered via its components
 		if d.get("is_phantom_item"):
 			continue
