@@ -28,6 +28,10 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -1064,6 +1068,53 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfer.cancel)
 
+	@change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_receipt_skips_a_serial_no_returned_by_the_supplier(self):
+		sco, received = make_order_sent_to_supplier(
+			"Serial Return", {"has_serial_no": 1, "serial_no_series": "SCOSR-.####"}
+		)
+		ste = get_return_of_components(sco)
+		ste.items[0].update({"qty": 1, "serial_no": received.serial_no[0]})
+		ste.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = scr.items[0].received_qty = 2
+		scr.submit()
+
+		consumed = get_serial_nos_from_bundle(scr.supplied_items[0].serial_and_batch_bundle)
+		self.assertEqual(consumed, sorted(received.serial_no[1:]))
+
+	@change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_return_of_components_skips_batch_qty_returned_by_the_supplier(self):
+		sco, received = make_order_sent_to_supplier(
+			"Batch Return", {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCOBR-.####"}
+		)
+		ste = get_return_of_components(sco)
+		row = ste.items[0]
+		bundle = make_serial_batch_bundle(
+			frappe._dict(
+				item_code=row.item_code,
+				warehouse=row.s_warehouse,
+				qty=-1,
+				batches={next(iter(received.batch_no)): 1},
+				voucher_type="Stock Entry",
+				type_of_transaction="Outward",
+				do_not_submit=True,
+			)
+		)
+		row.update(
+			{"qty": 1, "batch_no": None, "use_serial_batch_fields": 0, "serial_and_batch_bundle": bundle.name}
+		)
+		ste.submit()
+
+		self.assertEqual(get_return_of_components(sco).items[0].qty, 2)
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
@@ -1371,6 +1422,37 @@ class TestSubcontractingOrder(FrappeTestCase):
 		self.assertEqual(sco.items[0].rm_cost_per_qty, 800)
 		self.assertEqual(sco.supplied_items[0].rate, 800)
 		self.assertEqual(sco.supplied_items[0].amount, 4000)
+
+
+def make_order_sent_to_supplier(suffix, rm_properties):
+	"""Submitted order for 3 of a new subcontracted item, with all its raw material sent to the supplier."""
+	service_item = make_item(f"Subcontracted Service Item {suffix}", {"is_stock_item": 0}).name
+	fg_item = make_item(
+		f"Subcontracted FG Item {suffix}", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+	).name
+	rm_item = make_item(f"Subcontracted RM Item {suffix}", {"is_stock_item": 1, **rm_properties}).name
+	make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": service_item,
+			"qty": 3,
+			"rate": 100,
+			"fg_item": fg_item,
+			"fg_item_qty": 3,
+		}
+	]
+	sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	sco.submit()
+	received = copy.deepcopy(itemwise_details[rm_items[0]["item_code"]])
+	make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+	return sco, received
+
+
+def get_return_of_components(sco):
+	return get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
 
 
 def set_alternative_item(item_code, alternative_item_code):
