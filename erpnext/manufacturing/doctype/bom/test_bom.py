@@ -1344,28 +1344,6 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(bom.items[0].rate, 10)
 		self.assertEqual(bom.items[1].rate, 0)
 
-<<<<<<< HEAD
-=======
-	def test_get_items_rate_in_stock_uom(self):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		rm_item = make_box_item("_Test BOM Box Rate RM")
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
-		bom.items[0].update({"uom": "Box", "conversion_factor": 12})
-		bom.insert()
-		bom.submit()
-		self.assertEqual(bom.items[0].base_rate, 120)
-
-		in_stock_uom = get_bom_items_as_dict(bom.name, "_Test Company", fetch_exploded=0)[rm_item]
-		self.assertEqual((in_stock_uom.qty, in_stock_uom.rate), (12, 10))
-
-		in_row_uom = get_bom_items_as_dict(
-			bom.name, "_Test Company", fetch_exploded=0, fetch_qty_in_stock_uom=False
-		)[rm_item]
-		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
-
 	def test_currency_change_fetches_conversion_rate(self):
 		set_inr_exchange_rate("EUR", 90)
 		bom = frappe.get_doc(
@@ -1383,38 +1361,6 @@ class TestBOM(FrappeTestCase):
 		bom.save()
 		self.assertEqual(bom.conversion_rate, 90)
 
-
-def make_stage_items():
-	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
-	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
-
-	make_workstation({"workstation": "_Test SFG Workstation"})
-	for operation in ("_Test SFG Operation", "_Test SFG Final Operation"):
-		make_operation({"operation": operation, "workstation": "_Test SFG Workstation"})
-
-	return (
-		make_item(properties={"is_stock_item": 1}).name,
-		make_item(properties={"is_stock_item": 1}).name,
-		make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name,
-	)
-
-
-def make_stage_bom(fg_item, operations):
-	bom = frappe.new_doc("BOM")
-	bom.update(
-		{"company": "_Test Company", "item": fg_item, "quantity": 1, "with_operations": 1, "currency": "USD"}
-	)
-	bom.track_semi_finished_goods = 1
-	for operation in operations:
-		bom.append("operations", {"workstation": "_Test SFG Workstation", "time_in_mins": 30, **operation})
-
-	return bom
-
-
-def get_step_items(bom, step):
-	return [row.item_code for row in bom.items if row.operation_row_id == step]
-
->>>>>>> bdd6a32 (test: changing BOM currency fetches its conversion rate)
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
