@@ -1082,12 +1082,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			allow_zero_valuation_rate: item.allow_zero_valuation_rate,
 		};
 
+		// only the newest request of a row sets its rate
+		this.incoming_rate_requests ??= {};
+		const request_id = (this.incoming_rate_requests[item.name] || 0) + 1;
+		this.incoming_rate_requests[item.name] = request_id;
+
 		frappe.call({
 			method: "erpnext.stock.utils.get_incoming_rate",
 			args: {
 				args: item_args,
 			},
 			callback: (r) => {
+				if (this.incoming_rate_requests[item.name] !== request_id) return;
 				// the qty handler refetches an internal customer's rate, so skip the answer for an older qty
 				if (this.frm.doc.is_internal_customer && item.qty * item.conversion_factor !== stock_qty)
 					return;
