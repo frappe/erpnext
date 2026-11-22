@@ -2687,28 +2687,12 @@ class StockEntry(StockController):
 	def get_gl_entries(self, warehouse_account):
 		gl_entries = super().get_gl_entries(warehouse_account)
 
-		incoming_items, basis, divide_based_on = self.get_additional_cost_allocation()
-
 		item_account_wise_additional_cost = {}
-
-		for t in self.get("additional_costs"):
-			if not divide_based_on:
-				continue
-			for d in incoming_items:
-				item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
-				item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(
-					t.expense_account, {"amount": 0.0, "base_amount": 0.0}
-				)
-
-				multiply_based_on = flt(d.get(basis))
-
-				item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]["amount"] += (
-					flt(t.amount * multiply_based_on) / divide_based_on
-				)
-
-				item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account][
-					"base_amount"
-				] += flt(t.base_amount * multiply_based_on) / divide_based_on
+		for d, account, amount, base_amount in self.get_additional_cost_split():
+			item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})[account] = {
+				"amount": amount,
+				"base_amount": base_amount,
+			}
 
 		if item_account_wise_additional_cost:
 			precision = self.get_debit_field_precision()
