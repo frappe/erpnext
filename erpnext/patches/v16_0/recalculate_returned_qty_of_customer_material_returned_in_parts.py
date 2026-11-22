@@ -1,9 +1,11 @@
 import frappe
 from frappe.query_builder.functions import Sum
+from frappe.utils import flt
 
 
 def execute():
-	rows = [row for row in get_returned_rows() if row.qty != row.returned_qty]
+	precision = frappe.get_precision("Subcontracting Inward Order Received Item", "returned_qty")
+	rows = [row for row in get_returned_rows() if flt(row.qty, precision) != flt(row.returned_qty, precision)]
 	frappe.db.bulk_update(
 		"Subcontracting Inward Order Received Item",
 		{row.name: {"returned_qty": row.qty} for row in rows},
