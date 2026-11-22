@@ -1853,6 +1853,15 @@ def make_rm_stock_entry(
 
 				target_doc.set_stock_entry_type()
 
+				per_finished_good = (
+					order_doctype != "Subcontracting Order"
+					or frappe.db.get_single_value(
+						"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
+					)
+					!= "BOM"
+				)
+				pending_qty = get_pending_qty_by_material(subcontract_order.supplied_items, per_finished_good)
+				precision = target_doc.precision("qty", "items")
 				for fg_item_code in fg_item_code_list:
 					for rm_item in rm_items:
 						if (
@@ -1860,6 +1869,18 @@ def make_rm_stock_entry(
 							or rm_item.get("item_code") == fg_item_code
 						):
 							rm_item_code = rm_item.get("rm_item_code")
+							material = (rm_item_code, fg_item_code if per_finished_good else None)
+							qty = rm_item.get("qty") or flt(
+								min(
+									flt(rm_item.get("required_qty")) - flt(rm_item.get("total_supplied_qty")),
+									pending_qty[material],
+								),
+								precision,
+							)
+							if qty <= 0:
+								continue
+
+							pending_qty[material] -= qty
 
 							items_dict = {
 								rm_item_code: {
@@ -1867,10 +1888,7 @@ def make_rm_stock_entry(
 									"item_name": rm_item.get("item_name")
 									or item_wh.get(rm_item_code, {}).get("item_name", ""),
 									"description": item_wh.get(rm_item_code, {}).get("description", ""),
-									"qty": rm_item.get("qty")
-									or max(
-										rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0
-									),
+									"qty": qty,
 									"from_warehouse": rm_item.get("warehouse")
 									or rm_item.get("reserve_warehouse"),
 									"to_warehouse": source_doc.supplier_warehouse,
@@ -1921,6 +1939,16 @@ def make_rm_stock_entry(
 				return stock_entry.as_dict()
 		else:
 			frappe.throw(_("No Items selected for transfer."))
+
+
+def get_pending_qty_by_material(supplied_items, per_finished_good):
+	"""Qty of each raw material still to be sent, pooled the way the receipt consumes it."""
+	pending_qty = defaultdict(float)
+	for row in supplied_items:
+		material = (row.rm_item_code, row.main_item_code if per_finished_good else None)
+		pending_qty[material] += flt(row.required_qty) - flt(row.total_supplied_qty)
+
+	return pending_qty
 
 
 def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_detail", batch_no=None):
