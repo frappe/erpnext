@@ -2356,10 +2356,11 @@ class update_entries_after:
 	def get_internal_receipt_valuation_rate(self, sle):
 		"""Rate of the stock an internal receipt row accepted: what its transit leg gives back plus
 		the landed cost over the accepted qty, as the receipt itself values it."""
-		child_doctype = sle.voucher_type + " Item"
-		stock_qty = frappe.db.get_value(child_doctype, sle.voucher_detail_no, "stock_qty")
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		row = frappe.get_doc(sle.voucher_type + " Item", sle.voucher_detail_no)
 		return flt(sle.outgoing_rate) + get_landed_cost_rate(
-			child_doctype, sle.voucher_detail_no, flt(stock_qty)
+			row.doctype, row.name, get_stock_qty(row, row.qty)
 		)
 
 	def update_rate_on_subcontracting_receipt(self, sle, outgoing_rate):
