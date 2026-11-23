@@ -861,6 +861,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							return_against: me.frm.doc.return_against,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
+							coupon_code: me.frm.doc.coupon_code,
+							sales_partner: me.frm.doc.sales_partner,
+							campaign: me.frm.doc.utm_campaign,
 							doctype: me.frm.doc.doctype,
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
@@ -3452,7 +3455,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => (this.frm.doc.ignore_pricing_rule = 1),
 				() => this.frm.trigger("ignore_pricing_rule"),
 				() => (this.frm.doc.ignore_pricing_rule = _ignore_pricing_rule),
-				() => this.frm.trigger("apply_pricing_rule"),
+				() => this.apply_pricing_rule(),
 				() => (this.frm._last_coupon_code = this.frm.doc.coupon_code),
 			]);
 		}
