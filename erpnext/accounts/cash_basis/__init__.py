@@ -19,7 +19,7 @@ ACCOUNTING_METHODS = (ACCRUAL, CASH)
 
 # Phased rollout: the United States first. Other countries follow on need, when the feature is mature.
 # This is not a statement about tax law.
-CASH_METHOD_COUNTRIES = ()
+CASH_METHOD_COUNTRIES = ("United States",)
 
 
 def get_core_notice() -> str:
