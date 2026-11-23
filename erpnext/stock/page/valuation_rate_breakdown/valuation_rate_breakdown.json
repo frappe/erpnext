@@ -4,12 +4,12 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-11-14 10:00:00.000000",
+ "modified": "2026-11-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "stock-valuation-explained",
+ "name": "valuation-rate-breakdown",
  "owner": "Administrator",
- "page_name": "stock-valuation-explained",
+ "page_name": "valuation-rate-breakdown",
  "roles": [
   {
    "role": "Stock User"
@@ -28,5 +28,5 @@
  "standard": "Yes",
  "style": null,
  "system_page": 0,
- "title": "Stock Valuation Explained"
+ "title": "Valuation Rate Breakdown"
 }

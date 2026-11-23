@@ -5,22 +5,26 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.page.stock_valuation_explained.stock_valuation_explained import get_valuation_steps
+from erpnext.stock.page.valuation_rate_breakdown.valuation_rate_breakdown import get_valuation_steps
+from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 from erpnext.tests.utils import ERPNextTestSuite
 
 WAREHOUSE = "Stores - _TC"
 
 
-class TestStockValuationExplained(ERPNextTestSuite):
+class TestValuationRateBreakdown(ERPNextTestSuite):
 	def make_item(self, valuation_method, **properties):
 		properties.update({"is_stock_item": 1, "valuation_method": valuation_method})
 		return make_item(properties=properties).name
 
-	def receive(self, item_code, rate, days_ago):
+	def receive(self, item_code, rate, days_ago, qty=1):
 		return make_purchase_receipt(
 			item_code=item_code,
-			qty=1,
+			qty=qty,
 			rate=rate,
 			warehouse=WAREHOUSE,
 			posting_date=add_days(today(), -days_ago),
@@ -102,15 +106,84 @@ class TestStockValuationExplained(ERPNextTestSuite):
 		self.assertEqual(len(earlier.entries), 2)
 		self.assertFalse(earlier.has_earlier)
 
-	def test_batch_item_is_not_explained_yet(self):
-		item_code = self.make_item(
-			"FIFO", has_batch_no=1, create_new_batch=1, batch_number_series="SVE-BATCH-.###"
+	def issue(self, item_code, days_ago, **kwargs):
+		posting_date = add_days(today(), -days_ago)
+		entry = make_stock_entry(
+			item_code=item_code, source=WAREHOUSE, qty=1, posting_date=posting_date, **kwargs
 		)
+		return self.get_entry_name(entry.name)
 
-		steps = get_valuation_steps(item_code, WAREHOUSE)
+	def test_backdated_receipt_shows_the_rate_when_the_issue_was_entered(self):
+		item_code = self.make_item("Moving Average")
+		self.receive(item_code, 100, 5, qty=2)
+		issue = self.issue(item_code, 2)
+		backdated = self.receive(item_code, 200, 4, qty=2)
 
-		self.assertEqual(steps.item.unsupported, "batch")
-		self.assertEqual(steps.entries, [])
+		steps = get_valuation_steps(item_code, WAREHOUSE, upto=issue)
+		issued = steps.entries[-1]
+
+		self.assertEqual(issued.rate, 150)
+		self.assertEqual((issued.rate_when_entered, issued.rate_after_when_entered), (100, 100))
+		self.assertEqual([(d.voucher_no, d.kind) for d in issued.changed_by], [(backdated.name, "added")])
+		backdated_entry = next(d for d in steps.entries if d.voucher_no == backdated.name)
+		self.assertEqual(backdated_entry.later_dated_count, 1)
+		self.assertEqual(steps.entries[0].changed_by, [])
+
+	def test_backdated_receipt_changes_the_fifo_lot_used(self):
+		item_code = self.make_item("FIFO")
+		self.receive(item_code, 100, 5)
+		issue = self.issue(item_code, 2)
+		self.receive(item_code, 50, 6)
+
+		issued = get_valuation_steps(item_code, WAREHOUSE, upto=issue).entries[-1]
+
+		self.assertEqual(issued.rate, 50)
+		self.assertEqual(issued.rate_when_entered, 100)
+
+	def test_cancelled_earlier_receipt_is_listed_as_a_change(self):
+		item_code = self.make_item("Moving Average")
+		self.receive(item_code, 100, 5)
+		second = self.receive(item_code, 200, 4)
+		issue = self.issue(item_code, 2)
+		second.cancel()
+
+		issued = get_valuation_steps(item_code, WAREHOUSE, upto=issue).entries[-1]
+
+		self.assertEqual(issued.rate, 100)
+		self.assertEqual(issued.rate_when_entered, 150)
+		self.assertEqual([(d.voucher_no, d.kind) for d in issued.changed_by], [(second.name, "cancelled")])
+
+	def test_batch_issue_goes_out_at_the_batch_rate(self):
+		item_code = self.make_item(
+			"FIFO", has_batch_no=1, create_new_batch=1, batch_number_series="VRB-BATCH-.###"
+		)
+		self.receive(item_code, 100, 3, qty=10)
+		second = self.receive(item_code, 200, 2, qty=10)
+		batch_no = get_batch_from_bundle(second.items[0].serial_and_batch_bundle)
+		issue = self.issue(item_code, 1, batch_no=batch_no)
+
+		steps = get_valuation_steps(item_code, WAREHOUSE, upto=issue)
+		[part] = steps.entries[-1].parts
+
+		self.assertEqual(steps.item.valued_by, "batch")
+		self.assertEqual((part.batch_no, part.qty, part.rate, part.own_rate), (batch_no, -1, 200, True))
+		self.assertEqual((part.qty_before, part.value_before), (10, 2000))
+
+	def test_serial_issue_goes_out_at_the_rate_the_serial_came_in_at(self):
+		item_code = self.make_item("Moving Average", has_serial_no=1, serial_no_series="VRB-SN-.###")
+		self.receive(item_code, 100, 3)
+		second = self.receive(item_code, 300, 2)
+		serial_no = get_serial_nos_from_bundle(second.items[0].serial_and_batch_bundle)[0]
+		issue = self.issue(item_code, 1, serial_no=[serial_no])
+
+		steps = get_valuation_steps(item_code, WAREHOUSE, upto=issue)
+		[part] = steps.entries[-1].parts
+
+		self.assertEqual(steps.item.valued_by, "serial")
+		self.assertEqual(
+			(part.serial_nos, part.rate, part.source_voucher_no), ([serial_no], 300, second.name)
+		)
+		self.assertEqual(steps.entries[-1].rate, 300)
 
 	def test_entry_of_another_item_is_rejected(self):
 		item_code = self.make_item("Moving Average")

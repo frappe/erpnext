@@ -5,6 +5,8 @@ from frappe import _
 from frappe.query_builder import Order
 from frappe.utils import flt
 
+from erpnext.stock.page.valuation_rate_breakdown.backdated import set_backdated_details
+from erpnext.stock.page.valuation_rate_breakdown.serial_batch import set_serial_batch_details
 from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
 
 PAGE_SIZE = 50
@@ -28,44 +30,47 @@ def get_valuation_steps(
 
 	company = frappe.get_cached_value("Warehouse", warehouse, "company")
 	item = get_item_context(item_code, company)
-	result = frappe._dict(
+	rows, previous, has_earlier = get_ledger_window(item_code, warehouse, upto, before)
+	return frappe._dict(
 		item=item,
 		warehouse=warehouse,
 		company=company,
 		currency=frappe.get_cached_value("Company", company, "default_currency"),
-		entries=[],
-		opening=None,
-		has_earlier=False,
-		repost_pending=False,
+		entries=get_entries(item, warehouse, rows, previous),
+		opening=get_balance(previous, get_lot_method(item)),
+		has_earlier=has_earlier,
+		repost_pending=is_repost_pending(item_code, warehouse, company),
 	)
-	if item.unsupported:
-		return result
 
-	rows, previous, has_earlier = get_ledger_window(item_code, warehouse, upto, before)
-	result.entries = build_entries(rows, previous, item.valuation_method)
-	set_return_details(result.entries, item_code, warehouse)
-	result.opening = get_balance(previous, item.valuation_method)
-	result.has_earlier = has_earlier
-	result.repost_pending = is_repost_pending(item_code, warehouse, company)
-	return result
+
+def get_entries(item, warehouse, rows, previous):
+	entries = build_entries(rows, previous, get_lot_method(item))
+	set_return_details(entries, item.item_code, warehouse)
+	if item.valued_by:
+		set_serial_batch_details(entries, rows, item.valued_by, item.item_code, warehouse)
+
+	set_backdated_details(entries, rows, item.item_code, warehouse, get_lot_method(item))
+	return entries
+
+
+def get_lot_method(item):
+	return None if item.valued_by else item.valuation_method
 
 
 def get_item_context(item_code, company):
 	item = frappe.get_cached_value(
 		"Item", item_code, ["item_name", "stock_uom", "has_batch_no", "has_serial_no"], as_dict=True
 	)
-	unsupported = None
-	if item.has_batch_no:
-		unsupported = "batch"
-	elif item.has_serial_no and not is_serial_no_wise_valuation_disabled(item_code):
-		unsupported = "serial"
+	valued_by = None
+	if not is_serial_no_wise_valuation_disabled(item_code):
+		valued_by = "serial" if item.has_serial_no else "batch" if item.has_batch_no else None
 
 	return frappe._dict(
 		item_code=item_code,
 		item_name=item.item_name,
 		stock_uom=item.stock_uom,
 		valuation_method=get_valuation_method(item_code, company),
-		unsupported=unsupported,
+		valued_by=valued_by,
 	)
 
 
@@ -121,6 +126,10 @@ def fetch_ledger_rows(item_code, warehouse, anchor, inclusive):
 			sle.stock_value_difference,
 			sle.stock_queue,
 			sle.is_adjustment_entry,
+			sle.serial_and_batch_bundle,
+			sle.posting_datetime,
+			sle.creation,
+			sle.modified,
 		)
 		.where((sle.item_code == item_code) & (sle.warehouse == warehouse) & (sle.is_cancelled == 0))
 		.orderby(sle.posting_datetime, order=Order.desc)
