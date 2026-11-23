@@ -24,35 +24,6 @@ from erpnext.stock.get_item_details import ItemDetailsCtx, get_conversion_factor
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 
-<<<<<<< HEAD
-=======
-# Backward-compatible re-exports: these were moved to mapper.py / services/.
-# Re-importing here preserves whitelist dotted-paths and external imports.
-from erpnext.manufacturing.doctype.bom.mapper import (
-	get_bom_diff,
-	get_children,
-	item_query,
-	make_variant_bom,
-)
-from erpnext.manufacturing.doctype.bom.services.costing import (
-	BOMCostingService,
-	get_secondary_process_loss_qty,
-)
-from erpnext.manufacturing.doctype.bom.services.exploded_items import (
-	BOMExplodedItemsService,
-)
-from erpnext.manufacturing.doctype.bom.services.operations_cost import (
-	add_additional_cost,
-	add_non_stock_items_cost,
-	add_operating_cost_component_wise,
-	add_operations_cost,
-	get_component_account,
-	get_op_cost_from_sub_assemblies,
-	get_secondary_items_from_sub_assemblies,
-)
-
-
->>>>>>> a2dec76 (fix(manufacturing): keep the capped secondary process loss when the BOM saves)
 class BOMRecursionError(frappe.ValidationError):
 	pass
 
@@ -1323,7 +1294,9 @@ class BOM(WebsiteGenerator):
 		for d in self.get("secondary_items"):
 			if d.valuation_type == "Valuation Rate":
 				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
-				d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
+				# set here too, so Update Cost saves the loss the cost is net of
+				d.process_loss_qty = get_secondary_process_loss_qty(d)
+				d.cost = flt(flt(rate) * (flt(d.stock_qty) - d.process_loss_qty), precision)
 			elif d.valuation_type == "Manual":
 				d.cost = flt(d.cost, precision)
 			else:
@@ -2513,6 +2486,14 @@ def _get_unit_operating_cost(bom_no, unit_costs, skip_boms_with_operations=False
 
 	unit_costs[bom_no] = cost
 	return cost
+
+
+def get_secondary_process_loss_qty(row) -> float:
+	"""Rounded process loss qty of a secondary row, capped as rounding can take it above the row's qty."""
+	return min(
+		flt(flt(row.stock_qty) * flt(row.process_loss_per) / 100, row.precision("process_loss_qty")),
+		flt(row.stock_qty),
+	)
 
 
 def get_good_qty(bom):
