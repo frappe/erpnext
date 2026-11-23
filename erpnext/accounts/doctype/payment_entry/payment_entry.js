@@ -587,8 +587,9 @@ frappe.ui.form.on("Payment Entry", {
 			return;
 		}
 
+		const key = frm.events.get_party_balance_key(frm);
 		const cached = frm.party_balance;
-		if (cached && cached.party_type === frm.doc.party_type && cached.party === frm.doc.party) {
+		if (cached?.key === key) {
 			frm.set_df_property("party", "description", frm.events.get_party_balance_text(frm, cached));
 			return;
 		}
@@ -605,14 +606,17 @@ frappe.ui.form.on("Payment Entry", {
 			callback: (r) => {
 				if (!r.message) return;
 				frm.party_balance = {
-					party_type: frm.doc.party_type,
-					party: frm.doc.party,
+					key,
 					balance: r.message.party_balance,
 					currency: r.message.party_account_currency,
 				};
 				frm.events.set_party_description(frm);
 			},
 		});
+	},
+
+	get_party_balance_key: function (frm) {
+		return [frm.doc.company, frm.doc.posting_date, frm.doc.party_type, frm.doc.party].join("\n");
 	},
 
 	get_party_balance_text: function (frm, { balance, currency }) {
@@ -757,6 +761,7 @@ frappe.ui.form.on("Payment Entry", {
 			frm.set_party_account_based_on_party = true;
 
 			let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+			const balance_key = frm.events.get_party_balance_key(frm);
 
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details",
@@ -788,8 +793,7 @@ frappe.ui.form.on("Payment Entry", {
 							() => frm.set_value("party_name", r.message.party_name),
 							() => {
 								frm.party_balance = {
-									party_type: frm.doc.party_type,
-									party: frm.doc.party,
+									key: balance_key,
 									balance: r.message.party_balance,
 									currency: r.message.party_account_currency,
 								};
@@ -1010,6 +1014,7 @@ frappe.ui.form.on("Payment Entry", {
 	posting_date: function (frm) {
 		frm.events.paid_from_account_currency(frm);
 		frm.events.paid_to_account_currency(frm);
+		frm.events.set_party_description(frm);
 	},
 
 	source_exchange_rate: function (frm) {
