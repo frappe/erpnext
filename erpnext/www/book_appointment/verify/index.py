@@ -54,6 +54,7 @@ def get_context(context):
 
 def verify_appointment(appointment):
 	# the signed link is the authorization for the Guest visitor
+	appointment.flags.from_portal_verification = True
 	appointment.email_verified = True
 	appointment.status = "Open"
 	appointment.save(ignore_permissions=True)
