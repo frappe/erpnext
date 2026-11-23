@@ -425,7 +425,23 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not rm_items:
 			return
 
-		_check_bom_component_qty(self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom))
+		_check_bom_component_qty(
+			self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom), self.get_bom_component_qty
+		)
+
+	def get_bom_component_qty(self, bom_item):
+		"""Qty Get Items takes of a BOM item: a whole-number item's share of the running total."""
+		is_whole_number = cint(frappe.get_cached_value("UOM", bom_item.stock_uom, "must_be_whole_number"))
+		required_items = (
+			[row for row in self.wo_doc.required_items if row.item_code == bom_item.item_code]
+			if self.wo_doc and is_whole_number
+			else []
+		)
+		if not required_items:
+			return ceil_qty_if_uom_has_whole_number(
+				bom_item.qty * flt(self.doc.fg_completed_qty), bom_item.stock_uom
+			)
+		return sum(self.get_wo_raw_material_qty(row) for row in required_items)
 
 	def validate_work_order(self):
 		if not self.doc.work_order:
@@ -1454,12 +1470,16 @@ def get_production_item_details(work_order=None, bom_no=None):
 	)
 
 
-def _check_bom_component_qty(doc, bom_items):
-	"""Validate that stock entry items match BOM quantities."""
+def _check_bom_component_qty(doc, bom_items, get_qty=None):
+	"""Validate that stock entry items match BOM quantities. get_qty gives the qty a BOM item must have."""
 	precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 	for row in bom_items:
 		# Get Items rounds a whole number qty up
-		row.qty = ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
+		row.qty = (
+			get_qty(row)
+			if get_qty
+			else ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
+		)
 		matched_items = [
 			item for item in doc.items if item.s_warehouse and get_original_item(item) == row.item_code
 		]
@@ -1476,7 +1496,7 @@ def _check_bom_component_qty(doc, bom_items):
 					),
 					title=_("Incorrect Component Quantity"),
 				)
-		else:
+		elif row.qty:
 			frappe.throw(
 				_("According to the BOM {0}, the Item '{1}' is missing in the stock entry.").format(
 					get_link_to_form("BOM", doc.bom_no), bold(row.item_code)
