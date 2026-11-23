@@ -1180,7 +1180,12 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
 		rm_in.items = [item for item in rm_in.items if item.item_code != "RM with Batch"]
 		rm_in.submit()
-		receive_batch_in_two_lots(scio)
+		for qty in (3, 2):
+			lot = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+			lot.items = [item for item in lot.items if item.item_code == "RM with Batch"]
+			lot.items[0].qty = qty
+			lot.submit()
+			scio.reload()
 		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
 		wo.skip_transfer = 1
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
@@ -2288,34 +2293,6 @@ def make_work_order_with_extra_material():
 	return scio, wo
 
 
-<<<<<<< HEAD
-=======
-def get_picked_batches(stock_entry):
-	"""Batch qty in the bundle of each row."""
-	from erpnext.stock.serial_batch_bundle import get_batch_nos
-
-	return [
-		{batch_no: abs(d.qty) for batch_no, d in get_batch_nos(row.serial_and_batch_bundle).items()}
-		for row in stock_entry.items
-	]
-
-
-def receive_batch_in_two_lots(scio):
-	"""Receive the batch raw material as 3, then the other 2 in a new batch; return both batches."""
-	from erpnext.stock.serial_batch_bundle import get_batch_nos
-
-	batches = []
-	for qty in (3, 2):
-		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
-		rm_in.items[0].qty = qty
-		rm_in.submit()
-		batches.append(next(iter(get_batch_nos(rm_in.items[0].serial_and_batch_bundle))))
-		scio.reload()
-
-	return batches
-
-
 def make_manufacture_with_extra_material(extra_qtys):
 	_so, scio = create_so_scio()
 	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
@@ -2332,7 +2309,6 @@ def make_manufacture_with_extra_material(extra_qtys):
 	return scio, manufacture
 
 
->>>>>>> 0f3ffa1 (test: extra material of another inward order does not block a Manufacture cancel)
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
 	item_list = [{"item_code": service_item, "qty": 5, "fg_item": fg_item, "fg_item_qty": 5}]
 	so = make_sales_order(is_subcontracted=1, item_list=item_list)
