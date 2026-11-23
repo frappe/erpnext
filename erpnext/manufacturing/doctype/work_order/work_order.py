@@ -894,13 +894,20 @@ class WorkOrder(Document):
 				status = "In Process"
 
 		if status == "Not Started" and self.reserve_stock:
-			if any(row.stock_reserved_qty for row in self.required_items):
-				if any(row.stock_reserved_qty < row.required_qty for row in self.required_items):
+			if any(row.stock_reserved_qty or row.subcontracted_qty for row in self.required_items):
+				if any(self.get_unreserved_qty(row) > 0 for row in self.required_items):
 					status = "Stock Partially Reserved"
 				else:
 					status = "Stock Reserved"
 
 		return status
+
+	@staticmethod
+	def get_unreserved_qty(row):
+		# a Subcontracting Order reserves and sends what it took over
+		return flt(
+			row.required_qty - row.subcontracted_qty - row.stock_reserved_qty, row.precision("required_qty")
+		)
 
 	def _has_transferred_material(self):
 		"""True if any raw material transferred against this work order via a pick list or a
