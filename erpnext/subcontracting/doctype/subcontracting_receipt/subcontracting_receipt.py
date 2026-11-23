@@ -806,7 +806,7 @@ class SubcontractingReceipt(SubcontractingController):
 		original_rows = {row.name: row for row in original.items if row.bom}
 		based_on_amount = original.distribute_additional_costs_based_on == "Amount"
 		basis = {
-			name: self.get_amount_for_costing(row) if based_on_amount else flt(row.qty)
+			name: self.get_amount_for_costing(row) if based_on_amount else self.get_qty_for_costing(row)
 			for name, row in original_rows.items()
 		}
 		total_basis = sum(basis.values())
