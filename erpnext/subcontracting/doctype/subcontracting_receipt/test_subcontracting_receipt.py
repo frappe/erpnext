@@ -600,6 +600,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.submit()
 
 		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.items[1].reference_name = scr_return.items[0].name
 		scr_return.submit()
 
 		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
