@@ -10363,6 +10363,34 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			get_package_rates(pr.name, "Finished Goods - TCP1"), {batches[0]: 101.0, batches[1]: 133.0}
 		)
 
+	def test_second_internal_receipt_of_a_batch_takes_the_rest_of_transit(self):
+		"""A second internal receipt of a batch item takes what the first one left in transit."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 1}).name
+		dn = create_delivery_note(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=2,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			batch_no=get_batch_from_bundle(receive_lots(item, (101,))[0]),
+			use_serial_batch_fields=1,
+		)
+
+		for qty in (1, 1):
+			pr = make_inter_company_purchase_receipt(dn.name)
+			pr.items[0].update({"warehouse": "Finished Goods - TCP1", "qty": qty})
+			pr.submit()
+
+		transit = {"item_code": item, "warehouse": "Work In Progress - TCP1"}
+		self.assertEqual(frappe.db.get_value("Bin", transit, ["actual_qty", "stock_value"]), (0.0, 0.0))
+
+
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
 
