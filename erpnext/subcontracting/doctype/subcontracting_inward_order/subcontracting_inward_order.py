@@ -576,6 +576,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 		def postprocess(source, target):
 			target.purpose = "Subcontracting Return"
 			target.set_stock_entry_type()
+			delivery_accounts = source.get_delivery_accounts()
 
 			for fg_item in source.items:
 				qty = fg_item.delivered_qty - fg_item.returned_qty
@@ -590,6 +591,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 						"stock_uom": fg_item.stock_uom,
 						"scio_detail": fg_item.name,
 						"is_finished_item": 1,
+						"expense_account": delivery_accounts.get(fg_item.name),
 					},
 				)
 
@@ -614,6 +616,23 @@ class SubcontractingInwardOrder(SubcontractingController):
 			return stock_entry
 		else:
 			return stock_entry.as_dict()
+
+	def get_delivery_accounts(self):
+		"""Map each finished good row to the Difference Account of its deliveries, if they all used one."""
+		accounts = {}
+		for row in frappe.get_all(
+			"Stock Entry",
+			filters=[
+				["Stock Entry Detail", "scio_detail", "in", [item.name for item in self.items]],
+				["purpose", "=", "Subcontracting Delivery"],
+				["docstatus", "=", 1],
+			],
+			fields=["`tabStock Entry Detail`.scio_detail", "`tabStock Entry Detail`.expense_account"],
+			distinct=True,
+		):
+			accounts.setdefault(row.scio_detail, set()).add(row.expense_account)
+
+		return {scio_detail: used.pop() for scio_detail, used in accounts.items() if len(used) == 1}
 
 
 def set_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):
