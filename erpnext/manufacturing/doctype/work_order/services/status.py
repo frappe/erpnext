@@ -219,13 +219,21 @@ class StatusService:
 		return flt(self.doc.qty, precision) > flt(total_qty, precision)
 
 	def _reservation_status(self, status):
-		if not any(row.stock_reserved_qty for row in self.doc.required_items):
+		rows = self.doc.required_items
+		if not any(row.stock_reserved_qty or row.subcontracted_qty for row in rows):
 			return status
 
-		if any(row.stock_reserved_qty < row.required_qty for row in self.doc.required_items):
+		if any(self._unreserved_qty(row) > 0 for row in rows):
 			return "Stock Partially Reserved"
 
 		return "Stock Reserved"
+
+	@staticmethod
+	def _unreserved_qty(row):
+		# a Subcontracting Order reserves and sends what it took over
+		return flt(
+			row.required_qty - row.subcontracted_qty - row.stock_reserved_qty, row.precision("required_qty")
+		)
 
 	def update_work_order_qty(self):
 		"""Update Manufactured Qty and Material Transferred for Qty based on Stock Entry"""
