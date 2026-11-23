@@ -1391,6 +1391,9 @@ erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
 			bom_no: "",
 		},
 		callback(r) {
+			// the row may have left Valuation Rate while the rate was being fetched
+			if (row.valuation_type !== "Valuation Rate") return;
+
 			const loss_qty = Math.min(
 				flt(
 					(flt(row.stock_qty) * flt(row.process_loss_per)) / 100,
