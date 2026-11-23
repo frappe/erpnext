@@ -19,7 +19,13 @@ from frappe.utils import (
 from frappe.utils.data import add_to_date
 from frappe.utils.logging import get_log_db
 
-from erpnext.accounts.default_accounts import ACCUMULATED_DEPRECIATION, ASSET_DISPOSAL, DEPRECIATION_EXPENSE
+from erpnext.accounts.default_accounts import (
+	ACCUMULATED_DEPRECIATION,
+	ASSET_DISPOSAL,
+	DEPRECIATION_EXPENSE,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
@@ -1025,23 +1031,10 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.status, "Fully Depreciated")
 
 	def test_depreciation_accounts_is_set_for_depreciable_assets(self):
-		company_depreciation_accounts = frappe.db.get_value(
-			"Company",
-			"_Test Company",
-			[
-				"accumulated_depreciation_account",
-				"depreciation_expense_account",
-			],
-			as_dict=True,
-		)
-		frappe.db.set_value(
-			"Company",
-			"_Test Company",
-			{
-				"accumulated_depreciation_account": "",
-				"depreciation_expense_account": "",
-			},
-		)
+		accumulated_depreciation_account = get_default_account("_Test Company", ACCUMULATED_DEPRECIATION)
+		depreciation_expense_account = get_default_account("_Test Company", DEPRECIATION_EXPENSE)
+		set_default_account("_Test Company", ACCUMULATED_DEPRECIATION, "")
+		set_default_account("_Test Company", DEPRECIATION_EXPENSE, "")
 		asset_category_name = "Computers"
 		asset_category_account = None
 		if frappe.db.exists("Asset Category", asset_category_name):
@@ -1093,7 +1086,8 @@ class TestAsset(AssetSetup):
 				str(err.exception),
 			)
 		finally:
-			frappe.db.set_value("Company", "_Test Company", company_depreciation_accounts)
+			set_default_account("_Test Company", ACCUMULATED_DEPRECIATION, accumulated_depreciation_account)
+			set_default_account("_Test Company", DEPRECIATION_EXPENSE, depreciation_expense_account)
 			if asset_category_account:
 				frappe.db.set_value(
 					"Asset Category Account",

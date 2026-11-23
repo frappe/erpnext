@@ -3,7 +3,13 @@
 
 import frappe
 
-from erpnext.accounts.default_accounts import CAPITAL_WORK_IN_PROGRESS, set_default_account
+from erpnext.accounts.default_accounts import (
+	ACCUMULATED_DEPRECIATION,
+	CAPITAL_WORK_IN_PROGRESS,
+	DEPRECIATION_EXPENSE,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -81,23 +87,10 @@ class TestAssetCategory(ERPNextTestSuite):
 			company="_Test Company",
 			submit=1,
 		)
-		company_acccount_depreciation = frappe.db.get_value(
-			"Company",
-			asset.company,
-			[
-				"accumulated_depreciation_account",
-				"depreciation_expense_account",
-			],
-			as_dict=True,
-		)
-		frappe.db.set_value(
-			"Company",
-			asset.company,
-			{
-				"accumulated_depreciation_account": "",
-				"depreciation_expense_account": "",
-			},
-		)
+		accumulated_depreciation_account = get_default_account(asset.company, ACCUMULATED_DEPRECIATION)
+		depreciation_expense_account = get_default_account(asset.company, DEPRECIATION_EXPENSE)
+		set_default_account(asset.company, ACCUMULATED_DEPRECIATION, "")
+		set_default_account(asset.company, DEPRECIATION_EXPENSE, "")
 		try:
 			asset_category = frappe.get_doc("Asset Category", asset.asset_category)
 			asset_category.enable_cwip_accounting = 0
@@ -115,7 +108,8 @@ class TestAssetCategory(ERPNextTestSuite):
 				str(err.exception),
 			)
 		finally:
-			frappe.db.set_value("Company", asset.company, company_acccount_depreciation)
+			set_default_account(asset.company, ACCUMULATED_DEPRECIATION, accumulated_depreciation_account)
+			set_default_account(asset.company, DEPRECIATION_EXPENSE, depreciation_expense_account)
 
 	def test_accounts_cannot_change_while_active_assets_exist(self):
 		asset = create_asset(asset_category="Computers", company="_Test Company", submit=1)
