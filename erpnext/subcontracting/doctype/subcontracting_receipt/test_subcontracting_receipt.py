@@ -5806,6 +5806,27 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([row.amount for row in scr_return.additional_costs], [-50.0, -300.0])
 
+	def test_return_spreads_netted_out_additional_costs_by_costing_qty(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "Discount",
+				"amount": -100,
+				"base_amount": -100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items = [scr_return.items[1]]
+		scr_return.save()
+
+		# the first row's rejected qty weighs in, as in the original split: 5 of 10, not 5 of 8
+		self.assertEqual([row.amount for row in scr_return.additional_costs], [-50.0, -300.0, 50.0])
+
 	def test_additional_cost_cannot_target_a_row_outside_the_receipt(self):
 		scr = self.make_receipt_with_targeted_additional_cost()
 		scr.additional_costs[1].item_row = "not-a-row"
