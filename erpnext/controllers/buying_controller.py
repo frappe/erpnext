@@ -270,12 +270,13 @@ class BuyingController(SubcontractingController):
 			return
 
 		rejected_package = row.get("rejected_serial_and_batch_bundle")
-		if rejected_package and (
-			frappe.db.get_value("Serial and Batch Bundle", rejected_package, "warehouse")
-			== row.rejected_warehouse
-		):
+		if rejected_package:
 			self.resize_package(row, "rejected_serial_and_batch_bundle", "rejected_qty")
-			return
+			if (
+				frappe.db.get_value("Serial and Batch Bundle", rejected_package, "warehouse")
+				== row.rejected_warehouse
+			):
+				return
 
 		# the rejected warehouse changed: the selected rejected batches move with it
 		new_package = None
