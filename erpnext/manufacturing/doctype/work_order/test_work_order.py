@@ -4868,6 +4868,23 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(consumed_qty, [2, 1, 2, 1])
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 1,
+			"validate_components_quantities_per_bom": 1,
+		},
+	)
+	def test_bom_component_check_takes_unconsumed_share_with_continuous_consumption(self):
+		# 0.5 per unit: the second entry takes 1 of the 1 unconsumed, not 0 of the running total
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=2)
+		consumed_qty = []
+		for _ in range(2):
+			manufacture = submit_manufacture_of_one(work_order)
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+		self.assertEqual(consumed_qty, [1, 1])
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
 	)
 	def test_partial_manufactures_without_raw_materials_value_scrap_at_zero(self):
