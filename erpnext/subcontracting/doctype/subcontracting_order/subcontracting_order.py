@@ -739,7 +739,13 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 
 		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
+	def update_additional_cost(source, target, source_parent):
+		target.amount = flt(source.amount * additional_cost_share, target.precision("amount"))
+
 	items = {item["name"]: item["qty"] for item in items} if items else {}
+	additional_cost_share = get_additional_cost_share(
+		frappe.get_doc("Subcontracting Order", source_name), items
+	)
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
 		source_name,
@@ -766,11 +772,53 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 				if not items
 				else doc.name in items,
 			},
+			"Landed Cost Taxes and Charges": {
+				"doctype": "Landed Cost Taxes and Charges",
+				"postprocess": update_additional_cost,
+			},
 		},
 		target_doc,
 	)
+	target_doc.set_additional_costs()
 
 	return target_doc
+
+
+def get_additional_cost_share(order: Document, items: dict) -> float:
+	"""Share of the order's additional costs a receipt takes: what earlier receipts left of them,
+	in proportion to the qty it takes of what is still to be received."""
+	total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in order.items)
+	if not total_cost:
+		# costs that net to zero leave valuation unchanged, so keep their rows in full
+		return 1.0
+
+	pending_cost = received_cost = 0.0
+	for row in order.items:
+		pending_qty = max(flt(row.qty) - flt(row.received_qty), 0)
+		pending_cost += pending_qty * flt(row.additional_cost_per_qty)
+		if not items or row.name in items:
+			received_cost += flt(items.get(row.name) or pending_qty) * flt(row.additional_cost_per_qty)
+
+	if not pending_cost:
+		return 0.0
+
+	remaining_share = max(1 - get_additional_cost_taken_by_receipts(order.name) / total_cost, 0)
+	return remaining_share * min(received_cost / pending_cost, 1)
+
+
+def get_additional_cost_taken_by_receipts(order: str) -> float:
+	receipt = frappe.qb.DocType("Subcontracting Receipt")
+	receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	costing_qty = receipt_item.qty + receipt_item.rejected_qty + receipt_item.process_loss_qty
+	return flt(
+		(
+			frappe.qb.from_(receipt_item)
+			.inner_join(receipt)
+			.on(receipt.name == receipt_item.parent)
+			.select(Sum(costing_qty * receipt_item.additional_cost_per_qty))
+			.where((receipt.docstatus == 1) & (receipt_item.subcontracting_order == order))
+		).run()[0][0]
+	)
 
 
 def set_subcontracting_order_status(sco: str | Document, status: str | None = None):
