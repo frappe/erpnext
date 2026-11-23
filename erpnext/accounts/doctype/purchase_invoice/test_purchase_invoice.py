@@ -2795,6 +2795,17 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(returned_inv.items[0].rate, 10)
 
 		# a missing exchange rate is fetched before pricing
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": nowdate(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 62.9,
+				"for_buying": 1,
+				"for_selling": 1,
+			}
+		).insert(ignore_if_duplicate=True)
 		returned_inv = frappe.copy_doc(returned_inv)
 		returned_inv.conversion_rate = 0
 		returned_inv.items[0].rate = 0
