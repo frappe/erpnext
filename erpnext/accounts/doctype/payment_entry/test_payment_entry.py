@@ -956,6 +956,47 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual([row["cost_center"] for row in rows], [company_cost_center] * 2)
 		self.assertEqual(base_total_discount_loss, 23.6)
 
+	def test_payment_discount_account_by_payment_type(self):
+		create_payment_terms_template_with_discount()
+		company = "_Test Company"
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"default_discount_account": "Write Off - _TC",
+				"discount_received_account": "Cost of Goods Sold - _TC",
+				"discount_allowed_account": "_Test Account Discount - _TC",
+			},
+		)
+
+		pi = make_purchase_invoice(do_not_save=1)
+		pi.payment_terms_template = "Test Discount Template"
+		pi.submit()
+
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		si.payment_terms_template = "Test Discount Template"
+		si.submit()
+
+		# Pending discount loss, without tax loss
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 0)
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Cash - _TC")
+		self.assertEqual(pe.deductions[0].account, "Cost of Goods Sold - _TC")
+		self.assertEqual(pe.deductions[0].amount, -25.0)
+
+		pe.submit()
+		self.assertEqual(pe.references[0].payment_term_discount, 25.0)
+
+		# Discount loss split into income and tax loss
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 1)
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		self.assertEqual(pe.deductions[0].account, "_Test Account Discount - _TC")
+		self.assertEqual(pe.deductions[0].amount, 20.0)
+
+		# Without a specific account, use the default payment discount account
+		frappe.db.set_value("Company", company, "discount_allowed_account", None)
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		self.assertEqual(pe.deductions[0].account, "Write Off - _TC")
+
 	def test_payment_entry_against_payment_terms_with_discount_amount(self):
 		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
 
