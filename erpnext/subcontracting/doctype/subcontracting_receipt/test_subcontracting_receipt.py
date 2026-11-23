@@ -39,7 +39,6 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-	get_mapped_subcontracting_receipt,
 	make_subcontracting_receipt,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
@@ -431,73 +430,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 		self.assertEqual(stock_value_difference, -660)
 
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
-	def test_batch_return_uses_accepted_receipt_rate(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
-<<<<<<< HEAD
-=======
-		# the secondary row keeps the full receipt qty
-		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-		scr_return.save()
-		scr_return.get_secondary_items(recalculate_rate=True)
-		scr_return.items[0].qty = -1
-		scr_return.submit()
-
-		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
-		stock_value_difference = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": scr_return.name, "item_code": scr.items[0].item_code, "is_cancelled": 0},
-			"stock_value_difference",
-		)
-		self.assertEqual(stock_value_difference, scr_return.items[0].amount)
-
-	def test_return_values_the_secondary_items_at_the_receipt_rate(self):
-		scr = make_receipt_with_scrap()
-		make_stock_entry(
-			item_code=scr.items[1].item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=30
-		)
-
-		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-		scr_return.items[0].qty = -1
-		scr_return.save()
-		scr_return.get_secondary_items(recalculate_rate=True)
-		scr_return.submit()
-
-		self.assertEqual(scr_return.items[1].rate, scr.items[1].rate)
-		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
-
-	def test_return_values_manual_secondary_items_at_the_receipt_rate(self):
-		scr = make_receipt_with_scrap(valuation_type="Manual", scrap_rate=15)
-
-		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-		scr_return.save()
-		scr_return.get_secondary_items(recalculate_rate=True)
-		scr_return.submit()
-
-		self.assertEqual(scr_return.items[1].rate, 15)
-		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
-
-	def test_return_values_percentage_secondary_items_at_the_receipt_rate(self):
-		scr = make_receipt_with_scrap(co_product_allocation=10)
-
-		# the secondary rows keep the full receipt qty
-		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-		scr_return.save()
-		scr_return.get_secondary_items(recalculate_rate=True)
-		scr_return.items[0].qty = -1
-		scr_return.submit()
-
-		co_product = scr_return.items[2]
-		self.assertEqual(co_product.rate, scr.items[2].rate)
-		stock_value_difference = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": scr_return.name, "item_code": co_product.item_code, "is_cancelled": 0},
-			"stock_value_difference",
-		)
-		self.assertEqual(stock_value_difference, co_product.amount)
-
 	def test_partial_receipts_take_the_order_additional_costs_once(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
@@ -511,42 +443,11 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertEqual(first.total_additional_costs + second.total_additional_costs, 1000)
 
-	def test_receipt_mapped_for_selected_qty_takes_its_share_of_order_additional_costs(self):
-		sco = make_order_with_additional_cost_and_transfer(1000)
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_batch_return_uses_accepted_receipt_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 4}])
-		first.save()
-		first.submit()
-		second = make_subcontracting_receipt(sco.name)
-		second.save()
-		second.submit()
-
-		self.assertEqual(first.total_additional_costs, 400)
-		self.assertEqual(second.total_additional_costs, 600)
-
-	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
-		set_backflush_based_on("BOM")
-		sco = get_subcontracting_order()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 8
-		scr.items[0].process_loss_qty = 2
-		scr.save()
-		scr.submit()
-
-		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-8)
-
-		self.assertEqual(scr_return.items[0].process_loss_qty, 0)
-		self.assertEqual(scr_return.items[0].received_qty, -8)
-
-	def test_batch_return_value_matches_receipt(self):
->>>>>>> 79b2235 (test: partial receipts take the order's additional costs once)
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
 		).name
@@ -5094,65 +4995,6 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	scr = make_subcontracting_receipt(sco.name)
 	scr.submit()
 	return scr
-<<<<<<< HEAD
-=======
-
-
-def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None):
-	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate, and an optional co-product."""
-	set_backflush_based_on("BOM")
-	rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
-	secondary_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
-	fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
-	bom = make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR", do_not_submit=True)
-	bom.append(
-		"secondary_items",
-		{
-			"item_code": secondary_item,
-			"secondary_item_type": "Scrap",
-			"qty": 1,
-			"stock_qty": 1,
-			"valuation_type": valuation_type,
-		},
-	)
-	if co_product_allocation:
-		bom.append(
-			"secondary_items",
-			{
-				"item_code": make_item(properties={"is_stock_item": 1}).name,
-				"secondary_item_type": "Co-Product",
-				"qty": 1,
-				"stock_qty": 1,
-				"valuation_type": "% of Component Cost",
-				"cost_allocation_per": co_product_allocation,
-			},
-		)
-	bom.save()
-	bom.submit()
-	service_items = [
-		{
-			"warehouse": "_Test Warehouse - _TC",
-			"item_code": "Subcontracted Service Item 1",
-			"qty": 2,
-			"rate": 100,
-			"fg_item": fg_item,
-			"fg_item_qty": 2,
-		}
-	]
-	sco = get_subcontracting_order(service_items=service_items)
-	rm_items = get_rm_items(sco.supplied_items)
-	itemwise_details = make_stock_in_entry(rm_items=rm_items)
-	make_stock_transfer_entry(
-		sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
-	)
-	scr = make_subcontracting_receipt(sco.name)
-	scr.save()
-	scr.get_secondary_items(recalculate_rate=True)
-	if scrap_rate:
-		scr.items[1].rate = scrap_rate
-	scr.save()
-	scr.submit()
-	return scr
 
 
 def make_order_with_additional_cost_and_transfer(amount):
@@ -5171,4 +5013,3 @@ def make_order_with_additional_cost_and_transfer(amount):
 		itemwise_details=copy.deepcopy(itemwise_details),
 	)
 	return sco
->>>>>>> b4fd4c3 (test: a receipt mapped for a selected qty takes its share of the order's additional costs)
