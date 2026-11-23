@@ -845,10 +845,11 @@ class SubcontractingController(StockController):
 			return
 
 		voucher_nos = [d.voucher_no for d in consumed_materials if d.voucher_no]
+		# a receipt's consumption goes out of the supplier warehouse and its return comes back in
 		voucher_bundle_data = (
 			get_voucher_wise_serial_batch_from_bundle(
 				voucher_no=voucher_nos,
-				is_outward=1,
+				warehouse=self.supplier_warehouse,
 				get_subcontracted_item=("Subcontracting Receipt Supplied Item", "main_item_code"),
 			)
 			if voucher_nos
@@ -925,9 +926,9 @@ class SubcontractingController(StockController):
 		if bundles.batch_nos:
 			for batch_no, qty in bundles.batch_nos.items():
 				if qty:
-					# consumed qty is negative
-					self.deduct_consumed_batch_qty(keys, batch_no, abs(qty))
-					bundles.batch_nos[batch_no] += abs(qty)
+					# a consumption's entries are negative, a return's positive
+					self.deduct_consumed_batch_qty(keys, batch_no, -qty)
+					bundles.batch_nos[batch_no] = 0
 
 		# Will be deprecated in v16
 		if row.batch_no and not bundles.batch_nos:
