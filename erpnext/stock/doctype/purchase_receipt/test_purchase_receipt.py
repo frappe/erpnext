@@ -508,8 +508,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def make_item_for_returns_of_parts(self, conversion_factor):
 		"""Item kept in Kg and bought in Box."""
 		return make_item(
-			"_Test Item For Returns Of Parts",
-			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
+			properties={"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]}
 		).name
 
 	def test_purchase_return_partial(self):
