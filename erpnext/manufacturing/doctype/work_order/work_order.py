@@ -2288,12 +2288,12 @@ class WorkOrder(Document):
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# When only direct stock entries (fg_completed_qty > 0) transferred, preserve the
 		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
 		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		if sum_fg_completed_qty:
+		if sum_fg_completed_qty and not self._has_transfer_without_for_quantity():
 			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
 			return
 
@@ -2313,8 +2313,25 @@ class WorkOrder(Document):
 			for item_code, required_qty in required_by_item.items()
 		)
 		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.qty)
-		self.db_set("material_transferred_for_manufacturing", material_transferred)
+		material_transferred = max(min_fraction * flt(self.qty), sum_fg_completed_qty)
+		self.db_set(
+			"material_transferred_for_manufacturing",
+			flt(material_transferred, self.precision("material_transferred_for_manufacturing")),
+		)
+
+	def _has_transfer_without_for_quantity(self):
+		return frappe.db.exists(
+			"Stock Entry",
+			{
+				"work_order": self.name,
+				"docstatus": 1,
+				"purpose": "Material Transfer for Manufacture",
+				"is_return": 0,
+				"is_additional_transfer_entry": 0,
+				"fg_completed_qty": 0,
+				"job_card": ("is", "not set"),
+			},
+		)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
 		"""Set `transferred_qty` on the row's reservations and return the qty none of them could take."""
