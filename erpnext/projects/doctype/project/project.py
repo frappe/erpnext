@@ -171,6 +171,8 @@ class Project(Document):
 			color=task_details.color,
 			template_task=task_details.name,
 			priority=task_details.priority,
+			expected_time=task_details.expected_time,
+			is_milestone=task_details.is_milestone,
 		).insert()
 
 	def calculate_start_date(self, task_details):
@@ -228,9 +230,23 @@ class Project(Document):
 		if template_task.get("parent_task") and not project_task.get("parent_task"):
 			for pt in project_tasks:
 				if pt.template_task == template_task.parent_task:
+					self.extend_group_to_cover(pt, project_task.exp_end_date, project_tasks)
 					project_task.parent_task = pt.name
 					project_task.save()
 					break
+
+	def extend_group_to_cover(self, group, end_date, project_tasks):
+		"""A holiday can push a child task past the end of its group, so the group ends later too."""
+		if not end_date or not group.exp_end_date or getdate(end_date) <= getdate(group.exp_end_date):
+			return
+
+		group.reload()
+		if group.parent_task:
+			parent_group = next(pt for pt in project_tasks if pt.name == group.parent_task)
+			self.extend_group_to_cover(parent_group, end_date, project_tasks)
+
+		group.exp_end_date = end_date
+		group.save()
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data:
