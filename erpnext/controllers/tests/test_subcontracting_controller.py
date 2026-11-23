@@ -1459,6 +1459,25 @@ class TestSubcontractingController(ERPNextTestSuite):
 			[(row.qty, row.batch_no["X"]) for row in doc.available_materials.values()], [(2, 2), (1, 1)]
 		)
 
+	def test_batch_returned_by_bundle_goes_back_to_its_transfer(self):
+		"""FG A is sent 3 of batch X and consumes them, and a return of its receipt brings 2 back."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {("RM", "A", "SCO"): frappe._dict(qty=3, batch_no=defaultdict(float, X=3))}
+		bundles = {}
+		consumptions = []
+		for voucher_no, batch_qty, consumed_qty in (("SCR-1", -3, 3), ("SCR-2", 2, -2)):
+			bundles[("RM", "A", doc.supplier_warehouse, voucher_no)] = frappe._dict(
+				serial_nos=[], batch_nos=defaultdict(float, X=batch_qty)
+			)
+			row = frappe._dict(
+				rm_item_code="RM", main_item_code="A", voucher_no=voucher_no, consumed_qty=consumed_qty
+			)
+			consumptions.append(doc.get_consumption(row, ("RM", "A", "SCO"), bundles))
+
+		doc.deduct_consumptions(consumptions)
+		details = doc.available_materials[("RM", "A", "SCO")]
+		self.assertEqual((details.qty, details.batch_no["X"]), (2, 2))
+
 
 def make_receipt_with_two_serial_transfers():
 	"""A receipt whose order sent S1 and S2 for FG A, and S3 and S4 for FG B, all of batch X."""
