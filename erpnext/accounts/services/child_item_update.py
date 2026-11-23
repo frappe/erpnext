@@ -65,6 +65,7 @@ class ChildItemUpdater:
 
 		self._check_permissions("write")
 		self._validate_parent_status()
+		self._validate_rows_belong_to_parent(data)
 		self._validate_changed_uoms(data)
 
 		if self.parent_doctype == "Sales Order":
@@ -379,6 +380,16 @@ class ChildItemUpdater:
 			if quotation.valid_till and getdate(quotation.valid_till) < getdate():
 				frappe.throw(
 					_("Cannot update items of Quotation {0} because it has expired.").format(quotation.name)
+				)
+
+	def _validate_rows_belong_to_parent(self, data: list) -> None:
+		item_row_names = {row.name for row in self.parent.items}
+		for d in data:
+			if d.get("docname") and d.get("docname") not in item_row_names:
+				frappe.throw(
+					_("Item row {0} does not belong to {1} {2}.").format(
+						frappe.bold(d.get("docname")), _(self.parent_doctype), frappe.bold(self.parent.name)
+					)
 				)
 
 	def _validate_changed_uoms(self, data: list) -> None:
