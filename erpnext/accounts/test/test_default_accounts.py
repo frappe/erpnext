@@ -12,6 +12,7 @@ from erpnext.accounts.default_accounts import (
 	EXCHANGE_LOSS,
 	PURCHASE_EXPENSE,
 	RECEIVABLE,
+	DefaultAccountPurpose,
 	get_default_account,
 	get_purpose,
 	get_purpose_options,
@@ -99,18 +100,13 @@ class TestDefaultAccounts(ERPNextTestSuite):
 		)
 
 	def test_purposes_from_hook(self):
-		hook_entry = {
-			"key": "TEST_PURPOSE",
-			"label": "Test Purpose Account",
-			"filters": {"root_type": "Expense"},
-			"fieldname": "write_off_account",
-		}
 		get_hooks = frappe.get_hooks
 
 		def get_hooks_with_test_purpose(hook=None, *args, **kwargs):
+			hooks = get_hooks(hook, *args, **kwargs)
 			if hook == "company_default_accounts":
-				return [hook_entry]
-			return get_hooks(hook, *args, **kwargs)
+				return [*hooks, "erpnext.accounts.test.test_default_accounts.get_test_purposes"]
+			return hooks
 
 		with patch("frappe.get_hooks", side_effect=get_hooks_with_test_purpose):
 			self.assertEqual(get_purpose("TEST_PURPOSE").label, "Test Purpose Account")
@@ -134,3 +130,15 @@ class TestDefaultAccounts(ERPNextTestSuite):
 		account_doc.disabled = 1
 		with self.assertRaisesRegex(frappe.ValidationError, "Purchase Expense Account"):
 			account_doc.save()
+
+
+def get_test_purposes():
+	"""Purposes of a fictional app, registered by `test_purposes_from_hook`."""
+	return {
+		"TEST_PURPOSE": DefaultAccountPurpose(
+			key="TEST_PURPOSE",
+			label="Test Purpose Account",
+			filters={"root_type": "Expense"},
+			fieldname="write_off_account",
+		)
+	}

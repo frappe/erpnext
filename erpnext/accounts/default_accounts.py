@@ -7,8 +7,9 @@ Each purpose defines one default account: its label, the filters an account must
 where the account is stored. Read and write default accounts with `get_default_account` and
 `set_default_account` instead of the Company fields.
 
-Other apps add purposes with the hook `company_default_accounts`, a list of dicts with the
-fields of `DefaultAccountPurpose`.
+Apps register purposes with the hook `company_default_accounts`: the dotted path of a function
+that returns a dict of `DefaultAccountPurpose` by key. See `get_erpnext_purposes` and its entry in
+`erpnext/hooks.py`.
 """
 
 from dataclasses import dataclass
@@ -324,12 +325,19 @@ DEFAULT_ACCOUNT_PURPOSES = [
 ]
 
 
+def get_erpnext_purposes() -> dict[str, DefaultAccountPurpose]:
+	"""Return the purposes of ERPNext. Registered with the hook `company_default_accounts`."""
+	return {purpose.key: purpose for purpose in DEFAULT_ACCOUNT_PURPOSES}
+
+
 def get_purposes() -> dict[str, DefaultAccountPurpose]:
-	"""Return all purposes by key: the ERPNext purposes, then the purposes of other apps."""
-	purposes = {purpose.key: purpose for purpose in DEFAULT_ACCOUNT_PURPOSES}
-	for entry in frappe.get_hooks("company_default_accounts"):
-		purpose = DefaultAccountPurpose(**entry)
-		purposes[purpose.key] = purpose
+	"""Return the purposes of all installed apps by key, in the order of the installed apps.
+
+	A purpose of a later app replaces a purpose of an earlier app with the same key.
+	"""
+	purposes = {}
+	for method in frappe.get_hooks("company_default_accounts"):
+		purposes.update(frappe.get_attr(method)())
 
 	return purposes
 
