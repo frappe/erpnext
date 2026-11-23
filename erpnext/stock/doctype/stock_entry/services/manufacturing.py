@@ -646,19 +646,21 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def get_wo_raw_material_qty(self, row):
 		"""For a whole number UOM, round up the running total of the order's Manufacture entries
-		and take what earlier entries did not consume, so partial entries do not consume a whole unit each."""
+		and take what earlier entries did not consume, so partial entries do not consume a whole unit each.
+		Never more than this entry's own share: a shortfall of earlier entries is not taken."""
 		qty_per_unit = row.required_qty / self.wo_doc.qty
 		fg_completed_qty = flt(self.doc.fg_completed_qty)
+		entry_qty = ceil_qty_if_uom_has_whole_number(qty_per_unit * fg_completed_qty, row.stock_uom)
 		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
 		if self.doc.purpose != "Manufacture" or not is_whole_number:
-			return ceil_qty_if_uom_has_whole_number(qty_per_unit * fg_completed_qty, row.stock_uom)
+			return entry_qty
 
 		done_qty = flt(self.wo_doc.produced_qty) + flt(self.wo_doc.process_loss_qty)
 		total_qty = ceil_qty_if_uom_has_whole_number(
 			qty_per_unit * (done_qty + fg_completed_qty), row.stock_uom
 		)
 		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
-		return max(ceil(flt(total_qty - consumed_qty, 9)), 0)
+		return min(max(ceil(flt(total_qty - consumed_qty, 9)), 0), entry_qty)
 
 	def _resolve_rm_warehouse(self, row):
 		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
