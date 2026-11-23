@@ -70,8 +70,9 @@ class DefaultAccountPurpose:
 	fallback: str | None = None
 	# Account type to find the account when a Company is set up
 	account_type: str | None = None
-	# Find the account on setup only when perpetual inventory is enabled
-	perpetual_inventory_only: bool = False
+	# Company field that must be set to find the account when a Company is set up,
+	# for example "enable_perpetual_inventory"
+	depends_on: str | None = None
 
 
 # Order of the Company form
@@ -272,7 +273,7 @@ DEFAULT_ACCOUNT_PURPOSES = [
 		filters={"account_type": "Stock"},
 		fieldname="default_inventory_account",
 		account_type="Stock",
-		perpetual_inventory_only=True,
+		depends_on="enable_perpetual_inventory",
 	),
 	DefaultAccountPurpose(
 		key=STOCK_ADJUSTMENT,
@@ -280,7 +281,7 @@ DEFAULT_ACCOUNT_PURPOSES = [
 		filters={"root_type": "Expense", "account_type": "Stock Adjustment"},
 		fieldname="stock_adjustment_account",
 		account_type="Stock Adjustment",
-		perpetual_inventory_only=True,
+		depends_on="enable_perpetual_inventory",
 	),
 	DefaultAccountPurpose(
 		key=PURCHASE_PRICE_VARIANCE,
@@ -300,7 +301,7 @@ DEFAULT_ACCOUNT_PURPOSES = [
 		filters={"root_type": "Liability", "account_type": "Stock Received But Not Billed"},
 		fieldname="stock_received_but_not_billed",
 		account_type="Stock Received But Not Billed",
-		perpetual_inventory_only=True,
+		depends_on="enable_perpetual_inventory",
 	),
 	DefaultAccountPurpose(
 		key=STOCK_DELIVERED_BUT_NOT_BILLED,
@@ -308,7 +309,7 @@ DEFAULT_ACCOUNT_PURPOSES = [
 		filters={"root_type": "Asset", "account_type": "Stock Delivered But Not Billed"},
 		fieldname="stock_delivered_but_not_billed",
 		account_type="Stock Delivered But Not Billed",
-		perpetual_inventory_only=True,
+		depends_on="enable_perpetual_inventory",
 	),
 	DefaultAccountPurpose(
 		key=PROVISIONAL,

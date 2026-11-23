@@ -785,7 +785,7 @@ class Company(NestedSet):
 			if not purpose.account_type or not purpose.fieldname:
 				continue
 
-			if purpose.perpetual_inventory_only and not self.enable_perpetual_inventory:
+			if purpose.depends_on and not self.get(purpose.depends_on):
 				continue
 
 			self._set_default_account(purpose.fieldname, purpose.account_type)
