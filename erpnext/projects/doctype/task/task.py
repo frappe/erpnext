@@ -86,6 +86,7 @@ class Task(NestedSet):
 	def validate(self):
 		self.validate_parent_project()
 		self.validate_children_project()
+		self.validate_group_has_no_children()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -280,6 +281,17 @@ class Task(NestedSet):
 					),
 					ParentIsGroupError,
 				)
+
+	def validate_group_has_no_children(self):
+		if self.is_group or self.is_new() or not self.has_value_changed("is_group"):
+			return
+
+		if child_tasks := frappe.get_all("Task", filters={"parent_task": self.name}, pluck="name"):
+			frappe.throw(
+				_("Cannot convert Task to non-group because the following child Tasks exist: {0}.").format(
+					", ".join(get_link_to_form("Task", task) for task in child_tasks)
+				)
+			)
 
 	def validate_parent_project(self):
 		"""Keep a task in its parent task's project."""

@@ -423,6 +423,14 @@ class TestTask(ERPNextTestSuite):
 		group.exp_end_date = add_days(nowdate(), 9)
 		group.save()
 
+	def test_group_with_children_cannot_become_non_group(self):
+		group = create_task("_Test Group Unticked With Child", is_group=1)
+		create_task("_Test Child Of Unticked Group", parent_task=group.name)
+		group.reload()
+
+		group.is_group = 0
+		self.assertRaises(frappe.ValidationError, group.save)
+
 	def test_expected_end_date(self):
 		task = create_task("Testing End Date", add_days(nowdate(), 1), add_days(nowdate(), 5))
 		task.expected_time = 72
