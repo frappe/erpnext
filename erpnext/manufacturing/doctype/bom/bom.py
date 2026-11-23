@@ -841,28 +841,44 @@ class BOM(WebsiteGenerator):
 		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
+		self.update_stale_hour_rate(row)
+
 		if not row.hour_rate or update_hour_rate:
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
 
 			if hour_rate:
-				row.hour_rate = (
-					hour_rate / flt(self.conversion_rate) if self.conversion_rate and hour_rate else hour_rate
-				)
+				row.hour_rate = flt(hour_rate / (flt(self.conversion_rate) or 1), row.precision("hour_rate"))
 
-		if row.hour_rate:
-			row.base_hour_rate = flt(
-				flt(row.hour_rate) * flt(self.conversion_rate), row.precision("base_hour_rate")
-			)
+		row.base_hour_rate = flt(
+			flt(row.hour_rate) * flt(self.conversion_rate), row.precision("base_hour_rate")
+		)
 
-			if row.time_in_mins:
-				row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
-				base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
-				row.base_operating_cost = flt(base_operating_cost, row.precision("base_operating_cost"))
-				row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
-				row.base_cost_per_unit = base_operating_cost / (row.batch_size or 1.0)
+		if row.time_in_mins:
+			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
+			base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+			row.base_operating_cost = flt(base_operating_cost, row.precision("base_operating_cost"))
+			row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
+			row.base_cost_per_unit = base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate and save:
 			row.db_update()
+
+	def update_stale_hour_rate(self, row):
+		"""Workstation or conversion rate changed but the hour rate did not, e.g. through the API."""
+		before = self.get_doc_before_save()
+		previous = before and before.get("operations", {"name": row.name})
+		if not previous or flt(previous[0].hour_rate) != flt(row.hour_rate):
+			return
+
+		old_rate, new_rate = flt(before.conversion_rate), flt(self.conversion_rate)
+		if any(
+			cstr(previous[0].get(field)) != cstr(row.get(field))
+			for field in ("workstation", "workstation_type")
+		):
+			row.hour_rate = 0
+		elif old_rate and new_rate and old_rate != new_rate:
+			# keeps the rate in company currency, also a manual one
+			row.hour_rate = flt(flt(row.hour_rate) * old_rate / new_rate, row.precision("hour_rate"))
 
 	def calculate_rm_cost(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
