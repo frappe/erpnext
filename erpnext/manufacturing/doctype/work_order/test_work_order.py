@@ -6132,6 +6132,19 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(self.get_additional_cost(rest, "Freight"), 80)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_work_order_costs_are_booked_on_process_loss_qty_too(self):
+		sco = self.make_subcontracted_work_order_with_costs()
+
+		receipts = [
+			self.make_receipt_of_subcontracted_work_order(sco, 5, process_loss_qty=1) for _ in range(2)
+		]
+
+		for description, cost in (("Additional Operating Cost", 100), ("Corrective Operation Cost", 50)):
+			self.assertEqual(sum(self.get_additional_cost(scr, description) for scr in receipts), cost)
+
 	def make_subcontracted_work_order_with_costs(self, additional_costs=()):
 		"""Subcontracting Order for all of a Work Order with 100 additional and 50 corrective operation cost."""
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
@@ -6145,12 +6158,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		frappe.get_doc(make_rm_stock_entry(sco.name)).submit()
 		return sco
 
-	def make_receipt_of_subcontracted_work_order(self, sco, qty):
+	def make_receipt_of_subcontracted_work_order(self, sco, qty, process_loss_qty=0):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			get_mapped_subcontracting_receipt,
 		)
 
 		scr = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": qty}])
+		scr.items[0].qty = qty - process_loss_qty
+		scr.items[0].process_loss_qty = process_loss_qty
 		scr.submit()
 		return scr
 
