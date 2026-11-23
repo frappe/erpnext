@@ -173,6 +173,28 @@ class TestReactivity(ERPNextTestSuite):
 			frappe.ValidationError, sales_order.process_item_selection, 1, parentfield="company"
 		)
 
+	def test_item_selection_checks_the_party_it_prices(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user = make_fenced_user(
+			"_test_item_selection_party@example.com", ["Sales User"], [("Customer", "_Test Customer")]
+		)
+		sales_order = make_sales_order(item_code="_Test Item", do_not_save=True)
+		sales_order.customer = None
+
+		with as_user(user):
+			sales_order.party_name = "_Test Customer"
+			sales_order.process_item_selection(1)
+
+			# party_name is not a Sales Order field, so only the pricing check sees it
+			sales_order.party_name = "_Test Customer 1"
+			self.assertRaises(frappe.PermissionError, sales_order.process_item_selection, 1)
+
+			sales_order.party_name = "_Test Customer"
+			sales_order.selling_price_list = "Standard Buying"
+			self.assertRaises(frappe.PermissionError, sales_order.process_item_selection, 1)
+
 	def test_free_item_is_added_to_the_table_that_earned_it(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 		from erpnext.stock.doctype.item.test_item import make_item
