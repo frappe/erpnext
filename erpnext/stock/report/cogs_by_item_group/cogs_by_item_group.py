@@ -41,7 +41,9 @@ def execute(filters: Filters) -> tuple[Columns, Data]:
 
 
 def update_filters_with_account(filters: Filters) -> None:
-	account = get_default_account(filters.get("company"), COST_OF_GOODS_SOLD)
+	# the report does not enforce the company filter
+	company = filters.get("company")
+	account = get_default_account(company, COST_OF_GOODS_SOLD) if company else None
 	filters.update(dict(account=account))
 
 
