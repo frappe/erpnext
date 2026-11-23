@@ -12,6 +12,17 @@ from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.utils import add_days, add_to_date, cint, flt, format_date, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ADVANCE_RECEIVED,
+	ASSET_DISPOSAL,
+	INVENTORY,
+	ROUND_OFF,
+	ROUND_OFF_FOR_OPENING,
+	STOCK_RECEIVED_BUT_NOT_BILLED,
+	UNREALIZED_PROFIT_LOSS,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.accounts.deferred_revenue import (
 	book_deferred_income_or_expense,
 	get_already_booked_amount,
@@ -851,7 +862,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.rounding_adjustment, 0.0)
 
 	def test_discount_amount_gl_entry(self):
-		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
+		set_default_account("_Test Company", ROUND_OFF, "Round Off - _TC")
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][3])
 		si.discount_amount = 104.94
 		si.append(
@@ -2257,7 +2268,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			rate=90000,
 		)
 
-		disposal_account = frappe.get_cached_value("Company", "_Test Company", "disposal_account")
+		disposal_account = get_default_account("_Test Company", ASSET_DISPOSAL)
 
 		# Asset value is 100,000 but it was sold for 90,000, so there should be a loss of 10,000
 		loss_for_si = frappe.get_all(
@@ -2878,7 +2889,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.base_rounding_adjustment, -0.22)
 		self.assertEqual(si.base_rounded_total, 964.47)
 
-		round_off_account = frappe.get_cached_value("Company", si.company, "round_off_account")
+		round_off_account = get_default_account(si.company, ROUND_OFF)
 		gl_entries = frappe.get_all(
 			"GL Entry",
 			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
@@ -2970,7 +2981,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.total_taxes_and_charges, 229)
 		self.assertEqual(si.rounding_adjustment, -0.20)
 
-		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
+		round_off_account = get_default_account("_Test Company", ROUND_OFF)
 		expected_values = {
 			"_Test Account Service Tax - _TC": [0.0, 114.50],
 			"_Test Account VAT - _TC": [0.0, 114.50],
@@ -3033,7 +3044,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
 		self.assertEqual(si.rounding_adjustment, -0.02)
 
-		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
+		round_off_account = get_default_account("_Test Company", ROUND_OFF)
 		expected_values = dict(
 			(d[0], d)
 			for d in [
@@ -4231,16 +4242,12 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company 1")
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = 1
-		old_inventory_account = frappe.db.get_value("Company", "_Test Company 1", "default_inventory_account")
+		old_inventory_account = get_default_account("_Test Company 1", INVENTORY)
 
-		frappe.db.set_value(
-			"Company",
-			"_Test Company 1",
-			{
-				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC1",
-				"default_inventory_account": "Stock In Hand - _TC1",
-			},
+		set_default_account(
+			"_Test Company 1", STOCK_RECEIVED_BUT_NOT_BILLED, "Stock Received But Not Billed - _TC1"
 		)
+		set_default_account("_Test Company 1", INVENTORY, "Stock In Hand - _TC1")
 
 		# companies are created with their Stores warehouse as Default Warehouse; clear it so the
 		# item genuinely maps without one
@@ -4282,7 +4289,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		# tear down
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
-		frappe.db.set_value("Company", "_Test Company 1", "default_inventory_account", old_inventory_account)
+		set_default_account("_Test Company 1", INVENTORY, old_inventory_account)
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
 
 	def test_sle_for_target_warehouse(self):
@@ -6025,7 +6032,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 				"company": company_name,
 			},
 		):
-			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc)
+			set_default_account(company_name, ROUND_OFF_FOR_OPENING, acc)
 		else:
 			acc = frappe.new_doc("Account")
 			acc.company = company_name
@@ -6033,7 +6040,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			acc.account_name = "Round Off for Opening"
 			acc.account_type = "Round Off for Opening"
 			acc.save()
-			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc.name)
+			set_default_account(company_name, ROUND_OFF_FOR_OPENING, acc.name)
 
 	def test_opening_invoice_with_rounding_adjustment(self):
 		si = create_sales_invoice(qty=1, rate=99.98, do_not_submit=True)
@@ -6118,7 +6125,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 				"taxes": [{"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 21}],
 			}
 		).insert()
-		frappe.db.set_value("Company", "_Test Company", "round_off_for_opening", None)
+		set_default_account("_Test Company", ROUND_OFF_FOR_OPENING, None)
 
 		for round_off_configured in (False, True):
 			with self.subTest(round_off_configured=round_off_configured):
@@ -6833,14 +6840,8 @@ def make_item_for_si(item_code, properties=None):
 
 
 def set_advance_flag(company, flag, default_account):
-	frappe.db.set_value(
-		"Company",
-		company,
-		{
-			"book_advance_payments_in_separate_party_account": flag,
-			"default_advance_received_account": default_account,
-		},
-	)
+	frappe.db.set_value("Company", company, "book_advance_payments_in_separate_party_account", flag)
+	set_default_account(company, ADVANCE_RECEIVED, default_account)
 
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="Sales Invoice"):
@@ -7083,7 +7084,7 @@ def create_internal_parties():
 		company="_Test Company",
 	)
 
-	frappe.db.set_value("Company", "_Test Company", "unrealized_profit_loss_account", account)
+	set_default_account("_Test Company", UNREALIZED_PROFIT_LOSS, account)
 
 	create_internal_supplier(
 		supplier_name="_Test Internal Supplier",
@@ -7127,9 +7128,7 @@ def setup_accounts():
 		company="_Test Company with perpetual inventory",
 	)
 
-	frappe.db.set_value(
-		"Company", "_Test Company with perpetual inventory", "unrealized_profit_loss_account", account
-	)
+	set_default_account("_Test Company with perpetual inventory", UNREALIZED_PROFIT_LOSS, account)
 
 
 def add_taxes(doc):

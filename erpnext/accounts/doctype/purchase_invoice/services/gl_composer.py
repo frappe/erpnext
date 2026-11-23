@@ -6,6 +6,14 @@ from frappe import _
 from frappe.utils import cint, flt, get_link_to_form
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ASSET_RECEIVED_BUT_NOT_BILLED,
+	COST_OF_GOODS_SOLD,
+	EXCHANGE_GAIN_LOSS,
+	PROVISIONAL,
+	STOCK_RECEIVED_BUT_NOT_BILLED,
+	get_default_account,
+)
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
@@ -24,7 +32,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		doc.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(doc.company)
 
 		if doc.auto_accounting_for_stock:
-			doc.stock_received_but_not_billed = doc.get_company_default("stock_received_but_not_billed")
+			doc.stock_received_but_not_billed = get_default_account(
+				doc.company, STOCK_RECEIVED_BUT_NOT_BILLED, required=True
+			)
 		else:
 			doc.stock_received_but_not_billed = None
 
@@ -407,7 +417,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 								gl_entries.append(
 									self.get_gl_dict(
 										{
-											"account": doc.get_company_default("exchange_gain_loss_account"),
+											"account": get_default_account(
+												doc.company, EXCHANGE_GAIN_LOSS, required=True
+											),
 											"against": doc.supplier,
 											"credit": discrepancy_caused_by_exchange_rate_difference,
 											"cost_center": item.cost_center,
@@ -437,7 +449,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 					)
 
 					(
-						doc.get_company_default("asset_received_but_not_billed")
+						get_default_account(doc.company, ASSET_RECEIVED_BUT_NOT_BILLED, required=True)
 						if item.is_fixed_asset
 						else doc.stock_received_but_not_billed
 					)
@@ -484,7 +496,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			filters={"parent": ("in", linked_purchase_receipts)},
 			fields=["name", "provisional_expense_account", "qty", "base_rate", "rate"],
 		)
-		default_provisional_account = doc.get_company_default("default_provisional_account")
+		default_provisional_account = get_default_account(doc.company, PROVISIONAL, required=True)
 		provisional_accounts = {
 			d.provisional_expense_account if d.provisional_expense_account else default_provisional_account
 			for d in pr_items
@@ -582,7 +594,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			return get_purchase_price_variance_account(item.item_code, self.doc.company)
 
 		# 1. Primary choice: Company Default Expense / COGS Account
-		default_expense = self.doc.get_company_default("default_expense_account", ignore_validation=True)
+		default_expense = get_default_account(self.doc.company, COST_OF_GOODS_SOLD)
 		if default_expense:
 			return default_expense
 
@@ -593,9 +605,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		# For non-returns, fall back to the clearing account used by Purchase Receipts.
 		stock_asset_rbnb = (
-			self.doc.get_company_default("asset_received_but_not_billed", ignore_validation=True)
+			get_default_account(self.doc.company, ASSET_RECEIVED_BUT_NOT_BILLED)
 			if item.is_fixed_asset
-			else self.doc.get_company_default("stock_received_but_not_billed", ignore_validation=True)
+			else get_default_account(self.doc.company, STOCK_RECEIVED_BUT_NOT_BILLED)
 		)
 
 		return stock_asset_rbnb or item.expense_account

@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate, strip_html
 
+from erpnext.accounts.default_accounts import CASH, get_default_account
 from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 
 
@@ -38,9 +39,7 @@ class POSService:
 	def _set_default_change_amount_account(self) -> None:
 		doc = self.doc
 		if not doc.account_for_change_amount:
-			doc.account_for_change_amount = frappe.get_cached_value(
-				"Company", doc.company, "default_cash_account"
-			)
+			doc.account_for_change_amount = get_default_account(doc.company, CASH)
 
 	def _ensure_pos_profile(self) -> bool:
 		"""Auto-pick a POS Profile for the company; return False if none could be found."""
