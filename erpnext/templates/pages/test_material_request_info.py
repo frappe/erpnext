@@ -4,7 +4,9 @@
 import frappe
 from frappe.utils import now, today
 
-from erpnext.templates.pages.material_request_info import get_more_items_info
+from erpnext.accounts.doctype.payment_request.test_payment_request import make_portal_user
+from erpnext.templates.pages.material_request_info import get_context, get_more_items_info
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -160,3 +162,51 @@ class TestMaterialRequestInfo(ERPNextTestSuite):
 
 		names = {wo.name for wo in result[0].work_orders}
 		self.assertNotIn(self.work_order.name, names)
+
+	def test_page_gives_one_refusal_for_missing_and_unreadable_records(self):
+		portal_user = make_portal_user("_test_mr_portal_user@example.com", "_Test Customer")
+		requests = {
+			"material request": ("Material Request", self.material_request.name),
+			"missing material request": ("Material Request", "MAT-MR-MISSING-00001"),
+			"other doctype": ("User", "Administrator"),
+			"missing record of other doctype": ("User", "_missing_user@example.com"),
+		}
+
+		for user in ("Guest", portal_user):
+			for case, (doctype, name) in requests.items():
+				with self.subTest(user=user, case=case), as_user(user):
+					self.assertRaisesRegex(
+						frappe.PermissionError, "^Not Permitted$", self._render, doctype, name
+					)
+
+	def test_page_renders_material_request_for_entitled_users(self):
+		stock_user = make_fenced_user("_test_mr_stock_user@example.com", ["Stock User"])
+		portal_user = make_portal_user("_test_mr_portal_user@example.com", "_Test Customer")
+		self.material_request.db_set("customer", "_Test Customer")
+
+		for user in (stock_user, portal_user):
+			# the page always loads Material Request, whatever doctype the request names
+			for doctype in ("Material Request", "User"):
+				with self.subTest(user=user, doctype=doctype), as_user(user):
+					context = self._render(doctype, self.material_request.name)
+				self.assertEqual(context.doc.doctype, "Material Request")
+				self.assertEqual(context.doc.name, self.material_request.name)
+				self.assertEqual(context.print_format, "Standard")
+
+	def test_page_refuses_a_name_that_is_not_a_string(self):
+		stock_user = make_fenced_user("_test_mr_stock_user@example.com", ["Stock User"])
+
+		with as_user(stock_user):
+			self.assertRaisesRegex(
+				frappe.PermissionError,
+				"^Not Permitted$",
+				self._render,
+				"Material Request",
+				{"name": ["like", "%"]},
+			)
+
+	def _render(self, doctype, name):
+		frappe.local.form_dict = frappe._dict(doctype=doctype, name=name)
+		context = frappe._dict()
+		get_context(context)
+		return context
