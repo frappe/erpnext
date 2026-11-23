@@ -402,17 +402,20 @@ def _subcontracted_corrective_cost_per_unit(work_order, receipt_qty):
 
 
 def _subcontracted_qty_received(work_order):
-	"""Finished good qty received for the subcontracted final operation, also on job cards not submitted."""
-	table = frappe.qb.DocType("Job Card")
+	"""Finished good qty received for the subcontracted final operation, process loss included."""
+	job_card = frappe.qb.DocType("Job Card")
+	item = frappe.qb.DocType("Subcontracting Receipt Item")
 	query = (
-		frappe.qb.from_(table)
-		.select(Sum(table.manufactured_qty))
+		frappe.qb.from_(item)
+		.inner_join(job_card)
+		.on(job_card.name == item.job_card)
+		.select(Sum(item.qty + item.process_loss_qty))
 		.where(
-			(table.work_order == work_order.name)
-			& (table.docstatus < 2)
-			& (table.is_subcontracted == 1)
-			& (table.is_corrective_job_card == 0)
-			& (table.finished_good == work_order.production_item)
+			(item.docstatus == 1)
+			& (job_card.work_order == work_order.name)
+			& (job_card.is_subcontracted == 1)
+			& (job_card.is_corrective_job_card == 0)
+			& (job_card.finished_good == work_order.production_item)
 		)
 	)
 	return flt(query.run()[0][0])

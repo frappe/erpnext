@@ -845,7 +845,7 @@ class SubcontractingReceipt(SubcontractingController):
 				self.append("additional_costs", row)
 
 	def get_final_operation_qty(self) -> dict[str, dict[str, float]]:
-		"""Accepted qty of each item row, by the Work Order whose final operation its job card is."""
+		"""Accepted and process loss qty of each item row, by the Work Order whose final operation its job card is."""
 		rows = [row for row in self.items if row.job_card and row.name and flt(row.qty) > 0]
 		if not rows:
 			return {}
@@ -864,7 +864,7 @@ class SubcontractingReceipt(SubcontractingController):
 		qty = defaultdict(dict)
 		for row in rows:
 			if work_order := work_orders.get(row.job_card):
-				qty[work_order][row.name] = flt(row.qty)
+				qty[work_order][row.name] = flt(row.qty) + flt(row.process_loss_qty)
 		return qty
 
 	def set_additional_costs_for_return(self):
