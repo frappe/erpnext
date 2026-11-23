@@ -68,6 +68,10 @@ class TestDefaultAccounts(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			get_default_account(COMPANY, EXCHANGE_GAIN, required=True)
 
+	def test_no_company(self):
+		self.assertIsNone(get_default_account(None, RECEIVABLE))
+		self.assertIsNone(get_default_account("", RECEIVABLE))
+
 	def test_company_methods_work_in_memory(self):
 		company = frappe.get_doc("Company", COMPANY)
 		account = company.default_expense_account

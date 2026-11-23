@@ -347,6 +347,10 @@ def get_default_account(company: str, purpose: str, required: bool = False) -> s
 
 	If no account is found and `required` is set, throw an error.
 	"""
+	if not company and not required:
+		# Like `frappe.get_cached_value("Company", None, ...)`, which callers used before.
+		return None
+
 	return frappe.get_cached_doc("Company", company).get_default_account(purpose, required)
 
 
