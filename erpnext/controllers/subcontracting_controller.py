@@ -887,7 +887,7 @@ class SubcontractingController(StockController):
 		by_serial = spread and bool(serial_nos)
 		return frappe._dict(
 			row=row,
-			keys=keys,
+			transfer_keys=keys,
 			bundles=bundles,
 			serial_nos=serial_nos,
 			is_own=keys == [key],
@@ -904,9 +904,9 @@ class SubcontractingController(StockController):
 		for consumption in consumptions:
 			for batch_no, qty in self.get_consumed_qty_by_batch(consumption).items():
 				if consumption.is_own:
-					self.deduct_consumed(consumption.keys, batch_no, qty)
+					self.deduct_consumed(consumption.transfer_keys, batch_no, qty)
 				else:
-					other_consumption[(tuple(consumption.keys), batch_no)] += qty
+					other_consumption[(tuple(consumption.transfer_keys), batch_no)] += qty
 
 		for (keys, batch_no), qty in other_consumption.items():
 			self.deduct_consumed(list(keys), batch_no, qty)
@@ -916,7 +916,7 @@ class SubcontractingController(StockController):
 		for consumption in consumptions:
 			if consumption.serial_nos:
 				self.update_consumed_serial_nos(
-					consumption.keys,
+					consumption.transfer_keys,
 					consumption.serial_nos,
 					consumption.is_return,
 					consumption.by_serial,
