@@ -1350,101 +1350,6 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(bom.raw_material_cost, 110)
 		assert_exploded_row(55, 110)
 
-<<<<<<< HEAD
-=======
-	def test_clearing_process_loss_percentage_clears_process_loss_qty(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
-		sub_item = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(
-			item=sub_item,
-			raw_materials=[rm_item],
-			quantity=10,
-			rm_qty=10,
-			process_loss_percentage=10,
-			do_not_submit=True,
-		)
-		self.assertEqual(bom.process_loss_qty, 1)
-
-		bom.process_loss_percentage = 0
-		bom.save()
-		self.assertEqual(bom.process_loss_qty, 0)
-
-	def test_price_list_in_bom_currency_uses_bom_conversion_rate(self):
-		price_list = make_usd_buying_price_list(83)
-		rm_item = make_item(properties={"is_stock_item": 1}).name
-		frappe.get_doc(
-			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
-		).insert()
-
-		bom = make_usd_bom(
-			make_item(properties={"is_stock_item": 1}).name,
-			[{"item_code": rm_item, "qty": 1}],
-			rm_cost_as_per="Price List",
-			buying_price_list=price_list,
-		)
-
-		# the BOM's own conversion rate (80) applies, not the exchange rate (83)
-		self.assertEqual(bom.plc_conversion_rate, 80)
-		self.assertEqual(bom.items[0].rate, 10)
-
-		# a row fetched on a form still holding the exchange rate
-		bom.plc_conversion_rate = 83
-		detail = bom.get_bom_material_detail({"item_code": rm_item, "qty": 1, "fetch_rate": True})
-		self.assertEqual(detail["rate"], 10)
-
-	def test_operation_hour_rate_follows_workstation_and_conversion_rate(self):
-		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
-		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
-
-		workstation = {
-			rate: make_workstation(workstation_name=f"_Test BOM Hour Rate {rate}", hour_rate_rent=rate).name
-			for rate in (100, 300, 0)
-		}
-		operation = make_operation(operation="_Test BOM Hour Rate Op", workstation=workstation[100]).name
-		bom = frappe.get_doc(
-			{
-				"doctype": "BOM",
-				"item": make_item(properties={"is_stock_item": 1}).name,
-				"company": "_Test Company",
-				"currency": "USD",
-				"conversion_rate": 50,
-				"with_operations": 1,
-				"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
-				"operations": [{"operation": operation, "workstation": workstation[100], "time_in_mins": 60}],
-			}
-		).insert()
-		self.assertEqual(bom.operations[0].hour_rate, 2)
-
-		bom.conversion_rate = 100
-		bom.save()
-		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (1, 100))
-
-		bom.operations[0].workstation = workstation[300]
-		bom.save()
-		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (3, 300))
-
-		bom.operations[0].workstation = workstation[0]
-		bom.save()
-		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (0, 0))
-
-<<<<<<< HEAD
->>>>>>> 1b6d72f (test: BOM operation hour rate follows its workstation and the conversion rate)
-=======
-		bom.operations[0].hour_rate = 10
-		bom.conversion_rate = 83
-		bom.save()
-		bom.conversion_rate = 80
-		bom.save()
-		self.assertEqual(bom.operations[0].hour_rate, 10.38)
-
-		bom.reload()
-		bom.conversion_rate = 70
-		bom.save()
-		self.assertEqual(bom.operations[0].hour_rate, 11.86)
-
->>>>>>> 8e424c6 (test: keep a manual BOM operation hour rate in company currency when the conversion rate changes)
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
@@ -1487,6 +1392,53 @@ class TestBOM(FrappeTestCase):
 
 		self.assertEqual(bom.items[0].rate, 10)
 		self.assertEqual(bom.items[1].rate, 0)
+
+	def test_operation_hour_rate_follows_workstation_and_conversion_rate(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = {
+			rate: make_workstation(workstation_name=f"_Test BOM Hour Rate {rate}", hour_rate_rent=rate).name
+			for rate in (100, 300, 0)
+		}
+		operation = make_operation(operation="_Test BOM Hour Rate Op", workstation=workstation[100]).name
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": make_item(properties={"is_stock_item": 1}).name,
+				"company": "_Test Company",
+				"currency": "USD",
+				"conversion_rate": 50,
+				"with_operations": 1,
+				"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+				"operations": [{"operation": operation, "workstation": workstation[100], "time_in_mins": 60}],
+			}
+		).insert()
+		self.assertEqual(bom.operations[0].hour_rate, 2)
+
+		bom.conversion_rate = 100
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (1, 100))
+
+		bom.operations[0].workstation = workstation[300]
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (3, 300))
+
+		bom.operations[0].workstation = workstation[0]
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (0, 0))
+
+		bom.operations[0].hour_rate = 10
+		bom.conversion_rate = 83
+		bom.save()
+		bom.conversion_rate = 80
+		bom.save()
+		self.assertEqual(bom.operations[0].hour_rate, 10.38)
+
+		bom.reload()
+		bom.conversion_rate = 70
+		bom.save()
+		self.assertEqual(bom.operations[0].hour_rate, 11.86)
 
 	def test_currency_change_fetches_conversion_rate(self):
 		set_inr_exchange_rate("EUR", 90)
