@@ -10,6 +10,13 @@ frappe.query_reports["General Ledger"] = {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1,
+			on_change: function () {
+				// A change of the method refreshes the report by itself.
+				const changed = erpnext.financial_statements.set_accounting_method_default();
+				if (!changed && !frappe.query_report._no_refresh) {
+					frappe.query_report.refresh(true);
+				}
+			},
 		},
 		{
 			fieldname: "finance_book",
@@ -152,6 +159,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Select",
 			options: erpnext.get_presentation_currency_list(),
 		},
+		erpnext.financial_statements.get_accounting_method_filter(),
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
@@ -244,10 +252,29 @@ frappe.query_reports["General Ledger"] = {
 	],
 	collapsible_filters: true,
 	separate_check_filters: true,
-	onload: function () {
+	onload: function (report) {
 		toggle_reporting_date_rate_filter();
+		setup_cash_basis_hover_cards(report);
 	},
 };
+
+// The column "Cash Basis Adjustment": each label opens a hover card with its explanation.
+function setup_cash_basis_hover_cards(report) {
+	// The table renders its rows when they scroll into view, so each label gets its card on first hover.
+	report.page.wrapper.on("pointerover focusin", ".cash-basis-adjustment", function (event) {
+		// The table gives each cell a title with its text. The hover card replaces that browser tooltip.
+		$(this).closest(".dt-cell__content").removeAttr("title");
+		if ($(this).data("es-hover-card")) return;
+		const help = this.dataset.help;
+		frappe.ui.hover_card(this, {
+			side: "bottom",
+			align: "start",
+			content: () => help,
+		});
+		const card = $(this).data("es-hover-card");
+		event.type === "focusin" ? card.open() : card.onenter(event.originalEvent);
+	});
+}
 
 async function toggle_reporting_date_rate_filter() {
 	const filter = frappe.query_report.get_filter("convert_at_reporting_date_rate");
@@ -270,5 +297,14 @@ async function toggle_reporting_date_rate_filter() {
 		filter.set_value(0);
 	}
 }
+
+frappe.query_reports["General Ledger"].formatter = function (value, row, column, data, default_formatter) {
+	value = default_formatter(value, row, column, data);
+	if (column.fieldname === "cash_basis_adjustment" && data && data.cash_basis_adjustment_help) {
+		const help = frappe.utils.escape_html(data.cash_basis_adjustment_help);
+		return `<a class="grey cash-basis-adjustment" tabindex="0" data-help="${help}">${value}</a>`;
+	}
+	return value;
+};
 
 erpnext.utils.add_dimensions("General Ledger", 15);

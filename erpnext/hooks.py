@@ -143,6 +143,7 @@ demo_master_doctypes = [
 jinja = {
 	"methods": [
 		"erpnext.stock.serial_batch_bundle.get_serial_or_batch_nos",
+		"erpnext.accounts.cash_basis.reports.get_statement_print_rows",
 	],
 }
 
