@@ -2772,16 +2772,17 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		make_purchase_invoice(item_code=item.name, qty=18, rate=200, uom=item.stock_uom, update_stock=True)
 
 		# a Box takes 6 at 100 and 6 at 200; a missing factor comes from the item
-		for uom, conversion_factor, rate in (
-			("Box", 12, 1800),
-			("Box", 0, 1800),
-			(item.stock_uom, 1, 100),
-			(item.stock_uom, 12, 100),  # a stale factor on the stock UOM is reset
+		for uom, conversion_factor, stock_uom, rate in (
+			("Box", 12, item.stock_uom, 1800),
+			("Box", 0, item.stock_uom, 1800),
+			(item.stock_uom, 1, item.stock_uom, 100),
+			(item.stock_uom, 12, item.stock_uom, 100),  # a stale factor on the stock UOM is reset
+			("Box", 12, "Box", 1800),  # the stock UOM comes from the item, not the row
 		):
 			returned_inv = make_purchase_invoice(
 				item_code=item.name,
 				qty=-1,
-				uom=item.stock_uom,
+				uom=stock_uom,
 				update_stock=True,
 				is_return=True,
 				do_not_save=True,
