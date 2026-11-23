@@ -298,7 +298,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def is_raw_material_share_consumed(self):
 		"""Earlier entries of the Work Order may have consumed this entry's whole-number share."""
-		if not self.wo_doc or (self.backflush_based_on != "BOM" and not self.wo_doc.skip_transfer):
+		if not self.takes_running_total_share or (
+			self.backflush_based_on != "BOM" and not self.wo_doc.skip_transfer
+		):
 			return False
 
 		required_items = self.wo_doc.required_items
@@ -435,12 +437,17 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom), get_qty
 		)
 
+	@property
+	def takes_running_total_share(self):
+		"""A semi-finished goods entry consumes per its Job Card, not per the Work Order's running total."""
+		return bool(self.wo_doc) and not self.wo_doc.track_semi_finished_goods
+
 	def get_bom_component_qty(self, bom_item):
 		"""Qty Get Items takes of a BOM item: a whole-number item's share of the running total."""
 		is_whole_number = cint(frappe.get_cached_value("UOM", bom_item.stock_uom, "must_be_whole_number"))
 		required_items = (
 			[row for row in self.wo_doc.required_items if row.item_code == bom_item.item_code]
-			if self.wo_doc and is_whole_number
+			if self.takes_running_total_share and is_whole_number
 			else []
 		)
 		if not required_items:
