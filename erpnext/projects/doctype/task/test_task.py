@@ -126,6 +126,23 @@ class TestTask(ERPNextTestSuite):
 			getdate(frappe.db.get_value("Task", task3.name, "exp_end_date")), getdate(add_days(nowdate(), 30))
 		)
 
+	def test_reschedule_dependent_task_without_end_date(self):
+		task1 = create_task("_Test Task No End 1", nowdate(), add_days(nowdate(), 10))
+		task2 = create_task(
+			"_Test Task No End 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name
+		)
+		task2.exp_end_date = None
+		task2.save()
+
+		task1.update({"exp_end_date": add_days(nowdate(), 20)})
+		task1.save()
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", task2.name, "exp_start_date")),
+			getdate(add_days(nowdate(), 21)),
+		)
+		self.assertFalse(frappe.db.get_value("Task", task2.name, "exp_end_date"))
+
 	def test_child_task_does_not_reschedule_its_parent(self):
 		parent = create_task("_Test Parent Not Rescheduled", nowdate(), add_days(nowdate(), 10), is_group=1)
 		child = create_task(

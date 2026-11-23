@@ -436,13 +436,15 @@ class Task(NestedSet):
 			task = frappe.get_doc("Task", task_name)
 			if (
 				task.exp_start_date
-				and task.exp_end_date
 				and task.exp_start_date < get_datetime(end_date)
 				and task.status in ("Open", "Working", "Overdue")
 			):
-				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
-				task.exp_start_date = add_days(end_date, 1)
-				task.exp_end_date = add_days(task.exp_start_date, task_duration)
+				if task.exp_end_date:
+					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
+					task.exp_start_date = add_days(end_date, 1)
+					task.exp_end_date = add_days(task.exp_start_date, task_duration)
+				else:
+					task.exp_start_date = add_days(end_date, 1)
 				task.flags.ignore_recursion_check = True
 				task.flags.rescheduled = True
 				task.save(ignore_permissions=self.flags.ignore_permissions)
