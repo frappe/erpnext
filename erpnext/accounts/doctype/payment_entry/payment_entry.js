@@ -254,7 +254,6 @@ frappe.ui.form.on("Payment Entry", {
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
 		frm.events.set_party_description(frm);
-		frm.events.show_unallocated_note(frm);
 		frm.events.set_difference_description(frm);
 		frm.events.setup_reference_buttons(frm);
 		frm.events.show_allocate_button(frm);
@@ -394,8 +393,11 @@ frappe.ui.form.on("Payment Entry", {
 			company_currency
 		);
 
-		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
-		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
+		frm.set_currency_labels(["paid_amount", "paid_amount_after_tax"], frm.doc.paid_from_account_currency);
+		frm.set_currency_labels(
+			["received_amount", "received_amount_after_tax"],
+			frm.doc.paid_to_account_currency
+		);
 
 		var party_account_currency =
 			frm.doc.payment_type == "Receive"
@@ -529,17 +531,29 @@ frappe.ui.form.on("Payment Entry", {
 				: ""
 		);
 
-		[
-			["paid_amount_after_tax", frm.doc.paid_from_account_currency],
-			["received_amount_after_tax", frm.doc.paid_to_account_currency],
-		].forEach(([fieldname, account_currency]) => {
-			const label = __("Total Including Taxes");
-			frm.set_df_property(
-				fieldname,
-				"label",
-				account_currency ? `${label} (${account_currency})` : label
-			);
-		});
+		frm.events.set_bank_total_description(frm);
+	},
+
+	set_bank_total_description: function (frm) {
+		const bank_side = {
+			Receive: ["received_amount_after_tax", "received_amount", frm.doc.paid_to_account_currency],
+			Pay: ["paid_amount_after_tax", "paid_amount", frm.doc.paid_from_account_currency],
+		}[frm.doc.payment_type];
+		if (!bank_side) return;
+
+		const [fieldname, amount_field, currency] = bank_side;
+		const taxes = frm.doc.taxes?.length
+			? flt(flt(frm.doc[fieldname]) - flt(frm.doc[amount_field]), precision(fieldname))
+			: 0;
+		let description = "";
+		if (taxes > 0) {
+			description = __("Includes {0} of taxes and charges.", [format_currency(taxes, currency)]);
+		} else if (taxes < 0) {
+			description = __("After deducting {0} of taxes and charges.", [
+				format_currency(-taxes, currency),
+			]);
+		}
+		frm.set_df_property(fieldname, "description", description);
 	},
 
 	set_account_descriptions: function (frm) {
@@ -620,32 +634,6 @@ frappe.ui.form.on("Payment Entry", {
 			return balance > 0 ? __("Owes {0}", [amount]) : __("Has paid {0} in advance", [amount]);
 		}
 		return balance < 0 ? __("You owe {0}", [amount]) : __("You have paid {0} in advance", [amount]);
-	},
-
-	show_unallocated_note: function (frm) {
-		const amount = flt(frm.doc.unallocated_amount);
-		const is_advance =
-			amount > 0 && frm.doc.party && ["Customer", "Supplier"].includes(frm.doc.party_type);
-		let note = frappe.meta.get_docfield(frm.doctype, "unallocated_amount").description;
-
-		if (is_advance && frm.doc.docstatus === 0) {
-			const currency =
-				frm.doc.payment_type == "Receive"
-					? frm.doc.paid_from_account_currency
-					: frm.doc.paid_to_account_currency;
-			note = __("{0} will be kept as an advance for {1} when you submit.", [
-				format_currency(amount, currency),
-				frm.doc.party_name || frm.doc.party,
-			]);
-		} else if (
-			is_advance &&
-			frm.doc.docstatus === 1 &&
-			frappe.model.can_write("Payment Reconciliation")
-		) {
-			note = __("Not matched to an invoice yet. Use Actions > Allocate to Invoices to match it.");
-		}
-
-		frm.set_df_property("unallocated_amount", "description", note);
 	},
 
 	show_general_ledger: function (frm) {
@@ -1485,8 +1473,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	set_difference_description: function (frm) {
 		const doc = frm.doc;
-		let description =
-			doc.docstatus === 0 ? frappe.meta.get_docfield(frm.doctype, "difference_amount").description : "";
+		let description = "";
 
 		const deductions = frappe.utils.sum((doc.deductions || []).map((row) => flt(row.amount)));
 		const explain_deductions =
@@ -1520,12 +1507,16 @@ frappe.ui.form.on("Payment Entry", {
 					  ]);
 		}
 
-		frm.set_df_property("difference_amount", "description", description);
+		const control = frm.fields_dict.difference_amount;
+		if (description) {
+			control.set_new_description(description);
+		} else {
+			control.set_empty_description();
+		}
 	},
 
 	unallocated_amount: function (frm) {
 		frm.trigger("set_difference_amount");
-		frm.events.show_unallocated_note(frm);
 	},
 
 	check_mandatory_to_fetch: function (frm) {
@@ -1861,6 +1852,7 @@ frappe.ui.form.on("Payment Entry", {
 		);
 		frm.refresh_field("paid_amount_after_tax");
 		frm.refresh_field("received_amount_after_tax");
+		frm.events.set_bank_total_description(frm);
 	},
 
 	initialize_taxes: function (frm) {
