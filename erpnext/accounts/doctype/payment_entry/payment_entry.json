@@ -19,6 +19,7 @@
   "posting_date",
   "company",
   "party_section",
+  "party_column",
   "party_type",
   "party",
   "party_bank_account",
@@ -182,7 +183,12 @@
   {
    "fieldname": "party_section",
    "fieldtype": "Section Break",
-   "label": "Payment From / To"
+   "label": "Payment Details"
+  },
+  {
+   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
+   "fieldname": "party_column",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
@@ -401,17 +407,18 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:(doc.party && doc.paid_amount && doc.received_amount && doc.references)",
+   "depends_on": "eval:doc.party && doc.paid_amount && doc.received_amount && doc.references && (doc.docstatus == 0 || doc.unallocated_amount)",
    "description": "Not matched to any invoice or order, so it stays on the party's account as an advance until you allocate it.",
    "fieldname": "unallocated_amount",
    "fieldtype": "Currency",
    "label": "Unallocated Amount",
    "print_hide": 1,
+   "read_only": 1,
    "show_description_on_click": 1
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_amount && doc.received_amount)",
+   "depends_on": "eval:doc.docstatus == 0 && doc.paid_amount && doc.received_amount",
    "description": "Must be zero to submit. Use Write Off Difference Amount, or add a row under Deductions or Loss.",
    "fieldname": "difference_amount",
    "fieldtype": "Currency",
@@ -652,6 +659,7 @@
    "options": "Advance Taxes and Charges"
   },
   {
+   "depends_on": "eval:doc.taxes && doc.taxes.length",
    "fieldname": "section_break_60",
    "fieldtype": "Section Break"
   },
@@ -793,7 +801,7 @@
    "depends_on": "eval: doc.apply_tds",
    "fieldname": "section_tax_withholding_entry",
    "fieldtype": "Section Break",
-   "label": "Tax Withholding Entry"
+   "hide_border": 1
   },
   {
    "description": "Selects which rates of the Tax Withholding Category apply. Leave empty to use the rates that have no group.",
@@ -878,6 +886,7 @@
   {
    "fieldname": "tax_withholding_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Tax Withholding"
   },
   {
@@ -905,7 +914,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-11-23 18:00:00.000000",
+ "modified": "2026-11-24 01:08:11.570380",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

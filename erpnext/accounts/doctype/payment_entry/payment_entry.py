@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, Tuple
 from frappe.query_builder.functions import Abs, Count, Max
-from frappe.utils import cint, comma_or, flt, getdate, nowdate
+from frappe.utils import cint, comma_or, flt, formatdate, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
 from pypika.functions import Coalesce, Sum
 
@@ -2449,13 +2449,17 @@ def _get_outstanding_reference_documents(args, validate=False):
 			ref_document_type = "orders"
 
 		if not validate:
-			frappe.msgprint(
-				_(
+			party_type = _(args.get("party_type")).lower()
+			party = frappe.bold(args.get("party"))
+			if ref_document_type == "invoices" and args.get("from_posting_date"):
+				message = _(
+					"The {0} {1} has no outstanding invoices posted on or after {2}. Clear the From Date under Posting Date to include older invoices."
+				).format(party_type, party, formatdate(args.get("from_posting_date")))
+			else:
+				message = _(
 					"No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
-				).format(
-					_(ref_document_type), _(args.get("party_type")).lower(), frappe.bold(args.get("party"))
-				)
-			)
+				).format(_(ref_document_type), party_type, party)
+			frappe.msgprint(message)
 
 	return data
 

@@ -488,13 +488,6 @@ frappe.ui.form.on("Payment Entry", {
 
 	set_display_labels: function (frm) {
 		const is_party = ["Customer", "Supplier"].includes(frm.doc.party_type);
-		const party_section_label = {
-			Receive: __("Received From"),
-			Pay: __("Paid To"),
-		}[frm.doc.payment_type];
-		frm.fields_dict.party_section.set_label(
-			frappe.utils.escape_html(party_section_label || __("Payment Details"))
-		);
 		frm.fields_dict.section_break_14.set_label(
 			frappe.utils.escape_html(is_party ? __("Invoices") : __("References"))
 		);
