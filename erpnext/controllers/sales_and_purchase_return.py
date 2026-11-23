@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
 from collections import defaultdict
 
 import frappe
@@ -8,12 +9,13 @@ from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Abs, IfNull, NullIf, Sum
-from frappe.utils import cint, flt, format_datetime, get_datetime
+from frappe.utils import cint, flt, fmt_money, format_datetime, get_datetime, get_link_to_form
 
 import erpnext
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method, getdate
+from erpnext.stock.valuation import round_rate
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -41,6 +43,116 @@ def validate_return(doc):
 		validate_return_against(doc)
 
 		validate_returned_items(doc)
+		validate_return_warehouse_stock(doc)
+
+
+def validate_return_warehouse_stock(doc):
+	"""Refuse a purchase return from a warehouse the receipt row did not stock
+	unless that warehouse holds the returned qty at the receipt rate."""
+	if doc.docstatus != 1 or doc.doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		return
+
+	if doc.doctype == "Purchase Invoice" and not doc.update_stock:
+		return
+
+	moved_rows = get_moved_rows(doc)
+	qty_left = {}
+	for row in get_rows_taking_moved_stock(doc, moved_rows):
+		rate = round_rate(
+			get_rate_for_return(doc.doctype, doc.name, row.item_code, doc.return_against, item_row=row)
+		)
+		key = (row.item_code, row.warehouse, rate)
+		if key not in qty_left:
+			qty_left[key] = get_qty_held_at_rate(doc, row, rate)
+
+		# stock_qty and the factor reset to 1 for the stock UOM come later in validate
+		conversion_factor = 1 if row.uom == row.stock_uom else flt(row.conversion_factor) or 1
+		qty_left[key] -= abs(flt(flt(row.qty) * conversion_factor, row.precision("stock_qty")))
+		if row.idx in moved_rows and flt(qty_left[key], row.precision("stock_qty")) < 0:
+			frappe.throw(
+				_(
+					"Row #{0}: {1} does not hold enough of item {2} at the rate of {3}, at which {4} received it. Move the goods back to {5} and return them from there."
+				).format(
+					row.idx,
+					bold(row.warehouse),
+					bold(row.item_code),
+					bold(fmt_money(rate, currency=erpnext.get_company_currency(doc.company))),
+					get_link_to_form(doc.doctype, doc.return_against),
+					bold(moved_rows[row.idx][0]),
+				),
+				title=_("Return Warehouse"),
+			)
+
+
+def get_moved_rows(doc) -> dict:
+	"""Receipt warehouses of each return row, by idx, that takes FIFO or LIFO stock from another warehouse."""
+	receipt_rows = frappe.get_all(
+		f"{doc.doctype} Item",
+		filters={"parent": doc.return_against},
+		fields=["name", "item_code", "warehouse", "rejected_warehouse"],
+		limit_page_length=0,
+	)
+	moved_rows = {}
+	for row in doc.items:
+		if receipt_warehouses := get_receipt_warehouses_if_moved(doc, row, receipt_rows):
+			moved_rows[row.idx] = receipt_warehouses
+
+	return moved_rows
+
+
+def get_rows_taking_moved_stock(doc, moved_rows) -> list:
+	"""Return rows that take stock of a moved row's item and warehouse, moved rows last."""
+	moved_stock = {(row.item_code, row.warehouse) for row in doc.items if row.idx in moved_rows}
+	rows = [row for row in doc.items if flt(row.qty) < 0 and (row.item_code, row.warehouse) in moved_stock]
+	# a row returned from its receipt warehouse takes the receipt lot first
+	return sorted(rows, key=lambda row: row.idx in moved_rows)
+
+
+def get_receipt_warehouses_if_moved(doc, row, receipt_rows) -> list:
+	"""Warehouses of the receipt row, if the return row takes FIFO or LIFO stock from another one."""
+	if flt(row.qty) >= 0 or not (row.item_code and row.warehouse):
+		return []
+
+	# serial and batch items go back at their own rate
+	item = frappe.get_cached_value(
+		"Item", row.item_code, ["is_stock_item", "has_serial_no", "has_batch_no"], as_dict=True
+	)
+	if (
+		not item.is_stock_item
+		or item.has_serial_no
+		or item.has_batch_no
+		or get_valuation_method(row.item_code, doc.company) not in ("FIFO", "LIFO")
+	):
+		return []
+
+	# a row added by hand has no reference and goes back against any receipt row of its item
+	reference = row.get(get_return_against_item_fields(doc.doctype))
+	receipt_warehouses = [
+		warehouse
+		for receipt_row in receipt_rows
+		if receipt_row.name == reference or (not reference and receipt_row.item_code == row.item_code)
+		for warehouse in (receipt_row.warehouse, receipt_row.rejected_warehouse)
+		if warehouse
+	]
+	if not receipt_warehouses or row.warehouse in receipt_warehouses:
+		return []
+
+	return receipt_warehouses
+
+
+def get_qty_held_at_rate(doc, row, rate) -> float:
+	"""Qty in the row's warehouse queue at the given rate, matched as the ledger matches a purchase return."""
+	from erpnext.stock.stock_ledger import get_previous_sle
+
+	previous_sle = get_previous_sle(
+		{
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+			"posting_datetime": get_combine_datetime(doc.posting_date, doc.posting_time),
+		}
+	)
+	queue = json.loads(previous_sle.get("stock_queue") or "[]")
+	return sum(flt(qty) for qty, bin_rate in queue if round_rate(bin_rate) == rate)
 
 
 def validate_return_against(doc):
