@@ -7418,6 +7418,21 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 		self.assertGreaterEqual(len(job_cards), 2, "fixture must produce at least two job cards")
 		return work_order, job_cards
 
+	def add_bom_scrap_row(self, bom_no, item_code):
+		"""Add a Scrap row to a submitted BOM, so Job Card rows can link to it."""
+		row = frappe.get_doc(
+			{
+				"doctype": "BOM Secondary Item",
+				"parent": bom_no,
+				"parenttype": "BOM",
+				"parentfield": "secondary_items",
+				"item_code": item_code,
+				"secondary_item_type": "Scrap",
+			}
+		)
+		row.db_insert()
+		return row.name
+
 	def test_secondary_item_columns_come_from_one_line(self):
 		"""stock_uom is a stored snapshot, so it can differ between a work order's job cards.
 
@@ -7463,14 +7478,15 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 
 		scrap_item = make_item("_Test JC Secondary Bom Row", {"is_stock_item": 1, "stock_uom": "Nos"})
 		work_order, job_cards = self.make_work_order_with_two_job_cards()
+		row_a, row_b = (self.add_bom_scrap_row(work_order.bom_no, scrap_item.name) for _ in range(2))
 
-		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, "BOM-ROW-A")
+		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, row_a)
 
 		scrap_item.reload()
 		scrap_item.item_name = "_Test JC Secondary Bom Row Renamed"
 		scrap_item.save()
 
-		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, "BOM-ROW-B")
+		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, row_b)
 
 		by_bom_row = {
 			row.bom_secondary_item: row
@@ -7478,9 +7494,9 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 			if row.item_code == scrap_item.name
 		}
 
-		self.assertEqual(set(by_bom_row), {"BOM-ROW-A", "BOM-ROW-B"})
-		self.assertEqual(by_bom_row["BOM-ROW-A"].item_name, "_Test JC Secondary Bom Row")
-		self.assertEqual(by_bom_row["BOM-ROW-B"].item_name, "_Test JC Secondary Bom Row Renamed")
+		self.assertEqual(set(by_bom_row), {row_a, row_b})
+		self.assertEqual(by_bom_row[row_a].item_name, "_Test JC Secondary Bom Row")
+		self.assertEqual(by_bom_row[row_b].item_name, "_Test JC Secondary Bom Row Renamed")
 
 
 def create_stock_entries(sequence_of_entries):
