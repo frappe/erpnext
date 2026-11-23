@@ -2208,7 +2208,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
 		self.assertEqual(work_order.status, "In Process")
 
-<<<<<<< HEAD
 	def test_status_in_process_when_only_one_required_item_transferred_via_pick_list(self):
 		"""Stock Entry created from a Pick List that picked only one of the required items:
 		min-fraction keeps material_transferred_for_manufacturing at 0, but the work order must
@@ -2240,14 +2239,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
 		self.assertEqual(work_order.status, "In Process")
-=======
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
 	)
 	def test_transferred_qty_counts_direct_and_pick_list_transfers(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
-		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
+		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
 
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
@@ -2264,11 +2263,10 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 4))
 		self.assertEqual([row.qty for row in manufacture.items if row.s_warehouse], [8])
->>>>>>> 2b2b625 (test: Work Order transferred qty counts direct and pick list transfers)
 
 	def test_pick_list_transfer_first_covers_what_direct_transfer_left_out(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
-		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
+		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
 
 		rm_items = [make_item(properties={"is_stock_item": 1}).name for _ in range(2)]
 		fg_item = make_item(properties={"is_stock_item": 1}).name
