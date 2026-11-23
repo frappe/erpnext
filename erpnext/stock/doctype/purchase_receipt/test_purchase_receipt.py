@@ -2300,15 +2300,15 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			}
 		)
 		pr.insert()
-		# the package follows a later change of the rejected warehouse
+		# the package follows a later change of the rejected warehouse and qty
 		rejected_warehouse = create_warehouse("_Test Rejected Two", company="_Test Company")
-		pr.items[0].rejected_warehouse = rejected_warehouse
+		pr.items[0].update({"rejected_warehouse": rejected_warehouse, "qty": 2, "rejected_qty": 3})
 		pr.save()
 		pr.submit()
 
 		for bundle, warehouse, qty in (
-			(pr.items[0].serial_and_batch_bundle, "Stores - _TC", 3),
-			(pr.items[0].rejected_serial_and_batch_bundle, rejected_warehouse, 2),
+			(pr.items[0].serial_and_batch_bundle, "Stores - _TC", 2),
+			(pr.items[0].rejected_serial_and_batch_bundle, rejected_warehouse, 3),
 		):
 			package = frappe.get_doc("Serial and Batch Bundle", bundle)
 			self.assertEqual((package.warehouse, package.company), (warehouse, "_Test Company"))
@@ -2352,14 +2352,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		dn = make_inter_company_delivery_note(stock=[(3, 100), (2, 120)])
 		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.items[0].update({"warehouse": "_Test Warehouse - _TC", "qty": 3, "received_qty": 3})
+		pr.items[0].warehouse = "_Test Warehouse - _TC"
 		pr.insert()
 		# a partial receipt picks 1 of the first batch and all of the second
 		package = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
 		frappe.db.set_value("Serial and Batch Entry", package.entries[0].name, "qty", 1)
 		picked = [(package.entries[0].batch_no, 1), (package.entries[1].batch_no, package.entries[1].qty)]
 
-		pr.items[0].warehouse = "Stores - _TC"
+		pr.items[0].update({"warehouse": "Stores - _TC", "qty": 3, "received_qty": 3})
 		pr.save()
 
 		package = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
