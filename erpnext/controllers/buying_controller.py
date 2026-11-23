@@ -341,6 +341,12 @@ class BuyingController(SubcontractingController):
 						valuation_rate * conversion_factor / (flt(self.conversion_rate) or 1),
 						row.precision("rate"),
 					)
+					if not row.rate and flt(valuation_rate) > 0:
+						frappe.throw(
+							_(
+								"Row #{0}: The valuation rate of Item {1} rounds to 0 in the invoice currency. Increase the precision of Rate or enter the rate."
+							).format(row.idx, frappe.bold(row.item_code))
+						)
 
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
