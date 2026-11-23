@@ -221,7 +221,7 @@ erpnext.sales_common = {
 				}
 			}
 
-			campaign() {
+			utm_campaign() {
 				this.apply_pricing_rule();
 			}
 

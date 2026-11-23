@@ -2415,6 +2415,26 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(descendants.call_count, 1)
 		self.assertEqual([d.discount_percentage for d in si.items], [15, 0, 0])
 
+	def test_partner_and_campaign_rules_apply_when_item_is_added(self):
+		partner = "_Test Sales Partner India - 1"
+		partner_item = make_item("PR Partner Item", {"is_stock_item": 0}).name
+		campaign_item = make_item("PR Campaign Item", {"is_stock_item": 0}).name
+		make_item_price(partner_item, "Standard Selling", 8500)
+		make_item_price(campaign_item, "Standard Selling", 4200)
+		make_item_pricing_rule(
+			partner_item, discount_percentage=10, applicable_for="Sales Partner", sales_partner=partner
+		)
+		make_item_pricing_rule(
+			campaign_item, discount_percentage=5, applicable_for="Campaign", campaign="_Test Campaign"
+		)
+
+		for item, rate in ((partner_item, 7650), (campaign_item, 3990)):
+			with self.subTest(item=item):
+				si = make_invoice_with_selected_item(
+					item, sales_partner=partner, utm_campaign="_Test Campaign"
+				)
+				self.assertEqual(si.items[0].rate, rate)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -2556,3 +2576,13 @@ def get_pricing_details_for_row(doc, row):
 		"items": [{**row.as_dict(), "child_docname": row.name}],
 	}
 	return frappe._dict(apply_pricing_rule(args, doc=doc.as_dict())[0])
+
+
+def make_invoice_with_selected_item(item_code, **fields):
+	"""Add the item to a new invoice the way the form does, through process_item_selection."""
+	si = create_sales_invoice(item_code=item_code, do_not_save=True)
+	si.update({"selling_price_list": "Standard Selling", **fields})
+	si.items = []
+	row = si.append("items", {"item_code": item_code, "qty": 1})
+	si.process_item_selection(row.idx)
+	return si

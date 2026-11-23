@@ -346,6 +346,8 @@ class TransactionBase(StatusUpdater):
 					"is_return": cint(self.get("is_return")),
 					"is_subcontracted": self.get("is_subcontracted"),
 					"ignore_pricing_rule": self.get("ignore_pricing_rule"),
+					"sales_partner": self.get("sales_partner"),
+					"campaign": self.get("utm_campaign"),
 					"doctype": self.get("doctype"),
 					"name": self.get("name"),
 					"project": item.get("project") or self.get("project"),

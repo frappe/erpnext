@@ -861,6 +861,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							return_against: me.frm.doc.return_against,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
+							sales_partner: me.frm.doc.sales_partner,
+							campaign: me.frm.doc.utm_campaign,
 							doctype: me.frm.doc.doctype,
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
