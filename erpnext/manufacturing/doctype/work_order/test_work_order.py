@@ -6111,7 +6111,28 @@ class TestWorkOrder(ERPNextTestSuite):
 		scr.save()
 		self.assertEqual(scr.additional_costs[0].expense_account, "Expenses Included In Valuation - _TC")
 
-	def make_subcontracted_work_order_with_costs(self):
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 0}
+	)
+	def test_work_order_costs_leave_the_order_costs_to_later_receipts(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		freight = {
+			"expense_account": "Expenses Included In Valuation - _TC",
+			"description": "Freight",
+			"amount": 100,
+		}
+		sco = self.make_subcontracted_work_order_with_costs(additional_costs=[freight])
+
+		first = self.make_receipt_of_subcontracted_work_order(sco, 4)
+		scr_return = make_return_doc("Subcontracting Receipt", first.name)
+		scr_return.items[0].qty = -2
+		scr_return.submit()
+		rest = self.make_receipt_of_subcontracted_work_order(sco, 8)
+
+		self.assertEqual(self.get_additional_cost(rest, "Freight"), 80)
+
+	def make_subcontracted_work_order_with_costs(self, additional_costs=()):
 		"""Subcontracting Order for all of a Work Order with 100 additional and 50 corrective operation cost."""
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
@@ -6120,17 +6141,16 @@ class TestWorkOrder(ERPNextTestSuite):
 		test_stock_entry.make_stock_entry(
 			item_code=wo.required_items[0].item_code, target="Stores - _TC", qty=10, basic_rate=100
 		)
-		sco = self.subcontract_work_order(wo, 10)
+		sco = self.subcontract_work_order(wo, 10, additional_costs=additional_costs)
 		frappe.get_doc(make_rm_stock_entry(sco.name)).submit()
 		return sco
 
 	def make_receipt_of_subcontracted_work_order(self, sco, qty):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			make_subcontracting_receipt,
+			get_mapped_subcontracting_receipt,
 		)
 
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = qty
+		scr = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": qty}])
 		scr.submit()
 		return scr
 
@@ -6203,7 +6223,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			**kwargs,
 		)
 
-	def subcontract_work_order(self, wo, qty, reserve_warehouse=None):
+	def subcontract_work_order(self, wo, qty, reserve_warehouse=None, additional_costs=()):
 		"""Submit a Subcontracting Order for qty of the Work Order's subcontracted Job Card."""
 		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 		from erpnext.manufacturing.doctype.job_card.mapper import make_subcontracting_po
@@ -6223,6 +6243,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		sco = make_subcontracting_order(po.name)
 		sco.supplier_warehouse = supplier_warehouse
 		sco.set_reserve_warehouse = reserve_warehouse
+		for row in additional_costs:
+			sco.append("additional_costs", row)
 		sco.insert()
 		sco.submit()
 		return sco
