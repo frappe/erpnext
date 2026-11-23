@@ -97,8 +97,6 @@ class Company(NestedSet):
 		depreciation_cost_center: DF.Link | None
 		depreciation_expense_account: DF.Link | None
 		disable_sdbnb_in_sr: DF.Check
-		discount_allowed_account: DF.Link | None
-		discount_received_account: DF.Link | None
 		disposal_account: DF.Link | None
 		domain: DF.Data | None
 		email: DF.Data | None
@@ -119,6 +117,8 @@ class Company(NestedSet):
 		monthly_sales_target: DF.Currency
 		old_parent: DF.Data | None
 		parent_company: DF.Link | None
+		payment_discount_allowed_account: DF.Link | None
+		payment_discount_received_account: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
 		purchase_expense_account: DF.Link | None
@@ -428,8 +428,8 @@ class Company(NestedSet):
 			"default_purchase_price_variance_account": {},
 			"default_manufacturing_variance_account": {},
 			"default_discount_account": {},
-			"discount_received_account": {},
-			"discount_allowed_account": {},
+			"payment_discount_received_account": {},
+			"payment_discount_allowed_account": {},
 			"default_deferred_revenue_account": {},
 			"default_deferred_expense_account": {},
 		}

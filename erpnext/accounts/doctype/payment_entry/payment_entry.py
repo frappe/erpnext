@@ -1102,8 +1102,8 @@ class PaymentEntry(AccountsController):
 
 			discount_accounts = {
 				company.default_discount_account,
-				company.discount_received_account,
-				company.discount_allowed_account,
+				company.payment_discount_received_account,
+				company.payment_discount_allowed_account,
 				company.round_off_account,
 			}
 			discount_accounts.update(row.account_head for row in doc.taxes)
@@ -3471,7 +3471,9 @@ def get_payment_discount_account(company: str, payment_type: str) -> str | None:
 	Payment type "Pay" uses the discount received account, "Receive" uses the discount allowed
 	account. If that account is not set, use the default payment discount account.
 	"""
-	fieldname = "discount_received_account" if payment_type == "Pay" else "discount_allowed_account"
+	fieldname = (
+		"payment_discount_received_account" if payment_type == "Pay" else "payment_discount_allowed_account"
+	)
 	specific_account, default_account = frappe.get_cached_value(
 		"Company", company, [fieldname, "default_discount_account"]
 	)

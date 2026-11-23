@@ -964,8 +964,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 			company,
 			{
 				"default_discount_account": "Write Off - _TC",
-				"discount_received_account": "Cost of Goods Sold - _TC",
-				"discount_allowed_account": "_Test Account Discount - _TC",
+				"payment_discount_received_account": "Cost of Goods Sold - _TC",
+				"payment_discount_allowed_account": "_Test Account Discount - _TC",
 			},
 		)
 
@@ -993,7 +993,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(pe.deductions[0].amount, 20.0)
 
 		# Without a specific account, use the default payment discount account
-		frappe.db.set_value("Company", company, "discount_allowed_account", None)
+		frappe.db.set_value("Company", company, "payment_discount_allowed_account", None)
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
 		self.assertEqual(pe.deductions[0].account, "Write Off - _TC")
 
