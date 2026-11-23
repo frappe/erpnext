@@ -5,7 +5,7 @@
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_days, getdate, nowdate
+from frappe.utils import add_days, get_datetime, getdate, nowdate
 
 from erpnext.projects.doctype.task.task import (
 	CircularReferenceError,
@@ -215,6 +215,86 @@ class TestTask(ERPNextTestSuite):
 			getdate(frappe.db.get_value("Task", dependent.name, "exp_start_date")),
 			getdate(add_days(nowdate(), 1)),
 		)
+
+	def test_reschedule_dependent_starting_on_predecessor_end_day(self):
+		prerequisite = create_task("_Test Task Ending On Dependent Start", nowdate(), add_days(nowdate(), 4))
+		dependent = create_task(
+			"_Test Task Starting On Prerequisite End",
+			add_days(nowdate(), 5),
+			add_days(nowdate(), 7),
+			prerequisite.name,
+		)
+
+		prerequisite.exp_end_date = add_days(nowdate(), 5)
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), 6)))
+		self.assertEqual(getdate(dependent.exp_end_date), getdate(add_days(nowdate(), 8)))
+
+	def test_reschedule_keeps_dependent_times(self):
+		prerequisite = create_task(
+			"_Test Task Ending At Five", nowdate(), get_datetime(f"{add_days(nowdate(), 4)} 17:00:00")
+		)
+		dependent = create_task(
+			"_Test Task Of Nine Hours",
+			get_datetime(f"{add_days(nowdate(), 5)} 09:00:00"),
+			get_datetime(f"{add_days(nowdate(), 5)} 18:00:00"),
+			prerequisite.name,
+		)
+
+		prerequisite.exp_end_date = get_datetime(f"{add_days(nowdate(), 5)} 17:00:00")
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(dependent.exp_start_date, get_datetime(f"{add_days(nowdate(), 6)} 09:00:00"))
+		self.assertEqual(dependent.exp_end_date, get_datetime(f"{add_days(nowdate(), 6)} 18:00:00"))
+
+	def test_reschedule_keeps_dependent_starting_after_predecessor_end_on_same_day(self):
+		prerequisite = create_task(
+			"_Test Task Ending At Noon", nowdate(), get_datetime(f"{add_days(nowdate(), 5)} 12:00:00")
+		)
+		dependent = create_task(
+			"_Test Task Starting After Noon",
+			get_datetime(f"{add_days(nowdate(), 5)} 13:00:00"),
+			get_datetime(f"{add_days(nowdate(), 5)} 18:00:00"),
+			prerequisite.name,
+		)
+
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(dependent.exp_start_date, get_datetime(f"{add_days(nowdate(), 5)} 13:00:00"))
+
+	def test_reschedule_from_actual_end_after_expected_end(self):
+		prerequisite = create_task(
+			"_Test Task Running Late", add_days(nowdate(), -10), add_days(nowdate(), -6)
+		)
+		dependent = create_task(
+			"_Test Task After Late Task", add_days(nowdate(), -5), add_days(nowdate(), -3), prerequisite.name
+		)
+
+		prerequisite.act_end_date = add_days(nowdate(), -2)
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), -1)))
+		self.assertEqual(getdate(dependent.exp_end_date), getdate(add_days(nowdate(), 1)))
+
+	def test_reschedule_dependent_without_end_date(self):
+		prerequisite = create_task("_Test Task Before Open Ended Task", nowdate(), add_days(nowdate(), 4))
+		dependent = create_task(
+			"_Test Open Ended Task", add_days(nowdate(), 5), depends_on=prerequisite.name, save=False
+		)
+		dependent.exp_end_date = None
+		dependent.save()
+
+		prerequisite.exp_end_date = add_days(nowdate(), 9)
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), 10)))
+		self.assertIsNone(dependent.exp_end_date)
 
 	def test_actual_dates_outside_project_dates(self):
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
