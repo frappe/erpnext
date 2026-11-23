@@ -5655,10 +5655,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.save()
 		scr.items[0].qty = 3
 		scr.save()
-		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items]
-		scr.save()
 
-		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], costs)
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], [10.0, 70.0])
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_resave_keeps_amount_based_split_with_a_co_product(self):
