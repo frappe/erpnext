@@ -4906,21 +4906,19 @@ class TestWorkOrder(ERPNextTestSuite):
 		"""An entry whose whole-number share was consumed earlier values nothing, its scrap included."""
 		for valuation_type in ("Valuation Rate", "Manual"):
 			with self.subTest(valuation_type=valuation_type):
-				scrap_item = make_item(
-					properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}
-				).name
-				work_order, rm_item = make_whole_number_partial_work_order(
-					rm_qty=1, scrap_item=scrap_item, scrap_valuation_type=valuation_type
-				)
-
-				rates = []
-				for _ in range(4):
-					manufacture = submit_manufacture_of_one(work_order)
-					fg_row = next(row for row in manufacture.items if row.is_finished_item)
-					scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
-					rates.append((fg_row.valuation_rate, scrap_row.valuation_rate))
-
+				rates = get_partial_manufacture_scrap_rates(valuation_type)
 				self.assertEqual(rates, [(90, 10), (0, 0), (0, 0), (0, 0)])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_cap_scrap_at_consumed_cost(self):
+		"""Scrap worth more than the entry's consumed cost is scaled down to it, so the finished good is not negative."""
+		for valuation_type in ("Valuation Rate", "Manual"):
+			with self.subTest(valuation_type=valuation_type):
+				# later entries consume 1 Kg at 1 but no Nos, against scrap at 10
+				rates = get_partial_manufacture_scrap_rates(valuation_type, kg_rm_qty=4)
+				self.assertEqual(rates, [(91, 10), (0, 1), (0, 1), (0, 1)])
 
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
@@ -10279,15 +10277,25 @@ def make_multi_level_manufacture_entry(fg_item, bom_no):
 	return se_doc
 
 
-def make_whole_number_partial_work_order(rm_qty, scrap_item=None, scrap_valuation_type="Valuation Rate"):
-	"""Work Order for 4 Nos of a finished good that needs rm_qty Nos of a whole-number raw material,
-	and makes 1 Nos of scrap_item per finished good, valued at 10 each."""
+def make_whole_number_partial_work_order(
+	rm_qty, scrap_item=None, scrap_valuation_type="Valuation Rate", kg_rm_qty=0
+):
+	"""Work Order for 4 Nos of a finished good that needs rm_qty Nos of a whole-number raw material
+	at 100 and kg_rm_qty Kg of another at 1, and makes 1 Nos of scrap_item per finished good, valued at 10 each."""
 	frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 100}).name
 	fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
 	bom = make_bom(
 		item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=rm_qty, currency="INR", do_not_save=True
 	)
+	if kg_rm_qty:
+		kg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 1}).name
+		bom.append(
+			"items", {"item_code": kg_item, "qty": kg_rm_qty, "uom": "Kg", "stock_uom": "Kg", "rate": 1}
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=kg_item, target="Stores - _TC", qty=kg_rm_qty, basic_rate=1
+		)
 	if scrap_item:
 		bom.append(
 			"secondary_items",
@@ -10313,6 +10321,23 @@ def submit_manufacture_of_one(work_order):
 	manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 	manufacture.submit()
 	return manufacture
+
+
+def get_partial_manufacture_scrap_rates(scrap_valuation_type, kg_rm_qty=0):
+	"""(finished good, scrap) valuation rates of four Manufactures of 1 against a Work Order that needs 1 Nos."""
+	scrap_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+	work_order, _rm_item = make_whole_number_partial_work_order(
+		rm_qty=1, scrap_item=scrap_item, scrap_valuation_type=scrap_valuation_type, kg_rm_qty=kg_rm_qty
+	)
+
+	rates = []
+	for _ in range(4):
+		manufacture = submit_manufacture_of_one(work_order)
+		fg_row = next(row for row in manufacture.items if row.is_finished_item)
+		scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
+		rates.append((fg_row.valuation_rate, scrap_row.valuation_rate))
+
+	return rates
 
 
 def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
