@@ -6145,6 +6145,27 @@ class TestWorkOrder(ERPNextTestSuite):
 		for description, cost in (("Additional Operating Cost", 100), ("Corrective Operation Cost", 50)):
 			self.assertEqual(sum(self.get_additional_cost(scr, description) for scr in receipts), cost)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_rejected_return_leaves_the_corrective_cost_to_later_receipts(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			get_mapped_subcontracting_receipt,
+		)
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 5}])
+		first.items[0].qty = 4
+		first.items[0].rejected_qty = 1
+		first.items[0].rejected_warehouse = create_warehouse("Test SOI Rejected WH", company="_Test Company")
+		first.submit()
+		make_return_doc("Subcontracting Receipt", first.name, return_against_rejected_qty=True).submit()
+		rest = self.make_receipt_of_subcontracted_work_order(sco, 6)
+
+		self.assertEqual(self.get_additional_cost(rest, "Corrective Operation Cost"), 30)
+
 	def make_subcontracted_work_order_with_costs(self, additional_costs=()):
 		"""Subcontracting Order for all of a Work Order with 100 additional and 50 corrective operation cost."""
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
