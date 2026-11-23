@@ -5737,6 +5737,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], costs)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_resave_keeps_amount_based_split_with_a_co_product(self):
 		set_backflush_based_on("BOM")
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
