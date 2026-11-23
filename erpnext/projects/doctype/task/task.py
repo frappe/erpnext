@@ -416,7 +416,7 @@ class Task(NestedSet):
 		return self.name in reachable
 
 	def reschedule_dependent_tasks(self):
-		end_date = self.exp_end_date or self.act_end_date
+		end_date = self.get_schedule_end_date()
 		if not end_date or self.flags.ignore_reschedule:
 			return
 
@@ -446,6 +446,11 @@ class Task(NestedSet):
 				task.flags.ignore_recursion_check = True
 				task.flags.rescheduled = True
 				task.save(ignore_permissions=self.flags.ignore_permissions)
+
+	def get_schedule_end_date(self):
+		"""The later of the expected and actual end, as a task that overruns still blocks its dependents."""
+		end_dates = [get_datetime(d) for d in (self.exp_end_date, self.act_end_date) if d]
+		return max(end_dates, default=None)
 
 	def has_webform_permission(self, project=None):
 		project_user = frappe.db.get_value(

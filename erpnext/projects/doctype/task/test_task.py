@@ -216,6 +216,21 @@ class TestTask(ERPNextTestSuite):
 			getdate(add_days(nowdate(), 1)),
 		)
 
+	def test_reschedule_from_actual_end_after_expected_end(self):
+		prerequisite = create_task(
+			"_Test Task Running Late", add_days(nowdate(), -10), add_days(nowdate(), -6)
+		)
+		dependent = create_task(
+			"_Test Task After Late Task", add_days(nowdate(), -5), add_days(nowdate(), -3), prerequisite.name
+		)
+
+		prerequisite.act_end_date = add_days(nowdate(), -2)
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), -1)))
+		self.assertEqual(getdate(dependent.exp_end_date), getdate(add_days(nowdate(), 1)))
+
 	def test_actual_dates_outside_project_dates(self):
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 		frappe.db.set_value(
