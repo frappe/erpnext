@@ -182,7 +182,7 @@ def get_total_days_late(scorecard):
 
 
 def get_on_time_shipments(scorecard):
-	"""Counts PO lines (scheduled in the period) fully received on or before their schedule date.
+	"""Counts PO lines (scheduled in the period) fully received, rejected qty included, on or before their schedule date.
 
 	Counting in PO-line units keeps this consistent with get_total_shipments so that
 	get_late_shipments (total - on time) stays non-negative even for split deliveries.
@@ -201,7 +201,7 @@ def get_on_time_shipments(scorecard):
 		.on(PR_Item.purchase_order_item == PO_Item.name)
 		.join(PO)
 		.on(PO_Item.parent == PO.name)
-		.select(PO_Item.name, PO_Item.qty, Sum(PR_Item.qty).as_("received_on_time"))
+		.select(PO_Item.name, PO_Item.qty, Sum(PR_Item.received_qty).as_("received_on_time"))
 		.where(PO.supplier == scorecard.supplier)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
 		.where(PO_Item.schedule_date >= PR.posting_date)
