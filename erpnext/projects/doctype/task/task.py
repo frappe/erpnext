@@ -437,7 +437,6 @@ class Task(NestedSet):
 			task = frappe.get_doc("Task", task_name)
 			if (
 				task.exp_start_date
-				and task.exp_end_date
 				and get_datetime(task.exp_start_date) <= end_date
 				and task.status in ("Open", "Working", "Overdue")
 			):
@@ -457,7 +456,8 @@ class Task(NestedSet):
 		new_start_date = datetime.combine(add_days(getdate(end_date), 1), start_date.time())
 		shift = new_start_date - start_date
 		self.exp_start_date = new_start_date
-		self.exp_end_date = get_datetime(self.exp_end_date) + shift
+		if self.exp_end_date:
+			self.exp_end_date = get_datetime(self.exp_end_date) + shift
 
 	def has_webform_permission(self, project=None):
 		project_user = frappe.db.get_value(

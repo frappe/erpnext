@@ -281,6 +281,21 @@ class TestTask(ERPNextTestSuite):
 		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), -1)))
 		self.assertEqual(getdate(dependent.exp_end_date), getdate(add_days(nowdate(), 1)))
 
+	def test_reschedule_dependent_without_end_date(self):
+		prerequisite = create_task("_Test Task Before Open Ended Task", nowdate(), add_days(nowdate(), 4))
+		dependent = create_task(
+			"_Test Open Ended Task", add_days(nowdate(), 5), depends_on=prerequisite.name, save=False
+		)
+		dependent.exp_end_date = None
+		dependent.save()
+
+		prerequisite.exp_end_date = add_days(nowdate(), 9)
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), 10)))
+		self.assertIsNone(dependent.exp_end_date)
+
 	def test_actual_dates_outside_project_dates(self):
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 		frappe.db.set_value(
