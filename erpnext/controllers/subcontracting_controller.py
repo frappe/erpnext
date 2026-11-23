@@ -25,6 +25,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_auto_batch_nos,
 	get_available_serial_nos,
 	get_batch_qty_for_stock,
+	get_ledgers_from_serial_batch_bundle,
 	get_voucher_wise_serial_batch_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -809,6 +810,7 @@ class SubcontractingController(StockController):
 
 	def __get_consumed_items(self, doctype, receipt_items):
 		fields = [
+			"name",
 			"serial_no",
 			"rm_item_code",
 			"reference_name",
@@ -845,33 +847,38 @@ class SubcontractingController(StockController):
 			return
 
 		voucher_nos = [d.voucher_no for d in consumed_materials if d.voucher_no]
-		# a receipt's consumption goes out of the supplier warehouse and its return comes back in
-		voucher_bundle_data = (
-			get_voucher_wise_serial_batch_from_bundle(
-				voucher_no=voucher_nos,
-				warehouse=self.supplier_warehouse,
-				get_subcontracted_item=("Subcontracting Receipt Supplied Item", "main_item_code"),
-			)
-			if voucher_nos
-			else {}
-		)
+		row_bundles = self.get_supplied_row_bundles(voucher_nos) if voucher_nos else {}
 
 		consumptions = []
 		for row in consumed_materials:
 			key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
-			if consumption := self.get_consumption(row, key, voucher_bundle_data):
+			if consumption := self.get_consumption(row, key, row_bundles):
 				consumptions.append(consumption)
 
 		self.deduct_consumptions(consumptions)
 
-	def get_consumption(self, row, key, voucher_bundle_data):
+	def get_supplied_row_bundles(self, voucher_nos) -> dict:
+		"""Serial nos and batches of each supplied row, as its bundle moved them in the supplier warehouse."""
+		# a receipt's consumption goes out of the supplier warehouse and its return comes back in
+		row_bundles = defaultdict(lambda: frappe._dict(serial_nos=[], batch_nos=defaultdict(float)))
+		for entry in get_ledgers_from_serial_batch_bundle(
+			voucher_no=voucher_nos, warehouse=self.supplier_warehouse
+		):
+			bundle = row_bundles[entry.voucher_detail_no]
+			if entry.serial_no:
+				bundle.serial_nos.append(entry.serial_no)
+			if entry.batch_no:
+				bundle.batch_nos[entry.batch_no] += entry.qty
+
+		return row_bundles
+
+	def get_consumption(self, row, key, row_bundles):
 		"""A consumed row with the transfers it counts against and how it changes their qty."""
 		keys = self.get_transfer_keys(key)
 		if not keys:
 			return None
 
-		bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
-		bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
+		bundles = row_bundles.get(row.name, frappe._dict())
 		serial_nos = bundles.serial_nos or []
 		# Will be deprecated in v16
 		if row.serial_no and not serial_nos:
@@ -934,16 +941,9 @@ class SubcontractingController(StockController):
 		if not consumption.by_batch:
 			consumed[None] += row.consumed_qty
 
-		if bundles.batch_nos:
-			# a receipt's bundle can cover rows of several orders, so take only this row's qty from it
-			left = abs(flt(row.consumed_qty))
-			for batch_no, qty in bundles.batch_nos.items():
-				if taken := min(abs(qty), left):
-					# a consumption's entries are negative, a return's positive
-					taken = -taken if qty < 0 else taken
-					consumed[batch_no] -= taken
-					bundles.batch_nos[batch_no] -= taken
-					left -= abs(taken)
+		for batch_no, qty in (bundles.batch_nos or {}).items():
+			# a consumption's entries are negative, a return's positive
+			consumed[batch_no] -= qty
 
 		# Will be deprecated in v16
 		if row.batch_no and not bundles.batch_nos:
