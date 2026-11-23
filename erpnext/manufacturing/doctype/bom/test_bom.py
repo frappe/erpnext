@@ -2157,6 +2157,109 @@ class TestBOM(ERPNextTestSuite):
 			self.assertEqual(bom.operating_cost * 10, 100)
 			self.assertEqual(work_order.planned_operating_cost, 100)
 
+	def test_valuation_rate_secondary_item_cost_net_of_process_loss(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 10,
+						"process_loss_per": 20,
+					}
+				],
+			}
+		).insert()
+
+		# only 8 of the 10 scrap units are made
+		self.assertEqual(bom.secondary_items_cost, 40)
+		self.assertEqual(bom.total_cost, 60)
+
+	def test_valuation_rate_secondary_item_cost_uses_rounded_process_loss_qty(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		# loss qty precision differs from the BOM quantity precision
+		make_property_setter("BOM Secondary Item", "process_loss_qty", "precision", 2, "Select")
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 20000}).name
+		scrap_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10000}
+		).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 20000}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 1,
+						"process_loss_per": 33.33,
+					}
+				],
+			}
+		).insert()
+
+		# cost must match the stored (rounded) process loss qty
+		row = bom.secondary_items[0]
+		self.assertEqual(row.cost, flt(10000 * (row.stock_qty - row.process_loss_qty), row.precision("cost")))
+
+		# Update Cost saves the loss its cost is net of, over a loss stored at another precision
+		frappe.db.set_value("BOM Secondary Item", row.name, "process_loss_qty", 0.333)
+		bom.update_cost()
+		self.assertEqual(frappe.db.get_value("BOM Secondary Item", row.name, "process_loss_qty"), 0.33)
+
+	def test_valuation_rate_secondary_item_loss_rounded_above_its_qty_is_capped(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		make_property_setter("BOM Secondary Item", "process_loss_qty", "precision", 2, "Select")
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10000}
+		).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 0.006,
+						"process_loss_per": 90,
+					}
+				],
+			}
+		).insert()
+
+		# 0.0054 rounds to 0.01, above the 0.006 made
+		row = bom.secondary_items[0]
+		self.assertEqual(row.process_loss_qty, row.stock_qty)
+		self.assertEqual(row.cost, 0)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{

@@ -778,8 +778,10 @@ class SubcontractingReceipt(SubcontractingController):
 
 		if secondary_item.valuation_type == "Valuation Rate":
 			rate = self.get_valuation_rate_at_posting(secondary_item.item_code, warehouse)
-			if not rate and secondary_item.stock_qty:
-				rate = flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
+			# the BOM costs the row on its qty net of process loss
+			produced_qty = flt(secondary_item.stock_qty) - flt(secondary_item.process_loss_qty)
+			if not rate and produced_qty:
+				rate = flt(secondary_item.base_cost) / produced_qty
 			return rate
 
 		return self.get_percentage_secondary_rate(item, secondary_item.cost_allocation_per, qty, own_cost)
