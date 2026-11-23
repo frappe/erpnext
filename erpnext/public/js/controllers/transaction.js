@@ -894,23 +894,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								async () => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
-										const fetch_valuation_rate_for_internal_transactions =
-											await frappe.db.get_single_value(
-												"Accounts Settings",
-												"fetch_valuation_rate_for_internal_transaction"
-											);
-										if (fetch_valuation_rate_for_internal_transactions) {
-											me.get_incoming_rate(
-												item,
-												me.frm.posting_date,
-												me.frm.posting_time,
-												me.frm.doc.doctype,
-												me.frm.doc.company
-											);
-											return;
-										}
-									}
+									if (await me.set_internal_valuation_rate(item)) return;
 									me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 								},
 								() => {
@@ -1053,13 +1037,38 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+	async set_internal_valuation_rate(item) {
+		if (!this.frm.doc.is_internal_customer && !this.frm.doc.is_internal_supplier) return false;
+
+		const fetch_valuation_rate = await frappe.db.get_single_value(
+			"Accounts Settings",
+			"fetch_valuation_rate_for_internal_transaction"
+		);
+		if (fetch_valuation_rate) {
+			this.get_incoming_rate(
+				item,
+				this.frm.doc.posting_date || this.frm.doc.transaction_date,
+				this.frm.doc.posting_time || this.frm.doc.transaction_time,
+				this.frm.doc.doctype,
+				this.frm.doc.company
+			);
+		}
+		return fetch_valuation_rate;
+	}
+
 	get_incoming_rate(item, posting_date, posting_time, voucher_type, company) {
+		const stock_qty = item.qty * item.conversion_factor;
+		// a delivery takes the stock out, so ask for its outgoing rate as the server does
+		const is_outgoing = this.frm.doc.is_internal_customer && !this.frm.doc.is_return;
+		// an internal purchase is valued at the sending warehouse, as handle_internal_parties does
+		const is_internal_purchase = ["Purchase Receipt", "Purchase Invoice"].includes(voucher_type);
+
 		let item_args = {
 			item_code: item.item_code,
-			warehouse: item.warehouse,
+			warehouse: is_internal_purchase ? item.from_warehouse : item.warehouse,
 			posting_date: posting_date,
 			posting_time: posting_time,
-			qty: item.qty * item.conversion_factor,
+			qty: is_outgoing ? -stock_qty : stock_qty,
 			serial_no: item.serial_no,
 			batch_no: item.batch_no,
 			voucher_type: voucher_type,
@@ -1067,12 +1076,21 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			allow_zero_valuation_rate: item.allow_zero_valuation_rate,
 		};
 
+		// only the newest request of a row sets its rate
+		this.incoming_rate_requests ??= {};
+		const request_id = (this.incoming_rate_requests[item.name] || 0) + 1;
+		this.incoming_rate_requests[item.name] = request_id;
+
 		frappe.call({
 			method: "erpnext.stock.utils.get_incoming_rate",
 			args: {
 				args: item_args,
 			},
-			callback: function (r) {
+			callback: (r) => {
+				if (this.incoming_rate_requests[item.name] !== request_id) return;
+				// the qty handler refetches an internal customer's rate, so skip the answer for an older qty
+				if (this.frm.doc.is_internal_customer && item.qty * item.conversion_factor !== stock_qty)
+					return;
 				frappe.model.set_value(item.doctype, item.name, "rate", r.message * item.conversion_factor);
 			},
 		});
@@ -1759,7 +1777,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				callback: function (r) {
 					if (!r.exc) {
 						frappe.model.set_value(cdt, cdn, "conversion_factor", r.message.conversion_factor);
-						me.apply_price_list(item, true);
+						frappe.run_serially([
+							() => me.apply_price_list(item, true),
+							// the price list response sets the rate, so set an internal rate after it
+							() => me.set_internal_valuation_rate(item),
+						]);
 					}
 				},
 			});
@@ -1786,8 +1808,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				return;
 			}
 
-			if (!dont_fetch_price_list_rate && frappe.meta.has_field(doc.doctype, "price_list_currency")) {
-				this.apply_price_list(item, true);
+			if (!dont_fetch_price_list_rate) {
+				frappe.run_serially([
+					() =>
+						frappe.meta.has_field(doc.doctype, "price_list_currency") &&
+						this.apply_price_list(item, true),
+					// an internal rate is per stock UOM, so it changes with the conversion factor
+					() => this.set_internal_valuation_rate(item),
+				]);
 			}
 			this.calculate_stock_uom_rate(doc, cdt, cdn);
 		}
@@ -1842,6 +1870,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => this.apply_price_list(item, true), //reapply price list before applying pricing rule
 				() => this.calculate_stock_uom_rate(doc, cdt, cdn),
 				() => this.apply_pricing_rule(item, true),
+				// the outgoing rate of an internal delivery depends on the qty
+				() => this.frm.doc.is_internal_customer && this.set_internal_valuation_rate(item),
 			]);
 		} else {
 			this.conversion_factor(doc, cdt, cdn, true);
