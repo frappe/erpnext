@@ -220,6 +220,93 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, return_pi.save)
 
+	def test_purchase_return_from_another_warehouse_needs_the_receipt_stock(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("_Test FIFO Return Warehouse Item", {"valuation_method": "FIFO"}).name
+		receipt_warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=other_warehouse, qty=10, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item, warehouse=receipt_warehouse, qty=10, rate=300)
+
+		def make_return():
+			return_pr = make_return_doc("Purchase Receipt", pr.name)
+			return_pr.items[0].update({"qty": -5, "received_qty": -5, "warehouse": other_warehouse})
+			return return_pr.insert()
+
+		# the other warehouse holds stock at 100 only
+		self.assertRaisesRegex(frappe.ValidationError, "does not hold enough", make_return().submit)
+
+		make_stock_entry(item_code=item, source=receipt_warehouse, target=other_warehouse, qty=5)
+		return_pr = make_return()
+		return_pr.submit()
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": return_pr.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -1500)
+
+	def test_purchase_return_from_another_warehouse_counts_stock_uom_at_factor_one(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("_Test FIFO Return Stock UOM Factor Item", {"valuation_method": "FIFO"}).name
+		receipt_warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=other_warehouse, qty=10, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item, warehouse=receipt_warehouse, qty=10, rate=300)
+		make_stock_entry(item_code=item, source=receipt_warehouse, target=other_warehouse, qty=5)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		# the factor is reset to 1 later in validate, so the row takes 10, not 5
+		return_pr.items[0].update(
+			{"qty": -10, "received_qty": -10, "warehouse": other_warehouse, "conversion_factor": 0.5}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not hold enough", return_pr.submit)
+
+	def test_purchase_return_from_another_receipt_row_warehouse_needs_the_stock_of_both_rows(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("_Test FIFO Return Two Warehouses Item", {"valuation_method": "FIFO"}).name
+		warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=warehouse, qty=5, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item, warehouse=warehouse, qty=5, rate=300, do_not_submit=True)
+		pr.append("items", {**pr.items[0].as_dict(), "name": None, "idx": None, "warehouse": other_warehouse})
+		pr.submit()
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		for row in return_pr.items:
+			row.warehouse = warehouse
+
+		# both rows take the 5 @ 300 the first row received
+		self.assertRaisesRegex(frappe.ValidationError, "does not hold enough", return_pr.insert().submit)
+
+	def test_purchase_return_row_added_by_hand_needs_the_receipt_stock(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("_Test FIFO Return Row By Hand Item", {"valuation_method": "FIFO"}).name
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=other_warehouse, qty=10, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item, warehouse="_Test Warehouse - _TC", qty=10, rate=300)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.items[0].update(
+			{"qty": -5, "received_qty": -5, "warehouse": other_warehouse, "purchase_receipt_item": None}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not hold enough", return_pr.insert().submit)
+
 	def test_delivery_note_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
