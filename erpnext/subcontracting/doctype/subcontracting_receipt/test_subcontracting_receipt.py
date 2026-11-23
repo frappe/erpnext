@@ -5589,6 +5589,139 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			flt(-1 * original_row.qty * original_row.additional_cost_per_qty, 2),
 		)
 
+	def make_receipt_with_targeted_additional_cost(self):
+		"""Two finished good rows of 5 received: 100 spread over both, 300 on the second row only."""
+		service_items = [
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+			for service_item, fg_item in (
+				("Subcontracted Service Item 7", "Subcontracted Item SA7"),
+				("Subcontracted Service Item 8", "Subcontracted Item SA8"),
+			)
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 3
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.items[0].process_loss_qty = 0
+		cost_row = {"expense_account": "Expenses Included In Valuation - TCP1", "description": "Freight"}
+		scr.append("additional_costs", {**cost_row, "amount": 100, "base_amount": 100})
+		scr.save()
+		scr.append(
+			"additional_costs",
+			{**cost_row, "amount": 300, "base_amount": 300, "item_row": scr.items[1].name},
+		)
+		scr.save()
+		return scr
+
+	def test_targeted_additional_cost_goes_to_its_row_only(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], [10.0, 70.0])
+
+	def test_resave_keeps_amount_based_split_with_targeted_additional_cost(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.save()
+		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items]
+		scr.save()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], costs)
+
+	def test_resave_keeps_amount_based_split_with_a_co_product(self):
+		set_backflush_based_on("BOM")
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		service_items = []
+		for co_product_allocation in (20, 0):
+			fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+			bom = make_bom(
+				item=fg_item, raw_materials=[rm_item], rate=100, currency="INR", do_not_submit=True
+			)
+			if co_product_allocation:
+				bom.append(
+					"secondary_items",
+					{
+						"item_code": make_item(properties={"is_stock_item": 1}).name,
+						"secondary_item_type": "Co-Product",
+						"qty": 1,
+						"stock_qty": 1,
+						"valuation_type": "% of Component Cost",
+						"cost_allocation_per": co_product_allocation,
+					},
+				)
+			bom.save()
+			bom.submit()
+			service_items.append(
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 2,
+					"rate": 100,
+					"fg_item": fg_item,
+					"fg_item_qty": 2,
+				}
+			)
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "Freight",
+				"amount": 100,
+			},
+		)
+		# the first save reprices the mapped amounts with the BOM's cost allocation
+		scr.save()
+		scr.save()
+		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom]
+		scr.save()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom], costs)
+
+	def test_return_takes_back_targeted_additional_cost_with_its_row(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items = [scr_return.items[1]]
+		scr_return.save()
+
+		self.assertEqual([row.amount for row in scr_return.additional_costs], [-50.0, -300.0])
+
+	def test_additional_cost_cannot_target_a_row_outside_the_receipt(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+		scr.additional_costs[1].item_row = "not-a-row"
+
+		self.assertRaises(frappe.ValidationError, scr.save)
+
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings",
 		{
