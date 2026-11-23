@@ -425,8 +425,14 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not rm_items:
 			return
 
+		# continuous consumption takes each entry's share of what is unconsumed, not of the running total
+		get_qty = (
+			None
+			if frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
+			else self.get_bom_component_qty
+		)
 		_check_bom_component_qty(
-			self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom), self.get_bom_component_qty
+			self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom), get_qty
 		)
 
 	def get_bom_component_qty(self, bom_item):
