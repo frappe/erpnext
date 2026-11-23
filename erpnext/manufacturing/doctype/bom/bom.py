@@ -1847,10 +1847,10 @@ def _set_default_accounts_for_items(item_dict, company):
 		for d in fields:
 			company_in_record = company_of[d[0]].get(item_details.get(d[1]))
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
-				item_dict[item][d[1]] = _get_company_default(company, d[0])
+				item_dict[item][d[1]] = _get_company_fallback(company, d[0])
 
 
-def _get_company_default(company, doctype):
+def _get_company_fallback(company, doctype):
 	if doctype == "Account":
 		return get_default_account(company, STOCK_ADJUSTMENT)
 
