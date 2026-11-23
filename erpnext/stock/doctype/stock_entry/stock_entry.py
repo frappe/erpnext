@@ -265,6 +265,7 @@ class StockEntry(StockController):
 		self.set_transfer_qty()
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
+		self.validate_qty_against_transferred_qty()
 		self.validate_returned_qty_within_work_order()
 		self.validate_returned_qty_within_subcontracting_order()
 		self.validate_alternative_items()
@@ -1165,7 +1166,6 @@ class StockEntry(StockController):
 			) and self.work_order:
 				if not self.fg_completed_qty:
 					frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"))
-				self.validate_qty_against_transferred_qty()
 				self.check_if_operations_completed()
 				self.check_duplicate_entry_for_work_order()
 		elif self.purpose != "Material Transfer":
