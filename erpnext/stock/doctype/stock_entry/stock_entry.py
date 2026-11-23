@@ -371,6 +371,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls:
 			self.purpose_cls(self).validate()
 
+		# rows of every purpose count towards the Material Request
+		MaterialRequestStockEntry(self).validate_material_request()
 		self.validate_warehouses_company()
 		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
