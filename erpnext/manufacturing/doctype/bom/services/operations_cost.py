@@ -405,13 +405,18 @@ def _subcontracted_qty_received(work_order):
 	"""Finished good qty received for the subcontracted final operation, process loss included."""
 	job_card = frappe.qb.DocType("Job Card")
 	item = frappe.qb.DocType("Subcontracting Receipt Item")
+	returned = item.as_("returned")
 	query = (
 		frappe.qb.from_(item)
 		.inner_join(job_card)
 		.on(job_card.name == item.job_card)
+		.left_join(returned)
+		.on(returned.name == item.subcontracting_receipt_item)
 		.select(Sum(item.qty + item.process_loss_qty))
 		.where(
 			(item.docstatus == 1)
+			# a return from the rejected warehouse takes back no Work Order costs
+			& (returned.rejected_warehouse.isnull() | (item.warehouse != returned.rejected_warehouse))
 			& (job_card.work_order == work_order.name)
 			& (job_card.is_subcontracted == 1)
 			& (job_card.is_corrective_job_card == 0)
