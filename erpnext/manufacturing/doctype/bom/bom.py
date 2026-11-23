@@ -1140,6 +1140,7 @@ class BOM(WebsiteGenerator):
 		self.base_operating_cost = 0
 		if self.get("with_operations"):
 			for d in self.get("operations"):
+				self.set_cost_based_on_bom_qty(d, save)
 				if d.workstation or d.workstation_type:
 					self.update_rate_and_time(d, update_hour_rate, save)
 
@@ -1160,6 +1161,23 @@ class BOM(WebsiteGenerator):
 			self.base_operating_cost = total_operating_cost * self.conversion_rate
 
 		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
+
+	def set_cost_based_on_bom_qty(self, row, save):
+		"""As in the Work Order, fixed time is never per batch and a batch based operation always is."""
+		if row.fixed_time:
+			per_batch = 0
+		elif frappe.get_cached_value("Operation", row.operation, "create_job_card_based_on_batch_size"):
+			per_batch = 1
+		else:
+			return
+
+		if cint(row.set_cost_based_on_bom_qty) == per_batch:
+			return
+
+		row.set_cost_based_on_bom_qty = per_batch
+		if save:
+			# the row is saved only when hour rates are refreshed, so save the flag on its own
+			row.db_set("set_cost_based_on_bom_qty", per_batch, update_modified=False)
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		self.update_stale_hour_rate(row)
@@ -1517,7 +1535,6 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
-<<<<<<< HEAD
 				if not d.workstation and not d.workstation_type:
 					frappe.throw(
 						_(
@@ -1530,26 +1547,6 @@ class BOM(WebsiteGenerator):
 							d.idx, d.operation
 						)
 					)
-=======
-	def _validate_operation_row(self, d):
-		if not d.description:
-			d.description = frappe.db.get_value("Operation", d.operation, "description")
-		if not d.batch_size or d.batch_size <= 0:
-			d.batch_size = 1
-
-		if not d.workstation and not d.workstation_type:
-			frappe.throw(
-				_("Row {0}: Workstation or Workstation Type is mandatory for an operation {1}").format(
-					d.idx, d.operation
-				)
-			)
-		if not d.time_in_mins or d.time_in_mins <= 0:
-			frappe.throw(
-				_("Row {0}: Operation time should be greater than 0 for operation {1}").format(
-					d.idx, d.operation
-				)
-			)
->>>>>>> e71b395 (fix(manufacturing): cost and plan a batch operation per batch in both BOM and Work Order)
 
 	def get_tree_representation(self) -> BOMTree:
 		"""Get a complete tree representation preserving order of child items."""

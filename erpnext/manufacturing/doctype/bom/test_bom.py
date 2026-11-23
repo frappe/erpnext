@@ -2251,10 +2251,28 @@ class TestBOM(ERPNextTestSuite):
 		bom.save()
 		self.assertEqual(bom.conversion_rate, 90)
 
-<<<<<<< HEAD
 	def test_valuation_rate_ignores_stock_of_other_company(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-=======
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=rm_item, qty=10, rate=70, target="Stores - _TC1", company="_Test Company 1"
+		)
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"rm_cost_as_per": "Valuation Rate",
+				"items": [{"item_code": rm_item, "qty": 1}],
+			}
+		).insert()
+
+		self.assertEqual(bom.items[0].rate, 5)
+
 	def test_update_cost_costs_batch_operation_per_batch(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
@@ -2311,27 +2329,6 @@ def make_batch_operation_bom(operation, workstation, **row_values):
 	).insert()
 	bom.submit()
 	return bom
-
->>>>>>> bb5f2a6 (test: Update Cost costs a batch operation per batch)
-
-		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(
-			item_code=rm_item, qty=10, rate=70, target="Stores - _TC1", company="_Test Company 1"
-		)
-
-		bom = frappe.get_doc(
-			{
-				"doctype": "BOM",
-				"item": fg_item,
-				"company": "_Test Company",
-				"currency": "INR",
-				"rm_cost_as_per": "Valuation Rate",
-				"items": [{"item_code": rm_item, "qty": 1}],
-			}
-		).insert()
-
-		self.assertEqual(bom.items[0].rate, 5)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
