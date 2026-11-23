@@ -672,6 +672,32 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 1}, {first_batch: 2, second_batch: 2}])
 
+	def test_rm_return_row_with_raised_bundle_takes_reserved_batches(self):
+		so, scio = create_so_scio()
+		first_batch, second_batch = receive_batch_in_two_lots(scio)
+		rm_item = next(item for item in scio.received_items if item.rm_item_code == "RM with Batch")
+		# unreserved stock of the first batch, which a pick without the reservation takes first
+		make_stock_entry(
+			item_code="RM with Batch",
+			qty=1,
+			to_warehouse=rm_item.warehouse,
+			purpose="Material Receipt",
+			batch_no=first_batch,
+			basic_rate=10,
+		)
+
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.items[0].qty = 4
+		rm_return.insert()
+		StockEntrySABB(rm_return).make_serial_and_batch_bundle_for_outward()
+		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 3, second_batch: 1}])
+
+		rm_return.items[0].qty = 5
+		rm_return.submit()
+
+		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 3, second_batch: 2}])
+
 	def test_consumed_serial_and_batch_reservation(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
