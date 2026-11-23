@@ -316,13 +316,16 @@ class BuyingController(SubcontractingController):
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
-			self.reset_conversion_factor()
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate, converted to the row's UOM and currency
-					conversion_factor = flt(row.conversion_factor) or get_conversion_factor(
-						row.item_code, row.uom
-					).get("conversion_factor")
+					# the row's stock UOM is set from the item only later
+					if row.uom == frappe.get_cached_value("Item", row.item_code, "stock_uom"):
+						conversion_factor = 1.0
+					else:
+						conversion_factor = flt(row.conversion_factor) or get_conversion_factor(
+							row.item_code, row.uom
+						).get("conversion_factor")
 					valuation_rate = _get_incoming_rate(
 						{
 							"item_code": row.item_code,
