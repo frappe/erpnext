@@ -80,6 +80,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		// Show / Hide button
 		this.show_general_ledger();
 		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
+		erpnext.accounts.show_payment_ledger(this.frm);
+		erpnext.accounts.ledger_preview.show_payment_ledger_preview(this.frm);
 
 		if (doc.update_stock == 1) {
 			this.show_stock_ledger();
