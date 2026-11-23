@@ -321,13 +321,7 @@ class BuyingController(SubcontractingController):
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate, converted to the row's UOM and currency
-					# the row's stock UOM is set from the item only later
-					if row.uom == frappe.get_cached_value("Item", row.item_code, "stock_uom"):
-						conversion_factor = 1.0
-					else:
-						conversion_factor = flt(row.conversion_factor) or get_conversion_factor(
-							row.item_code, row.uom
-						).get("conversion_factor")
+					conversion_factor = self.get_standalone_debit_note_conversion_factor(row)
 					valuation_rate = _get_incoming_rate(
 						{
 							"item_code": row.item_code,
@@ -351,6 +345,21 @@ class BuyingController(SubcontractingController):
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
 					row.margin_rate_or_amount = 0.0
+
+	@staticmethod
+	def get_standalone_debit_note_conversion_factor(row):
+		"""Factor of the UOM the row gets, as its UOM and stock UOM are set from the item only later."""
+		item = (
+			frappe.get_cached_value("Item", row.item_code, ["stock_uom", "purchase_uom"], as_dict=True)
+			or frappe._dict()
+		)
+		uom = row.uom or item.purchase_uom or item.stock_uom
+		if uom == item.stock_uom:
+			return 1.0
+
+		return flt(row.conversion_factor) or get_conversion_factor(row.item_code, uom).get(
+			"conversion_factor"
+		)
 
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
