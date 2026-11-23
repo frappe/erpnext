@@ -31,11 +31,11 @@ COMPANY = "_Test Company"
 
 class TestDefaultAccounts(ERPNextTestSuite):
 	def test_registry(self):
-		company_meta = frappe.get_meta("Company")
-		self.assertFalse(company_meta.get("fields", {"fieldtype": "Link", "options": "Account"}))
-
 		fieldnames = [purpose.fieldname for purpose in DEFAULT_ACCOUNT_PURPOSES]
 		self.assertEqual(len(fieldnames), len(set(fieldnames)))
+		# other apps can still have Account fields on Company
+		company_fieldnames = set(frappe.get_meta("Company").get_fieldnames_with_value())
+		self.assertFalse(set(fieldnames) & company_fieldnames)
 		for purpose in DEFAULT_ACCOUNT_PURPOSES:
 			self.assertEqual(purpose.key, purpose.key.upper())
 			if purpose.fallback:
