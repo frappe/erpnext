@@ -7,15 +7,10 @@ from itertools import chain
 
 import frappe
 from frappe import _, bold
-<<<<<<< HEAD
 from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Case, Criterion, Tuple
 from frappe.query_builder.functions import Count, Max, Min, Sum
-=======
-from frappe.query_builder import Case, Criterion, Order, Tuple
-from frappe.query_builder.functions import Count, Max, Min
 from frappe.query_builder.terms import ParameterizedValueWrapper
->>>>>>> 573904c (fix(subcontracting): replay receipts and returns together on a supplier warehouse reservation's cancel)
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
