@@ -752,6 +752,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for d in finished_items_last:
 			if d.s_warehouse or d.set_basic_rate_manually:
 				if d.set_basic_rate_manually:
+					if is_costed_out_of_finished_item(d) and self.has_raw_materials_consumed_earlier():
+						d.basic_rate = 0.0
 					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 				continue
 
@@ -804,10 +806,20 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def has_consumption_basis(self) -> bool:
 		"""Whether the cost of the consumed items is known, even when that cost is zero."""
-		if any(d.s_warehouse for d in self.get("items")):
+		if any(d.s_warehouse for d in self.get("items")) or self.has_raw_materials_consumed_earlier():
 			return True
 
 		return self.is_rm_cost_from_consumption_entries()
+
+	def has_raw_materials_consumed_earlier(self) -> bool:
+		"""A Manufacture without raw materials, which without continuous consumption means
+		earlier entries consumed its whole-number share, so it carries no cost of its own."""
+		return bool(
+			self.purpose == "Manufacture"
+			and self.work_order
+			and not any(d.s_warehouse for d in self.get("items"))
+			and not frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
+		)
 
 	def is_rm_cost_from_consumption_entries(self) -> bool:
 		"""Whether the consumption entries replace the raw materials of this entry."""
@@ -871,7 +883,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 		elif is_costed_out_of_finished_item(d):
 			# Recomputed every time: a rate fetched before the target warehouse was set
 			# must not stick to the row.
-			d.basic_rate = self.get_row_valuation_rate(d, raise_error_if_no_rate)
+			d.basic_rate = (
+				0.0
+				if self.has_raw_materials_consumed_earlier()
+				else self.get_row_valuation_rate(d, raise_error_if_no_rate)
+			)
 			has_derived_rate = True
 		elif d.secondary_item_type and d.bom_secondary_item:
 			cost_allocation_per = flt(
