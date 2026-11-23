@@ -4630,6 +4630,95 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
 
+	def make_co_product_repack(self):
+		"""Unsaved Repack of 2 FG from 2,000 of raw material, with a co-product at 20% of component cost."""
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		co_product = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=20, basic_rate=100)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": rm_item, "qty": 10})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 2,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		bom.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = entry.stock_entry_type = "Repack"
+		entry.update(
+			{
+				"company": "_Test Company",
+				"from_bom": 1,
+				"bom_no": bom.name,
+				"fg_completed_qty": 2,
+				"from_warehouse": warehouse,
+				"to_warehouse": warehouse,
+			}
+		)
+		entry.get_items()
+		return entry, fg_item, co_product
+
+	def append_manual_finished_good(self, entry, item_code, qty, rate):
+		entry.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": qty,
+				"t_warehouse": entry.to_warehouse,
+				"is_finished_item": 1,
+				"set_basic_rate_manually": 1,
+				"basic_rate": rate,
+			},
+		)
+
+	def test_repack_co_product_shares_the_cost_left_after_a_manual_finished_good(self):
+		"""A manual finished good takes its value first; the BOM percentages split what is left."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		next(d for d in entry.items if d.is_finished_item).qty = 1
+		self.append_manual_finished_good(entry, fg_item, qty=1, rate=300)
+		entry.insert()
+
+		amounts = {(d.item_code, d.set_basic_rate_manually): d.basic_amount for d in entry.items}
+		self.assertEqual(amounts[(co_product, 0)], 340)
+		self.assertEqual(amounts[(fg_item, 0)], 1360)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
+		entry.submit()
+		ledger = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": entry.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		for row in entry.items:
+			if row.t_warehouse:
+				self.assertEqual(ledger[row.name], row.basic_amount)
+		# in equals out, so nothing is left for Stock Adjustment
+		self.assertEqual(sum(ledger.values()), 0)
+
+	def test_repack_co_product_keeps_its_share_when_every_finished_good_is_manual(self):
+		"""With no automatic finished good, the co-product takes its percentage of the whole cost."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		entry.remove(next(d for d in entry.items if d.is_finished_item))
+		self.append_manual_finished_good(entry, fg_item, qty=2, rate=800)
+		entry.insert()
+
+		co_row = next(d for d in entry.items if d.item_code == co_product)
+		self.assertEqual(co_row.basic_amount, 400)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
 	def test_secondary_item_with_zero_cost_allocation_carries_no_value(self):
 		"""A BOM that allocates 0% to a secondary item gives the finished good everything."""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
