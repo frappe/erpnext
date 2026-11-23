@@ -1410,6 +1410,9 @@ def make_bundle_for_material_transfer(**kwargs):
 	bundle_doc.company = kwargs.company or bundle_doc.company
 	bundle_doc.warehouse = kwargs.warehouse
 	bundle_doc.type_of_transaction = kwargs.type_of_transaction
+	if bundle_doc.voucher_type != kwargs.voucher_type:
+		bundle_doc.voucher_detail_no = None
+
 	bundle_doc.voucher_type = kwargs.voucher_type
 	bundle_doc.voucher_no = "" if kwargs.is_new or kwargs.docstatus == 2 else kwargs.voucher_no
 	bundle_doc.is_cancelled = 0
