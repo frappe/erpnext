@@ -106,8 +106,8 @@ class StockEntrySABB(BaseStockEntry):
 			for row in self.doc.items
 			if not row.serial_and_batch_bundle
 		]
-		# rows with serial nos or a batch entered take first, so other rows do not take those
-		for row, entered in sorted(rows, key=lambda pair: not any(pair[1])):
+		# rows with serial nos entered take first, then rows with a batch, so other rows do not take those
+		for row, entered in sorted(rows, key=lambda pair: (not pair[1][0], not pair[1][1])):
 			serial_nos_list, batch_nos_list = take_reserved_entries(
 				reserved[row.scio_detail], row.transfer_qty, *entered
 			)
