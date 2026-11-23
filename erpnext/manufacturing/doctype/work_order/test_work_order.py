@@ -4850,6 +4850,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(sum(row.qty for row in manufacture.items if row.item_code == rm_item), 1)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 0,
+			"validate_components_quantities_per_bom": 1,
+		},
+	)
+	def test_bom_component_check_takes_whole_number_share_of_running_total(self):
+		# 1.5 per unit: rounding each entry up would expect 2 every time
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=6)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=2, basic_rate=100)
+		consumed_qty = []
+		for _ in range(4):
+			manufacture = submit_manufacture_of_one(work_order)
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+		self.assertEqual(consumed_qty, [2, 1, 2, 1])
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
 	)
 	def test_partial_manufactures_without_raw_materials_value_scrap_at_zero(self):
