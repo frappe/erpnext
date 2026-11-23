@@ -810,8 +810,7 @@ class Company(NestedSet):
 			return
 
 		for purpose in get_purposes().values():
-			# a purpose of another app can have no Company field
-			if not purpose.account_type or not purpose.fieldname:
+			if not purpose.account_type:
 				continue
 
 			if purpose.depends_on and not self.get(purpose.depends_on):
