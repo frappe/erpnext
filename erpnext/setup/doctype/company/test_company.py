@@ -435,9 +435,9 @@ class TestCompany(ERPNextTestSuite):
 		company.set_default_account(EXCHANGE_LOSS, None)
 		company.save()
 		company.reload()
-		# the fields themselves are empty; get_default_account() would return the fallback
-		self.assertFalse(company.exchange_gain_account)
-		self.assertFalse(company.exchange_loss_account)
+		# the rows are removed; get_default_account() would return the fallback
+		self.assertIsNone(company.get_default_account_row(EXCHANGE_GAIN))
+		self.assertIsNone(company.get_default_account_row(EXCHANGE_LOSS))
 		self.assertEqual(get_exchange_gain_loss_account(company.name, True), cogs_account)
 		self.assertEqual(get_exchange_gain_loss_account(company.name, False), cogs_account)
 

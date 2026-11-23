@@ -3,9 +3,10 @@
 
 """Registry of the default accounts of a Company.
 
-Each purpose defines one default account: its label, the filters an account must match and
-where the account is stored. Read and write default accounts with `get_default_account` and
-`set_default_account` instead of the Company fields.
+Each purpose defines one default account: its label and the filters an account must match.
+A Company stores its default accounts as rows of the child table `default_accounts`
+(**Company Default Account**), one row per purpose. Read and write them with
+`get_default_account` and `set_default_account`.
 
 Apps register purposes with the hook `company_default_accounts`: the dotted path of a function
 that returns a dict of `DefaultAccountPurpose` by key. See `get_erpnext_purposes` and its entry in
@@ -64,7 +65,8 @@ class DefaultAccountPurpose:
 	label: str
 	# Account filters, each value is a str or ["in", [...]]
 	filters: dict
-	# Company field that stores the account
+	# Removed Company field that stored the account before v17. The migration copies it into a row,
+	# and `erpnext.accounts.utils.get_company_default` maps it to this purpose.
 	fieldname: str | None = None
 	# Purpose to use when this purpose has no account
 	fallback: str | None = None
@@ -73,9 +75,11 @@ class DefaultAccountPurpose:
 	# Company field that must be set to find the account when a Company is set up,
 	# for example "enable_perpetual_inventory"
 	depends_on: str | None = None
+	# Untranslated help text, shown in the purpose options
+	description: str | None = None
 
 
-# Order of the Company form
+# Order of the rows in the Default Accounts table of the Company form
 DEFAULT_ACCOUNT_PURPOSES = [
 	DefaultAccountPurpose(
 		key=BANK,
@@ -196,12 +200,14 @@ DEFAULT_ACCOUNT_PURPOSES = [
 		label=N_("Default Advance Received Account"),
 		filters={"root_type": "Liability", "account_type": "Receivable"},
 		fieldname="default_advance_received_account",
+		description=N_("Only 'Payment Entries' made against this advance account are supported."),
 	),
 	DefaultAccountPurpose(
 		key=ADVANCE_PAID,
 		label=N_("Default Advance Paid Account"),
 		filters={"root_type": "Asset", "account_type": "Payable"},
 		fieldname="default_advance_paid_account",
+		description=N_("Only 'Payment Entries' made against this advance account are supported."),
 	),
 	DefaultAccountPurpose(
 		key=ACCUMULATED_DEPRECIATION,
@@ -248,6 +254,7 @@ DEFAULT_ACCOUNT_PURPOSES = [
 		label=N_("Service Expense Account"),
 		filters={"root_type": "Expense"},
 		fieldname="service_expense_account",
+		description=N_("For service item"),
 	),
 	DefaultAccountPurpose(
 		key=PURCHASE_EXPENSE_CONTRA,
@@ -288,12 +295,18 @@ DEFAULT_ACCOUNT_PURPOSES = [
 		label=N_("Default Purchase Price Variance Account"),
 		filters={},
 		fieldname="default_purchase_price_variance_account",
+		description=N_(
+			"Used for items valued at Standard Cost: the difference between the purchase price and the standard rate is booked here."
+		),
 	),
 	DefaultAccountPurpose(
 		key=MANUFACTURING_VARIANCE,
 		label=N_("Default Manufacturing Variance Account"),
 		filters={},
 		fieldname="default_manufacturing_variance_account",
+		description=N_(
+			"For Standard Cost items: the Manufacture/Repack consumed cost vs standard rate difference is booked here."
+		),
 	),
 	DefaultAccountPurpose(
 		key=STOCK_RECEIVED_BUT_NOT_BILLED,
@@ -351,6 +364,13 @@ def get_purpose(key: str) -> DefaultAccountPurpose:
 	return purpose
 
 
+def get_purpose_by_fieldname(fieldname: str) -> str | None:
+	"""Return the purpose of a removed Company field, for example "RECEIVABLE" for "default_receivable_account"."""
+	for purpose in get_purposes().values():
+		if purpose.fieldname == fieldname:
+			return purpose.key
+
+
 def get_default_account(company: str, purpose: str, required: bool = False) -> str | None:
 	"""Return the account of this purpose, else the account of its fallback purpose.
 
@@ -364,8 +384,34 @@ def get_default_account(company: str, purpose: str, required: bool = False) -> s
 
 
 def set_default_account(company: str, purpose: str, account: str | None) -> None:
-	"""Store the account of this purpose without validation. Do not change the Company timestamp."""
-	frappe.db.set_value("Company", company, get_purpose(purpose).fieldname, account, update_modified=False)
+	"""Store the account of this purpose without validation. An empty account removes the row.
+
+	This writes the row directly to the database. To validate the account, use
+	`Company.set_default_account` and save the Company instead.
+	"""
+	get_purpose(purpose)
+	row_filters = {
+		"parenttype": "Company",
+		"parentfield": "default_accounts",
+		"parent": company,
+		"purpose": purpose,
+	}
+	row_name = frappe.db.get_value("Company Default Account", row_filters)
+	if row_name and account:
+		frappe.db.set_value("Company Default Account", row_name, "account", account)
+	elif row_name:
+		frappe.db.delete("Company Default Account", {"name": row_name})
+	elif account:
+		row_count = frappe.db.count(
+			"Company Default Account",
+			{"parenttype": "Company", "parentfield": "default_accounts", "parent": company},
+		)
+		row = frappe.get_doc(
+			{"doctype": "Company Default Account", **row_filters, "account": account, "idx": row_count + 1}
+		)
+		row.db_insert()
+
+	frappe.clear_document_cache("Company", company)
 
 
 @frappe.whitelist()
@@ -375,7 +421,7 @@ def get_purpose_options() -> list[dict]:
 			"value": purpose.key,
 			"label": _(purpose.label),
 			"filters": purpose.filters,
-			"fieldname": purpose.fieldname,
+			"description": purpose.description and _(purpose.description),
 		}
 		for purpose in get_purposes().values()
 	]

@@ -9,7 +9,6 @@ from functools import reduce
 import frappe
 from frappe import _
 from frappe.core.doctype.file.utils import find_file_by_url
-from frappe.desk.form.linked_with import get_linked_fields
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 from frappe.utils.csvutils import UnicodeWriter
@@ -483,9 +482,12 @@ def get_mandatory_account_types():
 
 
 def unset_existing_data(company):
-	# remove accounts data from company
-	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
-	frappe.db.set_value("Company", company, dict.fromkeys(fieldnames, ""))
+	# remove accounts data from company: the default account rows and Account fields of other apps
+	frappe.db.delete("Company Default Account", {"parenttype": "Company", "parent": company})
+	account_fields = frappe.get_meta("Company").get("fields", {"fieldtype": "Link", "options": "Account"})
+	if account_fields:
+		frappe.db.set_value("Company", company, dict.fromkeys([df.fieldname for df in account_fields], ""))
+	frappe.clear_document_cache("Company", company)
 
 	# import_coa authorizes company replacement; Accounts Manager cannot delete purchase templates.
 	for doctype in ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"):

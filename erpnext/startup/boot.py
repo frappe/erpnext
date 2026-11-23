@@ -23,9 +23,6 @@ READABLE_COMPANY_FIELDS = (
 	"cost_center",
 	"default_selling_terms",
 	"default_buying_terms",
-	"default_bank_account",
-	"exchange_gain_loss_account",
-	"bank_charges_account",
 )
 
 
