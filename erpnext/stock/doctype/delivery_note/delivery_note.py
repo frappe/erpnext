@@ -247,7 +247,10 @@ class DeliveryNote(SellingController):
 					"target_parent_dt": "Delivery Note",
 					"target_parent_field": "per_returned",
 					"target_ref_field": "stock_qty",
-					"source_field": "-1 * stock_qty",
+					"source_field": "-1 * qty * conversion_factor",
+					"round_to_target_precision": frappe.get_single_value(
+						"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
+					),
 					"percent_join_field_parent": "return_against",
 				},
 			]
