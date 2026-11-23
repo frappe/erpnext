@@ -1148,6 +1148,19 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	return flt(reserved_qty[0][0])
 
 
+def get_sre_held_qty_for_voucher_detail_nos(voucher_detail_nos: list[str]) -> dict[str, float]:
+	"""Qty the reservations of each voucher row still hold in any warehouse; consumed stock stays counted."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	data = (
+		frappe.qb.from_(sre)
+		.select(sre.voucher_detail_no, Sum(sre.reserved_qty - sre.transferred_qty - sre.delivered_qty))
+		.where((sre.docstatus == 1) & sre.voucher_detail_no.isin(voucher_detail_nos))
+		.groupby(sre.voucher_detail_no)
+	).run(as_list=True)
+
+	return {voucher_detail_no: flt(qty) for voucher_detail_no, qty in data}
+
+
 def get_sre_reserved_serial_nos_details(
 	item_code: str, warehouse: str, serial_nos: list | None = None
 ) -> dict:
@@ -2277,8 +2290,11 @@ def get_status(sre) -> str:
 		return "Cancelled"
 	if sre.docstatus != 1:
 		return "Draft"
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 	if sre.transferred_qty:
-		return "Partially Used" if sre.transferred_qty < sre.reserved_qty else "Closed"
+		# a supplier warehouse reservation is both consumed and returned
+		used_qty = flt(flt(sre.transferred_qty) + flt(sre.consumed_qty), precision)
+		return "Partially Used" if used_qty < flt(sre.reserved_qty, precision) else "Closed"
 	if flt(sre.delivered_qty) + flt(sre.consumed_qty) >= flt(sre.reserved_qty):
 		return "Delivered"
 	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
