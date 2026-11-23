@@ -792,7 +792,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			return __("This batch does not keep its own rate, so it goes out at the warehouse rate");
 		if (!part.qty_before) return __("This batch had no stock left to price from");
 		return __("The batch had {0} worth {1}, so {2} per unit", [
-			`${this.number(part.qty_before)} ${__(this.data.item.stock_uom)}`,
+			`${this.number(part.qty_before)} ${this.uom()}`,
 			this.plain_money(part.value_before),
 			this.plain_money(part.value_before / part.qty_before),
 		]);
@@ -901,8 +901,12 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		return format_number(rounded, null, decimals);
 	}
 
+	uom() {
+		return frappe.utils.escape_html(__(this.data.item.stock_uom));
+	}
+
 	qty(value) {
-		return `<span class="vrb-nowrap">${this.number(value)} ${__(this.data.item.stock_uom)}</span>`;
+		return `<span class="vrb-nowrap">${this.number(value)} ${this.uom()}</span>`;
 	}
 
 	signed_qty(value) {

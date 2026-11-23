@@ -1,4 +1,5 @@
 import frappe
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, today
 
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -191,3 +192,26 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 
 		with self.assertRaises(frappe.ValidationError):
 			get_valuation_steps(item_code, WAREHOUSE, upto=self.get_entry_name(other.name))
+
+	def make_user(self, email, role):
+		user = frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": "Valuation", "send_welcome_email": 0}
+		).insert(ignore_permissions=True)
+		user.add_roles(role)
+		return email
+
+	def test_user_without_access_is_refused(self):
+		item_code = self.make_item("Moving Average")
+		self.receive(item_code, 50, 1)
+		accounts_user = self.make_user("vrb-accounts-user@example.com", "Accounts User")
+		stock_user = self.make_user("vrb-stock-user@example.com", "Stock User")
+		other_warehouse = frappe.db.get_value(
+			"Warehouse", {"company": "_Test Company", "is_group": 0, "name": ("!=", WAREHOUSE)}, "name"
+		)
+		add_user_permission("Warehouse", other_warehouse, stock_user, ignore_permissions=True)
+
+		for user in (accounts_user, stock_user):
+			frappe.set_user(user)
+			with self.assertRaises(frappe.PermissionError):
+				get_valuation_steps(item_code, WAREHOUSE)
+			frappe.set_user("Administrator")
