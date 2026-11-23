@@ -1294,7 +1294,9 @@ class BOM(WebsiteGenerator):
 		for d in self.get("secondary_items"):
 			if d.valuation_type == "Valuation Rate":
 				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
-				d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
+				# set here too, so Update Cost saves the loss the cost is net of
+				d.process_loss_qty = get_secondary_process_loss_qty(d)
+				d.cost = flt(flt(rate) * (flt(d.stock_qty) - d.process_loss_qty), precision)
 			elif d.valuation_type == "Manual":
 				d.cost = flt(d.cost, precision)
 			else:
@@ -1558,9 +1560,7 @@ class BOM(WebsiteGenerator):
 		)
 
 		for item in self.secondary_items:
-			item.process_loss_qty = flt(
-				item.stock_qty * (item.process_loss_per / 100), self.precision("quantity")
-			)
+			item.process_loss_qty = get_secondary_process_loss_qty(item)
 
 	def validate_uoms(self):
 		self.validate_uom(self.item, self.uom, self.process_loss_percentage, self.process_loss_qty)
@@ -2486,6 +2486,14 @@ def _get_unit_operating_cost(bom_no, unit_costs, skip_boms_with_operations=False
 
 	unit_costs[bom_no] = cost
 	return cost
+
+
+def get_secondary_process_loss_qty(row) -> float:
+	"""Rounded process loss qty of a secondary row, capped as rounding can take it above the row's qty."""
+	return min(
+		flt(flt(row.stock_qty) * flt(row.process_loss_per) / 100, row.precision("process_loss_qty")),
+		flt(row.stock_qty),
+	)
 
 
 def get_good_qty(bom):
