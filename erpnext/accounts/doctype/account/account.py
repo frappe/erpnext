@@ -8,7 +8,6 @@ from frappe.utils import add_to_date, cint, cstr, pretty_date
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
 import erpnext
-from erpnext.accounts.default_accounts import get_purposes
 from erpnext.deprecation_dumpster import deprecation_warning
 
 
@@ -802,5 +801,32 @@ def _ensure_idle_system():
 
 
 def get_company_default_account_fields():
-	"""Return {fieldname: label} of the default accounts of a Company."""
-	return {purpose.fieldname: purpose.label for purpose in get_purposes().values()}
+	"""Return {fieldname: label} of the Company default accounts that block disabling an Account.
+
+	This is a subset of the registry. A new entry blocks more accounts, so it changes behavior.
+	"""
+	return {
+		"default_bank_account": "Default Bank Account",
+		"default_cash_account": "Default Cash Account",
+		"default_receivable_account": "Default Receivable Account",
+		"default_payable_account": "Default Payable Account",
+		"default_expense_account": "Default Expense Account",
+		"default_income_account": "Default Income Account",
+		"stock_received_but_not_billed": "Stock Received But Not Billed Account",
+		"stock_delivered_but_not_billed": "Stock Delivered But Not Billed Account",
+		"stock_adjustment_account": "Stock Adjustment Account",
+		"write_off_account": "Write Off Account",
+		"bank_charges_account": "Bank Charges Account",
+		"default_discount_account": "Default Payment Discount Account",
+		"unrealized_profit_loss_account": "Unrealized Profit / Loss Account",
+		"exchange_gain_loss_account": "Exchange Gain / Loss Account",
+		"exchange_gain_account": "Exchange Gain Account",
+		"exchange_loss_account": "Exchange Loss Account",
+		"unrealized_exchange_gain_loss_account": "Unrealized Exchange Gain / Loss Account",
+		"round_off_account": "Round Off Account",
+		"default_deferred_revenue_account": "Default Deferred Revenue Account",
+		"default_deferred_expense_account": "Default Deferred Expense Account",
+		"accumulated_depreciation_account": "Accumulated Depreciation Account",
+		"depreciation_expense_account": "Depreciation Expense Account",
+		"disposal_account": "Gain/Loss Account on Asset Disposal",
+	}

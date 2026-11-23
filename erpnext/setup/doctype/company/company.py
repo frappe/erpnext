@@ -781,7 +781,8 @@ class Company(NestedSet):
 			return
 
 		for purpose in get_purposes().values():
-			if not purpose.account_type:
+			# a purpose of another app can have no Company field
+			if not purpose.account_type or not purpose.fieldname:
 				continue
 
 			if purpose.perpetual_inventory_only and not self.enable_perpetual_inventory:
