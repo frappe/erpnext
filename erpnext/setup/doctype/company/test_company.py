@@ -361,6 +361,13 @@ class TestCompany(ERPNextTestSuite):
 			company.save()
 
 		company.default_operating_cost_account = None
+		company.payment_discount_received_account = frappe.db.get_value(
+			"Account", {"company": company.name, "root_type": "Asset", "is_group": 0}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.payment_discount_received_account = None
 		company.cost_center = frappe.db.get_value("Cost Center", {"company": company.name, "is_group": 1})
 		with self.assertRaises(frappe.ValidationError):
 			company.save()

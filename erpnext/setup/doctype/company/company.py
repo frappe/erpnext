@@ -428,8 +428,8 @@ class Company(NestedSet):
 			"default_purchase_price_variance_account": {},
 			"default_manufacturing_variance_account": {},
 			"default_discount_account": {},
-			"payment_discount_received_account": {},
-			"payment_discount_allowed_account": {},
+			"payment_discount_received_account": {"root_type": ("Income", "Expense")},
+			"payment_discount_allowed_account": {"root_type": ("Income", "Expense")},
 			"default_deferred_revenue_account": {},
 			"default_deferred_expense_account": {},
 		}
