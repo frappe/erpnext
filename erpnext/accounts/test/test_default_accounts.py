@@ -161,6 +161,38 @@ class TestDefaultAccounts(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "invalid root_type"):
 			company.save()
 
+	def test_empty_account_is_mandatory(self):
+		company = frappe.get_doc("Company", COMPANY)
+		company.get_default_account_row(WRITE_OFF).account = None
+		with self.assertRaises(frappe.MandatoryError):
+			company.save()
+
+	def test_rows_of_uninstalled_app(self):
+		write_off_account = get_default_account(COMPANY, WRITE_OFF)
+		frappe.get_doc(
+			{
+				"doctype": "Company Default Account",
+				"parenttype": "Company",
+				"parentfield": "default_accounts",
+				"parent": COMPANY,
+				"purpose": "UNINSTALLED_PURPOSE",
+				"account": write_off_account,
+				"idx": 1,
+			}
+		).db_insert()
+		frappe.clear_document_cache("Company", COMPANY)
+
+		# an unchanged row of an uninstalled app does not block the save
+		company = frappe.get_doc("Company", COMPANY)
+		company.save()
+		self.assertEqual(company.default_accounts[-1].purpose, "UNINSTALLED_PURPOSE")
+
+		company.get_default_account_row("UNINSTALLED_PURPOSE").account = get_default_account(
+			COMPANY, COST_OF_GOODS_SOLD
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "not a valid default account purpose"):
+			company.save()
+
 	def test_rows_follow_registry_order(self):
 		company = frappe.get_doc("Company", COMPANY)
 		company.set_default_account(BANK, None)

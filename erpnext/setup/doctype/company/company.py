@@ -372,7 +372,12 @@ class Company(NestedSet):
 
 		seen_purposes = set()
 		for row in self.default_accounts:
+			account_changed = old_accounts.get(row.purpose) != row.account
 			purpose = purposes.get(row.purpose)
+			# keep the unchanged rows of an uninstalled app
+			if not purpose and row.purpose in old_accounts and not account_changed:
+				continue
+
 			if not purpose:
 				frappe.throw(
 					_("Row #{0}: {1} is not a valid default account purpose").format(
@@ -385,7 +390,10 @@ class Company(NestedSet):
 				frappe.throw(_("Row #{0}: {1} is set more than once").format(row.idx, bold(label)))
 			seen_purposes.add(row.purpose)
 
-			account_changed = old_accounts.get(row.purpose) != row.account
+			# the mandatory check runs after validate
+			if not row.account:
+				continue
+
 			if account_changed:
 				self.validate_default_account(row.account, label, purpose.filters)
 
@@ -402,7 +410,7 @@ class Company(NestedSet):
 
 		# show the rows in the order of the registry
 		purpose_order = {key: index for index, key in enumerate(purposes)}
-		self.default_accounts.sort(key=lambda row: purpose_order[row.purpose])
+		self.default_accounts.sort(key=lambda row: purpose_order.get(row.purpose, len(purpose_order)))
 		for idx, row in enumerate(self.default_accounts, start=1):
 			row.idx = idx
 
