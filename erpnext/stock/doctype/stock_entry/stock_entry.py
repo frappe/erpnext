@@ -4736,15 +4736,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for key, row in available_materials.items():
-			pending_qty, covered_qty = self.get_material_pending_qty(
-				key, available_materials, wo_data, pending_qty_to_mfg
-			)
-			if flt(covered_qty - fg_completed_qty, fg_precision) <= 0:
-				# an entry for all that is pending consumes what is left
-				pending_qty = fg_completed_qty
-
 			qty = flt(row.qty)
 			if not self.is_return:
+				pending_qty, covered_qty = self.get_material_pending_qty(
+					key, available_materials, wo_data, pending_qty_to_mfg
+				)
+				if flt(covered_qty - fg_completed_qty, fg_precision) <= 0:
+					# an entry for all that is pending consumes what is left
+					pending_qty = fg_completed_qty
+
 				# drop float noise only, so 7.000000000000001 is not ceiled to 8 and 0.004 still is to 1
 				qty = flt(flt(row.qty) * fg_completed_qty / pending_qty, 9)
 
