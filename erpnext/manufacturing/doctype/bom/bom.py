@@ -1851,6 +1851,10 @@ def _set_default_accounts_for_items(item_dict, company):
 
 
 def _get_company_fallback(company, doctype):
+	# A work order without a company asks for the BOM items with an empty company
+	if not company:
+		return None
+
 	if doctype == "Account":
 		return get_default_account(company, STOCK_ADJUSTMENT)
 
