@@ -1436,9 +1436,13 @@ class TestSubcontractingController(ERPNextTestSuite):
 		bundles = {}
 		consumptions = []
 		for voucher_no, fg_item, consumed_qty in (("SCR-1", "C", 1), ("SCR-2", "C", -1), ("SCR-3", "A", 1)):
-			bundles[("RM", fg_item, doc.supplier_warehouse, voucher_no)] = frappe._dict(serial_nos=["S1"])
+			bundles[voucher_no] = frappe._dict(serial_nos=["S1"])
 			row = frappe._dict(
-				rm_item_code="RM", main_item_code=fg_item, voucher_no=voucher_no, consumed_qty=consumed_qty
+				name=voucher_no,
+				rm_item_code="RM",
+				main_item_code=fg_item,
+				voucher_no=voucher_no,
+				consumed_qty=consumed_qty,
 			)
 			consumptions.append(doc.get_consumption(row, ("RM", fg_item, "SCO"), bundles))
 
@@ -1466,11 +1470,13 @@ class TestSubcontractingController(ERPNextTestSuite):
 		bundles = {}
 		consumptions = []
 		for voucher_no, batch_qty, consumed_qty in (("SCR-1", -3, 3), ("SCR-2", 2, -2)):
-			bundles[("RM", "A", doc.supplier_warehouse, voucher_no)] = frappe._dict(
-				serial_nos=[], batch_nos=defaultdict(float, X=batch_qty)
-			)
+			bundles[voucher_no] = frappe._dict(serial_nos=[], batch_nos=defaultdict(float, X=batch_qty))
 			row = frappe._dict(
-				rm_item_code="RM", main_item_code="A", voucher_no=voucher_no, consumed_qty=consumed_qty
+				name=voucher_no,
+				rm_item_code="RM",
+				main_item_code="A",
+				voucher_no=voucher_no,
+				consumed_qty=consumed_qty,
 			)
 			consumptions.append(doc.get_consumption(row, ("RM", "A", "SCO"), bundles))
 
@@ -1478,26 +1484,38 @@ class TestSubcontractingController(ERPNextTestSuite):
 		details = doc.available_materials[("RM", "A", "SCO")]
 		self.assertEqual((details.qty, details.batch_no["X"]), (2, 2))
 
-	def test_bundle_shared_by_two_orders_takes_each_orders_own_qty(self):
-		"""Two orders each send 5 of batch X for FG A and B, and one receipt consumes 3 for FG C of each."""
+	def test_receipt_rows_of_two_orders_take_their_own_batches(self):
+		"""SCO-1 sends 5 of batch X and SCO-2 5 of batch Y for FG A and B; one receipt consumes 3 of each for FG C."""
 		doc = frappe.new_doc("Subcontracting Receipt")
+		batches = {"SCO-1": "X", "SCO-2": "Y"}
 		doc.available_materials = {
-			("RM", fg_item, order): frappe._dict(qty=5, batch_no=defaultdict(float, X=5))
-			for order in ("SCO-1", "SCO-2")
+			("RM", fg_item, order): frappe._dict(qty=5, batch_no=defaultdict(float, {batch_no: 5}))
+			for order, batch_no in batches.items()
 			for fg_item in ("A", "B")
 		}
 		bundles = {
-			("RM", "C", doc.supplier_warehouse, "SCR-1"): frappe._dict(
-				serial_nos=[], batch_nos=defaultdict(float, X=-6)
-			)
+			f"{order}-row": frappe._dict(serial_nos=[], batch_nos=defaultdict(float, {batch_no: -3}))
+			for order, batch_no in batches.items()
 		}
-		row = frappe._dict(rm_item_code="RM", main_item_code="C", voucher_no="SCR-1", consumed_qty=3)
-		consumptions = [doc.get_consumption(row, ("RM", "C", order), bundles) for order in ("SCO-1", "SCO-2")]
+		consumptions = [
+			doc.get_consumption(
+				frappe._dict(
+					name=f"{order}-row",
+					rm_item_code="RM",
+					main_item_code="C",
+					voucher_no="SCR-1",
+					consumed_qty=3,
+				),
+				("RM", "C", order),
+				bundles,
+			)
+			for order in batches
+		]
 
 		doc.deduct_consumptions(consumptions)
 		self.assertEqual(
-			[(row.qty, row.batch_no["X"]) for row in doc.available_materials.values()],
-			[(2, 2), (5, 5), (2, 2), (5, 5)],
+			[(row.qty, dict(row.batch_no)) for row in doc.available_materials.values()],
+			[(2, {"X": 2}), (5, {"X": 5}), (2, {"Y": 2}), (5, {"Y": 5})],
 		)
 
 	def test_return_over_other_transfers_gives_back_what_its_consumption_took(self):
