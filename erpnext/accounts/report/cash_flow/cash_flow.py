@@ -9,6 +9,13 @@ from frappe.utils import cstr, flt
 from pypika.terms import Bracket, LiteralValue
 
 import erpnext
+from erpnext.accounts.cash_basis.reports import (
+	add_report_message,
+	get_account_type_movement,
+	resolve_accounting_method,
+	set_report_end,
+	uses_cash_basis,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_filter_condition,
@@ -36,6 +43,9 @@ OTHER_BALANCE_SHEET_ACCOUNTS = "Other Balance Sheet Accounts"
 
 
 def execute(filters=None):
+	if filters:
+		resolve_accounting_method(filters)
+
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
@@ -45,6 +55,7 @@ def execute(filters=None):
 	if not period_list:
 		return
 
+	set_report_end(filters, period_list[-1]["to_date"])
 	cash_flow_sections = get_cash_flow_accounts()
 
 	# compute net profit / loss
@@ -171,7 +182,12 @@ def execute(filters=None):
 
 	report_summary = get_report_summary(summary_data, currency)
 
-	return columns, data, None, chart, report_summary
+	return add_report_message(
+		(columns, data, None, chart, report_summary),
+		filters,
+		period_list[-1]["to_date"],
+		from_date=period_list[0]["from_date"],
+	)
 
 
 def get_cash_flow_accounts():
@@ -308,6 +324,17 @@ def get_account_type_based_gl_data(company, filters=None):
 
 	result = query.run()
 	amount = flt(result[0][0]) if result and result[0][0] else 0
+
+	if uses_cash_basis(filters):
+		amount += get_account_type_movement(
+			filters,
+			get_row_accounts(company, filters.account_type),
+			filters.start_date,
+			filters.end_date,
+			filters.dimension_field,
+			filters.dimension_value,
+			company=company,
+		)
 
 	company_currency = erpnext.get_company_currency(company)
 	if amount and filters.presentation_currency and filters.presentation_currency != company_currency:

@@ -10,11 +10,10 @@ frappe.query_reports[CF_REPORT_NAME] = $.extend({}, erpnext.financial_statements
 
 erpnext.utils.add_dimensions(CF_REPORT_NAME, 10);
 
-// The last item in the array is the definition for Presentation Currency
-// filter. It won't be used in cash flow for now so we pop it. Please take
-// of this if you are working here.
-
-frappe.query_reports[CF_REPORT_NAME]["filters"].splice(8, 1);
+// Cash Flow does not use the Presentation Currency filter.
+frappe.query_reports[CF_REPORT_NAME]["filters"] = frappe.query_reports[CF_REPORT_NAME]["filters"].filter(
+	(filter) => filter.fieldname !== "presentation_currency"
+);
 
 frappe.query_reports[CF_REPORT_NAME]["filters"].push(
 	{

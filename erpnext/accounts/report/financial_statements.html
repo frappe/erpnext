@@ -30,6 +30,12 @@
 	<strong>{%=  __("Currency") %}:</strong> {%= filters.presentation_currency || erpnext.get_currency(filters.company) %}
 </h5>
 
+{% if (frappe.query_report.get_filter("accounting_method", false) && erpnext.financial_statements.is_cash_method_available(filters.company)) { %}
+	<h5 class="text-center">
+		<strong>{%= __("Accounting Method") %}:</strong> {%= (filters.accounting_method || erpnext.financial_statements.get_company_accounting_method(filters.company)) == "Cash" ? __("Cash") : __("Accrual") %}
+	</h5>
+{% } %}
+
 {% if (filters.from_date) { %}
 	<h5 class="text-center">
 		{%= frappe.datetime.str_to_user(filters.from_date) %} - {%= frappe.datetime.str_to_user(filters.to_date) %}

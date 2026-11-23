@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt
 
+from erpnext.accounts.cash_basis import CASH, get_accounting_method
+from erpnext.accounts.cash_basis.reports import get_report_message, resolve_accounting_method
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
 	get_xlsx_styles,  #! DO NOT REMOVE - hook for styling
@@ -31,6 +33,9 @@ from erpnext.accounts.report.utils import has_gl_entry_restrictions
 
 
 def execute(filters=None):
+	if filters:
+		resolve_accounting_method(filters)
+
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
@@ -116,6 +121,10 @@ def execute(filters=None):
 	if filters.get("selected_view") == "Growth":
 		compute_growth_view_data(data, period_list)
 
+	if cash_message := get_report_message(
+		filters, period_list[-1]["to_date"], balance_sheet=True, from_date=period_list[0]["from_date"]
+	):
+		message = "<br>".join(line for line in (message, cash_message) if line)
 	return columns, data, message, chart, report_summary, primitive_summary
 
 
@@ -307,7 +316,7 @@ def get_chart_data(filters, chart_columns, asset, liability, equity, currency):
 
 
 def execute_snapshot_report(filters):
-	if filters.report_template or has_gl_entry_restrictions():
+	if filters.report_template or has_gl_entry_restrictions() or get_accounting_method(filters) == CASH:
 		return execute(filters)
 
 	from frappe.database.duckdb.database import get_latest_sync
