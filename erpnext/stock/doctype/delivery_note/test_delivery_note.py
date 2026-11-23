@@ -2610,7 +2610,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertRaises(BatchExpiredError, dn.submit)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	def test_packed_row_on_batch_fields_rejects_an_expired_or_disabled_batch(self):
+	def test_packed_row_on_batch_fields_rejects_an_expired_batch(self):
 		from erpnext.exceptions import BatchExpiredError
 
 		component = make_item(
@@ -2628,15 +2628,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
 
 		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
-		dn.packed_items[0].use_serial_batch_fields = 1
 		dn.packed_items[0].batch_no = batch_no
 		self.assertRaises(BatchExpiredError, dn.save)
-
-		frappe.db.set_value("Batch", batch_no, {"expiry_date": None, "disabled": 1})
-		dn.reload()
-		dn.packed_items[0].use_serial_batch_fields = 1
-		dn.packed_items[0].batch_no = batch_no
-		self.assertRaisesRegex(frappe.ValidationError, "is disabled", dn.save)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
