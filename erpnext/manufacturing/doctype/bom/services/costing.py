@@ -343,7 +343,9 @@ class BOMCostingService:
 		for d in self.doc.get("secondary_items"):
 			if d.valuation_type == "Valuation Rate":
 				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
-				d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
+				# set here too, so Update Cost saves the loss the cost is net of
+				d.process_loss_qty = get_secondary_process_loss_qty(d)
+				d.cost = flt(flt(rate) * (flt(d.stock_qty) - d.process_loss_qty), precision)
 			elif d.valuation_type == "Manual":
 				d.cost = flt(d.cost, precision)
 			else:
@@ -381,6 +383,14 @@ class BOMCostingService:
 			if old_rate != row.rate:
 				# Only db_update if changed
 				row.db_update()
+
+
+def get_secondary_process_loss_qty(row) -> float:
+	"""Rounded process loss qty of a secondary row, capped as rounding can take it above the row's qty."""
+	return min(
+		flt(flt(row.stock_qty) * flt(row.process_loss_per) / 100, row.precision("process_loss_qty")),
+		flt(row.stock_qty),
+	)
 
 
 def get_good_qty(bom):
