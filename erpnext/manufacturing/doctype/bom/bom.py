@@ -24,6 +24,35 @@ from erpnext.stock.get_item_details import ItemDetailsCtx, get_conversion_factor
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 
+<<<<<<< HEAD
+=======
+# Backward-compatible re-exports: these were moved to mapper.py / services/.
+# Re-importing here preserves whitelist dotted-paths and external imports.
+from erpnext.manufacturing.doctype.bom.mapper import (
+	get_bom_diff,
+	get_children,
+	item_query,
+	make_variant_bom,
+)
+from erpnext.manufacturing.doctype.bom.services.costing import (
+	BOMCostingService,
+	get_secondary_process_loss_qty,
+)
+from erpnext.manufacturing.doctype.bom.services.exploded_items import (
+	BOMExplodedItemsService,
+)
+from erpnext.manufacturing.doctype.bom.services.operations_cost import (
+	add_additional_cost,
+	add_non_stock_items_cost,
+	add_operating_cost_component_wise,
+	add_operations_cost,
+	get_component_account,
+	get_op_cost_from_sub_assemblies,
+	get_secondary_items_from_sub_assemblies,
+)
+
+
+>>>>>>> a2dec76 (fix(manufacturing): keep the capped secondary process loss when the BOM saves)
 class BOMRecursionError(frappe.ValidationError):
 	pass
 
@@ -1558,9 +1587,7 @@ class BOM(WebsiteGenerator):
 		)
 
 		for item in self.secondary_items:
-			item.process_loss_qty = flt(
-				item.stock_qty * (item.process_loss_per / 100), item.precision("process_loss_qty")
-			)
+			item.process_loss_qty = get_secondary_process_loss_qty(item)
 
 	def validate_uoms(self):
 		self.validate_uom(self.item, self.uom, self.process_loss_percentage, self.process_loss_qty)
