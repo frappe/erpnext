@@ -3143,6 +3143,9 @@ def get_loyalty_programs(customer: str):
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):
+	frappe.has_permission("Sales Invoice", doc=source_name, throw=True)
+	frappe.has_permission("Invoice Discounting", ptype="create", throw=True)
+
 	invoice = frappe.get_doc("Sales Invoice", source_name)
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company
