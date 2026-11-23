@@ -31,6 +31,7 @@ from erpnext.manufacturing.doctype.bom.mapper import (
 )
 from erpnext.manufacturing.doctype.bom.services.costing import (
 	BOMCostingService,
+	get_secondary_process_loss_qty,
 )
 from erpnext.manufacturing.doctype.bom.services.exploded_items import (
 	BOMExplodedItemsService,
@@ -1261,9 +1262,7 @@ class BOM(WebsiteGenerator):
 		)
 
 		for item in self.secondary_items:
-			item.process_loss_qty = flt(
-				item.stock_qty * (item.process_loss_per / 100), item.precision("process_loss_qty")
-			)
+			item.process_loss_qty = get_secondary_process_loss_qty(item)
 
 	def validate_uoms(self):
 		self.validate_uom(self.item, self.uom, self.process_loss_percentage, self.process_loss_qty)
