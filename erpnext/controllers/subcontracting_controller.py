@@ -898,9 +898,18 @@ class SubcontractingController(StockController):
 
 	def deduct_consumptions(self, consumptions):
 		"""Deduct the consumptions from the transfers they count against."""
-		# a finished good's own consumption first, so another's only takes what it left
-		for consumption in sorted(consumptions, key=lambda consumption: not consumption.is_own):
-			self.deduct_consumed_qty_and_batches(consumption)
+		# a finished good's own consumption first, so another's only takes what it left; another's
+		# returns net with its consumption, so they give back what it took from each transfer
+		other_consumption = defaultdict(float)
+		for consumption in consumptions:
+			for batch_no, qty in self.get_consumed_qty_by_batch(consumption).items():
+				if consumption.is_own:
+					self.deduct_consumed(consumption.keys, batch_no, qty)
+				else:
+					other_consumption[(tuple(consumption.keys), batch_no)] += qty
+
+		for (keys, batch_no), qty in other_consumption.items():
+			self.deduct_consumed(list(keys), batch_no, qty)
 
 		# serial nos go out and come back in the order they were consumed and returned
 		serial_batches = self.get_serial_batches(consumptions)
@@ -914,20 +923,22 @@ class SubcontractingController(StockController):
 					serial_batches,
 				)
 
-	def deduct_consumed_qty_and_batches(self, consumption):
-		row, keys, bundles = consumption.row, consumption.keys, consumption.bundles
+	def get_consumed_qty_by_batch(self, consumption) -> dict:
+		"""Qty a consumption takes (under None) and the qty it takes of each batch; a return's is negative."""
+		row, bundles = consumption.row, consumption.bundles
+		consumed = defaultdict(float)
 		if consumption.by_serial:
 			# its serial nos change the qty and batches of the transfers that sent them
-			return
+			return consumed
 
 		if not consumption.by_batch:
-			self.deduct_consumed_qty(keys, row.consumed_qty)
+			consumed[None] += row.consumed_qty
 
 		if bundles.batch_nos:
 			for batch_no, qty in bundles.batch_nos.items():
 				if qty:
 					# a consumption's entries are negative, a return's positive
-					self.deduct_consumed_batch_qty(keys, batch_no, -qty)
+					consumed[batch_no] -= qty
 					bundles.batch_nos[batch_no] = 0
 
 		# Will be deprecated in v16
@@ -935,7 +946,16 @@ class SubcontractingController(StockController):
 			from erpnext.deprecation_dumpster import deprecation_warning
 
 			deprecation_warning("unknown", "v16", "No instructions.")
-			self.deduct_consumed_batch_qty(keys, row.batch_no, row.consumed_qty)
+			consumed[row.batch_no] += row.consumed_qty
+
+		return consumed
+
+	def deduct_consumed(self, keys, batch_no, qty):
+		"""Take the qty, or the batch qty if a batch is given, from the transfers."""
+		if batch_no:
+			self.deduct_consumed_batch_qty(keys, batch_no, qty)
+		else:
+			self.deduct_consumed_qty(keys, qty)
 
 	def get_serial_batches(self, consumptions) -> dict:
 		"""Batch of each serial no that changes the qty of the transfer that sent it."""
