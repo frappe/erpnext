@@ -3,6 +3,7 @@
 
 
 import json
+from datetime import datetime
 
 import frappe
 from frappe import _, throw
@@ -437,12 +438,10 @@ class Task(NestedSet):
 			if (
 				task.exp_start_date
 				and task.exp_end_date
-				and task.exp_start_date < get_datetime(end_date)
+				and get_datetime(task.exp_start_date) <= end_date
 				and task.status in ("Open", "Working", "Overdue")
 			):
-				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
-				task.exp_start_date = add_days(end_date, 1)
-				task.exp_end_date = add_days(task.exp_start_date, task_duration)
+				task.move_to_start_after(end_date)
 				task.flags.ignore_recursion_check = True
 				task.flags.rescheduled = True
 				task.save(ignore_permissions=self.flags.ignore_permissions)
@@ -451,6 +450,14 @@ class Task(NestedSet):
 		"""The later of the expected and actual end, as a task that overruns still blocks its dependents."""
 		end_dates = [get_datetime(d) for d in (self.exp_end_date, self.act_end_date) if d]
 		return max(end_dates, default=None)
+
+	def move_to_start_after(self, end_date):
+		"""Start on the day after `end_date`, keeping this task's time of day and duration."""
+		start_date = get_datetime(self.exp_start_date)
+		new_start_date = datetime.combine(add_days(getdate(end_date), 1), start_date.time())
+		shift = new_start_date - start_date
+		self.exp_start_date = new_start_date
+		self.exp_end_date = get_datetime(self.exp_end_date) + shift
 
 	def has_webform_permission(self, project=None):
 		project_user = frappe.db.get_value(
