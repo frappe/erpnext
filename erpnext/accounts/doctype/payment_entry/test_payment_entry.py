@@ -622,6 +622,29 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertFalse(frappe.has_permission("Journal Entry", "read", journal.name))
 			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
 
+	def test_outstanding_documents_need_payment_entry_and_voucher_read(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		readable_si = create_sales_invoice(qty=1, rate=500)
+		args = {
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"party": "_Test Customer",
+			"party_account": "Debtors - _TC",
+			"get_outstanding_invoices": True,
+			"get_orders_to_be_billed": True,
+		}
+
+		user = make_fenced_user("outstanding-docs@example.com", ["Stock User"])
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer"))
+			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
+
+		make_fenced_user(user, ["Accounts User"], [("Sales Invoice", readable_si.name)])
+		with as_user(user):
+			vouchers = {d.voucher_no for d in get_outstanding_reference_documents(args)}
+			self.assertIn(readable_si.name, vouchers)
+			self.assertNotIn(si.name, vouchers)
+
 	def test_dashboard_shows_linked_exchange_gain_loss_journal(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
