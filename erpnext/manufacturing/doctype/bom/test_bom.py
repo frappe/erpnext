@@ -1133,7 +1133,7 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(switched.plc_conversion_rate, 80)
 		self.assertEqual(switched.items[0].rate, 10)
 
-	def test_typed_price_list_exchange_rate_is_kept(self):
+	def test_typed_price_list_exchange_rate_follows_the_bom_conversion_rate(self):
 		import json
 
 		from frappe.handler import run_doc_method
@@ -1151,8 +1151,9 @@ class TestBOM(FrappeTestCase):
 			buying_price_list=price_list,
 			plc_conversion_rate=75,
 		)
-		self.assertEqual(bom.plc_conversion_rate, 75)
-		self.assertEqual(bom.items[0].rate, 9.375)
+		# a price list in the BOM currency takes the BOM's conversion rate (80), not the typed one
+		self.assertEqual(bom.plc_conversion_rate, 80)
+		self.assertEqual(bom.items[0].rate, 10)
 
 		frappe.local.request = frappe._dict(method="POST")
 		self.addCleanup(delattr, frappe.local, "request")
@@ -1162,12 +1163,12 @@ class TestBOM(FrappeTestCase):
 			docs=json.dumps(bom.as_dict(), default=str),
 			args=json.dumps({"update_parent": False, "save": False, "from_child_bom": True}),
 		)
-		self.assertEqual(frappe.local.response.docs[0].plc_conversion_rate, 75)
+		self.assertEqual(frappe.local.response.docs[0].plc_conversion_rate, 80)
 
 		bom.update_cost()
 		bom.reload()
-		self.assertEqual(bom.plc_conversion_rate, 75)
-		self.assertEqual(bom.items[0].rate, 9.375)
+		self.assertEqual(bom.plc_conversion_rate, 80)
+		self.assertEqual(bom.items[0].rate, 10)
 
 	def test_exploded_items_use_the_current_stock_qty(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -1349,6 +1350,29 @@ class TestBOM(FrappeTestCase):
 		bom.reload()
 		self.assertEqual(bom.raw_material_cost, 110)
 		assert_exploded_row(55, 110)
+
+	def test_price_list_in_bom_currency_uses_bom_conversion_rate(self):
+		price_list = make_usd_buying_price_list(83)
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		bom = make_usd_bom(
+			make_item(properties={"is_stock_item": 1}).name,
+			[{"item_code": rm_item, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+		)
+
+		# the BOM's own conversion rate (80) applies, not the exchange rate (83)
+		self.assertEqual(bom.plc_conversion_rate, 80)
+		self.assertEqual(bom.items[0].rate, 10)
+
+		# a row fetched on a form still holding the exchange rate
+		bom.plc_conversion_rate = 83
+		detail = bom.get_bom_material_detail({"item_code": rm_item, "qty": 1, "bom_no": ""})
+		self.assertEqual(detail["rate"], 10)
 
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
