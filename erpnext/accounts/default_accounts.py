@@ -351,8 +351,8 @@ def get_default_account(company: str, purpose: str, required: bool = False) -> s
 
 
 def set_default_account(company: str, purpose: str, account: str | None) -> None:
-	"""Store the account of this purpose without validation."""
-	frappe.db.set_value("Company", company, get_purpose(purpose).fieldname, account)
+	"""Store the account of this purpose without validation. Do not change the Company timestamp."""
+	frappe.db.set_value("Company", company, get_purpose(purpose).fieldname, account, update_modified=False)
 
 
 @frappe.whitelist()
