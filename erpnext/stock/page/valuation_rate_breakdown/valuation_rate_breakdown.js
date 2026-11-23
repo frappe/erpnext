@@ -1122,9 +1122,17 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	}
 
 	stock_part_label(part) {
-		if (part.shared) return __("{0} batches that share one value", [part.count]);
+		if (part.shared) {
+			return part.count === 1
+				? __("1 batch that shares one value")
+				: __("{0} batches that share one value", [part.count]);
+		}
 		if (part.batch_no) return this.batch_link(part);
-		const count = this.is_serial() ? __("{0} serial numbers", [this.number(part.qty)]) : "";
+		const count = !this.is_serial()
+			? ""
+			: flt(part.qty) === 1
+			? __("1 serial number")
+			: __("{0} serial numbers", [this.number(part.qty)]);
 		return `${count} <span class="vrb-muted">${this.part_label(part)}</span>`;
 	}
 
