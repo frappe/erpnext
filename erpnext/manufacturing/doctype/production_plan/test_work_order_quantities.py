@@ -343,8 +343,9 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		plan = self.make_plan(qty=90, consider_process_loss=True)
 		work_order = self.create_work_order(plan, field)
 		work_order.submit()
-		self.manufacture_with_loss(work_order, 94, loss_qty=0)
-		last_entry = self.manufacture_with_loss(work_order, 6, loss_qty=5)
+		# version-16-hotfix defaults a zero loss to the BOM's 10%, so lose 1 here and 4 on the last entry
+		self.manufacture_with_loss(work_order, 95, loss_qty=1)
+		last_entry = self.manufacture_with_loss(work_order, 5, loss_qty=4)
 		close_work_order(work_order.name, "Closed")
 		last_entry.cancel()
 		self.assertEqual(work_order.reload().produced_qty, 94)
@@ -358,8 +359,9 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		first.submit()
 		second = self.create_work_order(plan, field)
 		second.submit()
-		self.manufacture_with_loss(first, loss_qty=0)
-		manufacture = self.manufacture_with_loss(second, 20, loss_qty=0)
+		# version-16-hotfix defaults a zero loss to the BOM's 10%, so lose 1 on each entry
+		self.manufacture_with_loss(first, loss_qty=1)
+		manufacture = self.manufacture_with_loss(second, 20, loss_qty=1)
 		close_work_order(first.name, "Closed")
 		manufacture.cancel()
 		self.assertEqual(second.reload().produced_qty, 0)
