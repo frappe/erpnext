@@ -1812,15 +1812,38 @@ class SubcontractingController(StockController):
 			for item in self.get("items")
 			if not item.get("secondary_item_type") and not item.get("valuation_type")
 		]
-		for item in fg_rows:
-			item.additional_cost_per_qty = 0
+		costs = self.get_targeted_additional_costs(fg_rows)
+		spread_cost = flt(self.total_additional_costs - sum(costs), self.precision("total_additional_costs"))
+		if spread_cost:
+			shares = self.spread_additional_cost(fg_rows, spread_cost)
+			costs = [cost + share for cost, share in zip(costs, shares, strict=True)]
 
-		if not self.total_additional_costs:
-			return
+		for item, cost in zip(fg_rows, costs, strict=True):
+			qty = self.get_qty_for_costing(item)
+			item.additional_cost_per_qty = cost / qty if qty else 0
 
+	def get_targeted_additional_costs(self, fg_rows):
+		"""Cost of each finished good row from the additional cost rows that target it."""
+		row_index = {item.name: index for index, item in enumerate(fg_rows)}
+		costs = [0.0] * len(fg_rows)
+		for row in self.get("additional_costs"):
+			if not row.item_row:
+				continue
+			if row.item_row not in row_index:
+				frappe.throw(
+					_(
+						"Row #{0}: Additional Costs row targets an item row that is not a finished good."
+					).format(row.idx)
+				)
+			costs[row_index[row.item_row]] += flt(row.amount)
+		return costs
+
+	def spread_additional_cost(self, fg_rows, cost):
+		"""Share of the cost per finished good row, by qty or amount."""
 		based_on_amount = self.distribute_additional_costs_based_on == "Amount"
 		weights = [
-			flt(item.amount) if based_on_amount else self.get_qty_for_costing(item) for item in fg_rows
+			self.get_amount_for_costing(item) if based_on_amount else self.get_qty_for_costing(item)
+			for item in fg_rows
 		]
 		total_weight = sum(weights)
 		if not total_weight:
@@ -1832,15 +1855,17 @@ class SubcontractingController(StockController):
 
 		# round the running total, so no share goes negative and the shares add up to the cost
 		precision = self.precision("total_additional_costs")
-		allocated = cumulative_weight = 0.0
-		for item, weight in zip(fg_rows, weights, strict=True):
+		shares, allocated, cumulative_weight = [], 0.0, 0.0
+		for weight in weights:
 			cumulative_weight += weight
-			cumulative_share = flt(self.total_additional_costs * cumulative_weight / total_weight, precision)
-			share = flt(cumulative_share - allocated, precision)
+			cumulative_share = flt(cost * cumulative_weight / total_weight, precision)
+			shares.append(flt(cumulative_share - allocated, precision))
 			allocated = cumulative_share
+		return shares
 
-			if qty := self.get_qty_for_costing(item):
-				item.additional_cost_per_qty = share / qty
+	def get_amount_for_costing(self, item):
+		"""Amount a row's share of the additional costs is weighted by."""
+		return flt(item.amount)
 
 	def get_qty_for_costing(self, item):
 		"""Qty a row's cost is spread over: accepted, rejected and process loss qty."""
