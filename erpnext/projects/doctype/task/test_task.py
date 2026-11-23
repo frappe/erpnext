@@ -533,6 +533,58 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, child.save)
 
+	def test_group_cannot_end_before_its_child(self):
+		group = create_task("_Test Group Ending Before Child", nowdate(), add_days(nowdate(), 10), is_group=1)
+		create_task(
+			"_Test Child Ending After Group",
+			add_days(nowdate(), 1),
+			add_days(nowdate(), 9),
+			parent_task=group.name,
+		)
+		group.reload()
+
+		group.exp_end_date = add_days(nowdate(), 5)
+		self.assertRaises(frappe.exceptions.InvalidDates, group.save)
+
+		group.reload()
+		group.exp_end_date = add_days(nowdate(), 9)
+		group.save()
+
+	def test_group_with_children_cannot_become_non_group(self):
+		group = create_task("_Test Group Unticked With Child", is_group=1)
+		create_task("_Test Child Of Unticked Group", parent_task=group.name)
+		group.reload()
+
+		group.is_group = 0
+		self.assertRaises(frappe.ValidationError, group.save)
+
+	def test_end_date_from_expected_time_is_checked_against_group(self):
+		group = create_task("_Test Group For Expected Time", nowdate(), add_days(nowdate(), 5), is_group=1)
+		child = create_task(
+			"_Test Child Ending From Expected Time",
+			add_days(nowdate(), 4),
+			parent_task=group.name,
+			save=False,
+		)
+		child.exp_end_date = None
+		child.expected_time = 48
+
+		self.assertRaises(frappe.exceptions.InvalidDates, child.save)
+
+	def test_end_date_from_expected_time_is_checked_against_project(self):
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
+		frappe.db.set_value(
+			"Project",
+			project,
+			{"expected_start_date": nowdate(), "expected_end_date": add_days(nowdate(), 10)},
+		)
+		task = create_task("_Test Task Ending After Project", add_days(nowdate(), 9), save=False)
+		task.exp_end_date = None
+		task.expected_time = 72
+
+		with patch.object(frappe, "in_test", False):
+			self.assertRaises(frappe.exceptions.InvalidDates, task.save)
+
 	def test_expected_end_date(self):
 		task = create_task("Testing End Date", add_days(nowdate(), 1), add_days(nowdate(), 5))
 		task.expected_time = 72
