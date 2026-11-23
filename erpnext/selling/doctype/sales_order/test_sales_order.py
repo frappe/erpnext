@@ -33,15 +33,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	make_sales_invoice,
 	make_work_orders,
 )
-<<<<<<< HEAD
-=======
-from erpnext.selling.doctype.sales_order.sales_order import (
-	WarehouseRequired,
-	get_potentially_billable_sales_orders,
-	has_potentially_billable_items,
-)
 from erpnext.stock.doctype.item.item import make_item_price
->>>>>>> ecbc38b (test: Product Bundle priced from its components at a low row rate)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
@@ -4171,29 +4163,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code=bundle, qty=1, rate=1, do_not_submit=True)
 		self.assertEqual(so.items[0].rate, 400)
 
-	@change_settings("Selling Settings", {"validate_selling_price": 1})
-	def test_selling_price_validation_for_bundle_row_version(self):
-		bundle = make_item("_Test Bundle Checked From Its Version", {"is_stock_item": 0}).name
-		component = make_item("_Test Component Checked From Its Version", {"is_stock_item": 1}).name
-		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
-		row_version = make_bundle_version(bundle, [{"item_code": component, "qty": 1}])
-		make_bundle_version(bundle, [{"item_code": component, "qty": 1}]).db_set("disabled", 1)
-
-		so = make_sales_order(item_code=bundle, qty=1, rate=1, do_not_save=True)
-		so.items[0].product_bundle = row_version.name
-		self.assertRaises(frappe.ValidationError, so.insert)
-
-	def test_product_bundle_valuation_rate_from_row_version(self):
-		bundle = make_item("_Test Bundle Valued From Its Version", {"is_stock_item": 0}).name
-		component = make_item("_Test Component Valued From Its Version", {"is_stock_item": 1}).name
-		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
-		make_bundle_version(bundle, [{"item_code": component, "qty": 1}])
-		so = make_sales_order(item_code=bundle, qty=1, rate=150, do_not_submit=True)
-
-		make_bundle_version(bundle, [{"item_code": component, "qty": 10}])
-		so.save()
-		self.assertEqual(so.items[0].valuation_rate, 100)
-
 	def test_product_bundle_valuation_rate_in_component_stock_uom(self):
 		bundle = make_item("_Test Bundle Valued In Stock UOM", {"is_stock_item": 0}).name
 		component = make_item(
@@ -4205,7 +4174,13 @@ class TestSalesOrder(ERPNextTestSuite):
 			},
 		).name
 		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
-		make_bundle_version(bundle, [{"item_code": component, "qty": 100, "uom": "Gram"}])
+		frappe.get_doc(
+			{
+				"doctype": "Product Bundle",
+				"new_item_code": bundle,
+				"items": [{"item_code": component, "qty": 100, "uom": "Gram"}],
+			}
+		).insert()
 
 		so = make_sales_order(item_code=bundle, qty=1, rate=20, do_not_submit=True)
 		self.assertEqual(so.items[0].valuation_rate, 10)
@@ -4611,10 +4586,3 @@ def make_sales_order_edit_perm_workflow():
 	workflow.insert(ignore_permissions=True)
 
 	return workflow
-
-
-def make_bundle_version(parent, items):
-	bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": parent, "items": items})
-	bundle.insert()
-	bundle.submit()
-	return bundle

@@ -230,42 +230,8 @@ def get_product_bundle_items(item_code):
 		)
 		.where((product_bundle.new_item_code == item_code) & (product_bundle.disabled == 0))
 		.orderby(product_bundle_item.idx)
-<<<<<<< HEAD
 	)
 	return query.run(as_dict=True)
-=======
-	).run(as_dict=True)
-
-
-def get_bundle_version_for_row(item_row, doc=None):
-	"""Product Bundle version to pack ``item_row`` from.
-
-	Honours a version explicitly chosen on the row (validated to be a submitted
-	bundle of that item); otherwise falls back to the item's active version. A stale
-	choice (e.g. left over after changing the item) self-heals back to the active
-	one, but a disabled choice blocks the transaction instead of silently switching
-	versions behind the user's back. A return reuses the exact version of the document
-	it reverses, so a since-disabled version must not block it.
-	"""
-	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-	chosen = item_row.get("product_bundle")
-	if chosen:
-		bundle = frappe.db.get_value(
-			"Product Bundle", chosen, ["new_item_code", "docstatus", "disabled"], as_dict=True
-		)
-		if bundle and bundle.new_item_code == item_row.item_code and bundle.docstatus == 1:
-			if bundle.disabled and not (doc and doc.get("is_return")):
-				frappe.throw(
-					_("Row #{0}: Product Bundle {1} is disabled and cannot be used in transactions.").format(
-						item_row.idx, frappe.bold(chosen)
-					),
-					title=_("Disabled Product Bundle"),
-				)
-			return chosen
-
-	return get_active_product_bundle(item_row.item_code)
->>>>>>> 2ee7ae5 (fix(stock): value a bundle row from the version it is packed from)
 
 
 def add_packed_item_row(
