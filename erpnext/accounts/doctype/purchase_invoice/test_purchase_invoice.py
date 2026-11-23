@@ -2793,6 +2793,19 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		returned_inv.insert()
 		self.assertEqual(returned_inv.items[0].rate, 10)
 
+		# a stale exchange rate on a company currency return is ignored
+		returned_inv = make_purchase_invoice(
+			item_code=item_code,
+			qty=-1,
+			conversion_rate=50,
+			update_stock=True,
+			is_return=True,
+			do_not_save=True,
+		)
+		returned_inv.items[0].rate = 0
+		returned_inv.insert()
+		self.assertEqual(returned_inv.items[0].rate, 500)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 >>>>>>> ebedfac (test: price a foreign currency standalone debit note in its currency)
 	def test_payment_allocation_for_payment_terms(self):
