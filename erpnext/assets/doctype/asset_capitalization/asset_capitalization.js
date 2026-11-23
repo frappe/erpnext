@@ -186,16 +186,14 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 
 	warehouse(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
 		if (cdt === "Asset Capitalization Stock Item") {
-			this.get_warehouse_details(row);
+			this.get_all_item_warehouse_details();
 		}
 	}
 
 	serial_and_batch_bundle(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
 		if (cdt === "Asset Capitalization Stock Item") {
-			this.get_warehouse_details(row);
+			this.get_all_item_warehouse_details();
 		}
 	}
 
@@ -265,6 +263,17 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, "stock_items");
 	}
 
+	// a multi-row delete fires this per row; one call avoids late replies restoring deleted rows
+	stock_items_remove = frappe.utils.debounce(() => this.get_all_item_warehouse_details(), 300);
+
+	asset_items_remove() {
+		this.calculate_totals();
+	}
+
+	service_items_remove() {
+		this.calculate_totals();
+	}
+
 	asset_items_add(doc, cdt, cdn) {
 		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, "asset_items");
 	}
@@ -331,7 +340,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 					},
 				},
 				callback: function (r) {
-					if (!r.exc) {
+					if (r.exc) return;
+					// reprice all rows so same-item FIFO rows split the cost
+					if (row.warehouse) {
+						me.get_all_item_warehouse_details();
+					} else {
 						me.calculate_totals();
 					}
 				},
@@ -379,36 +392,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 						qty: flt(row.qty),
 						expense_account: row.expense_account,
 						company: me.frm.doc.company,
-					},
-				},
-				callback: function (r) {
-					if (!r.exc) {
-						me.calculate_totals();
-					}
-				},
-			});
-		}
-	}
-
-	get_warehouse_details(item) {
-		var me = this;
-		if (item.item_code && item.warehouse) {
-			me.frm.call({
-				method: "erpnext.assets.doctype.asset_capitalization.asset_capitalization.get_warehouse_details",
-				child: item,
-				args: {
-					args: {
-						item_code: item.item_code,
-						warehouse: cstr(item.warehouse),
-						qty: -1 * flt(item.stock_qty),
-						serial_no: item.serial_no,
-						posting_date: me.frm.doc.posting_date,
-						posting_time: me.frm.doc.posting_time,
-						company: me.frm.doc.company,
-						voucher_type: me.frm.doc.doctype,
-						voucher_no: me.frm.doc.name,
-						allow_zero_valuation: 1,
-						serial_and_batch_bundle: item.serial_and_batch_bundle,
 					},
 				},
 				callback: function (r) {
