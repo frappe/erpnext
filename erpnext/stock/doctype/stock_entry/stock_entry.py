@@ -546,11 +546,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 				return True
 
 	def reset_serial_batch_on_fg_row(self, row):
+		# Runs before validate_item sets the conversion factor.
+		conversion_factor = flt(row.conversion_factor) or (
+			get_conversion_factor(row.item_code, row.uom)["conversion_factor"] if row.uom else 1
+		)
+		stock_qty = flt(flt(row.qty) * conversion_factor, row.precision("transfer_qty"))
 		item_details = frappe._dict(
 			{
 				"item_code": row.item_code,
 				"t_warehouse": row.t_warehouse,
-				"qty": row.qty,
+				"qty": stock_qty,
 			}
 		)
 
@@ -4303,7 +4308,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.add_batchwise_finished_good(batches, args, item, existing_row=existing_row)
 
 	def add_batchwise_finished_good(self, batches, args, item, existing_row=None):
-		qty = flt(self.fg_completed_qty)
+		qty = flt(args.get("qty"))
 		row = frappe._dict({"batches_to_be_consume": defaultdict(float)})
 
 		self.update_batches_to_be_consume(batches, row, qty)
