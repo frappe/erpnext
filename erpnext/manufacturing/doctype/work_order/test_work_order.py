@@ -10235,7 +10235,9 @@ def make_whole_number_partial_work_order(rm_qty, scrap_item=None, scrap_valuatio
 	frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 100}).name
 	fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
-	bom = make_bom(item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=rm_qty, do_not_save=True)
+	bom = make_bom(
+		item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=rm_qty, currency="INR", do_not_save=True
+	)
 	if scrap_item:
 		bom.append(
 			"secondary_items",
