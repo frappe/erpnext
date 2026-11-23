@@ -8,13 +8,8 @@ import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, DocType
-<<<<<<< HEAD
 from frappe.query_builder.functions import Abs, Sum
-from frappe.utils import cint, flt, format_datetime, get_datetime
-=======
-from frappe.query_builder.functions import Abs, IfNull, NullIf, Sum
 from frappe.utils import cint, flt, fmt_money, format_datetime, get_datetime, get_link_to_form
->>>>>>> 3f6dd0e (fix(stock): refuse a purchase return from a warehouse without the receipt stock)
 
 import erpnext
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
