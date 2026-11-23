@@ -127,6 +127,18 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
+	def test_on_time_receipt_with_rejected_qty_counts_as_on_time(self):
+		supplier = create_scorecard_supplier()
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=10, rate=100)
+		receipt = make_pr_from_po(po.name)
+		receipt.items[0].qty = 8
+		receipt.items[0].rejected_qty = 2
+		receipt.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		receipt.insert()
+		receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
 
 def create_scorecard_supplier(supplier_name="_Test Supplier Scorecard"):
 	if not frappe.db.exists("Supplier", supplier_name):
