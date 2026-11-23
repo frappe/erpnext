@@ -453,12 +453,15 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			# plan row before Work Order, the order update_work_order_qty locks them in
 			ProductionPlanWorkOrderQuantities(wo.production_plan).lock_plan_row(wo)
 
-		produced_qty, process_loss_qty = frappe.db.get_value(
-			"Work Order", wo.name, ["produced_qty", "process_loss_qty"], for_update=is_submitting
+		transferred_qty, produced_qty, process_loss_qty = frappe.db.get_value(
+			"Work Order",
+			wo.name,
+			["material_transferred_for_manufacturing", "produced_qty", "process_loss_qty"],
+			for_update=is_submitting,
 		)
 		precision = self.doc.precision("fg_completed_qty")
 		allowed_qty = flt(
-			flt(wo.material_transferred_for_manufacturing)
+			flt(transferred_qty)
 			+ flt(wo.qty) * allowance_percentage / 100
 			- flt(produced_qty)
 			- flt(process_loss_qty),
