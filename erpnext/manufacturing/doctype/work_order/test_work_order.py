@@ -212,6 +212,25 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertRaisesRegex(frappe.ValidationError, "not yet produced", manufacture.insert)
 		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 4)).submit()
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 0}
+	)
+	def test_manufacture_refused_beyond_transferred_qty_left_after_production(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}], process_loss_percentage=20)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5)).submit()
+
+		# 4 produced and 1 lost leave 5 of the 10 transferred
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 6))
+		self.assertRaisesRegex(frappe.ValidationError, "not yet produced", manufacture.insert)
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5)).submit()
+
 	def test_planned_operating_cost(self):
 		wo_order = make_wo_order_test_record(
 			item="_Test FG Item 2", planned_start_date=now(), qty=1, do_not_save=True
