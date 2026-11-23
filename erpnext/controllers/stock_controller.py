@@ -1403,6 +1403,7 @@ class StockController(AccountsController):
 			docstatus=self.docstatus,
 			voucher_type=self.doctype,
 			voucher_no=self.name,
+			company=self.company,
 			serial_and_batch_bundle=serial_and_batch_bundle,
 			warehouse=warehouse,
 			type_of_transaction=type_of_transaction,
@@ -3278,6 +3279,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 	bundle_doc = frappe.copy_doc(bundle_doc)
 	bundle_doc.docstatus = 0
+	bundle_doc.company = kwargs.company or bundle_doc.company
 	bundle_doc.warehouse = kwargs.warehouse
 	bundle_doc.type_of_transaction = kwargs.type_of_transaction
 	bundle_doc.voucher_type = kwargs.voucher_type
