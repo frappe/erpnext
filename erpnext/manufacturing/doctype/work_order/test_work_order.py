@@ -6086,7 +6086,9 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		rm_item = make_item("_Test Workstation Type Cost RM", {"is_stock_item": 1}).name
 		fg_item = make_item("_Test Workstation Type Cost FG", {"is_stock_item": 1}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_submit=True)
+		bom = make_bom(
+			item=fg_item, raw_materials=[rm_item], with_operations=1, currency="INR", do_not_submit=True
+		)
 		bom.append(
 			"operations",
 			{"operation": "_Test Costed Operation 1", "workstation": workstation, "time_in_mins": 6},
