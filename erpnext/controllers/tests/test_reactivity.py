@@ -1,6 +1,6 @@
 import frappe
 from frappe import qb
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -197,3 +197,46 @@ class TestReactivity(ERPNextTestSuite):
 			[row.item_code for row in sales_order.optional_items],
 			[optional_item.name, free_item.name],
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"fetch_valuation_rate_for_internal_transaction": 1}
+	)
+	def test_internal_delivery_takes_the_outgoing_fifo_rate(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company, warehouse = "_Test Company with perpetual inventory", "Stores - TCP1"
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		for days, rate in ((-20, 100), (-10, 200), (0, 300)):
+			make_stock_entry(
+				item_code=item,
+				target=warehouse,
+				qty=10,
+				basic_rate=rate,
+				company=company,
+				posting_date=add_days(today(), days),
+			)
+		# a later issue uses up the 100 layer, so the current outgoing rate is 200
+		make_stock_entry(
+			item_code=item, source=warehouse, qty=10, company=company, posting_date=add_days(today(), -2)
+		)
+
+		delivery_note = frappe.get_doc(
+			{
+				"doctype": "Delivery Note",
+				"company": company,
+				"customer": "_Test Internal Customer 2",
+				"is_internal_customer": 1,
+				"set_posting_time": 1,
+				"posting_date": add_days(today(), -5),
+				"posting_time": "12:00:00",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"selling_price_list": "Standard Selling",
+			}
+		)
+		row = delivery_note.append("items", {"item_code": item, "qty": 5, "warehouse": warehouse})
+		delivery_note.process_item_selection(row.idx)
+
+		# FIFO cost of the 5 units that leave on the posting date, not the queue average of 150
+		self.assertEqual(row.rate, 100)
