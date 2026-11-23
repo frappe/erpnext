@@ -23,35 +23,114 @@ QUEUE_METHODS = ("FIFO", "LIFO")
 
 @frappe.whitelist()
 def get_valuation_steps(
-	item_code: str, warehouse: str, upto: str | None = None, before: str | None = None
+	item_code: str,
+	warehouse: str,
+	upto: str | None = None,
+	before: str | None = None,
+	batch_no: str | None = None,
+	serial_no: str | None = None,
 ) -> dict:
+	check_access(item_code, warehouse)
+	company = frappe.get_cached_value("Warehouse", warehouse, "company")
+	item = get_item_context(item_code, company)
+	focus = get_focus(item, batch_no, serial_no)
+	rows, previous, has_earlier = get_ledger_window(item_code, warehouse, upto, before, focus)
+	result = make_result(item, warehouse, company, rows, previous)
+	result.has_earlier = has_earlier
+	set_return_details(result.entries, item_code, warehouse)
+	if item.valued_by:
+		set_serial_batch_details(result, result.entries, rows, focus)
+
+	set_backdated_details(result.entries, rows, item_code, warehouse, get_lot_method(item))
+	if focus:
+		apply_focus(result, focus)
+
+	return result
+
+
+def check_access(item_code, warehouse):
 	frappe.has_permission("Stock Ledger Entry", "read", throw=True)
 	frappe.has_permission("Item", "read", doc=item_code, throw=True)
 	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
 
-	company = frappe.get_cached_value("Warehouse", warehouse, "company")
-	item = get_item_context(item_code, company)
-	rows, previous, has_earlier = get_ledger_window(item_code, warehouse, upto, before)
+
+def make_result(item, warehouse, company, rows, previous):
 	return frappe._dict(
 		item=item,
 		warehouse=warehouse,
 		company=company,
 		currency=frappe.get_cached_value("Company", company, "default_currency"),
-		entries=get_entries(item, warehouse, rows, previous),
+		entries=build_entries(rows, previous, get_lot_method(item)),
 		opening=get_balance(previous, get_lot_method(item)),
-		has_earlier=has_earlier,
-		repost_status=get_repost_status(item_code, warehouse, company),
+		repost_status=get_repost_status(item.item_code, warehouse, company),
+		stock_parts=[],
+		stock_gap=None,
+		focus=None,
 	)
 
 
-def get_entries(item, warehouse, rows, previous):
-	entries = build_entries(rows, previous, get_lot_method(item))
-	set_return_details(entries, item.item_code, warehouse)
-	if item.valued_by:
-		set_serial_batch_details(entries, rows, item.valued_by, item.item_code, warehouse)
+def get_focus(item, batch_no, serial_no):
+	if not batch_no and not serial_no:
+		return None
 
-	set_backdated_details(entries, rows, item.item_code, warehouse, get_lot_method(item))
-	return entries
+	doctype, item_field, label_field = (
+		("Batch", "item", "batch_id") if batch_no else ("Serial No", "item_code", "serial_no")
+	)
+	name = batch_no or serial_no
+	details = frappe.db.get_value(doctype, name, [item_field, label_field], as_dict=True)
+	if not details or details[item_field] != item.item_code:
+		frappe.throw(_("{0} {1} does not belong to item {2}").format(_(doctype), name, item.item_code))
+
+	frappe.has_permission(doctype, "read", doc=name, throw=True)
+	if item.valued_by != ("batch" if batch_no else "serial"):
+		return None
+
+	field = "batch_no" if batch_no else "serial_no"
+	return frappe._dict(field=field, name=name, doctype=doctype, label=details[label_field] or name)
+
+
+def apply_focus(result, focus):
+	for entry in result.entries:
+		focus_entry(entry)
+
+	entries = result.entries
+	first, last = (entries[0], entries[-1]) if entries else (None, None)
+	result.opening = frappe._dict(
+		qty=first.qty_before if first else 0.0,
+		value=first.value_before if first else 0.0,
+		rate=first.rate_before if first else 0.0,
+		lots=[],
+	)
+	focus.update(
+		qty=last.qty_after if last else 0.0,
+		value=last.value_after if last else 0.0,
+		rate=last.rate_after if last else 0.0,
+	)
+	result.update(focus=focus, stock_parts=[], stock_gap=None)
+
+
+def focus_entry(entry):
+	if not entry.get("parts"):
+		return
+
+	part = entry.parts[0]
+	qty_before, value_before = flt(part.qty_before), flt(part.value_before)
+	qty_after, value_after = qty_before + flt(part.qty), value_before + flt(part.value)
+	entry.update(
+		qty=flt(part.qty),
+		value_change=flt(part.value),
+		rate=unit_rate(part.qty, part.value),
+		qty_before=qty_before,
+		value_before=value_before,
+		rate_before=unit_rate(qty_before, value_before),
+		qty_after=qty_after,
+		value_after=value_after,
+		rate_after=unit_rate(qty_after, value_after),
+	)
+
+
+def unit_rate(qty, value):
+	return abs(flt(value) / flt(qty)) if flt(qty) else 0.0
 
 
 def get_lot_method(item):
@@ -75,13 +154,13 @@ def get_item_context(item_code, company):
 	)
 
 
-def get_ledger_window(item_code, warehouse, upto, before):
+def get_ledger_window(item_code, warehouse, upto, before, focus=None):
 	anchor = get_anchor(upto or before, item_code, warehouse)
-	rows = fetch_ledger_rows(item_code, warehouse, anchor, inclusive=not before)
+	rows = fetch_ledger_rows(item_code, warehouse, anchor, not before, focus)
 	has_earlier = len(rows) > PAGE_SIZE
 	previous = rows[PAGE_SIZE] if has_earlier else None
 	rows = list(reversed(rows[:PAGE_SIZE]))
-	if before or not rows:
+	if before or not rows or focus:
 		return rows, previous, has_earlier
 
 	start = get_restart_index(rows, previous)
@@ -109,7 +188,7 @@ def get_anchor(entry, item_code, warehouse):
 	return anchor
 
 
-def fetch_ledger_rows(item_code, warehouse, anchor, inclusive):
+def fetch_ledger_rows(item_code, warehouse, anchor, inclusive, focus=None):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
@@ -142,7 +221,24 @@ def fetch_ledger_rows(item_code, warehouse, anchor, inclusive):
 		creation = sle.creation <= anchor.creation if inclusive else sle.creation < anchor.creation
 		query = query.where((sle.posting_datetime < anchor.posting_datetime) | (same_time & creation))
 
+	if focus:
+		query = query.where(moves_focus(sle, focus))
+
 	return query.run(as_dict=True)
+
+
+def moves_focus(sle, focus):
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	return ExistsCriterion(
+		frappe.qb.from_(entry)
+		.select(entry.name)
+		.where(
+			(entry.parent == sle.serial_and_batch_bundle)
+			& (entry[focus.field] == focus.name)
+			& (entry.docstatus == 1)
+			& (entry.is_cancelled == 0)
+		)
+	)
 
 
 def get_restart_index(rows, previous):

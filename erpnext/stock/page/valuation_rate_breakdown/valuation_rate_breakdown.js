@@ -14,7 +14,10 @@ frappe.pages["valuation-rate-breakdown"].on_page_show = function () {
 	if (!explainer || !options || !options.item_code || !options.warehouse) return;
 
 	frappe.route_options = null;
-	explainer.open(options.item_code, options.warehouse, options.entry);
+	explainer.open(options.item_code, options.warehouse, options.entry, {
+		batch_no: options.batch_no,
+		serial_no: options.serial_no,
+	});
 };
 
 erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
@@ -45,32 +48,78 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			get_query: () => ({ filters: { is_group: 0 } }),
 			change: on_change,
 		});
+		this.batch_field = this.page.add_field({
+			fieldname: "batch_no",
+			label: __("Batch"),
+			fieldtype: "Link",
+			options: "Batch",
+			get_query: () => ({ filters: { item: this.item_field.get_value() } }),
+			change: on_change,
+		});
+		this.serial_field = this.page.add_field({
+			fieldname: "serial_no",
+			label: __("Serial No"),
+			fieldtype: "Link",
+			options: "Serial No",
+			get_query: () => ({ filters: { item_code: this.item_field.get_value() } }),
+			change: on_change,
+		});
+		this.toggle_part_fields(null);
+	}
+
+	toggle_part_fields(valued_by) {
+		this.batch_field.$wrapper.toggle(valued_by === "batch");
+		this.serial_field.$wrapper.toggle(valued_by === "serial");
 	}
 
 	on_filter_change() {
 		if (this.setting_filters) return;
 		const item_code = this.item_field.get_value();
 		const warehouse = this.warehouse_field.get_value();
+		const item_changed = item_code !== this.last_item;
+		if (item_changed) this.clear_part_fields(item_code);
 		if (item_code && warehouse) {
-			this.load({ item_code, warehouse });
+			this.load({ item_code, warehouse, ...(item_changed ? {} : this.part_args()) });
 		} else {
 			this.key = null;
 			this.render_blank_state();
 		}
 	}
 
-	open(item_code, warehouse, entry) {
+	clear_part_fields(item_code) {
+		this.last_item = item_code;
+		this.toggle_part_fields(null);
 		this.setting_filters = true;
-		Promise.all([this.item_field.set_value(item_code), this.warehouse_field.set_value(warehouse)]).then(
-			() => {
+		Promise.all([this.batch_field.set_value(""), this.serial_field.set_value("")]).then(() => {
+			this.setting_filters = false;
+		});
+	}
+
+	part_args() {
+		const args = {};
+		if (this.batch_field.get_value()) args.batch_no = this.batch_field.get_value();
+		if (this.serial_field.get_value()) args.serial_no = this.serial_field.get_value();
+		return args;
+	}
+
+	open(item_code, warehouse, entry, parts = {}) {
+		this.setting_filters = true;
+		this.last_item = item_code;
+		Promise.all([this.item_field.set_value(item_code), this.warehouse_field.set_value(warehouse)])
+			.then(() =>
+				Promise.all([
+					this.batch_field.set_value(parts.batch_no || ""),
+					this.serial_field.set_value(parts.serial_no || ""),
+				])
+			)
+			.then(() => {
 				this.setting_filters = false;
-				this.load({ item_code, warehouse, upto: entry });
-			}
-		);
+				this.load({ item_code, warehouse, upto: entry, ...this.part_args() });
+			});
 	}
 
 	load(args) {
-		const key = `${args.item_code}::${args.warehouse}::${args.upto || ""}`;
+		const key = [args.item_code, args.warehouse, args.upto, args.batch_no, args.serial_no].join("::");
 		this.key = key;
 		this.focus = args.upto || null;
 		this.render_skeleton();
@@ -78,6 +127,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			(data) => {
 				if (this.key !== key) return;
 				this.data = data;
+				this.toggle_part_fields(data.item.valued_by);
 				this.render();
 			},
 			() => {
@@ -93,6 +143,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			item_code: this.data.item.item_code,
 			warehouse: this.data.warehouse,
 			before: first.name,
+			...this.focus_args(),
 		}).then(
 			(data) => {
 				if (this.key !== key) return;
@@ -114,6 +165,11 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				error: reject,
 			});
 		});
+	}
+
+	focus_args() {
+		const focus = this.data.focus;
+		return focus ? { [focus.field]: focus.name } : {};
 	}
 
 	render_failed(args) {
@@ -164,6 +220,8 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		const repost = this.repost_alert();
 		if (repost) this.container.append(repost);
 		this.container.append(this.summary());
+		const gap = this.gap_alert();
+		if (gap) this.container.append(gap);
 		const backdated = this.backdated_alert();
 		if (backdated) this.container.append(backdated);
 		this.container.append(`<div class="vrb-section-title">${__("How we got here, step by step")}</div>`);
@@ -221,6 +279,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 					${frappe.ui.badge.html({ label: this.method_label(), theme: "blue", size: "lg" })}
 				</div>
 				${this.figures_html()}
+				${this.stock_parts_html()}
 				${this.guide_html()}
 			</div>
 		`);
@@ -232,6 +291,23 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		const last = this.last_entry();
 		const date = frappe.datetime.str_to_user(last.posting_date);
 		const warehouse = frappe.utils.escape_html(this.data.warehouse);
+		if (this.data.focus) return this.focus_sentence(warehouse);
+		if (this.data.item.valued_by && last.qty_after > 0) {
+			const holds = __("On {0}, {1} holds {2} worth {3}.", [
+				date,
+				warehouse,
+				this.b(this.qty(last.qty_after)),
+				this.b(this.money(last.value_after)),
+			]);
+			const why = this.is_serial()
+				? __(
+						"Each serial number keeps the value it came in at, so the stock value is the sum of those values."
+				  )
+				: __(
+						"Each batch keeps its own value per unit, so the stock value is the sum of the batches."
+				  );
+			return `${holds} ${why}`;
+		}
 		if (last.qty_after <= 0) {
 			return __("On {0}, {1} has {2} in stock, valued at {3}.", [
 				date,
@@ -249,7 +325,38 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		]);
 	}
 
+	focus_sentence(warehouse) {
+		const focus = this.data.focus;
+		if (focus.field === "batch_no") {
+			const batch = this.b(this.doc_link("Batch", focus.name, focus.label));
+			if (focus.qty <= 0) return __("Batch {0} has no stock left in {1}.", [batch, warehouse]);
+			return __("Batch {0} in {1} holds {2} worth {3}, so each unit is valued at {4}.", [
+				batch,
+				warehouse,
+				this.b(this.qty(focus.qty)),
+				this.b(this.money(focus.value)),
+				this.b(this.money(focus.rate)),
+			]);
+		}
+		const serial = this.b(this.doc_link("Serial No", focus.name, focus.label));
+		if (focus.qty > 0) {
+			return __("Serial number {0} is in {1}, valued at {2}. It keeps this value until it goes out.", [
+				serial,
+				warehouse,
+				this.b(this.money(focus.value)),
+			]);
+		}
+		const gone = __("Serial number {0} is no longer in {1}.", [serial, warehouse]);
+		if (this.same(focus.value, 0)) return gone;
+		return `${gone} ${__(
+			"It left {0} of value behind, because it went out at a different value than it came in at.",
+			[this.b(this.money(focus.value))]
+		)}`;
+	}
+
 	figures_html() {
+		const focus = this.data.focus;
+		if (focus && focus.field === "serial_no") return "";
 		const last = this.last_entry();
 		const figure = (label, value, align) => `
 			<div class="vrb-figure ${align}">
@@ -259,9 +366,13 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		`;
 		return `
 			<div class="vrb-figures">
-				${figure(__("Units in stock"), this.qty(last.qty_after), "")}
-				${figure(__("Stock value"), this.money(last.value_after), "text-right")}
-				${figure(__("Value per unit"), this.money(last.rate_after), "text-right")}
+				${figure(focus ? __("Units in batch") : __("Units in stock"), this.qty(last.qty_after), "")}
+				${figure(focus ? __("Batch value") : __("Stock value"), this.money(last.value_after), "text-right")}
+				${figure(
+					this.is_pooled_view() ? __("Average per unit") : __("Value per unit"),
+					this.money(last.rate_after),
+					"text-right"
+				)}
 			</div>
 		`;
 	}
@@ -299,24 +410,24 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		const lots_left = __("The value per unit is the value of the lots left, divided by the units left.");
 		return {
 			batch: {
-				short: __("Each batch keeps its own average rate."),
+				short: __("Each batch keeps its own value per unit."),
 				steps: [
-					__("When a batch comes in, its value is added to that batch only."),
+					__("When stock comes into a batch, its value is added to that batch only."),
 					__(
-						"When stock goes out, each batch leaves at its own average: the batch's value divided by its units."
+						"When stock goes out of a batch, it leaves at that batch's value per unit: the batch's value divided by its units."
 					),
 					__(
-						"A batch that does not keep its own rate goes out at the value per unit of the whole warehouse."
+						"The average per unit is the value of all batches divided by all units. Reports show this average, but stock never goes out at it."
 					),
 				],
 			},
 			serial: {
-				short: __("Each serial number keeps the rate it came in at."),
+				short: __("Each serial number keeps the value it came in at."),
 				steps: [
-					__("When a serial number comes in, it keeps its own rate."),
-					__("When it goes out, it leaves at that same rate."),
+					__("When a serial number comes in, it keeps the value it came in at."),
+					__("When it goes out, it leaves at that same value, whatever the average is."),
 					__(
-						"The value per unit of the warehouse is the value of all serial numbers divided by the units."
+						"The average per unit is the value of all serial numbers in stock divided by their count. Reports show this average, but stock never goes out at it."
 					),
 				],
 			},
@@ -371,12 +482,20 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 
 	start_step() {
 		const opening = this.data.opening;
+		const focus = this.data.focus;
+		const empty = focus
+			? __("Start: {0} had nothing in this warehouse", [frappe.utils.escape_html(focus.label)])
+			: __("Start: no stock in this warehouse");
 		const title = opening.qty
 			? __("Start: {0} worth {1}", [this.qty(opening.qty), this.money(opening.value)])
-			: __("Start: no stock in this warehouse");
-		const hint = this.data.has_earlier
-			? __("Earlier entries are hidden. The explanation picks up from here.")
-			: __("The explanation starts from the last time stock was zero or was counted.");
+			: empty;
+		let hint = __("The explanation starts from the last time stock was zero or was counted.");
+		if (focus)
+			hint = __("This is the whole history of {0} in this warehouse.", [
+				frappe.utils.escape_html(focus.label),
+			]);
+		if (this.data.has_earlier)
+			hint = __("Earlier entries are hidden. The explanation picks up from here.");
 		const step = $(`
 			<div class="vrb-step">
 				<div class="vrb-rail">
@@ -512,6 +631,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	}
 
 	inward_headline(entry) {
+		if (this.data.item.valued_by) return this.own_value_inward(entry);
 		const qty = this.b(this.qty(entry.qty));
 		const rate = this.b(this.money(entry.rate));
 		const lead = entry.is_return
@@ -522,14 +642,37 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		return parts.filter(Boolean).join(" ");
 	}
 
+	own_value_inward(entry) {
+		const parts = entry.parts || [];
+		const qty = this.b(this.qty(entry.qty));
+		const lead = entry.is_return
+			? __("Received {0} back against {1}", [qty, this.return_link(entry)])
+			: __("Received {0}", [qty]);
+		const total = this.b(this.money(entry.value_change));
+		if (this.is_serial()) {
+			if (parts.length === 1) {
+				return __("{0} at {1} each. Each serial number keeps this value until it goes out.", [
+					lead,
+					this.b(this.money(parts[0].rate)),
+				]);
+			}
+			return __("{0} worth {1}. Each serial number keeps the value it came in at.", [lead, total]);
+		}
+		if (parts.length === 1) {
+			return __("{0} into batch {1} at {2} each. The batch keeps its own value per unit.", [
+				lead,
+				this.batch_link(parts[0]),
+				this.b(this.money(parts[0].rate)),
+			]);
+		}
+		return __("{0} into {1} batches, worth {2}. Each batch keeps its own value per unit.", [
+			lead,
+			parts.length,
+			total,
+		]);
+	}
+
 	inward_reason(entry) {
-		const own_rate = {
-			batch: __("Each batch keeps its own rate. The figures below are for all batches together."),
-			serial: __(
-				"Each serial number keeps its own rate. The figures below are for all serial numbers together."
-			),
-		}[this.data.item.valued_by];
-		if (own_rate) return own_rate;
 		if (this.data.item.valuation_method === "Standard Cost") {
 			return __("Stock is kept at the standard cost, {0} per unit.", [this.money(entry.rate_after)]);
 		}
@@ -552,7 +695,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	outward_headline(entry) {
 		const lead = this.outward_lead(entry);
 		const rate = this.b(this.money(entry.rate));
-		if (this.data.item.valued_by) return this.own_rate_headline(entry, lead, rate);
+		if (this.data.item.valued_by) return this.own_rate_headline(entry, lead);
 		if (this.is_queue()) return `${lead}. ${this.lots_used_note(entry)}`;
 		if (this.data.item.valuation_method === "Standard Cost") {
 			return __("{0} at the standard cost, {1}.", [lead, rate]);
@@ -561,17 +704,41 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		return __("{0} at the current value per unit, {1}.", [lead, rate]);
 	}
 
-	own_rate_headline(entry, lead, rate) {
-		if (this.data.item.valued_by === "serial") {
-			return __("{0}. Each serial number goes out at the rate it came in at, {1} on average.", [
+	own_rate_headline(entry, lead) {
+		const parts = entry.parts || [];
+		const total = this.b(this.money(Math.abs(entry.value_change)));
+		if (this.is_serial()) {
+			if (parts.some((part) => this.serial_mismatch(part))) {
+				return __("{0} for {1} in total. Check the serial numbers below.", [lead, total]);
+			}
+			if (parts.length === 1) {
+				return __("{0} at {1} each, the value the serial number came in at.", [
+					lead,
+					this.b(this.money(parts[0].rate)),
+				]);
+			}
+			return __("{0} at the value each serial number came in at, {1} in total.", [lead, total]);
+		}
+		if (parts.length !== 1) {
+			return __("{0} from {1} batches, each at its own value per unit: {2} in total.", [
 				lead,
-				rate,
+				parts.length,
+				total,
 			]);
 		}
-		if ((entry.parts || []).some((part) => part.own_rate)) {
-			return __("{0}. Each batch goes out at its own rate, {1} on average.", [lead, rate]);
-		}
-		return __("{0} at the current value per unit, {1}.", [lead, rate]);
+		const part = parts[0];
+		const rate = this.b(this.money(part.rate));
+		return part.own_rate
+			? __("{0} from batch {1} at {2} each, the batch's own value per unit.", [
+					lead,
+					this.batch_link(part),
+					rate,
+			  ])
+			: __("{0} from batch {1} at {2} each, the value it shares with other batches.", [
+					lead,
+					this.batch_link(part),
+					rate,
+			  ]);
 	}
 
 	outward_lead(entry) {
@@ -606,6 +773,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	}
 
 	math_html(entry) {
+		if (this.is_pooled_view()) return this.together_html(entry);
 		const change_labels = {
 			in: __("In"),
 			out: __("Out"),
@@ -703,11 +871,20 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				this.b(this.money(entry.rate_after)),
 			]);
 		}
+		if (!entry.qty_after && !this.same(entry.value_after, 0)) {
+			return __(
+				"No units are left, but {0} of value stayed behind, because it went out at a different value than it came in at.",
+				[this.b(this.money(entry.value_after))]
+			);
+		}
 		if (!entry.qty_after) return __("No stock is left, so the stock value is {0}.", [this.money(0)]);
+		const per_unit = this.is_pooled_view()
+			? __("{0} average per unit", [this.money(entry.rate_after)])
+			: __("{0} per unit", [this.money(entry.rate_after)]);
 		const math = __("{0} ÷ {1} = {2}", [
 			this.money(entry.value_after),
 			this.qty(entry.qty_after),
-			this.b(__("{0} per unit", [this.money(entry.rate_after)])),
+			this.b(per_unit),
 		]);
 		if (entry.qty_before > 0 && this.same(entry.rate_after, entry.rate_before)) {
 			return __("{0}. The value per unit did not change.", [math]);
@@ -765,54 +942,281 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 
 	parts_html(entry) {
 		const parts = entry.parts || [];
-		if (!parts.length) return "";
-		const rows = parts.slice(0, 8).map((part) => this.part_rows(entry, part));
+		if (!parts.length || (this.data.focus && !this.is_serial())) return "";
+		if (this.data.focus) return this.focus_source_html(parts);
+		const blocks = parts
+			.slice(0, 8)
+			.map((part) => (part.batch_no ? this.batch_block(part) : this.serial_rows(part)));
 		const more = parts.length > 8 ? this.part_hint(__("+{0} more", [parts.length - 8])) : "";
-		return `<div class="vrb-parts">${rows.join("")}${more}</div>`;
+		const css = this.is_serial() ? "vrb-parts" : "vrb-batches";
+		return `<div class="${css}">${blocks.join("")}${more}</div>`;
 	}
 
-	part_rows(entry, part) {
-		const tone = part.qty > 0 ? "vrb-in" : "vrb-out";
-		const row = `
-			<div class="vrb-part-row">
-				<span class="ellipsis">${this.part_label(part)}</span>
-				<span class="text-right ${tone}">${this.signed_qty(part.qty)}</span>
-				<span class="text-right vrb-muted">× ${this.money(part.rate)}</span>
-				<span class="text-right ${tone}">${this.signed_money(part.value)}</span>
+	batch_block(part) {
+		const note = part.own_rate
+			? __("Keeps its own value per unit")
+			: __("Shares one value with other batches");
+		const head = `<div class="vrb-part-head"><span class="ellipsis">${this.batch_link(
+			part
+		)}</span><span class="vrb-muted ellipsis">${note}</span></div>`;
+		const change = this.math_row(
+			part.qty > 0 ? __("In") : __("Out"),
+			part.qty,
+			part.rate,
+			part.value,
+			"change"
+		);
+		if (!part.own_rate)
+			return `<div class="vrb-batch">${head}<div class="vrb-math">${change}</div></div>`;
+		const rows = [
+			this.math_row(
+				__("Before"),
+				part.qty_before,
+				this.per_unit(part.qty_before, part.value_before),
+				part.value_before
+			),
+			change,
+			this.math_row(
+				__("After"),
+				part.qty_after,
+				this.per_unit(part.qty_after, part.value_after),
+				part.value_after,
+				"total"
+			),
+		];
+		const hint = this.batch_mismatch(part)
+			? this.part_hint(
+					__("Went out at {0}, not the batch's own {1}.", [
+						this.plain_money(part.rate),
+						this.plain_money(this.per_unit(part.qty_before, part.value_before)),
+					]),
+					"is-warning"
+			  )
+			: "";
+		return `<div class="vrb-batch">${head}<div class="vrb-math">${rows.join("")}</div>${hint}</div>`;
+	}
+
+	focus_source_html(parts) {
+		const hints = parts
+			.filter((part) => part.qty < 0 && part.source_voucher_no)
+			.map((part) =>
+				this.part_hint(this.serial_source(part), this.serial_mismatch(part) ? "is-warning" : "")
+			);
+		return hints.length ? `<div class="vrb-focus-source">${hints.join("")}</div>` : "";
+	}
+
+	serial_rows(part) {
+		const row = this.part_row(this.part_label(part), part.qty, part.rate, part.value, "", true);
+		if (part.qty > 0 || !part.source_voucher_no) return row;
+		return row + this.part_hint(this.serial_source(part), this.serial_mismatch(part) ? "is-warning" : "");
+	}
+
+	part_row(label, qty, rate, value, css, signed) {
+		const tone = signed ? (qty > 0 ? "vrb-in" : "vrb-out") : "";
+		return `
+			<div class="vrb-part-row ${css || ""}">
+				<span class="ellipsis">${label}</span>
+				<span class="text-right ${tone}">${signed ? this.signed_qty(qty) : this.qty(qty)}</span>
+				<span class="text-right vrb-muted">${rate == null ? "" : `× ${this.money(rate)}`}</span>
+				<span class="text-right ${tone}">${signed ? this.signed_money(value) : this.money(value)}</span>
 			</div>
 		`;
-		const hint = part.qty < 0 ? this.part_reason(part) : "";
-		return row + (hint ? this.part_hint(hint) : "");
 	}
 
 	part_label(part) {
-		if (part.batch_no) return this.doc_link("Batch", part.batch_no, part.batch_id);
 		const labels = part.serial_labels || part.serial_nos;
 		const serials = labels.map((serial_no) => frappe.utils.escape_html(serial_no)).join(", ");
 		return part.more ? __("{0} and {1} more", [serials, part.more]) : serials;
 	}
 
-	part_reason(part) {
-		if (part.serial_nos) {
-			if (!part.source_voucher_no) return "";
-			return __("Came in through {0} {1} on {2}", [
-				__(part.source_voucher_type),
-				frappe.utils.escape_html(part.source_voucher_no),
-				frappe.datetime.str_to_user(part.source_date),
+	serial_source(part) {
+		const returns = {
+			"Delivery Note": "Sales Return",
+			"Sales Invoice": "Sales Return",
+			"Purchase Receipt": "Purchase Return",
+			"Purchase Invoice": "Purchase Return",
+		};
+		const doctype = part.source_is_return ? returns[part.source_voucher_type] : part.source_voucher_type;
+		const args = [
+			__(doctype || part.source_voucher_type),
+			frappe.utils.escape_html(part.source_voucher_no),
+			frappe.datetime.str_to_user(part.source_date),
+			this.plain_money(part.source_rate),
+		];
+		if (this.serial_mismatch(part)) {
+			args.push(this.plain_money(part.rate));
+			return part.source_is_return
+				? __("Came back through {0} {1} on {2} at {3}, but went out at {4}", args)
+				: __("Came in through {0} {1} on {2} at {3}, but went out at {4}", args);
+		}
+		return part.source_is_return
+			? __("Came back through {0} {1} on {2} at {3}", args)
+			: __("Came in through {0} {1} on {2} at {3}", args);
+	}
+
+	serial_mismatch(part) {
+		return part.source_rate != null && part.qty < 0 && !this.same(part.source_rate, part.rate);
+	}
+
+	batch_mismatch(part) {
+		return (
+			part.own_rate &&
+			part.qty < 0 &&
+			part.qty_before > 0 &&
+			!this.same(part.rate, this.per_unit(part.qty_before, part.value_before))
+		);
+	}
+
+	together_html(entry) {
+		const change_labels = {
+			in: __("In"),
+			out: __("Out"),
+			reconciliation: __("Count"),
+			revaluation: __("Change"),
+		};
+		const title = this.is_serial() ? __("All serial numbers together") : __("All batches together");
+		const rows = [
+			this.plain_row(__("Before"), entry.qty_before, entry.value_before),
+			this.plain_row(
+				change_labels[entry.kind],
+				entry.qty_after - entry.qty_before,
+				entry.value_after - entry.value_before,
+				"change"
+			),
+			this.plain_row(__("After"), entry.qty_after, entry.value_after, "total"),
+		];
+		return `<div><div class="vrb-subtitle">${title}</div><div class="vrb-math is-plain">${rows.join(
+			""
+		)}</div></div>`;
+	}
+
+	plain_row(label, qty, value, type) {
+		const change = type === "change";
+		const tone = change ? (qty > 0 || (!qty && value > 0) ? "vrb-in" : "vrb-out") : "";
+		return `
+			<div class="vrb-math-row${type === "total" ? " is-total" : ""}">
+				<span class="vrb-muted">${label}</span>
+				<span class="text-right ${tone}">${change ? this.signed_qty(qty) : this.qty(qty)}</span>
+				<span class="text-right ${tone}">${change ? this.signed_money(value) : this.money(value)}</span>
+			</div>
+		`;
+	}
+
+	stock_parts_html() {
+		const parts = this.data.stock_parts || [];
+		if (!this.data.item.valued_by || !parts.length) return "";
+		const rows = parts
+			.slice(0, 8)
+			.map((part) => this.part_row(this.stock_part_label(part), part.qty, part.rate, part.value));
+		const more = parts.length > 8 ? this.part_hint(__("+{0} more", [parts.length - 8])) : "";
+		const qty = parts.reduce((sum, part) => sum + part.qty, 0);
+		const value = parts.reduce((sum, part) => sum + part.value, 0);
+		const total = this.part_row(`<b>${__("Adds up to")}</b>`, qty, null, value, "is-total");
+		return `
+			<div class="vrb-stock-parts">
+				<div class="vrb-subtitle">${__("What the stock is made of")}</div>
+				<div class="vrb-parts">${rows.join("")}${more}${total}</div>
+				${this.average_html()}
+			</div>
+		`;
+	}
+
+	stock_part_label(part) {
+		if (part.shared) return __("{0} batches that share one value", [part.count]);
+		if (part.batch_no) return this.batch_link(part);
+		const count = this.is_serial() ? __("{0} serial numbers", [this.number(part.qty)]) : "";
+		return `${count} <span class="vrb-muted">${this.part_label(part)}</span>`;
+	}
+
+	average_html() {
+		const last = this.last_entry();
+		if (last.qty_after <= 0) return "";
+		const math = __("{0} ÷ {1} = {2}", [
+			this.money(last.value_after),
+			this.qty(last.qty_after),
+			this.b(__("{0} average per unit", [this.money(last.rate_after)])),
+		]);
+		const takes = this.is_serial()
+			? __(
+					"Reports such as Stock Balance show this average, but a delivery or issue uses the value of the serial number it takes."
+			  )
+			: __(
+					"Reports such as Stock Balance show this average, but a delivery or issue uses the value per unit of the batch it takes from."
+			  );
+		return `<div class="vrb-result">${frappe.utils.icon(
+			"equal",
+			"sm"
+		)}<span>${math}. ${takes}</span></div>`;
+	}
+
+	gap_alert() {
+		const gap = this.data.stock_gap;
+		if (!gap) return null;
+		const noun = this.is_serial() ? __("serial numbers") : __("batches");
+		const title =
+			gap.gap > 0
+				? __("The stock value is {0} more than its {1} add up to", [this.plain_money(gap.gap), noun])
+				: __("The stock value is {0} less than its {1} add up to", [
+						this.plain_money(Math.abs(gap.gap)),
+						noun,
+				  ]);
+		const lines = [__("This happens when stock goes out at a different value than it came in at.")];
+		lines.push(...gap.causes.map((cause) => this.cause_text(cause)));
+		if (gap.more_causes) lines.push(__("{0} more did the same.", [this.entries_count(gap.more_causes)]));
+		const untraced = gap.gap - gap.explained;
+		if (!this.same(untraced, 0)) {
+			lines.push(
+				__("The other {0} comes from older entries this page cannot trace.", [
+					this.plain_money(Math.abs(untraced)),
+				])
+			);
+		}
+		return frappe.ui.alert({ title, description: lines.join(" "), theme: "amber" });
+	}
+
+	cause_text(cause) {
+		const args = [
+			__(cause.voucher_type),
+			cause.voucher_no,
+			frappe.datetime.str_to_user(cause.posting_date),
+		];
+		if (cause.serial_nos) {
+			const labels = cause.serial_labels || cause.serial_nos;
+			return __("{0} {1} on {2} sent out {3} at {4} each instead of {5}.", [
+				...args,
+				this.join_list(labels),
+				this.plain_money(cause.actual),
+				this.plain_money(cause.expected),
 			]);
 		}
-		if (!part.own_rate)
-			return __("This batch does not keep its own rate, so it goes out at the warehouse rate");
-		if (!part.qty_before) return __("This batch had no stock left to price from");
-		return __("The batch had {0} worth {1}, so {2} per unit", [
-			`${this.number(part.qty_before)} ${this.uom()}`,
-			this.plain_money(part.value_before),
-			this.plain_money(part.value_before / part.qty_before),
+		return __("{0} {1} on {2} took {3} out at {4} instead of the batch's {5}.", [
+			...args,
+			this.join_list(cause.batch_ids),
+			this.plain_money(cause.actual),
+			this.plain_money(cause.expected),
 		]);
 	}
 
-	part_hint(text) {
-		return `<div class="vrb-part-hint ellipsis" title="${frappe.utils.escape_html(text)}">${text}</div>`;
+	batch_link(part) {
+		return this.doc_link("Batch", part.batch_no, part.batch_id);
+	}
+
+	per_unit(qty, value) {
+		return flt(qty) ? value / qty : 0;
+	}
+
+	is_pooled_view() {
+		return Boolean(this.data.item.valued_by && !this.data.focus);
+	}
+
+	is_serial() {
+		return this.data.item.valued_by === "serial";
+	}
+
+	part_hint(text, css) {
+		return `<div class="vrb-part-hint ellipsis ${css || ""}" title="${frappe.utils.escape_html(
+			text
+		)}">${text}</div>`;
 	}
 
 	backdated_alert() {
@@ -821,16 +1225,31 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		const changed = entries.filter((entry) => (entry.changed_by || []).length);
 		if (!backdated && !changed.length) return null;
 		const waiting = changed.filter((entry) => entry.awaiting_recalculation).length;
-		const counts = __("Posted with an earlier date: {0}. Later entries affected: {1}.", [
-			this.entries_count(backdated),
-			this.entries_count(changed.length),
-		]);
-		const status = waiting
-			? __("Still waiting to be recalculated: {0}.", [this.entries_count(waiting)])
-			: __("Look for the Backdated badge and the notes on the recalculated entries.");
+		const lines = [];
+		if (backdated) {
+			lines.push(
+				__("{0} below were posted with an earlier date after later entries already existed.", [
+					this.entries_count(backdated),
+				])
+			);
+		}
+		if (changed.length) {
+			lines.push(
+				__("{0} had their values recalculated because of entries added or cancelled before them.", [
+					this.entries_count(changed.length),
+				])
+			);
+		}
+		lines.push(
+			waiting
+				? __("{0} are still waiting to be recalculated.", [this.entries_count(waiting)])
+				: __("The notes on those entries show what changed.")
+		);
 		return frappe.ui.alert({
-			title: __("Some entries were posted with an earlier date"),
-			description: `${counts} ${status}`,
+			title: backdated
+				? __("Some entries were posted with an earlier date")
+				: __("Earlier entries were changed after later ones were made"),
+			description: lines.join(" "),
 			theme: "blue",
 		});
 	}
@@ -1073,11 +1492,24 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			.vrb-parts { display: flex; flex-direction: column; border: 1px solid var(--outline-gray-1); border-radius: var(--radius-4); padding: var(--padding-xs) var(--padding-sm); }
 			.vrb-part-row { display: grid; grid-template-columns: minmax(0, 1fr) 120px 120px 140px; gap: var(--margin-sm); align-items: center; height: 32px; font-size: var(--text-sm); color: var(--ink-gray-7); font-variant-numeric: tabular-nums; }
 			.vrb-part-hint { height: 24px; line-height: 24px; margin-top: -6px; font-size: var(--text-xs); color: var(--ink-gray-5); }
+			.vrb-part-hint.is-warning { color: var(--ink-amber-7); }
+			.vrb-focus-source .vrb-part-hint { margin-top: 0; font-size: var(--text-sm); }
+			.vrb-part-row.is-total { border-top: 1px solid var(--outline-gray-2); color: var(--ink-gray-9); font-weight: 600; }
+			.vrb-batches { display: flex; flex-direction: column; gap: var(--margin-md); }
+			.vrb-batch { display: flex; flex-direction: column; gap: 4px; }
+			.vrb-batch .vrb-part-hint { margin-top: 0; }
+			.vrb-part-head { display: flex; align-items: center; gap: var(--margin-sm); height: 24px; min-width: 0; font-size: var(--text-sm); }
+			.vrb-part-head > :first-child { flex-shrink: 0; max-width: 50%; font-weight: 500; }
+			.vrb-subtitle { margin-bottom: 4px; font-size: var(--text-sm); font-weight: 500; color: var(--ink-gray-7); }
+			.vrb-stock-parts { display: flex; flex-direction: column; gap: var(--margin-sm); padding: var(--padding-sm) var(--padding-lg); border-top: 1px solid var(--outline-gray-1); }
+			.vrb-stock-parts .vrb-subtitle { margin-bottom: 0; }
+			.vrb-math.is-plain .vrb-math-row { grid-template-columns: 64px 120px 140px; }
 			.vrb-result { display: flex; align-items: flex-start; gap: var(--margin-sm); font-size: var(--text-sm); line-height: 1.5; color: var(--ink-gray-7); }
 			.vrb-result .icon { flex-shrink: 0; margin: 2px 0 0; stroke: var(--ink-gray-5); }
 			@media (max-width: 767px) {
 				.vrb-math-row { grid-template-columns: 56px 96px 96px 112px; }
 				.vrb-part-row { grid-template-columns: minmax(0, 1fr) 80px 96px 104px; }
+				.vrb-math.is-plain .vrb-math-row { grid-template-columns: 56px 96px 112px; }
 			}
 		`;
 	}
