@@ -127,7 +127,7 @@ class SerialBatchBundleService:
 
 		check_batches = self.is_batch_check_needed()
 		# packed rows on batch fields get their bundle only at submit
-		for d in (self.doc.get("items") or []) + (self.doc.get("packed_items") or []):
+		for d in self.doc.get("items") + self.get_current_packed_rows():
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
 				serial_nos = SerialBatchIdentity("Serial No").get_records(
 					d.item_code, get_serial_nos(d.serial_no), ["batch_no", "serial_no", "warehouse"]
