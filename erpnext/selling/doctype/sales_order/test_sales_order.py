@@ -1296,6 +1296,16 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
 
+		other_so = make_sales_order(item_code="_Test Item", qty=4)
+		trans_item = json.dumps(
+			[
+				{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": so.items[0].name},
+				{"item_code": "_Test Item", "rate": 3, "qty": 9, "docname": other_so.items[0].name},
+			]
+		)
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", other_so.items[0].name, "qty"), 4)
+
 	def test_update_child_qty_with_conversion_factor_after_delivery(self):
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
 		sales_order = make_sales_order(item_code=item.item_code, qty=6, uom="Box")
