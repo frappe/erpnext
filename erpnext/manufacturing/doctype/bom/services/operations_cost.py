@@ -335,14 +335,10 @@ def _utilised_corrective_cost(work_order):
 		& (charges.parenttype == "Subcontracting Receipt")
 		& (charges.docstatus == 1)
 	)
-	return sum(_corrective_cost_booked(charges, condition) for condition in (on_entries, on_receipts))
-
-
-def _corrective_cost_booked(charges, condition):
 	query = (
 		frappe.qb.from_(charges)
 		.select(Sum(charges.amount))
-		.where((charges.has_corrective_cost == 1) & condition)
+		.where((charges.has_corrective_cost == 1) & (on_entries | on_receipts))
 	)
 	return flt(query.run()[0][0])
 
