@@ -50,9 +50,7 @@ class StockEntrySABB(BaseStockEntry):
 	def _create_or_update_bundle_for_row(
 		self, row, serial_nos, batch_nos, already_picked_serial_nos, already_picked_batches
 	):
-		if row.serial_and_batch_bundle and abs(row.transfer_qty) != abs(
-			frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
-		):
+		if is_bundle_resized(row):
 			return SerialBatchCreation(
 				{
 					"item_code": row.item_code,
@@ -101,10 +99,11 @@ class StockEntrySABB(BaseStockEntry):
 
 		reserved = self.get_reserved_entries_by_scio_detail()
 		self.take_bundled_entries(reserved)
+		# a resized bundle is picked again, so its row takes from reserved like a row without one
 		rows = [
 			(row, get_entered_serial_nos_and_batch(row))
 			for row in self.doc.items
-			if not row.serial_and_batch_bundle
+			if not row.serial_and_batch_bundle or is_bundle_resized(row)
 		]
 		# rows with serial nos entered take first, then rows with a batch, so other rows do not take those
 		for row, entered in sorted(rows, key=lambda pair: (not pair[1][0], not pair[1][1])):
@@ -159,23 +158,24 @@ class StockEntrySABB(BaseStockEntry):
 		return reserved
 
 	def take_bundled_entries(self, reserved):
-		"""Take from reserved what rows with a bundle already hold, up to the row qty."""
-		rows = {row.serial_and_batch_bundle: row for row in self.doc.items if row.serial_and_batch_bundle}
+		"""Take from reserved what rows with a bundle of the row qty already hold."""
+		rows = {
+			row.serial_and_batch_bundle: row
+			for row in self.doc.items
+			if row.serial_and_batch_bundle and not is_bundle_resized(row)
+		}
 		if not rows:
 			return
 
-		pending_qty = {bundle: abs(row.transfer_qty) for bundle, row in rows.items()}
 		for entry in frappe.get_all(
 			"Serial and Batch Entry",
 			filters={"parent": ["in", list(rows)]},
 			fields=["parent", "serial_no", "batch_no", "qty"],
 			order_by="idx",
 		):
-			qty = min(abs(entry.qty), pending_qty[entry.parent])
-			pending_qty[entry.parent] -= qty
 			take_reserved_entries(
 				reserved[rows[entry.parent].scio_detail],
-				qty,
+				abs(entry.qty),
 				[entry.serial_no] if entry.serial_no else None,
 				entry.batch_no,
 			)
@@ -299,6 +299,13 @@ class StockEntrySABB(BaseStockEntry):
 			row.idx = idx
 
 		self.doc.set("items", sorted_items)
+
+
+def is_bundle_resized(row):
+	"""The row has a bundle whose total qty is not the row qty."""
+	return bool(row.serial_and_batch_bundle) and abs(row.transfer_qty) != abs(
+		frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
+	)
 
 
 def get_entered_serial_nos_and_batch(row):
