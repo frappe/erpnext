@@ -830,6 +830,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if (!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
+				if (item.pricing_rules) {
+					item.margin_type = "";
+					item.margin_rate_or_amount = 0;
+				}
 				item.pricing_rules = "";
 				return this.frm.call({
 					method: "erpnext.stock.get_item_details.get_item_details",
