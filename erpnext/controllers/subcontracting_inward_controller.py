@@ -593,15 +593,8 @@ class SubcontractingInwardController:
 					)
 				)
 
-<<<<<<< HEAD
-			from pypika.terms import ValueWrapper
-=======
 			qty_by_row[item.scio_detail] += item.transfer_qty
-			table = frappe.qb.DocType("Subcontracting Inward Order Item")
-			allowed_qty = table.produced_qty
-			if not allow_delivery_of_overproduced_qty:
-				allowed_qty = Case().when(table.produced_qty < table.qty, table.produced_qty).else_(table.qty)
->>>>>>> a7fe007 (fix(subcontracting): sum the qty of every row for one inward order row in returns and deliveries)
+			from pypika.terms import ValueWrapper
 
 			table = frappe.qb.DocType("Subcontracting Inward Order Item")
 			query = (
