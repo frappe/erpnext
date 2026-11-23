@@ -1478,6 +1478,28 @@ class TestSubcontractingController(ERPNextTestSuite):
 		details = doc.available_materials[("RM", "A", "SCO")]
 		self.assertEqual((details.qty, details.batch_no["X"]), (2, 2))
 
+	def test_bundle_shared_by_two_orders_takes_each_orders_own_qty(self):
+		"""Two orders each send 5 of batch X for FG A and B, and one receipt consumes 3 for FG C of each."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {
+			("RM", fg_item, order): frappe._dict(qty=5, batch_no=defaultdict(float, X=5))
+			for order in ("SCO-1", "SCO-2")
+			for fg_item in ("A", "B")
+		}
+		bundles = {
+			("RM", "C", doc.supplier_warehouse, "SCR-1"): frappe._dict(
+				serial_nos=[], batch_nos=defaultdict(float, X=-6)
+			)
+		}
+		row = frappe._dict(rm_item_code="RM", main_item_code="C", voucher_no="SCR-1", consumed_qty=3)
+		consumptions = [doc.get_consumption(row, ("RM", "C", order), bundles) for order in ("SCO-1", "SCO-2")]
+
+		doc.deduct_consumptions(consumptions)
+		self.assertEqual(
+			[(row.qty, row.batch_no["X"]) for row in doc.available_materials.values()],
+			[(2, 2), (5, 5), (2, 2), (5, 5)],
+		)
+
 	def test_return_over_other_transfers_gives_back_what_its_consumption_took(self):
 		"""5 each are sent for FG A and B; B consumes its 5, then C consumes 6 over A and B and returns them."""
 		doc = frappe.new_doc("Subcontracting Receipt")
