@@ -5,6 +5,7 @@ from frappe.tests.utils import FrappeTestCase
 from erpnext.patches.v16_0 import (
 	mirror_release_perms_to_custom_docperm,
 	remove_all_role_from_payment_terms_template,
+	restrict_employee_project_perms_to_select,
 )
 from erpnext.setup.install import grant_address_read_to_accounts_manager
 from erpnext.tests.permission_test_utils import insert_test_record
@@ -25,12 +26,19 @@ FLAGS = (
 	"print",
 	"email",
 )
+PREVIOUS_EMPLOYEE_PROJECT_RULE = ("select", "report", "export", "share", "print", "email")
 
 
 class TestPermissionPatches(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
-		for doctype in ("Payment Terms Template", "POS Invoice", "Serial and Batch Bundle", "Address"):
+		for doctype in (
+			"Payment Terms Template",
+			"POS Invoice",
+			"Serial and Batch Bundle",
+			"Address",
+			"Project",
+		):
 			frappe.clear_cache(doctype=doctype)
 
 	def level_zero_rules(self, doctype, role):
@@ -135,3 +143,42 @@ class TestPermissionPatches(FrappeTestCase):
 				(rules[0].permlevel, rules[0].if_owner, rules[0].read, rules[0].export), (0, 0, 1, 0)
 			)
 			self.assertEqual(self.address_rules_except_accounts_manager(), self.shipped_address_rules())
+
+	def test_employee_project_rule_keeps_only_select(self):
+		setup_custom_perms("Project")
+		self.set_only("Project", "Employee", PREVIOUS_EMPLOYEE_PROJECT_RULE)
+		restrict_employee_project_perms_to_select.execute()
+		rules = self.level_zero_rules("Project", "Employee")
+		self.assertEqual(len(rules), 1)
+		for flag in FLAGS:
+			self.assertEqual(rules[0][flag], 1 if flag == "select" else 0, flag)
+
+	def test_employee_project_rule_with_read_is_kept(self):
+		setup_custom_perms("Project")
+		self.set_only("Project", "Employee", ("read", *PREVIOUS_EMPLOYEE_PROJECT_RULE))
+		before = self.level_zero_rules("Project", "Employee")
+		restrict_employee_project_perms_to_select.execute()
+		self.assertEqual(self.level_zero_rules("Project", "Employee"), before)
+
+	def test_employee_project_rule_at_higher_level_is_kept(self):
+		setup_custom_perms("Project")
+		self.set_only("Project", "Employee", PREVIOUS_EMPLOYEE_PROJECT_RULE)
+		values = {
+			"parent": "Project",
+			"parenttype": "DocType",
+			"parentfield": "permissions",
+			"role": "Employee",
+			"permlevel": 1,
+		}
+		for flag in FLAGS:
+			values[flag] = 1 if flag in PREVIOUS_EMPLOYEE_PROJECT_RULE else 0
+		name = insert_test_record("Custom DocPerm", values)
+		restrict_employee_project_perms_to_select.execute()
+		rule = frappe.db.get_value("Custom DocPerm", name, list(FLAGS), as_dict=True)
+		for flag in FLAGS:
+			self.assertEqual(rule[flag], 1 if flag in PREVIOUS_EMPLOYEE_PROJECT_RULE else 0, flag)
+
+	def test_employee_project_patch_skips_a_project_that_is_not_customised(self):
+		frappe.db.delete("Custom DocPerm", {"parent": "Project"})
+		restrict_employee_project_perms_to_select.execute()
+		self.assertFalse(frappe.db.exists("Custom DocPerm", {"parent": "Project"}))
