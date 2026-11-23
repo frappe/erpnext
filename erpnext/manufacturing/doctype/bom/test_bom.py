@@ -2421,6 +2421,41 @@ class TestBOM(ERPNextTestSuite):
 		bom.update_cost()
 		self.assertEqual(frappe.db.get_value("BOM Secondary Item", row.name, "process_loss_qty"), 0.33)
 
+	def test_valuation_rate_secondary_item_loss_rounded_above_its_qty_is_capped(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		make_property_setter("BOM Secondary Item", "process_loss_qty", "precision", 2, "Select")
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10000}
+		).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 0.006,
+						"process_loss_per": 90,
+					}
+				],
+			}
+		).insert()
+
+		# 0.0054 rounds to 0.01, above the 0.006 made
+		row = bom.secondary_items[0]
+		self.assertEqual(row.process_loss_qty, row.stock_qty)
+		self.assertEqual(row.cost, 0)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
