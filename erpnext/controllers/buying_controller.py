@@ -405,7 +405,7 @@ class BuyingController(SubcontractingController):
 			self.reset_conversion_factor()
 			for row in self.items:
 				if row.rate <= 0:
-					# override the rate with valuation rate, converted to the row's UOM
+					# override the rate with valuation rate, converted to the row's UOM and currency
 					conversion_factor = flt(row.conversion_factor) or get_conversion_factor(
 						row.item_code, row.uom
 					).get("conversion_factor")
@@ -424,7 +424,10 @@ class BuyingController(SubcontractingController):
 						},
 						raise_error_if_no_rate=False,
 					)
-					row.rate = flt(valuation_rate * conversion_factor, row.precision("rate"))
+					row.rate = flt(
+						valuation_rate * conversion_factor / (flt(self.conversion_rate) or 1),
+						row.precision("rate"),
+					)
 
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
