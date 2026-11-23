@@ -16,6 +16,7 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
+from erpnext.stock.doctype.packed_item.packed_item import get_bundle_version_for_row
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
@@ -462,6 +463,8 @@ class SellingController(StockController):
 			return
 
 		is_internal_customer = self.get("is_internal_customer")
+		# bundle rows priced from their components get their final rate only once packed
+		check_bundles = not frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 		for item in self.items:
 			if not item.item_code or item.is_free_item:
@@ -478,7 +481,9 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			if is_internal_customer or not is_stock_item:
+			# a bundle row is valued from the version it is packed from, so match that one
+			is_bundle = check_bundles and not is_stock_item and get_bundle_version_for_row(item, self)
+			if is_internal_customer or not (is_stock_item or is_bundle):
 				continue
 
 			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
