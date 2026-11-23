@@ -2415,6 +2415,40 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(descendants.call_count, 1)
 		self.assertEqual([d.discount_percentage for d in si.items], [15, 0, 0])
 
+	def test_item_change_drops_margin_of_previous_item_rule(self):
+		old_item = make_item("PR Margin Old Item", {"is_stock_item": 0}).name
+		new_item = make_item("PR Margin New Item", {"is_stock_item": 0}).name
+		make_item_price(old_item, "Standard Selling", 8500)
+		make_item_price(new_item, "Standard Selling", 4200)
+		make_item_pricing_rule(old_item, margin_type="Percentage", margin_rate_or_amount=20)
+
+		si = make_invoice_with_selected_item(old_item)
+		row = si.items[0]
+		self.assertEqual(row.rate, 10200)
+
+		row.item_code = new_item
+		si.process_item_selection(row.idx, reset_item_details=True)
+		self.assertFalse(row.margin_type)
+		self.assertEqual(row.margin_rate_or_amount, 0)
+		self.assertEqual(row.rate, 4200)
+
+		si.insert()
+		self.assertEqual(si.items[0].rate, 4200)
+
+	def test_item_change_keeps_manual_margin_without_rule(self):
+		old_item = make_item("PR Margin Old Item", {"is_stock_item": 0}).name
+		new_item = make_item("PR Margin New Item", {"is_stock_item": 0}).name
+		make_item_price(new_item, "Standard Selling", 4200)
+
+		si = make_invoice_with_selected_item(old_item)
+		row = si.items[0]
+		row.margin_type = "Percentage"
+		row.margin_rate_or_amount = 10
+		row.item_code = new_item
+		si.process_item_selection(row.idx, reset_item_details=True)
+		self.assertEqual(row.margin_type, "Percentage")
+		self.assertEqual(row.rate, 4620)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -2556,3 +2590,13 @@ def get_pricing_details_for_row(doc, row):
 		"items": [{**row.as_dict(), "child_docname": row.name}],
 	}
 	return frappe._dict(apply_pricing_rule(args, doc=doc.as_dict())[0])
+
+
+def make_invoice_with_selected_item(item_code, **fields):
+	"""Add the item to a new invoice the way the form does, through process_item_selection."""
+	si = create_sales_invoice(item_code=item_code, do_not_save=True)
+	si.update({"selling_price_list": "Standard Selling", **fields})
+	si.items = []
+	row = si.append("items", {"item_code": item_code, "qty": 1})
+	si.process_item_selection(row.idx)
+	return si

@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import reset_pricing_rule_details
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
 from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
@@ -384,6 +385,7 @@ class TransactionBase(StatusUpdater):
 			return
 
 		if cint(reset_item_details):
+			self.reset_pricing_rule_values(item_obj)
 			# Do not carry item-specific values from the previously selected item.
 			for fieldname in (
 				"weight_per_unit",
@@ -412,6 +414,16 @@ class TransactionBase(StatusUpdater):
 		self.handle_internal_parties(item_obj, item_details)
 		self.conversion_factor(item_obj, item_details)
 		self.calculate_taxes_and_totals()
+
+	def reset_pricing_rule_values(self, item_obj: object) -> None:
+		"""Clear the margin that the previous item's pricing rules set. Item details reset the discount."""
+		if not item_obj.pricing_rules:
+			return
+
+		reset_values = reset_pricing_rule_details(item_obj.pricing_rules, frappe._dict())
+		for fieldname in ("margin_type", "margin_rate_or_amount"):
+			if fieldname in reset_values:
+				item_obj.set(fieldname, reset_values[fieldname])
 
 	def get_selected_item_row(self, parentfield: str, item_idx: int):
 		if not self.get_table_field_doctype(parentfield):
