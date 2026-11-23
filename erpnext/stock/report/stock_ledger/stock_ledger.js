@@ -129,7 +129,7 @@ frappe.query_reports["Stock Ledger"] = {
 	],
 	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
-		if (column.fieldname == "valuation_rate" && data && data.stock_ledger_entry) {
+		if (data && data.stock_ledger_entry && column.fieldname == erpnext.stock_ledger_rate_column(data)) {
 			value = erpnext.stock_ledger_explain_link(value, data);
 		}
 		if (column.fieldname == "out_qty" && data && data.out_qty < 0) {
@@ -149,6 +149,10 @@ frappe.query_reports["Stock Ledger"] = {
 	},
 };
 
+erpnext.stock_ledger_rate_column = function (data) {
+	return data.out_qty < 0 ? "in_out_rate" : "incoming_rate";
+};
+
 erpnext.stock_ledger_explain_link = function (value, data) {
 	const params = new URLSearchParams({
 		item_code: data.item_code,
@@ -158,7 +162,7 @@ erpnext.stock_ledger_explain_link = function (value, data) {
 	const title = __("How was this calculated?");
 	const icon = frappe.utils.icon("info", "xs");
 	const link = `<a href="${frappe.router.make_url([
-		"stock-valuation-explained",
+		"valuation-rate-breakdown",
 	])}?${params}" title="${title}" aria-label="${title}" style="margin-right: 4px">${icon}</a>`;
 	return `<div class="text-right">${link}${$("<div>").html(value).text()}</div>`;
 };
