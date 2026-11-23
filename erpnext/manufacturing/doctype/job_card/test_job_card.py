@@ -4038,6 +4038,7 @@ class TestJobCard(ERPNextTestSuite):
 			make_workstation(operation)
 			make_operation(operation)
 			fg_bom.append("operations", operation)
+		fg_bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
 		fg_bom.append("items", {"item_code": sfg, "qty": 1, "operation_row_id": 2})
 		fg_bom.append("items", {"item_code": service_a, "qty": 1, "operation_row_id": 1})
 		fg_bom.append("items", {"item_code": service, "qty": 1, "operation_row_id": 2})
