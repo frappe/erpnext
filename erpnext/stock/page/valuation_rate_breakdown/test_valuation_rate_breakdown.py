@@ -268,3 +268,62 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 		self.assertEqual(steps.repost_status, "pending")
 		self.assertTrue(issued.awaiting_recalculation)
 		self.assertEqual(issued.rate, 100)
+
+	def make_batch_item(self):
+		item_code = self.make_item(
+			"FIFO", has_batch_no=1, create_new_batch=1, batch_number_series="VRB-FOCUS-.###"
+		)
+		first = self.receive(item_code, 100, 4, qty=10)
+		second = self.receive(item_code, 200, 3, qty=10)
+		batches = [get_batch_from_bundle(doc.items[0].serial_and_batch_bundle) for doc in (first, second)]
+		return item_code, batches, second
+
+	def test_batch_stock_is_shown_batch_by_batch(self):
+		item_code, (first_batch, second_batch), _second = self.make_batch_item()
+		self.issue(item_code, 2, batch_no=second_batch)
+
+		steps = get_valuation_steps(item_code, WAREHOUSE)
+		parts = {part.batch_no: (part.qty, part.value, part.rate) for part in steps.stock_parts}
+
+		self.assertEqual(parts, {first_batch: (10, 1000, 100), second_batch: (9, 1800, 200)})
+		self.assertIsNone(steps.stock_gap)
+
+	def test_batch_filter_shows_only_that_batch(self):
+		item_code, (first_batch, second_batch), second = self.make_batch_item()
+		self.issue(item_code, 2, batch_no=first_batch)
+		issue = self.issue(item_code, 1, batch_no=second_batch)
+
+		steps = get_valuation_steps(item_code, WAREHOUSE, batch_no=second_batch)
+		last = steps.entries[-1]
+
+		self.assertEqual([entry.name for entry in steps.entries], [self.get_entry_name(second.name), issue])
+		self.assertEqual((last.qty_before, last.value_before, last.qty, last.rate), (10, 2000, -1, 200))
+		self.assertEqual((last.qty_after, last.value_after), (9, 1800))
+		self.assertEqual((steps.focus.qty, steps.focus.value, steps.opening.qty), (9, 1800, 0))
+
+	def test_serial_filter_follows_one_serial_number(self):
+		item_code = self.make_item("Moving Average", has_serial_no=1, serial_no_series="VRB-FSN-.###")
+		receipt = self.receive(item_code, 100, 3, qty=2)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+		self.issue(item_code, 1, serial_no=[serial_no])
+
+		steps = get_valuation_steps(item_code, WAREHOUSE, serial_no=serial_no)
+		received, issued = steps.entries
+
+		self.assertEqual((received.qty, received.qty_after, received.value_after), (1, 1, 100))
+		self.assertEqual((issued.qty_before, issued.value_before, issued.qty_after), (1, 100, 0))
+		self.assertEqual(issued.parts[0].source_voucher_no, receipt.name)
+		self.assertEqual(steps.focus.qty, 0)
+		self.assertEqual(
+			[(part.qty, part.rate) for part in get_valuation_steps(item_code, WAREHOUSE).stock_parts],
+			[(1, 100)],
+		)
+
+	def test_batch_of_another_item_is_rejected(self):
+		item_code, (first_batch, _), _second = self.make_batch_item()
+		other_item = self.make_item(
+			"FIFO", has_batch_no=1, create_new_batch=1, batch_number_series="VRB-OTHER-.###"
+		)
+
+		with self.assertRaises(frappe.ValidationError):
+			get_valuation_steps(other_item, WAREHOUSE, batch_no=first_batch)
