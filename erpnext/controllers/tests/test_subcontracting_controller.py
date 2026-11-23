@@ -1374,6 +1374,216 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
 
+	def test_consumption_counts_against_a_transfer_for_another_finished_good(self):
+		"""16 of a shared raw material are sent for FG A only, and a receipt of 6 FG B consumes 6 of them."""
+		rm_item = make_item("Subcontracted RM Shared By Two FGs", {"is_stock_item": 1}).name
+		fg_a, fg_b = "Subcontracted FG Sharing RM A", "Subcontracted FG Sharing RM B"
+		sco = make_order_sharing_raw_material(rm_item, {fg_a: 10, fg_b: 6})
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=16, basic_rate=100)
+		send = frappe.get_doc(make_rm_stock_entry(sco.name))
+		send.remove(next(row for row in send.items if row.subcontracted_item == fg_b))
+		send.items[0].qty = 16
+		send.submit()
+
+		set_backflush_based_on("BOM")
+		scr = make_subcontracting_receipt(sco.name)
+		scr.remove(next(row for row in scr.items if row.item_code == fg_a))
+		scr.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		self.assertEqual(get_materials_from_supplier(sco.name).items[0].qty, 10)
+
+		set_backflush_based_on("Material Transferred for Subcontract")
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 10)
+
+	def test_own_consumption_counts_before_another_finished_goods(self):
+		"""5 each are sent for FG A and B; receipts consume 5 for A, then 5 for C, which has no transfer."""
+		rm_item = make_item("Subcontracted RM Shared By Three FGs", {"is_stock_item": 1}).name
+		fg_a, fg_b, fg_c = (f"Subcontracted FG Sharing RM 3{fg}" for fg in "ABC")
+		sco = make_order_sharing_raw_material(rm_item, {fg_a: 5, fg_b: 5, fg_c: 5})
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=10, basic_rate=100)
+		send = frappe.get_doc(make_rm_stock_entry(sco.name))
+		send.remove(next(row for row in send.items if row.subcontracted_item == fg_c))
+		send.submit()
+
+		set_backflush_based_on("BOM")
+		for fg_item in (fg_a, fg_c):
+			scr = make_subcontracting_receipt(sco.name)
+			for row in [row for row in scr.items if row.item_code != fg_item]:
+				scr.remove(row)
+			scr.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		self.assertEqual(get_materials_from_supplier(sco.name).items, [])
+
+	def test_batch_consumed_on_other_transfers_keeps_their_qty_in_step(self):
+		"""The same batch is sent 5 each for FG A and B, and FG C consumes 6 of it."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {
+			key: frappe._dict(qty=5, batch_no=defaultdict(float, {"B1": 5}))
+			for key in (("RM", "A", "SCO"), ("RM", "B", "SCO"))
+		}
+		doc.deduct_consumed_batch_qty(doc.get_transfer_keys(("RM", "C", "SCO")), "B1", 6)
+		self.assertEqual(
+			[(row.qty, row.batch_no["B1"]) for row in doc.available_materials.values()], [(0, 0), (4, 4)]
+		)
+
+	def test_serial_nos_consumed_on_other_transfers_keep_their_qty_in_step(self):
+		"""FG A and B are sent 2 serial nos each, and FG C consumes one of A's and both of B's."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {
+			("RM", "A", "SCO"): frappe._dict(qty=2, serial_no=["S1", "S2"]),
+			("RM", "B", "SCO"): frappe._dict(qty=2, serial_no=["S3", "S4"]),
+		}
+		keys = doc.get_transfer_keys(("RM", "C", "SCO"))
+		doc.update_consumed_serial_nos(keys, ["S2", "S3", "S4"], is_return=False, change_qty=True)
+		self.assertEqual(
+			[(row.qty, row.serial_no) for row in doc.available_materials.values()], [(1, ["S1"]), (0, [])]
+		)
+
+	def test_serial_no_returned_over_other_transfers_goes_back_to_the_one_that_sent_it(self):
+		"""FG C consumed S2 and S3, sent for FG A and B, and a return of C brings S3 back."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc._SubcontractingController__transferred_items = {
+			("RM", "A", "SCO"): frappe._dict(qty=2, serial_no=["S1", "S2"]),
+			("RM", "B", "SCO"): frappe._dict(qty=2, serial_no=["S3", "S4"]),
+		}
+		doc.available_materials = {
+			("RM", "A", "SCO"): frappe._dict(qty=1, serial_no=["S1"]),
+			("RM", "B", "SCO"): frappe._dict(qty=1, serial_no=["S4"]),
+		}
+		keys = doc.get_transfer_keys(("RM", "C", "SCO"))
+		doc.update_consumed_serial_nos(keys, ["S3"], is_return=True, change_qty=True)
+		self.assertEqual(
+			[(row.qty, sorted(row.serial_no)) for row in doc.available_materials.values()],
+			[(1, ["S1"]), (2, ["S3", "S4"])],
+		)
+
+	def test_serial_no_consumed_again_after_its_return_stays_consumed(self):
+		"""FG C consumes S1, sent for FG A, its receipt is returned, and then FG A consumes S1."""
+		doc = make_receipt_with_two_serial_transfers()
+		bundles = {}
+		consumptions = []
+		for voucher_no, fg_item, consumed_qty in (("SCR-1", "C", 1), ("SCR-2", "C", -1), ("SCR-3", "A", 1)):
+			bundles[voucher_no] = frappe._dict(serial_nos=["S1"])
+			row = frappe._dict(
+				name=voucher_no,
+				rm_item_code="RM",
+				main_item_code=fg_item,
+				voucher_no=voucher_no,
+				consumed_qty=consumed_qty,
+			)
+			consumptions.append(doc.get_consumption(row, ("RM", fg_item, "SCO"), bundles))
+
+		doc.deduct_consumptions(consumptions)
+		self.assertEqual(
+			[(row.qty, sorted(row.serial_no)) for row in doc.available_materials.values()],
+			[(1, ["S2"]), (2, ["S3", "S4"])],
+		)
+
+	def test_serial_nos_of_a_batch_consumed_on_other_transfers_keep_their_batches_in_step(self):
+		"""FG A and B are sent 2 serial nos each of batch X, and FG C consumes S3, sent for FG B."""
+		doc = make_receipt_with_two_serial_transfers()
+		keys = doc.get_transfer_keys(("RM", "C", "SCO"))
+		doc.update_consumed_serial_nos(
+			keys, ["S3"], is_return=False, change_qty=True, serial_batches={"S3": "X"}
+		)
+		self.assertEqual(
+			[(row.qty, row.batch_no["X"]) for row in doc.available_materials.values()], [(2, 2), (1, 1)]
+		)
+
+	def test_batch_returned_by_bundle_goes_back_to_its_transfer(self):
+		"""FG A is sent 3 of batch X and consumes them, and a return of its receipt brings 2 back."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {("RM", "A", "SCO"): frappe._dict(qty=3, batch_no=defaultdict(float, X=3))}
+		bundles = {}
+		consumptions = []
+		for voucher_no, batch_qty, consumed_qty in (("SCR-1", -3, 3), ("SCR-2", 2, -2)):
+			bundles[voucher_no] = frappe._dict(serial_nos=[], batch_nos=defaultdict(float, X=batch_qty))
+			row = frappe._dict(
+				name=voucher_no,
+				rm_item_code="RM",
+				main_item_code="A",
+				voucher_no=voucher_no,
+				consumed_qty=consumed_qty,
+			)
+			consumptions.append(doc.get_consumption(row, ("RM", "A", "SCO"), bundles))
+
+		doc.deduct_consumptions(consumptions)
+		details = doc.available_materials[("RM", "A", "SCO")]
+		self.assertEqual((details.qty, details.batch_no["X"]), (2, 2))
+
+	def test_receipt_rows_of_two_orders_take_their_own_batches(self):
+		"""SCO-1 sends 5 of batch X and SCO-2 5 of batch Y for FG A and B; one receipt consumes 3 of each for FG C."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		batches = {"SCO-1": "X", "SCO-2": "Y"}
+		doc.available_materials = {
+			("RM", fg_item, order): frappe._dict(qty=5, batch_no=defaultdict(float, {batch_no: 5}))
+			for order, batch_no in batches.items()
+			for fg_item in ("A", "B")
+		}
+		bundles = {
+			f"{order}-row": frappe._dict(serial_nos=[], batch_nos=defaultdict(float, {batch_no: -3}))
+			for order, batch_no in batches.items()
+		}
+		consumptions = [
+			doc.get_consumption(
+				frappe._dict(
+					name=f"{order}-row",
+					rm_item_code="RM",
+					main_item_code="C",
+					voucher_no="SCR-1",
+					consumed_qty=3,
+				),
+				("RM", "C", order),
+				bundles,
+			)
+			for order in batches
+		]
+
+		doc.deduct_consumptions(consumptions)
+		self.assertEqual(
+			[(row.qty, dict(row.batch_no)) for row in doc.available_materials.values()],
+			[(2, {"X": 2}), (5, {"X": 5}), (2, {"Y": 2}), (5, {"Y": 5})],
+		)
+
+	def test_return_over_other_transfers_gives_back_what_its_consumption_took(self):
+		"""5 each are sent for FG A and B; B consumes its 5, then C consumes 6 over A and B and returns them."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {
+			key: frappe._dict(qty=5) for key in (("RM", "A", "SCO"), ("RM", "B", "SCO"))
+		}
+		consumptions = []
+		for voucher_no, fg_item, consumed_qty in (("SCR-1", "B", 5), ("SCR-2", "C", 6), ("SCR-3", "C", -6)):
+			row = frappe._dict(
+				rm_item_code="RM", main_item_code=fg_item, voucher_no=voucher_no, consumed_qty=consumed_qty
+			)
+			consumptions.append(doc.get_consumption(row, ("RM", fg_item, "SCO"), {}))
+
+		doc.deduct_consumptions(consumptions)
+		self.assertEqual([row.qty for row in doc.available_materials.values()], [5, 0])
+
+
+def make_receipt_with_two_serial_transfers():
+	"""A receipt whose order sent S1 and S2 for FG A, and S3 and S4 for FG B, all of batch X."""
+	doc = frappe.new_doc("Subcontracting Receipt")
+	doc.available_materials = {
+		("RM", "A", "SCO"): frappe._dict(qty=2, serial_no=["S1", "S2"], batch_no=defaultdict(float, X=2)),
+		("RM", "B", "SCO"): frappe._dict(qty=2, serial_no=["S3", "S4"], batch_no=defaultdict(float, X=2)),
+	}
+	doc._SubcontractingController__transferred_items = copy.deepcopy(doc.available_materials)
+	return doc
+
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
@@ -1588,6 +1798,25 @@ def get_rm_items(supplied_items):
 		)
 
 	return rm_items
+
+
+def make_order_sharing_raw_material(rm_item, fg_qtys):
+	"""A Subcontracting Order for the finished goods and qtys given, each made of 1 rm_item."""
+	service_items = []
+	for idx, (fg_item, qty) in enumerate(fg_qtys.items(), start=2):
+		make_subcontracted_item(item_code=fg_item, raw_materials=[rm_item])
+		service_items.append(
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": f"Subcontracted Service Item {idx}",
+				"qty": qty,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": qty,
+			}
+		)
+
+	return get_subcontracting_order(service_items=service_items)
 
 
 def make_subcontracted_item(**args):

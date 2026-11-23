@@ -25,6 +25,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_auto_batch_nos,
 	get_available_serial_nos,
 	get_batch_qty_for_stock,
+	get_ledgers_from_serial_batch_bundle,
 	get_voucher_wise_serial_batch_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -809,6 +810,7 @@ class SubcontractingController(StockController):
 
 	def __get_consumed_items(self, doctype, receipt_items):
 		fields = [
+			"name",
 			"serial_no",
 			"rm_item_code",
 			"reference_name",
@@ -825,6 +827,7 @@ class SubcontractingController(StockController):
 			self.subcontract_data.receipt_supplied_items_field,
 			fields=fields,
 			filters={"docstatus": 1, "reference_name": ("in", list(receipt_items)), "parenttype": doctype},
+			order_by="creation",
 		)
 
 	def __update_consumed_materials(self, doctype, return_consumed_items=False):
@@ -844,56 +847,183 @@ class SubcontractingController(StockController):
 			return
 
 		voucher_nos = [d.voucher_no for d in consumed_materials if d.voucher_no]
-		voucher_bundle_data = (
-			get_voucher_wise_serial_batch_from_bundle(
-				voucher_no=voucher_nos,
-				is_outward=1,
-				get_subcontracted_item=("Subcontracting Receipt Supplied Item", "main_item_code"),
-			)
-			if voucher_nos
-			else {}
-		)
+		row_bundles = self.get_supplied_row_bundles(voucher_nos) if voucher_nos else {}
 
+		consumptions = []
 		for row in consumed_materials:
 			key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
-			if not self.available_materials.get(key):
-				continue
+			if consumption := self.get_consumption(row, key, row_bundles):
+				consumptions.append(consumption)
 
-			self.available_materials[key]["qty"] -= row.consumed_qty
+		self.deduct_consumptions(consumptions)
 
-			bundle_key = (row.rm_item_code, row.main_item_code, self.supplier_warehouse, row.voucher_no)
-			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
+	def get_supplied_row_bundles(self, voucher_nos) -> dict:
+		"""Serial nos and batches of each supplied row, as its bundle moved them in the supplier warehouse."""
+		# a receipt's consumption goes out of the supplier warehouse and its return comes back in
+		row_bundles = defaultdict(lambda: frappe._dict(serial_nos=[], batch_nos=defaultdict(float)))
+		for entry in get_ledgers_from_serial_batch_bundle(
+			voucher_no=voucher_nos, warehouse=self.supplier_warehouse
+		):
+			bundle = row_bundles[entry.voucher_detail_no]
+			if entry.serial_no:
+				bundle.serial_nos.append(entry.serial_no)
+			if entry.batch_no:
+				bundle.batch_nos[entry.batch_no] += entry.qty
 
-			if consumed_bundles.serial_nos:
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(consumed_bundles.serial_nos)
+		return row_bundles
+
+	def get_consumption(self, row, key, row_bundles):
+		"""A consumed row with the transfers it counts against and how it changes their qty."""
+		keys = self.get_transfer_keys(key)
+		if not keys:
+			return None
+
+		bundles = row_bundles.get(row.name, frappe._dict())
+		serial_nos = bundles.serial_nos or []
+		# Will be deprecated in v16
+		if row.serial_no and not serial_nos:
+			from erpnext.deprecation_dumpster import deprecation_warning
+
+			deprecation_warning("unknown", "v16", "No instructions.")
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+			)
+
+		# over several transfers, a serial no (else a batch) changes the qty of the one that sent it
+		spread = len(keys) > 1
+		by_serial = spread and bool(serial_nos)
+		return frappe._dict(
+			row=row,
+			transfer_keys=keys,
+			bundles=bundles,
+			serial_nos=serial_nos,
+			is_own=keys == [key],
+			is_return=row.consumed_qty < 0,
+			by_serial=by_serial,
+			by_batch=spread and not by_serial and bool(bundles.batch_nos or row.batch_no),
+		)
+
+	def deduct_consumptions(self, consumptions):
+		"""Deduct the consumptions from the transfers they count against."""
+		# a finished good's own consumption first, so another's only takes what it left; another's
+		# returns net with its consumption, so they give back what it took from each transfer
+		other_consumption = defaultdict(float)
+		for consumption in consumptions:
+			for batch_no, qty in self.get_consumed_qty_by_batch(consumption).items():
+				if consumption.is_own:
+					self.deduct_consumed(consumption.transfer_keys, batch_no, qty)
+				else:
+					other_consumption[(tuple(consumption.transfer_keys), batch_no)] += qty
+
+		for (keys, batch_no), qty in other_consumption.items():
+			self.deduct_consumed(list(keys), batch_no, qty)
+
+		# serial nos go out and come back in the order they were consumed and returned
+		serial_batches = self.get_serial_batches(consumptions)
+		for consumption in consumptions:
+			if consumption.serial_nos:
+				self.update_consumed_serial_nos(
+					consumption.transfer_keys,
+					consumption.serial_nos,
+					consumption.is_return,
+					consumption.by_serial,
+					serial_batches,
 				)
 
-			if consumed_bundles.batch_nos:
-				for batch_no, qty in consumed_bundles.batch_nos.items():
-					if qty:
-						# Conumed qty is negative therefore added it instead of subtracting
-						self.available_materials[key]["batch_no"][batch_no] += qty
-						consumed_bundles.batch_nos[batch_no] += abs(qty)
+	def get_consumed_qty_by_batch(self, consumption) -> dict:
+		"""Qty a consumption takes (under None) and the qty it takes of each batch; a return's is negative."""
+		row, bundles = consumption.row, consumption.bundles
+		consumed = defaultdict(float)
+		if consumption.by_serial:
+			# its serial nos change the qty and batches of the transfers that sent them
+			return consumed
 
-			# Will be deprecated in v16
-			if row.serial_no and not consumed_bundles.serial_nos:
-				from erpnext.deprecation_dumpster import deprecation_warning
+		if not consumption.by_batch:
+			consumed[None] += row.consumed_qty
 
-				deprecation_warning("unknown", "v16", "No instructions.")
-				consumed_serials = SerialBatchIdentity("Serial No").resolve(
-					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
-				)
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(consumed_serials)
-				)
+		for batch_no, qty in (bundles.batch_nos or {}).items():
+			# a consumption's entries are negative, a return's positive
+			consumed[batch_no] -= qty
 
-			# Will be deprecated in v16
-			if row.batch_no and not consumed_bundles.batch_nos:
-				from erpnext.deprecation_dumpster import deprecation_warning
+		# Will be deprecated in v16
+		if row.batch_no and not bundles.batch_nos:
+			from erpnext.deprecation_dumpster import deprecation_warning
 
-				deprecation_warning("unknown", "v16", "No instructions.")
-				self.available_materials[key]["batch_no"][row.batch_no] -= row.consumed_qty
+			deprecation_warning("unknown", "v16", "No instructions.")
+			consumed[row.batch_no] += row.consumed_qty
+
+		return consumed
+
+	def deduct_consumed(self, keys, batch_no, qty):
+		"""Take the qty, or the batch qty if a batch is given, from the transfers."""
+		if batch_no:
+			self.deduct_consumed_batch_qty(keys, batch_no, qty)
+		else:
+			self.deduct_consumed_qty(keys, qty)
+
+	def get_serial_batches(self, consumptions) -> dict:
+		"""Batch of each serial no that changes the qty of the transfer that sent it."""
+		serial_nos = {serial_no for c in consumptions if c.by_serial for serial_no in c.serial_nos}
+		if not serial_nos:
+			return {}
+
+		return dict(
+			frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", list(serial_nos)), "batch_no": ("is", "set")},
+				fields=["name", "batch_no"],
+				as_list=True,
+			)
+		)
+
+	def get_transfer_keys(self, key):
+		"""Transfers a consumption counts against: its own, else the order's other transfers of the raw material."""
+		if self.available_materials.get(key):
+			return [key]
+
+		rm_item_code, _finished_good, order = key
+		return [k for k in self.available_materials if (k[0], k[2]) == (rm_item_code, order)]
+
+	def deduct_consumed_qty(self, keys, qty, batch_no=None):
+		"""Take the qty from the transfers in turn, each up to what it has left (of the batch, if given);
+		the last takes the rest."""
+		for key in keys:
+			details = self.available_materials[key]
+			left = details.batch_no[batch_no] if batch_no else details.qty
+			deducted = qty if key == keys[-1] else min(qty, max(left, 0))
+			details.qty -= deducted
+			if batch_no:
+				details.batch_no[batch_no] -= deducted
+			qty -= deducted
+
+	def deduct_consumed_batch_qty(self, keys, batch_no, qty):
+		"""Take the batch from the transfers that sent it, and over several transfers their qty too."""
+		if len(keys) == 1:
+			self.available_materials[keys[0]].batch_no[batch_no] -= qty
+			return
+
+		sent_on = [key for key in keys if self.available_materials[key].batch_no.get(batch_no)]
+		self.deduct_consumed_qty(sent_on or keys[:1], qty, batch_no)
+
+	def update_consumed_serial_nos(self, keys, serial_nos, is_return, change_qty, serial_batches=None):
+		"""Take consumed serial nos out of the transfers, or put returned ones back on those that sent them;
+		with change_qty, each transfer's qty and batches (from serial_batches) change by its own."""
+		for key in keys:
+			details = self.available_materials[key]
+			if is_return:
+				sent = self.__transferred_items[key].serial_no
+				moved = set(serial_nos).intersection(sent) - set(details.serial_no)
+				details.serial_no.extend(moved)
+			else:
+				moved = set(details.serial_no) & set(serial_nos)
+				details.serial_no = list(set(details.serial_no) - moved)
+
+			if change_qty:
+				sign = 1 if is_return else -1
+				details.qty += sign * len(moved)
+				for serial_no in moved:
+					if batch_no := (serial_batches or {}).get(serial_no):
+						details.batch_no[batch_no] += sign
 
 	def get_available_materials(self):
 		"""Get the available raw materials which has been transferred to the supplier.
