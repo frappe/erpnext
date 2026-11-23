@@ -212,6 +212,55 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(task.expected_time, 8)
 		self.assertEqual(task.is_milestone, 1)
 
+	def test_holiday_under_child_task_extends_its_groups(self):
+		start_date = getdate(nowdate())
+		holiday_list = make_holiday_list(
+			"_Test Holiday Under Child Task",
+			from_date=start_date,
+			to_date=add_days(start_date, 30),
+			holiday_dates=[{"holiday_date": add_days(start_date, 2), "description": "Child start"}],
+		)
+		outer_group = create_task(
+			subject="_Test Template Outer Group", is_template=1, is_group=1, begin=0, duration=4
+		)
+		inner_group = create_task(
+			subject="_Test Template Inner Group",
+			is_template=1,
+			is_group=1,
+			begin=1,
+			duration=3,
+			parent_task=outer_group.name,
+		)
+		child = create_task(
+			subject="_Test Template Child Under Holiday",
+			is_template=1,
+			begin=2,
+			duration=2,
+			parent_task=inner_group.name,
+		)
+		template = make_project_template(
+			"_Test Template With Holiday Under Child", [child, inner_group, outer_group]
+		)
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Holiday Under Child {frappe.generate_hash(length=6)}",
+			project_template=template.name,
+			expected_start_date=start_date,
+			holiday_list=holiday_list.name,
+			company="_Test Company",
+		).insert()
+
+		end_dates = {
+			task.template_task: getdate(task.exp_end_date)
+			for task in frappe.get_all(
+				"Task", filters={"project": project.name}, fields=["template_task", "exp_end_date"]
+			)
+		}
+		self.assertEqual(end_dates[child.name], add_days(start_date, 5))
+		self.assertEqual(end_dates[inner_group.name], add_days(start_date, 5))
+		self.assertEqual(end_dates[outer_group.name], add_days(start_date, 5))
+
 	def test_holiday_on_template_task_moves_its_dependent(self):
 		start_date = getdate(nowdate())
 		holiday_list = make_holiday_list(
