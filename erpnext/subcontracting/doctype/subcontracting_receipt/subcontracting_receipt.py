@@ -925,6 +925,7 @@ class SubcontractingReceipt(SubcontractingController):
 					"description": row.description,
 					"has_corrective_cost": row.has_corrective_cost,
 					"work_order": row.work_order,
+					"item_row": row.item_row,
 					"amount": flt(row.amount * row_ratio, row.precision("amount")),
 					"base_amount": flt(row.base_amount * row_ratio, row.precision("base_amount")),
 				},
