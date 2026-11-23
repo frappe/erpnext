@@ -292,6 +292,18 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.validate_finished_good_serial_batch_for_work_order()
 		self.validate_alternative_items()
 
+	def validate_raw_materials_exists(self):
+		if not self.is_raw_material_share_consumed():
+			super().validate_raw_materials_exists()
+
+	def is_raw_material_share_consumed(self):
+		"""Earlier entries of the Work Order may have consumed this entry's whole-number share."""
+		if not self.wo_doc or (self.backflush_based_on != "BOM" and not self.wo_doc.skip_transfer):
+			return False
+
+		required_items = self.wo_doc.required_items
+		return bool(required_items) and not any(self.get_wo_raw_material_qty(row) for row in required_items)
+
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
 			self.doc.work_order
@@ -413,7 +425,29 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not rm_items:
 			return
 
-		_check_bom_component_qty(self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom))
+		# continuous consumption takes each entry's share of what is unconsumed, not of the running total
+		get_qty = (
+			None
+			if frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
+			else self.get_bom_component_qty
+		)
+		_check_bom_component_qty(
+			self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom), get_qty
+		)
+
+	def get_bom_component_qty(self, bom_item):
+		"""Qty Get Items takes of a BOM item: a whole-number item's share of the running total."""
+		is_whole_number = cint(frappe.get_cached_value("UOM", bom_item.stock_uom, "must_be_whole_number"))
+		required_items = (
+			[row for row in self.wo_doc.required_items if row.item_code == bom_item.item_code]
+			if self.wo_doc and is_whole_number
+			else []
+		)
+		if not required_items:
+			return ceil_qty_if_uom_has_whole_number(
+				bom_item.qty * flt(self.doc.fg_completed_qty), bom_item.stock_uom
+			)
+		return sum(self.get_wo_raw_material_qty(row) for row in required_items)
 
 	def validate_work_order(self):
 		if not self.doc.work_order:
@@ -597,14 +631,34 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				"uom": row.stock_uom,
 			}
 		)
-		qty = (
-			(row.required_qty / self.wo_doc.qty) * flt(self.doc.fg_completed_qty)
+		item_args["qty"] = (
+			self.get_wo_raw_material_qty(row)
 			if self.wo_doc
-			else flt(row.qty) * flt(self.doc.fg_completed_qty)
+			else ceil_qty_if_uom_has_whole_number(
+				flt(row.qty) * flt(self.doc.fg_completed_qty), row.stock_uom
+			)
 		)
-		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
+		if not item_args["qty"]:
+			# earlier entries already consumed the whole unit
+			return
 		item_args["transfer_qty"] = item_args["qty"]
 		self.append_raw_material_with_alternatives(item_args, alternative_items.get(row.item_code))
+
+	def get_wo_raw_material_qty(self, row):
+		"""For a whole number UOM, round up the running total of the order's Manufacture entries
+		and take what earlier entries did not consume, so partial entries do not consume a whole unit each."""
+		qty_per_unit = row.required_qty / self.wo_doc.qty
+		fg_completed_qty = flt(self.doc.fg_completed_qty)
+		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
+		if self.doc.purpose != "Manufacture" or not is_whole_number:
+			return ceil_qty_if_uom_has_whole_number(qty_per_unit * fg_completed_qty, row.stock_uom)
+
+		done_qty = flt(self.wo_doc.produced_qty) + flt(self.wo_doc.process_loss_qty)
+		total_qty = ceil_qty_if_uom_has_whole_number(
+			qty_per_unit * (done_qty + fg_completed_qty), row.stock_uom
+		)
+		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
+		return max(ceil(flt(total_qty - consumed_qty, 9)), 0)
 
 	def _resolve_rm_warehouse(self, row):
 		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
@@ -1417,12 +1471,16 @@ def get_production_item_details(work_order=None, bom_no=None):
 	)
 
 
-def _check_bom_component_qty(doc, bom_items):
-	"""Validate that stock entry items match BOM quantities."""
+def _check_bom_component_qty(doc, bom_items, get_qty=None):
+	"""Validate that stock entry items match BOM quantities. get_qty gives the qty a BOM item must have."""
 	precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 	for row in bom_items:
 		# Get Items rounds a whole number qty up
-		row.qty = ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
+		row.qty = (
+			get_qty(row)
+			if get_qty
+			else ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
+		)
 		matched_items = [
 			item for item in doc.items if item.s_warehouse and get_original_item(item) == row.item_code
 		]
@@ -1439,7 +1497,7 @@ def _check_bom_component_qty(doc, bom_items):
 					),
 					title=_("Incorrect Component Quantity"),
 				)
-		else:
+		elif row.qty:
 			frappe.throw(
 				_("According to the BOM {0}, the Item '{1}' is missing in the stock entry.").format(
 					get_link_to_form("BOM", doc.bom_no), bold(row.item_code)

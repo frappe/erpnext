@@ -4872,6 +4872,95 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertCountEqual(used_serials[rm_item], rm_serials)
 		self.assertCountEqual(used_serials[fg_item], fg_serials)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_round_whole_number_raw_material_once(self):
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=1)
+
+		consumed_qty, fg_rates = [], []
+		for _ in range(4):
+			manufacture = submit_manufacture_of_one(work_order)
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+			fg_rates.append(next(row.valuation_rate for row in manufacture.items if row.is_finished_item))
+
+		self.assertEqual(consumed_qty, [1, 0, 0, 0])
+		self.assertEqual(fg_rates, [100, 0, 0, 0])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_take_whole_number_raw_material_not_consumed_yet(self):
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=2)
+		consumed_qty = []
+		for _ in range(4):
+			manufacture = submit_manufacture_of_one(work_order)
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+		self.assertEqual(consumed_qty, [1, 0, 1, 0])
+
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=1)
+		submit_manufacture_of_one(work_order).cancel()
+		manufacture = submit_manufacture_of_one(work_order)
+		self.assertEqual(sum(row.qty for row in manufacture.items if row.item_code == rm_item), 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 0,
+			"validate_components_quantities_per_bom": 1,
+		},
+	)
+	def test_bom_component_check_takes_whole_number_share_of_running_total(self):
+		# 1.5 per unit: rounding each entry up would expect 2 every time
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=6)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=2, basic_rate=100)
+		consumed_qty = []
+		for _ in range(4):
+			manufacture = submit_manufacture_of_one(work_order)
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+		self.assertEqual(consumed_qty, [2, 1, 2, 1])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 1,
+			"validate_components_quantities_per_bom": 1,
+		},
+	)
+	def test_bom_component_check_takes_unconsumed_share_with_continuous_consumption(self):
+		# 0.5 per unit: the second entry takes 1 of the 1 unconsumed, not 0 of the running total
+		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=2)
+		consumed_qty = []
+		for _ in range(2):
+			manufacture = submit_manufacture_of_one(work_order)
+			consumed_qty.append(sum(row.qty for row in manufacture.items if row.item_code == rm_item))
+		self.assertEqual(consumed_qty, [1, 1])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_without_raw_materials_value_scrap_at_zero(self):
+		"""An entry whose whole-number share was consumed earlier values nothing, its scrap included."""
+		for valuation_type in ("Valuation Rate", "Manual"):
+			with self.subTest(valuation_type=valuation_type):
+				scrap_item = make_item(
+					properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}
+				).name
+				work_order, rm_item = make_whole_number_partial_work_order(
+					rm_qty=1, scrap_item=scrap_item, scrap_valuation_type=valuation_type
+				)
+
+				rates = []
+				for _ in range(4):
+					manufacture = submit_manufacture_of_one(work_order)
+					fg_row = next(row for row in manufacture.items if row.is_finished_item)
+					scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
+					rates.append((fg_row.valuation_rate, scrap_row.valuation_rate))
+
+				self.assertEqual(rates, [(90, 10), (0, 0), (0, 0), (0, 0)])
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
@@ -10300,6 +10389,42 @@ def make_multi_level_manufacture_entry(fg_item, bom_no):
 	se_doc.insert()
 	se_doc.submit()
 	return se_doc
+
+
+def make_whole_number_partial_work_order(rm_qty, scrap_item=None, scrap_valuation_type="Valuation Rate"):
+	"""Work Order for 4 Nos of a finished good that needs rm_qty Nos of a whole-number raw material,
+	and makes 1 Nos of scrap_item per finished good, valued at 10 each."""
+	frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 100}).name
+	fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+	bom = make_bom(
+		item=fg_item, quantity=4, raw_materials=[rm_item], rm_qty=rm_qty, currency="INR", do_not_save=True
+	)
+	if scrap_item:
+		bom.append(
+			"secondary_items",
+			{
+				"secondary_item_type": "Scrap",
+				"item_code": scrap_item,
+				"qty": 4,
+				"uom": "Nos",
+				"valuation_type": scrap_valuation_type,
+				"cost": 40 if scrap_valuation_type == "Manual" else 0,
+			},
+		)
+	bom.insert()
+	bom.submit()
+	test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=4, basic_rate=100)
+	work_order = make_wo_order_test_record(
+		production_item=fg_item, bom_no=bom.name, qty=4, skip_transfer=1, source_warehouse="Stores - _TC"
+	)
+	return work_order, rm_item
+
+
+def submit_manufacture_of_one(work_order):
+	manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+	manufacture.submit()
+	return manufacture
 
 
 def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
