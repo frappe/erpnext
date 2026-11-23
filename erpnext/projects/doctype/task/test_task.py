@@ -200,6 +200,19 @@ class TestTask(ERPNextTestSuite):
 		dependent.exp_end_date = add_days(nowdate(), 12)
 		self.assertRaises(frappe.exceptions.InvalidDates, dependent.save)
 
+	def test_group_end_date_cannot_precede_child(self):
+		parent = create_task("_Test Group Shrinking", nowdate(), add_days(nowdate(), 10), is_group=1)
+		create_task(
+			"_Test Child Of Shrinking Group",
+			add_days(nowdate(), 3),
+			add_days(nowdate(), 9),
+			parent_task=parent.name,
+		)
+
+		parent.reload()
+		parent.exp_end_date = add_days(nowdate(), 5)
+		self.assertRaises(frappe.exceptions.InvalidDates, parent.save)
+
 	def test_reschedule_dependent_task_from_actual_end_date(self):
 		prerequisite = create_task("_Test Task Actual End", save=False)
 		prerequisite.exp_start_date = prerequisite.exp_end_date = None

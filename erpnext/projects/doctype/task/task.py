@@ -104,6 +104,7 @@ class Task(NestedSet):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
 		self.validate_from_to_dates("act_start_date", "act_end_date")
 		self.validate_parent_expected_end_date()
+		self.validate_children_expected_end_date()
 		self.validate_parent_project_dates()
 
 	def set_default_weight(self):
@@ -130,6 +131,24 @@ class Task(NestedSet):
 				).format(format_date(parent_exp_end_date)),
 				"exp_end_date",
 				"parent_task",
+			)
+
+	def validate_children_expected_end_date(self):
+		if not self.is_group or not self.exp_end_date:
+			return
+
+		latest_child_end_date = frappe.db.get_value(
+			"Task", {"parent_task": self.name}, "exp_end_date", order_by="exp_end_date desc"
+		)
+		if not latest_child_end_date:
+			return
+
+		if getdate(self.exp_end_date) < getdate(latest_child_end_date):
+			self.report_date_conflict(
+				_(
+					"Expected End Date should be greater than or equal to child task's Expected End Date {0}."
+				).format(format_date(latest_child_end_date)),
+				"exp_end_date",
 			)
 
 	def validate_parent_project_dates(self):
