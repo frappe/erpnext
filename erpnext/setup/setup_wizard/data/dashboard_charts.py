@@ -2,6 +2,8 @@ import json
 
 import frappe
 
+from erpnext.accounts.default_accounts import BANK, COST_OF_GOODS_SOLD, INCOME
+
 
 def get_company_for_dashboards():
 	company = frappe.defaults.get_defaults().company
@@ -16,9 +18,11 @@ def get_company_for_dashboards():
 
 def get_default_dashboards():
 	company = frappe.get_doc("Company", get_company_for_dashboards())
-	income_account = company.default_income_account or get_account("Income Account", company.name)
-	expense_account = company.default_expense_account or get_account("Expense Account", company.name)
-	bank_account = company.default_bank_account or get_account("Bank", company.name)
+	income_account = company.get_default_account(INCOME) or get_account("Income Account", company.name)
+	expense_account = company.get_default_account(COST_OF_GOODS_SOLD) or get_account(
+		"Expense Account", company.name
+	)
+	bank_account = company.get_default_account(BANK) or get_account("Bank", company.name)
 
 	return {
 		"Dashboards": [

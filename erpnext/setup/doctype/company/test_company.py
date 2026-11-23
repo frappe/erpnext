@@ -9,6 +9,20 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import random_string
 from frappe.utils.nestedset import get_root_of
 
+from erpnext.accounts.default_accounts import (
+	CASH,
+	COST_OF_GOODS_SOLD,
+	EXCHANGE_GAIN,
+	EXCHANGE_GAIN_LOSS,
+	EXCHANGE_LOSS,
+	INVENTORY,
+	OPERATING_COST,
+	PAYABLE,
+	STOCK_ADJUSTMENT,
+	STOCK_DELIVERED_BUT_NOT_BILLED,
+	UNREALIZED_PROFIT_LOSS,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 	get_charts_for_country,
 )
@@ -129,9 +143,10 @@ class TestCompany(ERPNextTestSuite):
 
 		try:
 			company.reload()
-			self.assertTrue(company.default_payable_account)
+			payable_account = company.get_default_account(PAYABLE)
+			self.assertTrue(payable_account)
 			self.assertEqual(
-				frappe.db.get_value("Account", company.default_payable_account, "account_name"),
+				frappe.db.get_value("Account", payable_account, "account_name"),
 				"Accounts Payable - Trade",
 			)
 
@@ -143,7 +158,7 @@ class TestCompany(ERPNextTestSuite):
 			)
 			self.assertTrue(customer_deposits)
 			self.assertNotEqual(customer_deposits.account_type, "Payable")
-			self.assertNotEqual(company.default_payable_account, customer_deposits.name)
+			self.assertNotEqual(payable_account, customer_deposits.name)
 
 			self.assertFalse(
 				frappe.db.exists("Account", {"company": company.name, "account_name": ["like", "%Demo%"]})
@@ -308,7 +323,7 @@ class TestCompany(ERPNextTestSuite):
 		company = get_test_company()
 
 		company.enable_stock_delivered_but_not_billed = 1
-		company.stock_delivered_but_not_billed = None
+		company.set_default_account(STOCK_DELIVERED_BUT_NOT_BILLED, None)
 
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
@@ -334,33 +349,35 @@ class TestCompany(ERPNextTestSuite):
 			account_name="Stock Delivered But Not Billed - New",
 			account_type="Stock Delivered But Not Billed",
 			parent_account=frappe.db.get_value(
-				"Account", company.stock_delivered_but_not_billed, "parent_account"
+				"Account", company.get_default_account(STOCK_DELIVERED_BUT_NOT_BILLED), "parent_account"
 			),
 			company=company.name,
 		)
 
-		company.stock_delivered_but_not_billed = new_account
+		company.set_default_account(STOCK_DELIVERED_BUT_NOT_BILLED, new_account)
 
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
 	def test_invalid_default_accounts_and_cost_centers(self):
 		company = frappe.get_doc("Company", "_Test Company")
-		original_inventory = company.default_inventory_account
-		company.default_inventory_account = frappe.db.get_value(
-			"Account", {"company": company.name, "root_type": "Expense", "is_group": 0}
+		original_inventory = company.get_default_account(INVENTORY)
+		company.set_default_account(
+			INVENTORY,
+			frappe.db.get_value("Account", {"company": company.name, "root_type": "Expense", "is_group": 0}),
 		)
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
-		company.default_inventory_account = original_inventory
-		company.default_operating_cost_account = frappe.db.get_value(
-			"Account", {"company": company.name, "root_type": "Asset", "is_group": 0}
+		company.set_default_account(INVENTORY, original_inventory)
+		company.set_default_account(
+			OPERATING_COST,
+			frappe.db.get_value("Account", {"company": company.name, "root_type": "Asset", "is_group": 0}),
 		)
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
-		company.default_operating_cost_account = None
+		company.set_default_account(OPERATING_COST, None)
 		company.cost_center = frappe.db.get_value("Cost Center", {"company": company.name, "is_group": 1})
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
@@ -412,15 +429,17 @@ class TestCompany(ERPNextTestSuite):
 		from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
 
 		company = get_test_company()
-		company.exchange_gain_loss_account = company.default_expense_account
-		company.exchange_gain_account = None
-		company.exchange_loss_account = None
+		cogs_account = company.get_default_account(COST_OF_GOODS_SOLD)
+		company.set_default_account(EXCHANGE_GAIN_LOSS, cogs_account)
+		company.set_default_account(EXCHANGE_GAIN, None)
+		company.set_default_account(EXCHANGE_LOSS, None)
 		company.save()
 		company.reload()
+		# the fields themselves are empty; get_default_account() would return the fallback
 		self.assertFalse(company.exchange_gain_account)
 		self.assertFalse(company.exchange_loss_account)
-		self.assertEqual(get_exchange_gain_loss_account(company.name, True), company.default_expense_account)
-		self.assertEqual(get_exchange_gain_loss_account(company.name, False), company.default_expense_account)
+		self.assertEqual(get_exchange_gain_loss_account(company.name, True), cogs_account)
+		self.assertEqual(get_exchange_gain_loss_account(company.name, False), cogs_account)
 
 	def test_tax_setup_requires_manager_role(self):
 		company = frappe.get_doc("Company", "_Test Company")
@@ -450,14 +469,13 @@ class TestCompany(ERPNextTestSuite):
 		).insert()
 		from erpnext.accounts.doctype.account.account import get_account_currency
 
-		self.assertTrue(company.default_cash_account)
-		self.assertEqual(get_account_currency(company.default_cash_account), "INR")
+		cash_account = company.get_default_account(CASH)
+		self.assertTrue(cash_account)
+		self.assertEqual(get_account_currency(cash_account), "INR")
 		company.default_currency = "USD"
 		company.save()
-		self.assertEqual(
-			frappe.db.get_value("Account", company.default_cash_account, "account_currency"), "USD"
-		)
-		self.assertEqual(get_account_currency(company.default_cash_account), "USD")
+		self.assertEqual(frappe.db.get_value("Account", cash_account, "account_currency"), "USD")
+		self.assertEqual(get_account_currency(cash_account), "USD")
 
 	def test_provisional_field_stays_visible_if_another_company_uses_it(self):
 		company = get_test_company()
@@ -526,14 +544,14 @@ class TestCompany(ERPNextTestSuite):
 			pluck="name",
 			limit=2,
 		)
-		frappe.db.set_value("Company", company.name, "unrealized_profit_loss_account", expense_accounts[0])
+		set_default_account(company.name, UNREALIZED_PROFIT_LOSS, expense_accounts[0])
 		frappe.db.set_value("Warehouse", company.default_warehouse, "disabled", 1)
 
 		company.reload()
 		company.monthly_sales_target = 100
 		company.save()
 
-		company.unrealized_profit_loss_account = expense_accounts[1]
+		company.set_default_account(UNREALIZED_PROFIT_LOSS, expense_accounts[1])
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
@@ -635,7 +653,7 @@ def create_stock_item_with_inventory(company):
 		qty=10,
 		basic_rate=100,
 		company=company.name,
-		expense_account=company.stock_adjustment_account,
+		expense_account=company.get_default_account(STOCK_ADJUSTMENT),
 	)
 
 	return item_code
@@ -649,5 +667,5 @@ def create_outstanding_delivery_note(item_code, company):
 		company=company.name,
 		warehouse=f"Stores - {company.abbr}",
 		cost_center=company.cost_center,
-		expense_account=company.stock_delivered_but_not_billed,
+		expense_account=company.get_default_account(STOCK_DELIVERED_BUT_NOT_BILLED),
 	)

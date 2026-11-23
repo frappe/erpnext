@@ -9,6 +9,7 @@ from frappe.tests import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate
 from frappe.utils.data import today
 
+from erpnext.accounts.default_accounts import ADVANCE_PAID
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_due_date_from_template
 from erpnext.buying.doctype.purchase_order.mapper import (
@@ -1523,7 +1524,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		account = self.create_account("Advance Paid", company, "INR", "Application of Funds (Assets) - _TC")
 		company_doc = frappe.get_doc("Company", company)
 		company_doc.book_advance_payments_in_separate_party_account = True
-		company_doc.default_advance_paid_account = account.name
+		company_doc.set_default_account(ADVANCE_PAID, account.name)
 		company_doc.save()
 
 		po_doc = create_purchase_order(supplier=supplier)

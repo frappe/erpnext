@@ -14,6 +14,7 @@ from frappe.utils.caching import request_cache
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import _get_item_details
 from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
@@ -1823,9 +1824,9 @@ def _merge_phantom_bom_items(item_dict, item, stock_qty, company, opts):
 
 def _set_default_accounts_for_items(item_dict, company):
 	fields = [
-		["Account", "expense_account", "stock_adjustment_account"],
-		["Cost Center", "cost_center", "cost_center"],
-		["Warehouse", "default_warehouse", ""],
+		["Account", "expense_account"],
+		["Cost Center", "cost_center"],
+		["Warehouse", "default_warehouse"],
 	]
 
 	company_of = {}
@@ -1846,7 +1847,17 @@ def _set_default_accounts_for_items(item_dict, company):
 		for d in fields:
 			company_in_record = company_of[d[0]].get(item_details.get(d[1]))
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
-				item_dict[item][d[1]] = frappe.get_cached_value("Company", company, d[2]) if d[2] else None
+				item_dict[item][d[1]] = _get_company_default(company, d[0])
+
+
+def _get_company_default(company, doctype):
+	if doctype == "Account":
+		return get_default_account(company, STOCK_ADJUSTMENT)
+
+	if doctype == "Cost Center":
+		return frappe.get_cached_value("Company", company, "cost_center")
+
+	return None
 
 
 @frappe.whitelist()

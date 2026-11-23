@@ -25,7 +25,14 @@ from frappe.utils import (
 )
 from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
-from erpnext.accounts.default_accounts import get_purpose, get_purposes
+from erpnext.accounts.default_accounts import (
+	CASH,
+	INVENTORY,
+	PROVISIONAL,
+	STOCK_DELIVERED_BUT_NOT_BILLED,
+	get_purpose,
+	get_purposes,
+)
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
 	sync_financial_report_templates,
@@ -243,17 +250,19 @@ class Company(NestedSet):
 		if self.get("__islocal"):
 			return
 
-		if self.enable_stock_delivered_but_not_billed and not self.stock_delivered_but_not_billed:
+		sdbnb_account = self.get_default_account(STOCK_DELIVERED_BUT_NOT_BILLED)
+		if self.enable_stock_delivered_but_not_billed and not sdbnb_account:
 			frappe.throw(_("Please select Stock Delivered But Not Billed Account"))
 
 		doc_before_save = self.get_doc_before_save()
-
-		if not (doc_before_save and doc_before_save.stock_delivered_but_not_billed):
+		if not doc_before_save:
 			return
 
-		account_changed = (
-			self.stock_delivered_but_not_billed != doc_before_save.stock_delivered_but_not_billed
-		)
+		old_sdbnb_account = doc_before_save.get_default_account(STOCK_DELIVERED_BUT_NOT_BILLED)
+		if not old_sdbnb_account:
+			return
+
+		account_changed = sdbnb_account != old_sdbnb_account
 
 		feature_disabled = (
 			doc_before_save.enable_stock_delivered_but_not_billed
@@ -261,7 +270,7 @@ class Company(NestedSet):
 		)
 
 		if account_changed or feature_disabled:
-			self.validate_outstanding_sdbnb_transactions(doc_before_save.stock_delivered_but_not_billed)
+			self.validate_outstanding_sdbnb_transactions(old_sdbnb_account)
 
 	def cant_change_valuation_method(self):
 		doc_before_save = self.get_doc_before_save()
@@ -505,7 +514,7 @@ class Company(NestedSet):
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
-			if self.default_cash_account:
+			if self.get_default_account(CASH):
 				self.set_mode_of_payment_account()
 
 		if self.default_currency:
@@ -696,7 +705,7 @@ class Company(NestedSet):
 
 	def validate_perpetual_inventory(self):
 		if not self.get("__islocal"):
-			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
+			if cint(self.enable_perpetual_inventory) == 1 and not self.get_default_account(INVENTORY):
 				frappe.msgprint(
 					_("Set default inventory account for perpetual inventory"), alert=True, indicator="orange"
 				)
@@ -715,10 +724,8 @@ class Company(NestedSet):
 
 	def validate_provisional_account_for_non_stock_items(self):
 		if not self.get("__islocal"):
-			if (
-				cint(self.enable_provisional_accounting_for_non_stock_items) == 1
-				and not self.default_provisional_account
-			):
+			provisional_enabled = cint(self.enable_provisional_accounting_for_non_stock_items) == 1
+			if provisional_enabled and not self.get_default_account(PROVISIONAL):
 				frappe.throw(
 					_("Set default {0} account for non stock items").format(
 						frappe.bold(_("Provisional Account"))
@@ -867,15 +874,14 @@ class Company(NestedSet):
 
 	def set_mode_of_payment_account(self):
 		cash = frappe.db.get_value("Mode of Payment", {"type": "Cash"}, "name")
+		cash_account = self.get_default_account(CASH)
 		if (
 			cash
-			and self.default_cash_account
+			and cash_account
 			and not frappe.db.get_value("Mode of Payment Account", {"company": self.name, "parent": cash})
 		):
 			mode_of_payment = frappe.get_doc("Mode of Payment", cash, for_update=True)
-			mode_of_payment.append(
-				"accounts", {"company": self.name, "default_account": self.default_cash_account}
-			)
+			mode_of_payment.append("accounts", {"company": self.name, "default_account": cash_account})
 			mode_of_payment.save(ignore_permissions=True)
 
 	def create_default_cost_center(self):

@@ -14,6 +14,7 @@ from frappe.utils.nestedset import (
 	rebuild_tree,
 )
 
+from erpnext.accounts.default_accounts import INCOME, get_default_account
 from erpnext.tests.utils import ERPNextTestSuite
 
 TRANSLATED_ROOT = "Todos os Grupos de Itens"
@@ -99,7 +100,7 @@ class TestItemGroup(ERPNextTestSuite):
 		defaults = get_company_resolved_defaults("_Test Company")
 		self.assertEqual(
 			defaults["income_account"],
-			frappe.get_cached_value("Company", "_Test Company", "default_income_account"),
+			get_default_account("_Test Company", INCOME),
 		)
 		self.assertEqual(get_company_resolved_defaults(""), {})
 
@@ -117,7 +118,7 @@ class TestItemGroup(ERPNextTestSuite):
 			defaults = get_company_resolved_defaults("_Test Company")
 		self.assertEqual(
 			defaults["income_account"],
-			frappe.get_cached_value("Company", "_Test Company", "default_income_account"),
+			get_default_account("_Test Company", INCOME),
 		)
 
 		frappe.get_doc(
