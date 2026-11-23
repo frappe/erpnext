@@ -406,6 +406,23 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, child.save)
 
+	def test_group_cannot_end_before_its_child(self):
+		group = create_task("_Test Group Ending Before Child", nowdate(), add_days(nowdate(), 10), is_group=1)
+		create_task(
+			"_Test Child Ending After Group",
+			add_days(nowdate(), 1),
+			add_days(nowdate(), 9),
+			parent_task=group.name,
+		)
+		group.reload()
+
+		group.exp_end_date = add_days(nowdate(), 5)
+		self.assertRaises(frappe.exceptions.InvalidDates, group.save)
+
+		group.reload()
+		group.exp_end_date = add_days(nowdate(), 9)
+		group.save()
+
 	def test_expected_end_date(self):
 		task = create_task("Testing End Date", add_days(nowdate(), 1), add_days(nowdate(), 5))
 		task.expected_time = 72
