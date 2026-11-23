@@ -10,6 +10,13 @@ frappe.query_reports["Trial Balance"] = {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1,
+			on_change: function () {
+				// A change of the method refreshes the report by itself.
+				const changed = erpnext.financial_statements.set_accounting_method_default();
+				if (!changed && !frappe.query_report._no_refresh) {
+					frappe.query_report.refresh(true);
+				}
+			},
 		},
 		{
 			fieldname: "fiscal_year",
@@ -78,6 +85,7 @@ frappe.query_reports["Trial Balance"] = {
 			fieldtype: "Select",
 			options: erpnext.get_presentation_currency_list(),
 		},
+		erpnext.financial_statements.get_accounting_method_filter(),
 		{
 			fieldname: "with_period_closing_entry_for_opening",
 			label: __("With Period Closing Entry For Opening Balances"),

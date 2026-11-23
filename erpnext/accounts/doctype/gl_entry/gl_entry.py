@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import create_batch, flt, fmt_money, now
 
 import erpnext
+from erpnext.accounts.cash_basis.settings import validate_gl_account_is_not_unapplied
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
@@ -90,6 +91,7 @@ class GLEntry(Document):
 			self.check_mandatory()
 			self.validate_cost_center()
 			self.check_pl_account()
+			validate_gl_account_is_not_unapplied(self)
 			self.validate_party()
 			self.validate_currency()
 

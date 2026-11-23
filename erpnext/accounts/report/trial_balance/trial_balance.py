@@ -12,6 +12,14 @@ from frappe.utils import add_days, cstr, flt, formatdate, getdate
 from pypika.terms import Bracket, LiteralValue
 
 import erpnext
+from erpnext.accounts.cash_basis import CASH, get_accounting_method
+from erpnext.accounts.cash_basis.reports import (
+	add_report_message,
+	get_opening_entries,
+	resolve_accounting_method,
+	set_report_end,
+	uses_cash_basis,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_filter_condition,
@@ -43,9 +51,11 @@ value_fields = (
 def execute(filters=None):
 	validate_company_permission(filters.company)
 	validate_filters(filters)
+	resolve_accounting_method(filters)
+	set_report_end(filters, filters.to_date)
 	data = get_data(filters)
 	columns = get_columns()
-	return columns, data
+	return add_report_message((columns, data), filters, filters.to_date, from_date=filters.from_date)
 
 
 def validate_company_permission(company: str | None) -> None:
@@ -229,6 +239,19 @@ def get_rootwise_opening_balances(
 			report_type,
 			accounting_dimensions,
 			ignore_is_opening=ignore_is_opening,
+			ignore_reporting_currency=ignore_reporting_currency,
+		)
+
+	if uses_cash_basis(filters):
+		gle += get_opening_entries(
+			filters,
+			report_type,
+			filters.from_date,
+			year_start_date=None if filters.show_unclosed_fy_pl_balances else filters.year_start_date,
+			include_closing=bool(flt(filters.with_period_closing_entry_for_opening)),
+			closing_date=last_period_closing_voucher[0].period_end_date
+			if last_period_closing_voucher
+			else None,
 			ignore_reporting_currency=ignore_reporting_currency,
 		)
 
@@ -628,7 +651,7 @@ def hide_group_accounts(data):
 
 
 def execute_snapshot_report(filters):
-	if has_gl_entry_restrictions():
+	if has_gl_entry_restrictions() or get_accounting_method(filters) == CASH:
 		return execute(filters)
 
 	from frappe.database.duckdb.database import get_latest_sync

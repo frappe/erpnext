@@ -12,6 +12,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
 
 import erpnext
+from erpnext.accounts.cash_basis.settings import validate_journal_entry_treatment
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -146,6 +147,7 @@ class JournalEntry(AccountsController):
 			JournalEntryReferenceValidator,
 		)
 
+		validate_journal_entry_treatment(self)
 		if self.voucher_type == "Opening Entry":
 			self.is_opening = "Yes"
 
@@ -323,6 +325,9 @@ class JournalEntry(AccountsController):
 			frappe.throw(_("Please select Stock Asset Account"))
 
 		return [self.stock_asset_account]
+
+	def before_update_after_submit(self):
+		validate_journal_entry_treatment(self, after_submit=True)
 
 	def on_update_after_submit(self):
 		# Flag will be set on Reconciliation
