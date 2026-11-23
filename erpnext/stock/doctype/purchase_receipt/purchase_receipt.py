@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cint, flt, getdate, nowdate
 
 import erpnext
+from erpnext.accounts.default_accounts import ASSET_RECEIVED_BUT_NOT_BILLED, get_default_account
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import (
 	BuyingController,
@@ -308,7 +309,7 @@ class PurchaseReceipt(BuyingController):
 			if item.is_fixed_asset and is_cwip_accounting_enabled(item.asset_category):
 				# check cwip accounts before making auto assets
 				# Improves UX by not giving messages of "Assets Created" before throwing error of not finding arbnb account
-				self.get_company_default("asset_received_but_not_billed")
+				get_default_account(self.company, ASSET_RECEIVED_BUT_NOT_BILLED, required=True)
 				get_asset_account(
 					"capital_work_in_progress_account",
 					asset_category=item.asset_category,

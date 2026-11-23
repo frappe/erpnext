@@ -6,6 +6,13 @@ from frappe import _
 from frappe.utils import cint, flt
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ASSET_RECEIVED_BUT_NOT_BILLED,
+	COST_OF_GOODS_SOLD,
+	EXCHANGE_GAIN_LOSS,
+	STOCK_RECEIVED_BUT_NOT_BILLED,
+	get_default_account,
+)
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock import get_warehouse_account
@@ -177,7 +184,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 						self.add_gl_entry(
 							gl_entries=gl_entries,
-							account=doc.get_company_default("exchange_gain_loss_account"),
+							account=get_default_account(doc.company, EXCHANGE_GAIN_LOSS, required=True),
 							cost_center=d.cost_center,
 							debit=discrepancy_caused_by_exchange_rate_difference,
 							credit=0.0,
@@ -329,9 +336,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					continue
 
 				stock_asset_rbnb = (
-					doc.get_company_default("asset_received_but_not_billed")
+					get_default_account(doc.company, ASSET_RECEIVED_BUT_NOT_BILLED, required=True)
 					if d.is_fixed_asset
-					else doc.get_company_default("stock_received_but_not_billed")
+					else get_default_account(doc.company, STOCK_RECEIVED_BUT_NOT_BILLED, required=True)
 				)
 				if d.is_fixed_asset:
 					stock_asset_account_name = d.expense_account
@@ -380,9 +387,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			# a non-stock item puts no rejected qty in stock
 			if d.item_code in stock_items and self.has_booked_rejected_material(d):
 				stock_asset_rbnb = (
-					doc.get_company_default("asset_received_but_not_billed")
+					get_default_account(doc.company, ASSET_RECEIVED_BUT_NOT_BILLED, required=True)
 					if d.is_fixed_asset
-					else doc.get_company_default("stock_received_but_not_billed")
+					else get_default_account(doc.company, STOCK_RECEIVED_BUT_NOT_BILLED, required=True)
 				)
 
 				stock_value_diff = get_stock_value_difference(doc.name, d.name, d.rejected_warehouse)
@@ -434,9 +441,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 			return get_purchase_price_variance_account(item.item_code, doc.company)
 
-		loss_account = (
-			doc.get_company_default("default_expense_account", ignore_validation=True) or stock_asset_rbnb
-		)
+		loss_account = get_default_account(doc.company, COST_OF_GOODS_SOLD) or stock_asset_rbnb
 		if doc.is_return and item.expense_account and item.expense_account != stock_asset_rbnb:
 			loss_account = item.expense_account
 

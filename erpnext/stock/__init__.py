@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.default_accounts import INVENTORY, get_default_account
+
 install_docs = [
 	{"doctype": "Role", "role_name": "Stock Manager", "name": "Stock Manager"},
 	{"doctype": "Role", "role_name": "Item Manager", "name": "Item Manager"},
@@ -106,7 +108,7 @@ def get_warehouse_account(warehouse, warehouse_account=None, *, raise_error=True
 
 
 def get_company_default_inventory_account(company):
-	return frappe.get_cached_value("Company", company, "default_inventory_account")
+	return get_default_account(company, INVENTORY)
 
 
 def get_company_stock_accounts(company):

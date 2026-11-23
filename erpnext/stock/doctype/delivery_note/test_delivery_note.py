@@ -9,6 +9,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
+from erpnext.accounts.default_accounts import STOCK_DELIVERED_BUT_NOT_BILLED
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return as make_invoice_return
@@ -59,7 +60,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 	def get_perpetual_defaults(self):
 		company = frappe.get_doc("Company", "_Test SDBNB Company")
 		self.perpetual_company = company.name
-		self.perpetual_account = company.stock_delivered_but_not_billed
+		self.perpetual_account = company.get_default_account(STOCK_DELIVERED_BUT_NOT_BILLED)
 		self.perpetual_cost_center = company.cost_center
 		self.perpetual_warehouse = f"Stores - {company.abbr}"
 		self.perpetual_expense_account = f"Cost of Goods Sold - {company.abbr}"

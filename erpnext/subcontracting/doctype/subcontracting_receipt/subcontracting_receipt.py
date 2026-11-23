@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.controllers.sales_and_purchase_return import (
 	get_already_returned_items,
 	get_rate_for_return,
@@ -172,9 +173,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_items_cost_center()
 
 		if self.company:
-			default_expense_account = self.get_company_default(
-				"default_expense_account", ignore_validation=True
-			)
+			default_expense_account = get_default_account(self.company, COST_OF_GOODS_SOLD)
 			self.set_service_expense_account(default_expense_account)
 			self.set_expense_account_for_subcontracted_items(default_expense_account)
 
@@ -473,13 +472,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in self.supplied_items:
 			if not item.expense_account:
 				item.expense_account = get_default_expense_account(
-					frappe._dict(
-						{
-							"expense_account": self.get_company_default(
-								"default_expense_account", ignore_validation=True
-							)
-						}
-					),
+					frappe._dict({"expense_account": get_default_account(self.company, COST_OF_GOODS_SOLD)}),
 					get_item_defaults(item.rm_item_code, self.company),
 					get_item_group_defaults(item.rm_item_code, self.company),
 					get_brand_defaults(item.rm_item_code, self.company),

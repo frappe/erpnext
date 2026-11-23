@@ -21,6 +21,7 @@ from frappe.utils import (
 )
 
 import erpnext
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, STOCK_ADJUSTMENT, get_default_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import (
@@ -1933,24 +1934,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose == "Material Issue":
 			ret["expense_account"] = item.get("expense_account") or item_group_defaults.get("expense_account")
 		elif self.purpose in ("Subcontracting Delivery", "Subcontracting Return"):
-			ret["expense_account"] = frappe.get_cached_value(
-				"Company", self.company, "default_expense_account"
-			)
+			ret["expense_account"] = get_default_account(self.company, COST_OF_GOODS_SOLD)
 
 		return ret
 
 	def _apply_account_defaults(self, ret):
 		if not ret.get("expense_account"):
-			ret["expense_account"] = frappe.get_cached_value(
-				"Company", self.company, "stock_adjustment_account"
-			)
+			ret["expense_account"] = get_default_account(self.company, STOCK_ADJUSTMENT)
 
-		for company_field, field in {
-			"stock_adjustment_account": "expense_account",
-			"cost_center": "cost_center",
-		}.items():
-			if not ret.get(field):
-				ret[field] = frappe.get_cached_value("Company", self.company, company_field)
+		if not ret.get("cost_center"):
+			ret["cost_center"] = frappe.get_cached_value("Company", self.company, "cost_center")
 
 	def _resolve_subcontract_item(self, args, ret):
 		if not (self.get(self.subcontract_data.order_field) and args.get("item_code")):

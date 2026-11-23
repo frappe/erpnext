@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import get_combine_datetime
 
@@ -328,17 +329,17 @@ class ManufactureEntry:
 			else:
 				item_dict[key] = item
 
+		default_expense_account = get_default_account(self.company, STOCK_ADJUSTMENT)
+		default_cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 		for item, item_details in item_dict.items():
 			for d in [
-				["Account", "expense_account", "stock_adjustment_account"],
-				["Cost Center", "cost_center", "cost_center"],
-				["Warehouse", "default_warehouse", ""],
+				["Account", "expense_account", default_expense_account],
+				["Cost Center", "cost_center", default_cost_center],
+				["Warehouse", "default_warehouse", None],
 			]:
 				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
 				if not item_details.get(d[1]) or (company_in_record and self.company != company_in_record):
-					item_dict[item][d[1]] = (
-						frappe.get_cached_value("Company", self.company, d[2]) if d[2] else None
-					)
+					item_dict[item][d[1]] = d[2]
 
 		return item_dict
 

@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import cint, flt, today
 
 import erpnext
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.stock.utils import get_combine_datetime
 
 if TYPE_CHECKING:
@@ -133,7 +134,7 @@ def make_stock_entry(**args):
 		args.cost_center = frappe.get_value("Company", s.company, "cost_center")
 
 	if not args.expense_account and s.is_opening == "No":
-		args.expense_account = frappe.get_value("Company", s.company, "stock_adjustment_account")
+		args.expense_account = get_default_account(s.company, STOCK_ADJUSTMENT)
 
 	# We can find out the serial number using the batch source document
 	serial_number = args.serial_no

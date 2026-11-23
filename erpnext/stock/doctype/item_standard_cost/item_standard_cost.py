@@ -9,6 +9,11 @@ from frappe.query_builder.functions import IfNull, Max
 from frappe.utils import flt, get_datetime, get_link_to_form, getdate, nowtime, today
 from frappe.utils.caching import request_cache
 
+from erpnext.accounts.default_accounts import (
+	MANUFACTURING_VARIANCE,
+	PURCHASE_PRICE_VARIANCE,
+	get_default_account,
+)
 from erpnext.stock.utils import get_valuation_method
 
 
@@ -390,7 +395,7 @@ def get_purchase_price_variance_account(item_code, company):
 	account = get_variance_account(item_code, company, "purchase_price_variance_account")
 
 	if not account:
-		account = frappe.get_cached_value("Company", company, "default_purchase_price_variance_account")
+		account = get_default_account(company, PURCHASE_PRICE_VARIANCE)
 
 	if not account:
 		frappe.throw(
@@ -407,7 +412,7 @@ def get_manufacturing_variance_account(item_code, company):
 	account = get_variance_account(item_code, company, "manufacturing_variance_account")
 
 	if not account:
-		account = frappe.get_cached_value("Company", company, "default_manufacturing_variance_account")
+		account = get_default_account(company, MANUFACTURING_VARIANCE)
 
 	if not account:
 		frappe.throw(

@@ -6,6 +6,11 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.default_accounts import (
+	COST_OF_GOODS_SOLD,
+	STOCK_DELIVERED_BUT_NOT_BILLED,
+	get_default_account,
+)
 from erpnext.accounts.utils import pre_submit_validation
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.delivery_note.services.billing_status import BillingStatusService
@@ -492,18 +497,13 @@ class DeliveryNote(SellingController):
 		company_values = frappe.get_cached_value(
 			"Company",
 			self.company,
-			[
-				"stock_delivered_but_not_billed",
-				"disable_sdbnb_in_sr",
-				"default_expense_account",
-				"enable_stock_delivered_but_not_billed",
-			],
+			["disable_sdbnb_in_sr", "enable_stock_delivered_but_not_billed"],
 			as_dict=True,
 		)
 
-		sdbnb_account = company_values.stock_delivered_but_not_billed
+		sdbnb_account = get_default_account(self.company, STOCK_DELIVERED_BUT_NOT_BILLED)
 		disable_sdbnb_in_sr = company_values.disable_sdbnb_in_sr
-		default_expense_account = company_values.default_expense_account
+		default_expense_account = get_default_account(self.company, COST_OF_GOODS_SOLD)
 		is_enabled_sdbnb = company_values.enable_stock_delivered_but_not_billed
 		unbilled_rows = (
 			self.get_unbilled_original_rows()
