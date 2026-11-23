@@ -197,7 +197,7 @@ class TestWorkOrder(FrappeTestCase):
 		s = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 7))
 		self.assertRaisesRegex(frappe.ValidationError, "not yet produced", s.insert)
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	@change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
 	def test_manufacture_refused_beyond_transferred_qty(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
@@ -212,9 +212,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertRaisesRegex(frappe.ValidationError, "not yet produced", manufacture.insert)
 		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 4)).submit()
 
-	@ERPNextTestSuite.change_settings(
-		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 0}
-	)
+	@change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 0})
 	def test_manufacture_refused_beyond_transferred_qty_left_after_production(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
