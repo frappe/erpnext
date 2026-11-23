@@ -437,7 +437,6 @@ class ProductionPlan(Document):
 				(so_item.stock_qty - _reserved_qty_from_stock(so_item)).as_("qty"),
 				_reserved_work_order_output_qty(so_item).as_("reserved_work_order_output_qty"),
 				so_item.work_order_qty,
-				so_item.stock_qty,
 				so_item.production_plan_qty,
 				so_item.delivered_qty,
 				so_item.conversion_factor,
@@ -450,7 +449,7 @@ class ProductionPlan(Document):
 				(so_item.parent.isin(so_list))
 				& (so_item.docstatus == 1)
 				& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
-				& (so_item.stock_qty > so_item.production_plan_qty)
+				& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 			)
 		)
 
@@ -471,9 +470,7 @@ class ProductionPlan(Document):
 				item.reserved_work_order_output_qty
 			)
 			pending_qty = flt(item.qty) - max(item.work_order_qty, delivered_or_reserved_qty, 0)
-			item.pending_qty = flt(
-				min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty)), precision
-			)
+			item.pending_qty = flt(min(pending_qty, flt(item.qty) - flt(item.production_plan_qty)), precision)
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -691,14 +688,7 @@ class ProductionPlan(Document):
 			return
 
 		already_planned = self.get_so_wise_planned_qty(list({key[0] for key in planned_qty}))
-		so_items = {
-			row.name: row
-			for row in frappe.get_all(
-				"Sales Order Item",
-				filters={"name": ("in", [key[1] for key in planned_qty])},
-				fields=["name", "item_code", "stock_qty", "stock_uom"],
-			)
-		}
+		so_items = self.get_so_items_to_validate([key[1] for key in planned_qty])
 		allowance = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
@@ -707,7 +697,9 @@ class ProductionPlan(Document):
 		for (sales_order, so_item), qty in planned_qty.items():
 			row = so_items[so_item]
 			unplanned_qty = flt(
-				flt(row.stock_qty) * (1 + allowance / 100) - flt(already_planned.get((sales_order, so_item))),
+				flt(row.stock_qty) * (1 + allowance / 100)
+				- flt(row.reserved_qty)
+				- flt(already_planned.get((sales_order, so_item))),
 				precision,
 			)
 			if flt(qty, precision) > unplanned_qty:
@@ -719,6 +711,24 @@ class ProductionPlan(Document):
 					),
 					title=_("Sales Order Qty Exceeded"),
 				)
+
+	@staticmethod
+	def get_so_items_to_validate(so_items):
+		"""Sales Order Items by name, with the reserved qty that is not their own Work Order output."""
+		so_item = frappe.qb.DocType("Sales Order Item")
+		rows = (
+			frappe.qb.from_(so_item)
+			.select(
+				so_item.name,
+				so_item.item_code,
+				so_item.stock_qty,
+				_reserved_qty_from_stock(so_item).as_("reserved_qty"),
+				so_item.stock_uom,
+			)
+			.where(so_item.name.isin(so_items))
+			.run(as_dict=True)
+		)
+		return {row.name: row for row in rows}
 
 	def get_so_item_planned_qty(self):
 		"""Planned qty per Sales Order line, excluding product bundle components."""
@@ -2062,7 +2072,7 @@ def get_sales_orders(self):
 			& (so.docstatus == 1)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == self.company)
-			& (so_item.stock_qty > so_item.production_plan_qty)
+			& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 		)
 	)
 
@@ -2956,7 +2966,10 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 		.on(table.parent == so_table.name)
 		.select(table.parent)
 		.distinct()
-		.where((table.stock_qty > table.production_plan_qty) & (table.docstatus == 1))
+		.where(
+			((table.stock_qty - _reserved_qty_from_stock(table)) > table.production_plan_qty)
+			& (table.docstatus == 1)
+		)
 	)
 
 	if filters.get("company"):
