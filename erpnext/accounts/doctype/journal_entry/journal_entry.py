@@ -1719,8 +1719,7 @@ def get_party_account_and_currency(company, party_type, party):
 @frappe.whitelist()
 def get_account_details_and_party_type(account, date, company, debit=None, credit=None, exchange_rate=None):
 	"""Returns dict of account details and party type to be set in Journal Entry on selection of account."""
-	if not frappe.has_permission("Account"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
+	frappe.has_permission("Account", doc=account, throw=True)
 
 	company_currency = erpnext.get_company_currency(company)
 	account_details = frappe.get_cached_value(
