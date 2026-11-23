@@ -171,6 +171,8 @@ class Project(Document):
 			color=task_details.color,
 			template_task=task_details.name,
 			priority=task_details.priority,
+			expected_time=task_details.expected_time,
+			is_milestone=task_details.is_milestone,
 		).insert()
 
 	def calculate_start_date(self, task_details):

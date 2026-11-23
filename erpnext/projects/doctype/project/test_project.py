@@ -195,6 +195,23 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.count("Task", {"project": project.name}), len(template.tasks))
 
+	def test_template_task_copies_expected_time_and_milestone(self):
+		template_task = create_task(
+			subject="_Test Template Milestone Task", is_template=1, begin=0, duration=2, save=False
+		)
+		template_task.expected_time = 8
+		template_task.is_milestone = 1
+		template_task.save()
+		template = make_project_template("_Test Template With Milestone", [template_task])
+
+		project = get_project("_Test Project With Milestone", template)
+
+		task = frappe.get_value(
+			"Task", {"project": project.name}, ["expected_time", "is_milestone"], as_dict=True
+		)
+		self.assertEqual(task.expected_time, 8)
+		self.assertEqual(task.is_milestone, 1)
+
 	def test_holiday_on_template_task_moves_its_dependent(self):
 		start_date = getdate(nowdate())
 		holiday_list = make_holiday_list(
