@@ -296,6 +296,53 @@ class TestTask(ERPNextTestSuite):
 		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), 10)))
 		self.assertIsNone(dependent.exp_end_date)
 
+	def test_reschedule_moves_dependents_back_when_end_moves_earlier(self):
+		prerequisite = create_task("_Test Task Moved Out And Back", nowdate(), add_days(nowdate(), 4))
+		dependent = create_task(
+			"_Test Task After Moved Task", add_days(nowdate(), 5), add_days(nowdate(), 7), prerequisite.name
+		)
+		last = create_task(
+			"_Test Last Task In Chain", add_days(nowdate(), 8), add_days(nowdate(), 9), dependent.name
+		)
+
+		prerequisite.exp_end_date = add_days(nowdate(), 9)
+		prerequisite.save()
+		prerequisite.exp_end_date = add_days(nowdate(), 4)
+		prerequisite.save()
+
+		for task, start, end in ((dependent, 5, 7), (last, 8, 9)):
+			task.reload()
+			self.assertEqual(getdate(task.exp_start_date), getdate(add_days(nowdate(), start)))
+			self.assertEqual(getdate(task.exp_end_date), getdate(add_days(nowdate(), end)))
+
+	def test_reschedule_moves_dependent_back_only_to_its_latest_predecessor(self):
+		prerequisite = create_task("_Test Task Moved Back Early", nowdate(), add_days(nowdate(), 9))
+		other = create_task("_Test Task Ending Later", nowdate(), add_days(nowdate(), 6))
+		dependent = create_task(
+			"_Test Task After Two Tasks", add_days(nowdate(), 10), add_days(nowdate(), 12), prerequisite.name
+		)
+		dependent.append("depends_on", {"task": other.name})
+		dependent.save()
+
+		prerequisite.exp_end_date = add_days(nowdate(), 4)
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), 7)))
+		self.assertEqual(getdate(dependent.exp_end_date), getdate(add_days(nowdate(), 9)))
+
+	def test_reschedule_keeps_dependent_with_a_gap_when_end_moves_earlier(self):
+		prerequisite = create_task("_Test Task Moved Back Before Gap", nowdate(), add_days(nowdate(), 9))
+		dependent = create_task(
+			"_Test Task After A Gap", add_days(nowdate(), 12), add_days(nowdate(), 14), prerequisite.name
+		)
+
+		prerequisite.exp_end_date = add_days(nowdate(), 4)
+		prerequisite.save()
+
+		dependent.reload()
+		self.assertEqual(getdate(dependent.exp_start_date), getdate(add_days(nowdate(), 12)))
+
 	def test_actual_dates_outside_project_dates(self):
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 		frappe.db.set_value(

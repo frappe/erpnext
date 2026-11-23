@@ -429,26 +429,62 @@ class Task(NestedSet):
 		if not dependent_parents:
 			return
 
+		previous_end_date = self.get_previous_end_date_if_moved_earlier(end_date)
+		other_end_dates = self.get_other_predecessor_end_dates(dependent_parents) if previous_end_date else {}
+		day_after_previous_end = add_days(getdate(previous_end_date), 1) if previous_end_date else None
+
 		for task_name in frappe.get_all(
 			"Task",
 			filters={"project": self.project, "name": ["in", dependent_parents]},
 			pluck="name",
 		):
 			task = frappe.get_doc("Task", task_name)
-			if (
-				task.exp_start_date
-				and get_datetime(task.exp_start_date) <= end_date
-				and task.status in ("Open", "Working", "Overdue")
-			):
+			if not task.exp_start_date or task.status not in ("Open", "Working", "Overdue"):
+				continue
+
+			if get_datetime(task.exp_start_date) <= end_date:
 				task.move_to_start_after(end_date)
-				task.flags.ignore_recursion_check = True
-				task.flags.rescheduled = True
-				task.save(ignore_permissions=self.flags.ignore_permissions)
+			elif getdate(task.exp_start_date) == day_after_previous_end:
+				# It was scheduled from the old end: move it back, but not before another predecessor ends.
+				new_end_date = get_latest_date(end_date, other_end_dates.get(task_name))
+				if getdate(new_end_date) >= getdate(previous_end_date):
+					continue
+				task.move_to_start_after(new_end_date)
+			else:
+				continue
+
+			task.flags.ignore_recursion_check = True
+			task.flags.rescheduled = True
+			task.save(ignore_permissions=self.flags.ignore_permissions)
 
 	def get_schedule_end_date(self):
 		"""The later of the expected and actual end, as a task that overruns still blocks its dependents."""
-		end_dates = [get_datetime(d) for d in (self.exp_end_date, self.act_end_date) if d]
-		return max(end_dates, default=None)
+		return get_latest_date(self.exp_end_date, self.act_end_date)
+
+	def get_previous_end_date_if_moved_earlier(self, end_date):
+		doc_before_save = self.get_doc_before_save()
+		previous_end_date = doc_before_save and doc_before_save.get_schedule_end_date()
+		if previous_end_date and getdate(previous_end_date) > getdate(end_date):
+			return previous_end_date
+
+	def get_other_predecessor_end_dates(self, dependents: list[str]) -> dict:
+		"""Latest end of the tasks each dependent waits for, other than this one."""
+		depends_on = frappe.qb.DocType("Task Depends On")
+		task = frappe.qb.DocType("Task")
+		rows = (
+			frappe.qb.from_(depends_on)
+			.join(task)
+			.on(task.name == depends_on.task)
+			.select(depends_on.parent, task.exp_end_date, task.act_end_date)
+			.where(depends_on.parent.isin(dependents) & (depends_on.task != self.name))
+		).run(as_dict=True)
+
+		end_dates = {}
+		for row in rows:
+			end_dates[row.parent] = get_latest_date(
+				end_dates.get(row.parent), row.exp_end_date, row.act_end_date
+			)
+		return end_dates
 
 	def move_to_start_after(self, end_date):
 		"""Start on the day after `end_date`, keeping this task's time of day and duration."""
@@ -671,6 +707,10 @@ def add_multiple_tasks(data: str | list, parent: str, project: str | None = None
 		new_doc["subject"] = d.get("subject")
 		new_task = frappe.get_doc(new_doc)
 		new_task.insert()
+
+
+def get_latest_date(*dates):
+	return max((get_datetime(d) for d in dates if d), default=None)
 
 
 def on_doctype_update():
