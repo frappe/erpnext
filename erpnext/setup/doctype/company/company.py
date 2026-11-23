@@ -25,6 +25,7 @@ from frappe.utils import (
 )
 from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
+from erpnext.accounts.default_accounts import get_purpose, get_purposes
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
 	sync_financial_report_templates,
@@ -378,65 +379,15 @@ class Company(NestedSet):
 		setup_taxes_and_charges(self.name, self.country)
 
 	def validate_default_accounts(self):
-		account_filters = {
-			"default_bank_account": {"account_type": "Bank"},
-			"default_cash_account": {"account_type": "Cash"},
-			"default_receivable_account": {"root_type": "Asset", "account_type": "Receivable"},
-			"default_payable_account": {"root_type": "Liability", "account_type": "Payable"},
-			"default_expense_account": {"root_type": "Expense"},
-			"default_income_account": {"root_type": "Income"},
-			"round_off_account": {"root_type": ("Expense", "Income")},
-			"round_off_for_opening": {"root_type": "Liability", "account_type": "Round Off for Opening"},
-			"write_off_account": {"root_type": "Expense"},
-			"bank_charges_account": {"root_type": "Expense"},
-			"exchange_gain_loss_account": {"root_type": ("Expense", "Income")},
-			"exchange_gain_account": {"root_type": ("Expense", "Income")},
-			"exchange_loss_account": {"root_type": ("Expense", "Income")},
-			"unrealized_exchange_gain_loss_account": {
-				"root_type": ("Expense", "Income", "Equity", "Liability")
-			},
-			"accumulated_depreciation_account": {
-				"root_type": "Asset",
-				"account_type": "Accumulated Depreciation",
-			},
-			"depreciation_expense_account": {"root_type": "Expense", "account_type": "Depreciation"},
-			"disposal_account": {"report_type": "Profit and Loss"},
-			"default_inventory_account": {"account_type": "Stock"},
-			"stock_adjustment_account": {"root_type": "Expense", "account_type": "Stock Adjustment"},
-			"stock_received_but_not_billed": {
-				"root_type": "Liability",
-				"account_type": "Stock Received But Not Billed",
-			},
-			"stock_delivered_but_not_billed": {
-				"root_type": "Asset",
-				"account_type": "Stock Delivered But Not Billed",
-			},
-			"capital_work_in_progress_account": {"account_type": "Capital Work in Progress"},
-			"asset_received_but_not_billed": {"account_type": "Asset Received But Not Billed"},
-			"unrealized_profit_loss_account": {"root_type": ("Liability", "Asset")},
-			"default_provisional_account": {"root_type": ("Liability", "Asset")},
-			"default_advance_received_account": {"root_type": "Liability", "account_type": "Receivable"},
-			"default_advance_paid_account": {"root_type": "Asset", "account_type": "Payable"},
-			"purchase_expense_account": {"root_type": "Expense"},
-			"purchase_expense_contra_account": {"root_type": "Expense"},
-			"service_expense_account": {"root_type": "Expense"},
-			"expenses_added_to_stock_account": {"root_type": "Expense"},
-			"expenses_added_to_stock_contra_account": {"root_type": "Expense"},
-			"default_operating_cost_account": {"root_type": "Expense"},
-			"default_purchase_price_variance_account": {},
-			"default_manufacturing_variance_account": {},
-			"default_discount_account": {},
-			"default_deferred_revenue_account": {},
-			"default_deferred_expense_account": {},
-		}
-		for fieldname, filters in account_filters.items():
+		for purpose in get_purposes().values():
+			fieldname = purpose.fieldname
 			account = self.get(fieldname)
 			if not account:
 				continue
 
-			label = self.meta.get_translated_label(fieldname)
+			label = _(purpose.label)
 			if self.is_value_new_or_changed(fieldname):
-				self.validate_default_account(account, label, filters)
+				self.validate_default_account(account, label, purpose.filters)
 
 			if self.is_value_new_or_changed(fieldname) or self.currency_changed:
 				if get_account_currency(account) not in {
@@ -462,6 +413,22 @@ class Company(NestedSet):
 					)
 				)
 
+	def get_default_account(self, purpose: str, required: bool = False) -> str | None:
+		"""Return the account of this purpose, else the account of its fallback purpose."""
+		default_purpose = get_purpose(purpose)
+		account = self.get(default_purpose.fieldname)
+		if not account and default_purpose.fallback:
+			account = self.get_default_account(default_purpose.fallback)
+
+		if not account and required:
+			frappe.throw(_("Please set {0} in Company {1}").format(_(default_purpose.label), self.name))
+
+		return account
+
+	def set_default_account(self, purpose: str, account: str | None) -> None:
+		"""Set the account of this purpose. The caller saves the Company."""
+		self.set(get_purpose(purpose).fieldname, account)
+
 	def is_value_new_or_changed(self, fieldname):
 		"""Validate a default only when it is set, so existing defaults do not block unrelated saves."""
 		return self.is_new() or self.has_value_changed(fieldname)
@@ -484,7 +451,9 @@ class Company(NestedSet):
 			frappe.throw(_("Account {0} does not belong to company: {1}").format(account, self.name))
 
 		for key, expected in filters.items():
-			if details.get(key) not in (expected if isinstance(expected, tuple) else (expected,)):
+			# a filter value is a str or ["in", [...]]
+			allowed_values = expected[1] if isinstance(expected, list) else [expected]
+			if details.get(key) not in allowed_values:
 				frappe.throw(_("{0}: {1} has an invalid {2}").format(label, account, key))
 
 	def validate_currency(self):
@@ -808,33 +777,17 @@ class Company(NestedSet):
 				check_pending_reposting(self.accounts_frozen_till_date, self.name)
 
 	def set_default_accounts(self):
-		default_accounts = {
-			"default_cash_account": "Cash",
-			"default_bank_account": "Bank",
-			"round_off_account": "Round Off",
-			"accumulated_depreciation_account": "Accumulated Depreciation",
-			"depreciation_expense_account": "Depreciation",
-			"capital_work_in_progress_account": "Capital Work in Progress",
-			"asset_received_but_not_billed": "Asset Received But Not Billed",
-			"default_expense_account": "Cost of Goods Sold",
-		}
-
-		if self.enable_perpetual_inventory:
-			default_accounts.update(
-				{
-					"stock_received_but_not_billed": "Stock Received But Not Billed",
-					"stock_delivered_but_not_billed": "Stock Delivered But Not Billed",
-					"default_inventory_account": "Stock",
-					"stock_adjustment_account": "Stock Adjustment",
-				}
-			)
-
-		if self.update_default_account:
-			for default_account in default_accounts:
-				self._set_default_account(default_account, default_accounts.get(default_account))
-
 		if not self.update_default_account:
 			return
+
+		for purpose in get_purposes().values():
+			if not purpose.account_type:
+				continue
+
+			if purpose.perpetual_inventory_only and not self.enable_perpetual_inventory:
+				continue
+
+			self._set_default_account(purpose.fieldname, purpose.account_type)
 
 		if not self.default_income_account:
 			income_account = frappe.db.get_all(
