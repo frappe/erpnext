@@ -2099,137 +2099,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 					# Repack rate comes from consumed source-warehouse rows, not consumption entries
 					has_derived_rate = any(item.s_warehouse for item in self.get("items"))
 
-<<<<<<< HEAD
 				if self.bom_no:
 					d.basic_rate *= bom_cost_allocation_per / 100
 			elif is_costed_out_of_finished_item(d):
 				# Recomputed every time: a rate fetched before the target warehouse was set
 				# must not stick to the row.
 				d.basic_rate = self.get_row_valuation_rate(d, raise_error_if_no_rate)
-=======
-	def get_finished_good_cost_allocation_per(self) -> float:
-		secondary_rows = {
-			d.bom_secondary_item for d in self.get("items") if d.bom_secondary_item and flt(d.transfer_qty)
-		}
-		if not secondary_rows:
-			return 100.0
-
-		allocated_per = frappe.get_all(
-			"BOM Secondary Item",
-			filters={"name": ("in", list(secondary_rows)), "parent": self.bom_no},
-			pluck="cost_allocation_per",
-		)
-		return flt(100 - sum(flt(per) for per in allocated_per))
-
-	def get_secondary_items_cost_basis(self, outgoing_items_cost) -> float:
-		"""The cost a BOM allocation splits: the consumed rows, or the entry that replaced them."""
-		if outgoing_items_cost or self.purpose != "Manufacture" or not self.work_order:
-			return outgoing_items_cost
-
-		settings = frappe.get_single("Manufacturing Settings")
-		if not (settings.material_consumption and settings.get_rm_cost_from_consumption_entry):
-			return outgoing_items_cost
-
-		if not self.get_consumption_entries():
-			return outgoing_items_cost
-
-		return self._fetch_consumption_entry_cost()
-
-	def has_consumption_basis(self) -> bool:
-		"""Whether the cost of the consumed items is known, even when that cost is zero."""
-		if any(d.s_warehouse for d in self.get("items")):
-			return True
-
-		return self.is_rm_cost_from_consumption_entries()
-
-	def is_rm_cost_from_consumption_entries(self) -> bool:
-		"""Whether the consumption entries replace the raw materials of this entry."""
-		settings = frappe.get_single("Manufacturing Settings")
-		if settings.material_consumption and settings.get_rm_cost_from_consumption_entry and self.work_order:
-			return bool(self.get_consumption_entries())
-
-		return False
-
-	def get_consumption_entries(self) -> list[str]:
-		# Cached: queried in both has_consumption_basis() and _get_rm_cost_for_manufacture()
-		if getattr(self, "_consumption_entries", None) is None:
-			self._consumption_entries = frappe.get_all(
-				"Stock Entry",
-				filters={
-					"docstatus": 1,
-					"work_order": self.work_order,
-					"purpose": "Material Consumption for Manufacture",
-				},
-				pluck="name",
-			)
-		return self._consumption_entries
-
-	def _set_incoming_item_rate(
-		self,
-		d,
-		outgoing_items_cost,
-		raise_error_if_no_rate,
-		zero_valuation_items,
-		bom_cost_allocation_per=None,
-		has_consumption_basis=False,
-		secondary_items_cost_basis=0,
-	):
-		has_derived_rate = False
-
-		# a zero valued finished good takes no share of the cost, even before it has a rate
-		if (
-			d.allow_zero_valuation_rate
-			and (d.basic_rate or d.is_finished_item)
-			and self.purpose != "Receive from Customer"
-		):
-			if d.basic_rate:
-				zero_valuation_items.append(d.item_code)
-			d.basic_rate = 0.0
-		elif d.is_finished_item:
-			if self.purpose == "Manufacture":
-				# the cost is split over every finished good row, so a split row is not given all of it
-				d.basic_rate = self.get_basic_rate_for_manufactured_item(
-					self.get_finished_items_qty(), outgoing_items_cost, has_consumption_basis
-				)
-				has_derived_rate = has_consumption_basis or self.has_manually_rated_finished_items()
-			elif self.purpose == "Repack":
-				d.basic_rate = self.get_basic_rate_for_repacked_items(
-					self.get_finished_items_qty(), outgoing_items_cost
-				)
-				# Repack rate comes from consumed source-warehouse rows, not consumption entries
-				has_derived_rate = any(item.s_warehouse for item in self.get("items"))
-
-			if self.bom_no:
-				d.basic_rate *= bom_cost_allocation_per / 100
-		elif is_costed_out_of_finished_item(d):
-			# Recomputed every time: a rate fetched before the target warehouse was set
-			# must not stick to the row.
-			d.basic_rate = self.get_row_valuation_rate(d, raise_error_if_no_rate)
-			has_derived_rate = True
-		elif d.secondary_item_type and d.bom_secondary_item:
-			cost_allocation_per = flt(
-				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
-			)
-			if flt(d.transfer_qty):
-				secondary_items_qty = sum(
-					flt(item.transfer_qty)
-					for item in self.items
-					if item.bom_secondary_item == d.bom_secondary_item
-					and not item.s_warehouse
-					and not item.set_basic_rate_manually
-					and not is_costed_out_of_finished_item(item)
-				)
-				if self.is_sub_assembly_secondary_item(d):
-					allocation_basis = self.get_sub_assembly_component_cost(d)
-				else:
-					allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
-					# the basis automatic finished goods split: manual ones take their value first, down to zero
-					if self.get_finished_items_qty() and allocation_basis > 0:
-						allocation_basis = max(
-							allocation_basis - self.get_manually_rated_finished_items()[1], 0
-						)
-				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
->>>>>>> ed3764f (fix(stock): split a co-product's share from the cost left after manual finished goods)
 				has_derived_rate = True
 			elif d.secondary_item_type and d.bom_secondary_item:
 				cost_allocation_per = flt(
@@ -2245,6 +2120,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 						and not is_costed_out_of_finished_item(item)
 					)
 					allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
+					# the basis automatic finished goods split: manual ones take their value first, down to zero
+					if self.get_finished_items_qty() and allocation_basis > 0:
+						allocation_basis = max(
+							allocation_basis - self.get_manually_rated_finished_items()[1], 0
+						)
 					d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
 					has_derived_rate = True
 
