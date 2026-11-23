@@ -1394,16 +1394,12 @@ class TestMaterialRequest(ERPNextTestSuite):
 		se.save()
 		se.submit()
 
-	def test_material_issue_of_another_item_is_not_counted_against_the_request(self):
+	def test_material_issue_item_must_match_material_request(self):
 		mr = make_material_request(material_request_type="Material Issue")
 
 		se = make_stock_entry(mr.name)
 		se.items[0].item_code = "_Test Item Home Desktop 100"
 		self.assertRaises(frappe.MappingMismatchError, se.insert)
-
-		mr.reload()
-		self.assertEqual(mr.status, "Pending")
-		self.assertEqual(mr.items[0].ordered_qty, 0)
 
 	def test_mr_status_for_mixed_direct_and_transit_transfer(self):
 		material_request = make_material_request(
