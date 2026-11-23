@@ -316,8 +316,8 @@ class BuyingController(SubcontractingController):
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
-			# conversion_rate is reset to 1 for the company currency only later
-			exchange_rate = 1 if self.currency == self.company_currency else flt(self.conversion_rate) or 1
+			# set_missing_values sets the exchange rate only later
+			self.set_price_list_currency("Buying")
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate, converted to the row's UOM and currency
@@ -343,7 +343,10 @@ class BuyingController(SubcontractingController):
 						},
 						raise_error_if_no_rate=False,
 					)
-					row.rate = flt(valuation_rate * conversion_factor / exchange_rate, row.precision("rate"))
+					row.rate = flt(
+						valuation_rate * conversion_factor / (flt(self.conversion_rate) or 1),
+						row.precision("rate"),
+					)
 
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
