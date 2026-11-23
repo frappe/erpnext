@@ -846,7 +846,11 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def get_final_operation_qty(self) -> dict[str, dict[str, float]]:
 		"""Accepted and process loss qty of each item row, by the Work Order whose final operation its job card is."""
-		rows = [row for row in self.items if row.job_card and row.name and flt(row.qty) > 0]
+		rows = [
+			row
+			for row in self.items
+			if row.job_card and row.name and flt(row.qty) + flt(row.process_loss_qty) > 0
+		]
 		if not rows:
 			return {}
 
