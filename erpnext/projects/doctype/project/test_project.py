@@ -12,6 +12,7 @@ from erpnext.projects.doctype.project_template.test_project_template import make
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.mapper import make_project as make_project_from_so
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -193,6 +194,46 @@ class TestProject(ERPNextTestSuite):
 		).insert()
 
 		self.assertEqual(frappe.db.count("Task", {"project": project.name}), len(template.tasks))
+
+	def test_holiday_on_template_task_moves_its_dependent(self):
+		start_date = getdate(nowdate())
+		holiday_list = make_holiday_list(
+			"_Test Holiday On Project Start",
+			from_date=start_date,
+			to_date=add_days(start_date, 30),
+			holiday_dates=[{"holiday_date": start_date, "description": "Project start"}],
+		)
+		task_a = create_task(
+			subject="_Test Template Task Moved By Holiday", is_template=1, begin=0, duration=2
+		)
+		task_b = create_task(
+			subject="_Test Template Task After Holiday Task",
+			depends_on=task_a.name,
+			is_template=1,
+			begin=3,
+			duration=1,
+		)
+		template = make_project_template("_Test Template With Holiday Dependency", [task_a, task_b])
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Template With Holiday Dependency {frappe.generate_hash(length=6)}",
+			project_template=template.name,
+			expected_start_date=start_date,
+			holiday_list=holiday_list.name,
+			company="_Test Company",
+		).insert()
+
+		dates = {
+			task.template_task: (getdate(task.exp_start_date), getdate(task.exp_end_date))
+			for task in frappe.get_all(
+				"Task",
+				filters={"project": project.name},
+				fields=["template_task", "exp_start_date", "exp_end_date"],
+			)
+		}
+		self.assertEqual(dates[task_a.name], (add_days(start_date, 1), add_days(start_date, 3)))
+		self.assertEqual(dates[task_b.name], (add_days(start_date, 4), add_days(start_date, 5)))
 
 	def test_deleted_template_tasks_are_not_recreated_on_save(self):
 		template = make_project_template("_Test Template Tasks Not Recreated")
