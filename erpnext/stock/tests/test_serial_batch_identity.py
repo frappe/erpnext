@@ -737,6 +737,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					voucher_no="Receipt",
 					consumed_qty=1,
 					serial_no="SUPPLIER-001" if receipt_text else None,
+					serial_and_batch_bundle=None if receipt_text else "Receipt Bundle",
 				)
 				transfer_bundles = (
 					{}
@@ -750,11 +751,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				receipt_bundles = (
 					{}
 					if receipt_text
-					else {
-						(self.item.name, key[1], warehouse, "Receipt"): frappe._dict(
-							serial_nos=[consumed.name]
-						)
-					}
+					else {"Receipt Bundle": [frappe._dict(serial_no=consumed.name, batch_no=None, qty=-1)]}
 				)
 				with (
 					patch.object(
@@ -770,8 +767,9 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					),
 					patch(
 						"erpnext.controllers.subcontracting_controller.get_voucher_wise_serial_batch_from_bundle",
-						side_effect=[transfer_bundles, receipt_bundles],
+						return_value=transfer_bundles,
 					),
+					patch.object(doc, "get_bundle_entries", return_value=receipt_bundles),
 					patch("erpnext.deprecation_dumpster.deprecation_warning"),
 				):
 					doc.get_available_materials()
