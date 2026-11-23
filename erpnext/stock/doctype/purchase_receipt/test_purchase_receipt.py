@@ -3783,9 +3783,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_landed_cost_voucher_leaves_the_rejected_material_of_a_transfer_alone(self):
 		"""A charge is spread over the material the receipt accepted; what was rejected keeps the
 		value it arrived in transit with."""
-<<<<<<< HEAD
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-=======
 		item_doc = make_item(
 			"_Test Batch Item For Charged Transfer",
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFCT-.####"},
@@ -3798,8 +3795,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assert_rejected_material_of_a_charged_transfer_keeps_its_value(item_code)
 
 	def assert_rejected_material_of_a_charged_transfer_keeps_its_value(self, item_code, has_batch=False):
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
->>>>>>> d848195 (test: the rejected stock of a plain transfer keeps its transit value)
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
@@ -10206,43 +10202,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
-<<<<<<< HEAD
-=======
-	def test_return_of_receipt_from_invoice_at_another_rate_reverses_exchange_difference(self):
-		self.assert_return_reverses_exchange_difference()
-
-	def test_return_in_another_uom_reverses_exchange_difference(self):
-		self.assert_return_reverses_exchange_difference(
-			{"uom": "Box", "conversion_factor": 3, "qty": -1, "received_qty": -1, "rate": 30.99}
-		)
-
-	def assert_return_reverses_exchange_difference(self, return_row=None):
-		"""Full return of a receipt made at 83.11 from a USD invoice at 85.37 reverses its 70.04."""
-		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
-
-		pr = self.make_receipt_from_usd_invoice(83.11)
-		pr_return = make_purchase_return(pr.name)
-		if return_row:
-			item = frappe.get_doc("Item", pr.items[0].item_code)
-			item.append(
-				"uoms", {"uom": return_row["uom"], "conversion_factor": return_row["conversion_factor"]}
-			)
-			item.save()
-			pr_return.items[0].update(return_row)
-		pr_return.submit()
-
-		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
-		reversed_amount = frappe.db.get_value(
-			"GL Entry",
-			{"voucher_no": pr_return.name, "account": gain_loss_account, "is_cancelled": 0},
-			"credit",
-		)
-		self.assertEqual(reversed_amount, 70.04)
-
 	def test_landed_cost_on_internal_receipt_stays_out_of_transit(self):
 		"""The transit leg of an internal receipt gives back what the delivery put in transit; the
 		landed cost goes only to the stock received."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
@@ -10292,7 +10255,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
->>>>>>> c5e0ba7 (test: landed cost on an internal receipt stays out of transit)
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
