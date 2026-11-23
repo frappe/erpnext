@@ -26,10 +26,15 @@ def set_backdated_details(entries, rows, item_code, warehouse, valuation_method)
 		entry.later_dated_count = counts.get(entry.name, 0)
 		entry.changed_by = get_changed_by(row, late_rows)
 		if entry.changed_by:
+			entry.awaiting_recalculation = is_awaiting_recalculation(row, entry.changed_by)
 			affected.append((entry, row))
 
 	if affected and can_replay(valuation_method):
 		set_rates_when_entered(affected, item_code, warehouse, valuation_method)
+
+
+def is_awaiting_recalculation(row, changed_by):
+	return row.modified < max(change.changed_on for change in changed_by)
 
 
 def can_replay(valuation_method):

@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 from frappe.query_builder import Order
 from frappe.utils import flt
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock.page.valuation_rate_breakdown.backdated import set_backdated_details
 from erpnext.stock.page.valuation_rate_breakdown.serial_batch import set_serial_batch_details
@@ -39,7 +40,7 @@ def get_valuation_steps(
 		entries=get_entries(item, warehouse, rows, previous),
 		opening=get_balance(previous, get_lot_method(item)),
 		has_earlier=has_earlier,
-		repost_pending=is_repost_pending(item_code, warehouse, company),
+		repost_status=get_repost_status(item_code, warehouse, company),
 	)
 
 
@@ -303,21 +304,41 @@ def get_weighted_rates(rows):
 	return {key: value / qty for key, (qty, value) in totals.items() if qty}
 
 
-def is_repost_pending(item_code, warehouse, company):
+def get_repost_status(item_code, warehouse, company):
+	if get_reposts(item_code, warehouse, company, ["Queued", "In Progress"]):
+		return "pending"
+
+	latest = get_reposts(item_code, warehouse, company, ["Completed", "Failed"])
+	return "failed" if latest and latest[0] == "Failed" else None
+
+
+def get_reposts(item_code, warehouse, company, statuses):
 	repost = frappe.qb.DocType("Repost Item Valuation")
-	pending = (
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	touches_item = ExistsCriterion(
+		frappe.qb.from_(sle)
+		.select(sle.name)
+		.where(
+			(sle.voucher_type == repost.voucher_type)
+			& (sle.voucher_no == repost.voucher_no)
+			& (sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+		)
+	)
+	same_item = (repost.item_code == item_code) & (repost.warehouse == warehouse)
+	return (
 		frappe.qb.from_(repost)
-		.select(repost.name)
+		.select(repost.status)
 		.where(
 			(repost.docstatus == 1)
 			& (repost.company == company)
-			& (repost.status.isin(["Queued", "In Progress"]))
+			& (repost.status.isin(statuses))
 			& (
-				(repost.based_on == "Transaction")
-				| ((repost.item_code == item_code) & (repost.warehouse == warehouse))
+				((repost.based_on == "Item and Warehouse") & same_item)
+				| ((repost.based_on == "Transaction") & touches_item)
 			)
 		)
+		.orderby(repost.creation, order=Order.desc)
 		.limit(1)
-		.run()
+		.run(pluck=True)
 	)
-	return bool(pending)

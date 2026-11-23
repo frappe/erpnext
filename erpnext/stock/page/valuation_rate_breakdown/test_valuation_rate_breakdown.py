@@ -215,3 +215,56 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 			with self.assertRaises(frappe.PermissionError):
 				get_valuation_steps(item_code, WAREHOUSE)
 			frappe.set_user("Administrator")
+
+	def queue_repost(self, **fields):
+		repost = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"company": "_Test Company",
+				"posting_date": add_days(today(), -3),
+				"posting_time": "00:00:00",
+				**fields,
+			}
+		)
+		repost.flags.dont_run_in_test = True
+		repost.submit()
+		return repost
+
+	def test_transaction_repost_is_shown_only_for_its_items(self):
+		item_code = self.make_item("Moving Average")
+		other_item = self.make_item("Moving Average")
+		receipt = self.receive(item_code, 50, 3)
+		self.receive(other_item, 50, 3)
+		self.queue_repost(based_on="Transaction", voucher_type="Purchase Receipt", voucher_no=receipt.name)
+		other_warehouse = frappe.db.get_value(
+			"Warehouse", {"company": "_Test Company", "is_group": 0, "name": ("!=", WAREHOUSE)}, "name"
+		)
+		self.queue_repost(based_on="Item and Warehouse", item_code=other_item, warehouse=other_warehouse)
+
+		self.assertEqual(get_valuation_steps(item_code, WAREHOUSE).repost_status, "pending")
+		self.assertIsNone(get_valuation_steps(other_item, WAREHOUSE).repost_status)
+
+	def test_failed_repost_is_reported(self):
+		item_code = self.make_item("Moving Average")
+		self.receive(item_code, 50, 3)
+		repost = self.queue_repost(based_on="Item and Warehouse", item_code=item_code, warehouse=WAREHOUSE)
+		frappe.db.set_value("Repost Item Valuation", repost.name, "status", "Failed")
+
+		self.assertEqual(get_valuation_steps(item_code, WAREHOUSE).repost_status, "failed")
+
+	def test_issue_waits_for_recalculation_until_repost_runs(self):
+		item_code = self.make_item("Moving Average")
+		self.receive(item_code, 100, 5, qty=2)
+		issue = self.issue(item_code, 2)
+		frappe.flags.dont_execute_stock_reposts = True
+		try:
+			self.receive(item_code, 200, 4, qty=2)
+		finally:
+			frappe.flags.dont_execute_stock_reposts = False
+
+		steps = get_valuation_steps(item_code, WAREHOUSE, upto=issue)
+		issued = steps.entries[-1]
+
+		self.assertEqual(steps.repost_status, "pending")
+		self.assertTrue(issued.awaiting_recalculation)
+		self.assertEqual(issued.rate, 100)

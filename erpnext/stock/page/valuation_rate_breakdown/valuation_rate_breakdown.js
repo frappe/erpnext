@@ -161,9 +161,8 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			this.container.append(this.no_entries_state());
 			return;
 		}
-		if (data.repost_pending) {
-			this.container.append(this.repost_alert());
-		}
+		const repost = this.repost_alert();
+		if (repost) this.container.append(repost);
 		this.container.append(this.summary());
 		const backdated = this.backdated_alert();
 		if (backdated) this.container.append(backdated);
@@ -184,12 +183,26 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	}
 
 	repost_alert() {
+		if (this.data.repost_status === "pending") {
+			return frappe.ui.alert({
+				title: __("Stock values are being recalculated"),
+				description: __(
+					"A backdated entry changed this item's history. The rates below may change once the recalculation finishes."
+				),
+				theme: "amber",
+			});
+		}
+		if (this.data.repost_status !== "failed") return null;
 		return frappe.ui.alert({
-			title: __("Stock values are being recalculated"),
+			title: __("Stock values could not be recalculated"),
 			description: __(
-				"A backdated entry changed this item's history. The rates below may change once the recalculation finishes."
+				"The last recalculation for this item and warehouse failed, so the rates below may be out of date."
 			),
-			theme: "amber",
+			theme: "red",
+			primary_action: {
+				label: __("View Repost Item Valuation"),
+				onclick: () => frappe.set_route("List", "Repost Item Valuation", { status: "Failed" }),
+			},
 		});
 	}
 
@@ -805,30 +818,41 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	backdated_alert() {
 		const entries = this.data.entries;
 		const backdated = entries.filter((entry) => entry.later_dated_count).length;
-		const changed = entries.filter((entry) => (entry.changed_by || []).length).length;
-		if (!backdated && !changed) return null;
+		const changed = entries.filter((entry) => (entry.changed_by || []).length);
+		if (!backdated && !changed.length) return null;
+		const waiting = changed.filter((entry) => entry.awaiting_recalculation).length;
+		const counts = __("Posted with an earlier date: {0}. Later entries affected: {1}.", [
+			this.entries_count(backdated),
+			this.entries_count(changed.length),
+		]);
+		const status = waiting
+			? __("Still waiting to be recalculated: {0}.", [this.entries_count(waiting)])
+			: __("Look for the Backdated badge and the notes on the recalculated entries.");
 		return frappe.ui.alert({
 			title: __("Some entries were posted with an earlier date"),
-			description: __(
-				"{0} entries below were entered after entries with a later date, and {1} entries were recalculated because of that. Look for the Backdated badge and the notes on the recalculated entries.",
-				[backdated, changed]
-			),
+			description: `${counts} ${status}`,
 			theme: "blue",
 		});
 	}
 
 	entered_late_html(entry) {
 		if (!entry.later_dated_count) return "";
-		const text = __(
-			"Entered on {0}, after {1} entries with a later date. Those entries were recalculated.",
-			[this.user_datetime(entry.entered_on), entry.later_dated_count]
-		);
+		const outcome = {
+			pending: __("Those entries are waiting to be recalculated."),
+			failed: __("Recalculating those entries failed."),
+		}[this.data.repost_status];
+		const text = __("Entered on {0}, after {1} with a later date. {2}", [
+			this.user_datetime(entry.entered_on),
+			this.entries_count(entry.later_dated_count),
+			outcome || __("Those entries were recalculated."),
+		]);
 		return `<div class="vrb-opened">${frappe.utils.icon("history", "xs")} ${text}</div>`;
 	}
 
 	changed_note(entry) {
 		const changes = entry.changed_by || [];
 		if (!changes.length) return null;
+		if (entry.awaiting_recalculation) return this.waiting_note(entry, changes);
 		return {
 			theme: "amber",
 			title: this.changed_title(entry),
@@ -837,6 +861,21 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				this.change_list(changes),
 			]),
 		};
+	}
+
+	waiting_note(entry, changes) {
+		return {
+			theme: "blue",
+			title: __("Waiting for recalculation after an earlier-dated entry"),
+			description: __(
+				"Entered on {0}. Until the recalculation runs, the figures above are not final. It will take these into account: {1}.",
+				[this.user_datetime(entry.entered_on), this.change_list(changes)]
+			),
+		};
+	}
+
+	entries_count(count) {
+		return count === 1 ? __("1 entry") : __("{0} entries", [count]);
 	}
 
 	changed_title(entry) {
