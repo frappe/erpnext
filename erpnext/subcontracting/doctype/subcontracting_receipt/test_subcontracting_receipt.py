@@ -39,6 +39,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	get_mapped_subcontracting_receipt,
 	make_subcontracting_receipt,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
@@ -609,6 +610,32 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			"stock_value_difference",
 		)
 		self.assertEqual(stock_value_difference, co_product.amount)
+
+	def test_partial_receipts_take_the_order_additional_costs_once(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+		second.submit()
+
+		self.assertEqual(first.total_additional_costs + second.total_additional_costs, 1000)
+
+	def test_receipt_mapped_for_selected_qty_takes_its_share_of_order_additional_costs(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 4}])
+		first.save()
+		first.submit()
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+		second.submit()
+
+		self.assertEqual(first.total_additional_costs, 400)
+		self.assertEqual(second.total_additional_costs, 600)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
@@ -6167,3 +6194,21 @@ def make_receipt_with_scrap(
 	if not do_not_submit:
 		scr.submit()
 	return scr
+
+
+def make_order_with_additional_cost_and_transfer(amount):
+	set_backflush_based_on("BOM")
+	sco = get_subcontracting_order(do_not_submit=1)
+	sco.append(
+		"additional_costs",
+		{"expense_account": "Cost of Goods Sold - _TC", "description": "Freight", "amount": amount},
+	)
+	sco.submit()
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name,
+		rm_items=rm_items,
+		itemwise_details=copy.deepcopy(itemwise_details),
+	)
+	return sco
