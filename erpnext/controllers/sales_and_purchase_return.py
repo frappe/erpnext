@@ -695,7 +695,6 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		fields += [
 			f"sum(abs(`tab{child_doctype}`.rejected_qty)) as rejected_qty",
-			f"sum(abs(`tab{child_doctype}`.received_qty)) as received_qty",
 		]
 
 		if doctype == "Purchase Receipt":
@@ -873,13 +872,14 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
-			target_doc.received_qty = -1 * flt(
-				source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
-			)
 			target_doc.rejected_qty = -1 * flt(
 				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
 			)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			# debit notes without Update Stock store no received qty, so derive it
+			target_doc.received_qty = flt(
+				target_doc.qty + target_doc.rejected_qty, target_doc.precision("received_qty")
+			)
 
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 			target_doc.purchase_order = source_doc.purchase_order
