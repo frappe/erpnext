@@ -495,14 +495,14 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		first_return = make_return_doc(pi.doctype, pi.name)
 		first_return.items[0].update(
-			{"uom": "Nos", "conversion_factor": 1, "qty": -6, "received_qty": -6, "rate": 10}
+			{"uom": "Nos", "conversion_factor": 1, "qty": -12, "received_qty": -12, "rate": 10}
 		)
 		first_return.submit()
 
-		# 114 Nos are left, mapped in the invoiced row's UOM
+		# 108 Nos are left, mapped in the invoiced row's UOM, which must be whole
 		second_return = make_return_doc(pi.doctype, pi.name)
-		self.assertEqual(second_return.items[0].qty, -9.5)
-		self.assertEqual(second_return.items[0].received_qty, -9.5)
+		self.assertEqual(second_return.items[0].qty, -9)
+		self.assertEqual(second_return.items[0].received_qty, -9)
 		second_return.insert()
 
 
