@@ -935,11 +935,15 @@ class SubcontractingController(StockController):
 			consumed[None] += row.consumed_qty
 
 		if bundles.batch_nos:
+			# a receipt's bundle can cover rows of several orders, so take only this row's qty from it
+			left = abs(flt(row.consumed_qty))
 			for batch_no, qty in bundles.batch_nos.items():
-				if qty:
+				if taken := min(abs(qty), left):
 					# a consumption's entries are negative, a return's positive
-					consumed[batch_no] -= qty
-					bundles.batch_nos[batch_no] = 0
+					taken = -taken if qty < 0 else taken
+					consumed[batch_no] -= taken
+					bundles.batch_nos[batch_no] -= taken
+					left -= abs(taken)
 
 		# Will be deprecated in v16
 		if row.batch_no and not bundles.batch_nos:
