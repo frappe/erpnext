@@ -20,6 +20,7 @@ from frappe.utils import (
 	get_link_to_form,
 	get_string_between,
 	get_time,
+	getdate,
 	nowdate,
 	nowtime,
 	today,
@@ -152,6 +153,7 @@ class Project(Document):
 				project_tasks.append(task)
 
 			self.dependency_mapping(tmp_task_details, project_tasks)
+			self.reschedule_tasks_moved_by_holidays(tmp_task_details, project_tasks)
 
 	def create_task_from_template(self, task_details):
 		return frappe.get_doc(
@@ -194,6 +196,18 @@ class Project(Document):
 
 			self.check_depends_on_value(template_task, project_task, project_tasks)
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
+
+	def reschedule_tasks_moved_by_holidays(self, template_tasks, project_tasks):
+		"""A holiday can push a task past the start of a task that depends on it."""
+		for template_task, project_task in zip(template_tasks, project_tasks, strict=True):
+			start_date = getdate(add_days(self.expected_start_date, template_task.start))
+			end_date = add_days(start_date, template_task.duration)
+			if (
+				getdate(project_task.exp_start_date) != start_date
+				or getdate(project_task.exp_end_date) != end_date
+			):
+				project_task.reload()
+				project_task.reschedule_dependent_tasks()
 
 	def set_consumed_material_cost(self):
 		self.total_consumed_material_cost = ProjectCostQueries(self.name).material_cost()
