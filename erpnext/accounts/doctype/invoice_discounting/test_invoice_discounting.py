@@ -43,6 +43,17 @@ class TestInvoiceDiscounting(ERPNextTestSuite):
 		)
 		frappe.db.set_value("Company", "_Test Company", "default_bank_account", self.bank_account)
 
+	def test_create_from_invoice_needs_read_permission(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import (
+			create_invoice_discounting as make_from_invoice,
+		)
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		inv = create_sales_invoice(rate=200)
+		user = make_fenced_user("test-invoice-discounting-mapper@example.com", [])
+		with as_user(user):
+			self.assertRaises(frappe.PermissionError, make_from_invoice, inv.name)
+
 	def test_total_amount(self):
 		inv1 = create_sales_invoice(rate=200)
 		inv2 = create_sales_invoice(rate=500)
