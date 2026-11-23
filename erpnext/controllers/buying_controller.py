@@ -402,6 +402,7 @@ class BuyingController(SubcontractingController):
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
+			self.reset_conversion_factor()
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate, converted to the row's UOM
