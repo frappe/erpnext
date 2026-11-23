@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Coalesce, CombineDatetime, Count, IfNull, Max, Min, Sum
 from frappe.utils import (
 	cint,
@@ -42,53 +42,6 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-<<<<<<< HEAD
-=======
-
-# Backward-compatible re-exports: these functions were moved to mapper.py.
-# Importing them here preserves existing whitelist dotted-paths
-# (e.g. ...work_order.work_order.make_work_order) and external imports.
-from erpnext.manufacturing.doctype.work_order.mapper import (
-	add_variant_item,
-	check_if_scrap_warehouse_mandatory,
-	create_job_card,
-	create_pick_list,
-	get_item_details,
-	get_operation_details,
-	get_operation_qty,
-	get_operation_target_qty,
-	get_serial_nos_for_job_card,
-	get_serial_nos_for_work_order,
-	get_template_rm_item,
-	get_upstream_process_loss,
-	get_work_order_operation_data,
-	make_job_card,
-	make_material_request,
-	make_stock_entry,
-	make_stock_return_entry,
-	make_work_order,
-	split_qty_based_on_batch_size,
-	validate_operation_data,
-)
-from erpnext.manufacturing.doctype.work_order.services.operations import (
-	OperationsService,
-)
-from erpnext.manufacturing.doctype.work_order.services.required_items import (
-	RequiredItemsService,
-)
-from erpnext.manufacturing.doctype.work_order.services.reservation import (
-	WorkOrderStockReservation,
-	cancel_stock_reservation_entries,
-	get_consumed_qty,
-	get_reserved_qty_for_production,
-	get_row_wise_serial_batch,
-	get_sre_details,
-	make_stock_reservation_entries,
-)
-from erpnext.manufacturing.doctype.work_order.services.status import (
-	StatusService,
-)
->>>>>>> a60ed0a (fix(subcontracting): return extra customer material held by a Work Order)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
@@ -96,6 +49,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
 	clear_reserve_stock_if_disabled,
+	get_sre_reserved_qty_details_for_voucher,
 )
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
@@ -2090,8 +2044,7 @@ class WorkOrder(Document):
 
 		self.validate_reserved_qty()
 
-		if self.status == "Closed":
-			self.update_subcontracting_inward_order_received_items()
+		self.update_subcontracting_inward_order_received_items()
 
 	def update_reserved_qty_for_production(self, items=None):
 		"""update reserved_qty_for_production in bins"""
@@ -2795,7 +2748,6 @@ class WorkOrder(Document):
 		items = frappe._dict()
 		voucher_detail_no = {d.item_code: d.name for d in self.required_items}
 
-<<<<<<< HEAD
 		for row in stock_entry.items:
 			if row.item_code not in items:
 				items[row.item_code] = frappe._dict(
@@ -2816,11 +2768,6 @@ class WorkOrder(Document):
 				items[row.item_code]["stock_qty"] += row.transfer_qty
 				if row.serial_and_batch_bundle:
 					items[row.item_code]["serial_and_batch_bundles"].append(row.serial_and_batch_bundle)
-=======
-	def update_required_items(self):
-		RequiredItemsService(self).update_required_items()
-		self.update_subcontracting_inward_order_received_items()
->>>>>>> a60ed0a (fix(subcontracting): return extra customer material held by a Work Order)
 
 		return items
 
@@ -4419,6 +4366,107 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 			details.batch_nos[entry.batch_no] += abs(entry.qty)
 
 	return row_wise_serial_batch
+
+
+def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -> None:
+	"""Give each inward order row back, up to its `short_qty`, the customer material Work Orders hold beyond their required or used qty."""
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	sres = get_inward_reservations(scio, list(short_qty))
+	unused_qty = get_unused_inward_qty(sres)
+	for sre in sres:
+		release_qty = flt(
+			min(
+				sre.reserved_qty - sre.used_qty,
+				unused_qty[sre.voucher_detail_no],
+				short_qty[sre.from_voucher_detail_no],
+			),
+			precision,
+		)
+		if release_qty <= 0:
+			continue
+
+		released_qty = release_inward_reservation(sre, release_qty)
+		unused_qty[sre.voucher_detail_no] -= released_qty
+		short_qty[sre.from_voucher_detail_no] -= released_qty
+
+
+def restore_inward_reservations(scio: str, return_qty: dict[str, float]) -> None:
+	"""Give Work Orders back, up to `return_qty` per inward order row, the customer material a return released from them."""
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	free_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio)
+	for sre in get_inward_reservations(scio, list(return_qty)):
+		restore_qty = flt(
+			min(
+				sre.voucher_qty - sre.reserved_qty,
+				flt(free_qty.get(sre.from_voucher_detail_no)),
+				return_qty[sre.from_voucher_detail_no],
+			),
+			precision,
+		)
+		if restore_qty <= 0:
+			continue
+
+		release_inward_reservation(sre, -restore_qty)
+		free_qty[sre.from_voucher_detail_no] -= restore_qty
+		return_qty[sre.from_voucher_detail_no] -= restore_qty
+
+
+def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
+	"""Reserved qty of each Work Order row beyond its need."""
+	sres_by_row = defaultdict(list)
+	for sre in sres:
+		sres_by_row[sre.voucher_detail_no].append(sre)
+
+	unused_qty = {}
+	for voucher_detail_no, rows in sres_by_row.items():
+		needed_qty = max(rows[0].required_qty, sum(row.used_qty for row in rows))
+		unused_qty[voucher_detail_no] = sum(row.reserved_qty for row in rows) - needed_qty
+
+	return unused_qty
+
+
+def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
+	"""Qty based Work Order reservations taken from these inward order rows, newest first, locked for update."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	wo_item = frappe.qb.DocType("Work Order Item")
+	return (
+		frappe.qb.from_(sre)
+		.inner_join(wo_item)
+		.on(wo_item.name == sre.voucher_detail_no)
+		.select(
+			sre.name,
+			sre.voucher_detail_no,
+			sre.from_voucher_detail_no,
+			sre.reserved_qty,
+			sre.voucher_qty,
+			(sre.delivered_qty + sre.transferred_qty + sre.consumed_qty).as_("used_qty"),
+			wo_item.required_qty,
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Work Order")
+			& (sre.from_voucher_type == "Subcontracting Inward Order")
+			& (sre.reservation_based_on == "Qty")
+			& (sre.from_voucher_no == scio)
+			& (sre.from_voucher_detail_no.isin(scio_details))
+		)
+		.orderby(sre.creation, order=Order.desc)
+		.for_update()
+	).run(as_dict=True)
+
+
+def release_inward_reservation(sre: dict, qty: float) -> float:
+	"""Lower a Work Order reservation by `qty` (raise it when negative), not below what it used, and give the change back to the inward order reservation it came from."""
+	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
+	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
+	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
+	released_qty = doc.reserved_qty - reserved_qty
+	doc.db_set("reserved_qty", reserved_qty, update_modified=False)
+	doc.update_status()
+	doc.update_reserved_qty_in_voucher()
+	doc.update_delivered_qty_in_from_voucher_reservations()
+	doc.update_reserved_stock_in_bin()
+	return released_qty
 
 
 @frappe.request_cache

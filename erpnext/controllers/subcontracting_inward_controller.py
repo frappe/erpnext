@@ -6,7 +6,7 @@ from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, get_link_to_form
 
-from erpnext.manufacturing.doctype.work_order.services.reservation import (
+from erpnext.manufacturing.doctype.work_order.work_order import (
 	release_unused_inward_reservations,
 	restore_inward_reservations,
 )
@@ -1139,40 +1139,6 @@ class SubcontractingInwardController:
 				sre.submit()
 			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
-<<<<<<< HEAD
-=======
-	def adjust_stock_reservation_entries_for_return(self):
-		if self.purpose == "Return Raw Material to Customer":
-			if self._action == "cancel":
-				self.validate_no_later_work_order_reservation()
-				self.adjust_inward_reservations(release=False)
-				restore_inward_reservations(self.subcontracting_inward_order, self.get_return_qty())
-			else:
-				self.release_unused_work_order_reservations()
-				self.adjust_inward_reservations(release=True)
-
-	def get_return_qty(self) -> dict[str, float]:
-		"""Returned stock qty of each inward order row."""
-		return_qty = defaultdict(float)
-		for item in self.items:
-			return_qty[item.scio_detail] += item.transfer_qty
-		return return_qty
-
-	def release_unused_work_order_reservations(self):
-		"""Take the qty the inward order no longer holds from the unused part of its Work Order reservations."""
-		return_qty = self.get_return_qty()
-		reserved_qty = get_sre_reserved_qty_details_for_voucher(
-			"Subcontracting Inward Order", self.subcontracting_inward_order
-		)
-		short_qty = {}
-		for scio_detail, qty in return_qty.items():
-			if (missing_qty := qty - flt(reserved_qty.get(scio_detail))) > 0:
-				short_qty[scio_detail] = missing_qty
-
-		if short_qty:
-			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
-
->>>>>>> a60ed0a (fix(subcontracting): return extra customer material held by a Work Order)
 	def validate_no_later_work_order_reservation(self):
 		"""Cancel gives batch qty back newest reservation first, which is wrong once a later Work Order took from them."""
 		rows = defaultdict(list)
@@ -1237,7 +1203,32 @@ class SubcontractingInwardController:
 		if self.purpose == "Return Raw Material to Customer":
 			if self._action == "cancel":
 				self.validate_no_later_work_order_reservation()
-			self.adjust_inward_reservations(release=self._action == "submit")
+				self.adjust_inward_reservations(release=False)
+				restore_inward_reservations(self.subcontracting_inward_order, self.get_return_qty())
+			else:
+				self.release_unused_work_order_reservations()
+				self.adjust_inward_reservations(release=True)
+
+	def get_return_qty(self) -> dict[str, float]:
+		"""Returned stock qty of each inward order row."""
+		return_qty = defaultdict(float)
+		for item in self.items:
+			return_qty[item.scio_detail] += item.transfer_qty
+		return return_qty
+
+	def release_unused_work_order_reservations(self):
+		"""Take the qty the inward order no longer holds from the unused part of its Work Order reservations."""
+		return_qty = self.get_return_qty()
+		reserved_qty = get_sre_reserved_qty_details_for_voucher(
+			"Subcontracting Inward Order", self.subcontracting_inward_order
+		)
+		short_qty = {}
+		for scio_detail, qty in return_qty.items():
+			if (missing_qty := qty - flt(reserved_qty.get(scio_detail))) > 0:
+				short_qty[scio_detail] = missing_qty
+
+		if short_qty:
+			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
 
 	def adjust_inward_reservations(self, release):
 		for item in self.items:
