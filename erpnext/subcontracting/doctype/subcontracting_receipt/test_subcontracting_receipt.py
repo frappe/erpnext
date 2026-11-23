@@ -5648,6 +5648,18 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], costs)
 
+	def test_amount_based_split_uses_the_qty_saved(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.items[0].qty = 1
+		scr.save()
+		scr.items[0].qty = 3
+		scr.save()
+		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items]
+		scr.save()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], costs)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_resave_keeps_amount_based_split_with_a_co_product(self):
 		set_backflush_based_on("BOM")
