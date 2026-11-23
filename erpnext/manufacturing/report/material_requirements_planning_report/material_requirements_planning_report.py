@@ -44,7 +44,7 @@ class MaterialRequirementsPlanningReport:
 		self.fg_items = []
 		self.rm_items = []
 		self.dates = self.get_dates()
-		self.mps_data = self.get_mps_data()
+		self.mps_data = self.get_mps_data(self.filters.from_date, self.filters.to_date)
 		items = self.get_items_from_mps(self.mps_data)
 		self.update_sales_forecast_data()
 
@@ -493,8 +493,8 @@ class MaterialRequirementsPlanningReport:
 			if not row.sales_forecast_qty:
 				row.sales_forecast_qty = 0
 
-			row.demand_qty = max(flt(row.planned_qty), flt(row.sales_forecast_qty))
-			row.planned_qty = max(flt(row.planned_qty), flt(row.sales_forecast_qty))
+			row.demand_qty = flt(row.planned_qty) + flt(row.sales_forecast_qty)
+			row.planned_qty = row.demand_qty
 			if row.get("is_adhoc"):
 				row.planned_qty += row.adhoc_qty
 
@@ -835,7 +835,7 @@ class MaterialRequirementsPlanningReport:
 					material.raw_materials, row.release_date, row.required_qty, material.bom_no, data
 				)
 
-	def get_mps_data(self):
+	def get_mps_data(self, from_date=None, to_date=None):
 		doctype = frappe.qb.DocType("Master Production Schedule")
 		child_doctype = frappe.qb.DocType("Master Production Schedule Item")
 
@@ -857,11 +857,11 @@ class MaterialRequirementsPlanningReport:
 			.orderby(child_doctype.delivery_date)
 		)
 
-		if self.filters.get("from_date"):
-			query = query.where(child_doctype.delivery_date >= self.filters.from_date)
+		if from_date:
+			query = query.where(child_doctype.delivery_date >= from_date)
 
-		if self.filters.get("to_date"):
-			query = query.where(child_doctype.delivery_date <= self.filters.to_date)
+		if to_date:
+			query = query.where(child_doctype.delivery_date <= to_date)
 
 		fields = {
 			"parent_warehouse": self.filters.get("warehouse"),
@@ -1226,12 +1226,39 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code == self.filters.item_code)
 
 		sales_data = query.run(as_dict=True)
+		self.consume_forecast(sales_data)
+		sales_data = [row for row in sales_data if flt(row.qty, self.qty_precision)]
 
 		return [
 			row
 			for row in convert_to_daily_bucket_data(sales_data)
 			if self.is_in_date_range(row.delivery_date)
 		]
+
+	def consume_forecast(self, forecast_rows):
+		"""Let the MPS demand of a forecast period use up that period's forecast."""
+		if not forecast_rows:
+			return
+
+		periods = [get_forecast_period(row) for row in forecast_rows]
+		# the whole period counts, even the days outside the report dates
+		mps_data = self.get_mps_data(min(start for start, _ in periods), max(end for _, end in periods))
+
+		demand_by_item = {}
+		for row in mps_data:
+			demand = frappe._dict(date=getdate(row.delivery_date), qty=flt(row.planned_qty))
+			demand_by_item.setdefault(row.item_code, []).append(demand)
+
+		# periods that end first go first, so overlapping periods use up as much demand as they can
+		rows_by_period_end = sorted(
+			zip(forecast_rows, periods, strict=True), key=lambda pair: (pair[1][1], pair[1][0])
+		)
+		for row, (start_date, end_date) in rows_by_period_end:
+			for demand in demand_by_item.get(row.item_code, []):
+				if start_date <= demand.date < end_date:
+					consumed_qty = min(row.qty, demand.qty)
+					row.qty -= consumed_qty
+					demand.qty -= consumed_qty
 
 
 def get_stock_reserved_for_work_orders(items, warehouses=None):

@@ -298,6 +298,7 @@ def make_mps(**args):
 			"from_date": args.from_date or today(),
 			"to_date": args.to_date,
 			"parent_warehouse": args.parent_warehouse,
+			"sales_forecast": args.sales_forecast,
 			"select_items": [{"item_code": item} for item in args.select_items or []],
 			"sales_orders": [{"sales_order": name} for name in args.sales_orders or []],
 			"material_requests": [{"material_request": name} for name in args.material_requests or []],
