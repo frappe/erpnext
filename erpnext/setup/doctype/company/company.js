@@ -125,6 +125,7 @@ frappe.ui.form.on("Company", {
 
 	refresh: function (frm) {
 		erpnext.company.setup_queries(frm);
+		erpnext.company.accounting_method.refresh(frm);
 
 		frm.toggle_display("address_html", !frm.is_new());
 
@@ -220,6 +221,15 @@ frappe.ui.form.on("Company", {
 
 	country: function (frm) {
 		erpnext.company.set_chart_of_accounts_options(frm);
+		erpnext.company.accounting_method.refresh(frm);
+	},
+
+	accounting_method: function (frm) {
+		erpnext.company.accounting_method.confirm_cash(frm);
+	},
+
+	unapplied_cash_treatment: function (frm) {
+		erpnext.company.accounting_method.set_unapplied_description(frm);
 	},
 
 	delete_company_transactions: function (frm) {
@@ -357,12 +367,84 @@ erpnext.company.setup_queries = function (frm) {
 					"service_received_but_not_billed",
 					{ root_type: "Liability", account_type: "Service Received But Not Billed" },
 				],
+				["unapplied_cash_receipts_account", { root_type: "Income" }],
+				["unapplied_cash_payments_account", { root_type: "Expense" }],
 			],
 			function (i, v) {
 				erpnext.company.set_custom_query(frm, v);
 			}
 		);
 	}
+};
+
+erpnext.company.accounting_method = {
+	is_available(frm) {
+		const countries = frappe.boot.sysdefaults.cash_method_countries || [];
+		return countries.includes(frm.doc.country);
+	},
+
+	refresh(frm) {
+		const available = this.is_available(frm);
+		frm.toggle_display("financial_reporting_section", available);
+		this.set_unapplied_description(frm);
+		this.render_advisories(frm, []);
+		if (!available || frm.is_new() || frm.doc.accounting_method !== "Cash") return;
+
+		this.get_messages(frm).then((messages) => this.render_advisories(frm, messages.advisories));
+	},
+
+	set_unapplied_description(frm) {
+		const descriptions = {
+			"Income and Expense": __(
+				"Inflow or outflow of cash that is not against an invoice is reported as income or expense."
+			),
+			"Balance Sheet": __(
+				"Inflow or outflow of cash that is not against an invoice is reported as asset or liability."
+			),
+		};
+		const description = descriptions[frm.doc.unapplied_cash_treatment];
+		if (description) frm.set_df_property("unapplied_cash_treatment", "description", description);
+	},
+
+	get_messages(frm) {
+		return frappe
+			.call({
+				method: "erpnext.accounts.cash_basis.get_accounting_method_messages",
+				args: { company: frm.is_new() ? null : frm.doc.name },
+			})
+			.then((r) => r.message || { advisories: [] });
+	},
+
+	render_advisories(frm, advisories) {
+		const html = (advisories || [])
+			.map(
+				(advisory) => `<div class="alert alert-${frappe.utils.escape_html(
+					advisory.indicator || "info"
+				)}">
+					<strong>${frappe.utils.escape_html(advisory.title || "")}</strong>
+					<div>${frappe.utils.escape_html(advisory.message || "")}</div>
+				</div>`
+			)
+			.join("");
+		frm.get_field("accounting_method_advisories").$wrapper.html(html);
+	},
+
+	confirm_cash(frm) {
+		if (frm.doc.accounting_method !== "Cash") return;
+
+		this.get_messages(frm).then((result) => {
+			const advisories = (result.advisories || []).map((a) =>
+				[a.title, a.message].filter(Boolean).join(": ")
+			);
+			const lines = [result.notice, ...advisories];
+			const body = lines.map((line) => `<p>${frappe.utils.escape_html(line || "")}</p>`).join("");
+			frappe.confirm(
+				body,
+				() => this.render_advisories(frm, result.advisories),
+				() => frm.set_value("accounting_method", "Accrual")
+			);
+		});
+	},
 };
 
 erpnext.company.set_custom_query = function (frm, v) {

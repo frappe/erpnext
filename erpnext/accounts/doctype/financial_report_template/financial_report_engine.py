@@ -19,6 +19,12 @@ from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
 
 from erpnext import get_company_currency
+from erpnext.accounts.cash_basis.reports import (
+	add_report_message,
+	get_engine_adjustments,
+	set_report_end,
+	uses_cash_basis,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_filter_condition,
@@ -224,7 +230,16 @@ class FinancialReportEngine:
 
 		# Chart
 		self.generate_chart_data(context)
-		return context.get_result()
+		result = context.get_result()
+		if context.period_list:
+			result = add_report_message(
+				result,
+				filters,
+				context.period_list[-1]["to_date"],
+				balance_sheet=context.template.report_type == "Balance Sheet",
+				from_date=context.period_list[0]["from_date"],
+			)
+		return result
 
 	def _validate_filters(self, filters: dict[str, Any]) -> None:
 		filter_labels = {
@@ -536,10 +551,37 @@ class FinancialQueryBuilder:
 
 		balances_data = self._get_opening_balances(account_names)
 		gl_data = self._get_gl_movements(account_names)
+		if uses_cash_basis(self.filters):
+			set_report_end(self.filters, self.periods[-1]["to_date"])
+			self._add_cash_adjustments(balances_data, gl_data, account_names)
 		self._calculate_running_balances(balances_data, gl_data)
 		self._handle_balance_accumulation(balances_data)
 
 		return balances_data
+
+	def _add_cash_adjustments(self, balances_data, gl_data, account_names):
+		"""Add the cash basis adjustment rows to the openings and to the movements of each period."""
+		opening, movements = get_engine_adjustments(self.filters, account_names, self.periods)
+		first_key = self.periods[0]["key"]
+		for account, amount in opening.items():
+			account_data = balances_data.setdefault(
+				account, AccountData(account=account, **self._get_account_meta(account))
+			)
+			first_period = account_data.get_period(first_key)
+			if first_period:
+				first_period.opening += amount
+			else:
+				account_data.add_period(PeriodValue(first_key, amount, 0, 0))
+
+		rows = {row["account"]: row for row in gl_data}
+		for account, by_period in movements.items():
+			row = rows.get(account)
+			if row is None:
+				row = {"account": account}
+				gl_data.append(row)
+				rows[account] = row
+			for key, amount in by_period.items():
+				row[key] = flt(row.get(key)) + amount
 
 	def _get_opening_balances(self, accounts: list[str]) -> dict[str, dict[str, dict[str, float]]]:
 		"""
