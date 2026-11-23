@@ -122,7 +122,7 @@ def get_receipt_warehouses_if_moved(doc, row, receipt_rows) -> list:
 		not item.is_stock_item
 		or item.has_serial_no
 		or item.has_batch_no
-		or get_valuation_method(row.item_code, doc.company) not in ("FIFO", "LIFO")
+		or get_valuation_method(row.item_code) not in ("FIFO", "LIFO")
 	):
 		return []
 
