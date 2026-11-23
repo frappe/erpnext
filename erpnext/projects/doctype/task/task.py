@@ -87,6 +87,8 @@ class Task(NestedSet):
 	def validate(self):
 		self.validate_parent_project()
 		self.validate_children_project()
+		self.validate_group_has_no_children()
+		self.set_default_end_date_if_missing()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -94,7 +96,6 @@ class Task(NestedSet):
 		self.update_depends_on()
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
-		self.set_default_end_date_if_missing()
 		self.set_default_weight()
 		self.validate_parent_is_group()
 		self.validate_parent_not_completed()
@@ -105,6 +106,7 @@ class Task(NestedSet):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
 		self.validate_from_to_dates("act_start_date", "act_end_date")
 		self.validate_parent_expected_end_date()
+		self.validate_children_expected_end_date()
 		self.validate_parent_project_dates()
 
 	def set_default_weight(self):
@@ -131,6 +133,27 @@ class Task(NestedSet):
 				).format(format_date(parent_exp_end_date)),
 				"exp_end_date",
 				"parent_task",
+			)
+
+	def validate_children_expected_end_date(self):
+		if self.is_new() or not self.exp_end_date or not self.has_value_changed("exp_end_date"):
+			return
+
+		later_children = frappe.get_all(
+			"Task",
+			filters={
+				"parent_task": self.name,
+				"status": ["!=", "Cancelled"],
+				"exp_end_date": [">=", add_days(getdate(self.exp_end_date), 1)],
+			},
+			pluck="name",
+		)
+		if later_children:
+			self.report_date_conflict(
+				_("Expected End Date cannot be before the Expected End Date of child tasks {0}.").format(
+					", ".join(get_link_to_form("Task", task) for task in later_children)
+				),
+				"exp_end_date",
 			)
 
 	def validate_parent_project_dates(self):
@@ -259,6 +282,17 @@ class Task(NestedSet):
 					),
 					ParentIsGroupError,
 				)
+
+	def validate_group_has_no_children(self):
+		if self.is_group or self.is_new() or not self.has_value_changed("is_group"):
+			return
+
+		if child_tasks := frappe.get_all("Task", filters={"parent_task": self.name}, pluck="name"):
+			frappe.throw(
+				_("Cannot convert Task to non-group because the following child Tasks exist: {0}.").format(
+					", ".join(get_link_to_form("Task", task) for task in child_tasks)
+				)
+			)
 
 	def validate_parent_project(self):
 		"""Keep a task in its parent task's project."""
