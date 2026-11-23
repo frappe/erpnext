@@ -2415,6 +2415,25 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(descendants.call_count, 1)
 		self.assertEqual([d.discount_percentage for d in si.items], [15, 0, 0])
 
+	def test_coupon_rule_applies_when_item_is_added(self):
+		item = make_item("PR Coupon Item", {"is_stock_item": 0}).name
+		make_item_price(item, "Standard Selling", 4200)
+		rule = make_item_pricing_rule(item, discount_percentage=5, coupon_code_based=1)
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "PR Coupon On Item Add",
+				"coupon_code": "PRCOUPONADD",
+				"coupon_type": "Promotional",
+				"pricing_rule": rule.name,
+				"maximum_use": 10,
+			}
+		).insert()
+
+		si = make_invoice_with_selected_item(item, coupon_code=coupon.name)
+		self.assertEqual(si.items[0].discount_percentage, 5)
+		self.assertEqual(si.items[0].rate, 3990)
+
 	def test_partner_and_campaign_rules_apply_when_item_is_added(self):
 		partner = "_Test Sales Partner India - 1"
 		partner_item = make_item("PR Partner Item", {"is_stock_item": 0}).name

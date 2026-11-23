@@ -598,8 +598,10 @@ erpnext.sales_common = {
 			}
 
 			coupon_code() {
-				this.frm.set_value("discount_amount", 0);
-				this.frm.set_value("additional_discount_percentage", 0);
+				return frappe.run_serially([
+					() => this.frm.set_value({ discount_amount: 0, additional_discount_percentage: 0 }),
+					() => super.coupon_code(),
+				]);
 			}
 
 			is_return() {
