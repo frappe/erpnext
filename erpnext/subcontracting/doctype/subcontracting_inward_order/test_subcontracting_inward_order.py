@@ -6,15 +6,8 @@ import frappe
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as make_stock_entry_from_wo
 from erpnext.selling.doctype.sales_order.sales_order import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-<<<<<<< HEAD
-<<<<<<< HEAD
 from erpnext.stock.doctype.item.test_item import make_item
-=======
-from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
->>>>>>> 7592539 (test: FG return takes batches up to their delivered qty)
-=======
-from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB, take_reserved_entries
->>>>>>> 090ec73 (fix(subcontracting): rows of one inward order row share its reserved serial nos and batches)
+from erpnext.stock.doctype.stock_entry.stock_entry import take_reserved_entries
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.serial_batch_bundle import get_batch_nos
@@ -556,7 +549,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		fg_return = frappe.new_doc("Stock Entry", purpose="Subcontracting Return")
 		fg_return.append("items", {"scio_detail": "_FG Return Row"})
-		reserved = StockEntrySABB(fg_return).get_reserved_entries_by_scio_detail()
+		reserved = fg_return.get_reserved_entries_by_scio_detail()
 		_, picked = take_reserved_entries(reserved["_FG Return Row"], 3)
 		self.assertEqual(picked, {first: 1, second: 2})
 
@@ -609,7 +602,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 				},
 			)
 
-		serial_nos, _ = StockEntrySABB(rm_return).get_serial_batch_fields_for_subcontracting_inward()
+		serial_nos, _ = rm_return.set_serial_batch_fields_for_subcontracting_inward()
 		self.assertEqual(serial_nos, {"_batch_row": [second.name], "_serial_row": [first.name]})
 
 	def test_rm_return_rows_of_one_batch_item_share_reserved_batches(self):
@@ -660,7 +653,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
 		rm_return.items[0].qty = 4
 		rm_return.insert()
-		StockEntrySABB(rm_return).make_serial_and_batch_bundle_for_outward()
+		make_outward_bundles(rm_return)
 		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 3, second_batch: 1}])
 
 		# the bundled row gives back 3 of its reserved qty to the new row
@@ -690,7 +683,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
 		rm_return.items[0].qty = 4
 		rm_return.insert()
-		StockEntrySABB(rm_return).make_serial_and_batch_bundle_for_outward()
+		make_outward_bundles(rm_return)
 		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 3, second_batch: 1}])
 
 		rm_return.items[0].qty = 5
@@ -2321,6 +2314,13 @@ def make_work_order_with_extra_material():
 	wo.required_items[-1].source_warehouse = "Stores - _TC"
 	wo.submit()
 	return scio, wo
+
+
+def make_outward_bundles(stock_entry):
+	"""Pick the outward bundles of a draft, which this branch does only on submit."""
+	stock_entry.docstatus = 1
+	stock_entry.make_serial_and_batch_bundle_for_outward()
+	stock_entry.docstatus = 0
 
 
 def get_picked_batches(stock_entry):
