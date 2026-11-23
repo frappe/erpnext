@@ -27,7 +27,6 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_op_cost_from_sub_assemblies,
 	validate_bom_no,
 )
-from erpnext.manufacturing.doctype.bom.services.costing import get_exploded_good_qty
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -1059,13 +1058,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return 0.0
 
 		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no).get(row.bom_secondary_item, 0)
-		bom = frappe.get_cached_value(
-			"BOM", bom_no, ["quantity", "process_loss_qty", "is_phantom_bom"], as_dict=True
-		)
-		sub_assemblies_made = (
-			qty_per_finished_good * flt(self.fg_completed_qty) * flt(bom.quantity) / flt(qty_per_bom)
-		)
-		boms_made = sub_assemblies_made / get_exploded_good_qty(bom)
+		boms_made = qty_per_finished_good * flt(self.fg_completed_qty) / flt(qty_per_bom)
 		consumed_rates = self.get_consumed_rates()
 		components = frappe.get_all(
 			"BOM Explosion Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
@@ -1073,6 +1066,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		component_cost = sum(
 			flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components
 		)
+		sub_assemblies_made = boms_made * flt(frappe.get_cached_value("BOM", bom_no, "quantity"))
 		return component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made)
 
 	def get_consumed_rates(self) -> dict:

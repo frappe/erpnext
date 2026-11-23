@@ -8,6 +8,7 @@ from frappe.query_builder.functions import Coalesce, IfNull, Max, Min, NullIf, S
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.manufacturing.doctype.bom.services.costing import get_exploded_good_qty
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
@@ -1606,8 +1607,13 @@ def get_secondary_items_from_sub_assemblies(bom_no, qty=1):
 		if not row.bom_no:
 			continue
 
-		items.extend(get_bom_items(row.bom_no, qty=row.qty, fetch_secondary_items=True))
-		items.extend(get_secondary_items_from_sub_assemblies(row.bom_no, row.qty))
+		# the sub-assembly's process loss makes more of it than the parent consumes, as in the explosion
+		bom = frappe.get_cached_value(
+			"BOM", row.bom_no, ["quantity", "process_loss_qty", "is_phantom_bom"], as_dict=True
+		)
+		qty_made = row.qty * (flt(bom.quantity) / get_exploded_good_qty(bom))
+		items.extend(get_bom_items(row.bom_no, qty=qty_made, fetch_secondary_items=True))
+		items.extend(get_secondary_items_from_sub_assemblies(row.bom_no, qty_made))
 
 	return items
 
