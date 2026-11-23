@@ -3218,6 +3218,48 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(flt(sr.items[0].quantity_difference), 0.2)
 
+	def test_rate_from_buying_price_in_another_uom_is_per_stock_uom(self):
+		"""A row without a rate for an item without stock takes the buying price per stock UOM."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"valuation_rate": 0,
+				"uoms": [{"uom": "Box", "conversion_factor": 1000}],
+			}
+		).name
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": "_Test Buying Price List Default Currency",
+				"currency": frappe.db.get_default("currency"),
+				"buying": 1,
+				"enabled": 1,
+			}
+		).insert(ignore_if_duplicate=True)
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": price_list.name,
+				"uom": "Box",
+				"price_list_rate": 1,
+			}
+		).insert()
+
+		sr = frappe.get_doc(
+			{
+				"doctype": "Stock Reconciliation",
+				"company": "_Test Company",
+				"purpose": "Stock Reconciliation",
+				"items": [{"item_code": item_code, "warehouse": "_Test Warehouse - _TC", "qty": 10}],
+			}
+		).insert()
+
+		self.assertEqual(sr.items[0].valuation_rate, 0.001)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
