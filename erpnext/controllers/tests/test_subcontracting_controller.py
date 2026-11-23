@@ -1478,6 +1478,22 @@ class TestSubcontractingController(ERPNextTestSuite):
 		details = doc.available_materials[("RM", "A", "SCO")]
 		self.assertEqual((details.qty, details.batch_no["X"]), (2, 2))
 
+	def test_return_over_other_transfers_gives_back_what_its_consumption_took(self):
+		"""5 each are sent for FG A and B; B consumes its 5, then C consumes 6 over A and B and returns them."""
+		doc = frappe.new_doc("Subcontracting Receipt")
+		doc.available_materials = {
+			key: frappe._dict(qty=5) for key in (("RM", "A", "SCO"), ("RM", "B", "SCO"))
+		}
+		consumptions = []
+		for voucher_no, fg_item, consumed_qty in (("SCR-1", "B", 5), ("SCR-2", "C", 6), ("SCR-3", "C", -6)):
+			row = frappe._dict(
+				rm_item_code="RM", main_item_code=fg_item, voucher_no=voucher_no, consumed_qty=consumed_qty
+			)
+			consumptions.append(doc.get_consumption(row, ("RM", fg_item, "SCO"), {}))
+
+		doc.deduct_consumptions(consumptions)
+		self.assertEqual([row.qty for row in doc.available_materials.values()], [5, 0])
+
 
 def make_receipt_with_two_serial_transfers():
 	"""A receipt whose order sent S1 and S2 for FG A, and S3 and S4 for FG B, all of batch X."""
