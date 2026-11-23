@@ -4164,11 +4164,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def set_secondary_items(self):
 		if self.purpose in ["Manufacture", "Repack"]:
-			secondary_items_dict = self.get_secondary_items(self.fg_completed_qty)
+			secondary_items_dict = self.get_bom_secondary_items()
 			for item in secondary_items_dict.values():
-				if self.pro_doc and item.secondary_item_type:
-					if self.pro_doc.scrap_warehouse and item.secondary_item_type == "Scrap":
-						item["to_warehouse"] = self.pro_doc.scrap_warehouse
+				item["to_warehouse"] = self.get_secondary_item_warehouse(item.secondary_item_type)
 
 				if item.process_loss_per:
 					item["qty"] -= flt(
@@ -4177,6 +4175,24 @@ class StockEntry(StockController, SubcontractingInwardController):
 					)
 
 			self.add_to_stock_entry_detail(secondary_items_dict, bom_no=self.bom_no)
+
+	def get_secondary_item_warehouse(self, secondary_item_type):
+		if secondary_item_type == "Scrap" and self.pro_doc and self.pro_doc.get("scrap_warehouse"):
+			return self.pro_doc.scrap_warehouse
+		return self.to_warehouse
+
+	def get_bom_secondary_items(self):
+		"""Skip the BOM estimate of a secondary item whose actual qty the Job Cards recorded."""
+		secondary_items = self.get_secondary_items(self.fg_completed_qty)
+		if self.purpose != "Manufacture":
+			return secondary_items
+
+		recorded = {(row.item_code, row.secondary_item_type) for row in self.get_job_card_secondary_items()}
+		return {
+			key: row
+			for key, row in secondary_items.items()
+			if (row.item_code, row.secondary_item_type) not in recorded
+		}
 
 	def set_process_loss_qty(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
@@ -4513,6 +4529,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					"item_name": row.item_name,
 					"description": row.description,
 					"bom_secondary_item": row.bom_secondary_item,
+					"to_warehouse": self.get_secondary_item_warehouse(row.secondary_item_type),
 				}
 			)
 			if entry.valuation_type == "Manual":
@@ -4540,7 +4557,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 		}
 
-	def get_secondary_items_from_job_card(self):
+	def get_job_card_secondary_items(self):
 		if not hasattr(self, "pro_doc"):
 			self.pro_doc = None
 
@@ -4582,7 +4599,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.job_card:
 			other = other.where(job_card.name == self.job_card)
 
-		other = other.run(as_dict=1)
+		return other.run(as_dict=1)
+
+	def get_secondary_items_from_job_card(self):
+		other = self.get_job_card_secondary_items()
+		if not other:
+			return []
 
 		if self.job_card:
 			pending_qty = flt(self.fg_completed_qty)

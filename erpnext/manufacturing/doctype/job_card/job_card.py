@@ -442,12 +442,13 @@ class JobCard(Document):
 				"bom_secondary_item": values.name,
 			}
 
-<<<<<<< HEAD
 			secondary_item["stock_qty"] -= flt(
 				secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
 				self.precision("for_quantity"),
 			)
-=======
+
+			self.append("secondary_items", secondary_item)
+
 	def link_secondary_items_to_bom(self):
 		"""Link a secondary item added or changed by hand to the BOM row of its item and type, so it keeps that row's valuation."""
 		bom_no = self.semi_fg_bom or self.bom_no
@@ -488,19 +489,6 @@ class JobCard(Document):
 			for row in self.secondary_items
 			if linked_rows.get(row.bom_secondary_item) != (row.item_code, row.secondary_item_type)
 		]
-
-	def append_secondary_item(self, item_code, values):
-		secondary_item = {
-			"item_code": item_code,
-			"stock_qty": values.qty,
-			"item_name": values.item_name,
-			"stock_uom": values.stock_uom,
-			"secondary_item_type": values.secondary_item_type,
-			"bom_secondary_item": values.name,
-		}
->>>>>>> 58a1dbd (fix(manufacturing): link Job Card secondary items to their BOM row)
-
-			self.append("secondary_items", secondary_item)
 
 	def validate_time_logs(self, save=False):
 		self.total_time_in_mins = 0.0
