@@ -2797,6 +2797,16 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		returned_inv.insert()
 		self.assertEqual(returned_inv.items[0].rate, 10)
 
+		# a missing exchange rate is fetched before pricing
+		returned_inv = frappe.copy_doc(returned_inv)
+		returned_inv.conversion_rate = 0
+		returned_inv.items[0].rate = 0
+		returned_inv.insert()
+		self.assertEqual(
+			returned_inv.items[0].rate,
+			flt(500 / returned_inv.conversion_rate, returned_inv.items[0].precision("rate")),
+		)
+
 		# a stale exchange rate on a company currency return is ignored
 		returned_inv = make_purchase_invoice(
 			item_code=item_code,
