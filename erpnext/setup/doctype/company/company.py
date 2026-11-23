@@ -25,6 +25,7 @@ from frappe.utils import (
 )
 from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
+from erpnext.accounts.cash_basis.settings import CompanyAccountingMethod
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
 	sync_financial_report_templates,
@@ -44,6 +45,7 @@ class Company(NestedSet):
 		from frappe.types import DF
 
 		abbr: DF.Data
+		accounting_method: DF.Literal["Accrual", "Cash"]
 		accounts_frozen_till_date: DF.Date | None
 		accumulated_depreciation_account: DF.Link | None
 		allow_account_creation_against_child_company: DF.Check
@@ -53,6 +55,7 @@ class Company(NestedSet):
 		bank_charges_account: DF.Link | None
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
+		cash_basis_inventory_treatment: DF.Literal["Keep Accrual"]
 		chart_of_accounts: DF.Literal[None]
 		company_description: DF.TextEditor | None
 		company_logo: DF.AttachImage | None
@@ -143,6 +146,9 @@ class Company(NestedSet):
 		tax_id: DF.Data | None
 		total_monthly_sales: DF.Currency
 		transactions_annual_history: DF.Code | None
+		unapplied_cash_payments_account: DF.Link | None
+		unapplied_cash_receipts_account: DF.Link | None
+		unapplied_cash_treatment: DF.Literal["Income and Expense", "Balance Sheet"]
 		unrealized_exchange_gain_loss_account: DF.Link | None
 		unrealized_profit_loss_account: DF.Link | None
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
@@ -204,6 +210,7 @@ class Company(NestedSet):
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
 		self.validate_sdbnb_configuration()
+		CompanyAccountingMethod(self).validate()
 
 	def validate_outstanding_sdbnb_transactions(self, account):
 		GLEntry = frappe.qb.DocType("GL Entry")
@@ -428,6 +435,8 @@ class Company(NestedSet):
 			"default_discount_account": {},
 			"default_deferred_revenue_account": {},
 			"default_deferred_expense_account": {},
+			"unapplied_cash_receipts_account": {"root_type": "Income"},
+			"unapplied_cash_payments_account": {"root_type": "Expense"},
 		}
 		for fieldname, filters in account_filters.items():
 			account = self.get(fieldname)
@@ -526,6 +535,8 @@ class Company(NestedSet):
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
+
+		CompanyAccountingMethod(self).on_update()
 
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name, self.country)

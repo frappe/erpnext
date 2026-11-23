@@ -7,6 +7,7 @@ from frappe.defaults import get_user_default
 from frappe.utils import cint
 
 import erpnext.accounts.utils
+from erpnext.accounts.cash_basis import get_cash_method_countries
 from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 
 
@@ -75,6 +76,7 @@ def boot_session(bootinfo):
 				"country",
 				"exchange_gain_loss_account",
 				"bank_charges_account",
+				"accounting_method",
 			],
 			limit_page_length=0,  # intentionally unbounded: all companies are needed for boot
 		)
@@ -97,6 +99,7 @@ def boot_session(bootinfo):
 			"Accounts Settings", "default_ageing_range"
 		)
 		bootinfo.sysdefaults.repost_allowed_doctypes = frappe.get_hooks("repost_allowed_doctypes")
+		bootinfo.sysdefaults.cash_method_countries = get_cash_method_countries()
 
 
 def remove_disabled_price_list_defaults(bootinfo):
