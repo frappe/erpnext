@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import flt
 
 import erpnext
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.assets.doctype.asset.asset import get_asset_account
 
@@ -85,9 +86,7 @@ class AssetRepairGLComposer(BaseGLComposer):
 
 		default_expense_account = None
 		if not erpnext.is_perpetual_inventory_enabled(doc.company):
-			default_expense_account = frappe.get_cached_value(
-				"Company", doc.company, "default_expense_account"
-			)
+			default_expense_account = get_default_account(doc.company, COST_OF_GOODS_SOLD)
 			if not default_expense_account:
 				frappe.throw(_("Please set default Expense Account in Company {0}").format(doc.company))
 

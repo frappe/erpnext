@@ -19,6 +19,7 @@ from frappe.utils import (
 from frappe.utils.data import add_to_date
 from frappe.utils.logging import get_log_db
 
+from erpnext.accounts.default_accounts import ACCUMULATED_DEPRECIATION, ASSET_DISPOSAL, DEPRECIATION_EXPENSE
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
@@ -820,7 +821,6 @@ class TestAsset(AssetSetup):
 
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 0)
 		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", "")
-		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account", "")
 
 		# case 0 -- PI with cwip disable, Asset with cwip disabled, No cwip account set
 		pi = make_purchase_invoice(
@@ -885,7 +885,6 @@ class TestAsset(AssetSetup):
 
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", cwip)
 		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", cwip_acc)
-		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account", cwip_acc)
 
 	def test_partial_asset_sale(self):
 		date = nowdate()
@@ -2744,9 +2743,9 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 
 def set_depreciation_settings_in_company(company):
 	company = frappe.get_doc("Company", company)
-	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - " + company.abbr
-	company.depreciation_expense_account = "_Test Depreciations - " + company.abbr
-	company.disposal_account = "_Test Gain/Loss on Asset Disposal - " + company.abbr
+	company.set_default_account(ACCUMULATED_DEPRECIATION, "_Test Accumulated Depreciations - " + company.abbr)
+	company.set_default_account(DEPRECIATION_EXPENSE, "_Test Depreciations - " + company.abbr)
+	company.set_default_account(ASSET_DISPOSAL, "_Test Gain/Loss on Asset Disposal - " + company.abbr)
 	company.depreciation_cost_center = "Main - " + company.abbr
 	company.save()
 

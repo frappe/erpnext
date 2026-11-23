@@ -18,6 +18,7 @@ from frappe.utils import (
 	today,
 )
 
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account, set_default_account
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
 	get_asset_value_after_depreciation,
@@ -504,7 +505,7 @@ class TestAssetRepair(ERPNextTestSuite):
 			self.assertEqual(expected_values[d.account][1], d.credit)
 
 	def test_gl_entries_with_periodical_inventory(self):
-		frappe.db.set_value("Company", "_Test Company", "default_expense_account", "Cost of Goods Sold - _TC")
+		set_default_account("_Test Company", COST_OF_GOODS_SOLD, "Cost of Goods Sold - _TC")
 		asset_repair = create_asset_repair(
 			capitalize_repair_cost=1,
 			stock_consumption=1,
@@ -526,9 +527,7 @@ class TestAssetRepair(ERPNextTestSuite):
 		fixed_asset_account = get_asset_account(
 			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
 		)
-		default_expense_account = frappe.get_cached_value(
-			"Company", asset_repair.company, "default_expense_account"
-		)
+		default_expense_account = get_default_account(asset_repair.company, COST_OF_GOODS_SOLD)
 		pi_expense_accounts = [pi.expense_account for pi in asset_repair.invoices]
 
 		expected_values = {

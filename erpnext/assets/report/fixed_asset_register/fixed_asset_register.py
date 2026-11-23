@@ -9,6 +9,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_months, cstr, flt, formatdate, getdate, nowdate, today
 
+from erpnext.accounts.default_accounts import DEPRECIATION_EXPENSE, get_default_account
 from erpnext.accounts.report.financial_statements import (
 	get_cost_centers_with_children,
 	get_fiscal_year_data,
@@ -324,6 +325,7 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 	gle = frappe.qb.DocType("GL Entry")
 	aca = frappe.qb.DocType("Asset Category Account")
 	company = frappe.qb.DocType("Company")
+	company_depreciation_expense_account = get_default_account(filters.company, DEPRECIATION_EXPENSE)
 
 	query = (
 		frappe.qb.from_(gle)
@@ -334,7 +336,7 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		.join(company)
 		.on(company.name == asset.company)
 		.select(asset.name.as_("asset"), Sum(gle.debit - gle.credit).as_("depreciation_amount"))
-		.where(gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account))
+		.where(gle.account == IfNull(aca.depreciation_expense_account, company_depreciation_expense_account))
 		.where(gle.is_cancelled == 0)
 		.where(gle.is_opening == "No")
 		.where(company.name == filters.company)

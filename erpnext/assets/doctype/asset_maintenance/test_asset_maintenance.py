@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, add_months, get_last_day, getdate, nowdate
 
+from erpnext.accounts.default_accounts import ACCUMULATED_DEPRECIATION, ASSET_DISPOSAL, DEPRECIATION_EXPENSE
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import (
 	calculate_next_due_date,
 	get_team_members,
@@ -359,9 +360,9 @@ def get_maintenance_tasks():
 
 def set_depreciation_settings_in_company():
 	company = frappe.get_doc("Company", "_Test Company")
-	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - _TC"
-	company.depreciation_expense_account = "_Test Depreciations - _TC"
-	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"
+	company.set_default_account(ACCUMULATED_DEPRECIATION, "_Test Accumulated Depreciations - _TC")
+	company.set_default_account(DEPRECIATION_EXPENSE, "_Test Depreciations - _TC")
+	company.set_default_account(ASSET_DISPOSAL, "_Test Gain/Loss on Asset Disposal - _TC")
 	company.depreciation_cost_center = "_Test Cost Center - _TC"
 	company.save()
 

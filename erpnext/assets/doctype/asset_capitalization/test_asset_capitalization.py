@@ -5,6 +5,7 @@ import frappe
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, now_datetime, today
 
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
@@ -200,7 +201,7 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		self.assertEqual(consumed_asset.db_get("status"), "Capitalized")
 
 		# Test General Ledger Entries
-		default_expense_account = frappe.db.get_value("Company", company, "default_expense_account")
+		default_expense_account = get_default_account(company, COST_OF_GOODS_SOLD)
 		expected_gle = {
 			"_Test Fixed Asset - _TC": -100000.0,
 			default_expense_account: -2000.0,

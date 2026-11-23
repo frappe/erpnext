@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.default_accounts import CAPITAL_WORK_IN_PROGRESS, set_default_account
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -32,8 +33,7 @@ class TestAssetCategory(ERPNextTestSuite):
 			pass
 
 	def test_cwip_accounting(self):
-		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account")
-		frappe.db.set_value("Company", "_Test Company", "capital_work_in_progress_account", "")
+		set_default_account("_Test Company", CAPITAL_WORK_IN_PROGRESS, "")
 
 		asset_category = frappe.new_doc("Asset Category")
 		asset_category.asset_category_name = "Computers"

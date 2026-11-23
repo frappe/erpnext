@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import flt
 
 import erpnext
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.assets.doctype.asset.depreciation import get_gl_entries_on_asset_disposal
 from erpnext.stock.services.base_stock_gl_composer import BaseStockGLComposer
 
@@ -56,7 +57,7 @@ class AssetCapitalizationGLComposer(BaseStockGLComposer):
 						account = _inv_dict["account"]
 						account_currency = _inv_dict["account_currency"]
 					else:
-						account = doc.get_company_default("default_expense_account")
+						account = get_default_account(doc.company, COST_OF_GOODS_SOLD, required=True)
 						account_currency = None
 
 					target_against.add(account)
