@@ -157,7 +157,9 @@ class PaymentLedger:
 		self.build_conditions()
 
 		# fetch data from table
-		query = qb.from_(ple).select(ple.star).where(ple.delinked == 0).where(Criterion.all(self.conditions))
+		query = qb.from_(ple).select(ple.star).where(Criterion.all(self.conditions))
+		if not self.filters.show_cancelled_entries:
+			query = query.where(ple.delinked == 0)
 
 		from frappe.desk.reportview import build_match_conditions
 

@@ -86,6 +86,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 		this.show_general_ledger();
 		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
+		erpnext.accounts.show_payment_ledger(this.frm);
+		erpnext.accounts.ledger_preview.show_payment_ledger_preview(this.frm);
 
 		if (doc.update_stock) {
 			this.show_stock_ledger();
