@@ -7,9 +7,16 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
+from erpnext.accounts.default_accounts import DEFERRED_EXPENSE, DEFERRED_REVENUE, get_default_account
+
 DEFERRED_ACCOUNT_FIELD = {
 	"Sales Invoice": "deferred_revenue_account",
 	"Purchase Invoice": "deferred_expense_account",
+}
+
+DEFERRED_ACCOUNT_PURPOSE = {
+	"Sales Invoice": DEFERRED_REVENUE,
+	"Purchase Invoice": DEFERRED_EXPENSE,
 }
 
 
@@ -24,7 +31,9 @@ class DeferredAccountingService:
 			if not self._is_deferred(item) or item.get(account_field):
 				continue
 
-			default_account = frappe.get_cached_value("Company", self.doc.company, "default_" + account_field)
+			default_account = get_default_account(
+				self.doc.company, DEFERRED_ACCOUNT_PURPOSE[self.doc.doctype]
+			)
 			if not default_account:
 				frappe.throw(
 					_(

@@ -16,6 +16,17 @@ from frappe.utils.data import comma_and, fmt_money, get_link_to_form
 from pypika.functions import Coalesce, Sum
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ADVANCE_PAID,
+	ADVANCE_RECEIVED,
+	BANK_CHARGES,
+	EXCHANGE_GAIN_LOSS,
+	PAYMENT_DISCOUNT,
+	ROUND_OFF,
+	WRITE_OFF,
+	get_default_account,
+	get_purpose,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_bank_account_details,
@@ -363,16 +374,12 @@ class PaymentEntry(AccountsController):
 		accounts = get_party_account(self.party_type, self.party, self.company, include_advance=True)
 
 		liability_account = accounts[1] if len(accounts) > 1 else None
-		fieldname = (
-			"default_advance_received_account"
-			if self.party_type == "Customer"
-			else "default_advance_paid_account"
-		)
+		purpose = ADVANCE_RECEIVED if self.party_type == "Customer" else ADVANCE_PAID
 
 		if not liability_account:
 			throw(
 				_("Please set default {0} in Company {1}").format(
-					frappe.bold(frappe.get_meta("Company").get_translated_label(fieldname)),
+					frappe.bold(_(get_purpose(purpose).label)),
 					frappe.bold(self.company),
 				)
 			)
@@ -1124,7 +1131,10 @@ class PaymentEntry(AccountsController):
 				self.get_allocated_amount_in_transaction_currency(ref.allocated_amount, *key),
 			)
 
-			discount_accounts = {company.default_discount_account, company.round_off_account}
+			discount_accounts = {
+				company.get_default_account(PAYMENT_DISCOUNT),
+				company.get_default_account(ROUND_OFF),
+			}
 			discount_accounts.update(row.account_head for row in doc.taxes)
 			for deduction in self.deductions:
 				if deduction.account not in discount_accounts or deduction.name not in remaining_deductions:
@@ -1372,23 +1382,20 @@ class PaymentEntry(AccountsController):
 			return
 
 		if not exchange_gain_loss_row:
-			values = frappe.get_cached_value(
-				"Company",
-				self.company,
-				("bank_charges_account", "exchange_gain_loss_account", "cost_center"),
-				as_dict=True,
-			)
+			cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 			is_single_currency = self.paid_from_account_currency == self.paid_to_account_currency
 			account = (
-				is_single_currency and values.bank_charges_account
-			) or values.exchange_gain_loss_account
+				is_single_currency and get_default_account(self.company, BANK_CHARGES)
+			) or get_default_account(self.company, EXCHANGE_GAIN_LOSS)
 
-			missing_fields = {"exchange_gain_loss_account": account, "cost_center": values.cost_center}
-			for fieldname, value in missing_fields.items():
+			missing_fields = {
+				_(get_purpose(EXCHANGE_GAIN_LOSS).label): account,
+				frappe.get_meta("Company").get_translated_label("cost_center"): cost_center,
+			}
+			for label, value in missing_fields.items():
 				if value:
 					continue
 
-				label = frappe.get_meta("Company").get_translated_label(fieldname)
 				return frappe.msgprint(
 					_("Please set {0} in Company {1} to account for Exchange Gain / Loss").format(
 						label, get_link_to_form("Company", self.company)
@@ -1402,7 +1409,7 @@ class PaymentEntry(AccountsController):
 				"deductions",
 				{
 					"account": account,
-					"cost_center": values.cost_center,
+					"cost_center": cost_center,
 					"is_exchange_gain_loss": 1,
 				},
 			)
@@ -2766,8 +2773,11 @@ def get_account_details(account: str, date: str | date, cost_center: str | None 
 @frappe.whitelist()
 def get_company_defaults(company: str):
 	frappe.has_permission("Company", doc=company, throw=True)
-	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
-	return frappe.get_cached_value("Company", company, fields, as_dict=1)
+	return frappe._dict(
+		write_off_account=get_default_account(company, WRITE_OFF),
+		exchange_gain_loss_account=get_default_account(company, EXCHANGE_GAIN_LOSS),
+		cost_center=frappe.get_cached_value("Company", company, "cost_center"),
+	)
 
 
 def get_journal_entry_exchange_rate(voucher_no, party_type, party, account_currency, party_account=None):
@@ -3478,12 +3488,12 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 		# If tax loss booking is enabled, pending loss will be rounding loss.
 		# Otherwise it will be the total discount loss.
 		book_tax_loss = frappe.get_single_value("Accounts Settings", "book_tax_discount_loss")
-		account_type = "round_off_account" if book_tax_loss else "default_discount_account"
+		purpose = ROUND_OFF if book_tax_loss else PAYMENT_DISCOUNT
 
 		pe.append(
 			"deductions",
 			{
-				"account": frappe.get_cached_value("Company", pe.company, account_type),
+				"account": get_default_account(pe.company, purpose),
 				"cost_center": pe.cost_center
 				or frappe.get_cached_value("Company", pe.company, "cost_center"),
 				"amount": discount_amount * positive_negative,
@@ -3525,7 +3535,7 @@ def get_early_payment_discount_loss(
 	base_loss_on_income = doc.get("base_total") * (total_discount_percent / 100)
 	rows = [
 		{
-			"account": frappe.get_cached_value("Company", company, "default_discount_account"),
+			"account": get_default_account(company, PAYMENT_DISCOUNT),
 			"cost_center": cost_center,
 			"amount": flt(base_loss_on_income, doc.precision("total")) * positive_negative,
 		}

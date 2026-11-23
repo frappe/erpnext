@@ -13,6 +13,13 @@ from frappe.query_builder.functions import Sum
 from frappe.tests import change_settings
 from frappe.utils import add_days, cint, nowdate
 
+from erpnext.accounts.default_accounts import (
+	ADVANCE_PAID,
+	ADVANCE_RECEIVED,
+	EXCHANGE_GAIN_LOSS,
+	WRITE_OFF,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -320,10 +327,8 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(purchase_invoice.status, "Paid")
 
 	def test_payment_entry(self):
-		frappe.db.set_value(
-			"Company", "_Test Company", "exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC"
-		)
-		frappe.db.set_value("Company", "_Test Company", "write_off_account", "_Test Write Off - _TC")
+		set_default_account("_Test Company", EXCHANGE_GAIN_LOSS, "_Test Exchange Gain/Loss - _TC")
+		set_default_account("_Test Company", WRITE_OFF, "_Test Write Off - _TC")
 		frappe.db.set_value("Company", "_Test Company", "cost_center", "_Test Cost Center - _TC")
 
 		so_inr = make_sales_order(currency="INR")
@@ -1126,17 +1131,23 @@ class TestPaymentRequest(ERPNextTestSuite):
 	def test_unlink_advance_request_reverses_separate_account(self):
 		company = frappe.get_doc("Company", "_Test Company")
 		company.book_advance_payments_in_separate_party_account = 1
-		company.default_advance_received_account = create_account(
-			parent_account="Current Liabilities - _TC",
-			account_name="Customer Advance Request",
-			company=company.name,
-			account_type="Receivable",
+		company.set_default_account(
+			ADVANCE_RECEIVED,
+			create_account(
+				parent_account="Current Liabilities - _TC",
+				account_name="Customer Advance Request",
+				company=company.name,
+				account_type="Receivable",
+			),
 		)
-		company.default_advance_paid_account = create_account(
-			parent_account="Current Assets - _TC",
-			account_name="Supplier Advance Request",
-			company=company.name,
-			account_type="Payable",
+		company.set_default_account(
+			ADVANCE_PAID,
+			create_account(
+				parent_account="Current Assets - _TC",
+				account_name="Supplier Advance Request",
+				company=company.name,
+				account_type="Payable",
+			),
 		)
 		company.save()
 

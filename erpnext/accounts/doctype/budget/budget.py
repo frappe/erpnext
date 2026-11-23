@@ -11,6 +11,7 @@ from frappe.utils import add_months, flt, fmt_money, get_last_day, getdate
 from frappe.utils.data import get_first_day
 from pypika.terms import ExistsCriterion
 
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
@@ -862,9 +863,9 @@ def get_expense_cost_center(doctype, params):
 			["buying_cost_center", "expense_account"],
 		)
 	else:
-		return frappe.db.get_value(
-			doctype, params.get(frappe.scrub(doctype)), ["cost_center", "default_expense_account"]
-		)
+		company = params.get("company")
+		cost_center = frappe.db.get_value("Company", company, "cost_center")
+		return cost_center, get_default_account(company, COST_OF_GOODS_SOLD)
 
 
 def get_fiscal_year_date_range(from_fiscal_year, to_fiscal_year):

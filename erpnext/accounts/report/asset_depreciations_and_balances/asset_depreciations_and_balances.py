@@ -7,6 +7,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, flt, formatdate
 
+from erpnext.accounts.default_accounts import DEPRECIATION_EXPENSE, get_default_account
 from erpnext.accounts.report.utils import validate_date_range
 
 DISPOSAL_VALUE_FIELDS = {
@@ -185,7 +186,7 @@ def get_assets_for_grouped_by_category(filters):
 	asset = frappe.qb.DocType("Asset")
 	gl_entry = frappe.qb.DocType("GL Entry")
 	asset_category_account = frappe.qb.DocType("Asset Category Account")
-	company = frappe.qb.DocType("Company")
+	company_depreciation_expense_account = get_default_account(filters.company, DEPRECIATION_EXPENSE)
 	asset_depreciation_schedule = frappe.qb.DocType("Asset Depreciation Schedule")
 
 	assets_with_finance_book = None
@@ -205,8 +206,6 @@ def get_assets_for_grouped_by_category(filters):
 			(asset_category_account.parent == asset.asset_category)
 			& (asset_category_account.company_name == filters.company)
 		)
-		.join(company)
-		.on(company.name == filters.company)
 		.select(
 			asset.asset_category,
 			IfNull(
@@ -270,7 +269,7 @@ def get_assets_for_grouped_by_category(filters):
 			gl_entry.account
 			== IfNull(
 				asset_category_account.depreciation_expense_account,
-				company.depreciation_expense_account,
+				company_depreciation_expense_account,
 			)
 		)
 		.groupby(asset.asset_category)
@@ -536,7 +535,7 @@ def get_assets_for_grouped_by_asset(filters):
 	asset = frappe.qb.DocType("Asset")
 	gl_entry = frappe.qb.DocType("GL Entry")
 	asset_category_account = frappe.qb.DocType("Asset Category Account")
-	company = frappe.qb.DocType("Company")
+	company_depreciation_expense_account = get_default_account(filters.company, DEPRECIATION_EXPENSE)
 	asset_depreciation_schedule = frappe.qb.DocType("Asset Depreciation Schedule")
 
 	assets_with_finance_book = None
@@ -556,8 +555,6 @@ def get_assets_for_grouped_by_asset(filters):
 			(asset_category_account.parent == asset.asset_category)
 			& (asset_category_account.company_name == filters.company)
 		)
-		.join(company)
-		.on(company.name == filters.company)
 		.select(
 			asset.name.as_("asset"),
 			IfNull(
@@ -621,7 +618,7 @@ def get_assets_for_grouped_by_asset(filters):
 			gl_entry.account
 			== IfNull(
 				asset_category_account.depreciation_expense_account,
-				company.depreciation_expense_account,
+				company_depreciation_expense_account,
 			)
 		)
 		.groupby(asset.name)

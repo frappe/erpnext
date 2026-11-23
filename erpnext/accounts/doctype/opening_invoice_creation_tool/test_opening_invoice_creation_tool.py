@@ -7,6 +7,7 @@ import frappe
 from frappe.utils import add_days, now, today
 from frappe.utils.logging import get_log_db
 
+from erpnext.accounts.default_accounts import RECEIVABLE, get_default_account, set_default_account
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
@@ -87,10 +88,8 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 	def test_opening_sales_invoice_creation_with_missing_debit_account(self):
 		party_1, party_2 = make_customer("Customer A"), make_customer("Customer B")
 
-		old_default_receivable_account = frappe.db.get_value(
-			"Company", "_Test Opening Invoice Company", "default_receivable_account"
-		)
-		frappe.db.set_value("Company", "_Test Opening Invoice Company", "default_receivable_account", "")
+		old_default_receivable_account = get_default_account("_Test Opening Invoice Company", RECEIVABLE)
+		set_default_account("_Test Opening Invoice Company", RECEIVABLE, "")
 
 		# Error Logs are not rolled back between tests, so only count the ones logged here
 		started = now()
@@ -110,12 +109,7 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 		self.assertTrue(error_log)
 
 		# teardown
-		frappe.db.set_value(
-			"Company",
-			"_Test Opening Invoice Company",
-			"default_receivable_account",
-			old_default_receivable_account,
-		)
+		set_default_account("_Test Opening Invoice Company", RECEIVABLE, old_default_receivable_account)
 
 	def test_renaming_of_invoice_using_invoice_number_field(self):
 		party_1, party_2 = make_customer("Customer A"), make_customer("Customer B")

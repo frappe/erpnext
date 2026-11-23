@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD
 from erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer import (
 	build_forest,
 	unset_existing_data,
@@ -90,7 +91,7 @@ class TestChartofAccountsImporter(ERPNextTestSuite):
 					taxes=[
 						{
 							"charge_type": "On Net Total",
-							"account_head": company.default_expense_account,
+							"account_head": company.get_default_account(COST_OF_GOODS_SOLD),
 							"description": "Import tax",
 							"rate": 5,
 						}

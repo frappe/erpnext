@@ -17,7 +17,7 @@ frappe.query_reports["Cheques and Deposits Incorrectly cleared"] = {
 			fieldtype: "Link",
 			options: "Account",
 			default: frappe.defaults.get_user_default("Company")
-				? locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"]
+				? erpnext.utils.get_default_account(frappe.defaults.get_user_default("Company"), "BANK")
 				: "",
 			reqd: 1,
 			get_query: function () {

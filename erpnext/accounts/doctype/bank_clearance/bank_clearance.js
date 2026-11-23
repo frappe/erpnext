@@ -25,7 +25,7 @@ frappe.ui.form.on("Bank Clearance", {
 
 	onload: function (frm) {
 		let default_bank_account = frappe.defaults.get_user_default("Company")
-			? locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"]
+			? erpnext.utils.get_default_account(frappe.defaults.get_user_default("Company"), "BANK")
 			: "";
 		frm.set_value("account", default_bank_account);
 

@@ -5,6 +5,7 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, today
 
+from erpnext.accounts.default_accounts import UNREALIZED_EXCHANGE_GAIN_LOSS, set_default_account
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	BLANK_ACCOUNTING_DIMENSION,
 	get_dimension_filter_condition,
@@ -360,9 +361,7 @@ class TestGeneralLedger(ERPNextTestSuite):
 		revaluation.submit()
 
 		# post journal entry to revaluate
-		frappe.db.set_value(
-			"Company", company, "unrealized_exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC"
-		)
+		set_default_account(company, UNREALIZED_EXCHANGE_GAIN_LOSS, "_Test Exchange Gain/Loss - _TC")
 		revaluation_jv = revaluation.make_jv_for_revaluation()
 		revaluation_jv.cost_center = "_Test Cost Center - _TC"
 		for acc in revaluation_jv.get("accounts"):
@@ -464,9 +463,7 @@ class TestGeneralLedger(ERPNextTestSuite):
 		revaluation = revaluation.save().submit()
 
 		# post journal entry for Revaluation doc
-		frappe.db.set_value(
-			"Company", company, "unrealized_exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC"
-		)
+		set_default_account(company, UNREALIZED_EXCHANGE_GAIN_LOSS, "_Test Exchange Gain/Loss - _TC")
 		revaluation_jv = revaluation.make_jv_for_revaluation()
 		revaluation_jv.cost_center = "_Test Cost Center - _TC"
 		for acc in revaluation_jv.get("accounts"):

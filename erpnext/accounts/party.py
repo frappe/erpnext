@@ -25,6 +25,13 @@ from frappe.utils import (
 
 import erpnext
 from erpnext import get_company_currency
+from erpnext.accounts.default_accounts import (
+	ADVANCE_PAID,
+	ADVANCE_RECEIVED,
+	PAYABLE,
+	RECEIVABLE,
+	get_default_account,
+)
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
@@ -518,11 +525,8 @@ def find_party_account(party_type: str, party: str | None, company: str | None) 
 		frappe.throw(_("Please select a Company"))
 
 	if not party and party_type in ["Customer", "Supplier"]:
-		default_account_name = (
-			"default_receivable_account" if party_type == "Customer" else "default_payable_account"
-		)
-
-		account = frappe.get_cached_value("Company", company, default_account_name)
+		purpose = RECEIVABLE if party_type == "Customer" else PAYABLE
+		account = get_default_account(company, purpose)
 	else:
 		account = get_party_account_from_settings(party_type, party, company)
 
@@ -532,10 +536,8 @@ def find_party_account(party_type: str, party: str | None, company: str | None) 
 			account = get_party_account_from_settings(party_group_doctype, group, company)
 
 		if not account and party_type in ["Customer", "Supplier"]:
-			default_account_name = (
-				"default_receivable_account" if party_type == "Customer" else "default_payable_account"
-			)
-			account = frappe.get_cached_value("Company", company, default_account_name)
+			purpose = RECEIVABLE if party_type == "Customer" else PAYABLE
+			account = get_default_account(company, purpose)
 
 		existing_gle_currency = get_party_gle_currency(party_type, party, company)
 		if existing_gle_currency:
@@ -547,8 +549,8 @@ def find_party_account(party_type: str, party: str | None, company: str | None) 
 		# get default account on the basis of party type
 		if not account:
 			account_type = frappe.get_cached_value("Party Type", party_type, "account_type")
-			default_account_name = "default_" + account_type.lower() + "_account"
-			account = frappe.get_cached_value("Company", company, default_account_name)
+			purpose = RECEIVABLE if account_type == "Receivable" else PAYABLE
+			account = get_default_account(company, purpose)
 
 	return account
 
@@ -571,10 +573,8 @@ def get_party_advance_account(party_type, party, company):
 		account = get_party_account_from_settings(party_group_doctype, group, company, "advance_account")
 
 	if not account:
-		account_name = (
-			"default_advance_received_account" if party_type == "Customer" else "default_advance_paid_account"
-		)
-		account = frappe.get_cached_value("Company", company, account_name)
+		purpose = ADVANCE_RECEIVED if party_type == "Customer" else ADVANCE_PAID
+		account = get_default_account(company, purpose)
 
 	return account
 

@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import today
 
+from erpnext.accounts.default_accounts import ADVANCE_RECEIVED, set_default_account
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
@@ -431,9 +432,7 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 
 	def test_07_adv_from_so_to_invoice(self):
 		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", 1)
-		frappe.db.set_value(
-			"Company", self.company, "default_advance_received_account", "Advance Received - _TC"
-		)
+		set_default_account(self.company, ADVANCE_RECEIVED, "Advance Received - _TC")
 
 		so = self.create_sales_order()
 		pe = self.create_payment_entry()

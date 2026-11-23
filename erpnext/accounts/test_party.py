@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.accounts.default_accounts import RECEIVABLE, get_default_account
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.party import (
@@ -28,7 +29,7 @@ class PartyTestCase(ERPNextTestSuite):
 		customer.customer_group = group.name
 		customer.insert()
 		company = "_Test Company"
-		default_account = frappe.get_cached_value("Company", company, "default_receivable_account")
+		default_account = get_default_account(company, RECEIVABLE)
 		account = create_account(
 			account_name=frappe.generate_hash(length=10),
 			parent_account="Accounts Receivable - _TC",

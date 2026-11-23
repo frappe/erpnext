@@ -12,6 +12,7 @@ from frappe.query_builder.functions import Max, NullIf, Sum
 from frappe.utils import flt, get_link_to_form, nowdate
 
 import erpnext
+from erpnext.accounts.default_accounts import UNREALIZED_EXCHANGE_GAIN_LOSS, get_default_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
 from erpnext.accounts.utils import get_currency_precision
 from erpnext.setup.utils import get_exchange_rate
@@ -361,8 +362,8 @@ class ExchangeRateRevaluation(Document):
 		frappe.msgprint(message)
 
 	def get_for_unrealized_gain_loss_account(self):
-		unrealized_exchange_gain_loss_account = frappe.get_cached_value(
-			"Company", self.company, "unrealized_exchange_gain_loss_account"
+		unrealized_exchange_gain_loss_account = get_default_account(
+			self.company, UNREALIZED_EXCHANGE_GAIN_LOSS
 		)
 		if not unrealized_exchange_gain_loss_account:
 			frappe.throw(

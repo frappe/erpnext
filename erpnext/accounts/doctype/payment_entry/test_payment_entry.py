@@ -10,6 +10,17 @@ from frappe.desk.notifications import get_open_count
 from frappe.utils import add_days, flt, nowdate
 from freezegun import freeze_time
 
+from erpnext.accounts.default_accounts import (
+	ADVANCE_PAID,
+	ADVANCE_RECEIVED,
+	BANK_CHARGES,
+	EXCHANGE_GAIN,
+	EXCHANGE_GAIN_LOSS,
+	EXCHANGE_LOSS,
+	PAYMENT_DISCOUNT,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import get_linked_payments
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -719,7 +730,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 	def test_payment_schedule_records_only_applied_discounts(self):
 		create_payment_terms_template_with_discount()
 		create_payment_term("Remaining Balance")
-		frappe.db.set_value("Company", "_Test Company", "default_discount_account", "Write Off - _TC")
+		set_default_account("_Test Company", PAYMENT_DISCOUNT, "Write Off - _TC")
 		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 0)
 		template = frappe.copy_doc(frappe.get_doc("Payment Terms Template", "Test Discount Template"))
 		template.template_name = "_Test Instalment Discount Template"
@@ -828,7 +839,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		create_payment_terms_template_with_discount()
 		pi.payment_terms_template = "Test Discount Template"
 
-		frappe.db.set_value("Company", pi.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(pi.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 
 		pi.append(
 			"taxes",
@@ -870,7 +881,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		create_payment_terms_template_with_discount()
 		si.payment_terms_template = "Test Discount Template"
 
-		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(si.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 
 		si.append(
 			"taxes",
@@ -916,7 +927,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		create_payment_terms_template_with_discount()
 		si.payment_terms_template = "Test Discount Template"
 
-		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(si.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 
 		si.append(
 			"taxes",
@@ -966,7 +977,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 			discount=50,
 			template_name="Test Discount Amount Template",
 		)
-		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(si.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 
 		si.append(
 			"taxes",
@@ -1023,7 +1034,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		)
 		create_payment_terms_template_with_discount()
 		pi.payment_terms_template = "Test Discount Template"
-		frappe.db.set_value("Company", pi.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(pi.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 		pi.save()
 		pi.submit()
 
@@ -1074,7 +1085,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		create_payment_terms_template_with_discount()
 		si.payment_terms_template = "Test Discount Template"
 
-		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(si.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 		si.save()
 		si.submit()
 
@@ -1128,7 +1139,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		create_payment_terms_template_with_discount()
 		si.payment_terms_template = "Test Discount Template"
 
-		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(si.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 		si.save()
 		si.submit()
 
@@ -1390,7 +1401,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 			account_name="_Test Bank Charges",
 			company="_Test Company",
 		)
-		frappe.db.set_value("Company", "_Test Company", "bank_charges_account", bank_charges_account)
+		set_default_account("_Test Company", BANK_CHARGES, bank_charges_account)
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
@@ -1426,15 +1437,13 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_cross_currency_transfer_ignores_bank_charges_account(self):
-		exchange_gain_loss_account = frappe.db.get_value(
-			"Company", "_Test Company", "exchange_gain_loss_account"
-		)
+		exchange_gain_loss_account = get_default_account("_Test Company", EXCHANGE_GAIN_LOSS)
 		bank_charges_account = create_account(
 			parent_account="Indirect Expenses - _TC",
 			account_name="_Test Bank Charges",
 			company="_Test Company",
 		)
-		frappe.db.set_value("Company", "_Test Company", "bank_charges_account", bank_charges_account)
+		set_default_account("_Test Company", BANK_CHARGES, bank_charges_account)
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
@@ -1471,9 +1480,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_cross_currency_transfer_splits_bank_charge_and_exchange_gain_loss(self):
-		exchange_gain_loss_account = frappe.db.get_value(
-			"Company", "_Test Company", "exchange_gain_loss_account"
-		)
+		exchange_gain_loss_account = get_default_account("_Test Company", EXCHANGE_GAIN_LOSS)
 		bank_charges_account = create_account(
 			parent_account="Indirect Expenses - _TC",
 			account_name="_Test Bank Charges",
@@ -1976,8 +1983,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 			parent_account="Indirect Expenses - _TC",
 			company="_Test Company",
 		)
-		frappe.db.set_value("Company", "_Test Company", "exchange_gain_account", gain_account)
-		frappe.db.set_value("Company", "_Test Company", "exchange_loss_account", loss_account)
+		set_default_account("_Test Company", EXCHANGE_GAIN, gain_account)
+		set_default_account("_Test Company", EXCHANGE_LOSS, loss_account)
 
 		si_gain = create_sales_invoice(
 			customer="_Test Customer USD",
@@ -2920,14 +2927,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 			account_type="Receivable",
 		)
 
-		frappe.db.set_value(
-			"Company",
-			company,
-			{
-				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_received_account": advance_account,
-			},
-		)
+		frappe.db.set_value("Company", company, "book_advance_payments_in_separate_party_account", 1)
+		set_default_account(company, ADVANCE_RECEIVED, advance_account)
 		# Advance Payment
 		pe = create_payment_entry(
 			party_type="Customer",
@@ -3047,14 +3048,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 			account_type="Payable",
 		)
 
-		frappe.db.set_value(
-			"Company",
-			company,
-			{
-				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_paid_account": advance_account,
-			},
-		)
+		frappe.db.set_value("Company", company, "book_advance_payments_in_separate_party_account", 1)
+		set_default_account(company, ADVANCE_PAID, advance_account)
 
 		po = create_purchase_order(supplier="_Test Supplier")
 		pe = get_payment_entry("Purchase Order", po.name, bank_account="Cash - _TC")
@@ -3270,14 +3265,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 			account_type="Receivable",
 		)
 
-		frappe.db.set_value(
-			"Company",
-			company,
-			{
-				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_received_account": advance_account,
-			},
-		)
+		frappe.db.set_value("Company", company, "book_advance_payments_in_separate_party_account", 1)
+		set_default_account(company, ADVANCE_RECEIVED, advance_account)
 		# Reverse Payment(essentially an Invoice)
 		reverse_pe = create_payment_entry(
 			party_type="Customer",
@@ -3394,14 +3383,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		)
 
 		# Enable Advance in separate party account
-		frappe.db.set_value(
-			"Company",
-			company,
-			{
-				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_received_account": advance_account,
-			},
-		)
+		frappe.db.set_value("Company", company, "book_advance_payments_in_separate_party_account", 1)
+		set_default_account(company, ADVANCE_RECEIVED, advance_account)
 		# Advance Payment
 		adv = create_payment_entry(
 			party_type="Customer",
@@ -3421,14 +3404,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertNotEqual(gl_with_opening_set, [])
 
 		# Disable Advance in separate party account
-		frappe.db.set_value(
-			"Company",
-			company,
-			{
-				"book_advance_payments_in_separate_party_account": 0,
-				"default_advance_received_account": None,
-			},
-		)
+		frappe.db.set_value("Company", company, "book_advance_payments_in_separate_party_account", 0)
+		set_default_account(company, ADVANCE_RECEIVED, None)
 		payment = create_payment_entry(
 			party_type="Customer",
 			party="_Test Customer",

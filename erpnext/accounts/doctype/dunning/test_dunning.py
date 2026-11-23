@@ -8,6 +8,7 @@ from frappe.model import mapper
 from frappe.utils import add_days, flt, nowdate, today
 
 from erpnext import get_default_cost_center
+from erpnext.accounts.default_accounts import INCOME, get_default_account
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.mapper import (
 	create_dunning as create_dunning_from_sales_invoice,
@@ -899,7 +900,7 @@ def create_dunning_type(title, fee, interest, is_default):
 
 def get_income_account(company):
 	return (
-		frappe.get_value("Company", company, "default_income_account")
+		get_default_account(company, INCOME)
 		or frappe.get_all(
 			"Account",
 			filters={"is_group": 0, "company": company},

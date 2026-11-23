@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, nowdate, today
 from frappe.utils.logging import get_log_db
 
+from erpnext.accounts.default_accounts import PROVISIONAL, SERVICE_EXPENSE, set_default_account
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -199,10 +200,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 	def test_06_repost_purchase_receipt(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 
-		if not frappe.db.set_value("Company", "_Test Company", "service_expense_account"):
-			frappe.db.set_value(
-				"Company", "_Test Company", "service_expense_account", "Marketing Expenses - _TC"
-			)
+		set_default_account("_Test Company", SERVICE_EXPENSE, "Marketing Expenses - _TC")
 
 		provisional_account = create_account(
 			account_name="Provision Account",
@@ -218,11 +216,11 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		company = frappe.get_doc("Company", "_Test Company")
 		company.enable_provisional_accounting_for_non_stock_items = 1
-		company.default_provisional_account = provisional_account
+		company.set_default_account(PROVISIONAL, provisional_account)
 		company.save()
 
 		test_cc = company.cost_center
-		default_expense_account = company.service_expense_account
+		default_expense_account = company.get_default_account(SERVICE_EXPENSE)
 
 		item = make_item(properties={"is_stock_item": 0})
 
@@ -260,7 +258,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		pr.cancel()
 
 		company.enable_provisional_accounting_for_non_stock_items = 0
-		company.default_provisional_account = None
+		company.set_default_account(PROVISIONAL, None)
 		company.save()
 
 	def test_07_voucher_validations(self):

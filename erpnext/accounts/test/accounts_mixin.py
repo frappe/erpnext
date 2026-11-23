@@ -1,6 +1,7 @@
 import frappe
 from frappe import qb
 
+from erpnext.accounts.default_accounts import ADVANCE_PAID, ADVANCE_RECEIVED
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -154,14 +155,15 @@ class AccountsTestMixin:
 	def enable_advance_as_liability(self):
 		company = frappe.get_doc("Company", self.company)
 		company.book_advance_payments_in_separate_party_account = True
-		company.default_advance_received_account = self.advance_received
-		company.default_advance_paid_account = self.advance_paid
+		company.set_default_account(ADVANCE_RECEIVED, self.advance_received)
+		company.set_default_account(ADVANCE_PAID, self.advance_paid)
 		company.save()
 
 	def disable_advance_as_liability(self):
 		company = frappe.get_doc("Company", self.company)
 		company.book_advance_payments_in_separate_party_account = False
-		company.default_advance_paid_account = company.default_advance_received_account = None
+		company.set_default_account(ADVANCE_PAID, None)
+		company.set_default_account(ADVANCE_RECEIVED, None)
 		company.save()
 
 	def identify_default_warehouses(self):

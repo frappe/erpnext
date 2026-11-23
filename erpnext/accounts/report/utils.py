@@ -9,6 +9,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
+from erpnext.accounts.default_accounts import EXCHANGE_GAIN_LOSS, get_default_account
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_filter_condition,
@@ -152,7 +153,7 @@ def convert_to_presentation_currency(
 
 	if filters and isinstance(filters.get("account"), list):
 		account_filter = filters.get("account")
-		gain_loss_account = frappe.db.get_value("Company", filters.company, "exchange_gain_loss_account")
+		gain_loss_account = get_default_account(filters.company, EXCHANGE_GAIN_LOSS)
 
 		exchange_gain_or_loss = len(account_filter) == 1 and account_filter[0] == gain_loss_account
 
