@@ -3180,7 +3180,13 @@ def get_payment_entry(
 
 	reference_date = getdate(reference_date)
 	paid_amount, received_amount, discount_amount, valid_discounts = apply_early_payment_discount(
-		paid_amount, received_amount, doc, party_account_currency, reference_date
+		paid_amount,
+		received_amount,
+		doc,
+		party_account_currency,
+		reference_date,
+		payment_type=payment_type,
+		bank_account_currency=bank.account_currency if bank else None,
 	)
 
 	pe = frappe.new_doc("Payment Entry")
@@ -3604,7 +3610,15 @@ def set_paid_amount_and_received_amount(
 	return paid_amount, received_amount
 
 
-def apply_early_payment_discount(paid_amount, received_amount, doc, party_account_currency, reference_date):
+def apply_early_payment_discount(
+	paid_amount,
+	received_amount,
+	doc,
+	party_account_currency,
+	reference_date,
+	payment_type=None,
+	bank_account_currency=None,
+):
 	total_discount = 0
 	valid_discounts = []
 	eligible_for_payments = ["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"]
@@ -3625,16 +3639,19 @@ def apply_early_payment_discount(paid_amount, received_amount, doc, party_accoun
 				else:
 					discount_amount = term.discount
 
-				# if accounting is done in the same currency, paid_amount = received_amount
+				# bank side gets the discount in the bank's currency
 				conversion_rate = doc.get("conversion_rate", 1) if is_multi_currency else 1
-				discount_amount_in_foreign_currency = discount_amount * conversion_rate
+				if bank_account_currency == party_account_currency:
+					conversion_rate = 1
+				bank_side_discount = discount_amount * conversion_rate
 
-				if doc.doctype == "Sales Invoice":
+				is_receive = (payment_type or set_payment_type(doc.doctype, doc)) == "Receive"
+				if is_receive:
 					paid_amount -= discount_amount
-					received_amount -= discount_amount_in_foreign_currency
+					received_amount -= bank_side_discount
 				else:
 					received_amount -= discount_amount
-					paid_amount -= discount_amount_in_foreign_currency
+					paid_amount -= bank_side_discount
 
 				valid_discounts.append({"type": term.discount_type, "discount": term.discount})
 				total_discount += discount_amount
