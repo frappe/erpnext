@@ -8,6 +8,9 @@ from frappe.query_builder.functions import Coalesce, IfNull, Max, Min, NullIf, S
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -287,6 +290,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
 		self.validate_manufactured_qty()
+		self.validate_qty_against_transferred_qty()
 		self.check_if_operations_completed()
 		self.check_duplicate_entry_for_work_order()
 		self.validate_finished_good_serial_batch_for_work_order()
@@ -426,6 +430,53 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 		if not self.doc.fg_completed_qty:
 			frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"), ManufacturedQtyMandatoryError)
+
+	def validate_qty_against_transferred_qty(self):
+		"""Once material is transferred to the Work Order, refuse to manufacture more than it covers,
+		so BOM backflush does not take other orders' stock from the shared WIP warehouse."""
+		wo = self.wo_doc
+		if (
+			not wo
+			or wo.skip_transfer
+			or wo.track_semi_finished_goods
+			or wo.transfer_material_against == "Job Card"
+			or not flt(wo.material_transferred_for_manufacturing)
+		):
+			return
+
+		allowance_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		# lock on submit so concurrent Manufacture entries see each other's produced qty
+		is_submitting = self.doc.docstatus == 1
+		if is_submitting and wo.production_plan:
+			# plan row before Work Order, the order update_work_order_qty locks them in
+			ProductionPlanWorkOrderQuantities(wo.production_plan).lock_plan_row(wo)
+
+		transferred_qty, produced_qty, process_loss_qty = frappe.db.get_value(
+			"Work Order",
+			wo.name,
+			["material_transferred_for_manufacturing", "produced_qty", "process_loss_qty"],
+			for_update=is_submitting,
+		)
+		precision = self.doc.precision("fg_completed_qty")
+		allowed_qty = flt(
+			flt(transferred_qty)
+			+ flt(wo.qty) * allowance_percentage / 100
+			- flt(produced_qty)
+			- flt(process_loss_qty),
+			precision,
+		)
+		if flt(self.doc.fg_completed_qty, precision) > allowed_qty:
+			frappe.throw(
+				_(
+					"For Quantity ({0}) cannot be more than {1}, the qty transferred to Work Order {2} that is not yet produced."
+				).format(
+					flt(self.doc.fg_completed_qty, precision),
+					allowed_qty,
+					get_link_to_form("Work Order", self.doc.work_order),
+				)
+			)
 
 	def check_if_operations_completed(self):
 		"""Require operation (job card) completion before manufacture, so operating costs are captured."""
