@@ -1198,6 +1198,11 @@ frappe.ui.form.on("BOM Secondary Item", {
 			frappe.model.set_value(cdt, cdn, { cost: 0, base_cost: 0 });
 		}
 	},
+	process_loss_per(frm, cdt, cdn) {
+		if (locals[cdt][cdn].valuation_type === "Valuation Rate") {
+			erpnext.bom.fetch_secondary_item_cost(frm.doc, cdt, cdn);
+		}
+	},
 });
 
 erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
