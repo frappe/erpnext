@@ -47,9 +47,10 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 		supplier = create_scorecard_supplier("_Test Supplier Scorecard On Time")
 		on_time_po = create_scorecard_po(supplier, add_days(nowdate(), 5))
 		late_po = create_scorecard_po(supplier, add_days(nowdate(), -5), add_days(nowdate(), -10))
-		for po in (on_time_po, late_po):
-			make_purchase_receipt(po.name).submit()
+		make_purchase_receipt(on_time_po.name).submit()
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
+		make_purchase_receipt(late_po.name).submit()
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
 	def test_split_on_time_receipts_count_as_one_shipment(self):
