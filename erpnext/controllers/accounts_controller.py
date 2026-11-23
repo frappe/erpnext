@@ -4577,6 +4577,16 @@ def update_child_qty_rate(
 					_("Cannot update items of Quotation {0} because it has expired.").format(doc.name)
 				)
 
+	def validate_rows_belong_to_parent(doc, data):
+		item_row_names = {row.name for row in doc.items}
+		for d in data:
+			if d.get("docname") and d.get("docname") not in item_row_names:
+				frappe.throw(
+					_("Item row {0} does not belong to {1} {2}.").format(
+						frappe.bold(d.get("docname")), _(doc.doctype), frappe.bold(doc.name)
+					)
+				)
+
 	def validate_workflow_conditions(doc):
 		workflow = get_workflow_name(doc.doctype)
 		if not workflow:
@@ -4755,6 +4765,7 @@ def update_child_qty_rate(
 	check_doc_permissions(parent, "write")
 	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
 	validate_parent_status(parent)
+	validate_rows_belong_to_parent(parent, data)
 	validate_blanket_order_changes(parent, data)
 
 	if parent_doctype == "Quotation":
