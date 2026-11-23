@@ -629,6 +629,9 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name: str, target_doc: str | dict | Document | None = None):
+	frappe.has_permission("Sales Invoice", doc=source_name, throw=True)
+	frappe.has_permission("Invoice Discounting", ptype="create", throw=True)
+
 	invoice = frappe.get_doc("Sales Invoice", source_name)
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company
