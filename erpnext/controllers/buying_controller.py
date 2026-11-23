@@ -1203,6 +1203,88 @@ class BuyingController(SubcontractingController):
 		"""An internal receipt row whose rejected qty doesn't round to 0 in the stock UOM."""
 		return self.is_internal_receipt() and bool(get_stock_qty(row, row.rejected_qty))
 
+	def get_accepted_stock_qty(self, row) -> float:
+		"""Accepted qty in the stock UOM. A return takes back no more than its receipt row put in the
+		warehouse, less the row's other returns, so returns of parts add up to it. A row with a package
+		is not capped, as its package holds the qty."""
+		if not self.is_return or row.get("serial_and_batch_bundle"):
+			return get_stock_qty(row, row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, row.warehouse)
+
+	def get_return_stock_qty(self, row, qty, warehouse) -> float:
+		"""Stock qty a return row takes back from the warehouse: no more than its receipt row put there,
+		less the row's other returns, and all that is left once it returns the rest of the row's qty."""
+		stock_qty = get_stock_qty(row, qty)
+		if self.docstatus == 2:
+			return flt(self.get_posted_return_qty(row, warehouse)) or stock_qty
+
+		left = self.get_receipt_row_left_to_return(row, warehouse)
+		if flt(left.stock_qty) <= 0:
+			return stock_qty
+
+		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
+		if flt(unreturned_stock_qty, row.precision("stock_qty")) <= 0:
+			return -left.stock_qty
+
+		return max(stock_qty, -left.stock_qty)
+
+	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict:
+		"""Unrounded and posted stock qty the returned receipt row put in the warehouse that its other
+		returns have not taken back."""
+		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
+		reference_field = (
+			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
+		)
+		receipt_row = row.get(reference_field)
+		if not receipt_row:
+			return left
+
+		receipt_item = frappe.qb.DocType(row.doctype)
+		rows = (
+			frappe.qb.from_(receipt_item)
+			.select(
+				receipt_item.name,
+				receipt_item.qty,
+				receipt_item.rejected_qty,
+				receipt_item.conversion_factor,
+				receipt_item.warehouse,
+				receipt_item.rejected_warehouse,
+			)
+			.where(
+				(receipt_item.docstatus == 1)
+				& (
+					(receipt_item.name == receipt_row)
+					| ((receipt_item[reference_field] == receipt_row) & (receipt_item.parent != self.name))
+				)
+			)
+			.run(as_dict=True)
+		)
+		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouse)
+		for d in rows:
+			if d.name not in posted_qty:
+				continue  # moved no stock, like a debit note without Update Stock
+			if d.warehouse == warehouse:
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
+			if d.rejected_warehouse == warehouse:
+				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
+
+		left.stock_qty = flt(sum(posted_qty.values()), row.precision("stock_qty"))
+		return left
+
+	def get_posted_return_qty(self, row, warehouse):
+		"""Qty the return row's entry took out of the warehouse."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_detail_no": row.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"actual_qty": ("<", 0),
+			},
+			"actual_qty",
+		)
+
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
 		delivered row left in transit, so partial receipts that round up add up to the delivery, and its
@@ -1439,7 +1521,7 @@ class BuyingController(SubcontractingController):
 
 			source_reversal_sle = None
 
-			pr_qty = get_stock_qty(d, d.qty)
+			pr_qty = self.get_accepted_stock_qty(d)
 			source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
 			if source_qty and (d.warehouse or not pr_qty):
@@ -1984,6 +2066,18 @@ def get_stock_qty(row, qty) -> float:
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
 
 
+def get_posted_stock_qty_by_row(row_names, warehouse) -> dict:
+	"""Stock qty each row's entries moved in the warehouse."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	return dict(
+		frappe.qb.from_(sle)
+		.select(sle.voucher_detail_no, Sum(sle.actual_qty))
+		.where((sle.warehouse == warehouse) & (sle.is_cancelled == 0) & sle.voucher_detail_no.isin(row_names))
+		.groupby(sle.voucher_detail_no)
+		.run()
+	)
+
+
 def get_transit_amount(row, qty) -> float:
 	"""Value of qty of an internal transfer row at its transit rate, as the stock ledger moves it."""
 	return get_stock_qty(row, qty) * flt(row.sales_incoming_rate) / flt(row.conversion_factor)
@@ -2010,3 +2104,20 @@ def rounds_stock_qty(row) -> bool:
 		frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
 		or frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")
 	)
+
+
+def get_returned_stock_qty_status_args() -> dict:
+	"""Status updater args that add up the received stock qty of a receipt's returns. Add up qty * conversion
+	factor, rounded once at the total where the receipt row rounds its received stock qty, so parts add up to it."""
+	return {
+		"source_field": "-1 * received_qty * conversion_factor",
+		"round_to_target_precision": rounds_received_stock_qty,
+	}
+
+
+def rounds_received_stock_qty(row) -> bool:
+	"""Whether a receipt row stores its received stock qty rounded: a stock or asset row rounds it when valued."""
+	is_stock_item, is_fixed_asset = frappe.get_cached_value(
+		"Item", row.item_code, ["is_stock_item", "is_fixed_asset"]
+	)
+	return bool(is_stock_item or is_fixed_asset or rounds_stock_qty(row))
