@@ -6,6 +6,8 @@ from frappe import _
 from frappe.utils import flt, getdate, now_datetime, nowdate
 
 import erpnext
+from erpnext.accounts.cash_basis import get_accounting_method
+from erpnext.accounts.cash_basis.reports import get_report_message, resolve_accounting_method, set_report_end
 from erpnext.accounts.doctype.account.account import get_root_company
 from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
 	get_subsidiary_companies,
@@ -43,6 +45,11 @@ def execute(filters: dict | None = None):
 	columns = get_columns()
 	data = get_data(filters)
 
+	runs = filters.pop("cash_basis_runs", [])
+	if runs and (
+		message := get_report_message(runs[0], filters.to_date, from_date=filters.from_date, others=runs[1:])
+	):
+		return columns, data, message
 	return columns, data
 
 
@@ -108,12 +115,19 @@ def get_data(filters) -> list[list]:
 	else:
 		return data
 
+	# One method for the whole report: the filter, else the default of the first company.
+	filters.accounting_method = filters.get("accounting_method") or get_accounting_method(
+		{"company": filters.company[0]}
+	)
+	runs = []
 	for company in filters.company:
 		company_filter = frappe._dict(filters)
 		company_filter.company = company
 
 		tb_data = get_company_wise_tb_data(company_filter, reporting_currency, ignore_reporting_currency)
 		consolidate_trial_balance_data(data, tb_data)
+		runs.append(company_filter)
+	filters.cash_basis_runs = runs
 
 	if filters.get("show_net_values"):
 		prepare_opening_closing_for_ctb(data)
@@ -142,6 +156,8 @@ def get_data(filters) -> list[list]:
 
 
 def get_company_wise_tb_data(filters, reporting_currency, ignore_reporting_currency):
+	resolve_accounting_method(filters)
+	set_report_end(filters, filters.to_date)
 	accounts = frappe.get_all(
 		"Account",
 		filters={"company": filters.company},

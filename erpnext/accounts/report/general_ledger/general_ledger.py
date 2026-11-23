@@ -2,12 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import heapq
+
 import frappe
 from frappe import _, _dict
 from frappe.query_builder import Criterion
 from frappe.utils import cstr, getdate
 
 from erpnext import get_company_currency, get_default_company
+from erpnext.accounts.cash_basis import CASH, get_accounting_method
+from erpnext.accounts.cash_basis.reports import (
+	add_report_message,
+	get_ledger_adjustments,
+	resolve_accounting_method,
+	set_report_end,
+	uses_cash_basis,
+	without_private_keys,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_filter_sql_condition,
@@ -50,13 +61,16 @@ def execute(filters=None):
 
 	validate_party(filters)
 
+	resolve_accounting_method(filters)
+	set_report_end(filters, filters.to_date)
+
 	filters = set_account_currency(filters)
 
 	columns = get_columns(filters)
 
 	res = get_result(filters, account_details)
 
-	return columns, res
+	return add_report_message((columns, res), filters, filters.to_date, from_date=filters.from_date)
 
 
 def validate_filters(filters, account_details):
@@ -215,9 +229,12 @@ def get_gl_entries(filters, accounting_dimensions):
 		where company=%(company)s {get_conditions(filters)}
 		{order_by_statement}
 	""",
-		filters,
+		without_private_keys(filters),
 		as_dict=1,
 	)
+
+	if uses_cash_basis(filters):
+		gl_entries = add_ledger_adjustments(gl_entries, filters)
 
 	party_name_map = get_party_name_map()
 
@@ -226,6 +243,72 @@ def get_gl_entries(filters, accounting_dimensions):
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
 	return convert_gl_entries_currency(gl_entries, currency_map, filters)
+
+
+def add_ledger_adjustments(gl_entries, filters):
+	"""Section 8: the cash basis adjustment rows, in the order of the GL rows."""
+	with_opening = not filters.get("disable_opening_balance_calculation") and bool(
+		filters.get("account")
+		or filters.get("party")
+		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
+	)
+	rows = get_ledger_adjustments(filters, with_opening)
+	if not filters.get("show_remarks"):
+		for row in rows:
+			row.pop("remarks", None)
+	if not rows:
+		return gl_entries
+
+	# An adjustment row comes after the GL rows with the same leading keys.
+	if filters.get("categorize_by") == "Categorize by Voucher":
+		fields = ("posting_date", "voucher_type", "voucher_no", "is_cash_adjustment")
+	elif filters.get("categorize_by") == "Categorize by Account":
+		fields = ("account", "posting_date", "is_cash_adjustment", "creation")
+	elif filters.get("include_dimensions"):
+		fields = ("posting_date", "is_cash_adjustment", "creation")
+	else:
+		fields = ("posting_date", "account", "is_cash_adjustment", "creation")
+
+	# Names compare by rank, not by Python string order: the SQL orders them by the collation
+	# of the database. An account takes its rank from the database. A voucher type or a voucher
+	# takes its rank from its first appearance in the GL rows, within the key fields before it,
+	# because the SQL order starts again for each of those values.
+	account_ranks = {}
+	if "account" in fields:
+		account_names = frappe.get_all(
+			"Account", filters={"company": filters.company}, order_by="name asc", pluck="name"
+		)
+		account_ranks = {name: index for index, name in enumerate(account_names)}
+	scoped_ranks = {}
+
+	def rank(row, position, register=False):
+		field = fields[position]
+		if field == "account":
+			return account_ranks.get(row.get(field), len(account_ranks))
+		scope = (field, *(row.get(f) for f in fields[:position]))
+		values = scoped_ranks.setdefault(scope, {})
+		if register:
+			values.setdefault(row.get(field), len(values))
+		return values.get(row.get(field), len(values))
+
+	for entry in gl_entries:
+		for position, field in enumerate(fields):
+			if field in ("voucher_type", "voucher_no"):
+				rank(entry, position, register=True)
+
+	def key(row):
+		values = []
+		for position, field in enumerate(fields):
+			if field in ("account", "voucher_type", "voucher_no"):
+				values.append(rank(row, position))
+			elif field == "is_cash_adjustment":
+				values.append(row.get(field) or 0)
+			else:
+				values.append(row.get(field))
+		return tuple(values)
+
+	# Merge into the SQL order: the GL rows keep their order, the adjustment rows go in by key.
+	return list(heapq.merge(gl_entries, sorted(rows, key=key), key=key))
 
 
 def convert_gl_entries_currency(gl_entries, currency_map, filters):
@@ -521,9 +604,17 @@ def get_group_by_value(gle: dict, group_by_fields: tuple[str, ...]) -> tuple:
 	return tuple(gle.get(field) for field in group_by_fields)
 
 
+def get_report_group_fields(filters) -> tuple[str, ...]:
+	"""With no Categorize by value, a cash run groups by date too: a recognition row carries
+	the voucher of its invoice and the date of the payment."""
+	if uses_cash_basis(filters) and not filters.get("categorize_by"):
+		return ("posting_date", "voucher_type", "voucher_no")
+	return get_group_by_fields(filters.get("categorize_by"))
+
+
 def initialize_gle_map(gl_entries, filters):
 	gle_map = {}
-	group_by = get_group_by_fields(filters.get("categorize_by"))
+	group_by = get_report_group_fields(filters)
 
 	for gle in gl_entries:
 		group_by_value = get_group_by_value(gle, group_by)
@@ -538,7 +629,7 @@ def initialize_gle_map(gl_entries, filters):
 def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	entries = []
 	consolidated_gle = {}
-	group_by = get_group_by_fields(filters.get("categorize_by"))
+	group_by = get_report_group_fields(filters)
 	group_by_voucher_consolidated = filters.get("categorize_by") == "Categorize by Voucher (Consolidated)"
 
 	if filters.get("show_net_values_in_party_account"):
@@ -641,6 +732,9 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 				if immutable_ledger:
 					keylist.append(gle.get("creation"))
+
+				# A cash basis adjustment row stays apart from the GL rows of its voucher.
+				keylist.append(gle.get("cash_basis_kind"))
 
 				if filters.get("include_dimensions"):
 					for dim in accounting_dimensions:
@@ -875,11 +969,23 @@ def get_columns(filters):
 	if filters.get("show_remarks"):
 		columns.extend([{"label": _("Remarks"), "fieldname": "remarks", "width": 400}])
 
+	if uses_cash_basis(filters):
+		index = next(i for i, column in enumerate(columns) if column["fieldname"] == "voucher_no") + 1
+		columns.insert(
+			index,
+			{
+				"label": _("Cash Basis Adjustment"),
+				"fieldname": "cash_basis_adjustment",
+				"fieldtype": "Data",
+				"width": 170,
+			},
+		)
+
 	return columns
 
 
 def execute_snapshot_report(filters):
-	if has_gl_entry_restrictions():
+	if has_gl_entry_restrictions() or get_accounting_method(filters) == CASH:
 		return execute(filters)
 
 	from frappe.database.duckdb.database import get_latest_sync

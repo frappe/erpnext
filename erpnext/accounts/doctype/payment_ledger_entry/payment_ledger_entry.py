@@ -181,3 +181,11 @@ class PaymentLedgerEntry(Document):
 def on_doctype_update():
 	frappe.db.add_index("Payment Ledger Entry", ["against_voucher_no", "against_voucher_type"])
 	frappe.db.add_index("Payment Ledger Entry", ["voucher_no", "voucher_type"])
+	add_cash_basis_index()
+
+
+def add_cash_basis_index():
+	"""The cash basis reports read the rows of a company to a date."""
+	frappe.db.add_index(
+		"Payment Ledger Entry", ["company", "posting_date", "delinked"], "company_posting_date_delinked_index"
+	)

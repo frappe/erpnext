@@ -1,6 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from erpnext.accounts.cash_basis.reports import resolve_accounting_method
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
 	get_xlsx_styles,  #! DO NOT REMOVE - hook for styling
@@ -8,5 +9,8 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_engine 
 
 
 def execute(filters: dict | None = None):
+	if filters:
+		resolve_accounting_method(filters)
+
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)

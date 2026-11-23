@@ -7,6 +7,13 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt
 
+from erpnext.accounts.cash_basis.reports import (
+	add_report_message,
+	get_account_type_balance,
+	resolve_accounting_method,
+	set_report_end,
+	uses_cash_basis,
+)
 from erpnext.accounts.report.financial_statements import get_data, get_period_list
 from erpnext.accounts.utils import get_balance_on, get_fiscal_year
 
@@ -104,10 +111,14 @@ def execute(filters=None):
 		company=filters.company,
 	)
 
+	resolve_accounting_method(filters)
+	set_report_end(filters, period_list[-1]["to_date"])
 	columns, years = get_columns(period_list)
 	data = get_ratios_data(filters, period_list, years)
 
-	return columns, data
+	return add_report_message(
+		(columns, data), filters, period_list[-1]["to_date"], from_date=period_list[0]["from_date"]
+	)
 
 
 def setup_filters(filters):
@@ -404,6 +415,13 @@ def avg_ratio_balance(account_type, period_list, precision, filters):
 			account_type=account_type,
 			in_account_currency=False,
 		)
+		if uses_cash_basis(filters):
+			closing_balance = flt(closing_balance) + get_account_type_balance(
+				filters, account_type, closing_date
+			)
+			opening_balance = flt(opening_balance) + get_account_type_balance(
+				filters, account_type, opening_date
+			)
 		avg_ratio[period["key"]] = flt((flt(closing_balance) + flt(opening_balance)) / 2, precision=precision)
 
 	return avg_ratio

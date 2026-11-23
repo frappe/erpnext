@@ -69,3 +69,5 @@ frappe.query_reports["Financial Ratios"] = {
 		return value;
 	},
 };
+
+erpnext.financial_statements.add_accounting_method_filter(frappe.query_reports["Financial Ratios"]);

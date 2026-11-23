@@ -136,6 +136,12 @@
                     <strong>{%= __("Currency") %}:</strong>
                     {%= filters.presentation_currency || erpnext.get_currency(filters.company) %}
                 </div>
+                {% if (erpnext.financial_statements.is_cash_method_available(filters.company)) { %}
+                <div>
+                    <strong>{%= __("Accounting Method") %}:</strong>
+                    {%= (filters.accounting_method || erpnext.financial_statements.get_company_accounting_method(filters.company)) == "Cash" ? __("Cash") : __("Accrual") %}
+                </div>
+                {% } %}
             </div>
 
             <div class="right text-right">

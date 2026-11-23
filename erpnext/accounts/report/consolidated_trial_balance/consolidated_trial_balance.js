@@ -105,3 +105,5 @@ frappe.query_reports["Consolidated Trial Balance"] = {
 	parent_field: "parent_account",
 	initial_depth: 3,
 };
+
+erpnext.financial_statements.add_accounting_method_filter(frappe.query_reports["Consolidated Trial Balance"]);
