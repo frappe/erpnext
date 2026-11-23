@@ -560,6 +560,58 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		_, picked = take_reserved_entries(reserved["_FG Return Row"], 3)
 		self.assertEqual(picked, {first: 1, second: 2})
 
+	def test_rm_return_row_with_serial_no_takes_it_before_batch_only_rows(self):
+		item_code = "RM with Serial and Batch"
+		batch = frappe.get_doc(
+			doctype="Batch", item=item_code, batch_id=frappe.generate_hash(length=10)
+		).insert()
+		first, second = (
+			frappe.get_doc(
+				doctype="Serial No",
+				serial_no=frappe.generate_hash(length=10),
+				item_code=item_code,
+				batch_no=batch.name,
+				company="_Test Company",
+			).insert()
+			for _ in range(2)
+		)
+		reservation = frappe.get_doc(
+			doctype="Stock Reservation Entry",
+			voucher_detail_no="_RM Return Row",
+			docstatus=1,
+			sb_entries=[
+				{
+					"serial_no": serial.name,
+					"batch_no": batch.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 1,
+				}
+				for serial in (first, second)
+			],
+		)
+		reservation.db_insert()
+		for entry in reservation.sb_entries:
+			entry.parent = reservation.name
+			entry.db_insert()
+
+		rm_return = frappe.new_doc("Stock Entry", purpose="Return Raw Material to Customer")
+		for name, entered in (("_batch_row", {}), ("_serial_row", {"serial_no": first.serial_no})):
+			rm_return.append(
+				"items",
+				{
+					"name": name,
+					"scio_detail": "_RM Return Row",
+					"item_code": item_code,
+					"transfer_qty": 1,
+					"use_serial_batch_fields": 1,
+					"batch_no": batch.name,
+					**entered,
+				},
+			)
+
+		serial_nos, _ = StockEntrySABB(rm_return).get_serial_batch_fields_for_subcontracting_inward()
+		self.assertEqual(serial_nos, {"_batch_row": [second.name], "_serial_row": [first.name]})
+
 	def test_rm_return_rows_of_one_batch_item_share_reserved_batches(self):
 		so, scio = create_so_scio()
 		first_batch, second_batch = receive_batch_in_two_lots(scio)
