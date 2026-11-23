@@ -406,7 +406,7 @@ $.extend(erpnext.utils, {
 			.forEach((filter) => erpnext.utils.add_blank_option_to_dimension_filter(filter));
 
 		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
 			callback: function (r) {
 				let accounting_dimensions = r.message[0];
 				accounting_dimensions.forEach((dimension) => {
