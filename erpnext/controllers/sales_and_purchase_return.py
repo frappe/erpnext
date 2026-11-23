@@ -310,6 +310,8 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			current_stock_qty = args.get(column)
 			if column == "stock_qty":
 				current_stock_qty = flt(args.get("qty")) * flt(args.get("conversion_factor") or 1)
+				if current_stock_qty < 0:
+					current_stock_qty = -get_counted_stock_qty(doc, args)
 		elif args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
 			current_stock_qty = (
@@ -350,14 +352,19 @@ def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
 
-	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-	if not row.get("dn_detail"):
-		# no delivered row caps what it posts, so count the stock qty it stores
-		stock_qty = get_stored_stock_qty(row)
+	stock_qty = get_counted_stock_qty(doc, row)
 	for returned_key in {key, row.item_code}:
 		returned = already_returned_items.setdefault(returned_key, frappe._dict(qty=0, stock_qty=0))
 		returned.qty = flt(returned.qty) + abs(flt(row.qty))
 		returned.stock_qty = flt(returned.stock_qty) + stock_qty
+
+
+def get_counted_stock_qty(doc, row):
+	"""Stock qty a return row counts at. A Delivery Note row without dn_detail counts at the stock qty
+	it stores, as no delivered row caps what it posts."""
+	if doc.doctype == "Delivery Note" and not row.get("dn_detail"):
+		return get_stored_stock_qty(row)
+	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
 
 
 def get_stored_stock_qty(row):
