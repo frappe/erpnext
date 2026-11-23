@@ -3650,6 +3650,36 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(rows[fg_item], [1, 1044])
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_nested_sub_assembly_co_products_count_the_sub_assembly_process_loss(self):
+		# FG: 8 SA2 + 1 RMB at 900; SA2: 10 SA1 make 8, 20% co-product; SA1: 1 RMA at 100, 20% co-product
+		rm_a, rm_b = make_co_product_raw_materials()
+		test_stock_entry.make_stock_entry(
+			item_code=rm_a, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+		)
+		inner, outer, fg_item, inner_co_product, outer_co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(5)
+		)
+		inner_bom = make_co_product_bom(inner, [(rm_a, 1, None)], inner_co_product)
+		outer_bom = make_co_product_bom(
+			outer,
+			[(inner, 10, inner_bom)],
+			outer_co_product,
+			quantity=10,
+			co_product_qty=10,
+			process_loss_percentage=20,
+		)
+		bom = make_co_product_bom(fg_item, [(outer, 8, outer_bom), (rm_b, 1, None)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		# as BOM costing: 10 SA1 made, co-product 20 each; SA2 co-product 160 of 800; FG 8 x 80 + 900
+		rows = {d.item_code: (d.qty, d.amount) for d in se_doc.items if not d.s_warehouse}
+		self.assertEqual(rows[inner_co_product], (10, 200))
+		self.assertEqual(rows[outer_co_product], (10, 160))
+		self.assertEqual(rows[fg_item], (1, 1540))
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
 	def test_get_rm_cost_from_consumption_entry(self):
@@ -10297,10 +10327,26 @@ def make_co_product_raw_materials():
 	return rm_a, rm_b
 
 
-def make_co_product_bom(item, components, co_product=None, quantity=1, co_product_qty=1, process_loss_per=0):
+def make_co_product_bom(
+	item,
+	components,
+	co_product=None,
+	quantity=1,
+	co_product_qty=1,
+	process_loss_per=0,
+	process_loss_percentage=0,
+):
 	"""Submit a BOM of (item_code, qty, bom_no) components, with a 20% of Component Cost co-product."""
 	bom = frappe.new_doc("BOM")
-	bom.update({"item": item, "quantity": quantity, "company": "_Test Company", "currency": "INR"})
+	bom.update(
+		{
+			"item": item,
+			"quantity": quantity,
+			"company": "_Test Company",
+			"currency": "INR",
+			"process_loss_percentage": process_loss_percentage,
+		}
+	)
 	for item_code, qty, bom_no in components:
 		bom.append("items", {"item_code": item_code, "qty": qty, "bom_no": bom_no})
 
