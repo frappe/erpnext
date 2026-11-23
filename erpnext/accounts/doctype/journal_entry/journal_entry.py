@@ -1268,8 +1268,7 @@ def get_account_details_and_party_type(
 	exchange_rate: float | str | None = None,
 ) -> dict:
 	"""Returns dict of account details and party type to be set in Journal Entry on selection of account."""
-	if not frappe.has_permission("Account"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
+	frappe.has_permission("Account", doc=account, throw=True)
 
 	company_currency = erpnext.get_company_currency(company)
 	account_details = frappe.get_cached_value(
