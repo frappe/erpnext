@@ -11,6 +11,14 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, flt, getdate
 
 import erpnext
+from erpnext.accounts.cash_basis.reports import (
+	get_company_entries,
+	get_profit_and_loss_adjustments,
+	get_report_message,
+	resolve_accounting_method,
+	set_report_end,
+	uses_cash_basis,
+)
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
 	get_chart_data,
 	get_provisional_profit_loss,
@@ -54,6 +62,8 @@ def execute(filters=None):
 		validate_dates(filters.get("period_start_date"), filters.get("period_end_date"))
 
 	fiscal_year = get_fiscal_year_data(filters.get("from_fiscal_year"), filters.get("to_fiscal_year"))
+	resolve_accounting_method(filters)
+	set_report_end(filters, get_period_dates(fiscal_year, filters)[1])
 	company_list, companies = get_companies(filters)
 	for company in company_list:
 		validate_company_permission(company)
@@ -72,6 +82,15 @@ def execute(filters=None):
 	else:
 		data, report_summary = get_cash_flow_data(fiscal_year, companies, filters)
 
+	period_start, period_end = get_period_dates(fiscal_year, filters)
+	if cash_message := get_report_message(
+		filters,
+		period_end,
+		balance_sheet=filters.get("report") == "Balance Sheet",
+		from_date=period_start,
+		companies=company_list,
+	):
+		message = "<br>".join(line for line in (message or None, cash_message) if line)
 	return columns, data, message, chart, report_summary
 
 
@@ -658,6 +677,9 @@ def get_profit_and_loss_totals(company: str, from_date, to_date, filters: dict) 
 		.run(as_dict=True)
 	)
 
+	if uses_cash_basis(filters):
+		entries += get_profit_and_loss_adjustments(filters, company, from_date, to_date)
+
 	currency = erpnext.get_company_currency(company)
 	for entry in entries:
 		entry.update(currency=currency, report_type="Profit and Loss")
@@ -915,6 +937,10 @@ def set_gl_entries_by_account(
 		if additional_conditions:
 			query = query.where(Criterion.all(additional_conditions))
 		gl_entries = query.run(as_dict=True)
+		if uses_cash_basis(filters):
+			gl_entries += get_company_entries(
+				filters, d.name, from_date, to_date, root_lft, root_rgt, root_type, ignore_closing_entries
+			)
 		for entry in gl_entries:
 			entry.currency = d.default_currency
 
