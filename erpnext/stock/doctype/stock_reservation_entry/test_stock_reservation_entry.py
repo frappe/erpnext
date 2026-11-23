@@ -1975,6 +1975,8 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, self.make_sre(status="Partially Delivered").can_be_updated)
 		self.assertRaises(frappe.ValidationError, self.make_sre(from_voucher_type="Pick List").can_be_updated)
 		self.assertRaises(frappe.ValidationError, self.make_sre(delivered_qty=5).can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(consumed_qty=5).can_be_updated)
+		self.assertRaises(frappe.ValidationError, self.make_sre(transferred_qty=5).can_be_updated)
 
 	def test_group_warehouse_cannot_be_reserved(self):
 		group_wh = frappe.db.get_value("Warehouse", {"company": "_Test Company", "is_group": 1}, "name")
@@ -2169,6 +2171,39 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		sre.update_status()
 
 		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre.name, "status"), "Partially Used")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_used_entry_refuses_only_serial_and_batch_changes(self):
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=100,
+			serial_no="\n".join(f"{item_code}-{i}" for i in range(2)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=2)
+		sales_order.create_stock_reservation_entries(notify=False)
+		sre = frappe.get_doc("Stock Reservation Entry", {"voucher_no": sales_order.name, "docstatus": 1})
+		sre.db_set("consumed_qty", 1)
+
+		sre.save()  # no change
+
+		serial_no = sre.sb_entries[0].serial_no
+		sre.remove(sre.sb_entries[0])
+		sre.append("sb_entries", {"serial_no": serial_no, "qty": 1})
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Serial and Batch Reservation cannot be updated", sre.save
+		)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
