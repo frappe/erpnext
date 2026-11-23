@@ -731,6 +731,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					serial_no="supplier-001\nSUPPLIER-002" if transfer_text else None,
 				)
 				receipt = frappe._dict(
+					name="Receipt Supplied Row",
 					rm_item_code=self.item.name,
 					main_item_code=key[1],
 					reference_name="Receipt Row",
@@ -747,14 +748,14 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 						)
 					}
 				)
-				receipt_bundles = (
-					{}
+				receipt_ledgers = (
+					[]
 					if receipt_text
-					else {
-						(self.item.name, key[1], warehouse, "Receipt"): frappe._dict(
-							serial_nos=[consumed.name]
+					else [
+						frappe._dict(
+							voucher_detail_no=receipt.name, serial_no=consumed.name, batch_no=None, qty=-1
 						)
-					}
+					]
 				)
 				with (
 					patch.object(
@@ -770,7 +771,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					),
 					patch(
 						"erpnext.controllers.subcontracting_controller.get_voucher_wise_serial_batch_from_bundle",
-						side_effect=[transfer_bundles, receipt_bundles],
+						return_value=transfer_bundles,
+					),
+					patch(
+						"erpnext.controllers.subcontracting_controller.get_ledgers_from_serial_batch_bundle",
+						return_value=receipt_ledgers,
 					),
 					patch("erpnext.deprecation_dumpster.deprecation_warning"),
 				):
