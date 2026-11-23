@@ -3698,6 +3698,51 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(amounts["fg_item"], 980)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_nested_sub_assembly_co_product_takes_its_share_net_of_the_inner_co_product(self):
+		# FG: 2 SA2 + 1 RMB at 900; SA2: 1 SA1, 20% co-product; SA1: 1 RMA at 100, 20% co-product
+		rm_a, rm_b = make_co_product_raw_materials()
+		inner, outer, fg_item, inner_co_product, outer_co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(5)
+		)
+		inner_bom = make_co_product_bom(inner, [(rm_a, 1, None)], inner_co_product)
+		outer_bom = make_co_product_bom(outer, [(inner, 1, inner_bom)], outer_co_product)
+		bom = make_co_product_bom(fg_item, [(outer, 2, outer_bom), (rm_b, 1, None)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		# as BOM costing: SA1 80 (co-product 20), SA2 64 (co-product 16 of 80), FG 2 x 64 + 900
+		rows = {d.item_code: (d.qty, d.amount) for d in se_doc.items if not d.s_warehouse}
+		self.assertEqual(rows[inner_co_product], (2, 40))
+		self.assertEqual(rows[outer_co_product], (2, 32))
+		self.assertEqual(rows[fg_item], (1, 1028))
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_outer_sub_assembly_co_product_nets_only_its_own_inner_co_product(self):
+		# FG: 1 SA2 + 1 SA1 + 1 RMB at 900; SA2: 1 SA1, 20% co-product; SA1: 1 RMA at 100, 20% co-product
+		rm_a, rm_b = make_co_product_raw_materials()
+		inner, outer, fg_item, inner_co_product, outer_co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(5)
+		)
+		inner_bom = make_co_product_bom(inner, [(rm_a, 1, None)], inner_co_product)
+		outer_bom = make_co_product_bom(outer, [(inner, 1, inner_bom)], outer_co_product)
+		bom = make_co_product_bom(fg_item, [(outer, 1, outer_bom), (inner, 1, inner_bom), (rm_b, 1, None)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		# as BOM costing: SA1 80 (co-product 20), SA2 64 (co-product 16 of 80), FG 64 + 80 + 900
+		rows = defaultdict(lambda: [0, 0])
+		for d in se_doc.items:
+			if not d.s_warehouse:
+				rows[d.item_code][0] += d.qty
+				rows[d.item_code][1] += d.amount
+
+		self.assertEqual(rows[inner_co_product], [2, 40])
+		self.assertEqual(rows[outer_co_product], [1, 16])
+		self.assertEqual(rows[fg_item], [1, 1044])
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
 	def test_get_rm_cost_from_consumption_entry(self):
@@ -9793,43 +9838,67 @@ def allow_alternative_item(work_order, item_code, alternative_item_code):
 
 def make_sub_assembly_co_product_entry(sub_bom_qty=1, process_loss_per=0):
 	"""Submit a Manufacture entry for 1 FG made of 1 SA (1 RMA at 100, 20% co-product) and 1 RMB at 900."""
-	rm_a, rm_b, sub_assembly, fg_item = (
-		make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(4)
+	rm_a, rm_b = make_co_product_raw_materials()
+	sub_assembly, fg_item = (
+		make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(2)
 	)
 	# not a whole number UOM: version-16 does not round a secondary item's qty up
 	co_product = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+	sub_bom = make_co_product_bom(
+		sub_assembly,
+		[(rm_a, sub_bom_qty, None)],
+		co_product,
+		quantity=sub_bom_qty,
+		co_product_qty=2,
+		process_loss_per=process_loss_per,
+	)
+	bom = make_co_product_bom(fg_item, [(sub_assembly, 1, sub_bom), (rm_b, 1, None)])
+	se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+	names = {fg_item: "fg_item", co_product: "co_product"}
+	return {names[d.item_code]: d.amount for d in se_doc.items if d.item_code in names}
+
+
+def make_co_product_raw_materials():
+	"""RMA at 100 and RMB at 900, 5 of each in _Test Warehouse - _TC."""
+	rm_a, rm_b = (make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(2))
 	for item, rate in ((rm_a, 100), (rm_b, 900)):
 		test_stock_entry.make_stock_entry(
 			item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=rate
 		)
 
-	sub_bom = frappe.new_doc("BOM")
-	sub_bom.update(
-		{"item": sub_assembly, "quantity": sub_bom_qty, "company": "_Test Company", "currency": "INR"}
-	)
-	sub_bom.append("items", {"item_code": rm_a, "qty": sub_bom_qty})
-	sub_bom.append(
-		"secondary_items",
-		{
-			"item_code": co_product,
-			"secondary_item_type": "Co-Product",
-			"qty": 2,
-			"process_loss_per": process_loss_per,
-			"cost_allocation_per": 20,
-			"valuation_type": "% of Component Cost",
-		},
-	)
-	sub_bom.submit()
+	return rm_a, rm_b
 
+
+def make_co_product_bom(item, components, co_product=None, quantity=1, co_product_qty=1, process_loss_per=0):
+	"""Submit a BOM of (item_code, qty, bom_no) components, with a 20% of Component Cost co-product."""
 	bom = frappe.new_doc("BOM")
-	bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
-	bom.append("items", {"item_code": sub_assembly, "qty": 1, "bom_no": sub_bom.name})
-	bom.append("items", {"item_code": rm_b, "qty": 1})
-	bom.submit()
+	bom.update({"item": item, "quantity": quantity, "company": "_Test Company", "currency": "INR"})
+	for item_code, qty, bom_no in components:
+		bom.append("items", {"item_code": item_code, "qty": qty, "bom_no": bom_no})
 
+	if co_product:
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": co_product_qty,
+				"process_loss_per": process_loss_per,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+
+	bom.submit()
+	return bom.name
+
+
+def make_multi_level_manufacture_entry(fg_item, bom_no):
+	"""Submit a Manufacture entry for 1 FG of a multi-level Work Order."""
 	wo_order = make_wo_order_test_record(
 		production_item=fg_item,
-		bom_no=bom.name,
+		bom_no=bom_no,
 		qty=1,
 		use_multi_level_bom=1,
 		skip_transfer=1,
@@ -9838,9 +9907,7 @@ def make_sub_assembly_co_product_entry(sub_bom_qty=1, process_loss_per=0):
 	se_doc = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
 	se_doc.insert()
 	se_doc.submit()
-
-	names = {fg_item: "fg_item", co_product: "co_product"}
-	return {names[d.item_code]: d.amount for d in se_doc.items if d.item_code in names}
+	return se_doc
 
 
 def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
