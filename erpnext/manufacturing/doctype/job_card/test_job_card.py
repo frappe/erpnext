@@ -3826,6 +3826,14 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertEqual(non_stock_costs, [flt(service_a_amount * 10), flt(service_amount * 10)])
 
+	def test_return_components_of_job_card_transfer(self):
+		"""Return Components of a Job Card Work Order gives back the RM left in WIP."""
+		from erpnext.manufacturing.doctype.work_order.work_order import make_stock_return_entry
+
+		work_order, rm = make_partly_completed_job_card_transfer_order("JC Transfer Return", 1)
+		return_entry = make_stock_return_entry(work_order.name)
+		self.assertEqual(sum(row.qty for row in return_entry.items if row.item_code == rm), 10)
+
 	def test_secondary_items_from_multiple_boms_stay_separate(self):
 		"""Rows linked to different BOM rows keep their own quantity and valuation mode."""
 		from erpnext.stock.doctype.item.test_item import make_item
