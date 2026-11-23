@@ -2119,6 +2119,9 @@ class TestWorkOrder(FrappeTestCase):
 		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 4))
 		self.assertEqual([row.qty for row in manufacture.items if row.s_warehouse], [8])
 
+		# both transfers count towards the qty a Manufacture may take
+		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 10)).insert()
+
 	def test_pick_list_transfer_first_covers_what_direct_transfer_left_out(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
 		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
