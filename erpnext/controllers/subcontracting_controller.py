@@ -2167,7 +2167,8 @@ def add_return_items(ste_doc, row, qty, rm_details, rm_detail_field, batch_no=No
 		)
 
 	# material left on no row the return is made for
-	if flt(qty, precision) > 0:
+	qty = flt(qty, precision)
+	if qty > 0:
 		add_items_in_ste(
 			ste_doc, frappe._dict(row, serial_no=serial_nos), qty, rm_details, rm_detail_field, batch_no
 		)
