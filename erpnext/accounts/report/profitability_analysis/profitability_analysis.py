@@ -9,6 +9,13 @@ from frappe.query_builder import Criterion
 from frappe.utils import cstr, flt
 from pypika.terms import Bracket, LiteralValue
 
+from erpnext.accounts.cash_basis.reports import (
+	add_report_message,
+	get_dimension_entries,
+	resolve_accounting_method,
+	set_report_end,
+	uses_cash_basis,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
@@ -31,10 +38,12 @@ def execute(filters=None):
 		filters.based_on if filters.based_on != "Accounting Dimension" else filters.accounting_dimension
 	)
 	validate_filters(filters)
+	resolve_accounting_method(filters)
+	set_report_end(filters, filters.get("to_date"))
 	accounts = get_accounts_data(based_on, filters.get("company"))
 	data = get_data(accounts, filters, based_on)
 	columns = get_columns(filters)
-	return columns, data
+	return add_report_message((columns, data), filters, filters.to_date, from_date=filters.from_date)
 
 
 def get_accounts_data(based_on, company):
@@ -94,6 +103,15 @@ def get_data(accounts, filters, based_on):
 		ignore_closing_entries=not flt(filters.get("with_period_closing_entry")),
 		finance_books=get_finance_books(filters),
 	)
+	if uses_cash_basis(filters):
+		for entry in get_dimension_entries(
+			filters,
+			filters.get("from_date"),
+			filters.get("to_date"),
+			fieldname,
+			ignore_closing_entries=not flt(filters.get("with_period_closing_entry")),
+		):
+			gl_entries_by_account.setdefault(entry.based_on, []).append(entry)
 
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)

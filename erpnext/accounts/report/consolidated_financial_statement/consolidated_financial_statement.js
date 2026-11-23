@@ -175,3 +175,7 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 		});
 	},
 };
+
+erpnext.financial_statements.add_accounting_method_filter(
+	frappe.query_reports["Consolidated Financial Statement"]
+);

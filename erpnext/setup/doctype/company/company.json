@@ -91,6 +91,14 @@
   "auto_exchange_rate_revaluation",
   "auto_err_frequency",
   "submit_err_jv",
+  "financial_reporting_section",
+  "accounting_method",
+  "unapplied_cash_treatment",
+  "cash_basis_inventory_treatment",
+  "column_break_fnrp",
+  "unapplied_cash_receipts_account",
+  "unapplied_cash_payments_account",
+  "accounting_method_advisories",
   "budget_detail",
   "exception_budget_approver_role",
   "fixed_asset_defaults",
@@ -644,6 +652,65 @@
    "options": "Account"
   },
   {
+   "fieldname": "financial_reporting_section",
+   "fieldtype": "Section Break",
+   "label": "Financial Reporting"
+  },
+  {
+   "default": "Accrual",
+   "description": "Ledgers are always on the accrual basis. Each report has a filter to switch between Accrual and Cash. Reports open with this default method.",
+   "fieldname": "accounting_method",
+   "fieldtype": "Select",
+   "label": "Default Accounting Method",
+   "options": "Accrual\nCash"
+  },
+  {
+   "default": "Income and Expense",
+   "depends_on": "eval:doc.accounting_method==='Cash'",
+   "description": "Inflow or outflow of cash that is not against an invoice is reported as income or expense.",
+   "fieldname": "unapplied_cash_treatment",
+   "fieldtype": "Select",
+   "label": "Unapplied Cash Treatment",
+   "options": "Income and Expense\nBalance Sheet"
+  },
+  {
+   "default": "Keep Accrual",
+   "depends_on": "eval:doc.accounting_method==='Cash'",
+   "description": "Stock and cost of goods sold stay on accrual.",
+   "fieldname": "cash_basis_inventory_treatment",
+   "fieldtype": "Select",
+   "label": "Cash Basis Inventory Treatment",
+   "options": "Keep Accrual",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fnrp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.accounting_method==='Cash' && doc.unapplied_cash_treatment==='Income and Expense'",
+   "description": "Choose the ledger where unapplied receipts are reported as income on the cash basis.",
+   "fieldname": "unapplied_cash_receipts_account",
+   "fieldtype": "Link",
+   "label": "Unapplied Cash Receipts Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.accounting_method==='Cash' && doc.unapplied_cash_treatment==='Income and Expense'",
+   "description": "Choose the ledger where unapplied payments are reported as expense on the cash basis.",
+   "fieldname": "unapplied_cash_payments_account",
+   "fieldtype": "Link",
+   "label": "Unapplied Cash Payments Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "fieldname": "accounting_method_advisories",
+   "fieldtype": "HTML",
+   "label": "Accounting Method Advisories"
+  },
+  {
    "fieldname": "budget_detail",
    "fieldtype": "Section Break",
    "label": "Budget Detail"
@@ -1160,7 +1227,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-09-06 12:00:00.000000",
+ "modified": "2026-11-23 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

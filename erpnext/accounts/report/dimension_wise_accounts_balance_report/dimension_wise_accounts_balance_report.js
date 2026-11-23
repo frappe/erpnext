@@ -77,3 +77,7 @@ function get_accounting_dimension_options() {
 	});
 	return options;
 }
+
+erpnext.financial_statements.add_accounting_method_filter(
+	frappe.query_reports["Dimension-wise Accounts Balance Report"]
+);

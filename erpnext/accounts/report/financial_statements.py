@@ -13,6 +13,7 @@ from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import add_days, add_months, cstr, flt, formatdate, get_first_day, getdate
 from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
+from erpnext.accounts.cash_basis.reports import get_report_adjustments, set_report_end, uses_cash_basis
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	BLANK_ACCOUNTING_DIMENSION,
 	get_accounting_dimensions,
@@ -386,6 +387,7 @@ def get_data(
 	company_currency = get_appropriate_currency(company, filters)
 
 	gl_entries_by_account = {}
+	set_report_end(filters, period_list[-1]["to_date"])
 	for root in frappe.get_all(
 		"Account",
 		filters={"root_type": root_type, "parent_account": ["is", "not set"]},
@@ -663,6 +665,7 @@ def set_gl_entries_by_account(
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
+	report_from_date = from_date
 
 	# For balance sheet
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
@@ -709,6 +712,18 @@ def set_gl_entries_by_account(
 		group_by_account=group_by_account,
 		ignore_reporting_currency=ignore_reporting_currency,
 	)
+
+	if uses_cash_basis(filters):
+		gl_entries += get_report_adjustments(
+			filters,
+			report_from_date,
+			to_date,
+			root_lft,
+			root_rgt,
+			root_type,
+			ignore_closing_entries,
+			group_by_account,
+		)
 
 	if filters and filters.get("presentation_currency") and ignore_reporting_currency:
 		convert_to_presentation_currency(gl_entries, get_currency(filters))

@@ -28,6 +28,7 @@ frappe.ui.form.on("Journal Entry", {
 	},
 
 	refresh(frm) {
+		erpnext.journal_entry.toggle_cash_basis_treatment(frm);
 		if (frm.doc.reversal_of && (frm.is_new() || frm.doc.docstatus == 0)) {
 			erpnext.journal_entry.lock_reversal_entry(frm);
 		}
@@ -60,7 +61,12 @@ frappe.ui.form.on("Journal Entry", {
 		}
 	},
 
+	cash_basis_treatment(frm) {
+		erpnext.journal_entry.set_cash_basis_treatment_description(frm);
+	},
+
 	company(frm) {
+		erpnext.journal_entry.toggle_cash_basis_treatment(frm);
 		frappe.db.get_value("Company", frm.doc.company, "cost_center").then(({ message }) => {
 			if (!message) return;
 			(frm.doc.accounts || []).forEach((row) =>
@@ -141,6 +147,10 @@ frappe.ui.form.on("Journal Entry", {
 });
 
 frappe.ui.form.on("Journal Entry Account", {
+	party_type(frm) {
+		erpnext.journal_entry.toggle_cash_basis_treatment(frm);
+	},
+
 	party(frm, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
 		if (row.account || !row.party_type || !row.party) return;
@@ -218,6 +228,7 @@ frappe.ui.form.on("Journal Entry Account", {
 
 	accounts_remove(frm) {
 		erpnext.journal_entry.update_totals(frm);
+		erpnext.journal_entry.toggle_cash_basis_treatment(frm);
 	},
 });
 
@@ -686,5 +697,35 @@ Object.assign(erpnext.journal_entry, {
 			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
 		}
 		frm.get_field("accounts").grid.refresh_row(cdn);
+	},
+});
+
+Object.assign(erpnext.journal_entry, {
+	toggle_cash_basis_treatment(frm) {
+		// Any report of a company in the rollout scope can run on Cash, and the field matters only for
+		// an entry that can settle an invoice. A value that a user has set always stays visible.
+		const available = Boolean(
+			erpnext.financial_statements.get_company_accounting_method(frm.doc.company)
+		);
+		const has_party_row = (frm.doc.accounts || []).some((row) => row.party_type);
+		const set = frm.doc.cash_basis_treatment && frm.doc.cash_basis_treatment !== "Automatic";
+		frm.toggle_display("cash_basis_treatment", (available && has_party_row) || Boolean(set));
+		erpnext.journal_entry.set_cash_basis_treatment_description(frm);
+	},
+
+	set_cash_basis_treatment_description(frm) {
+		const descriptions = {
+			Automatic: __(
+				"The cash basis reports decide from the rows of this entry. An entry that they cannot decide is listed for review."
+			),
+			"Cash Settlement": __(
+				"The cash basis reports count the invoice amount that this entry settles as paid on the date of this entry."
+			),
+			"Non-cash Adjustment": __(
+				"The cash basis reports count no cash for this entry. The invoice amount that it settles and its income and expense rows are not counted."
+			),
+		};
+		const description = descriptions[frm.doc.cash_basis_treatment];
+		if (description) frm.set_df_property("cash_basis_treatment", "description", description);
 	},
 });

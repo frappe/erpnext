@@ -135,3 +135,5 @@ frappe.query_reports["Profitability Analysis"] = {
 	parent_field: "parent_account",
 	initial_depth: 3,
 };
+
+erpnext.financial_statements.add_accounting_method_filter(frappe.query_reports["Profitability Analysis"]);

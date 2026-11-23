@@ -312,6 +312,9 @@ erpnext.financial_statements = {
 			project: project && project.length > 0 ? project[0].get_value() : "",
 			cost_center: cost_center && cost_center.length > 0 ? cost_center[0].get_value() : "",
 		};
+		if (get_filter_value("accounting_method")) {
+			frappe.route_options.accounting_method = get_filter_value("accounting_method");
+		}
 
 		filters.forEach((f) => {
 			if (f.df.fieldtype == "MultiSelectList") {
@@ -370,6 +373,7 @@ erpnext.financial_statements = {
 					presentation_currency: filters.presentation_currency,
 					cost_center: filters.cost_center,
 					project: filters.project,
+					...(filters.accounting_method ? { accounting_method: filters.accounting_method } : {}),
 				});
 			});
 
@@ -386,6 +390,7 @@ erpnext.financial_statements = {
 					presentation_currency: filters.presentation_currency,
 					cost_center: filters.cost_center,
 					project: filters.project,
+					...(filters.accounting_method ? { accounting_method: filters.accounting_method } : {}),
 				});
 			});
 
@@ -401,9 +406,40 @@ erpnext.financial_statements = {
 					periodicity: filters.periodicity,
 					cost_center: filters.cost_center,
 					project: filters.project,
+					...(filters.accounting_method ? { accounting_method: filters.accounting_method } : {}),
 				});
 			});
 		}
+	},
+
+	is_cash_method_available: is_cash_method_available,
+
+	get_company_accounting_method: get_company_accounting_method,
+	get_accounting_method_filter: get_accounting_method_filter,
+
+	add_accounting_method_filter: function (report) {
+		// The filter, and the Company default on a change of the company.
+		report.filters.push(get_accounting_method_filter());
+		const company = report.filters.find((filter) => filter.fieldname === "company");
+		if (!company) return;
+		const on_change = company.on_change;
+		company.on_change = function (...args) {
+			// The report handler always runs, because it can do more than a refresh. A handler
+			// added later must not refresh again when the method changed (that refreshes already).
+			const changed = erpnext.financial_statements.set_accounting_method_default();
+			if (on_change) return on_change.apply(this, args);
+			if (!changed && !frappe.query_report._no_refresh) frappe.query_report.refresh(true);
+		};
+	},
+
+	set_accounting_method_default: function () {
+		// Return true when the value changes.
+		if (!frappe.query_report.get_filter("accounting_method", false)) return false;
+		const method = get_company_accounting_method(get_filter_value("company"));
+		// A hidden filter returns undefined, not an empty string.
+		if (method === (get_filter_value("accounting_method") || "")) return false;
+		frappe.query_report.set_filter_value("accounting_method", method);
+		return true;
 	},
 
 	get_accounting_dimension_options: function () {
@@ -419,6 +455,57 @@ erpnext.financial_statements = {
 	},
 };
 
+function first_company(company) {
+	// A consolidated report can select several companies. The first one gives the default.
+	return Array.isArray(company) ? company[0] : company;
+}
+
+function get_company_details(company) {
+	// The filters are built before boot syncs the companies to locals, so read boot too.
+	if (!company) return null;
+	if (locals[":Company"] && locals[":Company"][company]) return locals[":Company"][company];
+	return (frappe.boot.docs || []).find((doc) => doc.doctype === ":Company" && doc.name === company);
+}
+
+function is_cash_method_available(company) {
+	const countries = frappe.boot.sysdefaults.cash_method_countries || [];
+	const companies = Array.isArray(company) ? company : [company];
+	return companies.some((name) => {
+		const details = get_company_details(name);
+		return Boolean(details && countries.includes(details.country));
+	});
+}
+
+function get_company_accounting_method(company) {
+	// Outside the rollout scope the filter stays empty, so the report does not send it.
+	company = first_company(company);
+	if (!is_cash_method_available(company)) return "";
+	return get_company_details(company).accounting_method || "Accrual";
+}
+
+function get_accounting_method_filter() {
+	return {
+		fieldname: "accounting_method",
+		label: __("Accounting Method"),
+		fieldtype: "Select",
+		options: [
+			{ value: "", label: "" },
+			{ value: "Accrual", label: __("Accrual") },
+			{ value: "Cash", label: __("Cash") },
+		],
+		default: get_company_accounting_method(frappe.defaults.get_user_default("Company")),
+		depends_on: "eval: erpnext.financial_statements.is_cash_method_available(doc.company)",
+		on_change: function () {
+			// A blank method is only for a company outside the scope. Else use the company default.
+			// The new value refreshes the report by itself.
+			if (!get_filter_value("accounting_method")) {
+				if (erpnext.financial_statements.set_accounting_method_default()) return;
+			}
+			if (!frappe.query_report._no_refresh) frappe.query_report.refresh();
+		},
+	};
+}
+
 function get_filters() {
 	let filters = [
 		{
@@ -428,6 +515,13 @@ function get_filters() {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1,
+			on_change: function () {
+				// A change of the method refreshes the report by itself.
+				const changed = erpnext.financial_statements.set_accounting_method_default();
+				if (!changed && !frappe.query_report._no_refresh) {
+					frappe.query_report.refresh(true);
+				}
+			},
 		},
 		{
 			fieldname: "finance_book",
@@ -504,10 +598,6 @@ function get_filters() {
 			default: "Yearly",
 			reqd: 1,
 		},
-		// Note:
-		// If you are modifying this array such that the presentation_currency object
-		// is no longer the last object, please make adjustments in cash_flow.js
-		// accordingly.
 		{
 			fieldname: "presentation_currency",
 			label: __("Currency"),
@@ -537,6 +627,7 @@ function get_filters() {
 			},
 			options: "Project",
 		},
+		get_accounting_method_filter(),
 	];
 
 	// Dynamically set 'default' values for fiscal year filters

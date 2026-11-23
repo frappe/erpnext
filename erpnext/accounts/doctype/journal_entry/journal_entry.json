@@ -78,6 +78,7 @@
   "addtional_info",
   "is_opening",
   "finance_book",
+  "cash_basis_treatment",
   "from_template",
   "title",
   "column_break3",
@@ -161,6 +162,17 @@
    "label": "Finance Book",
    "options": "Finance Book",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Automatic",
+   "description": "How the cash basis reports read this entry when it settles an invoice. It has no effect on the ledger.",
+   "fieldname": "cash_basis_treatment",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Cash Basis Treatment",
+   "no_copy": 1,
+   "options": "Automatic\nCash Settlement\nNon-cash Adjustment"
   },
   {
    "fieldname": "2_add_edit_gl_entries",
@@ -681,7 +693,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-11-15 00:15:49.322062",
+ "modified": "2026-11-22 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

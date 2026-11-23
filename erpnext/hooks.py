@@ -143,6 +143,7 @@ demo_master_doctypes = [
 jinja = {
 	"methods": [
 		"erpnext.stock.serial_batch_bundle.get_serial_or_batch_nos",
+		"erpnext.accounts.cash_basis.reports.get_statement_print_rows",
 	],
 }
 
@@ -688,6 +689,10 @@ get_entries_for_bank_reconciliation_statement = "erpnext.accounts.report.bank_re
 
 regional_overrides = {
 	"France": {"erpnext.tests.test_regional.test_method": "erpnext.regional.france.utils.test_method"},
+	# Test only: the country does not exist on a real site. The function of a test regional app.
+	"_Test Cash Basis Region": {
+		"erpnext.accounts.cash_basis.get_accounting_method_advisories": "erpnext.accounts.cash_basis.tests.regional_app.get_accounting_method_advisories"
+	},
 	"United Arab Emirates": {
 		"erpnext.controllers.taxes_and_totals.update_itemised_tax_data": "erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data",
 		"erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries": "erpnext.regional.united_arab_emirates.utils.make_regional_gl_entries",

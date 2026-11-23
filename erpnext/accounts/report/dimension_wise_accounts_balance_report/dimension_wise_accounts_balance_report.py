@@ -7,6 +7,13 @@ from frappe import _
 from frappe.utils import cstr, flt
 
 import erpnext
+from erpnext.accounts.cash_basis.reports import (
+	add_report_message,
+	get_dimension_list_entries,
+	resolve_accounting_method,
+	set_report_end,
+	uses_cash_basis,
+)
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
@@ -17,6 +24,8 @@ from erpnext.accounts.utils import get_zero_cutoff
 
 def execute(filters=None):
 	validate_filters(filters)
+	resolve_accounting_method(filters)
+	set_report_end(filters, filters.get("to_date"))
 	dimension_list = get_dimensions(filters)
 
 	if not dimension_list:
@@ -25,7 +34,7 @@ def execute(filters=None):
 	columns = get_columns(dimension_list)
 	data = get_data(filters, dimension_list)
 
-	return columns, data
+	return add_report_message((columns, data), filters, filters.to_date, from_date=filters.from_date)
 
 
 def get_data(filters, dimension_list):
@@ -115,7 +124,10 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 		gl_entry.finance_book.isin([cstr(filters.get("finance_book")), ""]) | gl_entry.finance_book.isnull()
 	).where(gl_entry.voucher_type != "Period Closing Voucher")
 
-	for entry in query.run(as_dict=True):
+	entries = query.run(as_dict=True)
+	if uses_cash_basis(filters):
+		entries += get_dimension_list_entries(filters, dimension_field, dimension_list, account)
+	for entry in entries:
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
 
