@@ -1,7 +1,8 @@
 import frappe
 from frappe.query_builder.functions import Abs, Count, Sum
-from frappe.utils import create_batch, flt
+from frappe.utils import cint, create_batch, flt
 
+from erpnext.stock.page.valuation_rate_breakdown import legacy
 from erpnext.stock.serial_batch_bundle import SERIAL_NO_QUERY_BATCH_SIZE
 
 SERIALS_SHOWN = 10
@@ -73,6 +74,12 @@ def make_batch_book(item_code, warehouse, rows, focus_name):
 
 
 def get_window_lines(rows):
+	lines = get_bundle_lines(rows) + legacy.window_lines(rows)
+	position = {row.name: index for index, row in enumerate(rows)}
+	return sorted(lines, key=lambda line: (position[line.sle], line.idx))
+
+
+def get_bundle_lines(rows):
 	by_bundle = {row.serial_and_batch_bundle: row for row in rows if row.serial_and_batch_bundle}
 	if not by_bundle:
 		return []
@@ -81,8 +88,8 @@ def get_window_lines(rows):
 	lines = (
 		frappe.qb.from_(entry)
 		.select(entry.parent, entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference)
+		.select(entry.idx)
 		.where(entry.parent.isin(list(by_bundle)) & (entry.docstatus == 1) & (entry.is_cancelled == 0))
-		.orderby(entry.idx)
 		.run(as_dict=True)
 	)
 	for line in lines:
@@ -90,26 +97,29 @@ def get_window_lines(rows):
 		line.update(sle=row.name, voucher_type=row.voucher_type, voucher_no=row.voucher_no)
 		line.posting_date = row.posting_date
 
-	position = {row.name: index for index, row in enumerate(rows)}
-	return sorted(lines, key=lambda line: position[line.sle])
+	return lines
 
 
 def get_window_serial_history(item_code, warehouse, rows):
+	legacy_serials = {line.serial_no for line in legacy.window_lines(rows) if line.serial_no}
 	bundles = [row.serial_and_batch_bundle for row in rows if row.serial_and_batch_bundle]
 	if not bundles:
-		return []
+		return get_serial_history(item_code, warehouse, legacy_serials, rows[-1])
 
 	window = frappe.qb.DocType("Serial and Batch Entry").as_("window_entry")
 	serials = frappe.qb.from_(window).select(window.serial_no).distinct().where(window.parent.isin(bundles))
 	serial_nos = serials.limit(SERIAL_NO_QUERY_BATCH_SIZE + 1).run(pluck=True)
 	if len(serial_nos) <= SERIAL_NO_QUERY_BATCH_SIZE:
-		return get_serial_history(item_code, warehouse, serial_nos, rows[-1])
+		return get_serial_history(item_code, warehouse, set(serial_nos) | legacy_serials, rows[-1])
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = serial_history_query(item_code, warehouse, serials, rows[-1]).where(
 		(sle.item_code == item_code) & (sle.warehouse == warehouse)
 	)
-	return sorted(query.run(as_dict=True), key=history_order)
+	history = query.run(as_dict=True)
+	wanted = {row.serial_no for row in history} | legacy_serials
+	history.extend(legacy.get_serial_lines(item_code, warehouse, rows[-1], wanted))
+	return sorted(history, key=history_order)
 
 
 def get_serial_history(item_code, warehouse, serial_nos, last_row):
@@ -117,6 +127,9 @@ def get_serial_history(item_code, warehouse, serial_nos, last_row):
 	serial_nos = sorted({serial_no for serial_no in serial_nos if serial_no})
 	for chunk in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
 		rows.extend(serial_history_query(item_code, warehouse, chunk, last_row).run(as_dict=True))
+
+	if serial_nos:
+		rows.extend(legacy.get_serial_lines(item_code, warehouse, last_row, serial_nos))
 
 	return sorted(rows, key=history_order)
 
@@ -167,6 +180,9 @@ def get_entry_totals(item_code, warehouse, row, field, names=None, inclusive=Tru
 
 		for part in query.run(as_dict=True):
 			add_to_total(totals, part)
+
+	for part in legacy.get_totals(item_code, warehouse, row, field, names, inclusive):
+		add_to_total(totals, part)
 
 	return totals
 
@@ -255,7 +271,9 @@ class SerialBook:
 			self.held[row.serial_no] = frappe._dict(rate=rate, row=row)
 		else:
 			source = self.held.pop(row.serial_no, None)
-			if source and is_different(source.rate, rate):
+			if source and row.legacy:
+				rate = source.rate
+			elif source and is_different(source.rate, rate):
 				self.add_mismatch(row, source.rate, rate)
 
 		if in_window and self.focus in (None, row.serial_no):
@@ -381,15 +399,38 @@ def get_batch_parts(item_code, warehouse, last_row):
 	return parts
 
 
+def uses_shared_batch_rate(valuation_method):
+	return valuation_method == "Moving Average" and bool(
+		frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+	)
+
+
+def get_batch_valuation(item_code, valuation_method):
+	if uses_shared_batch_rate(valuation_method):
+		return "shared"
+
+	batch = frappe.qb.DocType("Batch")
+	flags = {
+		cint(flag)
+		for flag in frappe.qb.from_(batch)
+		.select(batch.use_batchwise_valuation)
+		.distinct()
+		.where(batch.item == item_code)
+		.run(pluck=True)
+	}
+	if 0 not in flags:
+		return "own"
+
+	return "mixed" if 1 in flags else "shared"
+
+
 def get_batches(batch_nos, item_code):
 	from erpnext.stock.utils import get_valuation_method
 
 	if not batch_nos:
 		return {}
 
-	shared_rate = get_valuation_method(item_code) == "Moving Average" and frappe.get_single_value(
-		"Stock Settings", "do_not_use_batchwise_valuation"
-	)
+	shared_rate = uses_shared_batch_rate(get_valuation_method(item_code))
 	batches = frappe.get_all(
 		"Batch",
 		filters={"name": ("in", list(batch_nos))},

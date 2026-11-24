@@ -450,13 +450,18 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				this.b(this.qty(last.qty_after)),
 				this.b(this.money(last.value_after)),
 			]);
-			const why = this.is_serial()
-				? __(
-						"Each serial number keeps the value it came in at, so the stock value is the sum of those values."
-				  )
-				: __(
-						"Each batch keeps its own value per unit, so the stock value is the sum of the batches."
-				  );
+			const why = {
+				serial: __(
+					"Each serial number keeps the value it came in at, so the stock value is the sum of those values."
+				),
+				batch_own: __(
+					"Each batch keeps its own value per unit, so the stock value is the sum of the batches."
+				),
+				batch_mixed: __(
+					"Some batches keep their own value per unit and the rest share one, so the stock value is the sum of both."
+				),
+				batch_shared: __("Its batches share one value per unit."),
+			}[this.guide_key()];
 			return `${holds} ${why}`;
 		}
 		if (last.qty_after <= 0) {
@@ -530,15 +535,23 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 
 	method_label() {
 		const labels = {
-			batch: __("Valued batch by batch"),
+			batch_own: __("Valued batch by batch"),
+			batch_mixed: __("Valued batch by batch"),
+			batch_shared: __("Batches share one value"),
 			serial: __("Valued per serial number"),
 		};
-		return labels[this.data.item.valued_by] || __("Valued by {0}", [__(this.data.item.valuation_method)]);
+		return labels[this.guide_key()] || __("Valued by {0}", [__(this.data.item.valuation_method)]);
+	}
+
+	guide_key() {
+		const item = this.data.item;
+		if (item.valued_by === "batch") return `batch_${item.batch_valuation || "own"}`;
+		return item.valued_by || item.valuation_method;
 	}
 
 	guide_html() {
 		const item = this.data.item;
-		const guide = this.method_guides()[item.valued_by || item.valuation_method];
+		const guide = this.method_guides()[this.guide_key()];
 		if (!guide) return "";
 		const steps = guide.steps
 			.map((step, i) => `<li><span class="vrb-step-no">${i + 1}</span><span>${step}</span></li>`)
@@ -560,7 +573,31 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		const own_lot = __("Every receipt is kept as its own lot, with its own rate.");
 		const lots_left = __("The value per unit is the value of the lots left, divided by the units left.");
 		return {
-			batch: {
+			batch_shared: {
+				short: __("All batches share one value per unit."),
+				steps: [
+					__("These batches are not valued batch by batch, so they share one value per unit."),
+					__("When stock comes into any batch, its value is added to the shared value."),
+					__(
+						"When stock goes out of any batch, it leaves at the shared value per unit, not at the rate that batch was bought at."
+					),
+				],
+			},
+			batch_mixed: {
+				short: __("Some batches keep their own value per unit, the rest share one."),
+				steps: [
+					__(
+						"A batch valued batch by batch keeps its own value per unit, and stock leaves it at that value."
+					),
+					__(
+						"Batches not valued batch by batch share one value per unit, and stock leaves them at that shared value."
+					),
+					__(
+						"The average per unit is the value of all batches divided by all units. Reports show this average, but stock goes out at a batch's own value or at the shared value."
+					),
+				],
+			},
+			batch_own: {
 				short: __("Each batch keeps its own value per unit."),
 				steps: [
 					__("When stock comes into a batch, its value is added to that batch only."),
@@ -845,14 +882,22 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		return `
 			<div class="vrb-entry-head">
 				<span class="vrb-date">${date} ${time}</span>
-				<span class="vrb-voucher ellipsis">${this.voucher_label(entry)}</span>
-				<span class="vrb-doc ellipsis">${this.doc_link(entry.voucher_type, entry.voucher_no)}</span>
-				${entry.later_dated_count ? frappe.ui.badge.html({ label: __("Backdated"), theme: "amber" }) : ""}
-				${entry.ledger_problems ? frappe.ui.badge.html({ label: __("Needs repost"), theme: "red" }) : ""}
-				${this.change_badge(entry)}
-				${this.qty_badge(entry)}
+				<span class="vrb-entry-doc">
+					<span class="vrb-voucher ellipsis">${this.voucher_label(entry)}</span>
+					<span class="vrb-doc ellipsis">${this.doc_link(entry.voucher_type, entry.voucher_no)}</span>
+				</span>
+				<span class="vrb-entry-status">${this.status_badges(entry)}</span>
+				<span class="vrb-entry-qty">${this.qty_badge(entry)}</span>
 			</div>
 		`;
+	}
+
+	status_badges(entry) {
+		return [
+			entry.later_dated_count ? frappe.ui.badge.html({ label: __("Backdated"), theme: "amber" }) : "",
+			entry.ledger_problems ? frappe.ui.badge.html({ label: __("Needs repost"), theme: "red" }) : "",
+			this.change_badge(entry),
+		].join("");
 	}
 
 	change_badge(entry) {
@@ -1802,8 +1847,9 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			.vrb-date { flex-shrink: 0; font-size: var(--text-sm); color: var(--ink-gray-5); font-variant-numeric: tabular-nums; }
 			.vrb-voucher { flex-shrink: 0; max-width: 40%; font-size: var(--text-base); font-weight: 600; color: var(--ink-gray-8); }
 			.vrb-doc { min-width: 0; font-size: var(--text-sm); }
-			.vrb-entry-head .es-badge { margin-left: auto; flex-shrink: 0; }
-			.vrb-entry-head .es-badge ~ .es-badge { margin-left: 0; }
+			.vrb-entry-doc { display: flex; align-items: center; gap: var(--margin-sm); flex: 1; min-width: 0; }
+			.vrb-entry-status, .vrb-entry-qty { display: flex; align-items: center; gap: var(--margin-sm); flex-shrink: 0; }
+			.vrb-entry-status:empty { display: none; }
 			.vrb-explain { margin-top: var(--margin-sm); padding: var(--padding-md); display: flex; flex-direction: column; gap: var(--margin-xs); }
 			.vrb-outcome { font-size: var(--text-sm); line-height: 1.6; color: var(--ink-gray-6); }
 			.vrb-note { display: flex; align-items: center; gap: 6px; height: 24px; min-width: 0; font-size: var(--text-sm); }
@@ -1864,6 +1910,11 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			.vrb-result { display: flex; align-items: flex-start; gap: var(--margin-sm); font-size: var(--text-sm); line-height: 1.5; color: var(--ink-gray-7); }
 			.vrb-result .icon { flex-shrink: 0; margin: 2px 0 0; stroke: var(--ink-gray-5); }
 			@media (max-width: 767px) {
+				.vrb-entry-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "date qty" "doc doc" "status status"; grid-template-rows: 32px auto auto; row-gap: 2px; height: auto; }
+				.vrb-date { grid-area: date; }
+				.vrb-entry-qty { grid-area: qty; }
+				.vrb-entry-doc { grid-area: doc; }
+				.vrb-entry-status { grid-area: status; flex-wrap: wrap; row-gap: var(--margin-xs); }
 				.vrb-math-row { grid-template-columns: 56px 96px 96px 112px; }
 				.vrb-part-row { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 2px; height: auto; padding: 6px 0; }
 				.vrb-part-row > :first-child { grid-column: 1 / -1; }
