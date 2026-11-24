@@ -55,6 +55,10 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry import test_stock_entry
+from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+	get_secondary_item_qty,
+	get_secondary_items,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry import OperationsNotCompleteError
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
@@ -3776,6 +3780,31 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		for entry in (manufacture, disassembly):
 			self.assertEqual(next(d.qty for d in entry.items if d.item_code == co_product), 200)
+
+	def test_co_product_below_the_row_precision_is_left_out(self):
+		# 1 FG of a BOM for 3 makes a third of the smallest qty the row holds, which saves as 0
+		rm_a, rm_b = make_co_product_raw_materials()
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		co_product = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		precision = frappe.get_precision("BOM Secondary Item", "qty")
+		bom = make_co_product_bom(
+			fg_item, [(rm_a, 3, None)], co_product, quantity=3, co_product_qty=10**-precision
+		)
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		self.assertFalse([d for d in se_doc.items if d.item_code == co_product])
+
+	def test_whole_number_co_product_of_a_large_qty_is_not_rounded_up_a_unit(self):
+		# 2 Nos less a loss of 1 per BOM of 3: SQL gives the 2 / 3 per FG with noise in the last digit
+		rm_a, rm_b = make_co_product_raw_materials()
+		fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(2)
+		)
+		bom = make_co_product_bom(
+			fg_item, [(rm_a, 3, None)], co_product, quantity=3, co_product_qty=2, process_loss_per=50
+		)
+
+		self.assertEqual(get_secondary_item_qty(get_secondary_items(bom)[0], 120000), 40000)
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
