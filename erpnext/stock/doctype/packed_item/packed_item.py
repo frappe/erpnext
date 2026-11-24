@@ -19,6 +19,7 @@ from erpnext.stock.get_item_details import (
 	get_item_details,
 	get_price_list_rate,
 )
+from erpnext.stock.utils import is_serial_no_wise_valuation_disabled
 
 
 class PackedItem(Document):
@@ -89,7 +90,10 @@ def make_packing_list(doc, order_packed_items=None):
 		return
 
 	parent_items_price, reset = {}, False
-	set_price_from_children = frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
+	# a return keeps its original's rates
+	set_price_from_children = not doc.get("return_against") and frappe.get_single_value(
+		"Selling Settings", "editable_bundle_item_rates"
+	)
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 	if order_packed_items is None:
@@ -284,6 +288,13 @@ def get_stale_row_idx(stale_rows, location=None):
 	if not location:
 		return 0
 	return next((idx for idx, row in enumerate(stale_rows) if is_packed_from(row, location)), 0)
+
+
+def set_incoming_rate_from_bundle(row, bundle):
+	"""Rate of the serial or batch nos picked on submit; validate looked it up before they were picked."""
+	# serial nos valued as one pool carry no rate of their own
+	if not is_serial_no_wise_valuation_disabled(row.item_code):
+		row.db_set("incoming_rate", flt(bundle.avg_rate, row.precision("incoming_rate")))
 
 
 def get_location_filters(row) -> dict:
@@ -718,7 +729,8 @@ def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 	if not rate:
 		parent_items_price[key] = 0.0
 
-	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.stock_qty)
+	# the row's rate is per its own UOM, so divide by its qty, not its stock qty
+	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.qty)
 
 
 def set_product_bundle_rate_amount(doc, parent_items_price):

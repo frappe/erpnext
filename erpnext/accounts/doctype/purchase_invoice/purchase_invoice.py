@@ -286,6 +286,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_posting_date_with_po()
 
 		super().validate()
+		self.reset_receipt_qty()
 
 		if not self.is_return:
 			self.po_required()
@@ -328,6 +329,16 @@ class PurchaseInvoice(BuyingController):
 
 		if self.on_hold:
 			self.validate_invoice_hold()
+
+	def reset_receipt_qty(self):
+		"""Clear qty left over from Update Stock once it is turned off."""
+		if self.update_stock:
+			return
+
+		for row in self.items:
+			if not row.pr_detail:
+				row.received_qty = 0
+				row.rejected_qty = 0
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
@@ -511,6 +522,7 @@ class PurchaseInvoice(BuyingController):
 			if not for_validate:
 				if tax_withholding_category or tax_withholding_group:
 					self.apply_tds = 1
+					self.set_onload("apply_tds", 1)
 
 		super().set_missing_values(for_validate)
 
@@ -567,11 +579,7 @@ class PurchaseInvoice(BuyingController):
 			}
 		)
 
-		if (
-			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
-			and not self.is_return
-			and not self.is_internal_supplier
-		):
+		if cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")) and not self.is_return:
 			self.validate_rate_with_reference_doc(
 				[
 					["Purchase Order", "purchase_order", "po_detail"],

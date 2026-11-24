@@ -30,9 +30,9 @@ How an entry is valued
 * Outward stock is valued from what is on hand: the pool at its average or its
   oldest (FIFO) / newest (LIFO) layers, a batch at its average, a serial at its
   receipt rate.
-* A FIFO purchase return first takes the layer carrying the rate of the receipt
-  it returns. A moving average return leaves at the current average, and a LIFO
-  return from the top of the stack, as the stock ledger does.
+* A FIFO or LIFO purchase return first takes the layer carrying the rate of the
+  receipt it returns, as the stock ledger does (LIFO looks from the top of the stack).
+  A moving average return leaves at the current average, as a repost of the ledger does.
 * A Stock Reconciliation without serial / batch nos sets the qty and the rate.
   With them, it is an issue of the counted-out lots and a receipt of the counted-in ones.
   For an item valued in the pool alone (serial no wise valuation off, no batches) both
@@ -208,8 +208,8 @@ class QueuePool:
 	def issue(self, qty: float, preferred_rate: float | None = None) -> float:
 		"""Take qty out layer by layer and return the value taken out.
 
-		For FIFO, a layer carrying `preferred_rate` is taken first. If the queue runs
-		dry, the rest goes negative at the last rate consumed.
+		A layer carrying `preferred_rate` is taken first. If the queue runs dry, the rest
+		goes negative at the last rate consumed.
 		"""
 		value_before = self.value
 
@@ -235,15 +235,16 @@ class QueuePool:
 		return value_before - self.value
 
 	def get_layer_to_consume(self, preferred_rate: float | None) -> int:
+		indexes = range(len(self.layers))
 		if self.last_in_first_out:
-			return -1
+			indexes = reversed(indexes)
 
 		if preferred_rate is not None:
-			for index, (_qty, rate) in enumerate(self.layers):
-				if rate == preferred_rate:
+			for index in indexes:
+				if self.layers[index][1] == preferred_rate:
 					return index
 
-		return 0
+		return -1 if self.last_in_first_out else 0
 
 	def set_balance(self, qty: float, rate: float) -> None:
 		self.layers = [[qty, rate]]
@@ -773,10 +774,10 @@ class ValuationDetails:
 		return [LotMovement(qty=qty, rate=flt(entry.incoming_rate), batch_no=entry.batch_no)]
 
 	def get_purchase_return_rate(self, entry) -> float | None:
-		"""For a FIFO purchase return, the rate of the receipt row it returns. None when the
-		entry is not one, or the receipt cannot be found."""
+		"""For a FIFO or LIFO purchase return, the rate of the receipt row it returns. None when
+		the entry is not one, or the receipt cannot be found."""
 		if (
-			self.valuation_method != "FIFO"
+			self.valuation_method not in ("FIFO", "LIFO")
 			or self.values_everything_in_pool
 			or entry.voucher_type not in RETURNABLE_PURCHASE_DOCTYPES
 		):

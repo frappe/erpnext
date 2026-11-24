@@ -332,7 +332,7 @@ $.extend(erpnext.utils, {
 		let filters = frappe.query_reports[report_name].filters;
 
 		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
 			callback: function (r) {
 				let accounting_dimensions = r.message[0];
 				accounting_dimensions.forEach((dimension) => {

@@ -11,6 +11,7 @@ from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
 	get_account_balances_coa,
 	get_balance_on,
+	get_company_default,
 	get_currency_precision,
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
@@ -232,3 +233,18 @@ class TestUtils(ERPNextTestSuite):
 		finally:
 			frappe.db.set_default("currency_precision", currency_precision or "")
 			frappe.db.set_default("number_format", number_format or "#,###.##")
+
+	def test_get_company_default_requires_company_read(self):
+		user = frappe.new_doc("User")
+		user.email = "company-default-reader@example.com"
+		user.first_name = "Company Default Reader"
+		user.send_welcome_email = 0
+		user.append("roles", {"role": "Manufacturing User"})
+		user.insert()
+		with self.set_user(user.name), self.assertRaises(frappe.PermissionError):
+			get_company_default("_Test Company", "cost_center")
+
+		self.assertEqual(
+			get_company_default("_Test Company", "cost_center"),
+			frappe.db.get_value("Company", "_Test Company", "cost_center"),
+		)

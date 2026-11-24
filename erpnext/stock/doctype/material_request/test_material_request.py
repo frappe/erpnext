@@ -2156,6 +2156,39 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		self.assertIsNone(mr.customer)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_indent": 1})
+	def test_variant_without_reorder_levels_is_reordered_from_its_template(self):
+		"""A variant with no re-order levels of its own uses its template's levels."""
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.reorder_item import reorder_item
+
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"reorder_levels": [
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"warehouse_reorder_level": 20,
+						"warehouse_reorder_qty": 50,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.reorder_levels = []
+		variant.insert()
+		make_stock_entry(item_code=variant.name, target="_Test Warehouse - _TC", qty=5, basic_rate=10)
+
+		requests = reorder_item() or []
+
+		requested_qty = [d.stock_qty for mr in requests for d in mr.items if d.item_code == variant.name]
+		self.assertEqual(requested_qty, [50])
+
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)

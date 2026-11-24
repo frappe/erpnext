@@ -92,7 +92,10 @@ page_js = {"print": "public/js/print.js"}
 
 extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
-override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
+override_whitelisted_methods = {
+	"frappe.www.contact.send_message": "erpnext.templates.utils.send_message",
+	"erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions": "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
+}
 
 welcome_email = "erpnext.setup.utils.welcome_email"
 

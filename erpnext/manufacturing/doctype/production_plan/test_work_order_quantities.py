@@ -323,6 +323,49 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		self.assertEqual(work_order.reload().produced_qty, 95)
 		self.assert_pending_qty(plan, field, 0)
 
+	def test_lower_loss_offsets_excess_loss_of_another_work_order(self):
+		field = "production_plan_item"
+		plan = self.make_plan(qty=90, consider_process_loss=True)
+		work_orders = []
+		for _ in range(2):
+			work_order = self.create_work_order(plan, field)
+			work_order.qty = 50
+			work_order.submit()
+			work_orders.append(work_order)
+
+		# version-16-hotfix defaults a zero loss to the BOM's 10%, so lose 1 here and 9 on the other
+		self.manufacture_with_loss(work_orders[0], loss_qty=1)
+		self.manufacture_with_loss(work_orders[1], loss_qty=9)
+		self.assert_pending_qty(plan, field, 0)
+
+	def test_closed_order_losing_less_than_planned_can_cancel_its_manufacture(self):
+		field = "production_plan_item"
+		plan = self.make_plan(qty=90, consider_process_loss=True)
+		work_order = self.create_work_order(plan, field)
+		work_order.submit()
+		# version-16-hotfix defaults a zero loss to the BOM's 10%, so lose 1 here and 4 on the last entry
+		self.manufacture_with_loss(work_order, 95, loss_qty=1)
+		last_entry = self.manufacture_with_loss(work_order, 5, loss_qty=4)
+		close_work_order(work_order.name, "Closed")
+		last_entry.cancel()
+		self.assertEqual(work_order.reload().produced_qty, 94)
+		self.assert_pending_qty(plan, field, 0)
+
+	def test_closing_an_order_does_not_block_cancelling_a_sibling(self):
+		field = "production_plan_item"
+		plan = self.make_plan(qty=90, consider_process_loss=True)
+		first = self.create_work_order(plan, field)
+		first.qty = 50
+		first.submit()
+		second = self.create_work_order(plan, field)
+		second.submit()
+		# version-16-hotfix defaults a zero loss to the BOM's 10%, so lose 1 on each entry
+		self.manufacture_with_loss(first, loss_qty=1)
+		manufacture = self.manufacture_with_loss(second, 20, loss_qty=1)
+		close_work_order(first.name, "Closed")
+		manufacture.cancel()
+		self.assertEqual(second.reload().produced_qty, 0)
+
 	def test_whole_number_replacement_rounds_up(self):
 		field = "production_plan_sub_assembly_item"
 		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10}).name
@@ -365,7 +408,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		self.assertEqual(work_order.reload().produced_qty, 90)
 		self.assert_pending_qty(plan, field, 0)
 
-	def test_stopped_and_closed_orders_consume_quantity(self):
+	def test_stopped_order_consumes_quantity_and_closed_order_releases_it(self):
 		plan = self.make_plan()
 		for field in REFERENCE_FIELDS:
 			with self.subTest(field=field):
@@ -375,7 +418,14 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				self.assert_pending_qty(plan, field, 0)
 				stop_unstop(first.name, "Resumed")
 				close_work_order(first.name, "Closed")
-				self.assert_pending_qty(plan, field, 0)
+				self.assert_pending_qty(plan, field, 100)
+
+	def test_closed_status_sent_on_submit_does_not_lift_the_limit(self):
+		plan = self.make_plan()
+		work_order = self.create_work_order(plan, "production_plan_item")
+		work_order.update({"qty": 1000, "status": "Closed"})
+		with self.assertRaises(OverProductionError):
+			work_order.submit()
 
 	def test_fractional_quantities(self):
 		plan = self.make_plan(qty=0.3)

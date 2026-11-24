@@ -335,7 +335,7 @@ class BootStrapTestData:
 				"selling": 0,
 			},
 		]
-		self.make_records(["price_list_name", "enabled", "selling", "buying", "currency"], records)
+		self.make_records(["price_list_name"], records)
 
 	def make_monthly_distribution(self):
 		records = [

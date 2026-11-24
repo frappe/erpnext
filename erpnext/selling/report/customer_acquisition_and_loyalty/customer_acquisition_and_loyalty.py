@@ -167,8 +167,9 @@ def get_customer_stats(filters, tree_view=False):
 		.orderby(si.posting_date)
 		.orderby(si.name)
 	)
-	if filters.get("company"):
-		query = query.where(si.company == filters.get("company"))
+	companies = get_companies(filters.get("company"))
+	if companies is not None:
+		query = query.where(si.company.isin(companies))
 
 	# scope to the user's permitted customers; the report serves roles without Sales
 	# Invoice read, so apply the Customer restriction directly instead of via get_list
@@ -210,12 +211,30 @@ def get_customer_stats(filters, tree_view=False):
 	return customers_in
 
 
+def get_companies(company):
+	"""Companies to report on: the selected one, else the user's permitted ones (None for all)."""
+	# the company filter is client-side only, so apply the user's Company restriction here
+	permitted = get_permitted_values("Company")
+	if company and permitted is not None and company not in permitted:
+		frappe.throw(
+			_("You do not have permission to access {0}: {1}.").format(_("Company"), company),
+			frappe.PermissionError,
+		)
+
+	return [company] if company else permitted
+
+
 def get_permitted_customers():
 	"""Customers the current user is restricted to, or None when unrestricted."""
-	customer_perms = get_user_permissions(frappe.session.user).get("Customer") or []
+	return get_permitted_values("Customer")
+
+
+def get_permitted_values(doctype):
+	"""Records of `doctype` the current user is restricted to, or None when unrestricted."""
+	user_perms = get_user_permissions(frappe.session.user).get(doctype) or []
 	allowed = [
 		perm.get("doc")
-		for perm in customer_perms
+		for perm in user_perms
 		if not perm.get("applicable_for") or perm.get("applicable_for") == "Sales Invoice"
 	]
 	return allowed or None
