@@ -9,7 +9,7 @@ delegating stubs so external callers (bom_update_log, etc.) keep working.
 
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cstr, flt
 
 
 class BOMCostingService:
@@ -184,35 +184,17 @@ class BOMCostingService:
 		)
 
 	def _accumulate_operation_cost(self, d, update_hour_rate, save=True):
-		self.set_cost_based_on_bom_qty(d, save)
 		if d.workstation or d.workstation_type:
 			self.update_rate_and_time(d, update_hour_rate, save)
 
 		operating_cost = d.operating_cost
 		base_operating_cost = d.base_operating_cost
-		if d.set_cost_based_on_bom_qty:
+		if is_costed_per_batch(d):
 			operating_cost = flt(d.cost_per_unit) * flt(self.doc.quantity)
 			base_operating_cost = flt(d.base_cost_per_unit) * flt(self.doc.quantity)
 
 		self.doc.operating_cost += flt(operating_cost)
 		self.doc.base_operating_cost += flt(base_operating_cost)
-
-	def set_cost_based_on_bom_qty(self, row, save):
-		"""As in the Work Order, fixed time is never per batch and a batch based operation always is."""
-		if row.fixed_time:
-			per_batch = 0
-		elif frappe.get_cached_value("Operation", row.operation, "create_job_card_based_on_batch_size"):
-			per_batch = 1
-		else:
-			return
-
-		if cint(row.set_cost_based_on_bom_qty) == per_batch:
-			return
-
-		row.set_cost_based_on_bom_qty = per_batch
-		if save:
-			# the row is saved only when hour rates are refreshed, so save the flag on its own
-			row.db_set("set_cost_based_on_bom_qty", per_batch, update_modified=False)
 
 	def _set_fg_based_operating_cost(self):
 		total = flt(self.doc.get("quantity")) * flt(self.doc.get("operating_cost_per_bom_quantity"))
@@ -383,6 +365,14 @@ class BOMCostingService:
 			if old_rate != row.rate:
 				# Only db_update if changed
 				row.db_update()
+
+
+def is_costed_per_batch(row) -> bool:
+	"""As in the Work Order: never for fixed time, always for a batch based Operation."""
+	return not row.fixed_time and bool(
+		row.set_cost_based_on_bom_qty
+		or frappe.get_cached_value("Operation", row.operation, "create_job_card_based_on_batch_size")
+	)
 
 
 def get_secondary_process_loss_qty(row) -> float:
