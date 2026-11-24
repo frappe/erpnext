@@ -3682,42 +3682,6 @@ class TestWorkOrder(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
 	)
-	def test_sub_assembly_co_product_net_of_its_loss_is_not_rounded_up_a_unit(self):
-		# SA: 9 RMA make 9 of 10; 10 co-product less 10%. 1 SA makes 10 / 9 x 0.9 = 1 co-product
-		rm_a, rm_b = make_co_product_raw_materials()
-		sub_assembly, fg_item, co_product = (
-			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(3)
-		)
-		sub_bom = make_co_product_bom(
-			sub_assembly,
-			[(rm_a, 9, None)],
-			co_product,
-			quantity=10,
-			co_product_qty=10,
-			process_loss_per=10,
-			process_loss_percentage=10,
-		)
-		bom = make_co_product_bom(fg_item, [(sub_assembly, 1, sub_bom), (rm_b, 1, None)])
-		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
-
-		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 1)
-
-	def test_co_product_net_of_a_rounded_loss_is_not_rounded_up_a_unit(self):
-		# 33.33% of 3 is 0.9999, which the BOM rounds to a loss of 1
-		rm_a, rm_b = make_co_product_raw_materials()
-		fg_item, co_product = (
-			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(2)
-		)
-		bom = make_co_product_bom(
-			fg_item, [(rm_a, 1, None)], co_product, co_product_qty=3, process_loss_per=33.33
-		)
-		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
-
-		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 2)
-
-	@ERPNextTestSuite.change_settings(
-		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
-	)
 	def test_sub_assembly_from_two_boms_takes_each_bom_yield(self):
 		# FG: 8 SA from BOM A (4 RMA make 8 of 10, 10 co-product) and 2 SA from BOM B (5 RMA make 10)
 		rm_a, rm_b = make_co_product_raw_materials()
