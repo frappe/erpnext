@@ -1932,7 +1932,7 @@ def get_stored_serial_nos(rows) -> dict[str, str]:
 
 	stored = set(frappe.get_all("Serial No", filters={"name": ("in", list(typed))}, pluck="name"))
 	# names a case-insensitive collation matched in another spelling
-	respelled = {name.casefold(): name for name in stored - typed}
+	respelled = {name.casefold(): name for name in stored}
 	return {
 		serial_no: serial_no if serial_no in stored else respelled.get(serial_no.casefold(), serial_no)
 		for serial_no in typed

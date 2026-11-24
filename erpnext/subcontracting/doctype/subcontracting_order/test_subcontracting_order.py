@@ -1602,6 +1602,12 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "has not supplied", scr.save)
 
+		# the next receipt consumes the serial no still at the supplier
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = scr.items[0].received_qty = 1
+		scr.submit()
+		self.assertEqual(get_serial_nos_from_bundle(scr.supplied_items[0].serial_and_batch_bundle), [second])
+
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings",
 		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
