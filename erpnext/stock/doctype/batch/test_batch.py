@@ -684,6 +684,12 @@ class TestBatch(ERPNextTestSuite):
 		third_batch = split_batch(new_batch, item_code, warehouse, 1)
 		self.assertEqual(get_batch_qty(new_batch, warehouse), 1)
 		self.assertEqual(get_batch_qty(third_batch, warehouse), 1)
+		self.assertEqual(
+			frappe.db.count(
+				"Serial No", {"item_code": item_code, "warehouse": warehouse, "status": "Active"}
+			),
+			4,
+		)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_existing_serial_no": 0})
 	def test_split_batch_of_returned_serial_nos(self):
