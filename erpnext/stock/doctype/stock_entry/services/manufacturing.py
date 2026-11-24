@@ -119,11 +119,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					"BOM", self.doc.bom_no, "default_target_warehouse"
 				)
 
-			row.qty = row.qty * flt(self.doc.fg_completed_qty)
-			if row.get("process_loss_per"):
-				row.qty -= flt(
-					row.qty * row.get("process_loss_per") / 100, self.doc.precision("fg_completed_qty")
-				)
+			# net of the BOM's rounded loss qty, as BOM costing: rounding the loss here can add a whole unit
+			row.qty = row.qty * flt(self.doc.fg_completed_qty) * (1 - flt(row.get("process_loss_share")))
 
 			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
 			item_args["transfer_qty"] = item_args["qty"]
@@ -1562,6 +1559,7 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.name,
 			doctype.cost_allocation_per,
 			doctype.process_loss_per,
+			(doctype.process_loss_qty / NullIf(doctype.stock_qty, 0)).as_("process_loss_share"),
 			doctype.secondary_item_type,
 			doctype.valuation_type,
 			(doctype.base_cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
