@@ -903,12 +903,13 @@ class WorkOrder(Document):
 		return status
 
 	def refresh_status(self):
-		"""Save the computed status, unless the order is Stopped or Closed or another transaction changed its status."""
-		saved_status = frappe.db.get_value("Work Order", self.name, "status", for_update=True)
-		if saved_status != self.status or saved_status in ("Stopped", "Closed"):
+		"""Save the computed status if it changed, unless the order is Stopped or Closed or another transaction changed its status."""
+		status = self.get_status()
+		if status == self.status:
 			return
 
-		if (status := self.get_status()) != saved_status:
+		saved_status = frappe.db.get_value("Work Order", self.name, "status", for_update=True)
+		if saved_status == self.status and saved_status not in ("Stopped", "Closed"):
 			self.db_set("status", status)
 
 	@staticmethod
