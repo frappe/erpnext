@@ -290,6 +290,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_job_card_for_semi_finished_goods()
 		self.validate_work_order_status_for_return()
 		self.validate_returned_qty_within_work_order()
+		self.validate_returned_fg_qty_within_job_card()
 		self.validate_same_source_target_warehouse()
 		self.validate_alternative_items()
 
@@ -319,10 +320,13 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if not (self.doc.is_return and self.wo_doc) or self.wo_doc.status in ("Completed", "Closed"):
 			return
 
+		if self.doc.job_card and frappe.db.get_value("Job Card", self.doc.job_card, "docstatus") == 0:
+			return
+
 		frappe.throw(
-			_("Components can be returned only after Work Order {0} is Completed or Closed").format(
-				get_link_to_form("Work Order", self.doc.work_order)
-			),
+			_(
+				"Components can be returned only against a draft Job Card, or after Work Order {0} is Completed or Closed"
+			).format(get_link_to_form("Work Order", self.doc.work_order)),
 			title=_("Work Order Not Finished"),
 		)
 
@@ -330,25 +334,57 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if not (self.doc.is_return and self.wo_doc):
 			return
 
-		returnable_qty = self.get_returnable_qty()
-		for item_code, returned_qty in self.get_returned_qty_by_item().items():
+		returned_qty_by_item = self.get_returned_qty_by_item()
+		if self.doc.job_card:
+			self.validate_returned_qty_within(
+				returned_qty_by_item, "Job Card", self.doc.job_card, self.get_returnable_qty()
+			)
+
+		self.validate_returned_qty_within(
+			returned_qty_by_item,
+			"Work Order",
+			self.wo_doc.name,
+			self.get_returnable_qty(scope_to_job_card=False),
+		)
+
+	def validate_returned_qty_within(self, returned_qty_by_item, doctype, name, returnable_qty):
+		for item_code, returned_qty in returned_qty_by_item.items():
 			if flt(returned_qty, 6) > flt(returnable_qty[item_code], 6):
 				frappe.throw(
 					_(
-						"Item {0}: cannot return {1} to the store, Work Order {2} has only {3} of it left unconsumed."
+						"Item {0}: cannot return {1} to the store, {2} {3} has only {4} of it left unconsumed."
 					).format(
 						frappe.bold(item_code),
 						flt(returned_qty),
-						get_link_to_form("Work Order", self.wo_doc.name),
+						_(doctype),
+						get_link_to_form(doctype, name),
 						flt(returnable_qty[item_code]),
 					),
 					title=_("Excess Return"),
 				)
 
-	def get_returnable_qty(self) -> dict:
+	def validate_returned_fg_qty_within_job_card(self):
+		if not (self.doc.is_return and self.doc.job_card):
+			return
+
+		transferred_qty = frappe.db.get_value("Job Card", self.doc.job_card, "transferred_qty")
+		if flt(self.doc.fg_completed_qty, 6) > flt(transferred_qty, 6):
+			frappe.throw(
+				_(
+					"Return quantity {0} is more than the quantity {1} transferred against Job Card {2}."
+				).format(
+					flt(self.doc.fg_completed_qty),
+					flt(transferred_qty),
+					get_link_to_form("Job Card", self.doc.job_card),
+				),
+				title=_("Excess Return"),
+			)
+
+	def get_returnable_qty(self, scope_to_job_card=True) -> dict:
 		from .manufacturing import ManufactureStockEntry
 
 		available = ManufactureStockEntry(self.doc)
+		available.scope_return_to_job_card = scope_to_job_card
 		available.prepare_available_materials_based_on_transfer()
 		returnable_qty = defaultdict(float)
 		for row in available._transfer_entries or []:
@@ -368,6 +404,9 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		return qty_by_item
 
 	def validate_component_and_quantities(self):
+		if self.doc.is_return:
+			return
+
 		if self.doc.fg_completed_qty:
 			if (
 				frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom")
@@ -380,9 +419,6 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			self._validate_no_excess_transfer()
 
 	def _validate_no_excess_transfer(self):
-		if self.doc.is_return:
-			return
-
 		if self.backflush_based_on == "Material Transferred for Manufacture":
 			return
 

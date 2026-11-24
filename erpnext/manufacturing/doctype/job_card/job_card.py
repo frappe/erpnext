@@ -8,7 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.model import default_fields
 from frappe.model.document import Document
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import IfNull, Max, Min, Sum
 from frappe.utils import (
 	add_days,
@@ -1511,6 +1511,8 @@ class JobCard(Document):
 				continue
 
 			transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item, 0.0))
+			if flt(transferred_qty, 6) < 0:
+				self.throw_components_already_returned()
 
 			if not allow_excess:
 				self.validate_over_transfer(ste_doc, row, transferred_qty)
@@ -1533,7 +1535,10 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.transfer_qty))
+			.select(
+				sed.job_card_item,
+				Sum(Case().when(se.is_return == 1, -sed.transfer_qty).else_(sed.transfer_qty)),
+			)
 			.where(
 				(sed.job_card_item.isin(job_card_items))
 				& (se.docstatus == 1)
@@ -1562,13 +1567,25 @@ class JobCard(Document):
 			)
 
 	def set_transferred_qty(self, update_status=False):
-		self.db_set("transferred_qty", self.get_transferred_qty_from_stock_entry())
+		transferred_qty = self.get_transferred_qty_from_stock_entry()
+		if flt(transferred_qty, 6) < 0:
+			self.throw_components_already_returned()
+
+		self.db_set("transferred_qty", transferred_qty)
 		self.set_status(update_status)
 
 		if self.work_order and not frappe.get_cached_value(
 			"Work Order", self.work_order, "track_semi_finished_goods"
 		):
 			self.set_transferred_qty_in_work_order()
+
+	def throw_components_already_returned(self):
+		frappe.throw(
+			_(
+				"Job Card {0} has more components returned than transferred. Cancel its return entries first."
+			).format(get_link_to_form("Job Card", self.name)),
+			title=_("Components Returned"),
+		)
 
 	def get_transferred_qty_from_stock_entry(self):
 		from frappe.query_builder.functions import Sum
@@ -1577,7 +1594,13 @@ class JobCard(Document):
 
 		result = (
 			frappe.qb.from_(stock_entry)
-			.select(Sum(stock_entry.fg_completed_qty))
+			.select(
+				Sum(
+					Case()
+					.when(stock_entry.is_return == 1, -stock_entry.fg_completed_qty)
+					.else_(stock_entry.fg_completed_qty)
+				)
+			)
 			.where(
 				(stock_entry.job_card == self.name)
 				& (stock_entry.docstatus == 1)
