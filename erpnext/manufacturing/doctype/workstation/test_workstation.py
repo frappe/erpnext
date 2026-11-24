@@ -266,6 +266,28 @@ class TestWorkstation(ERPNextTestSuite):
 		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
 		self.assertFalse([row for row in entry.additional_costs if row.has_operating_cost])
 
+	def test_partial_manufacture_takes_its_share_of_a_negative_operating_component(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		workstation = make_workstation(workstation_name="_Test WS Negative Component", hour_rate_labour=100)
+		workstation.append(
+			"workstation_costs", {"operating_component": _("Electricity"), "operating_cost": -10}
+		)
+		workstation.save()
+		work_order = make_work_order_with_completed_job_card(workstation.name)
+
+		recorded_cost = frappe.db.get_value(
+			"Work Order Operation", {"parent": work_order.name}, "actual_operating_cost"
+		)
+		# half of it made each time takes half of the net cost, the credit included
+		for _qty in range(2):
+			entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 5))
+			entry.submit()
+			operating_cost = sum(row.amount for row in entry.additional_costs if row.has_operating_cost)
+			self.assertAlmostEqual(operating_cost, recorded_cost / 2, delta=0.02)
+
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
 	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
 		shifts = [("13:00:00", "17:00:00"), ("08:00:00", "12:00:00")]
