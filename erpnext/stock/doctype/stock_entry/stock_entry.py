@@ -2256,9 +2256,34 @@ class StockEntry(StockController, SubcontractingInwardController):
 			for row in frappe.get_all(
 				"Pick List Item",
 				filters={"name": ("in", list(pick_list_items))},
-				fields=["name", "item_code", "warehouse", "picked_qty", "transferred_qty"],
+				fields=[
+					"name",
+					"item_code",
+					"warehouse",
+					"picked_qty",
+					"transferred_qty",
+					"material_request_item",
+				],
 			)
 		}
+		work_order = self.work_order or (
+			self.pick_list and frappe.db.get_value("Pick List", self.pick_list, "work_order")
+		)
+		wo_allowance = 0.0
+		if work_order:
+			if frappe.get_meta("Manufacturing Settings").has_field("transfer_extra_materials_percentage"):
+				wo_allowance = flt(
+					frappe.db.get_single_value(
+						"Manufacturing Settings", "transfer_extra_materials_percentage"
+					)
+				)
+			if not wo_allowance:
+				wo_allowance = flt(
+					frappe.db.get_single_value(
+						"Manufacturing Settings", "overproduction_percentage_for_work_order"
+					)
+				)
+
 		precision = frappe.get_precision("Pick List Item", "transferred_qty")
 		transfer_qty = defaultdict(float)
 		for d in self.items:
@@ -2291,12 +2316,27 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			transfer_qty[d.pick_list_item] += flt(d.transfer_qty)
 			transferred_qty = flt(flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item], precision)
-			if transferred_qty > flt(picked_row.picked_qty):
-				frappe.throw(
-					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
-						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
+
+			if work_order:
+				allowed_qty = flt(picked_row.picked_qty) + (flt(picked_row.picked_qty) * (wo_allowance / 100))
+			elif picked_row.get("material_request_item") and d.material_request_item == picked_row.get(
+				"material_request_item"
+			):
+				mr_allowance = flt(frappe.db.get_single_value("Stock Settings", "mr_qty_allowance"))
+				allowed_qty = flt(picked_row.picked_qty) + (flt(picked_row.picked_qty) * (mr_allowance / 100))
+			else:
+				allowed_qty = flt(picked_row.picked_qty)
+
+			if transferred_qty > flt(allowed_qty, precision):
+				if flt(allowed_qty, precision) > flt(picked_row.picked_qty, precision):
+					msg = _("Row #{0}: Item {1} is transferred more than the {2} allowed in {3}.").format(
+						d.idx, frappe.bold(d.item_code), flt(allowed_qty, precision), self.pick_list
 					)
-				)
+				else:
+					msg = _("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
+						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty, precision), self.pick_list
+					)
+				frappe.throw(msg)
 
 	def validate_batch(self):
 		if self.purpose in [
