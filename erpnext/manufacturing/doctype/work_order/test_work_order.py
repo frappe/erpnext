@@ -3680,6 +3680,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(rows[fg_item], (1, 1540))
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_sub_assembly_co_product_net_of_its_loss_is_not_rounded_up_a_unit(self):
+		# SA: 9 RMA make 9 of 10; 10 co-product less 10%. 1 SA makes 10 / 9 x 0.9 = 1 co-product
+		rm_a, rm_b = make_co_product_raw_materials()
+		sub_assembly, fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(3)
+		)
+		sub_bom = make_co_product_bom(
+			sub_assembly,
+			[(rm_a, 9, None)],
+			co_product,
+			quantity=10,
+			co_product_qty=10,
+			process_loss_per=10,
+			process_loss_percentage=10,
+		)
+		bom = make_co_product_bom(fg_item, [(sub_assembly, 1, sub_bom), (rm_b, 1, None)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 1)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
 	def test_get_rm_cost_from_consumption_entry(self):
