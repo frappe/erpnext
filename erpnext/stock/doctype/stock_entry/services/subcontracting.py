@@ -214,7 +214,10 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 		if not order:
 			return
 
-		frappe.get_doc(self.doc.subcontract_data.order_doctype, order).set_consumed_qty_in_subcontract_order()
+		# one cancel of the order's transfers at a time
+		order_doc = frappe.get_doc(self.doc.subcontract_data.order_doctype, order, for_update=True)
+		order_doc.set_consumed_qty_in_subcontract_order()
+
 		item_codes = list({row.item_code for row in self.doc.items})
 		net_qty_sent = self.get_net_qty_sent(order, item_codes)
 		precision = frappe.get_precision(self.doc.subcontract_data.order_supplied_items_field, "consumed_qty")
@@ -228,7 +231,7 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 				)
 
 	def get_net_qty_sent(self, order, item_codes):
-		"""Net qty of each item the order's transfers and their returns still supply, read with a lock."""
+		"""Net qty of each item the order's transfers and their returns still supply."""
 		se = frappe.qb.DocType("Stock Entry")
 		se_detail = frappe.qb.DocType("Stock Entry Detail")
 		qty = Case().when(se.is_return == 1, -se_detail.transfer_qty).else_(se_detail.transfer_qty)
@@ -247,8 +250,6 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 				)
 			)
 			.groupby(se_detail.item_code)
-			# a concurrent cancel of another transfer must not count as still supplying
-			.for_update()
 		).run()
 
 		return dict(rows)
