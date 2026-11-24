@@ -21,7 +21,7 @@ function get_filters() {
 	function get_dimensions() {
 		let result = [];
 		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
 			args: {
 				with_cost_center_and_project: true,
 			},
