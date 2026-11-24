@@ -4105,6 +4105,57 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.assertEqual(jv.tax_withholding_entries[0].taxable_amount, 50000)
 		self.assertEqual(jv.tax_withholding_entries[0].withholding_amount, 5000)
 
+	def test_gross_total_tds_excludes_valuation_charges(self):
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		create_tax_withholding_category(
+			category_name="Gross Total TDS Category",
+			rate=10,
+			from_date=fiscal_year[1],
+			to_date=fiscal_year[2],
+			account="TDS - _TC",
+			tax_deduction_basis="Gross Total",
+		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "Gross Total TDS Category")
+
+		pi = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"supplier": "Test TDS Supplier5",
+				"company": "_Test Company",
+				"apply_tds": 1,
+				"update_stock": 1,
+				"currency": "INR",
+				"credit_to": "Creditors - _TC",
+				"items": [
+					{
+						"item_code": "TCS Item",
+						"qty": 1,
+						"rate": 40000,
+						"warehouse": "_Test Warehouse - _TC",
+						"cost_center": "Main - _TC",
+					}
+				],
+				"taxes": [
+					{
+						"category": "Valuation",
+						"add_deduct_tax": "Add",
+						"charge_type": "Actual",
+						"account_head": "_Test Account Shipping Charges - _TC",
+						"cost_center": "Main - _TC",
+						"tax_amount": 1000,
+						"description": "Freight",
+					}
+				],
+			}
+		)
+		pi.save()
+		pi.submit()
+
+		self.assertEqual(pi.tax_withholding_entries[0].taxable_amount, 40000)
+		self.assertEqual(pi.tax_withholding_entries[0].withholding_amount, 4000)
+		self.assertEqual(pi.grand_total, 36000)
+		pi.cancel()
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object

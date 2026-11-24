@@ -682,6 +682,10 @@ class TaxWithholdingController:
 			if row.tax.is_tax_withholding_account:
 				continue
 
+			# a Valuation charge is not billed by this party, it only adds to the stock value
+			if row.tax.get("category") == "Valuation":
+				continue
+
 			item._item_total_tax_amount = flt(item._item_total_tax_amount + row.amount, precision)
 
 	def _evaluate_thresholds(self):
