@@ -1536,6 +1536,17 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		"Buying Settings",
 		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
 	)
+	def test_receipt_accepts_a_serial_no_field_in_another_case(self):
+		sco, received = make_order_sent_to_supplier(
+			"Serial Field Case", {"has_serial_no": 1, "serial_no_series": "SCOSC-.####"}
+		)
+
+		make_receipt_consuming_serial_no(sco, received.serial_no[0].lower()).save()
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
 	def test_serial_no_sent_on_a_serial_no_field_row_counts_once(self):
 		sco, received = make_order_sent_to_supplier(
 			"Serial Field Mix", {"has_serial_no": 1, "serial_no_series": "SCOSM-.####"}
