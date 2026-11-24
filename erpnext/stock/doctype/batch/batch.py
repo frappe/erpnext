@@ -340,14 +340,18 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 		qty=qty,
 	)
 
-	to_bundle_id = make_batch_bundle(
-		item_code=item_code,
-		warehouse=warehouse,
-		batches=frappe._dict({batch.name: qty}),
-		company=company,
-		type_of_transaction="Inward",
-		qty=qty,
-	)
+	if frappe.get_cached_value("Item", item_code, "has_serial_no"):
+		# move the picked serial nos into the new batch instead of creating new ones
+		to_bundle_id = make_split_serial_bundle(item_code, warehouse, company, from_bundle_id, batch.name)
+	else:
+		to_bundle_id = make_batch_bundle(
+			item_code=item_code,
+			warehouse=warehouse,
+			batches=frappe._dict({batch.name: qty}),
+			company=company,
+			type_of_transaction="Inward",
+			qty=qty,
+		)
 
 	stock_entry = frappe.get_doc(
 		dict(
@@ -419,6 +423,7 @@ def make_batch_bundle(
 	)
 
 
+<<<<<<< HEAD
 def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -460,6 +465,29 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 		query = query.where(batch.name == batches[0].batch_no)
 
 	return query.run(as_dict=True)
+=======
+def make_split_serial_bundle(item_code, warehouse, company, from_bundle_id, batch_no):
+	from frappe.utils import nowtime, today
+
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
+
+	serial_nos = frappe.get_all(
+		"Serial and Batch Entry", filters={"parent": from_bundle_id}, pluck="serial_no", order_by="idx"
+	)
+	bundle = frappe.get_doc(
+		{
+			"doctype": "Serial and Batch Bundle",
+			"item_code": item_code,
+			"warehouse": warehouse,
+			"company": company,
+			"voucher_type": "Stock Entry",
+			"type_of_transaction": "Inward",
+			"posting_datetime": combine_datetime(today(), nowtime()),
+			"entries": [{"serial_no": serial_no, "batch_no": batch_no, "qty": 1} for serial_no in serial_nos],
+		}
+	)
+	return bundle.save().name
+>>>>>>> 4e83929 (fix(stock): keep serial nos when splitting a serial and batch item)
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):

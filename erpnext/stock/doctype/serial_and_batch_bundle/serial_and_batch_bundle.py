@@ -221,12 +221,34 @@ class SerialandBatchBundle(Document):
 			return
 
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
+		if not serial_nos:
+			return
 
-		data = frappe.get_all(
-			"Serial and Batch Entry",
-			filters={"serial_no": ("in", serial_nos), "docstatus": 1, "qty": ("<", 0)},
-			fields=["serial_no", "parent"],
-		)
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		data = (
+			frappe.qb.from_(entry)
+			.join(bundle)
+			.on(bundle.name == entry.parent)
+			.select(entry.serial_no, entry.parent, entry.qty, bundle.voucher_type, bundle.voucher_no)
+			.where((entry.serial_no.isin(serial_nos)) & (entry.docstatus == 1))
+		).run(as_dict=True)
+
+		# a serial no issued by this same voucher is moved within it, not received again
+		moved = {
+			row.serial_no
+			for row in data
+			if row.qty < 0 and row.voucher_type == self.voucher_type and row.voucher_no == self.voucher_no
+		}
+		# an earlier voucher that issued and received it back (a batch split) did not use it up
+		received = {(row.serial_no, row.voucher_type, row.voucher_no) for row in data if row.qty > 0}
+		data = [
+			row
+			for row in data
+			if row.qty < 0
+			and row.serial_no not in moved
+			and (row.serial_no, row.voucher_type, row.voucher_no) not in received
+		]
 
 		note = "<br><br> <b>Note</b>:<br>"
 		for row in data:
