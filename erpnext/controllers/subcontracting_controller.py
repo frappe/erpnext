@@ -1694,6 +1694,9 @@ class SubcontractingController(StockController):
 		# Update consumed qty back in the subcontract order
 		if self.doctype in ["Subcontracting Order", "Subcontracting Receipt"]:
 			self.__get_subcontract_orders()
+			if self.doctype == "Subcontracting Order":
+				self.subcontract_orders = [self.name]
+
 			self.initialized_fields()
 			self.get_available_materials()
 			self.__update_consumed_qty_in_subcontract_order()
