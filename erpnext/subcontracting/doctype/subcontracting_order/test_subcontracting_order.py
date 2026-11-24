@@ -3,6 +3,7 @@
 
 import copy
 from collections import defaultdict
+from unittest.mock import PropertyMock, patch
 
 import frappe
 from frappe.utils import flt
@@ -25,6 +26,9 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 from erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost import (
 	execute as recalculate_subcontracting_order_service_cost,
 )
+from erpnext.patches.v16_0.set_reserved_components_return_cutoff import (
+	execute as set_reserved_components_return_cutoff,
+)
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -32,6 +36,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -2393,6 +2398,34 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		second_receipt.cancel()
 
 		self.assertEqual([reservation[1] for reservation in get_supplier_warehouse_reservations(sco)], [0, 0])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_cancel_replay_skips_returns_from_before_the_upgrade(self):
+		sco = make_reserving_order_with_new_items("Return Before Upgrade", qty=10)
+		row = sco.supplied_items[0]
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		rm_items[0]["qty"] = 5
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		# unreserved stock at the supplier let a return submit before the upgrade
+		make_stock_entry(item_code=row.rm_item_code, target=sco.supplier_warehouse, qty=4, basic_rate=100)
+		with patch.object(
+			StockEntry, "is_reserved_components_return", new_callable=PropertyMock, return_value=False
+		):
+			legacy_return = make_return_of_components(sco, qty=4)
+		set_reserved_components_return_cutoff()
+		receipt = make_subcontracting_receipt(sco.name)
+		receipt.items[0].qty = 5
+		receipt.save()
+		receipt.submit()
+
+		legacy_return.cancel()
+
+		self.assertEqual(
+			[reservation[:2] for reservation in get_supplier_warehouse_reservations(sco)], [(0, 5), (0, 0)]
+		)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reservation_counts_supplied_qty(self):
