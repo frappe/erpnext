@@ -813,8 +813,8 @@ class SubcontractingController(StockController):
 			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
 
 			if consumed_bundles.serial_nos:
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(consumed_bundles.serial_nos)
+				update_serial_nos_at_supplier(
+					self.available_materials[key], consumed_bundles.serial_nos, True
 				)
 
 			if consumed_bundles.batch_nos:
@@ -826,8 +826,8 @@ class SubcontractingController(StockController):
 
 			# Will be deprecated in v16
 			if row.serial_no and not consumed_bundles.serial_nos:
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(get_serial_nos(row.serial_no))
+				update_serial_nos_at_supplier(
+					self.available_materials[key], get_serial_nos(row.serial_no), True
 				)
 
 			# Will be deprecated in v16
@@ -1792,15 +1792,18 @@ class SubcontractingController(StockController):
 
 
 def update_serial_nos_at_supplier(details, serial_nos, is_return):
-	"""Add the serial nos a transfer sent to the supplier, or take out those a return brought back."""
+	"""Add the serial nos a transfer sent to the supplier, or take out those returned or consumed."""
+	# serial nos match case-insensitively, as in SerialBatchIdentity
 	if not is_return:
 		# a voucher's bundles repeat the serial nos of its rows that use the Serial No field
-		details.serial_no = list(dict.fromkeys([*details.serial_no, *serial_nos]))
+		listed = {}
+		for serial_no in [*details.serial_no, *serial_nos]:
+			listed.setdefault(serial_no.casefold(), serial_no)
+		details.serial_no = list(listed.values())
 		return
 
-	for serial_no in serial_nos:
-		if serial_no in details.serial_no:
-			details.serial_no.remove(serial_no)
+	returned = {serial_no.casefold() for serial_no in serial_nos}
+	details.serial_no = [serial_no for serial_no in details.serial_no if serial_no.casefold() not in returned]
 
 
 def get_consumed_qty_beyond_sent(rows, items_sent, itemwise_consumed_qty):
