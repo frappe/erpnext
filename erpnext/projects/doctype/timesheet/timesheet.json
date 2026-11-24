@@ -8,7 +8,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "naming_series",
   "company",
   "customer",
@@ -43,14 +42,14 @@
   "per_billed",
   "section_break_18",
   "note",
-  "amended_from"
+  "amended_from",
+  "title"
  ],
  "fields": [
   {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
@@ -90,7 +89,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-  "options": "Draft\nSubmitted\nPartially Billed\nBilled\nPayslip\nCompleted\nCancelled",
+   "options": "Draft\nSubmitted\nPartially Billed\nBilled\nPayslip\nCompleted\nCancelled",
    "print_hide": 1,
    "read_only": 1
   },
@@ -309,7 +308,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-30 11:04:12.882140",
+ "modified": "2026-11-11 16:47:41.715195",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
@@ -385,6 +384,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "ASC",
  "states": [],
