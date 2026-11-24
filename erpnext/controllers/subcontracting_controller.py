@@ -1700,7 +1700,7 @@ class SubcontractingController(StockController):
 		return consumed_qty
 
 	def get_serial_batches_sent_on_order_rows(self):
-		"""Net qty of each serial no and batch sent to the subcontractor, by the order's supplied row it was sent on."""
+		"""Qty of each serial no and batch sent to the subcontractor, by the order's supplied row it was sent on."""
 		se = frappe.qb.DocType("Stock Entry")
 		se_detail = frappe.qb.DocType("Stock Entry Detail")
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
@@ -1708,8 +1708,6 @@ class SubcontractingController(StockController):
 		order = se[self.subcontract_data.order_field]
 		rm_detail = se_detail[self.subcontract_data.rm_detail_field]
 		serial_no, batch_no = Coalesce(entry.serial_no, ""), Coalesce(entry.batch_no, "")
-		# the supplier's side of the transfer: inward when sent, outward when returned
-		supplier_side = Case().when(se.is_return == 1, "Outward").else_("Inward")
 		rows = (
 			frappe.qb.from_(se)
 			.inner_join(se_detail)
@@ -1726,7 +1724,9 @@ class SubcontractingController(StockController):
 				& order.isin(self.subcontract_orders)
 				& (Coalesce(rm_detail, "") != "")
 				& (bundle.docstatus == 1)
-				& (bundle.type_of_transaction == supplier_side)
+				# sends only: a return of components books a batch's return on any of its finished good's rows
+				& (se.is_return == 0)
+				& (bundle.type_of_transaction == "Inward")
 			)
 			.groupby(se_detail.item_code, order, bundle.warehouse, serial_no, batch_no, rm_detail)
 		).run()
