@@ -13,7 +13,7 @@ from frappe.core.doctype.user_permission.user_permission import get_user_permiss
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.permissions import get_allowed_docs_for_doctype
-from frappe.query_builder import DocType
+from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Coalesce, IfNull, Max, NullIf, Sum
 from frappe.utils import (
 	cint,
@@ -831,7 +831,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
-		self.validate_consumed_qty_is_still_supplied()
+		self.update_consumed_qty_in_order()
 		self.update_subcontracting_order_status()
 		self.update_pick_list_status()
 		self.cancel_stock_reserve_for_wip_and_fg()
@@ -5487,32 +5487,50 @@ class StockEntry(StockController, SubcontractingInwardController):
 							_("Batch {0} of Item {1} is disabled.").format(item.batch_no, item.item_code)
 						)
 
-	def validate_consumed_qty_is_still_supplied(self):
-		"""Receipts of the order must not have consumed the material this cancelled entry supplied."""
-		if not (self.purpose == "Send to Subcontractor" and self.get(self.subcontract_data.order_field)):
+	def update_consumed_qty_in_order(self):
+		"""Count the order's consumption again on the transfers left, and block a cancel that leaves some unsupplied."""
+		order = self.get(self.subcontract_data.order_field)
+		if not (self.purpose == "Send to Subcontractor" and order):
 			return
 
-		rm_detail_field = self.subcontract_data.rm_detail_field
-		order_rows = frappe.get_all(
-			self.subcontract_data.order_supplied_items_field,
-			filters={"name": ["in", [row.get(rm_detail_field) for row in self.items]]},
-			fields=["idx", "rm_item_code", "total_supplied_qty", "consumed_qty"],
-		)
+		frappe.get_doc(self.subcontract_data.order_doctype, order).set_consumed_qty_in_subcontract_order()
+		item_codes = list({row.item_code for row in self.items})
+		net_qty_sent = self.get_net_qty_sent(order, item_codes)
 		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
-		for row in order_rows:
-			if flt(row.consumed_qty, precision) > flt(row.total_supplied_qty, precision):
+		for item_code, consumed_qty in get_consumed_qty_by_item(order, item_codes).items():
+			qty = flt(consumed_qty - net_qty_sent.get(item_code, 0), precision)
+			if qty > 0:
 				frappe.throw(
 					_(
-						"Cannot cancel: receipts of {0} {1} already consumed {2} of Item {3} (row {4}), more than the {5} it would still have supplied."
-					).format(
-						self.subcontract_data.order_doctype,
-						self.get(self.subcontract_data.order_field),
-						row.consumed_qty,
-						row.rm_item_code,
-						row.idx,
-						row.total_supplied_qty,
-					)
+						"Cannot cancel: receipts of {0} {1} already consumed {2} more of Item {3} than it would still have supplied."
+					).format(self.subcontract_data.order_doctype, order, qty, item_code)
 				)
+
+	def get_net_qty_sent(self, order, item_codes):
+		"""Net qty of each item the order's transfers and their returns still supply, read with a lock."""
+		se = frappe.qb.DocType("Stock Entry")
+		se_detail = frappe.qb.DocType("Stock Entry Detail")
+		qty = Case().when(se.is_return == 1, -se_detail.transfer_qty).else_(se_detail.transfer_qty)
+		rows = (
+			frappe.qb.from_(se)
+			.inner_join(se_detail)
+			.on(se.name == se_detail.parent)
+			.select(se_detail.item_code, Sum(qty))
+			.where(
+				(se.docstatus == 1)
+				& (se[self.subcontract_data.order_field] == order)
+				& se_detail.item_code.isin(item_codes)
+				& (
+					(se.purpose == "Send to Subcontractor")
+					| ((se.purpose == "Material Transfer") & (se.is_return == 1))
+				)
+			)
+			.groupby(se_detail.item_code)
+			# a concurrent cancel of another transfer must not count as still supplying
+			.for_update()
+		).run()
+
+		return dict(rows)
 
 	def update_subcontract_order_supplied_items(self):
 		if self.get(self.subcontract_data.order_field) and (
@@ -7211,3 +7229,23 @@ def get_raw_material_entries(stock_entry, draft_only=False, for_update=False):
 def get_own_bundle_condition(sabb, stock_entry):
 	"""Bundles of this stock entry; a draft bundle is linked to its voucher only when the voucher is saved."""
 	return (sabb.voucher_type == "Stock Entry") & (Coalesce(sabb.voucher_no, "").isin(["", stock_entry]))
+
+
+def get_consumed_qty_by_item(order, item_codes):
+	"""Qty of each item the order's subcontracting receipts consumed, net of their returns."""
+	supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+	receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	rows = (
+		frappe.qb.from_(supplied_item)
+		.inner_join(receipt_item)
+		.on(receipt_item.name == supplied_item.reference_name)
+		.select(supplied_item.rm_item_code, Sum(supplied_item.consumed_qty))
+		.where(
+			(supplied_item.docstatus == 1)
+			& (receipt_item.subcontracting_order == order)
+			& supplied_item.rm_item_code.isin(item_codes)
+		)
+		.groupby(supplied_item.rm_item_code)
+	).run()
+
+	return dict(rows)
