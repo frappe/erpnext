@@ -1623,7 +1623,11 @@ def get_stock_qty_precision(ctx) -> int:
 	if doctype and not frappe.get_meta(doctype).istable:
 		doctype = f"{doctype} Item"
 
-	if doctype and frappe.db.exists("DocType", doctype) and frappe.get_meta(doctype).has_field("stock_qty"):
+	if (
+		doctype
+		and frappe.db.exists("DocType", doctype, cache=True)
+		and frappe.get_meta(doctype).has_field("stock_qty")
+	):
 		return frappe.get_precision(doctype, "stock_qty")
 	return frappe.get_precision("Item Price", "packing_unit")
 
