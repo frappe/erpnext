@@ -226,24 +226,25 @@ class SerialandBatchBundle(Document):
 
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
-		serial_no = frappe.qb.DocType("Serial No")
-		data = (
+		query = (
 			frappe.qb.from_(entry)
 			.join(bundle)
 			.on(bundle.name == entry.parent)
-			.join(serial_no)
-			.on(serial_no.name == entry.serial_no)
 			.select(entry.serial_no, entry.parent, bundle.voucher_type, bundle.voucher_no)
-			.where(
-				(entry.serial_no.isin(serial_nos))
-				& (entry.docstatus == 1)
-				& (entry.qty < 0)
-				# a serial no still in stock is moved (e.g. a batch split), not received again
-				& (Coalesce(serial_no.warehouse, "") == "")
+			.where((entry.serial_no.isin(serial_nos)) & (entry.docstatus == 1) & (entry.qty < 0))
+		)
+		if self.docstatus == 0:
+			# a serial no still in stock may be moving (e.g. a batch split), so check it on submit
+			serial_no = frappe.qb.DocType("Serial No")
+			query = (
+				query.join(serial_no)
+				.on(serial_no.name == entry.serial_no)
+				.where(Coalesce(serial_no.warehouse, "") == "")
 			)
-		).run(as_dict=True)
 
-		# so is one issued by this same voucher, whose outward row has already run
+		data = query.run(as_dict=True)
+
+		# a serial no issued by this same voucher is moved within it, not received again
 		moved = {
 			row.serial_no
 			for row in data
