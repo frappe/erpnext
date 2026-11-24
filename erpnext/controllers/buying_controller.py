@@ -153,9 +153,7 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.is_internal_transfer() and (
-			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
-		):
+		if self.get("is_internal_supplier") and self.is_stock_receipt():
 			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 
 			doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
@@ -181,8 +179,8 @@ class BuyingController(SubcontractingController):
 				elif item.serial_and_batch_bundle:
 					self.resize_package(item, "serial_and_batch_bundle", "qty")
 
-				if item.get(field) and bundle_ids.get(item.get(field)):
-					self.set_rejected_package(item, bundle_ids.get(item.get(field)))
+				if reference and bundle_ids.get(reference):
+					self.set_rejected_package(item, bundle_ids.get(reference))
 
 	def make_accepted_package(self, row, package) -> str:
 		"""Package of the material the row accepts.
@@ -190,9 +188,10 @@ class BuyingController(SubcontractingController):
 		A row that rejects nothing keeps the package of the in-transit warehouse it came out of. A
 		row that rejects material needs a package of the accepted warehouse instead, since that is
 		the entry it belongs to; the material leaving the in-transit warehouse gets a package of its
-		own when the receipt is submitted.
+		own when the receipt is submitted. An inter-company receipt has no in-transit warehouse, so it
+		always gets a package of the accepted warehouse.
 		"""
-		if not self.has_rejected_stock(row):
+		if self.keeps_transit_package(row):
 			return self.make_package_for_transfer(
 				package,
 				row.from_warehouse,
@@ -263,30 +262,37 @@ class BuyingController(SubcontractingController):
 	def set_rejected_package(self, row, package) -> None:
 		"""Package of the material the row rejects.
 
-		A receipt of an internal transfer builds no package for it on its own, so rejected material
+		A receipt from an internal supplier builds no package for it on its own, so rejected material
 		of a tracked item would have nothing to say where it came from.
 		"""
-		if not self.has_rejected_stock(row):
+		if not get_stock_qty(row, row.rejected_qty):
 			self.remove_package(row, "rejected_serial_and_batch_bundle")
 			return
 
-		if row.get("rejected_serial_and_batch_bundle"):
+		rejected_package = row.get("rejected_serial_and_batch_bundle")
+		if rejected_package:
 			self.resize_package(row, "rejected_serial_and_batch_bundle", "rejected_qty")
-			return
+			if (
+				frappe.db.get_value("Serial and Batch Bundle", rejected_package, "warehouse")
+				== row.rejected_warehouse
+			):
+				return
 
-		if not row.rejected_warehouse:
-			return
+		# the rejected warehouse changed: the selected rejected batches move with it
+		new_package = None
+		if row.rejected_warehouse:
+			new_package = self.make_package_for_transfer(
+				rejected_package or package,
+				row.rejected_warehouse,
+				type_of_transaction="Inward",
+				do_not_submit=True,
+				qty=get_stock_qty(row, row.rejected_qty),
+				exclude_serial_nos=self.get_accepted_serial_nos(row),
+			)
+			frappe.db.set_value("Serial and Batch Bundle", new_package, "is_rejected", 1)
 
-		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
-			package,
-			row.rejected_warehouse,
-			type_of_transaction="Inward",
-			do_not_submit=True,
-			qty=get_stock_qty(row, row.rejected_qty),
-			exclude_serial_nos=self.get_accepted_serial_nos(row),
-		)
-
-		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
+		self.remove_package(row, "rejected_serial_and_batch_bundle")
+		row.rejected_serial_and_batch_bundle = new_package
 
 	def remove_package(self, row, bundle_field) -> None:
 		"""Drop the draft package of a row that no longer moves that material."""
@@ -337,9 +343,10 @@ class BuyingController(SubcontractingController):
 
 		A row that rejects material carries the package of its accepted warehouse; a row that
 		rejects nothing carries the package of the in-transit warehouse it came out of. Editing the
-		split moves the package from one to the other.
+		split rebuilds the package from the delivered one; a change of warehouse only moves the
+		package's batches. An inter-company row always carries the package of its accepted warehouse.
 		"""
-		if not self.is_internal_receipt() or self.is_return:
+		if not (self.get("is_internal_supplier") and self.is_stock_receipt()) or self.is_return:
 			return
 
 		for row in self.get("items"):
@@ -356,17 +363,20 @@ class BuyingController(SubcontractingController):
 			if not details or details.docstatus != 0:
 				continue
 
-			if self.has_rejected_stock(row):
-				wanted = (row.warehouse, "Inward")
-			else:
+			if self.keeps_transit_package(row):
 				wanted = (row.from_warehouse, "Outward")
+			else:
+				wanted = (row.warehouse, "Inward")
 
 			if (details.warehouse, details.type_of_transaction) == wanted:
 				continue
 
-			row.serial_and_batch_bundle = self.make_accepted_package(
-				row, self.get_delivered_package(row) or package
-			)
+			if details.type_of_transaction != wanted[1]:
+				source = self.get_delivered_package(row) or package
+			else:
+				source = package
+
+			row.serial_and_batch_bundle = self.make_accepted_package(row, source)
 			frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
 	def get_internal_transfer_qty(self, row) -> float:
@@ -392,16 +402,21 @@ class BuyingController(SubcontractingController):
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
+			# set_missing_values sets the supplier and exchange rate only later
+			self.set_supplier_from_item_default()
+			self.set_price_list_currency("Buying")
+			exchange_rate = self.get_standalone_debit_note_exchange_rate()
 			for row in self.items:
 				if row.rate <= 0:
-					# override the rate with valuation rate
-					row.rate = _get_incoming_rate(
+					# override the rate with valuation rate, converted to the row's UOM and currency
+					conversion_factor = self.get_standalone_debit_note_conversion_factor(row)
+					valuation_rate = _get_incoming_rate(
 						{
 							"item_code": row.item_code,
 							"warehouse": row.warehouse,
 							"posting_date": self.get("posting_date"),
 							"posting_time": self.get("posting_time"),
-							"qty": row.qty,
+							"qty": flt(flt(row.qty) * conversion_factor, row.precision("stock_qty")),
 							"serial_and_batch_bundle": row.get("serial_and_batch_bundle"),
 							"company": self.company,
 							"voucher_type": self.doctype,
@@ -410,10 +425,48 @@ class BuyingController(SubcontractingController):
 						},
 						raise_error_if_no_rate=False,
 					)
+					row.rate = flt(
+						valuation_rate * conversion_factor / exchange_rate,
+						row.precision("rate"),
+					)
+					if not row.rate and flt(valuation_rate) > 0:
+						frappe.throw(
+							_(
+								"Row #{0}: The valuation rate of Item {1} rounds to 0 in the invoice currency. Increase the precision of Rate or enter the rate."
+							).format(row.idx, frappe.bold(row.item_code))
+						)
 
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
 					row.margin_rate_or_amount = 0.0
+
+	def get_standalone_debit_note_exchange_rate(self):
+		# without a price list, a missing currency is set from the supplier only later
+		currency = self.currency or frappe.get_cached_value("Supplier", self.supplier, "default_currency")
+		if (currency or self.company_currency) == self.company_currency:
+			return 1.0
+		return flt(self.conversion_rate) or 1.0
+
+	@staticmethod
+	def get_standalone_debit_note_conversion_factor(row):
+		"""Factor of the row's UOM, as its UOM and stock UOM are set from the item only later."""
+		item = (
+			frappe.get_cached_value("Item", row.item_code, ["stock_uom", "purchase_uom"], as_dict=True)
+			or frappe._dict()
+		)
+		if not row.uom:
+			# a factor sent without a UOM is not the factor of the UOM the row gets
+			row.uom = item.purchase_uom or item.stock_uom
+			row.conversion_factor = get_conversion_factor(row.item_code, row.uom, throw_if_missing=True).get(
+				"conversion_factor"
+			)
+
+		if row.uom == item.stock_uom:
+			return 1.0
+
+		return flt(row.conversion_factor) or get_conversion_factor(row.item_code, row.uom).get(
+			"conversion_factor"
+		)
 
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
@@ -1181,9 +1234,22 @@ class BuyingController(SubcontractingController):
 	def is_internal_receipt(self) -> bool:
 		return self.is_internal_transfer() and self.is_stock_receipt()
 
+	def keeps_transit_package(self, row) -> bool:
+		"""An internal transfer row that rejects nothing keeps the package of the in-transit warehouse."""
+		return self.is_internal_transfer() and not self.has_rejected_stock(row)
+
 	def has_rejected_stock(self, row) -> bool:
 		"""An internal receipt row whose rejected qty doesn't round to 0 in the stock UOM."""
 		return self.is_internal_receipt() and bool(get_stock_qty(row, row.rejected_qty))
+
+	def get_accepted_stock_qty(self, row) -> float:
+		"""Accepted qty in the stock UOM. A return takes back no more than its receipt row put in the
+		warehouse, less the row's other returns, so returns of parts add up to it. A row with a package
+		is not capped, as its package holds the qty."""
+		if not self.is_return or row.get("serial_and_batch_bundle"):
+			return get_stock_qty(row, row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, row.warehouse)
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
@@ -1421,7 +1487,7 @@ class BuyingController(SubcontractingController):
 
 			source_reversal_sle = None
 
-			pr_qty = get_stock_qty(d, d.qty)
+			pr_qty = self.get_accepted_stock_qty(d)
 			source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
 			if source_qty and (d.warehouse or not pr_qty):
@@ -1966,6 +2032,20 @@ def get_stock_qty(row, qty) -> float:
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
 
 
+def get_posted_stock_qty_by_row(row_names, warehouses) -> dict:
+	"""Stock qty each row's entries moved in the warehouses."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	return dict(
+		frappe.qb.from_(sle)
+		.select(sle.voucher_detail_no, Sum(sle.actual_qty))
+		.where(
+			sle.warehouse.isin(warehouses) & (sle.is_cancelled == 0) & sle.voucher_detail_no.isin(row_names)
+		)
+		.groupby(sle.voucher_detail_no)
+		.run()
+	)
+
+
 def get_transit_amount(row, qty) -> float:
 	"""Value of qty of an internal transfer row at its transit rate, as the stock ledger moves it."""
 	return get_stock_qty(row, qty) * flt(row.sales_incoming_rate) / flt(row.conversion_factor)
@@ -1992,3 +2072,20 @@ def rounds_stock_qty(row) -> bool:
 		frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
 		or frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")
 	)
+
+
+def get_returned_stock_qty_status_args() -> dict:
+	"""Status updater args that add up the received stock qty of a receipt's returns. Add up qty * conversion
+	factor, rounded once at the total where the receipt row rounds its received stock qty, so parts add up to it."""
+	return {
+		"source_field": "-1 * received_qty * conversion_factor",
+		"round_to_target_precision": rounds_received_stock_qty,
+	}
+
+
+def rounds_received_stock_qty(row) -> bool:
+	"""Whether a receipt row stores its received stock qty rounded: a stock or asset row rounds it when valued."""
+	is_stock_item, is_fixed_asset = frappe.get_cached_value(
+		"Item", row.item_code, ["is_stock_item", "is_fixed_asset"]
+	)
+	return bool(is_stock_item or is_fixed_asset or rounds_stock_qty(row))

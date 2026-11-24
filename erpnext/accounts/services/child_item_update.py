@@ -65,6 +65,7 @@ class ChildItemUpdater:
 
 		self._check_permissions("write")
 		self._validate_parent_status()
+		self._validate_rows_belong_to_parent(data)
 		self._validate_changed_uoms(data)
 
 		if self.parent_doctype == "Sales Order":
@@ -381,6 +382,16 @@ class ChildItemUpdater:
 					_("Cannot update items of Quotation {0} because it has expired.").format(quotation.name)
 				)
 
+	def _validate_rows_belong_to_parent(self, data: list) -> None:
+		item_row_names = {row.name for row in self.parent.items}
+		for d in data:
+			if d.get("docname") and d.get("docname") not in item_row_names:
+				frappe.throw(
+					_("Item row {0} does not belong to {1} {2}.").format(
+						frappe.bold(d.get("docname")), _(self.parent_doctype), frappe.bold(self.parent.name)
+					)
+				)
+
 	def _validate_changed_uoms(self, data: list) -> None:
 		current_uoms = {row.name: row.uom for row in self.parent.get(self.child_docname)}
 		validate_item_uoms(
@@ -676,26 +687,23 @@ def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 		frappe.throw(_("Cannot delete an item which has been ordered"))
 
 
-def update_bin_on_delete(row, doctype: str) -> None:
-	"""Update bin quantities after a child item row is deleted."""
-	from erpnext.stock.stock_balance import (
-		get_indented_qty,
-		get_ordered_qty,
-		get_reserved_qty,
-		update_bin_qty,
-	)
+def update_bin_on_delete(rows, parent) -> None:
+	"""Update bin quantities after child item rows are deleted."""
+	row_names = [row.name for row in rows]
+	if parent.doctype == "Sales Order":
+		# covers a bundle row's components too
+		parent.update_reserved_qty(row_names)
+		return
 
-	qty_dict = {}
-
-	if doctype == "Sales Order":
-		qty_dict["reserved_qty"] = get_reserved_qty(row.item_code, row.warehouse)
-	else:
+	parent.update_ordered_qty(row_names)
+	# the request's warehouse, which the order row may have changed
+	request_items = {}
+	for row in rows:
 		if row.material_request_item:
-			qty_dict["indented_qty"] = get_indented_qty(row.item_code, row.warehouse)
-		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
+			request_items.setdefault(row.material_request, []).append(row.material_request_item)
 
-	if row.warehouse:
-		update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	for material_request, items in request_items.items():
+		frappe.get_doc("Material Request", material_request).update_requested_qty(items)
 
 
 def validate_no_issued_proforma(rows) -> None:
@@ -835,8 +843,8 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	if parent.doctype not in ("Quotation", "Supplier Quotation"):
 		parent.update_prevdoc_status()
-		for d in deleted_children:
-			update_bin_on_delete(d, parent.doctype)
+		if deleted_children:
+			update_bin_on_delete(deleted_children, parent)
 
 	return bool(deleted_children)
 

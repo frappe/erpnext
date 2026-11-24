@@ -7,6 +7,7 @@ import frappe
 from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
+from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
@@ -546,6 +547,35 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln.get_items()
 
 		self.assertFalse(pln.po_items)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_part_of_sales_order_is_not_planned_again(self):
+		fg_item = make_item("_Test FG For Reserved SO Planning", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[make_item("_Test RM For Reserved SO Planning").name])
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse - _TC", qty=4, basic_rate=100)
+		sales_order = make_sales_order(item_code=fg_item, qty=10)
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		def plan_sales_order():
+			plan = frappe.new_doc("Production Plan")
+			plan.company = sales_order.company
+			plan.get_items_from = "Sales Order"
+			plan.append("sales_orders", {"sales_order": sales_order.name})
+			plan.get_items()
+			return plan
+
+		first_plan, second_plan = plan_sales_order(), plan_sales_order()
+		self.assertEqual([row.planned_qty for row in first_plan.po_items], [6])
+		first_plan.po_items[0].planned_qty = 2
+		first_plan.submit()
+		self.assertRaisesRegex(frappe.ValidationError, "Only 4.0 Nos is left to plan", second_plan.submit)
+
+		last_plan = plan_sales_order()
+		self.assertEqual([row.planned_qty for row in last_plan.po_items], [4])
+		last_plan.submit()
+
+		self.assertFalse(plan_sales_order().po_items)
+		self.assertFalse(sales_order_query(filters={"company": sales_order.company, "item_code": fg_item}))
 
 	def test_production_plan_combine_items(self):
 		"Test combining FG items in Production Plan."
@@ -3019,8 +3049,82 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual(plan.po_items, [])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_work_order_output_of_a_plan_leaves_the_rest_to_plan(self):
+		sales_order = self.make_sales_order_with_reserved_work_order_output(
+			"_Test FG For Planned WO Output", link_sales_order_item=True, from_production_plan=True
+		)
+		fg_item = sales_order.items[0].item_code
+		rows = sales_order_query(filters={"company": sales_order.company, "item_code": fg_item})
+		self.assertEqual([row[0] for row in rows], [sales_order.name])
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = sales_order.company
+		plan.item_code = fg_item
+		self.assertEqual([row.name for row in get_sales_orders(plan)], [sales_order.name])
+
+		self.assert_plan_pulls_the_unmade_qty(sales_order).submit()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_output_of_a_planned_work_order_without_sales_order_item_counts_once(self):
+		sales_order = self.make_sales_order_with_reserved_work_order_output(
+			"_Test FG For Planned Unlinked WO Output", link_sales_order_item=False, from_production_plan=True
+		)
+		self.assert_plan_pulls_the_unmade_qty(sales_order)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_bundle_component_is_not_planned_again(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.mapper import create_pick_list
+
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item("_Test Reserved Bundle Component", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=[make_item("_Test Reserved Bundle Component RM").name])
+		make_stock_entry(item_code=component, target=warehouse, qty=4, basic_rate=100)
+		bundle = make_item("_Test Bundle With Reserved Component", {"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=10)
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		pick_list.create_stock_reservation_entries(notify=False)
+
+		self.assert_plan_pulls_the_unmade_qty(sales_order, 6)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_row_of_a_repeated_bundle_component_is_planned_on_its_own(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item("_Test Repeated Bundle Component", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=[make_item("_Test Repeated Bundle Component RM").name])
+		make_stock_entry(item_code=component, target=warehouse, qty=10, basic_rate=100)
+		bundle = make_item("_Test Bundle With Repeated Component", {"is_stock_item": 0}).name
+		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		for qty in (1, 2):
+			product_bundle.append("items", {"item_code": component, "qty": qty})
+		product_bundle.insert()
+		if product_bundle.meta.is_submittable:
+			product_bundle.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=10)
+		sales_order.create_stock_reservation_entries(
+			items_details=[
+				{
+					"sales_order_item": sales_order.packed_items[1].name,
+					"item_code": component,
+					"qty_to_reserve": 10,
+					"warehouse": warehouse,
+				}
+			],
+			notify=False,
+		)
+
+		plan = create_production_plan(
+			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
+		)
+		self.assertEqual(sorted(row.planned_qty for row in plan.po_items), [10, 10])
+
 	def make_sales_order_with_reserved_work_order_output(
-		self, fg_item, link_sales_order_item, reserved_stock_qty=0
+		self, fg_item, link_sales_order_item, reserved_stock_qty=0, from_production_plan=False
 	):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
@@ -3057,6 +3161,17 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		if link_sales_order_item:
 			work_order.sales_order_item = sales_order.items[0].name
+		if from_production_plan:
+			plan = create_production_plan(
+				get_items_from="Sales Order",
+				sales_order=sales_order,
+				skip_getting_mr_items=True,
+				do_not_save=1,
+			)
+			plan.po_items[0].planned_qty = work_order.qty
+			plan.submit()
+			work_order.production_plan = plan.name
+			work_order.production_plan_item = plan.po_items[0].name
 		work_order.submit()
 		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 6)).submit()
 		self.assertEqual(
@@ -3065,11 +3180,12 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		return sales_order
 
-	def assert_plan_pulls_the_unmade_qty(self, sales_order):
+	def assert_plan_pulls_the_unmade_qty(self, sales_order, unmade_qty=4):
 		plan = create_production_plan(
 			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
 		)
-		self.assertEqual([row.planned_qty for row in plan.po_items], [4])
+		self.assertEqual([row.planned_qty for row in plan.po_items], [unmade_qty])
+		return plan
 
 	def test_production_plan_cannot_exceed_sales_order_qty(self):
 		so = make_sales_order(
@@ -3582,6 +3698,63 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Completed")
 		bin.reload()
 		self.assertEqual(bin.reserved_qty_for_production_plan, 0)
+
+	def test_work_order_closed_short_leaves_its_rest_to_order_again(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		warehouse = "_Test Warehouse - _TC"
+		properties = {"is_stock_item": 1, "valuation_rate": 10, "stock_uom": "Kg"}
+		rm_item = make_item(properties=properties).name
+		fg_item = make_item(properties=properties).name
+		make_bom(
+			item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, process_loss_percentage=10
+		)
+		make_stock_entry(item_code=rm_item, qty=10, rate=10, target=warehouse)
+
+		plan = create_production_plan(item_code=fg_item, planned_qty=10, warehouse=warehouse, stock_uom="Kg")
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.update({"skip_transfer": 1, "source_warehouse": warehouse, "fg_warehouse": warehouse})
+		work_order.submit()
+		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 6)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		# 6 made with 10% unplanned loss leaves 5.4 good, so 4.6 is ordered again
+		pending = ProductionPlanWorkOrderQuantities(plan.name).get_pending_quantities(plan)
+		self.assertEqual(pending["production_plan_item"][plan.po_items[0].name], 4.6)
+
+	def test_closed_work_order_that_made_all_good_output_leaves_nothing_pending(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(
+			item=fg_item,
+			raw_materials=[rm_item],
+			quantity=10,
+			rm_qty=10,
+			process_loss_percentage=10,
+			source_warehouse=warehouse,
+		)
+		make_stock_entry(item_code=rm_item, qty=20, rate=10, target=warehouse)
+
+		# 10 Nos with 10% planned loss orders 12
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=10, warehouse=warehouse, consider_process_loss=1
+		)
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.update({"skip_transfer": 1, "source_warehouse": warehouse, "fg_warehouse": warehouse})
+		work_order.submit()
+		# made with no loss, so 10 of the 12 already cover the plan
+		bom.db_set("process_loss_percentage", 0)
+		frappe.get_doc(make_se_from_wo(work_order.name, "Manufacture", 10)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		pending = ProductionPlanWorkOrderQuantities(plan.name).get_pending_quantities(plan)
+		self.assertEqual(pending["production_plan_item"][plan.po_items[0].name], 0)
 
 	def test_plan_reserves_sub_assembly_taken_from_stock(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -6578,8 +6751,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(component_rows[0].is_phantom_item, 0)
 
 	def test_sales_order_query_follows_company_user_permission(self):
-		from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
-
 		item = make_item(properties={"is_stock_item": 1}).name
 		sales_order = make_sales_order(item_code=item, qty=5, rate=100).name
 		other_company_planner = create_manufacturing_user("planner-tc1@example.com", "_Test Company 1")
@@ -6595,8 +6766,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual([row[0] for row in rows], [sales_order])
 
 	def test_sales_order_query_without_user_permission_lists_all_open_orders(self):
-		from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
-
 		item = make_item(properties={"is_stock_item": 1}).name
 		sales_order = make_sales_order(item_code=item, qty=5, rate=100).name
 		planner = create_manufacturing_user("planner-unrestricted@example.com")

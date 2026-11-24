@@ -3,6 +3,7 @@
 
 
 import json
+from datetime import datetime
 
 import frappe
 from frappe import _, throw
@@ -86,6 +87,8 @@ class Task(NestedSet):
 	def validate(self):
 		self.validate_parent_project()
 		self.validate_children_project()
+		self.validate_group_has_no_children()
+		self.set_default_end_date_if_missing()
 		self.validate_dates()
 		self.validate_progress()
 		self.validate_status()
@@ -93,7 +96,6 @@ class Task(NestedSet):
 		self.update_depends_on()
 		self.validate_dependencies_for_template_task()
 		self.validate_completed_on()
-		self.set_default_end_date_if_missing()
 		self.set_default_weight()
 		self.validate_parent_is_group()
 		self.validate_parent_not_completed()
@@ -104,6 +106,7 @@ class Task(NestedSet):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
 		self.validate_from_to_dates("act_start_date", "act_end_date")
 		self.validate_parent_expected_end_date()
+		self.validate_children_expected_end_date()
 		self.validate_parent_project_dates()
 
 	def set_default_weight(self):
@@ -130,6 +133,27 @@ class Task(NestedSet):
 				).format(format_date(parent_exp_end_date)),
 				"exp_end_date",
 				"parent_task",
+			)
+
+	def validate_children_expected_end_date(self):
+		if self.is_new() or not self.exp_end_date or not self.has_value_changed("exp_end_date"):
+			return
+
+		later_children = frappe.get_all(
+			"Task",
+			filters={
+				"parent_task": self.name,
+				"status": ["!=", "Cancelled"],
+				"exp_end_date": [">=", add_days(getdate(self.exp_end_date), 1)],
+			},
+			pluck="name",
+		)
+		if later_children:
+			self.report_date_conflict(
+				_("Expected End Date cannot be before the Expected End Date of child tasks {0}.").format(
+					", ".join(get_link_to_form("Task", task) for task in later_children)
+				),
+				"exp_end_date",
 			)
 
 	def validate_parent_project_dates(self):
@@ -258,6 +282,17 @@ class Task(NestedSet):
 					),
 					ParentIsGroupError,
 				)
+
+	def validate_group_has_no_children(self):
+		if self.is_group or self.is_new() or not self.has_value_changed("is_group"):
+			return
+
+		if child_tasks := frappe.get_all("Task", filters={"parent_task": self.name}, pluck="name"):
+			frappe.throw(
+				_("Cannot convert Task to non-group because the following child Tasks exist: {0}.").format(
+					", ".join(get_link_to_form("Task", task) for task in child_tasks)
+				)
+			)
 
 	def validate_parent_project(self):
 		"""Keep a task in its parent task's project."""
@@ -416,7 +451,7 @@ class Task(NestedSet):
 		return self.name in reachable
 
 	def reschedule_dependent_tasks(self):
-		end_date = self.exp_end_date or self.act_end_date
+		end_date = self.get_schedule_end_date()
 		if not end_date or self.flags.ignore_reschedule:
 			return
 
@@ -428,24 +463,71 @@ class Task(NestedSet):
 		if not dependent_parents:
 			return
 
+		previous_end_date = self.get_previous_end_date_if_moved_earlier(end_date)
+		other_end_dates = self.get_other_predecessor_end_dates(dependent_parents) if previous_end_date else {}
+		day_after_previous_end = add_days(getdate(previous_end_date), 1) if previous_end_date else None
+
 		for task_name in frappe.get_all(
 			"Task",
 			filters={"project": self.project, "name": ["in", dependent_parents]},
 			pluck="name",
 		):
 			task = frappe.get_doc("Task", task_name)
-			if (
-				task.exp_start_date
-				and task.exp_end_date
-				and task.exp_start_date < get_datetime(end_date)
-				and task.status in ("Open", "Working", "Overdue")
-			):
-				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
-				task.exp_start_date = add_days(end_date, 1)
-				task.exp_end_date = add_days(task.exp_start_date, task_duration)
-				task.flags.ignore_recursion_check = True
-				task.flags.rescheduled = True
-				task.save(ignore_permissions=self.flags.ignore_permissions)
+			if not task.exp_start_date or task.status not in ("Open", "Working", "Overdue"):
+				continue
+
+			if get_datetime(task.exp_start_date) <= end_date:
+				task.move_to_start_after(end_date)
+			elif getdate(task.exp_start_date) == day_after_previous_end:
+				# It was scheduled from the old end: move it back, but not before another predecessor ends.
+				new_end_date = get_latest_date(end_date, other_end_dates.get(task_name))
+				if getdate(new_end_date) >= getdate(previous_end_date):
+					continue
+				task.move_to_start_after(new_end_date)
+			else:
+				continue
+
+			task.flags.ignore_recursion_check = True
+			task.flags.rescheduled = True
+			task.save(ignore_permissions=self.flags.ignore_permissions)
+
+	def get_schedule_end_date(self):
+		"""The later of the expected and actual end, as a task that overruns still blocks its dependents."""
+		return get_latest_date(self.exp_end_date, self.act_end_date)
+
+	def get_previous_end_date_if_moved_earlier(self, end_date):
+		doc_before_save = self.get_doc_before_save()
+		previous_end_date = doc_before_save and doc_before_save.get_schedule_end_date()
+		if previous_end_date and getdate(previous_end_date) > getdate(end_date):
+			return previous_end_date
+
+	def get_other_predecessor_end_dates(self, dependents: list[str]) -> dict:
+		"""Latest end of the tasks each dependent waits for, other than this one."""
+		depends_on = frappe.qb.DocType("Task Depends On")
+		task = frappe.qb.DocType("Task")
+		rows = (
+			frappe.qb.from_(depends_on)
+			.join(task)
+			.on(task.name == depends_on.task)
+			.select(depends_on.parent, task.exp_end_date, task.act_end_date)
+			.where(depends_on.parent.isin(dependents) & (depends_on.task != self.name))
+		).run(as_dict=True)
+
+		end_dates = {}
+		for row in rows:
+			end_dates[row.parent] = get_latest_date(
+				end_dates.get(row.parent), row.exp_end_date, row.act_end_date
+			)
+		return end_dates
+
+	def move_to_start_after(self, end_date):
+		"""Start on the day after `end_date`, keeping this task's time of day and duration."""
+		start_date = get_datetime(self.exp_start_date)
+		new_start_date = datetime.combine(add_days(getdate(end_date), 1), start_date.time())
+		shift = new_start_date - start_date
+		self.exp_start_date = new_start_date
+		if self.exp_end_date:
+			self.exp_end_date = get_datetime(self.exp_end_date) + shift
 
 	def has_webform_permission(self, project=None):
 		project_user = frappe.db.get_value(
@@ -659,6 +741,10 @@ def add_multiple_tasks(data: str | list, parent: str, project: str | None = None
 		new_doc["subject"] = d.get("subject")
 		new_task = frappe.get_doc(new_doc)
 		new_task.insert()
+
+
+def get_latest_date(*dates):
+	return max((get_datetime(d) for d in dates if d), default=None)
 
 
 def on_doctype_update():

@@ -2260,6 +2260,202 @@ class TestBOM(ERPNextTestSuite):
 		bom.save()
 		self.assertEqual(bom.process_loss_qty, 0)
 
+	def test_price_list_in_bom_currency_uses_bom_conversion_rate(self):
+		price_list = make_usd_buying_price_list(83)
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		bom = make_usd_bom(
+			make_item(properties={"is_stock_item": 1}).name,
+			[{"item_code": rm_item, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+		)
+
+		# the BOM's own conversion rate (80) applies, not the exchange rate (83)
+		self.assertEqual(bom.plc_conversion_rate, 80)
+		self.assertEqual(bom.items[0].rate, 10)
+
+		# a row fetched on a form still holding the exchange rate
+		bom.plc_conversion_rate = 83
+		detail = bom.get_bom_material_detail({"item_code": rm_item, "qty": 1, "fetch_rate": True})
+		self.assertEqual(detail["rate"], 10)
+
+	def test_operation_hour_rate_follows_workstation_and_conversion_rate(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = {
+			rate: make_workstation(workstation_name=f"_Test BOM Hour Rate {rate}", hour_rate_rent=rate).name
+			for rate in (100, 300, 0)
+		}
+		operation = make_operation(operation="_Test BOM Hour Rate Op", workstation=workstation[100]).name
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": make_item(properties={"is_stock_item": 1}).name,
+				"company": "_Test Company",
+				"currency": "USD",
+				"conversion_rate": 50,
+				"with_operations": 1,
+				"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+				"operations": [{"operation": operation, "workstation": workstation[100], "time_in_mins": 60}],
+			}
+		).insert()
+		self.assertEqual(bom.operations[0].hour_rate, 2)
+
+		bom.conversion_rate = 100
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (1, 100))
+
+		bom.operations[0].workstation = workstation[300]
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (3, 300))
+
+		bom.operations[0].workstation = workstation[0]
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (0, 0))
+
+		bom.operations[0].hour_rate = 10
+		bom.conversion_rate = 83
+		bom.save()
+		bom.conversion_rate = 80
+		bom.save()
+		self.assertEqual(bom.operations[0].hour_rate, 10.38)
+
+		bom.reload()
+		bom.conversion_rate = 70
+		bom.save()
+		self.assertEqual(bom.operations[0].hour_rate, 11.86)
+
+	def test_batch_operating_cost_matches_work_order(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
+		for batch_based_operation, cost_based_on_bom_qty in ((0, 1), (1, 0)):
+			operation = make_operation(
+				operation=f"_Test BOM Batch Op {batch_based_operation}", workstation=workstation
+			)
+			operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": batch_based_operation})
+			operation.save()
+
+			bom = make_batch_operation_bom(
+				operation.name, workstation, set_cost_based_on_bom_qty=cost_based_on_bom_qty
+			)
+			work_order = make_wo_order_test_record(
+				production_item=bom.item, bom_no=bom.name, qty=10, stock_uom="Nos", do_not_save=True
+			)
+			work_order.insert()
+			self.assertEqual(bom.operating_cost * 10, 100)
+			self.assertEqual(work_order.planned_operating_cost, 100)
+
+	def test_valuation_rate_secondary_item_cost_net_of_process_loss(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 10,
+						"process_loss_per": 20,
+					}
+				],
+			}
+		).insert()
+
+		# only 8 of the 10 scrap units are made
+		self.assertEqual(bom.secondary_items_cost, 40)
+		self.assertEqual(bom.total_cost, 60)
+
+	def test_valuation_rate_secondary_item_cost_uses_rounded_process_loss_qty(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		# loss qty precision differs from the BOM quantity precision
+		make_property_setter("BOM Secondary Item", "process_loss_qty", "precision", 2, "Select")
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 20000}).name
+		scrap_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10000}
+		).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 20000}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 1,
+						"process_loss_per": 33.33,
+					}
+				],
+			}
+		).insert()
+
+		# cost must match the stored (rounded) process loss qty
+		row = bom.secondary_items[0]
+		self.assertEqual(row.cost, flt(10000 * (row.stock_qty - row.process_loss_qty), row.precision("cost")))
+
+		# Update Cost saves the loss its cost is net of, over a loss stored at another precision
+		frappe.db.set_value("BOM Secondary Item", row.name, "process_loss_qty", 0.333)
+		bom.update_cost()
+		self.assertEqual(frappe.db.get_value("BOM Secondary Item", row.name, "process_loss_qty"), 0.33)
+
+	def test_valuation_rate_secondary_item_loss_rounded_above_its_qty_is_capped(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		make_property_setter("BOM Secondary Item", "process_loss_qty", "precision", 2, "Select")
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10000}
+		).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 0.006,
+						"process_loss_per": 90,
+					}
+				],
+			}
+		).insert()
+
+		# 0.0054 rounds to 0.01, above the 0.006 made
+		row = bom.secondary_items[0]
+		self.assertEqual(row.process_loss_qty, row.stock_qty)
+		self.assertEqual(row.cost, 0)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
@@ -2339,6 +2535,80 @@ class TestBOM(ERPNextTestSuite):
 		bom.currency = "EUR"
 		bom.save()
 		self.assertEqual(bom.conversion_rate, 90)
+
+	def test_update_cost_costs_batch_operation_per_batch(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
+		# Replace BOM recalculates without refreshing hour rates, which does not save the rows
+		for update_hour_rate in (1, 0):
+			operation = make_operation(
+				operation=f"_Test BOM Batch Op Update Cost {update_hour_rate}", workstation=workstation
+			)
+			bom = make_batch_operation_bom(operation.name, workstation)
+			self.assertEqual(bom.operating_cost, 100)
+
+			operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
+			operation.save()
+			bom.update_cost(update_hour_rate=update_hour_rate)
+			bom.reload()
+			self.assertEqual(bom.operating_cost, 10)
+			# derived from the Operation, not stored on the row
+			self.assertFalse(bom.operations[0].set_cost_based_on_bom_qty)
+
+	def test_operation_no_longer_batch_based_is_not_costed_per_batch(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
+		operation = make_operation(operation="_Test BOM Batch Op Turned Off", workstation=workstation)
+		operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
+		operation.save()
+		bom = make_batch_operation_bom(operation.name, workstation)
+		self.assertEqual(bom.operating_cost, 10)
+
+		operation.create_job_card_based_on_batch_size = 0
+		operation.save()
+		bom.update_cost()
+		bom.reload()
+		self.assertEqual(bom.operating_cost, 100)
+
+	def test_fixed_time_operation_is_not_costed_per_batch(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
+		operation = make_operation(operation="_Test BOM Batch Op Fixed Time", workstation=workstation)
+		operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
+		operation.save()
+
+		bom = make_batch_operation_bom(operation.name, workstation, fixed_time=1, set_cost_based_on_bom_qty=1)
+		self.assertEqual(bom.operating_cost, 100)
+
+
+def make_batch_operation_bom(operation, workstation, **row_values):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": make_item(properties={"is_stock_item": 1}).name,
+			"company": "_Test Company",
+			"currency": "INR",
+			"with_operations": 1,
+			"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+			"operations": [
+				{
+					"operation": operation,
+					"workstation": workstation,
+					"time_in_mins": 60,
+					"batch_size": 10,
+					**row_values,
+				}
+			],
+		}
+	).insert()
+	bom.submit()
+	return bom
 
 
 def make_stage_items():

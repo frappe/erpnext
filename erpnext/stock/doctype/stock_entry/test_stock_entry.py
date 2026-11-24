@@ -4831,6 +4831,95 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
 
+	def make_co_product_repack(self):
+		"""Unsaved Repack of 2 FG from 2,000 of raw material, with a co-product at 20% of component cost."""
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		co_product = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=20, basic_rate=100)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": rm_item, "qty": 10})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 2,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		bom.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = entry.stock_entry_type = "Repack"
+		entry.update(
+			{
+				"company": "_Test Company",
+				"from_bom": 1,
+				"bom_no": bom.name,
+				"fg_completed_qty": 2,
+				"from_warehouse": warehouse,
+				"to_warehouse": warehouse,
+			}
+		)
+		entry.get_items()
+		return entry, fg_item, co_product
+
+	def append_manual_finished_good(self, entry, item_code, qty, rate):
+		entry.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": qty,
+				"t_warehouse": entry.to_warehouse,
+				"is_finished_item": 1,
+				"set_basic_rate_manually": 1,
+				"basic_rate": rate,
+			},
+		)
+
+	def test_repack_co_product_shares_the_cost_left_after_a_manual_finished_good(self):
+		"""A manual finished good takes its value first; the BOM percentages split what is left."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		next(d for d in entry.items if d.is_finished_item).qty = 1
+		self.append_manual_finished_good(entry, fg_item, qty=1, rate=300)
+		entry.insert()
+
+		amounts = {(d.item_code, d.set_basic_rate_manually): d.basic_amount for d in entry.items}
+		self.assertEqual(amounts[(co_product, 0)], 340)
+		self.assertEqual(amounts[(fg_item, 0)], 1360)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
+		entry.submit()
+		ledger = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": entry.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		for row in entry.items:
+			if row.t_warehouse:
+				self.assertEqual(ledger[row.name], row.basic_amount)
+		# in equals out, so nothing is left for Stock Adjustment
+		self.assertEqual(sum(ledger.values()), 0)
+
+	def test_repack_co_product_keeps_its_share_when_every_finished_good_is_manual(self):
+		"""With no automatic finished good, the co-product takes its percentage of the whole cost."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		entry.remove(next(d for d in entry.items if d.is_finished_item))
+		self.append_manual_finished_good(entry, fg_item, qty=2, rate=800)
+		entry.insert()
+
+		co_row = next(d for d in entry.items if d.item_code == co_product)
+		self.assertEqual(co_row.basic_amount, 400)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
 	def test_secondary_item_with_zero_cost_allocation_carries_no_value(self):
 		"""A BOM that allocates 0% to a secondary item gives the finished good everything."""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -6050,7 +6139,17 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		self.assertEqual(ceil_qty_if_uom_has_whole_number(2.3, "Nos"), 3)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(3 * 0.1 / 0.3, "Nos"), 1)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(1 / 2500, "Nos"), 1)
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
+	def test_ceil_qty_ignores_float_noise(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			ceil_qty_if_uom_has_whole_number,
+		)
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(0.07 * 100, "Nos"), 7)
 
 	def test_ceil_qty_no_rounding_for_decimal_uom(self):
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
@@ -7319,6 +7418,21 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 		self.assertGreaterEqual(len(job_cards), 2, "fixture must produce at least two job cards")
 		return work_order, job_cards
 
+	def add_bom_scrap_row(self, bom_no, item_code):
+		"""Add a Scrap row to a submitted BOM, so Job Card rows can link to it."""
+		row = frappe.get_doc(
+			{
+				"doctype": "BOM Secondary Item",
+				"parent": bom_no,
+				"parenttype": "BOM",
+				"parentfield": "secondary_items",
+				"item_code": item_code,
+				"secondary_item_type": "Scrap",
+			}
+		)
+		row.db_insert()
+		return row.name
+
 	def test_secondary_item_columns_come_from_one_line(self):
 		"""stock_uom is a stored snapshot, so it can differ between a work order's job cards.
 
@@ -7364,14 +7478,15 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 
 		scrap_item = make_item("_Test JC Secondary Bom Row", {"is_stock_item": 1, "stock_uom": "Nos"})
 		work_order, job_cards = self.make_work_order_with_two_job_cards()
+		row_a, row_b = (self.add_bom_scrap_row(work_order.bom_no, scrap_item.name) for _ in range(2))
 
-		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, "BOM-ROW-A")
+		self.make_submitted_job_card(job_cards[0], scrap_item.name, 5, row_a)
 
 		scrap_item.reload()
 		scrap_item.item_name = "_Test JC Secondary Bom Row Renamed"
 		scrap_item.save()
 
-		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, "BOM-ROW-B")
+		self.make_submitted_job_card(job_cards[1], scrap_item.name, 3, row_b)
 
 		by_bom_row = {
 			row.bom_secondary_item: row
@@ -7379,9 +7494,9 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 			if row.item_code == scrap_item.name
 		}
 
-		self.assertEqual(set(by_bom_row), {"BOM-ROW-A", "BOM-ROW-B"})
-		self.assertEqual(by_bom_row["BOM-ROW-A"].item_name, "_Test JC Secondary Bom Row")
-		self.assertEqual(by_bom_row["BOM-ROW-B"].item_name, "_Test JC Secondary Bom Row Renamed")
+		self.assertEqual(set(by_bom_row), {row_a, row_b})
+		self.assertEqual(by_bom_row[row_a].item_name, "_Test JC Secondary Bom Row")
+		self.assertEqual(by_bom_row[row_b].item_name, "_Test JC Secondary Bom Row Renamed")
 
 
 def create_stock_entries(sequence_of_entries):

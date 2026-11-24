@@ -291,7 +291,6 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_work_order_status_for_return()
 		self.validate_returned_qty_within_work_order()
 		self.validate_returned_fg_qty_within_job_card()
-		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
 		self.validate_alternative_items()
 
@@ -409,10 +408,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			self._validate_no_excess_transfer()
 
 	def _validate_no_excess_transfer(self):
-		if (
-			frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
-			== "Material Transferred for Manufacture"
-		):
+		if self.backflush_based_on == "Material Transferred for Manufacture":
 			return
 
 		wo = self.wo_doc

@@ -195,6 +195,7 @@ class JobCard(Document):
 		if self.docstatus == 1 or self.time_logs or flt(self.process_loss_qty):
 			self.validate_sequence_id()
 		self.set_sub_operations()
+		self.link_secondary_items_to_bom()
 		self.update_sub_operation_status()
 		if self.sub_operations:
 			self.set_total_completed_qty_from_sub_operations()
@@ -449,6 +450,47 @@ class JobCard(Document):
 		for values in items_dict.values():
 			values = frappe._dict(values)
 			self.append_secondary_item(values.item_code, values)
+
+	def link_secondary_items_to_bom(self):
+		"""Link a secondary item added or changed by hand to the BOM row of its item and type, so it keeps that row's valuation."""
+		bom_no = self.semi_fg_bom or self.bom_no
+		if not bom_no:
+			return
+
+		unlinked_rows = self.get_secondary_items_without_bom_row()
+		if not unlinked_rows:
+			return
+
+		bom_rows = {
+			(row.item_code, row.secondary_item_type): row.name
+			for row in frappe.get_all(
+				"BOM Secondary Item",
+				filters={"parent": bom_no, "parenttype": "BOM"},
+				fields=["name", "item_code", "secondary_item_type"],
+			)
+		}
+		for row in unlinked_rows:
+			row.bom_secondary_item = bom_rows.get((row.item_code, row.secondary_item_type))
+
+	def get_secondary_items_without_bom_row(self):
+		"""Rows with no BOM row, or whose item or type no longer matches the BOM row they link."""
+		links = [row.bom_secondary_item for row in self.secondary_items if row.bom_secondary_item]
+		if not links:
+			return self.secondary_items
+
+		linked_rows = {
+			row.name: (row.item_code, row.secondary_item_type)
+			for row in frappe.get_all(
+				"BOM Secondary Item",
+				filters={"name": ("in", links)},
+				fields=["name", "item_code", "secondary_item_type"],
+			)
+		}
+		return [
+			row
+			for row in self.secondary_items
+			if linked_rows.get(row.bom_secondary_item) != (row.item_code, row.secondary_item_type)
+		]
 
 	def append_secondary_item(self, item_code, values):
 		secondary_item = {

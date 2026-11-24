@@ -126,6 +126,16 @@ class StatusService:
 
 		return status or self.doc.status
 
+	def refresh_status(self):
+		"""Save the computed status if it changed, unless the order is Stopped or Closed or another transaction changed its status."""
+		status = self.get_status()
+		if status == self.doc.status:
+			return
+
+		saved_status = frappe.db.get_value("Work Order", self.doc.name, "status", for_update=True)
+		if saved_status == self.doc.status and saved_status not in ("Stopped", "Closed"):
+			self.doc.db_set("status", status)
+
 	def get_status(self, status=None):
 		"""Return the status based on stock entries against this work order"""
 		status = status or self.doc.status
@@ -219,13 +229,21 @@ class StatusService:
 		return flt(self.doc.qty, precision) > flt(total_qty, precision)
 
 	def _reservation_status(self, status):
-		if not any(row.stock_reserved_qty for row in self.doc.required_items):
+		rows = self.doc.required_items
+		if not any(row.stock_reserved_qty or row.subcontracted_qty for row in rows):
 			return status
 
-		if any(row.stock_reserved_qty < row.required_qty for row in self.doc.required_items):
+		if any(self._unreserved_qty(row) > 0 for row in rows):
 			return "Stock Partially Reserved"
 
 		return "Stock Reserved"
+
+	@staticmethod
+	def _unreserved_qty(row):
+		# a Subcontracting Order reserves and sends what it took over
+		return flt(
+			row.required_qty - row.subcontracted_qty - row.stock_reserved_qty, row.precision("required_qty")
+		)
 
 	def update_work_order_qty(self):
 		"""Update Manufactured Qty and Material Transferred for Qty based on Stock Entry"""
@@ -318,15 +336,20 @@ class StatusService:
 			update_produced_qty_in_so_item(self.doc.sales_order, self.doc.sales_order_item)
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import get_available_fg_qty
+
 		precision = self.doc.precision("disassembled_qty")
 		if is_cancel:
 			self.doc.disassembled_qty = max(0, flt(self.doc.disassembled_qty - qty, precision))
 		else:
+			if flt(qty, precision) > get_available_fg_qty(self.doc.name, for_update=True):
+				frappe.throw(
+					_(
+						"Cannot disassemble more than the produced quantity that is not converted to an alternative item."
+					)
+				)
 			if self.doc.docstatus == 1:
 				self.doc.disassembled_qty = flt(self.doc.disassembled_qty + qty, precision)
-
-		if not is_cancel and self.doc.disassembled_qty > self.doc.produced_qty:
-			frappe.throw(_("Cannot disassemble more than produced quantity."))
 
 		self.doc.db_set("disassembled_qty", self.doc.disassembled_qty)
 

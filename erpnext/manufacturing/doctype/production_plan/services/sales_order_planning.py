@@ -11,6 +11,9 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_item_or_template_bom_query,
+	get_reserved_packed_item_qty,
+	get_reserved_qty_from_stock,
+	get_reserved_work_order_output_qty,
 	get_sales_orders,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -190,7 +193,12 @@ class SalesOrderSourcingService:
 		)
 		if self.doc.item_code:
 			query = query.where(so_item.item_code == self.doc.item_code)
-		return query.run(as_dict=True)
+
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
+		items = query.run(as_dict=True)
+		for item in items:
+			item.pending_qty = max(flt(item.pending_qty, precision), 0)
+		return items
 
 	def get_mr_items(self):
 		# Check for empty table or empty rows
@@ -304,10 +312,9 @@ def _so_item_columns(so_item):
 		so_item.parent,
 		so_item.item_code,
 		so_item.warehouse,
-		(so_item.stock_qty - _reserved_qty_from_stock(so_item)).as_("qty"),
-		_reserved_work_order_output_qty(so_item).as_("reserved_work_order_output_qty"),
+		(so_item.stock_qty - get_reserved_qty_from_stock(so_item)).as_("qty"),
+		get_reserved_work_order_output_qty(so_item).as_("reserved_work_order_output_qty"),
 		so_item.work_order_qty,
-		so_item.stock_qty,
 		so_item.production_plan_qty,
 		so_item.delivered_qty,
 		so_item.conversion_factor,
@@ -322,37 +329,9 @@ def _so_items_filter(so_item, so_list):
 		(so_item.parent.isin(so_list))
 		& (so_item.docstatus == 1)
 		& (so_item.closed == 0)
-		& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
-		& (so_item.stock_qty > so_item.production_plan_qty)
+		& ((so_item.stock_qty - get_reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
+		& ((so_item.stock_qty - get_reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 	)
-
-
-def _reserved_qty_from_stock(so_item):
-	"""Reserved qty of a Sales Order Item, less the Work Order output that work_order_qty already counts."""
-	return so_item.stock_reserved_qty - _reserved_work_order_output_qty(so_item)
-
-
-def _reserved_work_order_output_qty(so_item):
-	"""Open reservations of the output of a Sales Order Item's own Work Orders."""
-	sre = frappe.qb.DocType("Stock Reservation Entry")
-	stock_entry = frappe.qb.DocType("Stock Entry")
-	work_order = frappe.qb.DocType("Work Order")
-	work_order_output_qty = (
-		frappe.qb.from_(sre)
-		.inner_join(stock_entry)
-		.on(stock_entry.name == sre.from_voucher_no)
-		.inner_join(work_order)
-		.on(work_order.name == stock_entry.work_order)
-		.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
-		.where(
-			(sre.docstatus == 1)
-			& (sre.voucher_type == "Sales Order")
-			& (sre.voucher_detail_no == so_item.name)
-			& (sre.from_voucher_type == "Stock Entry")
-			& (work_order.sales_order_item == so_item.name)
-		)
-	)
-	return IfNull(work_order_output_qty, 0)
 
 
 def _set_so_item_pending_qty(items):
@@ -363,22 +342,22 @@ def _set_so_item_pending_qty(items):
 			item.reserved_work_order_output_qty
 		)
 		pending_qty = flt(item.qty) - max(item.work_order_qty, delivered_or_reserved_qty, 0)
-		item.pending_qty = flt(
-			min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty)), precision
-		)
+		item.pending_qty = flt(min(pending_qty, flt(item.qty) - flt(item.production_plan_qty)), precision)
 
 
 def _so_packed_columns(so_item, pi):
-	pending_qty = (
+	per_bundle = pi.qty / so_item.qty
+	work_order_qty = so_item.work_order_qty * per_bundle
+	# reserved stock may be Work Order output, so like deliveries it overlaps work_order_qty
+	delivered_or_reserved_qty = so_item.delivered_qty * per_bundle + get_reserved_packed_item_qty(pi)
+	pending_qty = pi.qty - (
 		frappe.qb.terms.Case()
-		.when(
-			(so_item.work_order_qty > so_item.delivered_qty),
-			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty),
-		)
-		.else_(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
+		.when(work_order_qty > delivered_or_reserved_qty, work_order_qty)
+		.else_(delivered_or_reserved_qty)
 	)
 	return [
 		pi.parent,
+		pi.name.as_("packed_item"),
 		pi.item_code,
 		pi.warehouse.as_("warehouse"),
 		pending_qty.as_("pending_qty"),

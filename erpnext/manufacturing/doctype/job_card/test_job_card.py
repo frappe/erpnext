@@ -4151,6 +4151,138 @@ class TestJobCard(ERPNextTestSuite):
 		manufacture = frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 6))
 		self.assertEqual(sum(row.transfer_qty for row in manufacture.items if row.item_code == rm), 12)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_secondary_items_replace_bom_secondary_items(self):
+		bom, stock_entry = make_manufacture_entry_with_job_card_secondary_item(
+			{"secondary_item_type": "Scrap"}
+		)
+		item_code = bom.secondary_items[0].item_code
+		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == item_code], [3])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_scrap_goes_to_work_order_scrap_warehouse(self):
+		bom, stock_entry = make_manufacture_entry_with_job_card_secondary_item(
+			{"secondary_item_type": "Scrap"}
+		)
+		scrap_warehouse = frappe.db.get_value("Work Order", stock_entry.work_order, "scrap_warehouse")
+		row = next(row for row in stock_entry.items if row.item_code == bom.secondary_items[0].item_code)
+		self.assertTrue(scrap_warehouse)
+		self.assertEqual(row.t_warehouse, scrap_warehouse)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_secondary_item_keeps_bom_cost_allocation(self):
+		bom, stock_entry = make_manufacture_entry_with_job_card_secondary_item(
+			{
+				"secondary_item_type": "Co-Product",
+				"valuation_type": "% of Component Cost",
+				"cost_allocation_per": 20,
+			}
+		)
+		row = next(row for row in stock_entry.items if row.item_code == bom.secondary_items[0].item_code)
+		self.assertEqual(row.bom_secondary_item, bom.secondary_items[0].name)
+		self.assertEqual(row.basic_amount, 200)
+
+	def test_operation_output_carries_only_its_non_stock_items(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("Per Op Service RM", {"is_stock_item": 1, "valuation_rate": 50}).name
+		service_a = make_item("Per Op Service A Item", {"is_stock_item": 0, "valuation_rate": 30}).name
+		service = make_item("Per Op Service", {"is_stock_item": 0, "valuation_rate": 100}).name
+		unassigned = make_item("Per Op Unassigned Service", {"is_stock_item": 0, "valuation_rate": 40}).name
+		sfg = make_item("Per Op Service SFG", {"is_stock_item": 1}).name
+		fg = make_item("Per Op Service FG", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm, target=warehouse, qty=20, basic_rate=50)
+
+		sfg_bom = frappe.new_doc("BOM", company="_Test Company", item=sfg, quantity=1)
+		sfg_bom.append("items", {"item_code": rm, "qty": 1})
+		sfg_bom.insert()
+		sfg_bom.submit()
+
+		fg_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		operations = [
+			{"operation": "Per Op Service A", "finished_good": sfg, "bom_no": sfg_bom.name, "sequence_id": 1},
+			{
+				"operation": "Per Op Service B",
+				"finished_good": fg,
+				"is_final_finished_good": 1,
+				"sequence_id": 2,
+			},
+		]
+		for operation in operations:
+			operation.update({"workstation": "Per Op Service WS", "finished_good_qty": 1, "time_in_mins": 60})
+			make_workstation(operation)
+			make_operation(operation)
+			fg_bom.append("operations", operation)
+		fg_bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
+		fg_bom.append("items", {"item_code": sfg, "qty": 1, "operation_row_id": 2})
+		fg_bom.append("items", {"item_code": service_a, "qty": 1, "operation_row_id": 1})
+		fg_bom.append("items", {"item_code": service, "qty": 1, "operation_row_id": 2})
+		fg_bom.append("items", {"item_code": unassigned, "qty": 1})
+		fg_bom.insert()
+		fg_bom.submit()
+		service_a_amount = next(row.base_amount for row in fg_bom.items if row.item_code == service_a)
+		service_amount = sum(
+			row.base_amount for row in fg_bom.items if row.item_code in (service, unassigned)
+		)
+
+		work_order = make_wo_order_test_record(
+			item=fg, qty=10, source_warehouse=warehouse, bom_no=fg_bom.name, skip_transfer=1
+		)
+		non_stock_costs = []
+		for index, operation in enumerate(operations):
+			job_card = frappe.get_doc(
+				"Job Card",
+				frappe.db.get_value(
+					"Job Card", {"work_order": work_order.name, "operation": operation["operation"]}, "name"
+				),
+			)
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": f"2024-05-01 0{index}:00:00",
+					"to_time": f"2024-05-01 0{index}:30:00",
+					"completed_qty": job_card.for_quantity,
+				},
+			)
+			job_card.submit()
+			stock_entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+			non_stock_costs.append(
+				sum(
+					row.amount for row in stock_entry.additional_costs if row.description == "Non stock items"
+				)
+			)
+			stock_entry.submit()
+
+		self.assertEqual(non_stock_costs, [flt(service_a_amount * 10), flt(service_amount * 10)])
+
+	def test_job_card_secondary_item_relinks_when_its_item_changes(self):
+		"""A secondary row whose item changes links the BOM row of the new item, not the old one."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		other_scrap = make_item("JC Relinked Scrap", {"is_stock_item": 1, "valuation_rate": 20}).name
+		bom, job_card = make_job_card_with_bom_secondary_items(
+			{"secondary_item_type": "Scrap"}, {"item_code": other_scrap, "secondary_item_type": "Scrap"}
+		)
+		row = job_card.append(
+			"secondary_items",
+			{"item_code": bom.secondary_items[0].item_code, "stock_qty": 3, "secondary_item_type": "Scrap"},
+		)
+		job_card.save()
+		self.assertEqual(row.bom_secondary_item, bom.secondary_items[0].name)
+
+		row.item_code = other_scrap
+		job_card.save()
+		self.assertEqual(row.bom_secondary_item, bom.secondary_items[1].name)
+
 	def test_secondary_items_from_multiple_boms_stay_separate(self):
 		"""Rows linked to different BOM rows keep their own quantity and valuation mode."""
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -6801,3 +6933,55 @@ def make_partly_completed_job_card_transfer_order(name, operation_count):
 		job_card.submit()
 
 	return work_order, rm
+
+
+def make_manufacture_entry_with_job_card_secondary_item(bom_secondary_item):
+	"""Manufacture entry for 10 whose Job Card recorded 3 of the BOM secondary item."""
+	bom, job_card = make_job_card_with_bom_secondary_items(bom_secondary_item)
+	job_card.append(
+		"secondary_items",
+		{
+			"item_code": bom.secondary_items[0].item_code,
+			"stock_qty": 3,
+			"secondary_item_type": bom_secondary_item["secondary_item_type"],
+		},
+	)
+	job_card.append(
+		"time_logs",
+		{"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 09:00:00", "completed_qty": 10},
+	)
+	job_card.submit()
+
+	return bom, frappe.get_doc(make_stock_entry_for_work_order(job_card.work_order, "Manufacture", 10))
+
+
+def make_job_card_with_bom_secondary_items(*bom_secondary_items):
+	"""Draft Job Card of a Work Order for 10 whose BOM has the given secondary items, 0.1 each per unit."""
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	warehouse = "Stores - _TC"
+	rm = make_item("JC Recorded Scrap RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+	fg = make_item("JC Recorded Scrap FG", {"is_stock_item": 1}).name
+	scrap = make_item("JC Recorded Scrap", {"is_stock_item": 1, "valuation_rate": 5}).name
+	operation = {
+		"operation": "JC Recorded Scrap Op",
+		"workstation": "JC Recorded Scrap WS",
+		"time_in_mins": 60,
+	}
+	make_workstation(operation)
+	make_operation(operation)
+
+	bom = frappe.new_doc("BOM", company="_Test Company", item=fg, quantity=1, with_operations=1)
+	bom.append("items", {"item_code": rm, "qty": 1})
+	bom.append("operations", operation)
+	for row in bom_secondary_items:
+		bom.append("secondary_items", {"item_code": scrap, "qty": 0.1, **row})
+	bom.insert()
+	bom.submit()
+
+	make_stock_entry(item_code=rm, target=warehouse, qty=10, basic_rate=100)
+	work_order = make_wo_order_test_record(
+		item=fg, qty=10, bom_no=bom.name, skip_transfer=1, source_warehouse=warehouse
+	)
+	return bom, frappe.get_last_doc("Job Card", {"work_order": work_order.name})

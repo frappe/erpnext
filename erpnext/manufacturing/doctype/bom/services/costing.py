@@ -9,7 +9,7 @@ delegating stubs so external callers (bom_update_log, etc.) keep working.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 
 class BOMCostingService:
@@ -189,7 +189,7 @@ class BOMCostingService:
 
 		operating_cost = d.operating_cost
 		base_operating_cost = d.base_operating_cost
-		if d.set_cost_based_on_bom_qty:
+		if is_costed_per_batch(d):
 			operating_cost = flt(d.cost_per_unit) * flt(self.doc.quantity)
 			base_operating_cost = flt(d.base_cost_per_unit) * flt(self.doc.quantity)
 
@@ -202,18 +202,36 @@ class BOMCostingService:
 		self.doc.base_operating_cost = total * self.doc.conversion_rate
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
+		self.update_stale_hour_rate(row)
+
 		if not row.hour_rate or update_hour_rate:
 			self._set_row_hour_rate(row)
 
-		if row.hour_rate:
-			row.base_hour_rate = flt(
-				flt(row.hour_rate) * flt(self.doc.conversion_rate), row.precision("base_hour_rate")
-			)
-			if row.time_in_mins:
-				self._set_row_operating_costs(row)
+		row.base_hour_rate = flt(
+			flt(row.hour_rate) * flt(self.doc.conversion_rate), row.precision("base_hour_rate")
+		)
+		if row.time_in_mins:
+			self._set_row_operating_costs(row)
 
 		if update_hour_rate and save:
 			row.db_update()
+
+	def update_stale_hour_rate(self, row):
+		"""Workstation or conversion rate changed but the hour rate did not, e.g. through the API."""
+		before = self.doc.get_doc_before_save()
+		previous = before and before.get("operations", {"name": row.name})
+		if not previous or flt(previous[0].hour_rate) != flt(row.hour_rate):
+			return
+
+		old_rate, new_rate = flt(before.conversion_rate), flt(self.doc.conversion_rate)
+		if any(
+			cstr(previous[0].get(field)) != cstr(row.get(field))
+			for field in ("workstation", "workstation_type")
+		):
+			row.hour_rate = 0
+		elif old_rate and new_rate and old_rate != new_rate:
+			# keeps the rate in company currency, also a manual one
+			row.hour_rate = flt(flt(row.hour_rate) * old_rate / new_rate, row.precision("hour_rate"))
 
 	def _set_row_hour_rate(self, row):
 		hour_rate = 0
@@ -223,9 +241,7 @@ class BOMCostingService:
 			hour_rate = flt(frappe.get_cached_value("Workstation Type", row.workstation_type, "hour_rate"))
 
 		if hour_rate:
-			row.hour_rate = (
-				hour_rate / flt(self.doc.conversion_rate) if self.doc.conversion_rate else hour_rate
-			)
+			row.hour_rate = flt(hour_rate / (flt(self.doc.conversion_rate) or 1), row.precision("hour_rate"))
 
 	def _set_row_operating_costs(self, row):
 		row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
@@ -309,7 +325,9 @@ class BOMCostingService:
 		for d in self.doc.get("secondary_items"):
 			if d.valuation_type == "Valuation Rate":
 				rate = self.get_rm_rate(self._secondary_item_rate_args(d))
-				d.cost = flt(flt(rate) * flt(d.stock_qty), precision)
+				# set here too, so Update Cost saves the loss the cost is net of
+				d.process_loss_qty = get_secondary_process_loss_qty(d)
+				d.cost = flt(flt(rate) * (flt(d.stock_qty) - d.process_loss_qty), precision)
 			elif d.valuation_type == "Manual":
 				d.cost = flt(d.cost, precision)
 			else:
@@ -347,6 +365,22 @@ class BOMCostingService:
 			if old_rate != row.rate:
 				# Only db_update if changed
 				row.db_update()
+
+
+def is_costed_per_batch(row) -> bool:
+	"""As in the Work Order: never for fixed time, always for a batch based Operation."""
+	return not row.fixed_time and bool(
+		row.set_cost_based_on_bom_qty
+		or frappe.get_cached_value("Operation", row.operation, "create_job_card_based_on_batch_size")
+	)
+
+
+def get_secondary_process_loss_qty(row) -> float:
+	"""Rounded process loss qty of a secondary row, capped as rounding can take it above the row's qty."""
+	return min(
+		flt(flt(row.stock_qty) * flt(row.process_loss_per) / 100, row.precision("process_loss_qty")),
+		flt(row.stock_qty),
+	)
 
 
 def get_good_qty(bom):

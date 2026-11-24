@@ -16,6 +16,7 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
+from erpnext.stock.doctype.packed_item.packed_item import get_bundle_version_for_row
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
@@ -462,6 +463,8 @@ class SellingController(StockController):
 			return
 
 		is_internal_customer = self.get("is_internal_customer")
+		# bundle rows priced from their components get their final rate only once packed
+		check_bundles = not frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 		for item in self.items:
 			if not item.item_code or item.is_free_item:
@@ -478,7 +481,9 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			if is_internal_customer or not is_stock_item:
+			# a bundle row is valued from the version it is packed from, so match that one
+			is_bundle = check_bundles and not is_stock_item and get_bundle_version_for_row(item, self)
+			if is_internal_customer or not (is_stock_item or is_bundle):
 				continue
 
 			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
@@ -859,7 +864,7 @@ class SellingController(StockController):
 		sl_entries = []
 		# Loop over items and packed items table
 		for d in self.get_item_list():
-			if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
+			if self.posts_stock_ledger_entry(d.item_code, d.qty):
 				if flt(d.conversion_factor) == 0.0:
 					d.conversion_factor = (
 						get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
@@ -885,6 +890,10 @@ class SellingController(StockController):
 
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
+	def posts_stock_ledger_entry(self, item_code, stock_qty) -> bool:
+		"""Whether a row posts stock ledger entries: a row of a stock item whose stock qty is not 0."""
+		return frappe.get_cached_value("Item", item_code, "is_stock_item") == 1 and bool(flt(stock_qty))
+
 	def get_sle_for_source_warehouse(self, item_row):
 		serial_and_batch_bundle = (
 			item_row.serial_and_batch_bundle
@@ -907,7 +916,7 @@ class SellingController(StockController):
 		sle = self.get_sl_entries(
 			item_row,
 			{
-				"actual_qty": -1 * get_ledger_qty(item_row.qty),
+				"actual_qty": -1 * self.get_source_warehouse_ledger_qty(item_row),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
 				"serial_and_batch_bundle": serial_and_batch_bundle,
@@ -917,6 +926,21 @@ class SellingController(StockController):
 			sle.dependant_sle_voucher_detail_no = item_row.name
 
 		return sle
+
+	def get_source_warehouse_ledger_qty(self, item_row) -> float:
+		"""Stock qty an item row moves in its warehouse. A return puts back no more than its delivered
+		row took out, less the row's other returns to any warehouse. A row with a package, a packed item
+		and an internal transfer keep their own qty."""
+		row = item_row.item_row
+		if (
+			not self.is_return
+			or item_row.serial_and_batch_bundle
+			or item_row.target_warehouse
+			or row.doctype == "Packed Item"
+		):
+			return get_ledger_qty(item_row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, item_row.warehouse)
 
 	def get_sle_for_target_warehouse(self, item_row):
 		sle = self.get_sl_entries(

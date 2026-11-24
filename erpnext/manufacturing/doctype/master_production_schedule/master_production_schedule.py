@@ -10,8 +10,15 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, flt, get_link_to_form, getdate, parse_json
 
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
-from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
-from erpnext.manufacturing.scheduling.plan_adapter import get_days_needed
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import (
+	get_forecast_period,
+	update_sales_forecast_status,
+)
+from erpnext.manufacturing.scheduling.plan_adapter import (
+	get_days_needed,
+	get_material_lead_days,
+	get_supplier_lead_times,
+)
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
@@ -118,20 +125,18 @@ class MasterProductionSchedule(Document):
 			self.to_date = max(getdate(date) for date in dates)
 
 	def get_sales_forecast_data(self):
+		"""Return the last day of each forecast period."""
 		if not self.sales_forecast:
 			return []
 
-		filters = {"parent": self.sales_forecast}
+		filters = {"parent": self.sales_forecast, "parentfield": "items"}
 		if self.select_items:
 			items = [d.item_code for d in self.select_items if d.item_code]
 			filters["item_code"] = ("in", items)
 
-		return frappe.get_all(
-			"Sales Forecast Item",
-			filters=filters,
-			pluck="delivery_date",
-			order_by="delivery_date asc",
-		)
+		frequency = frappe.db.get_value("Sales Forecast", self.sales_forecast, "frequency")
+		rows = frappe.get_all("Sales Forecast Item", filters=filters, fields=["delivery_date"])
+		return [add_days(get_forecast_period(frappe._dict(row, frequency=frequency))[1], -1) for row in rows]
 
 	def update_item_details(self, data):
 		items = [item[0] for item in data if item[0]]
@@ -164,11 +169,13 @@ class MasterProductionSchedule(Document):
 
 	def load_lead_times(self, roots):
 		self._bom_materials = {}
-		items, visited, stack = set(), set(), list(roots)
+		items, purchased_items, visited, stack = set(), set(), set(), list(roots)
 		while stack:
 			item_code, bom_no = stack.pop()
 			items.add(item_code)
-			if bom_no and bom_no not in visited:
+			if not bom_no:
+				purchased_items.add(item_code)
+			elif bom_no not in visited:
 				visited.add(bom_no)
 				stack.extend((row.item_code, row.bom_no) for row in self.get_bom_materials(bom_no))
 
@@ -189,6 +196,9 @@ class MasterProductionSchedule(Document):
 				],
 			)
 		}
+		self._purchase_lead_days = get_material_lead_days(
+			purchased_items, self._lead_times, get_supplier_lead_times(purchased_items), {}
+		)[0]
 
 	def get_bom_materials(self, bom_no):
 		if bom_no not in self._bom_materials:
@@ -209,10 +219,10 @@ class MasterProductionSchedule(Document):
 		return self._bom_materials[bom_no]
 
 	def get_cumulative_lead_time(self, item_code, bom_no, qty):
-		own_time = get_own_lead_time(self._lead_times.get(item_code), qty, bool(bom_no))
 		if not bom_no:
-			return own_time
+			return self._purchase_lead_days[item_code]
 
+		own_time = get_own_lead_time(self._lead_times.get(item_code), qty)
 		component_times = [
 			self.get_cumulative_lead_time(row.item_code, row.bom_no, qty * flt(row.qty_per_unit))
 			for row in self.get_bom_materials(bom_no)
@@ -545,16 +555,11 @@ class MasterProductionSchedule(Document):
 		update_sales_forecast_status(self.sales_forecast)
 
 
-def get_own_lead_time(lead_time, qty, is_manufactured):
+def get_own_lead_time(lead_time, qty):
 	if not lead_time:
 		return 0
 
-	if is_manufactured:
-		days = get_days_needed(lead_time, qty, 0)
-	else:
-		days = flt(lead_time.purchase_time)
-
-	return days + flt(lead_time.buffer_time)
+	return get_days_needed(lead_time, qty, 0) + flt(lead_time.buffer_time)
 
 
 @frappe.whitelist()

@@ -314,6 +314,12 @@ frappe.ui.form.on("BOM", {
 		frm.doc.operations.forEach((d) => {
 			frappe.model.set_value(d.doctype, d.name, "fg_warehouse", frm.doc.default_target_warehouse);
 		});
+		// Valuation Rate secondary items are valued in this warehouse
+		frm.doc.secondary_items.forEach((d) => {
+			if (d.valuation_type === "Valuation Rate") {
+				erpnext.bom.fetch_secondary_item_cost(frm.doc, d.doctype, d.name);
+			}
+		});
 	},
 
 	refresh(frm) {
@@ -867,6 +873,10 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 		this.hour_rate(doc);
 	}
 
+	fixed_time(doc) {
+		this.hour_rate(doc);
+	}
+
 	bom_no(doc, cdt, cdn) {
 		get_bom_material_detail(doc, cdt, cdn, false);
 	}
@@ -966,7 +976,9 @@ erpnext.bom.calculate_op_cost = function (doc) {
 				base_cost_per_unit: base_cost_per_unit,
 			});
 
-			if (item.set_cost_based_on_bom_qty) {
+			// as is_costed_per_batch in services/costing.py
+			const batch_based = doc.__onload?.batch_based_operations?.includes(item.operation);
+			if (!item.fixed_time && (item.set_cost_based_on_bom_qty || batch_based)) {
 				operating_cost = cost_per_unit * flt(doc.quantity);
 				base_operating_cost = base_cost_per_unit * flt(doc.quantity);
 			}
@@ -1364,33 +1376,55 @@ frappe.ui.form.on("BOM Secondary Item", {
 			frappe.model.set_value(cdt, cdn, { cost: 0, base_cost: 0 });
 		}
 	},
+	process_loss_per(frm, cdt, cdn) {
+		if (locals[cdt][cdn].valuation_type === "Valuation Rate") {
+			erpnext.bom.fetch_secondary_item_cost(frm.doc, cdt, cdn);
+		}
+	},
 });
 
 erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
-	const row = locals[cdt][cdn];
-	if (!row.item_code) return;
+	const args = {
+		item_code: locals[cdt][cdn].item_code,
+		company: doc.company,
+		warehouse: doc.default_target_warehouse || "",
+	};
+	if (!args.item_code) return;
 
+	// not a doc method: its reply syncs back the row as sent, undoing later edits
 	frappe.call({
-		doc: doc,
-		method: "get_bom_material_detail",
-		args: {
-			company: doc.company,
-			item_code: row.item_code,
-			uom: row.uom,
-			stock_uom: row.stock_uom,
-			conversion_factor: row.conversion_factor,
-			warehouse: doc.default_target_warehouse,
-			set_rate_based_on_warehouse: 1,
-			force_valuation_rate: 1,
-			fetch_rate: 1,
-			bom_no: "",
-		},
+		method: "erpnext.manufacturing.doctype.bom.bom.get_secondary_item_valuation_rate",
+		args: args,
 		callback(r) {
-			const cost = flt(r.message.rate) * flt(row.stock_qty);
+			const row = locals[cdt][cdn];
+			doc = locals[doc.doctype][doc.name];
+			// the form may have been reloaded meanwhile
+			if (!doc || !row || row.valuation_type !== "Valuation Rate") return;
+
+			// the item, company or warehouse changed while the rate was being fetched
+			if (
+				row.item_code !== args.item_code ||
+				doc.company !== args.company ||
+				(doc.default_target_warehouse || "") !== args.warehouse
+			) {
+				erpnext.bom.fetch_secondary_item_cost(doc, cdt, cdn);
+				return;
+			}
+
+			const loss_qty = Math.min(
+				flt(
+					(flt(row.stock_qty) * flt(row.process_loss_per)) / 100,
+					precision("process_loss_qty", row)
+				),
+				flt(row.stock_qty)
+			);
+			const produced_qty = flt(row.stock_qty) - loss_qty;
+			const conversion_rate = flt(doc.conversion_rate || 1);
+			const cost = (flt(r.message) / conversion_rate) * produced_qty;
 			frappe.model
 				.set_value(cdt, cdn, {
 					cost: cost,
-					base_cost: cost * flt(doc.conversion_rate || 1),
+					base_cost: cost * conversion_rate,
 				})
 				.then(() => erpnext.bom.calculate_total(doc));
 		},

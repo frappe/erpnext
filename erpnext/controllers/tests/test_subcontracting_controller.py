@@ -1234,6 +1234,44 @@ class TestSubcontractingController(ERPNextTestSuite):
 			itemwise_details.get(doc.items[0].item_code)["serial_no"][5:6],
 		)
 
+	def test_return_of_components_split_over_the_rows_it_was_sent_on(self):
+		"""5 + 5 of a raw material sent on two rows of the same finished good; the first row consumed 2."""
+		set_backflush_based_on("BOM")
+		rm_item = make_item("Subcontracted RM Sent On Two Rows", {"is_stock_item": 1}).name
+		fg_item = "Subcontracted FG Sent On Two Rows"
+		make_subcontracted_item(item_code=fg_item, raw_materials=[rm_item])
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+			for service_item in ("Subcontracted Service Item 2", "Subcontracted Service Item 3")
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=rm_item, qty=10, basic_rate=100)
+		frappe.get_doc(make_rm_stock_entry(sco.name)).submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 2
+		scr.remove(scr.items[1])
+		scr.submit()
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+		self.assertEqual([row.qty for row in ste.items], [3, 5])
+		ste.submit()
+
+		sco.load_from_db()
+		self.assertEqual([row.total_supplied_qty for row in sco.supplied_items], [2, 0])
+
 	def test_phantom_bom_explosion(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
 
@@ -1317,6 +1355,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 		)
 
 		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.save()
 		scr1.get_secondary_items()
 		scr1.save()
 
@@ -1330,8 +1369,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 		self.assertEqual(scr1.items[1].received_qty, 5)
 		self.assertEqual(scr1.items[1].process_loss_qty, 0.5)
 		self.assertEqual(scr1.items[1].qty, 4.5)
-		self.assertEqual(flt(scr1.items[1].rate, 3), 11.111)
-		self.assertEqual(scr1.items[1].amount, 50)
+		self.assertEqual(flt(scr1.items[1].rate, 3), 22.222)
+		self.assertEqual(scr1.items[1].amount, 100)
 
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
 

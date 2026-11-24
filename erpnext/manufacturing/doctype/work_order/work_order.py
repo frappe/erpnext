@@ -201,6 +201,8 @@ class WorkOrder(Document):
 	# end: auto-generated types
 
 	def onload(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import get_converted_fg_qty
+
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
@@ -210,6 +212,7 @@ class WorkOrder(Document):
 		self.set_onload("allow_alternative_finished_goods", ms.allow_alternative_finished_goods)
 		if ms.allow_alternative_finished_goods and self.docstatus == 1 and flt(self.produced_qty):
 			self.set_onload("has_alternative_finished_goods", self.has_alternative_finished_goods())
+			self.set_onload("converted_fg_qty", get_converted_fg_qty(self.name))
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
 			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}
@@ -1209,8 +1212,7 @@ class WorkOrder(Document):
 
 	def update_required_items(self):
 		RequiredItemsService(self).update_required_items()
-		if self.status == "Closed":
-			self.update_subcontracting_inward_order_received_items()
+		self.update_subcontracting_inward_order_received_items()
 
 	def update_reserved_qty_for_production(self, items=None):
 		return RequiredItemsService(self).update_reserved_qty_for_production(items)
@@ -1255,6 +1257,9 @@ class WorkOrder(Document):
 	def update_status(self, status=None):
 		return StatusService(self).update_status(status)
 
+	def refresh_status(self):
+		return StatusService(self).refresh_status()
+
 	def get_status(self, status=None):
 		return StatusService(self).get_status(status)
 
@@ -1296,9 +1301,17 @@ class WorkOrder(Document):
 
 
 def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) -> dict[str, float]:
-	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty."""
+	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty or the qty it used if more."""
 	work_order = frappe.qb.DocType("Work Order")
 	work_order_item = frappe.qb.DocType("Work Order Item")
+	used_qty = (
+		Case()
+		.when(
+			work_order_item.transferred_qty > work_order_item.consumed_qty,
+			work_order_item.transferred_qty - work_order_item.returned_qty,
+		)
+		.else_(work_order_item.consumed_qty - work_order_item.returned_qty)
+	)
 	return dict(
 		frappe.qb.from_(work_order_item)
 		.join(work_order)
@@ -1308,13 +1321,8 @@ def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) 
 			Sum(
 				Case()
 				.when(
-					(work_order.status == "Closed")
-					& (work_order_item.transferred_qty > work_order_item.consumed_qty),
-					work_order_item.transferred_qty - work_order_item.returned_qty,
-				)
-				.when(
-					work_order.status == "Closed",
-					work_order_item.consumed_qty - work_order_item.returned_qty,
+					(work_order.status == "Closed") | (used_qty > work_order_item.required_qty),
+					used_qty,
 				)
 				.else_(work_order_item.required_qty)
 			),

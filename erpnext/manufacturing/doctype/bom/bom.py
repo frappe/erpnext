@@ -31,6 +31,7 @@ from erpnext.manufacturing.doctype.bom.mapper import (
 )
 from erpnext.manufacturing.doctype.bom.services.costing import (
 	BOMCostingService,
+	get_secondary_process_loss_qty,
 )
 from erpnext.manufacturing.doctype.bom.services.exploded_items import (
 	BOMExplodedItemsService,
@@ -250,6 +251,17 @@ class BOM(WebsiteGenerator):
 		super().onload()
 
 		self.set_onload_for_multi_level_bom()
+		# the form previews these per batch, as is_costed_per_batch does
+		operations = list({row.operation for row in self.operations if row.operation})
+		self.set_onload(
+			"batch_based_operations",
+			operations
+			and frappe.get_all(
+				"Operation",
+				filters={"name": ("in", operations), "create_job_card_based_on_batch_size": 1},
+				pluck="name",
+			),
+		)
 
 	def set_onload_for_multi_level_bom(self):
 		use_multi_level_bom = frappe.db.get_value(
@@ -680,6 +692,8 @@ class BOM(WebsiteGenerator):
 		)
 		args.update(item)
 
+		# the form may send a stale price list exchange rate
+		self.set_plc_conversion_rate()
 		rate = self.get_rm_rate(args) if args.get("fetch_rate") else 0
 		return self._build_rm_detail(args, item, rate)
 
@@ -924,9 +938,12 @@ class BOM(WebsiteGenerator):
 
 		if self.price_list_currency == self.company_currency():
 			self.plc_conversion_rate = 1
-		elif flt(self.plc_conversion_rate) in (0, 1) or self.has_value_changed("buying_price_list"):
-			self.plc_conversion_rate = get_exchange_rate(
-				self.price_list_currency, self.company_currency(), args="for_buying"
+		elif self.price_list_currency == self.currency:
+			self.plc_conversion_rate = self.conversion_rate
+		else:
+			self.plc_conversion_rate = (
+				get_exchange_rate(self.price_list_currency, self.company_currency(), args="for_buying")
+				or self.plc_conversion_rate
 			)
 
 	def validate_materials(self):
@@ -1256,9 +1273,7 @@ class BOM(WebsiteGenerator):
 		)
 
 		for item in self.secondary_items:
-			item.process_loss_qty = flt(
-				item.stock_qty * (item.process_loss_per / 100), self.precision("quantity")
-			)
+			item.process_loss_qty = get_secondary_process_loss_qty(item)
 
 	def validate_uoms(self):
 		self.validate_uom(self.item, self.uom, self.process_loss_percentage, self.process_loss_qty)
@@ -1400,6 +1415,15 @@ def _get_price_list_item_rate(args, bom_doc):
 	item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 	price_list_data = get_price_list_rate(ctx, item_doc)
 	return price_list_data.price_list_rate
+
+
+@frappe.whitelist()
+def get_secondary_item_valuation_rate(item_code: str, company: str, warehouse: str | None = None) -> float:
+	"""Company currency rate a Valuation Rate secondary item is costed at."""
+	frappe.has_permission("BOM", "read", throw=True)
+	return get_valuation_rate(
+		{"item_code": item_code, "company": company, "warehouse": warehouse, "set_rate_based_on_warehouse": 1}
+	)
 
 
 def get_valuation_rate(data):

@@ -154,10 +154,10 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		}
 	}
 	set_party_from_route() {
-		const { company, party_type, party } = frappe.route_options || {};
+		const { company, party_type, party, payment_name } = frappe.route_options || {};
 		if (!party) return;
 		frappe.route_options = null;
-		this.frm.set_value({ company, party_type, party }).then(() => {
+		this.frm.set_value({ company, party_type, party, payment_name: payment_name || "" }).then(() => {
 			if (this.frm.doc.receivable_payable_account) this.frm.trigger("get_unreconciled_entries");
 		});
 	}

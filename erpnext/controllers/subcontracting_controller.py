@@ -1560,6 +1560,12 @@ class SubcontractingController(StockController):
 
 	def __validate_serial_no(self, row, key, bundle_entries):
 		serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
+		if row.get("serial_no"):
+			serial_nos.update(
+				SerialBatchIdentity("Serial No").resolve(
+					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+				)
+			)
 		incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
 
 		if incorrect_sn:
@@ -1630,20 +1636,28 @@ class SubcontractingController(StockController):
 	def __update_consumed_qty_in_subcontract_order(self, itemwise_consumed_qty):
 		fields = ["main_item_code", "parent", "name"]
 		filters = {"docstatus": 1, "parent": ("in", self.subcontract_orders)}
+		rows = frappe.get_all(
+			self.subcontract_data.order_supplied_items_field, fields=fields, filters=filters, order_by="idx"
+		)
 		items_sent = self.get_items_sent_on_order_rows()
+		consumed_beyond_sent = get_consumed_qty_beyond_sent(rows, items_sent, itemwise_consumed_qty)
 		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
 
-		for row in frappe.get_all(
-			self.subcontract_data.order_supplied_items_field, fields=fields, filters=filters, order_by="idx"
-		):
+		for row in rows:
 			# a row consumes the items sent on it: its raw material or an alternative
 			consumed_qty = 0
 			for item_code, sent_qty in items_sent.get(row.name, {}).items():
-				key = (item_code, row.main_item_code, row.parent)
 				# a return of components books an item's return on one of its rows, so a row can net below 0
-				qty = min(itemwise_consumed_qty.get(key, 0), max(sent_qty, 0))
-				consumed_qty += qty
-				itemwise_consumed_qty[key] -= qty
+				qty_left = max(sent_qty, 0)
+				# its own finished good's consumption first, then what others consumed beyond their rows
+				for consumption, key in (
+					(itemwise_consumed_qty, (item_code, row.main_item_code, row.parent)),
+					(consumed_beyond_sent, (item_code, row.parent)),
+				):
+					qty = min(consumption.get(key, 0), qty_left)
+					consumption[key] -= qty
+					qty_left -= qty
+					consumed_qty += qty
 
 			frappe.db.set_value(
 				self.subcontract_data.order_supplied_items_field,
@@ -1804,15 +1818,38 @@ class SubcontractingController(StockController):
 			for item in self.get("items")
 			if not item.get("secondary_item_type") and not item.get("valuation_type")
 		]
-		for item in fg_rows:
-			item.additional_cost_per_qty = 0
+		costs = self.get_targeted_additional_costs(fg_rows)
+		spread_cost = flt(self.total_additional_costs - sum(costs), self.precision("total_additional_costs"))
+		if spread_cost:
+			shares = self.spread_additional_cost(fg_rows, spread_cost)
+			costs = [cost + share for cost, share in zip(costs, shares, strict=True)]
 
-		if not self.total_additional_costs:
-			return
+		for item, cost in zip(fg_rows, costs, strict=True):
+			qty = self.get_qty_for_costing(item)
+			item.additional_cost_per_qty = cost / qty if qty else 0
 
+	def get_targeted_additional_costs(self, fg_rows):
+		"""Cost of each finished good row from the additional cost rows that target it."""
+		row_index = {item.name: index for index, item in enumerate(fg_rows)}
+		costs = [0.0] * len(fg_rows)
+		for row in self.get("additional_costs"):
+			if not row.item_row:
+				continue
+			if row.item_row not in row_index:
+				frappe.throw(
+					_(
+						"Row #{0}: Additional Costs row targets an item row that is not a finished good."
+					).format(row.idx)
+				)
+			costs[row_index[row.item_row]] += flt(row.amount)
+		return costs
+
+	def spread_additional_cost(self, fg_rows, cost):
+		"""Share of the cost per finished good row, by qty or amount."""
 		based_on_amount = self.distribute_additional_costs_based_on == "Amount"
 		weights = [
-			flt(item.amount) if based_on_amount else self.get_qty_for_costing(item) for item in fg_rows
+			self.get_amount_for_costing(item) if based_on_amount else self.get_qty_for_costing(item)
+			for item in fg_rows
 		]
 		total_weight = sum(weights)
 		if not total_weight:
@@ -1824,15 +1861,17 @@ class SubcontractingController(StockController):
 
 		# round the running total, so no share goes negative and the shares add up to the cost
 		precision = self.precision("total_additional_costs")
-		allocated = cumulative_weight = 0.0
-		for item, weight in zip(fg_rows, weights, strict=True):
+		shares, allocated, cumulative_weight = [], 0.0, 0.0
+		for weight in weights:
 			cumulative_weight += weight
-			cumulative_share = flt(self.total_additional_costs * cumulative_weight / total_weight, precision)
-			share = flt(cumulative_share - allocated, precision)
+			cumulative_share = flt(cost * cumulative_weight / total_weight, precision)
+			shares.append(flt(cumulative_share - allocated, precision))
 			allocated = cumulative_share
+		return shares
 
-			if qty := self.get_qty_for_costing(item):
-				item.additional_cost_per_qty = share / qty
+	def get_amount_for_costing(self, item):
+		"""Amount a row's share of the additional costs is weighted by."""
+		return flt(item.amount)
 
 	def get_qty_for_costing(self, item):
 		"""Qty a row's cost is spread over: accepted, rejected and process loss qty."""
@@ -1888,12 +1927,27 @@ class SubcontractingController(StockController):
 def update_serial_nos_at_supplier(details, serial_nos, is_return):
 	"""Add the serial nos a transfer sent to the supplier, or take out those a return brought back."""
 	if not is_return:
-		details.serial_no.extend(serial_nos)
+		# a voucher's bundles repeat the serial nos of its rows that use the Serial No field
+		details.serial_no = list(dict.fromkeys([*details.serial_no, *serial_nos]))
 		return
 
 	for serial_no in serial_nos:
 		if serial_no in details.serial_no:
 			details.serial_no.remove(serial_no)
+
+
+def get_consumed_qty_beyond_sent(rows, items_sent, itemwise_consumed_qty):
+	"""Consumption, by item and order, beyond what its finished good's order rows were sent."""
+	sent_for = defaultdict(float)
+	for row in rows:
+		for item_code, sent_qty in items_sent.get(row.name, {}).items():
+			sent_for[(item_code, row.main_item_code, row.parent)] += max(sent_qty, 0)
+
+	consumed_qty = defaultdict(float)
+	for (item_code, finished_good, order), qty in itemwise_consumed_qty.items():
+		consumed_qty[(item_code, order)] += max(qty - sent_for[(item_code, finished_good, order)], 0)
+
+	return consumed_qty
 
 
 def get_item_details(items):
@@ -1964,9 +2018,15 @@ def make_rm_stock_entry(
 
 				target_doc.set_stock_entry_type()
 
-				over_transfer_allowance = frappe.get_single_value(
-					"Buying Settings", "over_transfer_allowance"
+				per_finished_good = (
+					order_doctype != "Subcontracting Order"
+					or frappe.db.get_single_value(
+						"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
+					)
+					!= "BOM"
 				)
+				pending_qty = get_pending_qty_by_material(subcontract_order.supplied_items, per_finished_good)
+				precision = target_doc.precision("qty", "items")
 				for fg_item_code in fg_item_code_list:
 					for rm_item in rm_items:
 						if (
@@ -1974,19 +2034,18 @@ def make_rm_stock_entry(
 							or rm_item.get("item_code") == fg_item_code
 						):
 							rm_item_code = rm_item.get("rm_item_code")
-							qty = rm_item.get("qty") or max(
-								rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0
+							material = (rm_item_code, fg_item_code if per_finished_good else None)
+							qty = rm_item.get("qty") or flt(
+								min(
+									flt(rm_item.get("required_qty")) - flt(rm_item.get("total_supplied_qty")),
+									pending_qty[material],
+								),
+								precision,
 							)
-							if qty <= 0 and rm_item.get("total_supplied_qty"):
-								per_transferred = (
-									flt(
-										rm_item.get("total_supplied_qty") / rm_item.get("required_qty"),
-										frappe.db.get_default("float_precision"),
-									)
-									* 100
-								)
-								if per_transferred >= 100 + over_transfer_allowance:
-									continue
+							if qty <= 0:
+								continue
+
+							pending_qty[material] -= qty
 
 							items_dict = {
 								rm_item_code: {
@@ -2049,6 +2108,16 @@ def make_rm_stock_entry(
 			frappe.throw(_("No Items selected for transfer."))
 
 
+def get_pending_qty_by_material(supplied_items, per_finished_good):
+	"""Qty of each raw material still to be sent, pooled the way the receipt consumes it."""
+	pending_qty = defaultdict(float)
+	for row in supplied_items:
+		material = (row.rm_item_code, row.main_item_code if per_finished_good else None)
+		pending_qty[material] += flt(row.required_qty) - flt(row.total_supplied_qty)
+
+	return pending_qty
+
+
 def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_detail", batch_no=None):
 	item = ste_doc.append("items", row.item_details)
 
@@ -2073,6 +2142,50 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 	)
 
 
+def add_return_items(ste_doc, row, qty, qty_left, rm_details, rm_detail_field, batch_no=None):
+	"""Split a return over the order rows its material was sent on, each up to what the row has left."""
+	precision = frappe.get_precision("Stock Entry Detail", "qty")
+	# a fully consumed material can leave a float remainder
+	if flt(qty, precision) <= 0:
+		return
+
+	order_rows = [name for name in qty_left if name in rm_details and name in row.get(f"{rm_detail_field}s")]
+	if not order_rows:
+		add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field, batch_no)
+		return
+
+	serial_nos = row.serial_no
+	for order_row in order_rows:
+		row_qty = flt(
+			qty if order_row == order_rows[-1] else min(qty, max(qty_left[order_row], 0)), precision
+		)
+		if row_qty <= 0:
+			continue
+
+		qty_left[order_row] -= row_qty
+		qty -= row_qty
+		row_serial_nos, serial_nos = serial_nos[: cint(row_qty)], serial_nos[cint(row_qty) :]
+		add_items_in_ste(
+			ste_doc,
+			frappe._dict(row, serial_no=row_serial_nos),
+			row_qty,
+			[order_row],
+			rm_detail_field,
+			batch_no,
+		)
+
+
+def get_qty_left_on_order_rows(order_doc):
+	"""Qty each supplied row of the order still has at the supplier, in row order."""
+	rows = frappe.get_all(
+		order_doc.subcontract_data.order_supplied_items_field,
+		filters={"parent": order_doc.name},
+		fields=["name", "total_supplied_qty", "consumed_qty"],
+		order_by="idx",
+	)
+	return {row.name: flt(row.total_supplied_qty) - flt(row.consumed_qty) for row in rows}
+
+
 def make_return_stock_entry_for_subcontract(
 	available_materials, order_doc, rm_details, order_doctype="Subcontracting Order"
 ):
@@ -2088,6 +2201,7 @@ def make_return_stock_entry_for_subcontract(
 
 		target_doc.company = source_doc.company
 		target_doc.is_return = 1
+		qty_left = get_qty_left_on_order_rows(order_doc)
 		for _key, value in available_materials.items():
 			if not value.qty:
 				continue
@@ -2098,9 +2212,11 @@ def make_return_stock_entry_for_subcontract(
 			if value.batch_no:
 				for batch_no, qty in value.batch_no.items():
 					if qty > 0:
-						add_items_in_ste(target_doc, value, qty, rm_details, rm_detail_field, batch_no)
+						add_return_items(
+							target_doc, value, qty, qty_left, rm_details, rm_detail_field, batch_no
+						)
 			else:
-				add_items_in_ste(target_doc, value, value.qty, rm_details, rm_detail_field)
+				add_return_items(target_doc, value, value.qty, qty_left, rm_details, rm_detail_field)
 
 		target_doc.set_stock_entry_type()
 
