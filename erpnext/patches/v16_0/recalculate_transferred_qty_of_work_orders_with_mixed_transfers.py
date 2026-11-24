@@ -23,4 +23,4 @@ def execute():
 	).run(pluck=True)
 
 	for name in work_orders:
-		frappe.get_doc("Work Order", name).refresh_material_transferred_for_manufacturing()
+		frappe.get_doc("Work Order", name).update_transferred_qty_for_required_items()
