@@ -1406,8 +1406,7 @@ class BOM(WebsiteGenerator):
 		)
 
 		for d in child_fb_items:
-			good_qty = (flt(d.quantity) or 1) if d.is_phantom_bom else get_good_qty(d)
-			d.qty_consumed_per_unit = flt(d.stock_qty) / good_qty
+			d.qty_consumed_per_unit = flt(d.stock_qty) / get_exploded_good_qty(d)
 			self.add_to_cur_exploded_items(
 				frappe._dict(
 					{
@@ -2510,6 +2509,11 @@ def get_secondary_process_loss_qty(row) -> float:
 def get_good_qty(bom):
 	good_qty = flt(bom.quantity) - flt(bom.process_loss_qty)
 	return good_qty if good_qty > 0 else flt(bom.quantity) or 1
+
+
+def get_exploded_good_qty(bom):
+	"""Qty a child BOM's components are spread over when exploded: a phantom BOM's loss is ignored."""
+	return (flt(bom.quantity) or 1) if bom.is_phantom_bom else get_good_qty(bom)
 
 
 def get_secondary_items_from_sub_assemblies(bom_no, company, qty, secondary_items=None):
