@@ -1194,8 +1194,12 @@ class StockController(AccountsController):
 
 		# the earlier rows of this return post their entries first
 		for d in earlier_rows:
-			if d.warehouse in warehouses:
+			if d.warehouse not in warehouses:
+				continue
+			if self.posts_stock_ledger_entry(d.item_code, d.stock_qty):
 				self.take_from_row_left_to_return(left, d, d.qty)
+			else:  # takes nothing, and counts like a return that took nothing
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
 
 		return left
 
@@ -1213,6 +1217,10 @@ class StockController(AccountsController):
 			"actual_qty",
 		)
 		return flt(actual_qty) * sign
+
+	def posts_stock_ledger_entry(self, item_code, stock_qty) -> bool:
+		"""Whether a row of a stock item posts its stock ledger entries."""
+		return True
 
 	def get_stock_qty_sign(self) -> int:
 		"""1 where a row's stock qty goes into the warehouse, as on a receipt, -1 where it goes out."""
