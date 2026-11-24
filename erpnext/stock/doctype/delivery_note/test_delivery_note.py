@@ -6129,6 +6129,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		).name
 
 	def test_draft_credit_note_is_rejected_after_invoice_deducts_the_return(self):
+		"""A draft credit note of a return cannot be submitted after a later invoice deducted the return."""
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
@@ -6155,6 +6156,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, credit_note.submit)
 
 	def test_return_after_credited_return_is_not_credited_again(self):
+		"""A later return is settled by the invoice and needs no credit after an earlier return was credited."""
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
@@ -6180,6 +6182,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assert_return_is_settled(later_return)
 
 	def test_return_in_boxes_deducted_on_sales_order_invoice_is_settled(self):
+		"""A return in boxes is settled when the Sales Order invoice deducts it."""
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
@@ -6198,6 +6201,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 1})
 	def test_invoice_credit_in_pieces_covers_return_in_boxes(self):
+		"""An invoice credit in pieces covers a return of the same qty in boxes."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
@@ -6222,6 +6226,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assert_return_is_settled(sales_return)
 
 	def test_return_after_sales_order_invoice_credit_is_settled(self):
+		"""A Sales Order invoice credit that updates the order billing covers a later return."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
@@ -6248,6 +6253,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assert_return_is_settled(sales_return)
 
 	def test_sales_order_invoice_of_another_delivery_does_not_settle_return(self):
+		"""A Sales Order invoice that made a later delivery does not bill or settle an earlier delivery."""
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note as make_dn_from_invoice
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
@@ -6294,6 +6300,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(delivery.items[0].billed_amt, delivery.items[0].amount)
 
 	def test_settled_return_of_free_items_leaves_billing_selector(self):
+		"""A zero-value return that the invoice settled is not offered for billing."""
 		from erpnext.controllers.queries import get_delivery_notes_to_be_billed
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
