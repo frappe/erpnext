@@ -201,15 +201,21 @@ def get_on_time_shipments(scorecard):
 		.on(PR_Item.purchase_order_item == PO_Item.name)
 		.join(PO)
 		.on(PO_Item.parent == PO.name)
-		.select(PO_Item.name, PO_Item.qty, Sum(PR_Item.received_qty).as_("received_on_time"))
+		.select(
+			PO_Item.name,
+			PO_Item.qty,
+			PO_Item.conversion_factor,
+			Sum(PR_Item.received_qty * PR_Item.conversion_factor).as_("received_stock_qty"),
+		)
 		.where(PO.supplier == scorecard.supplier)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
 		.where(PO_Item.schedule_date >= PR.posting_date)
 		.where(PR_Item.docstatus == 1)
-		.groupby(PO_Item.name, PO_Item.qty)
+		.groupby(PO_Item.name, PO_Item.qty, PO_Item.conversion_factor)
 	).run(as_dict=True)
 
-	return sum(1 for row in rows if flt(row.received_on_time) >= flt(row.qty))
+	precision = frappe.get_precision("Purchase Order Item", "received_qty")
+	return sum(1 for row in rows if flt(row.received_stock_qty / row.conversion_factor, precision) >= row.qty)
 
 
 def get_late_shipments(scorecard):
