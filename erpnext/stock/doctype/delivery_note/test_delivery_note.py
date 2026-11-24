@@ -550,6 +550,11 @@ class TestDeliveryNote(ERPNextTestSuite):
 			dn_return.append("items", row | {"qty": qty})
 		dn_return.submit()
 
+		posted_qty = [
+			frappe.db.get_value("Stock Ledger Entry", {"voucher_detail_no": d.name}, "actual_qty") or 0
+			for d in dn_return.items
+		]
+		self.assertEqual(posted_qty, [2.01, 0, 0.01])
 		stock_bin = {"item_code": dn.items[0].item_code, "warehouse": dn.items[0].warehouse}
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 10)
 
