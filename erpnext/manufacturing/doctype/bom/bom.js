@@ -1372,17 +1372,30 @@ frappe.ui.form.on("BOM Secondary Item", {
 });
 
 erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
-	const item_code = locals[cdt][cdn].item_code;
-	if (!item_code) return;
+	const args = {
+		item_code: locals[cdt][cdn].item_code,
+		company: doc.company,
+		warehouse: doc.default_target_warehouse || "",
+	};
+	if (!args.item_code) return;
 
 	// not a doc method: its reply syncs back the row as sent, undoing later edits
 	frappe.call({
 		method: "erpnext.manufacturing.doctype.bom.bom.get_secondary_item_valuation_rate",
-		args: { item_code: item_code, company: doc.company, warehouse: doc.default_target_warehouse },
+		args: args,
 		callback(r) {
-			// the row may have changed item or left Valuation Rate while the rate was being fetched
+			// the item, company or warehouse may have changed while the rate was being fetched
 			const row = locals[cdt][cdn];
-			if (!row || row.item_code !== item_code || row.valuation_type !== "Valuation Rate") return;
+			doc = locals[doc.doctype][doc.name];
+			if (
+				!row ||
+				row.valuation_type !== "Valuation Rate" ||
+				row.item_code !== args.item_code ||
+				doc.company !== args.company ||
+				(doc.default_target_warehouse || "") !== args.warehouse
+			) {
+				return;
+			}
 
 			const loss_qty = Math.min(
 				flt(
