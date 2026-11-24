@@ -3,13 +3,60 @@
 import unittest
 
 import frappe
+from frappe.handler import execute_cmd
+from frappe.utils import set_request
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_dimensions,
+	get_dimensions_for_user,
+)
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
+
+GET_DIMENSIONS = "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions"
 
 
 class TestAccountingDimension(ERPNextTestSuite):
+	def test_client_dimension_defaults_only_for_companies_the_user_can_see(self):
+		add_dimension_default("Department", "_Test Company 1", "_Test Department - _TC")
+		limited_user = make_fenced_user(
+			"_test_dimension_limited@example.com", ["Accounts User"], [("Company", "_Test Company")]
+		)
+		stock_user = make_fenced_user("_test_dimension_stock@example.com", ["Stock User"])
+		dimensions = get_dimensions()[0]
+
+		self.addCleanup(setattr, frappe.local, "request", None)
+		with as_user(limited_user):
+			limited_dimensions, limited_defaults = get_dimensions_for_user()
+			# client scripts call the old path, which the hooks send to get_dimensions_for_user
+			set_request(method="GET", path=f"/api/method/{GET_DIMENSIONS}")
+			self.assertEqual(execute_cmd(GET_DIMENSIONS)[1], limited_defaults)
+		self.assertEqual(limited_dimensions, dimensions)
+		self.assertEqual(set(limited_defaults), {"_Test Company"})
+
+		with as_user(stock_user):
+			stock_dimensions, stock_defaults = get_dimensions_for_user(with_cost_center_and_project="true")
+		self.assertEqual(stock_defaults["_Test Company 1"], {"department": "_Test Department - _TC"})
+		self.assertEqual(
+			[d.fieldname for d in stock_dimensions][-2:],
+			["cost_center", "project"],
+		)
+
+	def test_client_dimension_lookup_refuses_website_users(self):
+		website_user = make_fenced_user("_test_dimension_website@example.com", [])
+		self.addCleanup(setattr, frappe.local, "request", None)
+
+		with as_user(website_user):
+			self.assertRaises(frappe.PermissionError, get_dimensions_for_user)
+
+			set_request(method="GET", path=f"/api/method/{GET_DIMENSIONS}")
+			self.assertRaises(frappe.PermissionError, execute_cmd, GET_DIMENSIONS)
+
+			# server code keeps the unscoped lookup for any user
+			self.assertIn("_Test Company", get_dimensions()[1])
+
 	def test_dimension_against_sales_invoice(self):
 		si = create_sales_invoice(do_not_save=1)
 
@@ -96,3 +143,19 @@ class TestAccountingDimension(ERPNextTestSuite):
 
 		si.save()
 		self.assertRaises(frappe.ValidationError, si.submit)
+
+
+def add_dimension_default(dimension, company, default_dimension):
+	dimension_doc = frappe.get_doc("Accounting Dimension", dimension)
+	frappe.get_doc(
+		{
+			"doctype": "Accounting Dimension Detail",
+			"parent": dimension_doc.name,
+			"parenttype": "Accounting Dimension",
+			"parentfield": "dimension_defaults",
+			"idx": len(dimension_doc.dimension_defaults) + 1,
+			"company": company,
+			"reference_document": dimension_doc.document_type,
+			"default_dimension": default_dimension,
+		}
+	).db_insert()
