@@ -260,6 +260,7 @@ frappe.ui.form.on("Timesheet", {
 							employee: frm.doc.employee,
 							activity_type: row.activity_type,
 							currency: frm.doc.currency,
+							transaction_date: get_start_date(frm),
 						},
 						callback: function (r) {
 							if (r.message) {
@@ -293,6 +294,9 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	from_time: function (frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn);
+		if ((frm.exchange_rate_date || frm.doc.start_date) != get_start_date(frm)) {
+			set_exchange_rate(frm);
+		}
 	},
 
 	to_time: function (frm, cdt, cdn) {
@@ -350,6 +354,7 @@ frappe.ui.form.on("Timesheet Detail", {
 				employee: frm.doc.employee,
 				activity_type: frm.selected_doc.activity_type,
 				currency: frm.doc.currency,
+				transaction_date: get_start_date(frm),
 			},
 			callback: function (r) {
 				if (r.message) {
@@ -444,10 +449,17 @@ var calculate_time_and_amount = function (frm) {
 	frm.set_value("total_costing_amount", total_costing_amount);
 };
 
+var get_start_date = function (frm) {
+	let dates = (frm.doc.time_logs || []).filter((d) => d.from_time).map((d) => d.from_time.slice(0, 10));
+	return dates.length ? dates.sort()[0] : frappe.datetime.get_today();
+};
+
 var set_exchange_rate = function (frm) {
 	let company_currency = erpnext.get_currency(frm.doc.company);
+	let transaction_date = get_start_date(frm);
+	frm.exchange_rate_date = transaction_date;
 	// a later call makes this quote stale, so its response is dropped
-	let quote = [frm.doc.currency, company_currency].join("|");
+	let quote = [frm.doc.currency, company_currency, transaction_date].join("|");
 	frm.exchange_rate_quote = quote;
 
 	if (!frm.doc.currency || frm.doc.currency == company_currency) {
@@ -462,6 +474,7 @@ var set_exchange_rate = function (frm) {
 		args: {
 			from_currency: frm.doc.currency,
 			to_currency: company_currency,
+			transaction_date: transaction_date,
 		},
 		callback: function (r) {
 			if (frm.exchange_rate_quote !== quote || !r.message) return;
