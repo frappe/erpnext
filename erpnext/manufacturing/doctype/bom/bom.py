@@ -3,7 +3,7 @@
 
 import functools
 import re
-from collections import deque
+from collections import defaultdict, deque
 from operator import itemgetter
 
 import frappe
@@ -2517,32 +2517,39 @@ def get_exploded_good_qty(bom):
 
 
 def get_secondary_items_from_sub_assemblies(bom_no, company, qty, secondary_items=None):
-	"""Secondary items of the sub-assembly BOMs at every level, for qty of the BOM's item."""
+	"""Secondary items of the sub-assembly BOMs at every level, for qty of the BOM's item, by BOM row."""
 	if secondary_items is None:
 		secondary_items = {}
 
-	bom_items = frappe.get_all(
+	# by BOM, not item: two BOMs of one sub-assembly have their own yield and secondary items
+	qty_per_bom = defaultdict(float)
+	bom_qty = flt(frappe.get_cached_value("BOM", bom_no, "quantity")) or 1
+	for row in frappe.get_all(
 		"BOM Item",
 		filters={"parent": bom_no, "docstatus": 1},
-		fields=["bom_no", "qty"],
+		fields=["bom_no", "stock_qty"],
 		order_by="idx asc",
-	)
+	):
+		if row.bom_no:
+			qty_per_bom[row.bom_no] += flt(row.stock_qty) * flt(qty) / bom_qty
 
-	for row in bom_items:
-		if not row.bom_no:
-			continue
-
-		row_qty = flt(row.qty) * flt(qty)
-		items = get_bom_items_as_dict(
-			row.bom_no, company, qty=row_qty, fetch_exploded=0, fetch_secondary_items=1
+	for sub_bom_no, sub_assembly_qty in qty_per_bom.items():
+		# the sub-assembly's process loss makes more of it than the parent consumes, as in the explosion
+		bom = frappe.get_cached_value(
+			"BOM", sub_bom_no, ["quantity", "process_loss_qty", "is_phantom_bom"], as_dict=True
 		)
-		for key, item in items.items():
-			if key in secondary_items:
-				secondary_items[key].qty += flt(item.qty)
+		qty_made = sub_assembly_qty * flt(bom.quantity) / get_exploded_good_qty(bom)
+		items = get_bom_items_as_dict(
+			sub_bom_no, company, qty=qty_made, fetch_exploded=0, fetch_secondary_items=1
+		)
+		for item in items.values():
+			# a BOM reached through two paths makes its rows for both
+			if item.name in secondary_items:
+				secondary_items[item.name].qty += flt(item.qty)
 			else:
-				secondary_items[key] = item
+				secondary_items[item.name] = item
 
-		get_secondary_items_from_sub_assemblies(row.bom_no, company, row_qty, secondary_items)
+		get_secondary_items_from_sub_assemblies(sub_bom_no, company, qty_made, secondary_items)
 
 	return secondary_items
 
