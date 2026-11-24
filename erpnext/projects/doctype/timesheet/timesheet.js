@@ -294,7 +294,9 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	from_time: function (frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn);
-		if ((frm.exchange_rate_date || frm.doc.start_date) != get_start_date(frm)) {
+		let start_date = get_start_date(frm);
+		if (frm.doc.start_date != start_date) {
+			frm.set_value("start_date", start_date);
 			set_exchange_rate(frm);
 		}
 	},
@@ -457,7 +459,6 @@ var get_start_date = function (frm) {
 var set_exchange_rate = function (frm) {
 	let company_currency = erpnext.get_currency(frm.doc.company);
 	let transaction_date = get_start_date(frm);
-	frm.exchange_rate_date = transaction_date;
 	// a later call makes this quote stale, so its response is dropped
 	let quote = [frm.doc.currency, company_currency, transaction_date].join("|");
 	frm.exchange_rate_quote = quote;
