@@ -1560,6 +1560,12 @@ class SubcontractingController(StockController):
 
 	def __validate_serial_no(self, row, key, bundle_entries):
 		serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
+		if row.get("serial_no"):
+			serial_nos.update(
+				SerialBatchIdentity("Serial No").resolve(
+					row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+				)
+			)
 		incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
 
 		if incorrect_sn:
