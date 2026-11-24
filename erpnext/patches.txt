@@ -487,3 +487,4 @@ erpnext.patches.v16_0.recalculate_received_qty_of_material_requests_received_in_
 erpnext.patches.v16_0.update_serial_batch_entries #11-01-2026 10:00:00
 erpnext.patches.v16_0.drop_item_code_warehouse_posting_datetime_index_from_sabb
 erpnext.patches.v16_0.restrict_employee_project_perms_to_select
+erpnext.patches.v16_0.recalculate_transferred_qty_of_work_orders_with_mixed_transfers
