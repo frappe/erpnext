@@ -1666,28 +1666,36 @@ class SubcontractingController(StockController):
 	def count_serial_batches_on_rows_that_sent_them(
 		self, rows, items_sent, itemwise_consumed_qty, consumed_bundles
 	):
-		"""Count consumed serial nos and batches on the order rows that sent them, own finished good's rows first."""
+		"""Count consumed serial nos and batches on the order rows that sent them, own finished goods' rows first."""
 		consumed_qty = defaultdict(float)
 		if not consumed_bundles:
 			return consumed_qty
 
 		serial_batches_sent = self.get_serial_batches_sent_on_order_rows()
-		for (key, serial_no, batch_no), qty in get_consumed_serial_batches(consumed_bundles).items():
-			item_code, finished_good, order = key
-			sent_on_rows = serial_batches_sent.get((item_code, order, serial_no, batch_no), {})
-			for row in sorted(rows, key=lambda row: row.main_item_code != finished_good):
-				row_sent = items_sent.get(row.name, {})
-				counted = min(
-					qty, itemwise_consumed_qty[key], sent_on_rows.get(row.name, 0), row_sent.get(item_code, 0)
-				)
-				if counted <= 0:
-					continue
+		serial_batches_consumed = get_consumed_serial_batches(consumed_bundles)
+		for own_rows in (True, False):
+			for consumption, qty in serial_batches_consumed.items():
+				key, serial_no, batch_no = consumption
+				item_code, finished_good, order = key
+				sent_on_rows = serial_batches_sent.get((item_code, order, serial_no, batch_no), {})
+				for row in rows:
+					row_sent = items_sent.get(row.name, {})
+					counted = min(
+						qty,
+						itemwise_consumed_qty[key],
+						sent_on_rows.get(row.name, 0),
+						row_sent.get(item_code, 0),
+					)
+					if (row.main_item_code == finished_good) != own_rows or counted <= 0:
+						continue
 
-				qty -= counted
-				itemwise_consumed_qty[key] -= counted
-				sent_on_rows[row.name] -= counted
-				row_sent[item_code] -= counted
-				consumed_qty[row.name] += counted
+					qty -= counted
+					itemwise_consumed_qty[key] -= counted
+					sent_on_rows[row.name] -= counted
+					row_sent[item_code] -= counted
+					consumed_qty[row.name] += counted
+
+				serial_batches_consumed[consumption] = qty
 
 		return consumed_qty
 
@@ -1699,6 +1707,9 @@ class SubcontractingController(StockController):
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		order = se[self.subcontract_data.order_field]
 		rm_detail = se_detail[self.subcontract_data.rm_detail_field]
+		serial_no, batch_no = Coalesce(entry.serial_no, ""), Coalesce(entry.batch_no, "")
+		# the supplier's side of the transfer: inward when sent, outward when returned
+		supplier_side = Case().when(se.is_return == 1, "Outward").else_("Inward")
 		rows = (
 			frappe.qb.from_(se)
 			.inner_join(se_detail)
@@ -1707,15 +1718,15 @@ class SubcontractingController(StockController):
 			.on(bundle.voucher_detail_no == se_detail.name)
 			.inner_join(entry)
 			.on(entry.parent == bundle.name)
-			.select(se_detail.item_code, order, entry.serial_no, entry.batch_no, rm_detail, Sum(entry.qty))
+			.select(se_detail.item_code, order, serial_no, batch_no, rm_detail, Sum(entry.qty))
 			.where(
 				(se.docstatus == 1)
 				& order.isin(self.subcontract_orders)
 				& (Coalesce(rm_detail, "") != "")
-				& (bundle.warehouse == self.supplier_warehouse)
-				& (bundle.is_cancelled == 0)
+				& (bundle.docstatus == 1)
+				& (bundle.type_of_transaction == supplier_side)
 			)
-			.groupby(se_detail.item_code, order, entry.serial_no, entry.batch_no, rm_detail)
+			.groupby(se_detail.item_code, order, serial_no, batch_no, rm_detail)
 		).run()
 
 		serial_batches = defaultdict(dict)
@@ -2019,7 +2030,7 @@ def get_consumed_serial_batches(bundles):
 		fields=["parent", "serial_no", "batch_no", "qty"],
 	):
 		# a consumption's entries are negative, a return's positive
-		consumed[(bundles[entry.parent], entry.serial_no, entry.batch_no)] -= entry.qty
+		consumed[(bundles[entry.parent], entry.serial_no or "", entry.batch_no or "")] -= entry.qty
 
 	return consumed
 

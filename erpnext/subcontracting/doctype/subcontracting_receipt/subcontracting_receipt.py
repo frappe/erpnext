@@ -272,12 +272,11 @@ class SubcontractingReceipt(SubcontractingController):
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
-		# after the bundles are made: consumed serial nos and batches count on the rows that sent them
-		self.set_consumed_qty_in_subcontract_order()
-
 		self.validate_returned_serial_batches()
 		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
+		# after the bundles are made: consumed serial nos and batches count on the rows that sent them
+		self.set_consumed_qty_in_subcontract_order()
 		self.validate_consumed_batches()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
