@@ -3794,17 +3794,15 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertFalse([d for d in se_doc.items if d.item_code == co_product])
 
-	def test_whole_number_co_product_of_a_large_qty_is_not_rounded_up_a_unit(self):
-		# 2 Nos less a loss of 1 per BOM of 3: SQL gives the 2 / 3 per FG with noise in the last digit
+	def test_whole_number_co_product_below_the_row_precision_is_rounded_up(self):
+		# 1 Nos per 1,000 FG: 4 FG make 0.004, which a whole number UOM rounds up to 1
 		rm_a, rm_b = make_co_product_raw_materials()
 		fg_item, co_product = (
 			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(2)
 		)
-		bom = make_co_product_bom(
-			fg_item, [(rm_a, 3, None)], co_product, quantity=3, co_product_qty=2, process_loss_per=50
-		)
+		bom = make_co_product_bom(fg_item, [(rm_a, 1000, None)], co_product, quantity=1000)
 
-		self.assertEqual(get_secondary_item_qty(get_secondary_items(bom)[0], 120000), 40000)
+		self.assertEqual(get_secondary_item_qty(get_secondary_items(bom)[0], 4), 1)
 
 	def test_job_card_default_takes_the_co_product_qty_manufacture_makes(self):
 		# 33.33% of 3 Nos is a BOM loss of 1, so 100 FG make 200, not 200.01
