@@ -1114,26 +1114,36 @@ class StockController(AccountsController):
 		row's qty."""
 		from erpnext.controllers.buying_controller import get_stock_qty
 
-		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
 			return self.get_posted_return_qty(row, warehouse)
 
 		left = self.get_row_left_to_return(row, warehouse)
 		if left is None:
-			return stock_qty
+			return get_stock_qty(row, qty)
 
-		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
-		if flt(unreturned_stock_qty, row.precision("stock_qty")) <= 0:
-			return -left.stock_qty
+		return self.take_from_row_left_to_return(left, row, qty)
 
-		return max(stock_qty, -left.stock_qty)
+	def take_from_row_left_to_return(self, left, row, qty) -> float:
+		"""Stock qty a return row takes from what is left of its original row, signed as its qty, taken off
+		what is left: no more than is left, and all of it once the row returns the rest of the qty."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		precision = row.precision("stock_qty")
+		left.unrounded_stock_qty += flt(qty) * flt(row.conversion_factor)
+		if flt(left.unrounded_stock_qty, precision) <= 0:
+			taken = -left.stock_qty
+		else:
+			taken = max(get_stock_qty(row, qty), -left.stock_qty)
+
+		left.stock_qty = flt(left.stock_qty + taken, precision)
+		return taken
 
 	def get_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
 		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
 		returns and the earlier rows of this return have not moved back, or None if it moved no stock
 		there. A delivery counts every warehouse its rows used, as a return can put its stock back in
 		another one."""
-		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row, get_stock_qty
+		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row
 
 		reference_field = get_return_reference_field(self.doctype)
 		original_row = row.get(reference_field)
@@ -1176,13 +1186,13 @@ class StockController(AccountsController):
 			if d.get("rejected_warehouse") in warehouses:
 				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
 
+		left.stock_qty = max(flt(left.stock_qty, row.precision("stock_qty")), 0)
+
 		# the earlier rows of this return post their entries first
 		for d in earlier_rows:
 			if d.warehouse in warehouses:
-				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
-				left.stock_qty += get_stock_qty(d, d.qty)
+				self.take_from_row_left_to_return(left, d, d.qty)
 
-		left.stock_qty = max(flt(left.stock_qty, row.precision("stock_qty")), 0)
 		return left
 
 	def get_posted_return_qty(self, row, warehouse):
