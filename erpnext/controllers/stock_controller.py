@@ -1130,9 +1130,10 @@ class StockController(AccountsController):
 
 	def get_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
 		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
-		returns have not moved back, or None if it moved no stock there. A delivery counts every warehouse
-		its rows used, as a return can put its stock back in another one."""
-		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row
+		returns and the earlier rows of this return have not moved back, or None if it moved no stock
+		there. A delivery counts every warehouse its rows used, as a return can put its stock back in
+		another one."""
+		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row, get_stock_qty
 
 		reference_field = get_return_reference_field(self.doctype)
 		original_row = row.get(reference_field)
@@ -1156,7 +1157,10 @@ class StockController(AccountsController):
 			)
 			.run(as_dict=True)
 		)
-		warehouses = [warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows})
+		earlier_rows = [d for d in self.items if d.get(reference_field) == original_row and d.idx < row.idx]
+		warehouses = (
+			[warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows + earlier_rows})
+		)
 		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouses)
 		if original_row not in posted_qty:
 			return None
@@ -1171,6 +1175,12 @@ class StockController(AccountsController):
 				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
 			if d.get("rejected_warehouse") in warehouses:
 				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
+
+		# the earlier rows of this return post their entries first
+		for d in earlier_rows:
+			if d.warehouse in warehouses:
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
+				left.stock_qty += get_stock_qty(d, d.qty)
 
 		left.stock_qty = max(flt(left.stock_qty, row.precision("stock_qty")), 0)
 		return left
