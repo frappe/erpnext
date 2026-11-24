@@ -1307,6 +1307,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 5)).submit()
 
 		extra_receipt.cancel()
+		receive_customer_material(scio, "Basic RM", 2, 100)
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.submit()
+		rm_return.cancel()
 		self.assertEqual(
 			frappe.db.get_value(
 				"Work Order Item", {"parent": wo.name, "item_code": "Basic RM"}, "stock_reserved_qty"
