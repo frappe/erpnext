@@ -20,12 +20,21 @@ frappe.pages["valuation-rate-breakdown"].on_page_show = function () {
 	});
 };
 
+const PARTS_SHOWN = 5;
+const PARTS_LISTED = 100;
+
 erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	constructor(page) {
 		this.page = page;
 		this.body = $(this.page.body);
 		this.body.append(`${this.styles()}<div class="vrb"></div>`);
 		this.container = this.body.find(".vrb");
+		this.container.on("click", ".vrb-details-toggle", (e) => this.toggle_open(e, ".vrb-explain"));
+		this.container.on("click", ".vrb-more-toggle", (e) => this.toggle_open(e, ".vrb-stock-list"));
+		this.stock_parts_open = false;
+		this.container.on("click", ".vrb-stock-toggle", (e) => {
+			this.stock_parts_open = this.toggle_open(e, ".vrb-stock-parts");
+		});
 		this.make_fields();
 		this.render_blank_state();
 	}
@@ -121,14 +130,17 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	load(args) {
 		const key = [args.item_code, args.warehouse, args.upto, args.batch_no, args.serial_no].join("::");
 		this.key = key;
+		this.args = args;
 		this.focus = args.upto || null;
 		this.render_skeleton();
-		this.fetch(args).then(
+		this.fetch("get_valuation_steps", args).then(
 			(data) => {
 				if (this.key !== key) return;
 				this.data = data;
+				this.breakdown_state = this.is_pooled_view() && data.entries.length ? "loading" : null;
 				this.toggle_part_fields(data.item.valued_by);
 				this.render();
+				if (this.breakdown_state) this.load_breakdown(key);
 			},
 			() => {
 				if (this.key === key) this.render_failed(args);
@@ -136,30 +148,170 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		);
 	}
 
-	load_earlier() {
-		const first = this.data.entries[0];
-		const key = this.key;
-		return this.fetch({
+	load_breakdown(key) {
+		this.fetch("get_stock_breakdown", {
 			item_code: this.data.item.item_code,
 			warehouse: this.data.warehouse,
-			before: first.name,
+			upto: this.last_entry().name,
+		}).then(
+			(breakdown) => this.show_breakdown(key, "ready", breakdown),
+			() => this.show_breakdown(key, "failed", {})
+		);
+	}
+
+	show_breakdown(key, state, breakdown) {
+		if (this.key !== key) return;
+		Object.assign(this.data, breakdown);
+		this.breakdown_state = state;
+		this.container.find(".vrb-stock-parts").replaceWith(this.stock_parts_html());
+		this.update_notices();
+	}
+
+	notices() {
+		return [this.problems_alert(), this.gap_alert(), this.backdated_alert()].filter(Boolean);
+	}
+
+	update_notices() {
+		const slot = this.container.find(".vrb-notices-slot").empty();
+		const count = this.notices().length;
+		if (!count) return;
+		const tone = this.repost_target() ? "is-red" : this.data.stock_gap ? "is-amber" : "is-blue";
+		slot.append(
+			frappe.ui.button({
+				label: count === 1 ? __("1 notice") : __("{0} notices", [count]),
+				icon: tone === "is-blue" ? "info" : "triangle-alert",
+				variant: "subtle",
+				css_class: `vrb-notices-button ${tone}`,
+				onclick: () => this.show_notices(),
+			})
+		);
+	}
+
+	show_notices() {
+		this.notices_dialog = new frappe.ui.Dialog({ title: __("Notices"), size: "large" });
+		this.notices_dialog.$body.append($('<div class="vrb-notices"></div>').append(this.notices()));
+		this.notices_dialog.show();
+	}
+
+	problems_alert() {
+		const target = this.repost_target();
+		if (!target) return null;
+		const count = this.data.entries.filter((entry) => entry.ledger_problems).length;
+		const alert = {
+			title:
+				count === 1
+					? __("1 entry has figures that don't add up")
+					: __("{0} entries have figures that don't add up", [count]),
+			description: __("Reposting from {0} recalculates it and every entry after it.", [
+				this.repost_start_label(target.repost_from),
+			]),
+			theme: "red",
+		};
+		if (this.can_repost()) {
+			alert.primary_action = {
+				label: __("Repost from {0}", [frappe.datetime.str_to_user(target.repost_from.posting_date)]),
+				onclick: () => this.confirm_repost(target.repost_from),
+			};
+		}
+		return frappe.ui.alert(alert);
+	}
+
+	repost_target() {
+		return this.data.entries.find((entry) => entry.repost_from) || null;
+	}
+
+	can_repost() {
+		return frappe.model.can_create("Repost Item Valuation") && this.data.repost_status !== "pending";
+	}
+
+	repost_start_label(start) {
+		const date = frappe.datetime.str_to_user(start.posting_date);
+		const time = moment(start.posting_time, "HH:mm:ss").format("HH:mm");
+		return `${date} ${time}, ${frappe.utils.escape_html(start.voucher_no)}`;
+	}
+
+	repost_block(entry) {
+		const start = entry.repost_from;
+		const block = $('<div class="vrb-repost"></div>');
+		if (start.name !== entry.name) {
+			const text = __("This started earlier, on {0}. Reposting starts there.", [
+				this.repost_start_label(start),
+			]);
+			block.append(
+				`<div class="vrb-muted ellipsis" title="${frappe.utils.escape_html(text)}">${text}</div>`
+			);
+		}
+		if (!this.can_repost()) {
+			const text =
+				this.data.repost_status === "pending"
+					? __("A repost is already queued for this item and warehouse.")
+					: __("Ask a Stock Manager to repost from this entry.");
+			return block.append(`<div class="vrb-muted ellipsis">${text}</div>`);
+		}
+		return block.append(
+			frappe.ui.button({
+				label:
+					start.name === entry.name
+						? __("Repost from this entry")
+						: __("Repost from {0}", [frappe.datetime.str_to_user(start.posting_date)]),
+				icon: "refresh-cw",
+				variant: "subtle",
+				onclick: () => this.confirm_repost(start),
+			})
+		);
+	}
+
+	confirm_repost(start) {
+		if (this.notices_dialog) this.notices_dialog.hide();
+		const item = this.data.item;
+		const message = __(
+			"Stock values for {0} in {1} will be recalculated from {2} onward. Later entries and their accounting entries may change. The repost runs in the background.",
+			[
+				this.b(frappe.utils.escape_html(item.item_name || item.item_code)),
+				this.b(frappe.utils.escape_html(this.data.warehouse)),
+				this.b(this.repost_start_label(start)),
+			]
+		);
+		frappe.confirm(message, () => this.repost(start));
+	}
+
+	repost(start) {
+		return this.fetch("repost_from_entry", { entry: start.name }).then(
+			(name) => {
+				const link = this.doc_link("Repost Item Valuation", name);
+				frappe.show_alert({ message: __("Repost {0} queued", [link]), indicator: "green" });
+				this.load(this.args);
+			},
+			() => null
+		);
+	}
+
+	load_older() {
+		const oldest = this.data.entries[0];
+		const key = this.key;
+		return this.fetch("get_valuation_steps", {
+			item_code: this.data.item.item_code,
+			warehouse: this.data.warehouse,
+			before: oldest.name,
 			...this.focus_args(),
 		}).then(
 			(data) => {
 				if (this.key !== key) return;
+				const top = this.step_top(oldest.name);
 				this.data.entries = data.entries.concat(this.data.entries);
 				this.data.opening = data.opening;
 				this.data.has_earlier = data.has_earlier;
-				this.render(first.name);
+				this.render();
+				this.keep_step_at(oldest.name, top);
 			},
-			() => frappe.show_alert({ message: __("Could not load earlier entries"), indicator: "red" })
+			() => frappe.show_alert({ message: __("Could not load older entries"), indicator: "red" })
 		);
 	}
 
-	fetch(args) {
+	fetch(method, args) {
 		return new Promise((resolve, reject) => {
 			frappe.call({
-				method: "erpnext.stock.page.valuation_rate_breakdown.valuation_rate_breakdown.get_valuation_steps",
+				method: `erpnext.stock.page.valuation_rate_breakdown.valuation_rate_breakdown.${method}`,
 				args,
 				callback: (r) => resolve(r.message),
 				error: reject,
@@ -210,7 +362,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		this.container.html(`<div class="vrb-card">${block("100%", "176px")}</div>${step.repeat(3)}`);
 	}
 
-	render(scroll_to) {
+	render() {
 		const data = this.data;
 		this.container.empty();
 		if (!data.entries.length) {
@@ -220,13 +372,9 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		const repost = this.repost_alert();
 		if (repost) this.container.append(repost);
 		this.container.append(this.summary());
-		const gap = this.gap_alert();
-		if (gap) this.container.append(gap);
-		const backdated = this.backdated_alert();
-		if (backdated) this.container.append(backdated);
-		this.container.append(`<div class="vrb-section-title">${__("How we got here, step by step")}</div>`);
+		this.update_notices();
+		this.container.append(`<div class="vrb-section-title">${__("How we got here, newest first")}</div>`);
 		this.container.append(this.timeline());
-		this.scroll_to(scroll_to || this.focus);
 	}
 
 	no_entries_state() {
@@ -245,7 +393,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			return frappe.ui.alert({
 				title: __("Stock values are being recalculated"),
 				description: __(
-					"A backdated entry changed this item's history. The rates below may change once the recalculation finishes."
+					"A recalculation is queued for this item and warehouse. The rates below may change once it finishes."
 				),
 				theme: "amber",
 			});
@@ -267,7 +415,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	summary() {
 		const item = this.data.item;
 		const card = $(`
-			<div class="vrb-card">
+			<div class="vrb-card vrb-summary">
 				<div class="vrb-summary-head">
 					<div class="vrb-summary-text">
 						<div class="vrb-item ellipsis">
@@ -276,7 +424,10 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 						</div>
 						<div class="vrb-lead">${this.summary_sentence()}</div>
 					</div>
-					${frappe.ui.badge.html({ label: this.method_label(), theme: "blue", size: "lg" })}
+					<div class="vrb-summary-side">
+						<span class="vrb-notices-slot"></span>
+						${frappe.ui.badge.html({ label: this.method_label(), theme: "blue", size: "lg" })}
+					</div>
 				</div>
 				${this.figures_html()}
 				${this.stock_parts_html()}
@@ -474,9 +625,8 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 
 	timeline() {
 		const list = $('<div class="vrb-timeline"></div>');
-		const entries = this.data.entries;
+		[...this.data.entries].reverse().forEach((entry) => list.append(this.entry_step(entry)));
 		list.append(this.start_step());
-		entries.forEach((entry, i) => list.append(this.entry_step(entry, i === entries.length - 1)));
 		return list;
 	}
 
@@ -495,12 +645,11 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				frappe.utils.escape_html(focus.label),
 			]);
 		if (this.data.has_earlier)
-			hint = __("Earlier entries are hidden. The explanation picks up from here.");
+			hint = __("Older entries are not shown. The explanation picks up from here.");
 		const step = $(`
 			<div class="vrb-step">
 				<div class="vrb-rail">
 					<div class="vrb-dot is-gray">${frappe.utils.icon("flag", "sm")}</div>
-					<div class="vrb-line"></div>
 				</div>
 				<div class="vrb-step-body vrb-start">
 					<div class="vrb-start-title">${title}</div>
@@ -508,47 +657,167 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				</div>
 			</div>
 		`);
-		if (this.data.has_earlier) step.find(".vrb-start").append(this.earlier_button());
+		if (this.data.has_earlier) step.find(".vrb-start").append(this.older_button());
 		return step;
 	}
 
-	earlier_button() {
+	older_button() {
 		return $('<div class="vrb-earlier"></div>').append(
 			frappe.ui.button({
-				label: __("Show earlier entries"),
+				label: __("Show older entries"),
 				variant: "subtle",
 				icon: "history",
-				onclick: () => this.load_earlier(),
+				onclick: () => this.load_older(),
 			})
 		);
 	}
 
-	entry_step(entry, is_last) {
+	entry_step(entry) {
 		const focus = entry.name === this.focus;
 		const step = $(`
 			<div class="vrb-step" data-entry="${frappe.utils.escape_html(entry.name)}">
 				<div class="vrb-rail">
 					${this.dot_html(entry)}
-					${is_last ? "" : '<div class="vrb-line"></div>'}
+					<div class="vrb-line"></div>
 				</div>
 				<div class="vrb-step-body">
 					${this.entry_header_html(entry)}
-					<div class="vrb-card vrb-explain${focus ? " is-focus" : ""}">
+					<div class="vrb-card vrb-explain${focus ? " is-focus is-open" : ""}${
+			entry.ledger_problems ? " is-wrong" : ""
+		}">
 						${focus ? this.opened_html() : ""}
-						${this.entered_late_html(entry)}
 						<div class="vrb-lead">${this.headline(entry)}</div>
-						${this.parts_html(entry)}
-						${this.math_html(entry)}
-						${this.is_queue() ? this.lots_html(entry) : ""}
-						${this.result_html(entry)}
+						<div class="vrb-outcome">${this.outcome_text(entry)}</div>
+						${this.notes_html(entry)}
+						${this.details_html(entry)}
+						${this.details_toggle_html(focus)}
 					</div>
 				</div>
 			</div>
 		`);
 		for (const note of [this.rate_note(entry), this.changed_note(entry)]) {
-			if (note) step.find(".vrb-explain").append(frappe.ui.alert(note));
+			if (note) step.find(".vrb-details").append(frappe.ui.alert(note));
 		}
+		if (entry === this.repost_target()) step.find(".vrb-details").before(this.repost_block(entry));
 		return step;
+	}
+
+	details_html(entry) {
+		return `
+			<div class="vrb-details">
+				${this.entered_late_html(entry)}
+				${this.parts_html(entry)}
+				${this.math_html(entry)}
+				${this.is_queue() ? this.lots_html(entry) : ""}
+				${this.result_html(entry)}
+			</div>
+		`;
+	}
+
+	details_toggle_html(open) {
+		return `
+			<button class="vrb-details-toggle" aria-expanded="${open}">
+				<span class="vrb-when-closed">${__("Show calculation")}</span>
+				<span class="vrb-when-open">${__("Hide calculation")}</span>
+				${frappe.utils.icon("chevron-down", "sm")}
+			</button>
+		`;
+	}
+
+	toggle_open(event, selector) {
+		const button = $(event.currentTarget);
+		const open = button.closest(selector).toggleClass("is-open").hasClass("is-open");
+		button.attr("aria-expanded", open);
+		return open;
+	}
+
+	outcome_text(entry) {
+		if (entry.qty_after <= 0) return this.result_text(entry);
+		const holds = __("Now {0} worth {1}", [this.qty(entry.qty_after), this.money(entry.value_after)]);
+		if (this.is_pooled_view()) return `${holds}.`;
+		const rate = this.b(this.money(entry.rate_after));
+		if (entry.qty_before > 0 && !this.same(entry.rate_after, entry.rate_before)) {
+			return __("{0}, so {1} per unit, was {2}.", [holds, rate, this.money(entry.rate_before)]);
+		}
+		return __("{0}, so {1} per unit.", [holds, rate]);
+	}
+
+	notes_html(entry) {
+		const changed = (entry.changed_by || []).length && !entry.awaiting_recalculation;
+		const lines = [
+			entry.ledger_problems
+				? this.note_line(this.problem_text(entry, entry.ledger_problems[0]), "is-red")
+				: "",
+			entry.awaiting_recalculation
+				? this.note_line(__("Waiting for recalculation. These figures are not final yet."), "is-blue")
+				: "",
+			changed && this.rate_changed(entry) ? this.note_line(this.changed_title(entry), "is-amber") : "",
+			this.rate_note(entry) ? this.note_line(this.rate_note(entry).title, "is-amber") : "",
+			...(entry.parts || []).map((part) => this.mismatch_line(part)),
+		];
+		return lines.filter(Boolean).slice(0, 3).join("");
+	}
+
+	problem_text(entry, problem) {
+		const texts = {
+			qty: () =>
+				__("Units don't add up: should be {0}, the ledger says {1}.", [
+					this.qty(problem.expected),
+					this.qty(problem.actual),
+				]),
+			value: () =>
+				__("Value doesn't add up: should be {0}, the ledger says {1}.", [
+					this.money(problem.expected),
+					this.money(problem.actual),
+				]),
+			rate: () =>
+				__("Value per unit × units gives {0}, but the ledger says {1}.", [
+					this.money(problem.expected),
+					this.money(problem.actual),
+				]),
+			lots: () =>
+				__("The lots add up to {0} worth {1}, not {2} worth {3}.", [
+					this.qty(problem.qty),
+					this.money(problem.value),
+					this.qty(entry.qty_after),
+					this.money(entry.value_after),
+				]),
+			outgoing_rate: () =>
+				__("Went out at {0} each, not the average {1}.", [
+					this.money(problem.actual),
+					this.money(problem.expected),
+				]),
+		};
+		return texts[problem.check]();
+	}
+
+	note_line(text, tone) {
+		const plain = frappe.utils.escape_html($("<div>").html(text).text());
+		const icon = frappe.utils.icon(tone === "is-blue" ? "info" : "triangle-alert", "sm");
+		return `<div class="vrb-note ${tone}" title="${plain}">${icon}<span class="ellipsis">${text}</span></div>`;
+	}
+
+	rate_changed(entry) {
+		if (entry.rate_after_when_entered == null) return false;
+		if (entry.kind === "out" && !this.same(entry.rate, entry.rate_when_entered)) return true;
+		return !this.same(entry.rate_after, entry.rate_after_when_entered);
+	}
+
+	mismatch_line(part) {
+		if (part.batch_no && this.batch_mismatch(part)) {
+			return this.note_line(
+				__("Batch {0} went out at {1}, not its own {2}.", [
+					frappe.utils.escape_html(part.batch_id),
+					this.plain_money(part.rate),
+					this.plain_money(this.per_unit(part.qty_before, part.value_before)),
+				]),
+				"is-amber"
+			);
+		}
+		if (!part.batch_no && this.serial_mismatch(part)) {
+			return this.note_line(`${this.part_label(part)}: ${this.serial_source(part)}`, "is-amber");
+		}
+		return "";
 	}
 
 	opened_html() {
@@ -579,9 +848,18 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				<span class="vrb-voucher ellipsis">${this.voucher_label(entry)}</span>
 				<span class="vrb-doc ellipsis">${this.doc_link(entry.voucher_type, entry.voucher_no)}</span>
 				${entry.later_dated_count ? frappe.ui.badge.html({ label: __("Backdated"), theme: "amber" }) : ""}
+				${entry.ledger_problems ? frappe.ui.badge.html({ label: __("Needs repost"), theme: "red" }) : ""}
+				${this.change_badge(entry)}
 				${this.qty_badge(entry)}
 			</div>
 		`;
+	}
+
+	change_badge(entry) {
+		if (!(entry.changed_by || []).length) return "";
+		return entry.awaiting_recalculation
+			? frappe.ui.badge.html({ label: __("Waiting"), theme: "blue" })
+			: frappe.ui.badge.html({ label: __("Recalculated") });
 	}
 
 	voucher_label(entry) {
@@ -649,27 +927,21 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			? __("Received {0} back against {1}", [qty, this.return_link(entry)])
 			: __("Received {0}", [qty]);
 		const total = this.b(this.money(entry.value_change));
+		if (!parts.length) return __("{0} worth {1}.", [lead, total]);
 		if (this.is_serial()) {
 			if (parts.length === 1) {
-				return __("{0} at {1} each. Each serial number keeps this value until it goes out.", [
-					lead,
-					this.b(this.money(parts[0].rate)),
-				]);
+				return __("{0} at {1} each.", [lead, this.b(this.money(parts[0].rate))]);
 			}
-			return __("{0} worth {1}. Each serial number keeps the value it came in at.", [lead, total]);
+			return __("{0} worth {1}.", [lead, total]);
 		}
 		if (parts.length === 1) {
-			return __("{0} into batch {1} at {2} each. The batch keeps its own value per unit.", [
+			return __("{0} into batch {1} at {2} each.", [
 				lead,
 				this.batch_link(parts[0]),
 				this.b(this.money(parts[0].rate)),
 			]);
 		}
-		return __("{0} into {1} batches, worth {2}. Each batch keeps its own value per unit.", [
-			lead,
-			parts.length,
-			total,
-		]);
+		return __("{0} into {1} batches, worth {2}.", [lead, parts.length, total]);
 	}
 
 	inward_reason(entry) {
@@ -707,9 +979,10 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	own_rate_headline(entry, lead) {
 		const parts = entry.parts || [];
 		const total = this.b(this.money(Math.abs(entry.value_change)));
+		if (!parts.length) return __("{0}, {1} in total.", [lead, total]);
 		if (this.is_serial()) {
 			if (parts.some((part) => this.serial_mismatch(part))) {
-				return __("{0} for {1} in total. Check the serial numbers below.", [lead, total]);
+				return __("{0} for {1} in total.", [lead, total]);
 			}
 			if (parts.length === 1) {
 				return __("{0} at {1} each, the value the serial number came in at.", [
@@ -1017,7 +1290,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			<div class="vrb-part-row ${css || ""}">
 				<span class="ellipsis">${label}</span>
 				<span class="text-right ${tone}">${signed ? this.signed_qty(qty) : this.qty(qty)}</span>
-				<span class="text-right vrb-muted">${rate == null ? "" : `× ${this.money(rate)}`}</span>
+				<span class="text-right vrb-muted vrb-nowrap">${rate == null ? "" : `× ${this.money(rate)}`}</span>
 				<span class="text-right ${tone}">${signed ? this.signed_money(value) : this.money(value)}</span>
 			</div>
 		`;
@@ -1103,21 +1376,61 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	}
 
 	stock_parts_html() {
+		if (!this.is_pooled_view()) return "";
+		const body = this.stock_parts_body();
+		if (!body) return "";
+		const open = this.stock_parts_open;
+		return `
+			<div class="vrb-stock-parts${open ? " is-open" : ""}">
+				<button class="vrb-stock-toggle" aria-expanded="${open}">
+					<span class="vrb-subtitle">${__("What the stock is made of")}</span>
+					<span class="vrb-stock-chevron">${frappe.utils.icon("chevron-down", "sm")}</span>
+				</button>
+				<div class="vrb-stock-body">${body}</div>
+			</div>
+		`;
+	}
+
+	stock_parts_body() {
+		if (this.breakdown_state === "loading") {
+			return frappe.ui.skeleton.html({ width: "100%", height: "96px" });
+		}
+		if (this.breakdown_state === "failed") {
+			const text = __("Could not work out what the stock is made of. Reload the page to try again.");
+			return `<div class="vrb-muted">${text}</div>`;
+		}
 		const parts = this.data.stock_parts || [];
-		if (!this.data.item.valued_by || !parts.length) return "";
+		if (!parts.length) return "";
 		const rows = parts
-			.slice(0, 8)
-			.map((part) => this.part_row(this.stock_part_label(part), part.qty, part.rate, part.value));
-		const more = parts.length > 8 ? this.part_hint(__("+{0} more", [parts.length - 8])) : "";
+			.slice(0, PARTS_LISTED)
+			.map((part, i) =>
+				this.part_row(
+					this.stock_part_label(part),
+					part.qty,
+					part.rate,
+					part.value,
+					i < PARTS_SHOWN ? "" : "is-extra"
+				)
+			);
 		const qty = parts.reduce((sum, part) => sum + part.qty, 0);
 		const value = parts.reduce((sum, part) => sum + part.value, 0);
 		const total = this.part_row(`<b>${__("Adds up to")}</b>`, qty, null, value, "is-total");
 		return `
-			<div class="vrb-stock-parts">
-				<div class="vrb-subtitle">${__("What the stock is made of")}</div>
-				<div class="vrb-parts">${rows.join("")}${more}${total}</div>
-				${this.average_html()}
-			</div>
+			<div class="vrb-parts vrb-stock-list">${rows.join("")}${this.more_parts_html(parts)}${total}</div>
+			${this.average_html()}
+		`;
+	}
+
+	more_parts_html(parts) {
+		if (parts.length <= PARTS_SHOWN) return "";
+		const hidden = parts.length - PARTS_LISTED;
+		const unlisted = hidden > 0 ? this.part_hint(__("+{0} more", [hidden]), "vrb-when-open") : "";
+		return `
+			${unlisted}
+			<button class="vrb-more-toggle" aria-expanded="false">
+				<span class="vrb-when-closed">${__("Show all {0}", [parts.length])}</span>
+				<span class="vrb-when-open">${__("Show fewer")}</span>
+			</button>
 		`;
 	}
 
@@ -1168,6 +1481,17 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 						this.plain_money(Math.abs(gap.gap)),
 						noun,
 				  ]);
+		const lines = this.is_serial()
+			? this.serial_gap_lines(gap)
+			: [
+					__(
+						"The batch values recorded on each entry add up to a different total than the stock ledger."
+					),
+			  ];
+		return frappe.ui.alert({ title, description: lines.join(" "), theme: "amber" });
+	}
+
+	serial_gap_lines(gap) {
 		const lines = [__("This happens when stock goes out at a different value than it came in at.")];
 		lines.push(...gap.causes.map((cause) => this.cause_text(cause)));
 		if (gap.more_causes) lines.push(__("{0} more did the same.", [this.entries_count(gap.more_causes)]));
@@ -1179,27 +1503,15 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 				])
 			);
 		}
-		return frappe.ui.alert({ title, description: lines.join(" "), theme: "amber" });
+		return lines;
 	}
 
 	cause_text(cause) {
-		const args = [
+		return __("{0} {1} on {2} sent out {3} at {4} each instead of {5}.", [
 			__(cause.voucher_type),
 			cause.voucher_no,
 			frappe.datetime.str_to_user(cause.posting_date),
-		];
-		if (cause.serial_nos) {
-			const labels = cause.serial_labels || cause.serial_nos;
-			return __("{0} {1} on {2} sent out {3} at {4} each instead of {5}.", [
-				...args,
-				this.join_list(labels),
-				this.plain_money(cause.actual),
-				this.plain_money(cause.expected),
-			]);
-		}
-		return __("{0} {1} on {2} took {3} out at {4} instead of the batch's {5}.", [
-			...args,
-			this.join_list(cause.batch_ids),
+			this.join_list(cause.serial_labels || cause.serial_nos),
 			this.plain_money(cause.actual),
 			this.plain_money(cause.expected),
 		]);
@@ -1230,33 +1542,26 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	backdated_alert() {
 		const entries = this.data.entries;
 		const backdated = entries.filter((entry) => entry.later_dated_count).length;
-		const changed = entries.filter((entry) => (entry.changed_by || []).length);
-		if (!backdated && !changed.length) return null;
-		const waiting = changed.filter((entry) => entry.awaiting_recalculation).length;
-		const lines = [];
-		if (backdated) {
-			lines.push(
-				__("{0} below were posted with an earlier date after later entries already existed.", [
-					this.entries_count(backdated),
-				])
-			);
-		}
-		if (changed.length) {
-			lines.push(
-				__("{0} had their values recalculated because of entries added or cancelled before them.", [
-					this.entries_count(changed.length),
-				])
-			);
-		}
-		lines.push(
-			waiting
-				? __("{0} are still waiting to be recalculated.", [this.entries_count(waiting)])
-				: __("The notes on those entries show what changed.")
-		);
+		const changed = entries.filter((entry) => (entry.changed_by || []).length).length;
+		if (!backdated && !changed) return null;
+		const waiting = entries.filter((entry) => entry.awaiting_recalculation).length;
+		const lines = [
+			changed === 1
+				? __("1 entry below was recalculated because of it.")
+				: __("{0} entries below were recalculated because of it.", [changed]),
+		];
+		if (waiting) lines.push(__("{0} still waiting, so their figures are not final yet.", [waiting]));
+		if (!backdated)
+			lines[0] = __("Entries added or cancelled with an earlier date changed {0} below.", [
+				this.entries_count(changed),
+			]);
 		return frappe.ui.alert({
-			title: backdated
-				? __("Some entries were posted with an earlier date")
-				: __("Earlier entries were changed after later ones were made"),
+			title:
+				backdated === 1
+					? __("1 entry was posted with an earlier date")
+					: backdated
+					? __("{0} entries were posted with an earlier date", [backdated])
+					: __("Some entries were recalculated"),
 			description: lines.join(" "),
 			theme: "blue",
 		});
@@ -1351,10 +1656,18 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 		return entries[entries.length - 1];
 	}
 
-	scroll_to(name) {
-		if (!name) return;
-		const step = this.container.find(`.vrb-step[data-entry="${CSS.escape(name)}"]`);
-		if (step.length) step[0].scrollIntoView({ block: "center" });
+	step_top(name) {
+		const step = this.step_element(name);
+		return step ? step.getBoundingClientRect().top : null;
+	}
+
+	keep_step_at(name, top) {
+		const step = this.step_element(name);
+		if (step && top !== null) window.scrollBy(0, step.getBoundingClientRect().top - top);
+	}
+
+	step_element(name) {
+		return this.container.find(`.vrb-step[data-entry="${CSS.escape(name)}"]`)[0];
 	}
 
 	is_queue() {
@@ -1434,6 +1747,12 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			.vrb-gap { height: var(--margin-sm); }
 			.vrb-summary-head { display: flex; align-items: flex-start; gap: var(--margin-lg); padding: var(--padding-lg); }
 			.vrb-summary-text { flex: 1; min-width: 0; }
+			.vrb-summary-side { display: flex; align-items: center; gap: var(--margin-sm); flex-shrink: 0; }
+			.vrb-notices-slot:empty { display: none; }
+			.vrb-notices-button.is-amber .icon { stroke: var(--ink-amber-7); }
+			.vrb-notices-button.is-blue .icon { stroke: var(--ink-blue-7); }
+			.vrb-notices-button.is-red .icon { stroke: var(--ink-red-6); }
+			.vrb-notices { display: flex; flex-direction: column; gap: var(--margin-sm); }
 			.vrb-item { font-size: var(--text-xl); font-weight: 600; color: var(--ink-gray-9); }
 			.vrb-item .vrb-muted { font-size: var(--text-sm); margin-left: var(--margin-xs); }
 			.vrb-lead { margin-top: var(--margin-xs); font-size: var(--text-base); line-height: 1.6; color: var(--ink-gray-7); }
@@ -1455,7 +1774,12 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			.vrb-step-no { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--surface-gray-2); font-size: var(--text-xs); color: var(--ink-gray-6); }
 			.vrb-section-title { margin-bottom: calc(-1 * var(--margin-xs)); font-size: var(--text-lg); font-weight: 600; color: var(--ink-gray-8); }
 			@media (max-width: 767px) {
-				.vrb-figure-value { font-size: var(--text-lg); }
+				.vrb { padding: 0 var(--padding-md); }
+				.vrb-summary-head { flex-direction: column; gap: var(--margin-sm); }
+				.vrb-figures { grid-template-columns: minmax(0, 1fr); }
+				.vrb-figure { display: flex; align-items: center; justify-content: space-between; gap: var(--margin-sm); }
+				.vrb-figure + .vrb-figure { border-left: 0; border-top: 1px solid var(--outline-gray-1); }
+				.vrb-figure-value { margin-top: 0; font-size: var(--text-lg); }
 			}
 		`;
 	}
@@ -1480,8 +1804,26 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			.vrb-doc { min-width: 0; font-size: var(--text-sm); }
 			.vrb-entry-head .es-badge { margin-left: auto; flex-shrink: 0; }
 			.vrb-entry-head .es-badge ~ .es-badge { margin-left: 0; }
-			.vrb-explain { margin-top: var(--margin-sm); padding: var(--padding-md); display: flex; flex-direction: column; gap: var(--margin-md); }
+			.vrb-explain { margin-top: var(--margin-sm); padding: var(--padding-md); display: flex; flex-direction: column; gap: var(--margin-xs); }
+			.vrb-outcome { font-size: var(--text-sm); line-height: 1.6; color: var(--ink-gray-6); }
+			.vrb-note { display: flex; align-items: center; gap: 6px; height: 24px; min-width: 0; font-size: var(--text-sm); }
+			.vrb-note .icon { flex-shrink: 0; stroke: currentColor; }
+			.vrb-note.is-amber { color: var(--ink-amber-7); }
+			.vrb-note.is-blue { color: var(--ink-blue-7); }
+			.vrb-note.is-red { color: var(--ink-red-6); }
+			.vrb-explain.is-wrong { border-color: var(--outline-red-2); }
+			.vrb-repost { display: flex; flex-direction: column; align-items: flex-start; gap: var(--margin-xs); min-width: 0; margin-top: 2px; font-size: var(--text-sm); }
+			.vrb-repost .vrb-muted { max-width: 100%; }
+			.vrb-details { display: none; flex-direction: column; gap: var(--margin-md); margin-top: var(--margin-sm); padding-top: var(--padding-md); border-top: 1px solid var(--outline-gray-1); }
+			.vrb-explain.is-open .vrb-details { display: flex; }
+			.vrb-details-toggle, .vrb-more-toggle { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; height: 24px; margin-top: 2px; padding: 0; background: none; border: 0; font-size: var(--text-sm); color: var(--ink-gray-6); }
+			.vrb-details-toggle:hover, .vrb-more-toggle:hover { color: var(--ink-gray-8); }
+			.vrb-details-toggle .icon { stroke: currentColor; transition: transform 0.15s; }
+			.vrb-explain.is-open .vrb-details-toggle .icon { transform: rotate(180deg); }
+			.vrb-explain:not(.is-open) .vrb-details-toggle .vrb-when-open, .vrb-explain.is-open .vrb-details-toggle .vrb-when-closed { display: none; }
+			.vrb-stock-list:not(.is-open) .vrb-when-open, .vrb-stock-list.is-open .vrb-when-closed, .vrb-stock-list:not(.is-open) .is-extra { display: none; }
 			.vrb-explain .vrb-lead { margin-top: 0; }
+			.vrb-explain .vrb-opened { margin-bottom: var(--margin-xs); }
 			.vrb-explain.is-focus { border-color: var(--outline-gray-4); background: var(--surface-gray-1); box-shadow: var(--shadow-sm); }
 			.vrb-opened { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--ink-gray-6); }
 			.vrb-math { width: fit-content; max-width: 100%; overflow-x: auto; background: var(--surface-gray-1); border-radius: var(--radius-4); padding: var(--padding-xs) var(--padding-sm); }
@@ -1511,12 +1853,20 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			.vrb-subtitle { margin-bottom: 4px; font-size: var(--text-sm); font-weight: 500; color: var(--ink-gray-7); }
 			.vrb-stock-parts { display: flex; flex-direction: column; gap: var(--margin-sm); padding: var(--padding-sm) var(--padding-lg); border-top: 1px solid var(--outline-gray-1); }
 			.vrb-stock-parts .vrb-subtitle { margin-bottom: 0; }
+			.vrb-stock-toggle { display: flex; align-items: center; gap: var(--margin-sm); width: 100%; min-height: 20px; padding: 0; background: none; border: 0; text-align: left; }
+			.vrb-stock-toggle:hover .vrb-subtitle { color: var(--ink-gray-9); }
+			.vrb-stock-chevron { margin-left: auto; display: flex; transition: transform 0.15s; }
+			.vrb-stock-chevron .icon { stroke: var(--ink-gray-5); }
+			.vrb-stock-parts.is-open .vrb-stock-chevron { transform: rotate(180deg); }
+			.vrb-stock-body { display: flex; flex-direction: column; gap: var(--margin-sm); }
+			.vrb-stock-parts:not(.is-open) .vrb-stock-body { display: none; }
 			.vrb-math.is-plain .vrb-math-row { grid-template-columns: 64px 120px 140px; }
 			.vrb-result { display: flex; align-items: flex-start; gap: var(--margin-sm); font-size: var(--text-sm); line-height: 1.5; color: var(--ink-gray-7); }
 			.vrb-result .icon { flex-shrink: 0; margin: 2px 0 0; stroke: var(--ink-gray-5); }
 			@media (max-width: 767px) {
 				.vrb-math-row { grid-template-columns: 56px 96px 96px 112px; }
-				.vrb-part-row { grid-template-columns: minmax(0, 1fr) 80px 96px 104px; }
+				.vrb-part-row { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 2px; height: auto; padding: 6px 0; }
+				.vrb-part-row > :first-child { grid-column: 1 / -1; }
 				.vrb-math.is-plain .vrb-math-row { grid-template-columns: 56px 96px 112px; }
 			}
 		`;

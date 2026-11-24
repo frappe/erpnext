@@ -1,60 +1,231 @@
 import frappe
-from frappe.utils import flt
+from frappe.query_builder.functions import Abs, Count, Sum
+from frappe.utils import create_batch, flt
+
+from erpnext.stock.serial_batch_bundle import SERIAL_NO_QUERY_BATCH_SIZE
 
 SERIALS_SHOWN = 10
 MISMATCHES_SHOWN = 5
+TRACED_SERIALS = 200
+ROUNDING_GAP = 1
 RETURN_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice")
 
 
-def set_serial_batch_details(result, entries, rows, focus=None):
+def set_serial_batch_details(entries, rows, item, warehouse, focus=None):
 	if not rows:
 		return
 
-	item = result.item
-	history = get_bundle_history(item.item_code, result.warehouse, rows[-1])
 	focus_name = focus.name if focus else None
 	if item.valued_by == "serial":
-		book = SerialBook(focus_name)
+		book = make_serial_book(item.item_code, warehouse, rows, focus_name)
 	else:
-		book = BatchBook(item.item_code, history, focus_name)
+		book = make_batch_book(item.item_code, warehouse, rows, focus_name)
 
+	parts = []
+	for entry in entries:
+		entry.parts = book.entry_parts(entry.name)
+		parts.extend(entry.parts)
+
+	if item.valued_by == "serial":
+		set_serial_labels(parts)
+
+	set_source_returns(parts)
+
+
+def get_stock_summary(item, warehouse, anchor):
+	if item.valued_by == "serial":
+		held, mismatches = get_serial_summary(item.item_code, warehouse, anchor)
+		stock_parts = group_serials(held)
+	else:
+		stock_parts, mismatches = get_batch_parts(item.item_code, warehouse, anchor), {}
+
+	stock_gap = get_stock_gap(anchor, stock_parts, mismatches)
+	if item.valued_by == "serial":
+		set_serial_labels(stock_parts + (stock_gap.causes if stock_gap else []))
+
+	return frappe._dict(stock_parts=stock_parts, stock_gap=stock_gap)
+
+
+def make_serial_book(item_code, warehouse, rows, focus_name):
+	book = SerialBook(focus_name)
 	window = {row.name for row in rows}
+	if focus_name:
+		history = get_serial_history(item_code, warehouse, [focus_name], rows[-1])
+	else:
+		history = get_window_serial_history(item_code, warehouse, rows)
+
 	for row in history:
 		book.add(row, row.sle in window)
 
-	for entry in entries:
-		entry.parts = book.entry_parts(entry.name)
-
-	result.stock_parts = book.stock_parts()
-	result.stock_gap = get_stock_gap(rows[-1], result.stock_parts, book.mismatches)
-	set_labels(entries, result, item.valued_by)
+	return book
 
 
-def get_bundle_history(item_code, warehouse, last_row):
+def make_batch_book(item_code, warehouse, rows, focus_name):
+	lines = get_window_lines(rows)
+	batch_nos = {line.batch_no for line in lines if line.batch_no}
+	totals = get_entry_totals(item_code, warehouse, rows[0], "batch_no", batch_nos, inclusive=False)
+	opening = {batch_no: [total.qty, total.value] for batch_no, total in totals.items()}
+	book = BatchBook(get_batches(batch_nos, item_code), opening, focus_name)
+	for line in lines:
+		book.add(line)
+
+	return book
+
+
+def get_window_lines(rows):
+	by_bundle = {row.serial_and_batch_bundle: row for row in rows if row.serial_and_batch_bundle}
+	if not by_bundle:
+		return []
+
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	lines = (
+		frappe.qb.from_(entry)
+		.select(entry.parent, entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference)
+		.where(entry.parent.isin(list(by_bundle)) & (entry.docstatus == 1) & (entry.is_cancelled == 0))
+		.orderby(entry.idx)
+		.run(as_dict=True)
+	)
+	for line in lines:
+		row = by_bundle[line.parent]
+		line.update(sle=row.name, voucher_type=row.voucher_type, voucher_no=row.voucher_no)
+		line.posting_date = row.posting_date
+
+	position = {row.name: index for index, row in enumerate(rows)}
+	return sorted(lines, key=lambda line: position[line.sle])
+
+
+def get_window_serial_history(item_code, warehouse, rows):
+	bundles = [row.serial_and_batch_bundle for row in rows if row.serial_and_batch_bundle]
+	if not bundles:
+		return []
+
+	window = frappe.qb.DocType("Serial and Batch Entry").as_("window_entry")
+	serials = frappe.qb.from_(window).select(window.serial_no).distinct().where(window.parent.isin(bundles))
+	serial_nos = serials.limit(SERIAL_NO_QUERY_BATCH_SIZE + 1).run(pluck=True)
+	if len(serial_nos) <= SERIAL_NO_QUERY_BATCH_SIZE:
+		return get_serial_history(item_code, warehouse, serial_nos, rows[-1])
+
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = serial_history_query(item_code, warehouse, serials, rows[-1]).where(
+		(sle.item_code == item_code) & (sle.warehouse == warehouse)
+	)
+	return sorted(query.run(as_dict=True), key=history_order)
+
+
+def get_serial_history(item_code, warehouse, serial_nos, last_row):
+	rows = []
+	serial_nos = sorted({serial_no for serial_no in serial_nos if serial_no})
+	for chunk in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
+		rows.extend(serial_history_query(item_code, warehouse, chunk, last_row).run(as_dict=True))
+
+	return sorted(rows, key=history_order)
+
+
+def history_order(row):
+	return (row.posting_datetime, row.creation, row.idx)
+
+
+def serial_history_query(item_code, warehouse, serial_nos, last_row):
 	entry = frappe.qb.DocType("Serial and Batch Entry")
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	same_time = sle.posting_datetime == last_row.posting_datetime
+	same_time = (entry.posting_datetime == last_row.posting_datetime) & (sle.creation <= last_row.creation)
 	return (
 		frappe.qb.from_(entry)
 		.inner_join(sle)
 		.on((sle.serial_and_batch_bundle == entry.parent) & (sle.is_cancelled == 0))
-		.select(entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference)
+		.select(entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference, entry.idx)
 		.select(sle.name.as_("sle"), sle.voucher_type, sle.voucher_no, sle.posting_date)
+		.select(sle.posting_datetime, sle.creation)
 		.where(
-			(sle.item_code == item_code)
-			& (sle.warehouse == warehouse)
-			& (
-				(sle.posting_datetime < last_row.posting_datetime)
-				| (same_time & (sle.creation <= last_row.creation))
-			)
+			entry.serial_no.isin(serial_nos)
+			& (entry.warehouse == warehouse)
+			& (entry.item_code == item_code)
+			& ((entry.posting_datetime < last_row.posting_datetime) | same_time)
 			& (entry.docstatus == 1)
 			& (entry.is_cancelled == 0)
 		)
-		.orderby(sle.posting_datetime)
-		.orderby(sle.creation)
-		.orderby(entry.idx)
-		.run(as_dict=True)
 	)
+
+
+def get_entry_totals(item_code, warehouse, row, field, names=None, inclusive=True):
+	if names is not None and not names:
+		return {}
+
+	totals = {}
+	for query, entry in totals_queries(item_code, warehouse, row, inclusive):
+		query = (
+			query.select(entry[field].as_("key"), Sum(entry.qty).as_("qty"), Count(entry.name).as_("moves"))
+			.select(Sum(entry.stock_value_difference).as_("value"))
+			.groupby(entry[field])
+		)
+		if names is None:
+			query = query.where(entry[field].isnotnull()).having(
+				(Abs(Sum(entry.qty)) >= 0.000001) | (Abs(Sum(entry.stock_value_difference)) >= 0.005)
+			)
+		else:
+			query = query.where(entry[field].isin(list(names)))
+
+		for part in query.run(as_dict=True):
+			add_to_total(totals, part)
+
+	return totals
+
+
+def totals_queries(item_code, warehouse, row, inclusive):
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	condition = (
+		(entry.item_code == item_code)
+		& (entry.warehouse == warehouse)
+		& (entry.docstatus == 1)
+		& (entry.is_cancelled == 0)
+	)
+	creation = sle.creation <= row.creation if inclusive else sle.creation < row.creation
+	earlier = frappe.qb.from_(entry).where(condition & (entry.posting_datetime < row.posting_datetime))
+	same_time = (
+		frappe.qb.from_(entry)
+		.inner_join(sle)
+		.on((sle.serial_and_batch_bundle == entry.parent) & (sle.is_cancelled == 0))
+		.where(condition & (entry.posting_datetime == row.posting_datetime) & creation)
+	)
+	return [(earlier, entry), (same_time, entry)]
+
+
+def add_to_total(totals, part):
+	if not part.key:
+		return
+
+	total = totals.setdefault(part.key, frappe._dict(qty=0.0, value=0.0, moves=0))
+	total.qty += flt(part.qty)
+	total.value += flt(part.value)
+	total.moves += part.moves
+
+
+def get_serial_summary(item_code, warehouse, anchor):
+	totals = get_entry_totals(item_code, warehouse, anchor, "serial_no")
+	held = {serial: total.value for serial, total in totals.items() if total.qty > 0 and total.moves == 1}
+	moved_again = [serial for serial, total in totals.items() if total.qty > 0 and total.moves > 1]
+	left_value = [
+		serial for serial, total in totals.items() if total.qty <= 0 and is_different(total.value, 0)
+	]
+	left_value.sort(key=lambda serial: -abs(totals[serial].value))
+	book = SerialBook()
+	for row in get_serial_history(item_code, warehouse, moved_again + left_value[:TRACED_SERIALS], anchor):
+		book.add(row, False)
+
+	held.update({serial_no: source.rate for serial_no, source in book.held.items()})
+	return held, book.mismatches
+
+
+def group_serials(held):
+	groups = {}
+	for serial_no, rate in held.items():
+		group = groups.setdefault(
+			flt(rate, 2), frappe._dict(serial_nos=[], more=0, qty=0.0, value=0.0, rate=rate)
+		)
+		add_serial(group, serial_no, 1, rate)
+
+	return sorted(groups.values(), key=lambda group: -group.qty)
 
 
 def unit_rate(qty, value):
@@ -111,16 +282,6 @@ class SerialBook:
 	def entry_parts(self, name):
 		return list(self.parts.get(name, {}).values())
 
-	def stock_parts(self):
-		groups = {}
-		for serial_no, held in self.held.items():
-			group = groups.setdefault(
-				flt(held.rate, 2), frappe._dict(serial_nos=[], more=0, qty=0.0, value=0.0, rate=held.rate)
-			)
-			add_serial(group, serial_no, 1, held.rate)
-
-		return sorted(groups.values(), key=lambda group: -group.qty)
-
 
 def add_serial_to_group(groups, row, rate, source):
 	key = (flt(rate, 2), source.row.voucher_no if source else None, flt(source.rate, 2) if source else None)
@@ -147,27 +308,20 @@ def add_serial(group, serial_no, qty, rate):
 
 
 class BatchBook:
-	def __init__(self, item_code, history, focus=None):
+	def __init__(self, batches, balances, focus=None):
+		self.batches = batches
+		self.balances = balances
 		self.focus = focus
-		self.batches = get_batches({row.batch_no for row in history if row.batch_no}, item_code)
-		self.balances = {}
 		self.parts = {}
-		self.mismatches = {}
 
-	def add(self, row, in_window):
+	def add(self, row):
 		if not row.batch_no:
 			return
 
 		balance = self.balances.setdefault(row.batch_no, [0.0, 0.0])
 		qty, value = flt(row.qty), flt(row.stock_value_difference)
-		if in_window and self.focus in (None, row.batch_no):
+		if self.focus in (None, row.batch_no):
 			self.add_part(row, balance, qty, value)
-
-		own_rate = self.batches.get(row.batch_no, frappe._dict()).own_rate
-		if own_rate and qty < 0 and balance[0] > 0:
-			expected = unit_rate(balance[0], balance[1])
-			if is_different(expected, unit_rate(qty, value)):
-				self.add_mismatch(row, expected, unit_rate(qty, value), qty)
 
 		balance[0] += qty
 		balance[1] += value
@@ -189,22 +343,6 @@ class BatchBook:
 		part.qty += qty
 		part.value += value
 
-	def add_mismatch(self, row, expected, actual, qty):
-		mismatch = self.mismatches.setdefault(
-			row.sle,
-			frappe._dict(
-				voucher_type=row.voucher_type,
-				voucher_no=row.voucher_no,
-				posting_date=row.posting_date,
-				batch_ids=[],
-				expected=expected,
-				actual=actual,
-				gap=0.0,
-			),
-		)
-		mismatch.batch_ids.append(self.batches.get(row.batch_no, frappe._dict()).batch_id or row.batch_no)
-		mismatch.gap += (expected - actual) * abs(qty)
-
 	def entry_parts(self, name):
 		parts = list(self.parts.get(name, {}).values())
 		for part in parts:
@@ -214,28 +352,33 @@ class BatchBook:
 
 		return parts
 
-	def stock_parts(self):
-		parts, shared = [], frappe._dict(shared=True, count=0, qty=0.0, value=0.0)
-		for batch_no, (qty, value) in self.balances.items():
-			if not flt(qty, 6) and not is_different(value, 0):
-				continue
 
-			batch = self.batches.get(batch_no, frappe._dict())
-			if not batch.own_rate:
-				shared.update(count=shared.count + 1, qty=shared.qty + qty, value=shared.value + value)
-				continue
+def get_batch_parts(item_code, warehouse, last_row):
+	totals = get_entry_totals(item_code, warehouse, last_row, "batch_no")
+	batches = get_batches(set(totals), item_code)
+	parts, shared = [], frappe._dict(shared=True, count=0, qty=0.0, value=0.0)
+	for batch_no, total in totals.items():
+		qty, value = total.qty, total.value
+		if not flt(qty, 6) and not is_different(value, 0):
+			continue
 
-			label = batch.batch_id or batch_no
-			parts.append(frappe._dict(batch_no=batch_no, batch_id=label, qty=qty, value=value))
+		batch = batches.get(batch_no, frappe._dict())
+		if not batch.own_rate:
+			shared.update(count=shared.count + 1, qty=shared.qty + qty, value=shared.value + value)
+			continue
 
-		parts.sort(key=lambda part: -part.qty)
-		if shared.count:
-			parts.append(shared)
+		parts.append(
+			frappe._dict(batch_no=batch_no, batch_id=batch.batch_id or batch_no, qty=qty, value=value)
+		)
 
-		for part in parts:
-			part.rate = unit_rate(part.qty, part.value)
+	parts.sort(key=lambda part: -part.qty)
+	if shared.count:
+		parts.append(shared)
 
-		return parts
+	for part in parts:
+		part.rate = unit_rate(part.qty, part.value)
+
+	return parts
 
 
 def get_batches(batch_nos, item_code):
@@ -264,7 +407,7 @@ def get_batches(batch_nos, item_code):
 def get_stock_gap(last_row, stock_parts, mismatches):
 	parts_value = sum(flt(part.value) for part in stock_parts)
 	gap = flt(last_row.stock_value) - parts_value
-	if not is_different(gap, 0):
+	if abs(gap) < ROUNDING_GAP:
 		return None
 
 	causes = sorted(mismatches.values(), key=lambda mismatch: -abs(mismatch.gap))
@@ -278,18 +421,8 @@ def get_stock_gap(last_row, stock_parts, mismatches):
 	)
 
 
-def set_labels(entries, result, valued_by):
-	parts = [part for entry in entries for part in entry.get("parts", [])]
-	if valued_by == "serial":
-		groups = parts + list(result.stock_parts)
-		causes = result.stock_gap.causes if result.stock_gap else []
-		set_serial_labels(groups, causes)
-
-	set_source_returns(parts)
-
-
-def set_serial_labels(groups, causes):
-	names = {serial_no for group in groups + causes for serial_no in group.serial_nos}
+def set_serial_labels(groups):
+	names = {serial_no for group in groups for serial_no in group.serial_nos}
 	if not names:
 		return
 
@@ -298,7 +431,7 @@ def set_serial_labels(groups, causes):
 			"Serial No", filters={"name": ("in", list(names))}, fields=["name", "serial_no"], as_list=True
 		)
 	)
-	for group in groups + causes:
+	for group in groups:
 		group.serial_labels = [labels.get(serial_no) or serial_no for serial_no in group.serial_nos]
 
 

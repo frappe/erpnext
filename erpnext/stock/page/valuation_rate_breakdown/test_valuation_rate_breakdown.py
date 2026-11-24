@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.permissions import add_user_permission
 from frappe.utils import add_days, today
@@ -10,11 +12,16 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_batch_from_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.page.valuation_rate_breakdown.valuation_rate_breakdown import get_valuation_steps
+from erpnext.stock.page.valuation_rate_breakdown.valuation_rate_breakdown import (
+	get_stock_breakdown,
+	get_valuation_steps,
+	repost_from_entry,
+)
 from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 from erpnext.tests.utils import ERPNextTestSuite
 
 WAREHOUSE = "Stores - _TC"
+PAGE_MODULE = "erpnext.stock.page.valuation_rate_breakdown.valuation_rate_breakdown"
 
 
 class TestValuationRateBreakdown(ERPNextTestSuite):
@@ -202,7 +209,7 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 
 	def test_user_without_access_is_refused(self):
 		item_code = self.make_item("Moving Average")
-		self.receive(item_code, 50, 1)
+		entry = self.get_entry_name(self.receive(item_code, 50, 1).name)
 		accounts_user = self.make_user("vrb-accounts-user@example.com", "Accounts User")
 		stock_user = self.make_user("vrb-stock-user@example.com", "Stock User")
 		other_warehouse = frappe.db.get_value(
@@ -214,7 +221,76 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 			frappe.set_user(user)
 			with self.assertRaises(frappe.PermissionError):
 				get_valuation_steps(item_code, WAREHOUSE)
+			with self.assertRaises(frappe.PermissionError):
+				get_stock_breakdown(item_code, WAREHOUSE, entry)
+			with self.assertRaises(frappe.PermissionError):
+				repost_from_entry(entry)
 			frappe.set_user("Administrator")
+
+	def test_repost_needs_permission_to_create_reposts(self):
+		item_code = self.make_item("Moving Average")
+		entry = self.get_entry_name(self.receive(item_code, 50, 1).name)
+		frappe.set_user(self.make_user("vrb-stock-reader@example.com", "Stock User"))
+		try:
+			get_valuation_steps(item_code, WAREHOUSE)
+			with self.assertRaises(frappe.PermissionError):
+				repost_from_entry(entry)
+		finally:
+			frappe.set_user("Administrator")
+
+	def tamper(self, entry, **values):
+		frappe.db.set_value("Stock Ledger Entry", entry, values, update_modified=False)
+
+	def problems_by_entry(self, item_code):
+		entries = get_valuation_steps(item_code, WAREHOUSE).entries
+		return {entry.name: [problem.check for problem in entry.ledger_problems or []] for entry in entries}
+
+	def test_entry_that_does_not_add_up_is_flagged_and_repost_fixes_it(self):
+		item_code = self.make_item("Moving Average")
+		first, second, third = (
+			self.get_entry_name(self.receive(item_code, rate, days_ago).name)
+			for rate, days_ago in ((100, 3), (200, 2), (300, 1))
+		)
+		self.tamper(second, stock_value=800)
+
+		entries = get_valuation_steps(item_code, WAREHOUSE).entries
+		self.assertEqual(
+			self.problems_by_entry(item_code), {first: [], second: ["value", "rate"], third: ["value"]}
+		)
+		self.assertEqual(entries[1].repost_from.name, second)
+
+		repost = repost_from_entry(second)
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", repost, ["based_on", "item_code", "status"]),
+			("Item and Warehouse", item_code, "Completed"),
+		)
+		self.assertEqual(self.problems_by_entry(item_code), {first: [], second: [], third: []})
+
+	def test_moving_average_issue_at_the_wrong_rate_is_flagged(self):
+		item_code = self.make_item("Moving Average")
+		self.receive(item_code, 100, 3, qty=2)
+		issue = self.issue(item_code, 1)
+		self.tamper(issue, stock_value_difference=-150, stock_value=50, valuation_rate=50)
+
+		[problem] = get_valuation_steps(item_code, WAREHOUSE).entries[-1].ledger_problems
+
+		self.assertEqual((problem.check, problem.expected, problem.actual), ("outgoing_rate", 100, 150))
+
+	@patch(f"{PAGE_MODULE}.PAGE_SIZE", 1)
+	def test_lots_problem_reposts_from_where_it_started(self):
+		item_code = self.make_item("FIFO")
+		first, second, third = (
+			self.get_entry_name(self.receive(item_code, 100, days_ago).name) for days_ago in (3, 2, 1)
+		)
+		for entry in (second, third):
+			self.tamper(entry, stock_queue="[]")
+
+		[entry] = get_valuation_steps(item_code, WAREHOUSE).entries
+
+		self.assertEqual(entry.name, third)
+		self.assertEqual([problem.check for problem in entry.ledger_problems], ["lots"])
+		self.assertEqual(entry.repost_from.name, second)
 
 	def queue_repost(self, **fields):
 		repost = frappe.get_doc(
@@ -282,11 +358,12 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 		item_code, (first_batch, second_batch), _second = self.make_batch_item()
 		self.issue(item_code, 2, batch_no=second_batch)
 
-		steps = get_valuation_steps(item_code, WAREHOUSE)
-		parts = {part.batch_no: (part.qty, part.value, part.rate) for part in steps.stock_parts}
+		newest = get_valuation_steps(item_code, WAREHOUSE).entries[-1]
+		breakdown = get_stock_breakdown(item_code, WAREHOUSE, newest.name)
+		parts = {part.batch_no: (part.qty, part.value, part.rate) for part in breakdown.stock_parts}
 
 		self.assertEqual(parts, {first_batch: (10, 1000, 100), second_batch: (9, 1800, 200)})
-		self.assertIsNone(steps.stock_gap)
+		self.assertIsNone(breakdown.stock_gap)
 
 	def test_batch_filter_shows_only_that_batch(self):
 		item_code, (first_batch, second_batch), second = self.make_batch_item()
@@ -315,9 +392,59 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 		self.assertEqual(issued.parts[0].source_voucher_no, receipt.name)
 		self.assertEqual(steps.focus.qty, 0)
 		self.assertEqual(
-			[(part.qty, part.rate) for part in get_valuation_steps(item_code, WAREHOUSE).stock_parts],
+			[
+				(part.qty, part.rate)
+				for part in get_stock_breakdown(item_code, WAREHOUSE, issued.name).stock_parts
+			],
 			[(1, 100)],
 		)
+
+	@patch(f"{PAGE_MODULE}.PAGE_SIZE", 1)
+	def test_older_entries_load_one_page_at_a_time(self):
+		item_code = self.make_item(
+			"FIFO", has_batch_no=1, create_new_batch=1, batch_number_series="VRB-PAGE-.###"
+		)
+		self.receive(item_code, 100, 3, qty=10)
+		second = self.receive(item_code, 200, 2, qty=10)
+		batch_no = get_batch_from_bundle(second.items[0].serial_and_batch_bundle)
+		issue = self.issue(item_code, 1, batch_no=batch_no)
+
+		newest = get_valuation_steps(item_code, WAREHOUSE)
+		[part] = newest.entries[0].parts
+		older = get_valuation_steps(item_code, WAREHOUSE, before=issue)
+
+		self.assertEqual(([entry.name for entry in newest.entries], newest.has_earlier), ([issue], True))
+		self.assertEqual((part.qty_before, part.value_before, part.rate), (10, 2000, 200))
+		self.assertEqual(
+			([entry.voucher_no for entry in older.entries], older.has_earlier), ([second.name], True)
+		)
+
+	def test_serial_that_left_at_a_different_value_explains_the_gap(self):
+		item_code = self.make_item("Moving Average", has_serial_no=1, serial_no_series="VRB-GAP-.###")
+		receipt = self.receive(item_code, 100, 3, qty=2)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+		issue = self.issue(item_code, 1, serial_no=[serial_no])
+		bundle = frappe.db.get_value("Stock Ledger Entry", issue, "serial_and_batch_bundle")
+		frappe.db.set_value("Serial and Batch Entry", {"parent": bundle}, "stock_value_difference", 0)
+		frappe.db.set_value("Stock Ledger Entry", issue, {"stock_value_difference": 0, "stock_value": 200})
+
+		breakdown = get_stock_breakdown(item_code, WAREHOUSE, issue)
+		[cause] = breakdown.stock_gap.causes
+
+		self.assertEqual([(part.qty, part.value) for part in breakdown.stock_parts], [(1, 100)])
+		self.assertEqual(breakdown.stock_gap.gap, 100)
+		self.assertEqual((cause.serial_nos, cause.actual, cause.expected), ([serial_no], 0, 100))
+
+	def test_rounding_sized_gap_is_not_flagged(self):
+		item_code = self.make_item("Moving Average", has_serial_no=1, serial_no_series="VRB-ROUND-.###")
+		receipt = self.receive(item_code, 100, 3, qty=2)
+		sle = self.get_entry_name(receipt.name)
+		frappe.db.set_value("Stock Ledger Entry", sle, "stock_value", 200.4)
+
+		breakdown = get_stock_breakdown(item_code, WAREHOUSE, sle)
+
+		self.assertEqual(sum(part.value for part in breakdown.stock_parts), 200)
+		self.assertIsNone(breakdown.stock_gap)
 
 	def test_batch_of_another_item_is_rejected(self):
 		item_code, (first_batch, _), _second = self.make_batch_item()
