@@ -38,6 +38,7 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.stock.doctype.delivery_note.services.billing_status import (
 	update_billed_amount_based_on_so,
 	update_billing_percentage_of_returns,
+	validate_credit_of_returns,
 )
 from erpnext.stock.utils import get_bin_qty_map
 
@@ -446,6 +447,8 @@ class SalesInvoice(SellingController):
 
 	def before_submit(self):
 		self.add_remarks()
+		if self.is_return:
+			validate_credit_of_returns(self)
 		if cint(self.is_created_using_pos):
 			POSService(self).validate_mandatory_pos_fields()
 

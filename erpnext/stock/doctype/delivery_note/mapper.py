@@ -20,7 +20,7 @@ from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
-from erpnext.stock.doctype.delivery_note.services.billing_status import get_settled_return_qty
+from erpnext.stock.doctype.delivery_note.services.billing_status import get_creditable_qty
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -92,12 +92,12 @@ def make_sales_invoice(
 	to_make_invoice_qty_map = {}
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	if doc.is_return and doc.return_against:
+		# Credit only what the original's invoices billed and did not already deduct or credit.
+		creditable_qty = get_creditable_qty(doc)
+		invoiced_qty_map = {row.name: row.qty + flt(creditable_qty.get(row.name)) for row in doc.items}
 	for ref, qty in get_qty_already_mapped(target_doc, "dn_detail").items():
 		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
-	if doc.is_return and doc.return_against:
-		# Returns deducted on the original's invoice need no credit note.
-		for ref, qty in get_settled_return_qty(doc.return_against).items():
-			invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) - qty
 
 	def set_missing_values(source, target):
 		target.update_stock = 0
