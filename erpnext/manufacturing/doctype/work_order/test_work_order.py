@@ -5586,7 +5586,9 @@ class TestWorkOrder(ERPNextTestSuite):
 			wo = self.send_reserved_cloth_to_subcontractor(qty)
 			self.assertEqual(wo.get_status(), "Stock Reserved")
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
 	def test_subcontracting_refreshes_the_saved_work_order_status(self):
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
