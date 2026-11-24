@@ -282,6 +282,7 @@
    "fieldname": "base_total_costing_amount",
    "fieldtype": "Currency",
    "label": "Base Total Costing Amount",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -289,6 +290,7 @@
    "fieldname": "base_total_billable_amount",
    "fieldtype": "Currency",
    "label": "Base Total Billable Amount",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -296,6 +298,7 @@
    "fieldname": "base_total_billed_amount",
    "fieldtype": "Currency",
    "label": "Base Total Billed Amount",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -315,7 +318,7 @@
  "is_submittable": 1,
  "link_display_mode": "Search",
  "links": [],
- "modified": "2026-11-24 12:00:00.000000",
+ "modified": "2026-11-24 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
