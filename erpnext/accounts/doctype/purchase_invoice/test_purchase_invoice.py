@@ -2780,6 +2780,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			(item.stock_uom, 12, item.stock_uom, 100),  # a stale factor on the stock UOM is reset
 			("Box", 12, "Box", 1800),  # the stock UOM comes from the item, not the row
 			(None, 0, item.stock_uom, 1800),  # a missing UOM is the item's purchase UOM
+			(None, 1, item.stock_uom, 1800),  # with its own factor, not the one sent without a UOM
 		):
 			returned_inv = make_purchase_invoice(
 				item_code=item.name,
@@ -2792,6 +2793,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			returned_inv.items[0].update({"uom": uom, "conversion_factor": conversion_factor, "rate": 0})
 			returned_inv.insert()
 			self.assertEqual(returned_inv.items[0].rate, rate)
+
+		self.assertEqual(returned_inv.items[0].stock_qty, -12)
 
 	def test_standalone_debit_note_rate_rounding_to_zero_is_rejected(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
