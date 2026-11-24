@@ -1140,13 +1140,12 @@ class BOM(WebsiteGenerator):
 		self.base_operating_cost = 0
 		if self.get("with_operations"):
 			for d in self.get("operations"):
-				self.set_cost_based_on_bom_qty(d, save)
 				if d.workstation or d.workstation_type:
 					self.update_rate_and_time(d, update_hour_rate, save)
 
 				operating_cost = d.operating_cost
 				base_operating_cost = d.base_operating_cost
-				if d.set_cost_based_on_bom_qty:
+				if is_costed_per_batch(d):
 					operating_cost = flt(d.cost_per_unit) * flt(self.quantity)
 					base_operating_cost = flt(d.base_cost_per_unit) * flt(self.quantity)
 
@@ -1161,23 +1160,6 @@ class BOM(WebsiteGenerator):
 			self.base_operating_cost = total_operating_cost * self.conversion_rate
 
 		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
-
-	def set_cost_based_on_bom_qty(self, row, save):
-		"""As in the Work Order, fixed time is never per batch and a batch based operation always is."""
-		if row.fixed_time:
-			per_batch = 0
-		elif frappe.get_cached_value("Operation", row.operation, "create_job_card_based_on_batch_size"):
-			per_batch = 1
-		else:
-			return
-
-		if cint(row.set_cost_based_on_bom_qty) == per_batch:
-			return
-
-		row.set_cost_based_on_bom_qty = per_batch
-		if save:
-			# the row is saved only when hour rates are refreshed, so save the flag on its own
-			row.db_set("set_cost_based_on_bom_qty", per_batch, update_modified=False)
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		self.update_stale_hour_rate(row)
@@ -1626,6 +1608,14 @@ def get_secondary_item_valuation_rate(item_code: str, company: str, warehouse: s
 	frappe.has_permission("BOM", "read", throw=True)
 	return get_valuation_rate(
 		{"item_code": item_code, "company": company, "warehouse": warehouse, "set_rate_based_on_warehouse": 1}
+	)
+
+
+def is_costed_per_batch(row) -> bool:
+	"""As in the Work Order: never for fixed time, always for a batch based Operation."""
+	return not row.fixed_time and bool(
+		row.set_cost_based_on_bom_qty
+		or frappe.get_cached_value("Operation", row.operation, "create_job_card_based_on_batch_size")
 	)
 
 
