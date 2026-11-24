@@ -14,7 +14,9 @@ def set_ledger_problems(entries, rows, previous, item):
 	precision = get_precision()
 	before = previous
 	for entry, row in zip(entries, rows, strict=True):
-		problems = get_row_problems(row, before, entry, item, precision)
+		problems = (
+			None if entry.awaiting_recalculation else get_row_problems(row, before, entry, item, precision)
+		)
 		if problems:
 			entry.ledger_problems = problems
 		before = row

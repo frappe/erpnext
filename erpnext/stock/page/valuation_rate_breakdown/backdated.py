@@ -146,7 +146,7 @@ def set_rates_when_entered(affected, item_code, warehouse, valuation_method):
 
 	history = get_history(item_code, warehouse, start, upto, valuation_method)
 	for entry, row in affected:
-		replayed = replay_until(row, start, history, valuation_method)
+		replayed = replay_until(row, start, history, valuation_method, get_return_rate(entry))
 		if replayed:
 			entry.rate_when_entered = replayed.rate
 			entry.rate_after_when_entered = replayed.rate_after
@@ -207,14 +207,21 @@ def history_query(sle, item_code, warehouse, start, upto):
 	return query
 
 
-def replay_until(target, start, history, valuation_method):
+def get_return_rate(entry):
+	if entry.is_return and entry.qty < 0 and entry.original_rate:
+		return flt(entry.original_rate)
+
+	return None
+
+
+def replay_until(target, start, history, valuation_method, return_rate=None):
 	book = make_book(start, valuation_method)
 	for row in history:
 		if not existed_when_entered(row, target.creation):
 			continue
 
 		if row.name == target.name:
-			return book.apply(row)
+			return book.apply(row, return_rate)
 
 		if row.modified <= target.creation and not row.is_cancelled:
 			book.sync(row)
@@ -248,7 +255,7 @@ class MovingAverageBook:
 		self.qty = flt(row.qty_after_transaction)
 		self.rate = flt(row.valuation_rate)
 
-	def apply(self, row):
+	def apply(self, row, return_rate=None):
 		qty = flt(row.actual_qty)
 		if is_reconciliation(row):
 			self.sync(row)
@@ -258,9 +265,11 @@ class MovingAverageBook:
 			self.revalue(flt(row.stock_value_difference))
 			return frappe._dict(rate=0.0, rate_after=self.rate)
 
-		rate = flt(row.incoming_rate) if qty > 0 else self.rate
+		rate = flt(row.incoming_rate) if qty > 0 else return_rate or self.rate
 		if qty > 0:
 			self.receive(qty, rate)
+		elif return_rate:
+			self.return_at(qty, return_rate)
 		else:
 			self.qty += qty
 
@@ -272,6 +281,15 @@ class MovingAverageBook:
 			self.rate = rate
 		else:
 			self.rate = (self.qty * self.rate + qty * rate) / new_qty
+
+		self.qty = new_qty
+
+	def return_at(self, qty, rate):
+		new_qty = self.qty + qty
+		if new_qty > 0:
+			self.rate = (self.qty * self.rate + qty * rate) / new_qty
+		elif new_qty == 0 or self.qty >= 0:
+			self.rate = rate
 
 		self.qty = new_qty
 
@@ -288,7 +306,7 @@ class QueueBook:
 	def sync(self, row):
 		self.queue = self.valuation_class(load_queue(row.stock_queue))
 
-	def apply(self, row):
+	def apply(self, row, return_rate=None):
 		qty = flt(row.actual_qty)
 		if is_reconciliation(row):
 			self.queue = self.valuation_class([[flt(row.qty_after_transaction), flt(row.valuation_rate)]])
@@ -301,7 +319,9 @@ class QueueBook:
 			rate = flt(row.incoming_rate)
 			self.queue.add_stock(qty, rate)
 		else:
-			used = self.queue.remove_stock(abs(qty))
+			used = self.queue.remove_stock(
+				abs(qty), outgoing_rate=return_rate or 0.0, is_return_purchase_entry=bool(return_rate)
+			)
 			rate = sum(flt(lot_qty) * flt(lot_rate) for lot_qty, lot_rate in used) / abs(qty)
 
 		return frappe._dict(rate=rate, rate_after=self.rate_after())

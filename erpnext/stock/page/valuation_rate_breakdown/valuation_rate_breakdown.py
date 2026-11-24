@@ -6,9 +6,11 @@ from frappe.query_builder import Order
 from frappe.utils import flt
 from pypika.terms import ExistsCriterion
 
+from erpnext.stock.page.valuation_rate_breakdown import legacy
 from erpnext.stock.page.valuation_rate_breakdown.backdated import set_backdated_details
 from erpnext.stock.page.valuation_rate_breakdown.ledger_checks import set_ledger_problems, set_repost_start
 from erpnext.stock.page.valuation_rate_breakdown.serial_batch import (
+	get_batch_valuation,
 	get_stock_summary,
 	set_serial_batch_details,
 )
@@ -189,12 +191,14 @@ def get_item_context(item_code, company):
 	if not is_serial_no_wise_valuation_disabled(item_code):
 		valued_by = "serial" if item.has_serial_no else "batch" if item.has_batch_no else None
 
+	valuation_method = get_valuation_method(item_code, company)
 	return frappe._dict(
 		item_code=item_code,
 		item_name=item.item_name,
 		stock_uom=item.stock_uom,
-		valuation_method=get_valuation_method(item_code, company),
+		valuation_method=valuation_method,
 		valued_by=valued_by,
+		batch_valuation=get_batch_valuation(item_code, valuation_method) if valued_by == "batch" else None,
 	)
 
 
@@ -251,6 +255,8 @@ def fetch_ledger_rows(item_code, warehouse, anchor, inclusive, focus=None):
 			sle.stock_queue,
 			sle.is_adjustment_entry,
 			sle.serial_and_batch_bundle,
+			sle.batch_no,
+			sle.serial_no,
 			sle.posting_datetime,
 			sle.creation,
 			sle.modified,
@@ -273,7 +279,7 @@ def fetch_ledger_rows(item_code, warehouse, anchor, inclusive, focus=None):
 
 def moves_focus(sle, focus):
 	entry = frappe.qb.DocType("Serial and Batch Entry")
-	return ExistsCriterion(
+	in_bundle = ExistsCriterion(
 		frappe.qb.from_(entry)
 		.select(entry.name)
 		.where(
@@ -283,6 +289,7 @@ def moves_focus(sle, focus):
 			& (entry.is_cancelled == 0)
 		)
 	)
+	return in_bundle | legacy.focus_condition(sle, focus)
 
 
 def get_restart_index(rows, previous):

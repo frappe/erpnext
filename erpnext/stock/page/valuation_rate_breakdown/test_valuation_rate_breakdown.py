@@ -84,6 +84,30 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 		self.assertEqual((returned.rate, returned.original_rate), (55, 50))
 		self.assertEqual((returned.qty_after, returned.value_after, returned.rate_after), (1, 55, 55))
 
+	def test_purchase_return_keeps_its_original_rate_when_entered(self):
+		item_code = self.make_item("Moving Average")
+		_first, entry = self.make_purchase_return(item_code)
+		self.receive(item_code, 80, 1)
+
+		returned = get_valuation_steps(item_code, WAREHOUSE, upto=entry).entries[-1]
+
+		self.assertTrue(returned.changed_by)
+		self.assertEqual((returned.rate_when_entered, returned.rate_after_when_entered), (50, 60))
+
+	def test_fifo_purchase_return_replays_from_its_own_lot(self):
+		item_code = self.make_item("FIFO")
+		self.receive(item_code, 50, 2)
+		second = self.receive(item_code, 60, 1)
+		purchase_return = make_return_doc("Purchase Receipt", second.name)
+		purchase_return.submit()
+		entry = self.get_entry_name(purchase_return.name)
+		self.receive(item_code, 80, 1)
+
+		returned = get_valuation_steps(item_code, WAREHOUSE, upto=entry).entries[-1]
+
+		self.assertTrue(returned.changed_by)
+		self.assertEqual(returned.rate_when_entered, 60)
+
 	def test_fifo_issue_lists_the_lot_used(self):
 		item_code = self.make_item("FIFO")
 		self.receive(item_code, 50, 2)
@@ -344,6 +368,7 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 		self.assertEqual(steps.repost_status, "pending")
 		self.assertTrue(issued.awaiting_recalculation)
 		self.assertEqual(issued.rate, 100)
+		self.assertIsNone(issued.ledger_problems)
 
 	def make_batch_item(self):
 		item_code = self.make_item(
@@ -445,6 +470,63 @@ class TestValuationRateBreakdown(ERPNextTestSuite):
 
 		self.assertEqual(sum(part.value for part in breakdown.stock_parts), 200)
 		self.assertIsNone(breakdown.stock_gap)
+
+	def test_batch_valuation_says_whether_batches_share_a_value(self):
+		item_code, (first_batch, second_batch), _second = self.make_batch_item()
+		valuation = lambda: get_valuation_steps(item_code, WAREHOUSE).item.batch_valuation  # noqa: E731
+
+		self.assertEqual(valuation(), "own")
+		frappe.db.set_value("Batch", first_batch, "use_batchwise_valuation", 0)
+		self.assertEqual(valuation(), "mixed")
+		frappe.db.set_value("Batch", second_batch, "use_batchwise_valuation", 0)
+		self.assertEqual(valuation(), "shared")
+
+	def make_legacy(self, entry, **fields):
+		bundle = frappe.db.get_value("Stock Ledger Entry", entry, "serial_and_batch_bundle")
+		frappe.db.set_value("Serial and Batch Entry", {"parent": bundle}, "is_cancelled", 1)
+		values = {"serial_and_batch_bundle": None, **fields}
+		frappe.db.set_value("Stock Ledger Entry", entry, values, update_modified=False)
+
+	def test_legacy_batch_entries_are_part_of_the_history(self):
+		item_code, (first_batch, second_batch), _second = self.make_batch_item()
+		[receipt] = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item_code, "is_cancelled": 0},
+			order_by="posting_datetime, creation",
+			limit=1,
+			pluck="name",
+		)
+		self.make_legacy(receipt, batch_no=first_batch)
+		issue = self.issue(item_code, 1, batch_no=first_batch)
+
+		breakdown = get_stock_breakdown(item_code, WAREHOUSE, issue)
+		[issued] = get_valuation_steps(item_code, WAREHOUSE, upto=issue).entries[-1].parts
+		focus = get_valuation_steps(item_code, WAREHOUSE, batch_no=first_batch)
+
+		parts = {part.batch_no: (part.qty, part.value) for part in breakdown.stock_parts}
+		self.assertEqual(parts, {first_batch: (9, 900), second_batch: (10, 2000)})
+		self.assertIsNone(breakdown.stock_gap)
+		self.assertEqual((issued.batch_no, issued.qty_before, issued.rate), (first_batch, 10, 100))
+		self.assertEqual([entry.name for entry in focus.entries], [receipt, issue])
+
+	def test_legacy_serial_entries_are_part_of_the_history(self):
+		item_code = self.make_item("Moving Average", has_serial_no=1, serial_no_series="VRB-OLD-.###")
+		receipt = self.receive(item_code, 100, 3, qty=2)
+		entry = self.get_entry_name(receipt.name)
+		first, second = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		self.make_legacy(entry, serial_no=f"{first}\n{second}")
+		issue = self.issue(item_code, 1, serial_no=[first])
+
+		breakdown = get_stock_breakdown(item_code, WAREHOUSE, issue)
+		[issued] = get_valuation_steps(item_code, WAREHOUSE, upto=issue).entries[-1].parts
+		focus = get_valuation_steps(item_code, WAREHOUSE, serial_no=first)
+
+		self.assertEqual([(part.qty, part.value) for part in breakdown.stock_parts], [(1, 100)])
+		self.assertIsNone(breakdown.stock_gap)
+		self.assertEqual(
+			(issued.serial_nos, issued.source_voucher_no, issued.source_rate), ([first], receipt.name, 100)
+		)
+		self.assertEqual([step.name for step in focus.entries], [entry, issue])
 
 	def test_batch_of_another_item_is_rejected(self):
 		item_code, (first_batch, _), _second = self.make_batch_item()
