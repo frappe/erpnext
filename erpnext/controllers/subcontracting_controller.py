@@ -2142,17 +2142,13 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 
 def add_return_items(ste_doc, row, qty, rm_details, rm_detail_field, batch_no=None):
 	"""Split a return over the order rows it is made for, each up to what the row has left; the last takes the rest."""
-	precision = frappe.get_precision("Stock Entry Detail", "qty")
-	# a fully consumed material can leave a float remainder
-	if flt(qty, precision) <= 0:
-		return
-
 	qty_left = row.get(f"{rm_detail_field}s")
 	order_rows = [order_row for order_row in qty_left if order_row in rm_details]
 	if not order_rows:
-		add_items_in_ste(ste_doc, row, flt(qty, precision), rm_details, rm_detail_field, batch_no)
+		add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field, batch_no)
 		return
 
+	precision = frappe.get_precision("Stock Entry Detail", "qty")
 	serial_nos = row.serial_no
 	for order_row in order_rows:
 		row_qty = flt(qty if order_row == order_rows[-1] else min(qty, qty_left[order_row]), precision)
