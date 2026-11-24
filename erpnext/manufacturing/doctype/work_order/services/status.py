@@ -126,6 +126,15 @@ class StatusService:
 
 		return status or self.doc.status
 
+	def refresh_status(self):
+		"""Save the computed status, unless the order is Stopped or Closed or another transaction changed its status."""
+		saved_status = frappe.db.get_value("Work Order", self.doc.name, "status", for_update=True)
+		if saved_status != self.doc.status or saved_status in ("Stopped", "Closed"):
+			return
+
+		if (status := self.get_status()) != saved_status:
+			self.doc.db_set("status", status)
+
 	def get_status(self, status=None):
 		"""Return the status based on stock entries against this work order"""
 		status = status or self.doc.status
