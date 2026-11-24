@@ -1264,10 +1264,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, r"\(150.0 / 100.0\)", pr.insert)
 		with (
-			patch("erpnext.utilities.transaction_base.has_source_doc_permission", return_value=False),
+			patch(
+				"erpnext.utilities.transaction_base.has_source_doc_permission", return_value=False
+			) as has_permission,
 			self.assertRaises(frappe.ValidationError) as error,
 		):
 			pr.insert()
+		has_permission.assert_called_with("Purchase Order", po.name, frappe.session.user)
+		self.assertIn(f"Rate must be same as Purchase Order: {po.name}", str(error.exception))
 		self.assertNotIn(" / ", str(error.exception))
 
 	def test_serial_no_against_purchase_receipt(self):
