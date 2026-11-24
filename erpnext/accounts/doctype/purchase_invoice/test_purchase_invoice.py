@@ -2870,6 +2870,34 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		returned_inv.save()
 		self.assertEqual(returned_inv.items[0].rate, 500)
 
+		# so is a supplier set later from the item default, here in USD
+		item = frappe.get_doc("Item", item_code)
+		item.set(
+			"item_defaults",
+			[
+				{
+					"company": "_Test Company",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"default_supplier": "_Test Supplier USD",
+				}
+			],
+		)
+		item.save()
+		returned_inv.credit_to = "_Test Payable USD - _TC"
+		returned_inv.update(
+			{
+				"supplier": None,
+				"currency": None,
+				"buying_price_list": None,
+				"price_list_currency": None,
+				"plc_conversion_rate": 50,
+			}
+		)
+		returned_inv.items[0].rate = 0
+		returned_inv.save()
+		self.assertEqual(returned_inv.supplier, "_Test Supplier USD")
+		self.assertEqual(returned_inv.items[0].rate, 10)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
