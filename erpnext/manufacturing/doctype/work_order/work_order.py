@@ -3070,6 +3070,9 @@ class WorkOrder(Document):
 			sre.update_reserved_stock_in_bin()
 			sre.update_reserved_qty_in_voucher()
 
+		self.reload()
+		self.db_set("status", self.get_status())
+
 	def _subcontract_transferred_qty_by_item(self):
 		"""Qty sent to subcontractors for this Work Order, keyed by (item_code, source warehouse).
 
