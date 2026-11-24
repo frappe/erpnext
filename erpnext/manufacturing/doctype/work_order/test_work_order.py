@@ -3899,6 +3899,56 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(sorted(d.amount for d in se_doc.items if d.item_code == co_product), [20, 180])
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_sub_assembly_co_product_takes_no_more_than_the_posted_component_cost(self):
+		# 2 FG need 2 RMA at 100 for 2 SA, but only 1 is posted: the co-product takes 20% of 100, not 200
+		rm_a, rm_b = make_co_product_raw_materials()
+		sub_assembly, fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(3)
+		)
+		sub_bom = make_co_product_bom(sub_assembly, [(rm_a, 1, None)], co_product)
+		bom = make_co_product_bom(fg_item, [(sub_assembly, 1, sub_bom), (rm_b, 1, None)])
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom,
+			qty=2,
+			use_multi_level_bom=1,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		se_doc = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		next(d for d in se_doc.items if d.item_code == rm_a).qty = 1
+		se_doc.insert()
+		se_doc.submit()
+
+		amounts = {d.item_code: d.amount for d in se_doc.items}
+		self.assertEqual(amounts[co_product], 20)
+		self.assertEqual(amounts[fg_item], 1880)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_co_product_of_a_sub_assembly_reached_through_two_paths_is_one_row(self):
+		# FG: 1 SA1 + 1 SA2, each using 4 SA; SA's BOM makes 1 Kg co-product per 1,000: one row of 0.008
+		rm_a, rm_b = make_co_product_raw_materials()
+		test_stock_entry.make_stock_entry(
+			item_code=rm_a, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+		)
+		sub_assembly, sa1, sa2, fg_item = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(4)
+		)
+		co_product = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_bom = make_co_product_bom(sub_assembly, [(rm_a, 1000, None)], co_product, quantity=1000)
+		bom_1 = make_co_product_bom(sa1, [(sub_assembly, 4, sub_bom)])
+		bom_2 = make_co_product_bom(sa2, [(sub_assembly, 4, sub_bom)])
+		bom = make_co_product_bom(fg_item, [(sa1, 1, bom_1), (sa2, 1, bom_2)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		self.assertEqual([d.qty for d in se_doc.items if d.item_code == co_product], [flt(0.008, precision)])
+
 	def test_job_card_default_takes_the_co_product_qty_manufacture_makes(self):
 		# 33.33% of 3 Nos is a BOM loss of 1, so 100 FG make 200, not 200.01
 		rm_item, fg_item, co_product = (
