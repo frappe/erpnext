@@ -3585,7 +3585,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
 	)
 	def test_sub_assembly_co_product_share_ignores_process_loss_and_rounding_of_its_qty(self):
-		# 0.2 Nos of co-product per finished good, halved by process loss, is rounded up to 1
+		# 0.2 Kg of co-product per finished good, halved by process loss
 		amounts = make_sub_assembly_co_product_entry(sub_bom_qty=10, process_loss_per=50)
 		self.assertEqual(amounts["co_product"], 20)
 		self.assertEqual(amounts["fg_item"], 980)
@@ -9657,9 +9657,11 @@ def allow_alternative_item(work_order, item_code, alternative_item_code):
 
 def make_sub_assembly_co_product_entry(sub_bom_qty=1, process_loss_per=0):
 	"""Submit a Manufacture entry for 1 FG made of 1 SA (1 RMA at 100, 20% co-product) and 1 RMB at 900."""
-	rm_a, rm_b, sub_assembly, fg_item, co_product = (
-		make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(5)
+	rm_a, rm_b, sub_assembly, fg_item = (
+		make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(4)
 	)
+	# not a whole number UOM: version-16 does not round a secondary item's qty up
+	co_product = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
 	for item, rate in ((rm_a, 100), (rm_b, 900)):
 		test_stock_entry.make_stock_entry(
 			item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=rate
