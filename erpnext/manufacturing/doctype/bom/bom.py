@@ -251,6 +251,11 @@ class BOM(WebsiteGenerator):
 		super().onload()
 
 		self.set_onload_for_multi_level_bom()
+		# the form previews these per batch, as is_costed_per_batch does
+		self.set_onload(
+			"batch_based_operations",
+			frappe.get_all("Operation", filters={"create_job_card_based_on_batch_size": 1}, pluck="name"),
+		)
 
 	def set_onload_for_multi_level_bom(self):
 		use_multi_level_bom = frappe.db.get_value(
