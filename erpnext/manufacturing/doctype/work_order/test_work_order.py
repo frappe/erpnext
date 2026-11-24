@@ -6029,6 +6029,27 @@ class TestWorkOrder(ERPNextTestSuite):
 			wo = self.send_reserved_cloth_to_subcontractor(qty)
 			self.assertEqual(wo.get_status(), "Stock Reserved")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_subcontracting_refreshes_the_saved_work_order_status(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		cloth = make_item("Test SOI Cloth", {"is_stock_item": 1}).name
+		test_stock_entry.make_stock_entry(item_code=cloth, target="Stores - _TC", qty=6, basic_rate=100)
+		wo = self.make_subcontracted_operation_work_order(skip_transfer=1, reserve_stock=1)
+		sco = self.subcontract_work_order(wo, 4)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Stock Reserved")
+
+		send = frappe.new_doc("Stock Entry").update(make_rm_stock_entry(sco.name))
+		send.submit()
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Stock Partially Reserved")
+
+		send.cancel()
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Stock Reserved")
+
+		sco.reload()
+		sco.cancel()
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Stock Partially Reserved")
+
 	def send_reserved_cloth_to_subcontractor(self, qty):
 		"""A skip-transfer Work Order that reserved its cloth and sent qty of it to a subcontractor."""
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
