@@ -2,10 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.permissions import add_user_permission
 from frappe.utils import getdate, random_string
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.buying.test_utils import create_user_with_roles
 from erpnext.selling.report.customer_acquisition_and_loyalty.customer_acquisition_and_loyalty import (
+	execute,
 	get_customer_stats,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -170,3 +173,38 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 		# Revenue is the sale netted by the credit note, all in the new bucket.
 		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si.base_grand_total + cn.base_grand_total)
 		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, 0.0)
+
+	def test_company_restricted_user(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test CAL Company Customer " + random_string(8),
+				"customer_group": "_Test Customer Group",
+				"customer_type": "Individual",
+				"territory": "_Test Territory",
+			}
+		).insert()
+		create_sales_invoice(customer=customer.name, company="_Test Company", posting_date="2017-07-05")
+		filters = frappe._dict(
+			{"view_type": "Territory Wise", "from_date": "2017-07-01", "to_date": "2017-07-31"}
+		)
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		# a restriction for all doctypes and one scoped to Sales Invoice both apply
+		for applicable_for in (None, "Sales Invoice"):
+			with self.subTest(applicable_for=applicable_for):
+				frappe.set_user("Administrator")
+				email = f"test_cal_company_{frappe.scrub(applicable_for or 'all')}@example.com"
+				create_user_with_roles(email, "Sales User")
+				add_user_permission("Company", "_Test Company 1", email, applicable_for=applicable_for)
+				frappe.set_user(email)
+
+				# another company is refused
+				with self.assertRaises(frappe.PermissionError):
+					execute(frappe._dict(filters, company="_Test Company"))
+
+				# the permitted company still runs
+				execute(frappe._dict(filters, company="_Test Company 1"))
+
+				# without a company, only the permitted company's invoices count
+				self.assertNotIn("_Test Territory", get_customer_stats(filters, tree_view=True))
