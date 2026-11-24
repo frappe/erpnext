@@ -7,7 +7,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import IfNull, Max, Min, Sum
 from frappe.utils import (
 	add_days,
@@ -1058,7 +1058,10 @@ class JobCard(Document):
 					frappe.qb.from_(sed)
 					.join(se)
 					.on(sed.parent == se.name)
-					.select(sed.job_card_item, Sum(sed.transfer_qty))
+					.select(
+						sed.job_card_item,
+						Sum(Case().when(se.is_return == 1, -sed.transfer_qty).else_(sed.transfer_qty)),
+					)
 					.where(
 						(sed.job_card_item.isin(job_card_items))
 						& (se.docstatus == 1)
@@ -1094,6 +1097,8 @@ class JobCard(Document):
 				continue
 
 			transferred_qty = flt(job_card_items_transferred_qty.get(row.job_card_item, 0.0))
+			if flt(transferred_qty, 6) < 0:
+				self.throw_components_already_returned()
 
 			if not allow_excess:
 				_validate_over_transfer(row, transferred_qty)
@@ -1101,6 +1106,14 @@ class JobCard(Document):
 			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
 
 		self.set_status(update_status=True)
+
+	def throw_components_already_returned(self):
+		frappe.throw(
+			_(
+				"Job Card {0} has more components returned than transferred. Cancel its return entries first."
+			).format(get_link_to_form("Job Card", self.name)),
+			title=_("Components Returned"),
+		)
 
 	def set_transferred_qty(self, update_status=False):
 		"Set total FG Qty in Job Card for which RM was transferred."
@@ -1113,19 +1126,27 @@ class JobCard(Document):
 
 		if self.items:
 			# sum of 'For Quantity' of Stock Entries against JC
-			self.transferred_qty = (
-				frappe.db.get_value(
-					"Stock Entry",
-					{
-						"job_card": self.name,
-						"work_order": self.work_order,
-						"docstatus": 1,
-						"purpose": "Material Transfer for Manufacture",
-					},
-					"sum(fg_completed_qty)",
-				)
-				or 0
+			stock_entry = frappe.qb.DocType("Stock Entry")
+			fg_completed_qty = (
+				Case()
+				.when(stock_entry.is_return == 1, -stock_entry.fg_completed_qty)
+				.else_(stock_entry.fg_completed_qty)
 			)
+			self.transferred_qty = flt(
+				(
+					frappe.qb.from_(stock_entry)
+					.select(Sum(fg_completed_qty))
+					.where(
+						(stock_entry.job_card == self.name)
+						& (stock_entry.work_order == self.work_order)
+						& (stock_entry.docstatus == 1)
+						& (stock_entry.purpose == "Material Transfer for Manufacture")
+					)
+				).run()[0][0]
+			)
+
+		if flt(self.transferred_qty, 6) < 0:
+			self.throw_components_already_returned()
 
 		self.db_set("transferred_qty", self.transferred_qty)
 
@@ -1619,6 +1640,31 @@ def get_job_details(start: str, end: str, filters: str | None = None):
 		events.append(job_card_data)
 
 	return events
+
+
+@frappe.whitelist()
+def make_stock_return_entry(job_card: str):
+	frappe.has_permission("Stock Entry", "create", throw=True)
+	job_card_doc = frappe.get_doc("Job Card", job_card)
+	job_card_doc.check_permission("read")
+
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.company = job_card_doc.company
+	stock_entry.from_bom = 1
+	stock_entry.is_return = 1
+	stock_entry.work_order = job_card_doc.work_order
+	stock_entry.job_card = job_card_doc.name
+	stock_entry.purpose = "Material Transfer for Manufacture"
+	stock_entry.bom_no = job_card_doc.bom_no
+	stock_entry.fg_completed_qty = job_card_doc.transferred_qty
+	stock_entry.add_transfered_raw_materials_in_items()
+	stock_entry.set_stock_entry_type()
+
+	job_card_items = {row.item_code: row.name for row in job_card_doc.items}
+	for row in stock_entry.items:
+		row.job_card_item = job_card_items.get(row.original_item or row.item_code)
+
+	return stock_entry
 
 
 @frappe.whitelist()

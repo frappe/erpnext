@@ -1525,6 +1525,7 @@ class WorkOrder(Document):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 		job_card = frappe.qb.DocType("Job Card")
+		has_job_card = IfNull(ste.job_card, "") != ""
 
 		query = (
 			frappe.qb.from_(ste)
@@ -1535,13 +1536,15 @@ class WorkOrder(Document):
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
+				fn.Sum(
+					Case().when(ste.is_return == 1, -ste_child.transfer_qty).else_(ste_child.transfer_qty)
+				).as_("qty"),
 			)
 			.where(
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 0)
+				& ((ste.is_return == 0) | has_job_card)
 				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
 			)
 			.groupby(ste_child.item_code, ste_child.original_item)
@@ -1627,6 +1630,7 @@ class WorkOrder(Document):
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 1)
+				& (IfNull(ste.job_card, "") == "")
 			)
 			.groupby(ste_child.item_code)
 		)
