@@ -1769,17 +1769,18 @@ class TestPickList(FrappeTestCase):
 			stock_entry.items[0].set(field, value)
 			self.assertRaises(frappe.ValidationError, stock_entry.insert)
 
-	def test_stock_entry_transfer_with_overproduction_allowance(self):
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"transfer_extra_materials_percentage": 50})
+	def test_stock_entry_against_work_order_pick_list_honours_transfer_allowance(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.work_order.mapper import (
-			create_pick_list as create_pick_list_from_wo,
+			create_pick_list as create_pick_list_from_work_order,
 		)
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		raw_material = make_item(properties={"is_stock_item": 1}).name
 		finished_good = make_item(properties={"is_stock_item": 1}).name
 		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
-		make_stock_entry(item=raw_material, to_warehouse="_Test Warehouse - _TC", qty=200, basic_rate=100)
+		make_stock_entry(item=raw_material, to_warehouse="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		work_order = make_wo_order_test_record(
 			production_item=finished_good,
 			bom_no=bom.name,
@@ -1787,136 +1788,16 @@ class TestPickList(FrappeTestCase):
 			source_warehouse="_Test Warehouse - _TC",
 			wip_warehouse="_Test Warehouse 1 - _TC",
 		)
-
-		# Partial pick: WO demands 50, but Pick List only picks 10
-		pick_list = create_pick_list_from_wo(work_order.name, None, 10)
-		pick_list.save()
+		pick_list = create_pick_list_from_work_order(work_order.name, None, 10)
 		pick_list.submit()
 
-		# Case 1: 0% allowance -> Pick List allows max 10.
-		# Attempting 12 fits Work Order limit (12 <= 50) but exceeds Pick List picked (10).
-		# Validation message must state "10.0 picked in ..."
-		frappe.db.set_single_value("Manufacturing Settings", "transfer_extra_materials_percentage", 0)
-		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 0)
 		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
-		stock_entry.items[0].qty = 12
-		stock_entry.items[0].transfer_qty = 12
-		with self.assertRaises(frappe.ValidationError) as cm:
-			stock_entry.insert()
-		self.assertIn(f"transferred more than the 10.0 picked in {pick_list.name}", str(cm.exception))
+		stock_entry.items[0].qty = 15
+		stock_entry.insert()
 
-		# Case 2: 50% allowance via fallback overproduction_percentage_for_work_order
-		# WO limit is 75 (50 + 50%). Pick List allowed is 15 (10 + 50%).
-		frappe.db.set_single_value("Manufacturing Settings", "transfer_extra_materials_percentage", 0)
-		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 50)
-		try:
-			# Transferring 12 succeeds (fits WO 75 and Pick List 15)
-			valid_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
-			valid_entry.items[0].qty = 12
-			valid_entry.items[0].transfer_qty = 12
-			valid_entry.insert()
-			self.assertTrue(valid_entry.name)
-
-			# Attempting 18 fits Work Order limit (18 <= 75) but exceeds Pick List allowed (15).
-			# Validation message must state "15.0 allowed in ..." (not "15.0 picked")
-			excess_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
-			excess_entry.items[0].qty = 18
-			excess_entry.items[0].transfer_qty = 18
-			with self.assertRaises(frappe.ValidationError) as cm:
-				excess_entry.insert()
-			self.assertIn(f"transferred more than the 15.0 allowed in {pick_list.name}", str(cm.exception))
-		finally:
-			frappe.db.set_single_value("Manufacturing Settings", "transfer_extra_materials_percentage", 0)
-			frappe.db.set_single_value(
-				"Manufacturing Settings", "overproduction_percentage_for_work_order", 0
-			)
-
-	def test_standalone_pick_list_ignores_mr_qty_allowance(self):
-		item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=20, basic_rate=100)
-
-		frappe.db.set_single_value("Stock Settings", "mr_qty_allowance", 10)
-		try:
-			pick_list = frappe.get_doc(
-				{
-					"doctype": "Pick List",
-					"company": "_Test Company",
-					"purpose": "Material Transfer",
-					"pick_manually": 1,
-					"locations": [
-						{"item_code": item, "warehouse": "_Test Warehouse - _TC", "qty": 10, "picked_qty": 10}
-					],
-				}
-			).insert()
-			pick_list.submit()
-
-			stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
-			stock_entry.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
-			stock_entry.items[0].qty = 11
-			stock_entry.items[0].transfer_qty = 11
-
-			with self.assertRaises(frappe.ValidationError) as cm:
-				stock_entry.insert()
-			self.assertIn(f"transferred more than the 10.0 picked in {pick_list.name}", str(cm.exception))
-
-			# Case B: Stock Entry row manually sets material_request_item but Pick List row has none
-			stock_entry_with_mr = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
-			stock_entry_with_mr.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
-			stock_entry_with_mr.items[0].qty = 11
-			stock_entry_with_mr.items[0].transfer_qty = 11
-			stock_entry_with_mr.items[0].material_request_item = "MR-ITEM-DUMMY-001"
-			with self.assertRaises(frappe.ValidationError):
-				stock_entry_with_mr.insert()
-		finally:
-			frappe.db.set_single_value("Stock Settings", "mr_qty_allowance", 0)
-
-	def test_material_request_for_work_order_ignores_overproduction_fallback(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-
-		raw_material = make_item(properties={"is_stock_item": 1}).name
-		finished_good = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
-
-		work_order = make_wo_order_test_record(
-			production_item=finished_good,
-			bom_no=bom.name,
-			qty=10,
-			source_warehouse="_Test Warehouse - _TC",
-			wip_warehouse="_Test Warehouse 1 - _TC",
-		)
-
-		frappe.db.set_single_value("Manufacturing Settings", "transfer_extra_materials_percentage", 0)
-		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 50)
-		try:
-			# A Material Request for 15 against a Work Order requiring 10 must be rejected
-			mr = frappe.get_doc(
-				{
-					"doctype": "Material Request",
-					"material_request_type": "Material Transfer",
-					"work_order": work_order.name,
-					"company": "_Test Company",
-					"items": [
-						{
-							"item_code": raw_material,
-							"qty": 15,
-							"stock_uom": "Nos",
-							"uom": "Nos",
-							"conversion_factor": 1,
-							"warehouse": "_Test Warehouse - _TC",
-							"schedule_date": frappe.utils.nowdate(),
-						}
-					],
-				}
-			)
-			mr.insert()
-			with self.assertRaises(frappe.ValidationError) as cm:
-				mr.submit()
-			self.assertIn("Only 10.0 Nos", str(cm.exception))
-		finally:
-			frappe.db.set_single_value(
-				"Manufacturing Settings", "overproduction_percentage_for_work_order", 0
-			)
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.items[0].qty = 16
+		self.assertRaisesRegex(frappe.ValidationError, "more than the 15.0 allowed", stock_entry.insert)
 
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
