@@ -627,6 +627,39 @@ class TestBatch(ERPNextTestSuite):
 		)
 		self.assertEqual(frappe.db.get_value("Batch", new_batch, "parent_batch"), batch_no)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_existing_serial_no": 0})
+	def test_split_batch_moves_the_serial_nos_of_a_serial_and_batch_item(self):
+		from erpnext.stock.doctype.batch.batch import split_batch
+
+		warehouse = "_Test Warehouse - _TC"
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TSBS-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "TSSS-.#####",
+			}
+		).name
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=4, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		new_batch = split_batch(batch_no, item_code, warehouse, 2)
+
+		serial_nos = frappe.get_all(
+			"Serial No", filters={"item_code": item_code}, fields=["batch_no", "warehouse", "status"]
+		)
+		self.assertEqual(len(serial_nos), 4)
+		self.assertTrue(all(row.warehouse == warehouse and row.status == "Active" for row in serial_nos))
+		self.assertEqual(sorted(row.batch_no for row in serial_nos), sorted([batch_no] * 2 + [new_batch] * 2))
+		self.assertEqual(get_batch_qty(new_batch, warehouse), 2)
+
+		# the moved serial nos can be split again
+		third_batch = split_batch(new_batch, item_code, warehouse, 1)
+		self.assertEqual(get_batch_qty(new_batch, warehouse), 1)
+		self.assertEqual(get_batch_qty(third_batch, warehouse), 1)
+
 	def test_get_batch_qty(self):
 		"""Test getting batch quantities by batch_numbers, item_code or warehouse"""
 		self.make_batch_item("ITEM-BATCH-2")
