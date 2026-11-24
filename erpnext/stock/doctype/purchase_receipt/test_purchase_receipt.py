@@ -1693,7 +1693,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 			properties={"account": "_Test Account Stock In Hand - TCP1"},
 		)
 
+		item_code = make_item("_Test Item For Internal Transfer Valuation", {"is_stock_item": 1}).name
 		pr1 = make_purchase_receipt(
+			item_code=item_code,
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
