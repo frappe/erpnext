@@ -705,7 +705,9 @@ def update_subcontracted_qty(work_order: str):
 		if flt(row.subcontracted_qty) != qty:
 			row.db_set("subcontracted_qty", qty)
 	doc.update_reserved_qty_for_production()
-	doc.db_set("status", doc.get_status())
+	# get_status does not keep a Stopped status
+	if doc.status != "Stopped":
+		doc.db_set("status", doc.get_status())
 
 
 @frappe.whitelist()

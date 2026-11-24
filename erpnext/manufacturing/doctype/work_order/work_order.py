@@ -3071,7 +3071,9 @@ class WorkOrder(Document):
 			sre.update_reserved_qty_in_voucher()
 
 		self.reload()
-		self.db_set("status", self.get_status())
+		# get_status does not keep a Stopped status
+		if self.status != "Stopped":
+			self.db_set("status", self.get_status())
 
 	def _subcontract_transferred_qty_by_item(self):
 		"""Qty sent to subcontractors for this Work Order, keyed by (item_code, source warehouse).
