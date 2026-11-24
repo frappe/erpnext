@@ -250,30 +250,8 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	employee: function (frm) {
-		if (frm.doc.employee && frm.doc.time_logs) {
-			const selected_employee = frm.doc.employee;
-			frm.doc.time_logs.forEach((row) => {
-				if (row.activity_type) {
-					frappe.call({
-						method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-						args: {
-							employee: frm.doc.employee,
-							activity_type: row.activity_type,
-							currency: frm.doc.currency,
-							transaction_date: get_start_date(frm),
-						},
-						callback: function (r) {
-							if (r.message) {
-								if (selected_employee !== frm.doc.employee) return;
-								row.billing_rate = r.message["billing_rate"];
-								row.costing_rate = r.message["costing_rate"];
-								frm.refresh_fields("time_logs");
-								calculate_billing_costing_amount(frm, row.doctype, row.name);
-							}
-						},
-					});
-				}
-			});
+		if (frm.doc.employee) {
+			set_activity_costs(frm);
 		}
 	},
 });
@@ -298,6 +276,11 @@ frappe.ui.form.on("Timesheet Detail", {
 		if (frm.doc.start_date != start_date) {
 			frm.set_value("start_date", start_date);
 			set_exchange_rate(frm);
+			// activity costs are converted at the start date rate
+			let base_currency = frappe.defaults.get_global_default("currency");
+			if (frm.doc.currency && frm.doc.currency != base_currency) {
+				set_activity_costs(frm);
+			}
 		}
 	},
 
@@ -454,6 +437,32 @@ var calculate_time_and_amount = function (frm) {
 var get_start_date = function (frm) {
 	let dates = (frm.doc.time_logs || []).filter((d) => d.from_time).map((d) => d.from_time.slice(0, 10));
 	return dates.length ? dates.sort()[0] : frappe.datetime.get_today();
+};
+
+var set_activity_costs = function (frm) {
+	const employee = frm.doc.employee;
+	const transaction_date = get_start_date(frm);
+	(frm.doc.time_logs || []).forEach((row) => {
+		if (!row.activity_type) return;
+		frappe.call({
+			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+			args: {
+				employee: employee,
+				activity_type: row.activity_type,
+				currency: frm.doc.currency,
+				transaction_date: transaction_date,
+			},
+			callback: function (r) {
+				if (!r.message || employee !== frm.doc.employee || transaction_date !== get_start_date(frm)) {
+					return;
+				}
+				row.billing_rate = r.message["billing_rate"];
+				row.costing_rate = r.message["costing_rate"];
+				frm.refresh_fields("time_logs");
+				calculate_billing_costing_amount(frm, row.doctype, row.name);
+			},
+		});
+	});
 };
 
 var set_exchange_rate = function (frm) {
