@@ -2344,26 +2344,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
 	)
 	def test_transferred_qty_counts_direct_and_pick_list_transfers(self):
-<<<<<<< HEAD
-		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
-		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
-
-		rm_item = make_item(properties={"is_stock_item": 1}).name
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
-		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100)
-		work_order = make_wo_order_test_record(
-			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
-		)
-		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 4)).submit()
-		pick_list = create_pick_list(work_order.name, for_qty=6)
-		pick_list.submit()
-		frappe.get_doc(create_stock_entry(pick_list.as_dict())).submit()
-		self.assertEqual(work_order.reload().material_transferred_for_manufacturing, 10)
-=======
 		work_order = make_mixed_transfer_work_order()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 10)
->>>>>>> 35a4b98 (test: patch recalculates transferred qty of open mixed-transfer Work Orders)
 
 		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 4))
 		self.assertEqual([row.qty for row in manufacture.items if row.s_warehouse], [8])
@@ -9822,8 +9804,8 @@ def make_batch_finished_good_work_order(fg_properties=None, process_loss_percent
 
 def make_mixed_transfer_work_order():
 	"""Work Order for 10 with 4 transferred directly and 6 through a Pick List."""
-	from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
-	from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
+	from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
+	from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
 
 	rm_item = make_item(properties={"is_stock_item": 1}).name
 	fg_item = make_item(properties={"is_stock_item": 1}).name
