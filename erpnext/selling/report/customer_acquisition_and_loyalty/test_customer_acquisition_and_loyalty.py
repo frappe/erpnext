@@ -2,10 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.permissions import add_user_permission
 from frappe.utils import getdate, random_string
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.buying.test_utils import create_user_with_roles
 from erpnext.selling.report.customer_acquisition_and_loyalty.customer_acquisition_and_loyalty import (
+	execute,
 	get_customer_stats,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -170,3 +173,32 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 		# Revenue is the sale netted by the credit note, all in the new bucket.
 		self.assertAlmostEqual(bucket["new"][1] - base_new_rev, si.base_grand_total + cn.base_grand_total)
 		self.assertAlmostEqual(bucket["repeat"][1] - base_repeat_rev, 0.0)
+
+	def test_company_restricted_user(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test CAL Company Customer " + random_string(8),
+				"customer_group": "_Test Customer Group",
+				"customer_type": "Individual",
+				"territory": "_Test Territory",
+			}
+		).insert()
+		create_sales_invoice(customer=customer.name, company="_Test Company", posting_date="2017-07-05")
+
+		user = create_user_with_roles("test_cal_company_user@example.com", "Sales User")
+		add_user_permission("Company", "_Test Company 1", user.name)
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user.name)
+
+		filters = frappe._dict(
+			{"view_type": "Territory Wise", "from_date": "2017-07-01", "to_date": "2017-07-31"}
+		)
+
+		# another company is refused
+		with self.assertRaises(frappe.PermissionError):
+			execute(frappe._dict(filters, company="_Test Company"))
+
+		# without a company, only the permitted company's invoices count
+		stats = get_customer_stats(filters, tree_view=True)
+		self.assertNotIn("_Test Territory", stats)
