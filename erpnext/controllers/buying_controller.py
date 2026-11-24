@@ -316,7 +316,8 @@ class BuyingController(SubcontractingController):
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
-			# set_missing_values sets the exchange rate only later
+			# set_missing_values sets the supplier and exchange rate only later
+			self.set_supplier_from_item_default()
 			self.set_price_list_currency("Buying")
 			exchange_rate = self.get_standalone_debit_note_exchange_rate()
 			for row in self.items:
