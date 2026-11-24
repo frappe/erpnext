@@ -1258,6 +1258,31 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "Rate must be same as Purchase Order", pr.insert)
 
 	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
+	def test_maintain_same_rate_error_hides_rate_of_unreadable_order(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_receipt as make_receipt_from_order,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(rate=100)
+		pr = frappe.get_doc(make_receipt_from_order(po.name))
+		pr.items[0].rate = 150
+
+		self.assertRaisesRegex(frappe.ValidationError, r"\(150.0 / 100.0\)", pr.insert)
+		with (
+			patch(
+				"erpnext.utilities.transaction_base.has_source_doc_permission", return_value=False
+			) as has_permission,
+			self.assertRaises(frappe.ValidationError) as error,
+		):
+			pr.insert()
+		has_permission.assert_called_with("Purchase Order", po.name, frappe.session.user)
+		self.assertIn(f"Rate must be same as Purchase Order: {po.name}", str(error.exception))
+		self.assertNotIn(" / ", str(error.exception))
+
+	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
 	)
 	def test_per_billed_by_qty_when_landed_cost_follows_invoice_rate(self):
