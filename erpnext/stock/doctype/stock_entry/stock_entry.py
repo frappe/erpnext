@@ -1213,10 +1213,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.total_additional_costs = sum(flt(t.base_amount) for t in self.get("additional_costs"))
 
+		# split before clearing, as the split reads the row totals saved on a submitted entry
+		split = self.get_additional_cost_split()
 		for d in self.get("items"):
 			d.additional_cost = 0
 
-		for d, _account, _amount, base_amount in self.get_additional_cost_split():
+		for d, _account, _amount, base_amount in split:
 			d.additional_cost = flt(d.additional_cost + base_amount, d.precision("additional_cost"))
 
 	def get_additional_cost_split(self) -> list[tuple]:
@@ -1229,14 +1231,28 @@ class StockEntry(StockController, SubcontractingInwardController):
 		precision = incoming_items[0].precision("additional_cost")
 		weights = [flt(d.get(basis)) / total_basis for d in incoming_items]
 
+		costs = self.get_additional_costs_by_account()
+		amounts = [split_by_weights(amount, weights, precision) for amount, _base in costs.values()]
+		base_amounts = [split_by_weights(base, weights, precision) for _amount, base in costs.values()]
+		if not self.has_additional_cost_split_per_account(incoming_items, base_amounts):
+			fit_to_row_shares(amounts, weights, precision)
+			fit_to_row_shares(base_amounts, weights, precision)
+
 		split = []
-		for account, (amount, base_amount) in self.get_additional_costs_by_account().items():
-			amounts = split_by_weights(amount, weights, precision)
-			base_amounts = split_by_weights(base_amount, weights, precision)
-			for d, row_amount, row_base_amount in zip(incoming_items, amounts, base_amounts, strict=True):
-				split.append((d, account, row_amount, row_base_amount))
+		for account, row_amounts, row_base_amounts in zip(costs, amounts, base_amounts, strict=True):
+			for d, amount, base_amount in zip(incoming_items, row_amounts, row_base_amounts, strict=True):
+				split.append((d, account, amount, base_amount))
 
 		return split
+
+	def has_additional_cost_split_per_account(self, incoming_items, base_amounts) -> bool:
+		"""A submitted entry whose saved row costs are each account's own split, as before the rows
+		were fitted to their share of the combined cost. Its ledger is rebuilt the same way."""
+		return self.docstatus == 1 and all(
+			flt(d.additional_cost, d.precision("additional_cost"))
+			== flt(sum(account[i] for account in base_amounts), d.precision("additional_cost"))
+			for i, d in enumerate(incoming_items)
+		)
 
 	def get_additional_costs_by_account(self) -> dict:
 		"""(amount, base amount) of the additional costs per expense account."""
@@ -2379,6 +2395,30 @@ def split_by_weights(amount: float, weights: list[float], precision: int) -> lis
 		previous_total = total
 
 	return shares
+
+
+def fit_to_row_shares(shares: list[list[float]], weights: list[float], precision: int) -> None:
+	"""Move single units of an account between rows, so each row adds up to its share of the combined
+	amount. Each account keeps its total and no share changes sign."""
+	unit = 10**-precision
+	row_totals = split_by_weights(sum(sum(account) for account in shares), weights, precision)
+	gaps = [
+		round((total - sum(account[row] for account in shares)) / unit)
+		for row, total in enumerate(row_totals)
+	]
+	while any(gaps):
+		short = next(row for row, gap in enumerate(gaps) if gap > 0)
+		over = next(row for row, gap in enumerate(gaps) if gap < 0)
+		account = next(
+			(account for account in shares if account[over] >= unit / 2 or account[short] <= -unit / 2), None
+		)
+		if not account:
+			return
+
+		account[over] = flt(account[over] - unit, precision)
+		account[short] = flt(account[short] + unit, precision)
+		gaps[short] -= 1
+		gaps[over] += 1
 
 
 @frappe.whitelist()
