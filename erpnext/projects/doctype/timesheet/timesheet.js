@@ -150,7 +150,7 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	set_dynamic_field_label: function (frm) {
-		let base_currency = frappe.defaults.get_global_default("currency");
+		let base_currency = erpnext.get_currency(frm.doc.company);
 		frm.set_currency_labels(
 			["base_total_costing_amount", "base_total_billable_amount", "base_total_billed_amount"],
 			base_currency
