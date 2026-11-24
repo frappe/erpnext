@@ -259,6 +259,7 @@ frappe.ui.form.on("Timesheet", {
 frappe.ui.form.on("Timesheet Detail", {
 	time_logs_remove: function (frm) {
 		calculate_time_and_amount(frm);
+		set_start_date(frm);
 	},
 
 	task: (frm, cdt, cdn) => {
@@ -272,16 +273,7 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	from_time: function (frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn);
-		let start_date = get_start_date(frm);
-		if (frm.doc.start_date != start_date) {
-			frm.set_value("start_date", start_date);
-			set_exchange_rate(frm);
-			// activity costs are converted at the start date rate
-			let base_currency = frappe.defaults.get_global_default("currency");
-			if (frm.doc.currency && frm.doc.currency != base_currency) {
-				set_activity_costs(frm);
-			}
-		}
+		set_start_date(frm);
 	},
 
 	to_time: function (frm, cdt, cdn) {
@@ -437,6 +429,19 @@ var calculate_time_and_amount = function (frm) {
 var get_start_date = function (frm) {
 	let dates = (frm.doc.time_logs || []).filter((d) => d.from_time).map((d) => d.from_time.slice(0, 10));
 	return dates.length ? dates.sort()[0] : frappe.datetime.get_today();
+};
+
+// the exchange rate and the converted activity costs are taken on the start date
+var set_start_date = function (frm) {
+	let start_date = get_start_date(frm);
+	if (frm.doc.start_date == start_date) return;
+
+	frm.set_value("start_date", start_date);
+	set_exchange_rate(frm);
+	let base_currency = frappe.defaults.get_global_default("currency");
+	if (frm.doc.currency && frm.doc.currency != base_currency) {
+		set_activity_costs(frm);
+	}
 };
 
 var set_activity_costs = function (frm) {
