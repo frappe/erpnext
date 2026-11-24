@@ -354,6 +354,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_work_order_status_for_return()
 		self.validate_job_card_for_semi_finished_goods()
 		self.validate_returned_qty_within_work_order()
+		self.validate_returned_fg_qty_within_job_card()
 		self.validate_returned_qty_within_subcontracting_order()
 		self.validate_alternative_items()
 		self.validate_source_stock_entry()
@@ -1375,10 +1376,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not (self.is_return and self.pro_doc) or self.pro_doc.status in ("Completed", "Closed"):
 			return
 
+		if self.job_card and frappe.db.get_value("Job Card", self.job_card, "docstatus") == 0:
+			return
+
 		frappe.throw(
-			_("Components can be returned only after Work Order {0} is Completed or Closed").format(
-				get_link_to_form("Work Order", self.work_order)
-			),
+			_(
+				"Components can be returned only against a draft Job Card, or after Work Order {0} is Completed or Closed"
+			).format(get_link_to_form("Work Order", self.work_order)),
 			title=_("Work Order Not Finished"),
 		)
 
@@ -1412,20 +1416,48 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not (self.is_return and self.pro_doc and self.purpose == "Material Transfer for Manufacture"):
 			return
 
-		returnable_qty = self.get_returnable_qty()
-		for item_code, returned_qty in self.get_returned_qty_by_item().items():
+		returned_qty_by_item = self.get_returned_qty_by_item()
+		if self.job_card:
+			self.validate_returned_qty_within(
+				returned_qty_by_item, "Job Card", self.job_card, self.get_returnable_qty(self.job_card)
+			)
+
+		self.validate_returned_qty_within(
+			returned_qty_by_item, "Work Order", self.work_order, self.get_returnable_qty()
+		)
+
+	def validate_returned_qty_within(self, returned_qty_by_item, doctype, name, returnable_qty):
+		for item_code, returned_qty in returned_qty_by_item.items():
 			if flt(returned_qty, 6) > flt(returnable_qty[item_code], 6):
 				frappe.throw(
 					_(
-						"Item {0}: cannot return {1} to the store, Work Order {2} has only {3} of it left unconsumed."
+						"Item {0}: cannot return {1} to the store, {2} {3} has only {4} of it left unconsumed."
 					).format(
 						frappe.bold(item_code),
 						flt(returned_qty),
-						get_link_to_form("Work Order", self.work_order),
+						_(doctype),
+						get_link_to_form(doctype, name),
 						flt(returnable_qty[item_code]),
 					),
 					title=_("Excess Return"),
 				)
+
+	def validate_returned_fg_qty_within_job_card(self):
+		if not (self.is_return and self.job_card and self.purpose == "Material Transfer for Manufacture"):
+			return
+
+		transferred_qty = frappe.db.get_value("Job Card", self.job_card, "transferred_qty")
+		if flt(self.fg_completed_qty, 6) > flt(transferred_qty, 6):
+			frappe.throw(
+				_(
+					"Return quantity {0} is more than the quantity {1} transferred against Job Card {2}."
+				).format(
+					flt(self.fg_completed_qty),
+					flt(transferred_qty),
+					get_link_to_form("Job Card", self.job_card),
+				),
+				title=_("Excess Return"),
+			)
 
 	def validate_returned_qty_within_subcontracting_order(self):
 		"""A Return of Components takes back at most what the order still has at the supplier."""
@@ -1446,7 +1478,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					).format(row.idx, allowed_qty, row.item_code, order.name)
 				)
 
-	def get_returnable_qty(self) -> dict:
+	def get_returnable_qty(self, job_card=None) -> dict:
 		from pypika import Case
 
 		stock_entry = frappe.qb.DocType("Stock Entry")
@@ -1458,7 +1490,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"])
 			| ((stock_entry.purpose == "Material Transfer for Manufacture") & (stock_entry.is_return == 1))
 		)
-		rows = (
+		query = (
 			frappe.qb.from_(detail)
 			.inner_join(stock_entry)
 			.on(stock_entry.name == detail.parent)
@@ -1469,7 +1501,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 			.where((stock_entry.work_order == self.work_order) & (stock_entry.docstatus == 1))
 			.where(transferred | consumed)
 			.groupby(detail.item_code)
-		).run()
+		)
+		if job_card:
+			query = query.where(stock_entry.job_card == job_card)
+
+		rows = query.run()
 
 		return defaultdict(float, {item_code: flt(qty) for item_code, qty in rows})
 
@@ -1894,7 +1930,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 
 	def validate_component_and_quantities(self):
-		if self.purpose not in ["Manufacture", "Material Transfer for Manufacture"]:
+		if self.purpose not in ["Manufacture", "Material Transfer for Manufacture"] or self.is_return:
 			return
 
 		if not self.fg_completed_qty:
@@ -1941,9 +1977,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return True
 
 	def _validate_no_excess_transfer(self):
-		if self.is_return:
-			return
-
 		if self.get_backflush_based_on() == "Material Transferred for Manufacture":
 			return
 
@@ -4713,7 +4746,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 					)
 
 	def add_transfered_raw_materials_in_items(self) -> None:
-		available_materials = get_available_materials(self.work_order)
+		available_materials = get_available_materials(
+			self.work_order, job_card=self.job_card if self.is_return else None
+		)
 		wo_data = frappe.db.get_value(
 			"Work Order",
 			self.work_order,
@@ -6233,8 +6268,8 @@ def get_items_from_subcontract_order(source_name, target_doc=None):
 	return target_doc
 
 
-def get_available_materials(work_order, stock_entry_doc=None) -> dict:
-	data = get_stock_entry_data(work_order, stock_entry_doc=stock_entry_doc)
+def get_available_materials(work_order, stock_entry_doc=None, job_card=None) -> dict:
+	data = get_stock_entry_data(work_order, stock_entry_doc=stock_entry_doc, job_card=job_card)
 	is_disassemble = stock_entry_doc and stock_entry_doc.purpose == "Disassemble"
 
 	available_materials = {}
@@ -6368,7 +6403,7 @@ def _deduct_consumed_batch_qty(buckets, batch_no, consumed_qty):
 	holders[-1].qty -= consumed_qty
 
 
-def get_stock_entry_data(work_order, stock_entry_doc=None):
+def get_stock_entry_data(work_order, stock_entry_doc=None, job_card=None):
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 		get_voucher_wise_serial_batch_from_bundle,
 	)
@@ -6429,6 +6464,9 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 		)
 
 		data = data.where(stock_entry_detail.s_warehouse.isnotnull())
+
+	if job_card:
+		data = data.where(stock_entry.job_card == job_card)
 
 	data = data.run(as_dict=1)
 
