@@ -35,6 +35,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
+	get_bom_items_as_dict,
 	get_op_cost_from_sub_assemblies,
 	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
@@ -2459,7 +2460,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made)
 
 	def get_consumed_rates(self) -> dict:
-		"""Average consumed rate of each component, keyed by the BOM item it was consumed for."""
+		"""Consumed value of each component per unit consumed, or per unit the entry's BOM needs when
+		that is more, keyed by the BOM item it was consumed for. A sub-assembly's share of what the BOM
+		needs then takes no more than the value posted, which rounding can make less than the need."""
 		rows = self.get("items")
 		if self.is_rm_cost_from_consumption_entries():
 			rows = frappe.get_all(
@@ -2475,7 +2478,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 				qty[item_code] += flt(d.transfer_qty)
 				value[item_code] += flt(d.basic_amount)
 
-		return {item_code: value[item_code] / qty[item_code] for item_code in qty if qty[item_code]}
+		required = defaultdict(float)
+		for d in get_bom_items_as_dict(self.bom_no, self.company, qty=self.fg_completed_qty).values():
+			required[d.item_code] += flt(d.qty)
+
+		return {
+			item_code: value[item_code] / max(qty[item_code], required[item_code])
+			for item_code in qty
+			if qty[item_code]
+		}
 
 	def get_secondary_items_cost_within(self, bom_no, qty) -> float:
 		"""Value of the BOM's Valuation Rate and Manual secondary rows, and of what its sub-assemblies
