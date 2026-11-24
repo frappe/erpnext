@@ -4,6 +4,7 @@
 
 import re
 from datetime import datetime
+from urllib.parse import urlparse
 
 import frappe
 import pytz
@@ -12,6 +13,8 @@ from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 from pyyoutube import Api
+
+HOSTNAME = re.compile(r"[a-z0-9.-]+")
 
 
 class Video(Document):
@@ -38,9 +41,18 @@ class Video(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_web_url()
 		if self.provider == "YouTube" and is_tracking_enabled():
 			self.set_video_id()
 			self.set_youtube_statistics()
+
+	def validate_web_url(self):
+		if not self.url:
+			return  # the mandatory check reports it
+
+		parsed = urlparse(self.url.strip())
+		if parsed.scheme not in ("http", "https") or not HOSTNAME.fullmatch(parsed.hostname or ""):
+			frappe.throw(_("Enter a valid http or https URL"), title=_("Invalid URL"))
 
 	def set_video_id(self):
 		if self.url and not self.get("youtube_video_id"):
