@@ -83,7 +83,7 @@
    "label": "Auto Reposting of Incorrect Valuation"
   },
   {
-   "default": "1",
+   "default": "0",
    "description": "If enabled, a weekly job checks the stock ledger entries of the current fiscal year. For each item and warehouse with an incorrect entry, it creates a Repost Item Valuation from that entry.",
    "fieldname": "repost_incorrect_valuation_entries",
    "fieldtype": "Check",
@@ -93,7 +93,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-21 02:46:58.292759",
+ "modified": "2026-11-24 11:54:49.120357",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
