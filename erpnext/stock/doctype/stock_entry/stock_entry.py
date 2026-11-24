@@ -5493,6 +5493,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not (self.purpose == "Send to Subcontractor" and order):
 			return
 
+		self.validate_reservation_is_not_consumed(order)
 		# one cancel of the order's transfers at a time
 		order_doc = frappe.get_doc(self.subcontract_data.order_doctype, order, for_update=True)
 		order_doc.set_consumed_qty_in_subcontract_order()
@@ -5509,6 +5510,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"Cannot cancel: {0} {1} would then supply {2} less of Item {3} than its receipts already consumed and its returns took back."
 					).format(self.subcontract_data.order_doctype, order, qty, item_code)
 				)
+
+	def validate_reservation_is_not_consumed(self, order):
+		"""Receipts keep the supplier warehouse reservation of this entry they consumed; the cancel cannot move it to another."""
+		if frappe.db.exists(
+			"Stock Reservation Entry",
+			{
+				"from_voucher_type": "Stock Entry",
+				"from_voucher_no": self.name,
+				"docstatus": 1,
+				"consumed_qty": (">", 0),
+			},
+		):
+			frappe.throw(
+				_(
+					"Cannot cancel: receipts of {0} {1} already consumed the stock this entry reserved at the supplier. Cancel those receipts first."
+				).format(self.subcontract_data.order_doctype, order)
+			)
 
 	def get_net_qty_sent(self, order, item_codes):
 		"""Net qty of each item the order's transfers and their returns still supply."""
