@@ -1194,7 +1194,11 @@ class SubcontractingInwardController:
 				short_qty[scio_detail] = missing_qty
 
 		if short_qty:
-			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
+			release_unused_inward_reservations(
+				self.subcontracting_inward_order,
+				short_qty,
+				lower_voucher_qty=self.purpose == "Receive from Customer",
+			)
 
 	def validate_no_later_work_order_reservation(self):
 		"""Cancel gives batch qty back newest reservation first, which is wrong once a later Work Order took from them."""
