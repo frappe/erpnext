@@ -16,7 +16,10 @@ from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	get_print_format_list,
+	make_payment_request,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.buying.doctype.purchase_order.purchase_order import (
@@ -26,6 +29,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 PAYMENT_URL = "https://example.com/payment"
@@ -1642,6 +1646,31 @@ class TestPaymentRequest(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Payment Request", existing_pr.name, "status"), "Requested")
 
+	def test_print_format_list_follows_print_format_permissions(self):
+		print_format = frappe.get_doc(
+			{
+				"doctype": "Print Format",
+				"name": "_Test Payment Request Print Format",
+				"doc_type": "Sales Invoice",
+				"standard": "No",
+				"custom_format": 1,
+				"print_format_type": "Jinja",
+				"html": "<p>{{ doc.name }}</p>",
+			}
+		).insert()
+		# Accounts User has no Print Format role of its own, only select through Desk User
+		accounts_user = make_fenced_user("_test_pr_print_format_user@example.com", ["Accounts User"])
+		portal_user = make_portal_user("_test_pr_print_format_portal_user@example.com", "_Test Customer")
+
+		with as_user(accounts_user):
+			print_formats = get_print_format_list("Sales Invoice")["print_format"]
+		self.assertEqual(print_formats[0], "Standard")
+		self.assertIn(print_format.name, print_formats)
+
+		for user in (portal_user, "Guest"):
+			with self.subTest(user=user), as_user(user):
+				self.assertRaises(frappe.PermissionError, get_print_format_list, "Sales Invoice")
+
 	def test_loyalty_points_in_payment_request(self):
 		customer = frappe.db.get_value("Customer", {"customer_name": "Test Loyalty Customer"})
 		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
@@ -1856,3 +1885,11 @@ def make_shopping_cart_order(customer, rate=1000):
 	so.save()
 	so.submit()
 	return so
+
+
+def make_portal_user(email, customer):
+	user = make_fenced_user(email, ["Customer"])
+	customer_doc = frappe.get_doc("Customer", customer)
+	customer_doc.append("portal_users", {"user": user})
+	customer_doc.save()
+	return user
