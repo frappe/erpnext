@@ -13,6 +13,7 @@
   "mode_of_payment",
   "enabled",
   "type",
+  "requires_cheque_book",
   "accounts"
  ],
  "fields": [
@@ -45,13 +46,20 @@
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Enabled"
+  },
+  {
+   "default": "0",
+   "description": "Payments made with this mode must use a cheque from a Cheque Book",
+   "fieldname": "requires_cheque_book",
+   "fieldtype": "Check",
+   "label": "Requires Cheque Book"
   }
  ],
  "icon": "wallet",
  "idx": 1,
- "index_web_pages_for_search": 1,
+ "link_display_mode": "Search",
  "links": [],
- "modified": "2026-08-21 23:11:44.763131",
+ "modified": "2026-11-16 16:48:42.115479",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",
