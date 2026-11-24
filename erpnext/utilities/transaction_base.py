@@ -186,7 +186,9 @@ class TransactionBase(StatusUpdater):
 					ref_rate = reference_details.get(d.get(ref_link_field))
 
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
-						message = self.get_rate_mismatch_message(d, ref_dt, d.get(ref_dn_field), ref_rate)
+						message = self.get_rate_mismatch_message(
+							d, ref_dt, d.get(ref_dn_field), ref_rate, d.get(ref_link_field)
+						)
 						if action == "Stop":
 							if role_allowed_to_override not in frappe.get_roles():
 								stop_actions.append(message)
@@ -195,10 +197,12 @@ class TransactionBase(StatusUpdater):
 		if stop_actions:
 			frappe.throw(stop_actions, as_list=True)
 
-	def get_rate_mismatch_message(self, row, ref_dt, ref_dn, ref_rate):
+	def get_rate_mismatch_message(self, row, ref_dt, ref_dn, ref_rate, ref_row):
 		from erpnext.stock.get_item_details import has_source_doc_permission
 
-		if has_source_doc_permission(ref_dt, ref_dn, frappe.session.user):
+		# the rate comes from ref_row, so check the document that holds it
+		ref_parent = frappe.db.get_value(f"{ref_dt} Item", ref_row, "parent")
+		if has_source_doc_permission(ref_dt, ref_parent, frappe.session.user):
 			return _("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
 				row.idx, ref_dt, ref_dn, row.rate, ref_rate
 			)
