@@ -1,11 +1,53 @@
+from unittest.mock import patch
+
 import frappe
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.accounts.party import get_default_price_list, set_price_list
+from erpnext.accounts.party import get_default_price_list, get_party_account, set_price_list
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class PartyTestCase(ERPNextTestSuite):
+	def test_party_account_lookup_refreshes_after_changes(self):
+		group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": frappe.generate_hash(length=10),
+				"parent_customer_group": "All Customer Groups",
+			}
+		).insert()
+		customer = frappe.get_doc(get_customer_dict(frappe.generate_hash(length=10)))
+		customer.customer_group = group.name
+		customer.insert()
+		company = "_Test Company"
+		default_account = frappe.get_cached_value("Company", company, "default_receivable_account")
+		account = create_account(
+			account_name=frappe.generate_hash(length=10),
+			parent_account="Accounts Receivable - _TC",
+			account_type="Receivable",
+		)
+		self.assertEqual(get_party_account("Customer", customer.name, company), default_account)
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			self.assertEqual(get_party_account("Customer", customer.name, company), default_account)
+			self.assertFalse(any("tabParty Account" in str(call.args[0]) for call in queries.call_args_list))
+
+		group.append("accounts", {"company": company, "account": account})
+		group.save()
+		self.assertEqual(get_party_account("Customer", customer.name, company), account)
+		frappe.db.savepoint("party_accounts")
+		customer.append("accounts", {"company": company, "account": default_account})
+		customer.save()
+		self.assertEqual(get_party_account("Customer", customer.name, company), default_account)
+		frappe.db.rollback(save_point="party_accounts")
+		self.assertEqual(get_party_account("Customer", customer.name, company), account)
+		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
+			get_party_account("Customer", customer.name, company)
+		group.accounts = []
+		group.save()
+		self.assertEqual(get_party_account("Customer", customer.name, company), default_account)
+
 	def test_get_default_price_list_should_return_none_for_invalid_group(self):
 		customer = frappe.get_doc(
 			{

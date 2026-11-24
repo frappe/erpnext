@@ -2,14 +2,92 @@
 # See license.txt
 import unittest
 
+from unittest.mock import patch
+
 import frappe
 
+<<<<<<< HEAD
+=======
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+	get_accounting_dimensions,
+	get_checks_for_pl_and_bs_accounts,
+	get_dimension_filter_sql_condition,
+	get_dimension_filter_values,
+)
+>>>>>>> 08ce4fa (test(accounts): cover transaction lookup cache invalidation)
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccountingDimension(ERPNextTestSuite):
+<<<<<<< HEAD
+=======
+	def test_dimension_lookups_refresh_after_changes(self):
+		dimension = frappe.get_doc("Accounting Dimension", "Location")
+		original_disabled = dimension.disabled
+		original_mandatory = dimension.dimension_defaults[0].mandatory_for_bs
+		try:
+			dimension.disabled = 0
+			dimension.save()
+			dimensions = get_accounting_dimensions(as_list=False)
+			checks = get_checks_for_pl_and_bs_accounts()
+			with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+				self.assertEqual(get_accounting_dimensions(), [d.fieldname for d in dimensions])
+				self.assertEqual(get_checks_for_pl_and_bs_accounts(), checks)
+				self.assertEqual(queries.call_count, 0)
+
+			dimensions[0].fieldname = "changed"
+			checks[0].mandatory_for_bs = "changed"
+			self.assertNotIn("changed", get_accounting_dimensions())
+			self.assertNotIn("changed", [d.mandatory_for_bs for d in get_checks_for_pl_and_bs_accounts()])
+
+			dimension.dimension_defaults[0].mandatory_for_bs = not original_mandatory
+			dimension.save()
+			self.assertEqual(
+				next(
+					d.mandatory_for_bs
+					for d in get_checks_for_pl_and_bs_accounts()
+					if d.fieldname == dimension.fieldname
+					and d.company == dimension.dimension_defaults[0].company
+				),
+				not original_mandatory,
+			)
+
+			dimension.disabled = 1
+			dimension.save()
+			self.assertNotIn(dimension.fieldname, get_accounting_dimensions())
+			self.assertNotIn(dimension.fieldname, [d.fieldname for d in get_checks_for_pl_and_bs_accounts()])
+		finally:
+			dimension.disabled = original_disabled
+			dimension.dimension_defaults[0].mandatory_for_bs = original_mandatory
+			dimension.save()
+
+	def test_blank_dimension_filter_sql_condition(self):
+		condition, values = get_dimension_filter_sql_condition(
+			"department",
+			f'["_Test Department - _TC", "{BLANK_ACCOUNTING_DIMENSION}"]',
+		)
+
+		self.assertEqual(
+			condition,
+			"(department IN (?) OR (department IS NULL OR department = ''))",
+		)
+		self.assertEqual(values, ["_Test Department - _TC"])
+
+	def test_dimension_filter_values_preserve_plain_string_names(self):
+		values, include_blank = get_dimension_filter_values("null")
+
+		self.assertEqual(values, ["null"])
+		self.assertFalse(include_blank)
+
+		values, include_blank = get_dimension_filter_values("__blank__")
+
+		self.assertEqual(values, ["__blank__"])
+		self.assertFalse(include_blank)
+
+>>>>>>> 08ce4fa (test(accounts): cover transaction lookup cache invalidation)
 	def test_dimension_against_sales_invoice(self):
 		si = create_sales_invoice(do_not_save=1)
 
