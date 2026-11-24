@@ -1283,6 +1283,35 @@ class TestGetItemDetail(ERPNextTestSuite):
 			]
 			self.assertEqual(apply_price_list(ctx)["children"][0].price_list_rate, 100)
 
+	def test_party_price_in_stock_uom_for_a_context_without_a_row_doctype(self):
+		from erpnext.stock.get_item_details import get_price_list_rate_for
+
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer")
+		ctx = dict(self.get_uom_rate_context(item_code, price_list.name), stock_uom="_Test UOM")
+
+		# a plain dict without a doctype, and a doctype whose rows have no stock qty
+		for doctype in (None, "Blanket Order"):
+			with self.subTest(doctype=doctype):
+				self.assertEqual(get_price_list_rate_for(dict(ctx, doctype=doctype), item_code), 80)
+
+	def test_party_price_in_stock_uom_packing_unit_skips_a_stock_qty_rounding_to_zero(self):
+		from erpnext.stock.get_item_details import get_price_list_rate_for
+
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(
+			item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer", packing_unit=1
+		)
+		ctx = self.get_uom_rate_context(item_code, price_list.name)
+		# the stock qty rounds to 0 at any stock qty precision
+		ctx.update(stock_uom="_Test UOM", conversion_factor=1e-10)
+
+		self.assertEqual(get_price_list_rate_for(ctx, item_code), 100)
+
 	def test_fallback_price_list_uses_its_own_uom_setting(self):
 		item_code = self.make_multi_uom_item()
 		selected_list = self.make_selling_price_list("_Test UOM Price List", not_uom_dependent=1)
