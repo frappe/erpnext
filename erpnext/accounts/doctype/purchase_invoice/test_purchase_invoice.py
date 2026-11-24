@@ -2760,6 +2760,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			(item.stock_uom, 12, item.stock_uom, 100),  # a stale factor on the stock UOM is reset
 			("Box", 12, "Box", 1800),  # the stock UOM comes from the item, not the row
 			(None, 0, item.stock_uom, 1800),  # a missing UOM is the item's purchase UOM
+			(None, 1, item.stock_uom, 1800),  # with its own factor, not the one sent without a UOM
 		):
 			returned_inv = make_purchase_invoice(
 				item_code=item.name,
@@ -2772,6 +2773,8 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			returned_inv.items[0].update({"uom": uom, "conversion_factor": conversion_factor, "rate": 0})
 			returned_inv.insert()
 			self.assertEqual(returned_inv.items[0].rate, rate)
+
+		self.assertEqual(returned_inv.items[0].stock_qty, -12)
 
 	def test_standalone_debit_note_rate_rounding_to_zero_is_rejected(self):
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -2848,6 +2851,47 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		returned_inv.items[0].rate = 0
 		returned_inv.insert()
 		self.assertEqual(returned_inv.items[0].rate, 500)
+
+		# so is a stale price list rate on a return saved without a currency and price list
+		returned_inv.update(
+			{
+				"currency": None,
+				"buying_price_list": None,
+				"price_list_currency": None,
+				"plc_conversion_rate": 50,
+			}
+		)
+		returned_inv.items[0].rate = 0
+		returned_inv.save()
+		self.assertEqual(returned_inv.items[0].rate, 500)
+
+		# so is a supplier set later from the item default, here in USD
+		item = frappe.get_doc("Item", item_code)
+		item.set(
+			"item_defaults",
+			[
+				{
+					"company": "_Test Company",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"default_supplier": "_Test Supplier USD",
+				}
+			],
+		)
+		item.save()
+		returned_inv.credit_to = "_Test Payable USD - _TC"
+		returned_inv.update(
+			{
+				"supplier": None,
+				"currency": None,
+				"buying_price_list": None,
+				"price_list_currency": None,
+				"plc_conversion_rate": 50,
+			}
+		)
+		returned_inv.items[0].rate = 0
+		returned_inv.save()
+		self.assertEqual(returned_inv.supplier, "_Test Supplier USD")
+		self.assertEqual(returned_inv.items[0].rate, 10)
 
 	@change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_allocation_for_payment_terms(self):
