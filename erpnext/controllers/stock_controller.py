@@ -1421,10 +1421,10 @@ class StockController(AccountsController):
 
 		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
-			return flt(self.get_posted_return_qty(row, warehouse)) or stock_qty
+			return self.get_posted_return_qty(row, warehouse)
 
 		left = self.get_row_left_to_return(row, warehouse)
-		if flt(left.stock_qty) <= 0:
+		if left is None:
 			return stock_qty
 
 		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
@@ -1433,17 +1433,16 @@ class StockController(AccountsController):
 
 		return max(stock_qty, -left.stock_qty)
 
-	def get_row_left_to_return(self, row, warehouse) -> frappe._dict:
+	def get_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
 		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
-		returns have not moved back. A delivery counts every warehouse its rows used, as a return can put
-		its stock back in another one."""
+		returns have not moved back, or None if it moved no stock there. A delivery counts every warehouse
+		its rows used, as a return can put its stock back in another one."""
 		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row
 
-		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
 		reference_field = get_return_reference_field(self.doctype)
 		original_row = row.get(reference_field)
 		if not original_row:
-			return left
+			return None
 
 		item = frappe.qb.DocType(row.doctype)
 		fields = [item.name, item.qty, item.conversion_factor, item.warehouse]
@@ -1464,6 +1463,12 @@ class StockController(AccountsController):
 		)
 		warehouses = [warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows})
 		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouses)
+		if original_row not in posted_qty:
+			return None
+
+		left = frappe._dict(
+			unrounded_stock_qty=0.0, stock_qty=sum(posted_qty.values()) * self.get_stock_qty_sign()
+		)
 		for d in rows:
 			if d.name not in posted_qty:
 				continue  # moved no stock, like a return without Update Stock
@@ -1472,7 +1477,7 @@ class StockController(AccountsController):
 			if d.get("rejected_warehouse") in warehouses:
 				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
 
-		left.stock_qty = flt(sum(posted_qty.values()) * self.get_stock_qty_sign(), row.precision("stock_qty"))
+		left.stock_qty = max(flt(left.stock_qty, row.precision("stock_qty")), 0)
 		return left
 
 	def get_posted_return_qty(self, row, warehouse):
