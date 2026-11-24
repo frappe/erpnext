@@ -1,15 +1,36 @@
 import frappe
 from frappe.query_builder.functions import Concat, Count, Locate, Min, Sum
 from frappe.utils import flt
+from pypika.terms import Criterion
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+SQL_FILTERED_SERIALS = 50
 
 
 def is_legacy(row):
 	return not row.serial_and_batch_bundle and bool(row.batch_no or row.serial_no)
 
 
-def to_lines(row):
+def parse_serials(row):
+	return get_serial_nos(row.serial_no) if row.serial_no else []
+
+
+def serial_moves(row, wanted=None, serial_nos=None):
+	serial_nos = parse_serials(row) if serial_nos is None else serial_nos
+	if not serial_nos:
+		return []
+
+	sign = 1 if flt(row.actual_qty) > 0 else -1
+	value = flt(row.stock_value_difference) / len(serial_nos)
+	return [
+		(index, serial_no, sign, value)
+		for index, serial_no in enumerate(serial_nos)
+		if wanted is None or serial_no in wanted
+	]
+
+
+def to_lines(row, wanted=None):
 	base = dict(
 		sle=row.name,
 		voucher_type=row.voucher_type,
@@ -20,16 +41,14 @@ def to_lines(row):
 		batch_no=row.batch_no or None,
 		legacy=1,
 	)
-	serial_nos = get_serial_nos(row.serial_no) if row.serial_no else []
+	serial_nos = parse_serials(row)
 	if not serial_nos:
 		qty, value = flt(row.actual_qty), flt(row.stock_value_difference)
 		return [frappe._dict(base, idx=0, serial_no=None, qty=qty, stock_value_difference=value)]
 
-	sign = 1 if flt(row.actual_qty) > 0 else -1
-	value = flt(row.stock_value_difference) / len(serial_nos)
 	return [
-		frappe._dict(base, idx=index, serial_no=serial_no, qty=sign, stock_value_difference=value)
-		for index, serial_no in enumerate(serial_nos)
+		frappe._dict(base, idx=index, serial_no=serial_no, qty=qty, stock_value_difference=value)
+		for index, serial_no, qty, value in serial_moves(row, wanted, serial_nos)
 	]
 
 
@@ -68,12 +87,16 @@ def legacy_condition(sle, item_code, warehouse, row, inclusive=True):
 	)
 
 
+def has_serial(sle, serial_no):
+	padded = Locate(f"\n{serial_no}\n", Concat("\n", sle.serial_no, "\n")) > 0
+	return (Locate(serial_no, sle.serial_no) > 0) & padded
+
+
 def focus_condition(sle, focus):
 	if focus.field == "batch_no":
 		return sle.serial_and_batch_bundle.isnull() & (sle.batch_no == focus.name)
 
-	padded = Locate(f"\n{focus.name}\n", Concat("\n", sle.serial_no, "\n")) > 0
-	return sle.serial_and_batch_bundle.isnull() & (Locate(focus.name, sle.serial_no) > 0) & padded
+	return sle.serial_and_batch_bundle.isnull() & has_serial(sle, focus.name)
 
 
 def get_totals(item_code, warehouse, row, field, names=None, inclusive=True):
@@ -83,14 +106,14 @@ def get_totals(item_code, warehouse, row, field, names=None, inclusive=True):
 	if field == "batch_no":
 		return get_batch_totals(item_code, warehouse, row, names, inclusive)
 
+	wanted = set(names) if names is not None else None
 	totals = {}
-	for line in get_serial_lines(item_code, warehouse, row, names, inclusive):
-		total = totals.setdefault(
-			line.serial_no, frappe._dict(key=line.serial_no, qty=0.0, value=0.0, moves=0)
-		)
-		total.qty += line.qty
-		total.value += line.stock_value_difference
-		total.moves += 1
+	for legacy_row in get_serial_rows(item_code, warehouse, row, wanted, inclusive):
+		for _index, serial_no, qty, value in serial_moves(legacy_row, wanted):
+			total = totals.setdefault(serial_no, frappe._dict(key=serial_no, qty=0.0, value=0.0, moves=0))
+			total.qty += qty
+			total.value += value
+			total.moves += 1
 
 	return list(totals.values())
 
@@ -116,15 +139,25 @@ def get_serial_lines(item_code, warehouse, row, serial_nos=None, inclusive=True)
 	if not has_legacy_rows(item_code, warehouse):
 		return []
 
+	wanted = set(serial_nos) if serial_nos is not None else None
+	rows = get_serial_rows(item_code, warehouse, row, wanted, inclusive)
+	return [line for legacy_row in rows for line in to_lines(legacy_row, wanted)]
+
+
+def get_serial_rows(item_code, warehouse, row, wanted=None, inclusive=True):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	rows = (
+	query = (
 		frappe.qb.from_(sle)
 		.select(sle.name, sle.voucher_type, sle.voucher_no, sle.posting_date, sle.posting_datetime)
 		.select(sle.creation, sle.actual_qty, sle.stock_value_difference, sle.serial_no, sle.batch_no)
 		.select(sle.serial_and_batch_bundle)
 		.where(legacy_condition(sle, item_code, warehouse, row, inclusive))
 		.where(sle.serial_no.isnotnull() & (sle.serial_no != ""))
-		.run(as_dict=True)
 	)
-	wanted = set(serial_nos) if serial_nos is not None else None
-	return [line for row in rows for line in to_lines(row) if wanted is None or line.serial_no in wanted]
+	if wanted is not None and len(wanted) <= SQL_FILTERED_SERIALS:
+		if not wanted:
+			return []
+
+		query = query.where(Criterion.any([has_serial(sle, serial_no) for serial_no in sorted(wanted)]))
+
+	return query.run(as_dict=True)
