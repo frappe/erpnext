@@ -14,6 +14,8 @@ from erpnext.manufacturing.report.work_order_summary.work_order_summary import e
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 
+test_dependencies = ["BOM"]
+
 
 class TestWorkOrderSummary(FrappeTestCase):
 	def tearDown(self):

@@ -18,6 +18,8 @@ from erpnext.manufacturing.report.work_order_consumed_materials.work_order_consu
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 
+test_dependencies = ["BOM"]
+
 
 class TestWorkOrderConsumedMaterials(FrappeTestCase):
 	def tearDown(self):
