@@ -802,6 +802,7 @@ class SubcontractingController(StockController):
 			else {}
 		)
 
+		stored_serial_nos = get_stored_serial_nos(consumed_materials)
 		for row in consumed_materials:
 			key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
 			if not self.available_materials.get(key):
@@ -813,8 +814,8 @@ class SubcontractingController(StockController):
 			consumed_bundles = voucher_bundle_data.get(bundle_key, frappe._dict())
 
 			if consumed_bundles.serial_nos:
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(consumed_bundles.serial_nos)
+				update_serial_nos_at_supplier(
+					self.available_materials[key], consumed_bundles.serial_nos, True
 				)
 
 			if consumed_bundles.batch_nos:
@@ -826,9 +827,8 @@ class SubcontractingController(StockController):
 
 			# Will be deprecated in v16
 			if row.serial_no and not consumed_bundles.serial_nos:
-				self.available_materials[key]["serial_no"] = list(
-					set(self.available_materials[key]["serial_no"]) - set(get_serial_nos(row.serial_no))
-				)
+				serial_nos = [stored_serial_nos[serial_no] for serial_no in get_serial_nos(row.serial_no)]
+				update_serial_nos_at_supplier(self.available_materials[key], serial_nos, True)
 
 			# Will be deprecated in v16
 			if row.batch_no and not consumed_bundles.batch_nos:
@@ -858,6 +858,7 @@ class SubcontractingController(StockController):
 			else {}
 		)
 
+		stored_serial_nos = get_stored_serial_nos(transferred_items)
 		for row in transferred_items:
 			key = (row.rm_item_code, row.main_item_code, row.get(self.subcontract_data.order_field))
 
@@ -882,7 +883,8 @@ class SubcontractingController(StockController):
 			)
 
 			if row.serial_no:
-				update_serial_nos_at_supplier(details, get_serial_nos(row.serial_no), row.is_return)
+				serial_nos = [stored_serial_nos[serial_no] for serial_no in get_serial_nos(row.serial_no)]
+				update_serial_nos_at_supplier(details, serial_nos, row.is_return)
 
 			elif row.batch_no:
 				details.batch_no[row.batch_no] += row.qty
@@ -1435,8 +1437,9 @@ class SubcontractingController(StockController):
 			msg = f'The Batch No {frappe.bold(", ".join(incorrect_batches))} has not supplied against the {self.subcontract_data.order_doctype} {link}'
 			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
 
-	def __validate_serial_no(self, row, key, bundle_entries):
+	def __validate_serial_no(self, row, key, bundle_entries, stored_serial_nos):
 		serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
+		serial_nos.update(stored_serial_nos[serial_no] for serial_no in get_serial_nos(row.get("serial_no")))
 		incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
 
 		if incorrect_sn:
@@ -1458,6 +1461,7 @@ class SubcontractingController(StockController):
 			return
 
 		bundle_entries = self.get_bundle_entries(self.get(self.raw_material_table))
+		stored_serial_nos = get_stored_serial_nos(self.get(self.raw_material_table))
 		for row in self.get(self.raw_material_table):
 			key = (row.rm_item_code, row.main_item_code, row.get(self.subcontract_data.order_field))
 			if not self.__transferred_items.get(key):
@@ -1465,7 +1469,7 @@ class SubcontractingController(StockController):
 
 			entries = bundle_entries.get(row.get("serial_and_batch_bundle"), [])
 			self.__validate_batch_no(row, key, entries)
-			self.__validate_serial_no(row, key, entries)
+			self.__validate_serial_no(row, key, entries, stored_serial_nos)
 
 	def get_bundle_entries(self, rows):
 		bundles = [row.get("serial_and_batch_bundle") for row in rows if row.get("serial_and_batch_bundle")]
@@ -1787,14 +1791,29 @@ class SubcontractingController(StockController):
 
 
 def update_serial_nos_at_supplier(details, serial_nos, is_return):
-	"""Add the serial nos a transfer sent to the supplier, or take out those a return brought back."""
+	"""Add the serial nos a transfer sent to the supplier, or take out those returned or consumed."""
 	if not is_return:
-		details.serial_no.extend(serial_nos)
+		# a voucher's bundles repeat the serial nos of its rows that use the Serial No field
+		details.serial_no = list(dict.fromkeys([*details.serial_no, *serial_nos]))
 		return
 
-	for serial_no in serial_nos:
-		if serial_no in details.serial_no:
-			details.serial_no.remove(serial_no)
+	taken_out = set(serial_nos)
+	details.serial_no = [serial_no for serial_no in details.serial_no if serial_no not in taken_out]
+
+
+def get_stored_serial_nos(rows) -> dict[str, str]:
+	"""Stored name of each serial no in the rows' Serial No fields; the database decides which spellings match."""
+	typed = {serial_no for row in rows for serial_no in get_serial_nos(row.get("serial_no"))}
+	if not typed:
+		return {}
+
+	stored = set(frappe.get_all("Serial No", filters={"name": ("in", list(typed))}, pluck="name"))
+	# names a case-insensitive collation matched in another spelling
+	respelled = {name.casefold(): name for name in stored}
+	return {
+		serial_no: serial_no if serial_no in stored else respelled.get(serial_no.casefold(), serial_no)
+		for serial_no in typed
+	}
 
 
 def get_consumed_qty_beyond_sent(rows, items_sent, itemwise_consumed_qty):
