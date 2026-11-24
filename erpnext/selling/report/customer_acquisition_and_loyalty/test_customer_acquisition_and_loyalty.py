@@ -185,20 +185,26 @@ class TestCustomerAcquisitionAndLoyalty(ERPNextTestSuite):
 			}
 		).insert()
 		create_sales_invoice(customer=customer.name, company="_Test Company", posting_date="2017-07-05")
-
-		user = create_user_with_roles("test_cal_company_user@example.com", "Sales User")
-		add_user_permission("Company", "_Test Company 1", user.name)
-		self.addCleanup(frappe.set_user, "Administrator")
-		frappe.set_user(user.name)
-
 		filters = frappe._dict(
 			{"view_type": "Territory Wise", "from_date": "2017-07-01", "to_date": "2017-07-31"}
 		)
+		self.addCleanup(frappe.set_user, "Administrator")
 
-		# another company is refused
-		with self.assertRaises(frappe.PermissionError):
-			execute(frappe._dict(filters, company="_Test Company"))
+		# a restriction for all doctypes and one scoped to Sales Invoice both apply
+		for applicable_for in (None, "Sales Invoice"):
+			with self.subTest(applicable_for=applicable_for):
+				frappe.set_user("Administrator")
+				email = f"test_cal_company_{frappe.scrub(applicable_for or 'all')}@example.com"
+				create_user_with_roles(email, "Sales User")
+				add_user_permission("Company", "_Test Company 1", email, applicable_for=applicable_for)
+				frappe.set_user(email)
 
-		# without a company, only the permitted company's invoices count
-		stats = get_customer_stats(filters, tree_view=True)
-		self.assertNotIn("_Test Territory", stats)
+				# another company is refused
+				with self.assertRaises(frappe.PermissionError):
+					execute(frappe._dict(filters, company="_Test Company"))
+
+				# the permitted company still runs
+				execute(frappe._dict(filters, company="_Test Company 1"))
+
+				# without a company, only the permitted company's invoices count
+				self.assertNotIn("_Test Territory", get_customer_stats(filters, tree_view=True))
