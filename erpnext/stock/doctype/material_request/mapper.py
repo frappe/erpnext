@@ -491,11 +491,7 @@ def get_open_pick_qty(material_request: str) -> dict[str, float]:
 			pick_list_item.material_request_item,
 			Sum(pick_list_item.picked_qty - pick_list_item.transferred_qty),
 		)
-		.where(
-			(pick_list.docstatus == 1)
-			& (pick_list_item.material_request == material_request)
-			& (pick_list_item.material_request_item.isnotnull())
-		)
+		.where((pick_list.docstatus == 1) & (pick_list_item.material_request == material_request))
 		.groupby(pick_list_item.material_request_item)
 	).run()
 
