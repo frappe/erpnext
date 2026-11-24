@@ -29,6 +29,7 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
@@ -1458,26 +1459,10 @@ class TestSubcontractingOrder(FrappeTestCase):
 	def test_consumption_for_a_finished_good_counts_on_the_row_its_material_was_sent_on(self):
 		set_backflush_based_on("BOM")
 		rm_item = make_item("Subcontracted RM Item Sent For Other FG", {"is_stock_item": 1}).name
-		service_items = []
-		for code, service_item, qty in (
-			("A", "Subcontracted Service Item 2", 10),
-			("B", "Subcontracted Service Item 3", 6),
-		):
-			fg_item = make_item(
-				f"Subcontracted FG Item Sent For Other FG {code}",
-				{"is_stock_item": 1, "is_sub_contracted_item": 1},
-			).name
-			make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
-			service_items.append(
-				{
-					"warehouse": "_Test Warehouse - _TC",
-					"item_code": service_item,
-					"qty": qty,
-					"rate": 100,
-					"fg_item": fg_item,
-					"fg_item_qty": qty,
-				}
-			)
+		service_items = get_service_items_sharing_raw_material(
+			rm_item,
+			{"Subcontracted FG Item Sent For Other FG A": 10, "Subcontracted FG Item Sent For Other FG B": 6},
+		)
 
 		# 16 sent on FG A's and FG B's rows, then a receipt of 6 FG B
 		for sent, consumed in (((16, 0), [6, 0]), ((14, 2), [4, 2])):
@@ -1499,6 +1484,45 @@ class TestSubcontractingOrder(FrappeTestCase):
 				[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items],
 				consumed,
 			)
+
+	def test_batch_consumed_for_a_finished_good_with_nothing_sent_counts_on_the_row_that_sent_it(self):
+		"""Batch X is sent for FG A and batch Y for FG B, and a receipt of FG C consumes Y."""
+		set_backflush_based_on("BOM")
+		rm_item = make_item(
+			"Subcontracted Batch RM Sent For Other FG",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBRSOFG-.#####",
+			},
+		).name
+		finished_goods = {f"Subcontracted FG Item Batch Sent For Other FG {code}": 5 for code in "ABC"}
+		sco = get_subcontracting_order(
+			service_items=get_service_items_sharing_raw_material(rm_item, finished_goods)
+		)
+		for row in sco.supplied_items[:2]:
+			stock = make_stock_entry(item_code=rm_item, target=row.reserve_warehouse, qty=5, basic_rate=100)
+			batch_no = get_batch_from_bundle(stock.items[0].serial_and_batch_bundle)
+			transfer = make_supplied_item_transfer(sco, row)
+			transfer.items[0].update(
+				{"use_serial_batch_fields": 1, "batch_no": batch_no, "serial_and_batch_bundle": None}
+			)
+			transfer.submit()
+
+		receipt = make_subcontracting_receipt(sco.name)
+		for item in receipt.items[:2]:
+			receipt.remove(item)
+		receipt.save()
+		receipt.supplied_items[0].update(
+			{"use_serial_batch_fields": 1, "batch_no": batch_no, "serial_and_batch_bundle": None}
+		)
+		receipt.submit()
+
+		self.assertEqual(
+			[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items],
+			[0, 5, 0],
+		)
 
 	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
 		sco = get_subcontracting_order_sharing_a_raw_material()
@@ -1701,6 +1725,26 @@ def set_alternative_item(item_code, alternative_item_code):
 	frappe.get_doc(
 		doctype="Item Alternative", item_code=item_code, alternative_item_code=alternative_item_code
 	).insert()
+
+
+def get_service_items_sharing_raw_material(rm_item, finished_goods):
+	"""Service items of an order whose finished goods' BOMs each use 1 of the raw material."""
+	service_items = []
+	for service_no, (fg_item, qty) in enumerate(finished_goods.items(), start=2):
+		make_item(fg_item, {"is_stock_item": 1, "is_sub_contracted_item": 1})
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+		service_items.append(
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": f"Subcontracted Service Item {service_no}",
+				"qty": qty,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": qty,
+			}
+		)
+
+	return service_items
 
 
 def make_supplied_item_transfer(sco, row, link=True):
