@@ -1484,14 +1484,26 @@ def get_party_price_in_stock_uom(args, item_price_args, item_code):
 		return None
 
 	prices = get_item_price({**item_price_args, "uom": args.get("stock_uom")}, item_code)
-	# apply_price_list passes the row doctype, get_item_details the parent
-	row_doctype = args.doctype if frappe.get_meta(args.doctype).istable else f"{args.doctype} Item"
 	stock_qty = flt(
-		flt(args.get("qty")) * flt(args.get("conversion_factor", 1)),
-		frappe.get_precision(row_doctype, "stock_qty"),
+		flt(args.get("qty")) * flt(args.get("conversion_factor", 1)), get_stock_qty_precision(args)
 	)
 	prices = get_prices_fitting_packing_unit(prices, stock_qty)
 	return prices if is_party_price(prices) else None
+
+
+def get_stock_qty_precision(args) -> int:
+	# apply_price_list passes the row doctype, get_item_details the parent
+	doctype = args.get("doctype")
+	if doctype and not frappe.get_meta(doctype).istable:
+		doctype = f"{doctype} Item"
+
+	if (
+		doctype
+		and frappe.db.exists("DocType", doctype, cache=True)
+		and frappe.get_meta(doctype).has_field("stock_qty")
+	):
+		return frappe.get_precision(doctype, "stock_qty")
+	return frappe.get_precision("Item Price", "packing_unit")
 
 
 def is_party_price(item_prices):
@@ -1502,7 +1514,8 @@ def is_party_price(item_prices):
 def get_prices_fitting_packing_unit(item_prices, desired_qty):
 	for item_price in item_prices:
 		packing_unit = flt(item_price[3])
-		if not packing_unit or flt(desired_qty) % packing_unit == 0:
+		# a qty that rounds to 0 fits no packing unit
+		if not packing_unit or (flt(desired_qty) and flt(desired_qty) % packing_unit == 0):
 			return [item_price]
 
 	return []
