@@ -867,6 +867,10 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 		this.hour_rate(doc);
 	}
 
+	fixed_time(doc) {
+		this.hour_rate(doc);
+	}
+
 	bom_no(doc, cdt, cdn) {
 		get_bom_material_detail(doc, cdt, cdn, false);
 	}
