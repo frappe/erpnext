@@ -10,6 +10,8 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Count, DateDiff, Sum
 from frappe.utils import date_diff, flt
 
+from erpnext.controllers.status_updater import COMPLETE_PERCENTAGE
+
 
 class VariablePathNotFound(frappe.ValidationError):
 	pass
@@ -212,8 +214,8 @@ def get_on_time_shipments(scorecard):
 		.groupby(PO_Item.name, PO_Item.qty, PO_Item.conversion_factor)
 	).run(as_dict=True)
 
-	precision = frappe.get_precision("Purchase Order Item", "stock_qty")
-	return sum(1 for row in rows if flt(row.received_on_time, precision) >= flt(row.ordered, precision))
+	# fully received as the PO's per_received counts it
+	return sum(1 for row in rows if flt(row.received_on_time) * 100 >= flt(row.ordered) * COMPLETE_PERCENTAGE)
 
 
 def get_late_shipments(scorecard):
