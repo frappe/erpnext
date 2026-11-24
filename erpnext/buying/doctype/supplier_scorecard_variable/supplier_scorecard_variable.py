@@ -214,8 +214,12 @@ def get_on_time_shipments(scorecard):
 		.groupby(PO_Item.name, PO_Item.qty, PO_Item.conversion_factor)
 	).run(as_dict=True)
 
-	# fully received as the PO's per_received counts it
-	return sum(1 for row in rows if flt(row.received_on_time / row.ordered * 100, 6) >= COMPLETE_PERCENTAGE)
+	# fully received as the PO's per_received counts it; a unit-price line (no qty ordered) counts once received
+	return sum(
+		1
+		for row in rows
+		if not row.ordered or flt(row.received_on_time / row.ordered * 100, 6) >= COMPLETE_PERCENTAGE
+	)
 
 
 def get_late_shipments(scorecard):
