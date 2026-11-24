@@ -1620,6 +1620,15 @@ def get_bom_item_rate(args, bom_doc):
 	return flt(rate)
 
 
+@frappe.whitelist()
+def get_secondary_item_valuation_rate(item_code: str, company: str, warehouse: str | None = None) -> float:
+	"""Company currency rate a Valuation Rate secondary item is costed at."""
+	frappe.has_permission("BOM", "read", throw=True)
+	return get_valuation_rate(
+		{"item_code": item_code, "company": company, "warehouse": warehouse, "set_rate_based_on_warehouse": 1}
+	)
+
+
 def get_valuation_rate(data):
 	"""
 	1) Get average valuation rate from all warehouses
