@@ -319,6 +319,36 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		frappe.get_doc("Sales Order", so.name).cancel()
 		self.assertEqual(reserved_qty(), 0)
 
+	def test_deleting_a_disabled_bundle_row_releases_its_components(self):
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=5, warehouse="_Test Warehouse - _TC", do_not_submit=True)
+		so.append("items", dict(so.items[0].as_dict(), name=None, item_code="_Test Item"))
+		so.submit()
+
+		def reserved_qty():
+			return frappe.db.get_value(
+				"Bin", {"item_code": component, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+			)
+
+		self.assertEqual(reserved_qty(), 10)
+
+		product_bundle.db_set("disabled", 1)
+		row = so.items[1]
+		trans_item = [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": row.qty,
+				"rate": row.rate,
+				"conversion_factor": row.conversion_factor,
+			}
+		]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+		self.assertEqual(reserved_qty(), 0)
+
 	def test_make_sales_invoice(self):
 		so = make_sales_order(do_not_submit=True)
 
@@ -1216,6 +1246,16 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			[{"item_code": "_Test Item", "rate": 200, "qty": 2, "docname": so.items[0].name}]
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+
+		other_so = make_sales_order(item_code="_Test Item", qty=4)
+		trans_item = json.dumps(
+			[
+				{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": so.items[0].name},
+				{"item_code": "_Test Item", "rate": 3, "qty": 9, "docname": other_so.items[0].name},
+			]
+		)
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", other_so.items[0].name, "qty"), 4)
 
 	def test_update_child_with_precision(self):
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter

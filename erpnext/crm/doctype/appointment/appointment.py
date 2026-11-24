@@ -337,8 +337,14 @@ class Appointment(Document):
 	def get_assignee_from_latest_opportunity(self):
 		if not self.party or not frappe.db.exists("Lead", self.party):
 			return None
+		if self.flags.from_portal_verification:
+			get_opportunities = frappe.get_all
+		elif frappe.has_permission("Opportunity", "read"):
+			get_opportunities = frappe.get_list
+		else:
+			return None
 
-		opportunities = frappe.get_all(
+		opportunities = get_opportunities(
 			"Opportunity",
 			filters={"party_name": self.party},
 			fields=["_assign"],

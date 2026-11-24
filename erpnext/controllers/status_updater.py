@@ -301,11 +301,16 @@ class StatusUpdater(Document):
 						item["idx"] = d.idx
 						item["target_ref_field"] = args["target_ref_field"].replace("_", " ")
 
-						# skip qty over-allowance check for non-stock items
+						# skip qty over-allowance check for non-stock items, except a subcontracted
+						# service row, which is received with its finished goods
 						if (
 							"qty" in args.get("target_ref_field", "")
 							and not is_installation
 							and not frappe.get_cached_value("Item", item["item_code"], "is_stock_item")
+							and not (
+								args["target_dt"] == "Purchase Order Item"
+								and frappe.db.get_value("Purchase Order Item", args["name"], "fg_item")
+							)
 						):
 							continue
 

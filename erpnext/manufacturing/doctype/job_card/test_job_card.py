@@ -884,6 +884,50 @@ class TestJobCard(FrappeTestCase):
 		)
 
 	@change_settings(
+		"Manufacturing Settings",
+		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
+	)
+	def test_corrective_job_card_takes_the_rate_of_its_new_workstation(self):
+		wo, corrective_job_card = make_jc_review_corrective_job_card_on_new_workstation()
+		corrective_job_card.submit()
+
+		self.assertEqual(corrective_job_card.hour_rate, 1500)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "corrective_operation_cost"), 1500)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
+	)
+	def test_amended_corrective_job_card_keeps_its_manual_rate(self):
+		_wo, corrective_job_card = make_jc_review_corrective_job_card_on_new_workstation()
+		corrective_job_card.insert()
+		corrective_job_card.hour_rate = 1400
+		corrective_job_card.submit()
+		corrective_job_card.cancel()
+
+		amended = frappe.copy_doc(corrective_job_card)
+		amended.amended_from = corrective_job_card.name
+		amended.docstatus = 0
+		amended.insert()
+
+		self.assertEqual(amended.hour_rate, 1400)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
+	)
+	def test_corrective_job_card_rate_follows_a_workstation_change_after_save(self):
+		wo, corrective_job_card = make_jc_review_corrective_job_card_on_new_workstation()
+		corrective_job_card.insert()
+		corrective_job_card.workstation = frappe.db.get_value(
+			"Job Card", corrective_job_card.for_job_card, "workstation"
+		)
+		corrective_job_card.submit()
+
+		self.assertEqual(corrective_job_card.hour_rate, 600)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "corrective_operation_cost"), 600)
+
+	@change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_if_corrective_jc_ops_cost_is_added_to_manufacture_stock_entry(self):
@@ -2219,6 +2263,59 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(len(job_card.time_logs), 1)
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_running_job_keeps_its_workstation_busy(self):
+		running_card, second_card = make_jc_review_job_cards(make_jc_review_workstation(capacity=1), 2)
+
+		running_card.add_time_log(
+			frappe._dict(
+				start_time="2031-03-04 08:00:00",
+				employees=[{"employee": make_jc_review_employee()}],
+				status="Work In Progress",
+			)
+		)
+		second_card.append(
+			"time_logs", {"from_time": "2031-03-04 08:30:00", "employee": make_jc_review_employee()}
+		)
+		self.assertRaises(OverlapError, second_card.save)
+
+		second_card.reload()
+		second_card.append("time_logs", jc_review_log("2031-03-04 08:30:00", 30, 10))
+		self.assertRaises(OverlapError, second_card.save)
+
+		# a qty-only time log takes no workstation time
+		second_card.reload()
+		second_card.append("time_logs", {"completed_qty": 10})
+		second_card.save()
+
+		running_card.reload()
+		running_card.add_time_log(
+			frappe._dict(complete_time="2031-03-04 09:30:00", completed_qty=10, status="Complete")
+		)
+		self.assertEqual(frappe.db.get_value("Job Card", running_card.name, "total_completed_qty"), 10)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_running_job_takes_one_slot_of_its_workstation(self):
+		running_card, first_card, second_card = make_jc_review_job_cards(
+			make_jc_review_workstation(capacity=2), 3
+		)
+		running_card.add_time_log(
+			frappe._dict(
+				start_time="2031-03-05 08:00:00",
+				employees=[{"employee": make_jc_review_employee()}],
+				status="Work In Progress",
+			)
+		)
+		first_card.append("time_logs", jc_review_log("2031-03-05 08:00:00", 60))
+		first_card.save()
+
+		second_card.append("time_logs", jc_review_log("2031-03-05 08:30:00", 60))
+		self.assertRaises(OverlapError, second_card.save)
+
+		second_card.reload()
+		second_card.append("time_logs", jc_review_log("2031-03-05 09:00:00", 60))
+		second_card.save()
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_two_operators_on_one_job_charge_the_workstation_once(self):
 		workstation = make_jc_review_workstation(hour_rate=600, capacity=1)
 		operation = make_jc_review_operation(workstation)
@@ -2844,12 +2941,49 @@ def make_jc_review_scheduled_job_card(planned_start, time_in_mins, workstation=N
 	return get_jc_review_job_cards(wo.name)[0]
 
 
+def make_jc_review_corrective_job_card_on_new_workstation():
+	"""Return a Work Order and an unsaved corrective card moved from a 600 to a 1,500 per hour workstation."""
+	workstation = make_jc_review_workstation(hour_rate=600)
+	rework_workstation = make_jc_review_workstation(hour_rate=1500)
+	operation = make_jc_review_operation(workstation)
+	rework = make_jc_review_operation(rework_workstation, is_corrective_operation=1)
+	wo = make_jc_review_work_order(
+		make_jc_review_item(),
+		[{"item_code": make_jc_review_item(), "qty": 1}],
+		[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+		skip_transfer=1,
+	)
+	job_card = get_jc_review_job_cards(wo.name)[0]
+	job_card.append("time_logs", jc_review_log("2031-03-06 08:00:00", 60, 10))
+	job_card.submit()
+
+	corrective_job_card = make_corrective_job_card(job_card.name, operation=rework, for_operation=operation)
+	corrective_job_card.workstation = rework_workstation
+	corrective_job_card.append("time_logs", jc_review_log("2031-03-06 10:00:00", 60, 10))
+	return wo, corrective_job_card
+
+
 def get_jc_review_job_cards(work_order):
 	return [
 		frappe.get_doc("Job Card", name)
 		for name in frappe.get_all(
 			"Job Card", filters={"work_order": work_order}, order_by="sequence_id, creation", pluck="name"
 		)
+	]
+
+
+def make_jc_review_job_cards(workstation, count):
+	operation = make_jc_review_operation(workstation)
+	return [
+		get_jc_review_job_cards(
+			make_jc_review_work_order(
+				make_jc_review_item(),
+				[{"item_code": make_jc_review_item(), "qty": 1}],
+				[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+				skip_transfer=1,
+			).name
+		)[0]
+		for _ in range(count)
 	]
 
 
