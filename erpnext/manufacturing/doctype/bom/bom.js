@@ -1226,7 +1226,8 @@ erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
 		callback(r) {
 			const row = locals[cdt][cdn];
 			doc = locals[doc.doctype][doc.name];
-			if (!row || row.valuation_type !== "Valuation Rate") return;
+			// the form may have been reloaded meanwhile
+			if (!doc || !row || row.valuation_type !== "Valuation Rate") return;
 
 			// the item, company or warehouse changed while the rate was being fetched
 			if (
