@@ -1770,6 +1770,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		pr1 = make_purchase_receipt(
+			item_code=make_item(properties={"is_stock_item": 1}).name,
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
