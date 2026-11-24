@@ -3832,6 +3832,26 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(amounts[co_product], 20)
 		self.assertEqual(amounts[fg_item], 1880)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_co_product_of_a_sub_assembly_reached_through_two_paths_is_rounded_once(self):
+		# FG: 1 SA1 + 1 SA2, each using 4 SA; SA's BOM makes 1 Nos co-product per 1,000: 0.008 is 1
+		rm_a, rm_b = make_co_product_raw_materials()
+		test_stock_entry.make_stock_entry(
+			item_code=rm_a, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+		)
+		sub_assembly, sa1, sa2, fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(5)
+		)
+		sub_bom = make_co_product_bom(sub_assembly, [(rm_a, 1000, None)], co_product, quantity=1000)
+		bom_1 = make_co_product_bom(sa1, [(sub_assembly, 4, sub_bom)])
+		bom_2 = make_co_product_bom(sa2, [(sub_assembly, 4, sub_bom)])
+		bom = make_co_product_bom(fg_item, [(sa1, 1, bom_1), (sa2, 1, bom_2)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		self.assertEqual([d.qty for d in se_doc.items if d.item_code == co_product], [1])
+
 	def test_job_card_default_takes_the_co_product_qty_manufacture_makes(self):
 		# 33.33% of 3 Nos is a BOM loss of 1, so 100 FG make 200, not 200.01
 		rm_item, fg_item, co_product = (
