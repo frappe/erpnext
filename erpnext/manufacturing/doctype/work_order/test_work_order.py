@@ -3702,6 +3702,19 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 1)
 
+	def test_co_product_net_of_a_rounded_loss_is_not_rounded_up_a_unit(self):
+		# 33.33% of 3 is 0.9999, which the BOM rounds to a loss of 1
+		rm_a, rm_b = make_co_product_raw_materials()
+		fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(2)
+		)
+		bom = make_co_product_bom(
+			fg_item, [(rm_a, 1, None)], co_product, co_product_qty=3, process_loss_per=33.33
+		)
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 2)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
