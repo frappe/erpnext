@@ -506,7 +506,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 		"""Of 7 Box at 0.004 Kg (0.03 Kg), rows of 3, 3 and 1 Box take 0.01 Kg, the 0.02 Kg left once the
 		rest of the row rounds to nothing, and nothing."""
 		pr = self.receive_for_returns_of_parts(0.004, 7)
-		self.return_receipt_rows(pr, [-3, -3, -1])
+		pr_return = self.return_receipt_rows(pr, [-3, -3, -1])
+
+		posted_qty = [
+			frappe.db.get_value("Stock Ledger Entry", {"voucher_detail_no": d.name}, "actual_qty") or 0
+			for d in pr_return.items
+		]
+		self.assertEqual(posted_qty, [-0.01, -0.02, 0])
 		self.assertEqual(self.get_returns_of_parts_bin_qty(pr), 0)
 
 	@change_settings("Buying Settings", {"allow_multiple_items": 1})
