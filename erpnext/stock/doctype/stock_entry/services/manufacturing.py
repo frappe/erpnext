@@ -1602,19 +1602,21 @@ def get_secondary_items(bom_no, work_order=None):
 
 def get_secondary_items_from_sub_assemblies(bom_no, qty=1):
 	"""Secondary items of the sub-assembly BOMs at every level, for qty of the BOM's item."""
-	items = []
-	bom_items = get_bom_items(bom_no, qty=qty)
-	for row in bom_items:
-		if not row.bom_no:
-			continue
+	# by BOM, not item: two BOMs of one sub-assembly have their own yield and secondary items
+	qty_per_bom = defaultdict(float)
+	for row in _run_bom_items_query(bom_no, "BOM Item", qty):
+		if row.bom_no:
+			qty_per_bom[row.bom_no] += row.qty
 
+	items = []
+	for sub_bom_no, sub_assembly_qty in qty_per_bom.items():
 		# the sub-assembly's process loss makes more of it than the parent consumes, as in the explosion
 		bom = frappe.get_cached_value(
-			"BOM", row.bom_no, ["quantity", "process_loss_qty", "is_phantom_bom"], as_dict=True
+			"BOM", sub_bom_no, ["quantity", "process_loss_qty", "is_phantom_bom"], as_dict=True
 		)
-		qty_made = row.qty * (flt(bom.quantity) / get_exploded_good_qty(bom))
-		items.extend(get_bom_items(row.bom_no, qty=qty_made, fetch_secondary_items=True))
-		items.extend(get_secondary_items_from_sub_assemblies(row.bom_no, qty_made))
+		qty_made = sub_assembly_qty * (flt(bom.quantity) / get_exploded_good_qty(bom))
+		items.extend(get_bom_items(sub_bom_no, qty=qty_made, fetch_secondary_items=True))
+		items.extend(get_secondary_items_from_sub_assemblies(sub_bom_no, qty_made))
 
 	return items
 
