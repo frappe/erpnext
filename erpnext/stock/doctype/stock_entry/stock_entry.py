@@ -5499,13 +5499,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		item_codes = list({row.item_code for row in self.items})
 		net_qty_sent = self.get_net_qty_sent(order, item_codes)
+		consumed_qty = get_consumed_qty_by_item(order, item_codes)
 		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
-		for item_code, consumed_qty in get_consumed_qty_by_item(order, item_codes).items():
-			qty = flt(consumed_qty - net_qty_sent.get(item_code, 0), precision)
+		for item_code in item_codes:
+			qty = flt(consumed_qty.get(item_code, 0) - net_qty_sent.get(item_code, 0), precision)
 			if qty > 0:
 				frappe.throw(
 					_(
-						"Cannot cancel: receipts of {0} {1} already consumed {2} more of Item {3} than it would still have supplied."
+						"Cannot cancel: {0} {1} would then supply {2} less of Item {3} than its receipts already consumed and its returns took back."
 					).format(self.subcontract_data.order_doctype, order, qty, item_code)
 				)
 
