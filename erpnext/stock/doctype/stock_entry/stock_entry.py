@@ -1416,9 +1416,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not (self.is_return and self.pro_doc and self.purpose == "Material Transfer for Manufacture"):
 			return
 
-		doctype, name = ("Job Card", self.job_card) if self.job_card else ("Work Order", self.work_order)
-		returnable_qty = self.get_returnable_qty()
-		for item_code, returned_qty in self.get_returned_qty_by_item().items():
+		returned_qty_by_item = self.get_returned_qty_by_item()
+		if self.job_card:
+			self.validate_returned_qty_within(
+				returned_qty_by_item, "Job Card", self.job_card, self.get_returnable_qty(self.job_card)
+			)
+
+		self.validate_returned_qty_within(
+			returned_qty_by_item, "Work Order", self.work_order, self.get_returnable_qty()
+		)
+
+	def validate_returned_qty_within(self, returned_qty_by_item, doctype, name, returnable_qty):
+		for item_code, returned_qty in returned_qty_by_item.items():
 			if flt(returned_qty, 6) > flt(returnable_qty[item_code], 6):
 				frappe.throw(
 					_(
@@ -1469,7 +1478,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					).format(row.idx, allowed_qty, row.item_code, order.name)
 				)
 
-	def get_returnable_qty(self) -> dict:
+	def get_returnable_qty(self, job_card=None) -> dict:
 		from pypika import Case
 
 		stock_entry = frappe.qb.DocType("Stock Entry")
@@ -1493,8 +1502,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			.where(transferred | consumed)
 			.groupby(detail.item_code)
 		)
-		if self.job_card:
-			query = query.where(stock_entry.job_card == self.job_card)
+		if job_card:
+			query = query.where(stock_entry.job_card == job_card)
 
 		rows = query.run()
 
