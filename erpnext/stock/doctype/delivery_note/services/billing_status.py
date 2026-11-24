@@ -39,12 +39,13 @@ class BillingStatusService:
 			elif d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
-		for dn in set(updated_delivery_notes):
+		updated_delivery_notes = set(updated_delivery_notes)
+		for dn in updated_delivery_notes:
 			dn_doc = doc if (dn == doc.name) else frappe.get_lazy_doc("Delivery Note", dn)
 			update_dn_modified = update_modified and dn != doc.return_against
 			dn_doc.update_billing_percentage(update_modified=update_dn_modified)
 			# Deliveries and returns of the same Sales Order row can shift which returns are settled.
-			update_billing_percentage_of_returns(dn)
+			update_billing_percentage_of_returns(dn, already_updated=updated_delivery_notes)
 
 		doc.load_from_db()
 
@@ -377,13 +378,16 @@ def get_so_overbilled_stock_qty(so_details: set) -> dict[str, float]:
 	return overbilled_qty
 
 
-def update_billing_percentage_of_returns(delivery_note: str) -> None:
+def update_billing_percentage_of_returns(delivery_note: str, already_updated: set) -> None:
+	"""Update the returns against `delivery_note`, except the ones in `already_updated`."""
 	# Side effect on other documents, like for `return_against`: keep their modified timestamp.
 	for name in frappe.get_all(
 		"Delivery Note",
 		filters={"return_against": delivery_note, "is_return": 1, "docstatus": 1},
 		pluck="name",
 	):
+		if name in already_updated:
+			continue
 		frappe.get_lazy_doc("Delivery Note", name).update_billing_percentage(update_modified=False)
 
 
