@@ -182,6 +182,16 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 0)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1})
+	def test_on_time_receipt_against_unit_price_line_counts_as_on_time(self):
+		supplier = create_scorecard_supplier()
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=0, rate=100)
+		receipt = make_pr_from_po(po.name)
+		receipt.items[0].qty = 5
+		receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
 
 def create_scorecard_supplier(supplier_name="_Test Supplier Scorecard"):
 	if not frappe.db.exists("Supplier", supplier_name):
