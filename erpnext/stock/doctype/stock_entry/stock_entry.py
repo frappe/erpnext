@@ -55,6 +55,7 @@ from .services.manufacturing import (
 	MaterialConsumptionForManufactureStockEntry,
 	OperationsNotCompleteError,
 	RepackStockEntry,
+	get_bom_items,
 	get_secondary_items_from_sub_assemblies,
 )
 from .services.material_receipt_issue import (
@@ -1070,7 +1071,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made)
 
 	def get_consumed_rates(self) -> dict:
-		"""Average consumed rate of each component, keyed by the BOM item it was consumed for."""
+		"""Consumed value of each component per unit consumed, or per unit the entry's BOM needs when
+		that is more, keyed by the BOM item it was consumed for. A sub-assembly's share of what the BOM
+		needs then takes no more than the value posted, which rounding can make less than the need."""
 		rows = self.get("items")
 		if self.is_rm_cost_from_consumption_entries():
 			rows = frappe.get_all(
@@ -1086,7 +1089,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 				qty[item_code] += flt(d.transfer_qty)
 				value[item_code] += flt(d.basic_amount)
 
-		return {item_code: value[item_code] / qty[item_code] for item_code in qty if qty[item_code]}
+		required = {
+			d.item_code: d.qty
+			for d in get_bom_items(self.bom_no, use_multi_level_bom=1, qty=self.fg_completed_qty)
+		}
+		return {
+			item_code: value[item_code] / max(qty[item_code], flt(required.get(item_code)))
+			for item_code in qty
+			if qty[item_code]
+		}
 
 	def get_secondary_items_cost_within(self, bom_no, qty) -> float:
 		"""Value of the BOM's Valuation Rate and Manual secondary rows, and of what its sub-assemblies
