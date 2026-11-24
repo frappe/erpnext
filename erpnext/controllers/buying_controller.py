@@ -316,8 +316,10 @@ class BuyingController(SubcontractingController):
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
-			# set_missing_values sets the exchange rate only later
+			# set_missing_values sets the supplier and exchange rate only later
+			self.set_supplier_from_item_default()
 			self.set_price_list_currency("Buying")
+			exchange_rate = self.get_standalone_debit_note_exchange_rate()
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate, converted to the row's UOM and currency
@@ -338,7 +340,7 @@ class BuyingController(SubcontractingController):
 						raise_error_if_no_rate=False,
 					)
 					row.rate = flt(
-						valuation_rate * conversion_factor / (flt(self.conversion_rate) or 1),
+						valuation_rate * conversion_factor / exchange_rate,
 						row.precision("rate"),
 					)
 					if not row.rate and flt(valuation_rate) > 0:
@@ -352,18 +354,31 @@ class BuyingController(SubcontractingController):
 					row.discount_amount = 0.0
 					row.margin_rate_or_amount = 0.0
 
+	def get_standalone_debit_note_exchange_rate(self):
+		# without a price list, a missing currency is set from the supplier only later
+		currency = self.currency or frappe.get_cached_value("Supplier", self.supplier, "default_currency")
+		if (currency or self.company_currency) == self.company_currency:
+			return 1.0
+		return flt(self.conversion_rate) or 1.0
+
 	@staticmethod
 	def get_standalone_debit_note_conversion_factor(row):
-		"""Factor of the UOM the row gets, as its UOM and stock UOM are set from the item only later."""
+		"""Factor of the row's UOM, as its UOM and stock UOM are set from the item only later."""
 		item = (
 			frappe.get_cached_value("Item", row.item_code, ["stock_uom", "purchase_uom"], as_dict=True)
 			or frappe._dict()
 		)
-		uom = row.uom or item.purchase_uom or item.stock_uom
-		if uom == item.stock_uom:
+		if not row.uom:
+			# a factor sent without a UOM is not the factor of the UOM the row gets
+			row.uom = item.purchase_uom or item.stock_uom
+			row.conversion_factor = get_conversion_factor(row.item_code, row.uom, throw_if_missing=True).get(
+				"conversion_factor"
+			)
+
+		if row.uom == item.stock_uom:
 			return 1.0
 
-		return flt(row.conversion_factor) or get_conversion_factor(row.item_code, uom).get(
+		return flt(row.conversion_factor) or get_conversion_factor(row.item_code, row.uom).get(
 			"conversion_factor"
 		)
 
