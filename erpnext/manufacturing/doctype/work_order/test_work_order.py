@@ -3835,6 +3835,59 @@ class TestWorkOrder(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
 	)
+	def test_sub_assembly_co_product_takes_nothing_when_its_manual_rows_exceed_the_posted_cost(self):
+		# SA: 1 RMA at 100, 20% co-product and a Manual scrap of 60; 2 FG post 1 RMA, worth less than 120 scrap
+		rm_a, rm_b = make_co_product_raw_materials()
+		sub_assembly, fg_item, co_product, scrap = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(4)
+		)
+		sub_bom = frappe.new_doc("BOM")
+		sub_bom.update({"item": sub_assembly, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		sub_bom.append("items", {"item_code": rm_a, "qty": 1})
+		sub_bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 1,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		sub_bom.append(
+			"secondary_items",
+			{
+				"item_code": scrap,
+				"secondary_item_type": "Scrap",
+				"qty": 1,
+				"cost": 60,
+				"valuation_type": "Manual",
+			},
+		)
+		sub_bom.submit()
+		bom = make_co_product_bom(fg_item, [(sub_assembly, 1, sub_bom.name), (rm_b, 1, None)])
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom,
+			qty=2,
+			use_multi_level_bom=1,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		se_doc = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		next(d for d in se_doc.items if d.item_code == rm_a).qty = 1
+		se_doc.insert()
+		se_doc.submit()
+
+		# 100 + 1,800 in: scrap 120, co-product 0, FG the rest
+		amounts = {d.item_code: d.amount for d in se_doc.items}
+		self.assertEqual(amounts[scrap], 120)
+		self.assertEqual(amounts[co_product], 0)
+		self.assertEqual(amounts[fg_item], 1780)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
 	def test_co_product_of_a_sub_assembly_reached_through_two_paths_is_rounded_once(self):
 		# FG: 1 SA1 + 1 SA2, each using 4 SA; SA's BOM makes 1 Nos co-product per 1,000: 0.008 is 1
 		rm_a, rm_b = make_co_product_raw_materials()
