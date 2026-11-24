@@ -1428,6 +1428,49 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "can be returned against", ste.save)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 100})
+	def test_return_of_components_skips_the_float_remainder_of_a_consumed_material(self):
+		fg_item = make_item(
+			"Subcontracted FG Item Remainder", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		consumed_item, leftover_item = (
+			make_item(f"Subcontracted RM Item Remainder {n}", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+			for n in (1, 2)
+		)
+		make_bom(
+			item=fg_item, raw_materials=[consumed_item, leftover_item], rm_qty=0.3, rate=100, currency="INR"
+		)
+		service_item = make_item("Subcontracted Service Item Remainder", {"is_stock_item": 0}).name
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": 1,
+					"rate": 100,
+					"fg_item": fg_item,
+					"fg_item_qty": 1,
+				}
+			]
+		)
+		rm_items = {row["item_code"]: row for row in get_rm_items(sco.supplied_items)}
+		for item_code, qty in ((consumed_item, 0.1), (consumed_item, 0.2), (leftover_item, 0.5)):
+			make_stock_entry(target="_Test Warehouse - _TC", item_code=item_code, qty=qty, basic_rate=100)
+			make_stock_transfer_entry(
+				sco_no=sco.name, rm_items=[{**rm_items[item_code], "qty": qty}], itemwise_details={}
+			)
+		make_subcontracting_receipt(sco.name).submit()
+
+		# the order offers only the rows the receipt did not consume in full
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[row.name for row in sco.supplied_items if row.rm_item_code == leftover_item],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+
+		self.assertEqual([(row.item_code, row.qty) for row in ste.items], [(leftover_item, 0.2)])
+
 	def test_return_of_components_sent_in_another_uom(self):
 		rm_item = make_item(
 			"Subcontracted RM In Box", {"is_stock_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 10}]
