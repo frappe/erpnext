@@ -163,8 +163,9 @@ erpnext.stock_ledger_explain_link = function (value, data) {
 	const icon = frappe.utils.icon("info", "xs");
 	const link = `<a href="${frappe.router.make_url([
 		"valuation-rate-breakdown",
-	])}?${params}" title="${title}" aria-label="${title}" style="margin-right: 4px">${icon}</a>`;
-	return `<div class="text-right">${link}${$("<div>").html(value).text()}</div>`;
+	])}?${params}" title="${title}" aria-label="${title}" class="d-inline-flex flex-shrink-0">${icon}</a>`;
+	const text = $("<div>").html(value).text();
+	return `<div class="d-flex align-items-center justify-content-end" style="gap: 4px">${link}<span class="ellipsis">${text}</span></div>`;
 };
 
 erpnext.utils.add_inventory_dimensions("Stock Ledger", 10);

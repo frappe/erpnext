@@ -7,7 +7,11 @@ from frappe.utils import flt
 from pypika.terms import ExistsCriterion
 
 from erpnext.stock.page.valuation_rate_breakdown.backdated import set_backdated_details
-from erpnext.stock.page.valuation_rate_breakdown.serial_batch import set_serial_batch_details
+from erpnext.stock.page.valuation_rate_breakdown.ledger_checks import set_ledger_problems, set_repost_start
+from erpnext.stock.page.valuation_rate_breakdown.serial_batch import (
+	get_stock_summary,
+	set_serial_batch_details,
+)
 from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
 
 PAGE_SIZE = 50
@@ -39,13 +43,55 @@ def get_valuation_steps(
 	result.has_earlier = has_earlier
 	set_return_details(result.entries, item_code, warehouse)
 	if item.valued_by:
-		set_serial_batch_details(result, result.entries, rows, focus)
+		set_serial_batch_details(result.entries, rows, item, warehouse, focus)
 
 	set_backdated_details(result.entries, rows, item_code, warehouse, get_lot_method(item))
 	if focus:
 		apply_focus(result, focus)
+	else:
+		set_ledger_problems(result.entries, rows, previous, item)
+		set_repost_start(result.entries, rows, previous, item, warehouse)
 
 	return result
+
+
+@frappe.whitelist(methods=["POST"])
+def repost_from_entry(entry: str) -> str:
+	row = frappe.db.get_value(
+		"Stock Ledger Entry",
+		entry,
+		["item_code", "warehouse", "posting_date", "posting_time", "is_cancelled"],
+		as_dict=True,
+	)
+	if not row or row.is_cancelled:
+		frappe.throw(_("Stock Ledger Entry {0} does not exist").format(entry))
+
+	check_access(row.item_code, row.warehouse)
+	frappe.has_permission("Repost Item Valuation", "create", throw=True)
+	repost = frappe.get_doc(
+		{
+			"doctype": "Repost Item Valuation",
+			"based_on": "Item and Warehouse",
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+			"posting_date": row.posting_date,
+			"posting_time": row.posting_time,
+		}
+	)
+	repost.insert()
+	repost.submit()
+	return repost.name
+
+
+@frappe.whitelist()
+def get_stock_breakdown(item_code: str, warehouse: str, upto: str) -> dict:
+	check_access(item_code, warehouse)
+	company = frappe.get_cached_value("Warehouse", warehouse, "company")
+	item = get_item_context(item_code, company)
+	if not item.valued_by:
+		return frappe._dict(stock_parts=[], stock_gap=None)
+
+	return get_stock_summary(item, warehouse, get_anchor(upto, item_code, warehouse))
 
 
 def check_access(item_code, warehouse):
@@ -63,8 +109,6 @@ def make_result(item, warehouse, company, rows, previous):
 		entries=build_entries(rows, previous, get_lot_method(item)),
 		opening=get_balance(previous, get_lot_method(item)),
 		repost_status=get_repost_status(item.item_code, warehouse, company),
-		stock_parts=[],
-		stock_gap=None,
 		focus=None,
 	)
 
@@ -106,7 +150,7 @@ def apply_focus(result, focus):
 		value=last.value_after if last else 0.0,
 		rate=last.rate_after if last else 0.0,
 	)
-	result.update(focus=focus, stock_parts=[], stock_gap=None)
+	result.focus = focus
 
 
 def focus_entry(entry):
@@ -179,7 +223,7 @@ def get_anchor(entry, item_code, warehouse):
 	anchor = frappe.db.get_value(
 		"Stock Ledger Entry",
 		entry,
-		["item_code", "warehouse", "posting_datetime", "creation"],
+		["item_code", "warehouse", "posting_datetime", "creation", "stock_value"],
 		as_dict=True,
 	)
 	if not anchor or anchor.item_code != item_code or anchor.warehouse != warehouse:

@@ -2,7 +2,6 @@ import json
 
 import frappe
 from frappe.query_builder import Order
-from frappe.query_builder.functions import Count
 from frappe.utils import flt
 
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -43,31 +42,46 @@ def can_replay(valuation_method):
 
 def get_later_dated_counts(rows, item_code, warehouse):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	later = frappe.qb.DocType("Stock Ledger Entry").as_("later")
-	later_count = (
-		frappe.qb.from_(later)
-		.select(Count(later.name))
-		.where(
-			(later.item_code == item_code)
-			& (later.warehouse == warehouse)
-			& (later.is_cancelled == 0)
-			& (later.posting_datetime > sle.posting_datetime)
-			& (later.creation < sle.creation)
-			& (later.voucher_no != sle.voucher_no)
-		)
-	)
-	result = (
+	later_rows = (
 		frappe.qb.from_(sle)
-		.select(sle.name, later_count.as_("later_dated"))
-		.where(sle.name.isin([row.name for row in rows]))
+		.select(sle.voucher_no, sle.posting_datetime, sle.creation)
+		.where(
+			(sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+			& (sle.posting_datetime > min(row.posting_datetime for row in rows))
+			& (sle.creation < max(row.creation for row in rows))
+			& (sle.is_cancelled == 0)
+		)
 		.run(as_dict=True)
 	)
-	return {row.name: row.later_dated for row in result if row.later_dated}
+	counts = {row.name: count_later_dated(row, later_rows) for row in rows}
+	return {name: count for name, count in counts.items() if count}
+
+
+def count_later_dated(row, later_rows):
+	return sum(
+		1
+		for later in later_rows
+		if later.posting_datetime > row.posting_datetime
+		and later.creation < row.creation
+		and later.voucher_no != row.voucher_no
+	)
 
 
 def get_late_rows(rows, item_code, warehouse):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	first_entered = min(row.creation for row in rows)
+	added = late_rows_query(sle, rows, item_code, warehouse).where(
+		(sle.creation > first_entered) & (sle.is_cancelled == 0)
+	)
+	cancelled = late_rows_query(sle, rows, item_code, warehouse).where(
+		(sle.is_cancelled == 1) & (sle.modified > first_entered)
+	)
+	late_rows = added.run(as_dict=True) + cancelled.run(as_dict=True)
+	return sorted(late_rows, key=lambda late: (late.posting_datetime, late.creation))
+
+
+def late_rows_query(sle, rows, item_code, warehouse):
 	return (
 		frappe.qb.from_(sle)
 		.select(
@@ -85,11 +99,7 @@ def get_late_rows(rows, item_code, warehouse):
 			(sle.item_code == item_code)
 			& (sle.warehouse == warehouse)
 			& (sle.posting_datetime < max(row.posting_datetime for row in rows))
-			& ((sle.creation > first_entered) | ((sle.is_cancelled == 1) & (sle.modified > first_entered)))
 		)
-		.orderby(sle.posting_datetime)
-		.orderby(sle.creation)
-		.run(as_dict=True)
 	)
 
 
@@ -130,10 +140,11 @@ def get_change_kind(late, entered_on):
 def set_rates_when_entered(affected, item_code, warehouse, valuation_method):
 	earliest = min(change.posting_datetime for entry, _row in affected for change in entry.changed_by)
 	start = get_start_row(item_code, warehouse, earliest)
-	history = get_history(item_code, warehouse, start, max(row.posting_datetime for _entry, row in affected))
-	if len(history) > REPLAY_LIMIT:
+	upto = max(row.posting_datetime for _entry, row in affected)
+	if is_too_long_to_replay(item_code, warehouse, start, upto):
 		return
 
+	history = get_history(item_code, warehouse, start, upto, valuation_method)
 	for entry, row in affected:
 		replayed = replay_until(row, start, history, valuation_method)
 		if replayed:
@@ -161,18 +172,31 @@ def get_start_row(item_code, warehouse, earliest):
 	return rows[0] if rows else None
 
 
-def get_history(item_code, warehouse, start, upto):
+def is_too_long_to_replay(item_code, warehouse, start, upto):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = history_query(sle, item_code, warehouse, start, upto)
+	return bool(query.select(sle.name).limit(1).offset(REPLAY_LIMIT).run())
+
+
+def get_history(item_code, warehouse, start, upto, valuation_method):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
-		frappe.qb.from_(sle)
+		history_query(sle, item_code, warehouse, start, upto)
 		.select(sle.name, sle.voucher_type, sle.voucher_no, sle.posting_datetime, sle.creation, sle.modified)
 		.select(sle.is_cancelled, sle.actual_qty, sle.incoming_rate, sle.stock_value_difference)
-		.select(sle.qty_after_transaction, sle.valuation_rate, sle.stock_value, sle.stock_queue)
-		.select(sle.is_adjustment_entry)
-		.where((sle.item_code == item_code) & (sle.warehouse == warehouse) & (sle.posting_datetime <= upto))
+		.select(sle.qty_after_transaction, sle.valuation_rate, sle.stock_value, sle.is_adjustment_entry)
 		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
-		.limit(REPLAY_LIMIT + 1)
+	)
+	if valuation_method in QUEUE_CLASSES:
+		query = query.select(sle.stock_queue)
+
+	return query.run(as_dict=True)
+
+
+def history_query(sle, item_code, warehouse, start, upto):
+	query = frappe.qb.from_(sle).where(
+		(sle.item_code == item_code) & (sle.warehouse == warehouse) & (sle.posting_datetime <= upto)
 	)
 	if start:
 		query = query.where(
@@ -180,7 +204,7 @@ def get_history(item_code, warehouse, start, upto):
 			| ((sle.posting_datetime == start.posting_datetime) & (sle.creation > start.creation))
 		)
 
-	return query.run(as_dict=True)
+	return query
 
 
 def replay_until(target, start, history, valuation_method):
