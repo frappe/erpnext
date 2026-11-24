@@ -1278,6 +1278,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			pr.insert()
 		self.assertNotIn(" / ", str(error.exception))
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
 	def test_per_billed_by_qty_when_landed_cost_follows_invoice_rate(self):
 		pr = make_purchase_receipt(qty=100, rate=50)
 		pi = make_purchase_invoice(pr.name)
