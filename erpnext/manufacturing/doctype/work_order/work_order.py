@@ -902,6 +902,15 @@ class WorkOrder(Document):
 
 		return status
 
+	def refresh_status(self):
+		"""Save the computed status, unless the order is Stopped or Closed or another transaction changed its status."""
+		saved_status = frappe.db.get_value("Work Order", self.name, "status", for_update=True)
+		if saved_status != self.status or saved_status in ("Stopped", "Closed"):
+			return
+
+		if (status := self.get_status()) != saved_status:
+			self.db_set("status", status)
+
 	@staticmethod
 	def get_unreserved_qty(row):
 		# a Subcontracting Order reserves and sends what it took over
@@ -3071,9 +3080,7 @@ class WorkOrder(Document):
 			sre.update_reserved_qty_in_voucher()
 
 		self.reload()
-		# get_status does not keep a Stopped status
-		if self.status != "Stopped":
-			self.db_set("status", self.get_status())
+		self.refresh_status()
 
 	def _subcontract_transferred_qty_by_item(self):
 		"""Qty sent to subcontractors for this Work Order, keyed by (item_code, source warehouse).
