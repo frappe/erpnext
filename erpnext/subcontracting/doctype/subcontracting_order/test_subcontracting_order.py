@@ -1568,6 +1568,98 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		"Buying Settings",
 		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
 	)
+	def test_receipt_refuses_a_returned_serial_no_in_the_serial_no_field(self):
+		sco, received = make_order_sent_to_supplier(
+			"Serial Field Return", {"has_serial_no": 1, "serial_no_series": "SCOSF-.####"}
+		)
+		ste = get_return_of_components(sco)
+		ste.items[0].update({"qty": 1, "serial_no": received.serial_no[0]})
+		ste.submit()
+
+		scr = make_receipt_consuming_serial_no(sco, received.serial_no[0])
+
+		self.assertRaisesRegex(frappe.ValidationError, "has not supplied", scr.save)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_receipt_accepts_a_serial_no_field_in_another_case(self):
+		if frappe.db.db_type == "postgres":
+			self.skipTest("PostgreSQL matches serial nos case-sensitively")
+		sco, received = make_order_sent_to_supplier(
+			"Serial Field Case", {"has_serial_no": 1, "serial_no_series": "SCOSC-.####"}
+		)
+
+		make_receipt_consuming_serial_no(sco, received.serial_no[0].lower()).save()
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_serial_no_sent_on_a_serial_no_field_row_counts_once(self):
+		self.check_serial_no_sent_on_a_serial_no_field_row_counts_once(str)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_serial_no_sent_in_another_case_on_a_serial_no_field_row_counts_once(self):
+		if frappe.db.db_type == "postgres":
+			self.skipTest("PostgreSQL matches serial nos case-sensitively")
+		self.check_serial_no_sent_on_a_serial_no_field_row_counts_once(str.lower)
+
+	def check_serial_no_sent_on_a_serial_no_field_row_counts_once(self, spell):
+		"""Send a serial no on a Serial No field row, spelled by `spell`, next to a bundle row; return it."""
+		sco, received = make_order_sent_to_supplier(
+			"Serial Field Mix", {"has_serial_no": 1, "serial_no_series": "SCOSM-.####"}
+		)
+		get_return_of_components(sco).submit()
+		first, second = received.serial_no[:2]
+		resend = frappe.get_doc(make_rm_stock_entry(sco.name))
+		field_row = resend.items[0]
+		field_row.update(
+			{
+				"qty": 1,
+				"serial_no": spell(first),
+				"use_serial_batch_fields": 1,
+				"serial_and_batch_bundle": None,
+			}
+		)
+		bundle_row = resend.append("items", frappe.copy_doc(field_row).as_dict())
+		bundle = make_serial_batch_bundle(
+			frappe._dict(
+				item_code=bundle_row.item_code,
+				warehouse=bundle_row.s_warehouse,
+				qty=-1,
+				serial_nos=[second],
+				voucher_type="Stock Entry",
+				type_of_transaction="Outward",
+				do_not_submit=True,
+			)
+		)
+		bundle_row.update(
+			{"serial_no": "", "use_serial_batch_fields": 0, "serial_and_batch_bundle": bundle.name}
+		)
+		resend.submit()
+		ste = get_return_of_components(sco)
+		ste.items[0].update({"qty": 1, "serial_no": first})
+		ste.submit()
+
+		scr = make_receipt_consuming_serial_no(sco, spell(first))
+
+		self.assertRaisesRegex(frappe.ValidationError, "has not supplied", scr.save)
+
+		# the next receipt consumes the serial no still at the supplier
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = scr.items[0].received_qty = 1
+		scr.submit()
+		self.assertEqual(get_serial_nos_from_bundle(scr.supplied_items[0].serial_and_batch_bundle), [second])
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
 	def test_return_of_components_skips_batch_qty_returned_by_the_supplier(self):
 		sco, received = make_order_sent_to_supplier(
 			"Batch Return", {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCOBR-.####"}
@@ -2677,6 +2769,17 @@ def get_return_of_components(sco):
 		order_doctype=sco.doctype,
 	)
 	return get_materials_from_supplier(sco.name)
+
+
+def make_receipt_consuming_serial_no(sco, serial_no):
+	"""Draft receipt of 1 whose supplied item names `serial_no` in its Serial No field."""
+	scr = make_subcontracting_receipt(sco.name)
+	scr.items[0].qty = scr.items[0].received_qty = 1
+	scr.insert()
+	scr.supplied_items[0].update(
+		{"serial_no": serial_no, "serial_and_batch_bundle": None, "use_serial_batch_fields": 1}
+	)
+	return scr
 
 
 def transfer_shared_raw_material(sco, fg_item, qty):
