@@ -1591,7 +1591,7 @@ def get_secondary_items(bom_no, work_order=None):
 		and work_order
 		and frappe.get_cached_value("Work Order", work_order, "use_multi_level_bom")
 	):
-		return get_secondary_items_from_sub_assemblies(bom_no)
+		return merge_secondary_items_by_bom_row(get_secondary_items_from_sub_assemblies(bom_no))
 	else:
 		return get_bom_items(bom_no, fetch_secondary_items=True)
 
@@ -1615,6 +1615,19 @@ def get_secondary_items_from_sub_assemblies(bom_no, qty=1):
 		items.extend(get_secondary_items_from_sub_assemblies(sub_bom_no, qty_made))
 
 	return items
+
+
+def merge_secondary_items_by_bom_row(items):
+	"""One row per BOM secondary row: a BOM reached through two paths makes its rows for both,
+	and rounding each path's qty on its own could lose or add a whole unit."""
+	merged = {}
+	for row in items:
+		if row.name in merged:
+			merged[row.name].qty += row.qty
+		else:
+			merged[row.name] = row
+
+	return list(merged.values())
 
 
 def get_secondary_item_key(row):
