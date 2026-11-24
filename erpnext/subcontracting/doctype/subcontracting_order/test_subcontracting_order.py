@@ -1158,6 +1158,30 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfer.cancel)
 
+	def test_transfer_cannot_be_cancelled_after_its_material_was_returned(self):
+		"""5 are sent for FG A and all 5 returned, with stock of other orders at the supplier."""
+		set_backflush_based_on("BOM")
+		sco, rm_item = make_order_of_three_sharing_a_raw_material("Cancel Returned")
+		transfer = make_supplied_item_transfer(sco, sco.supplied_items[0])
+		transfer.submit()
+		get_materials_from_supplier_for(sco).submit()
+		make_stock_entry(item_code=rm_item, target=sco.supplier_warehouse, qty=5, basic_rate=100)
+
+		self.assertRaisesRegex(frappe.ValidationError, "returns took back", transfer.cancel)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_transfer_whose_reservation_was_consumed_cannot_be_cancelled(self):
+		"""With Reserve Stock, 5 each are sent for FG A and FG B, and a receipt of FG C consumes A's reservation."""
+		set_backflush_based_on("BOM")
+		sco, _rm_item = make_order_of_three_sharing_a_raw_material("Cancel Reserved", reserve_stock=1)
+		transfers = [make_supplied_item_transfer(sco, row) for row in sco.supplied_items[:2]]
+		for transfer in transfers:
+			transfer.submit()
+		make_receipt_for_finished_good(sco, sco.items[2].item_code).submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "reserved at the supplier", transfers[0].cancel)
+		transfers[1].cancel()
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
@@ -3132,7 +3156,7 @@ def set_alternative_item(item_code, alternative_item_code):
 	).insert()
 
 
-def get_order_for_finished_goods(suffix, rm_item, fg_qtys):
+def get_order_for_finished_goods(suffix, rm_item, fg_qtys, **args):
 	"""A Subcontracting Order with a finished good of each qty, each made of 1 rm_item."""
 	service_items = []
 	for idx, qty in enumerate(fg_qtys):
@@ -3151,16 +3175,18 @@ def get_order_for_finished_goods(suffix, rm_item, fg_qtys):
 			}
 		)
 
-	return get_subcontracting_order(service_items=service_items)
+	return get_subcontracting_order(service_items=service_items, **args)
 
 
-def make_order_of_three_sharing_a_raw_material(suffix):
+def make_order_of_three_sharing_a_raw_material(suffix, reserve_stock=0):
 	"""Order for 5 each of FG A, B and C, each made of 1 of a new raw material, with 15 of it in stock."""
 	rm_item = make_item(f"Subcontracted RM Item {suffix}", {"is_stock_item": 1}).name
-	sco = get_order_for_finished_goods(suffix, rm_item, (5, 5, 5))
+	sco = get_order_for_finished_goods(suffix, rm_item, (5, 5, 5), do_not_submit=1)
+	sco.reserve_stock = reserve_stock
 	make_stock_entry(
 		item_code=rm_item, target=sco.supplied_items[0].reserve_warehouse, qty=15, basic_rate=100
 	)
+	sco.submit()
 	return sco, rm_item
 
 
