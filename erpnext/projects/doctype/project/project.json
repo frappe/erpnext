@@ -411,7 +411,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "collect_progress",
+   "depends_on": "eval:doc.collect_progress || doc.project_template",
    "fieldname": "holiday_list",
    "fieldtype": "Link",
    "label": "Holiday List",
@@ -568,7 +568,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-24 17:27:51.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
