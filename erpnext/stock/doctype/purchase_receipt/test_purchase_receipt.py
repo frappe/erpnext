@@ -1693,7 +1693,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 			properties={"account": "_Test Account Stock In Hand - TCP1"},
 		)
 
+		# a new item, so stock left by earlier tests does not change the transfer value
 		pr1 = make_purchase_receipt(
+			item_code=make_item(properties={"is_stock_item": 1}).name,
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
