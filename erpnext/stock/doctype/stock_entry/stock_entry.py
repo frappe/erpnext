@@ -3969,12 +3969,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 				item["to_warehouse"] = ""
 				item["is_finished_item"] = 0
 
-				if item.get("process_loss_per"):
-					item["qty"] -= flt(
-						item["qty"] * (item["process_loss_per"] / 100),
-						self.precision("fg_completed_qty"),
-					)
-
 			self.add_to_stock_entry_detail(secondary_items, bom_no=self.bom_no)
 
 		# Finished goods
@@ -4304,12 +4298,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 					if self.pro_doc.scrap_warehouse and item.secondary_item_type == "Scrap":
 						item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
-				if item.process_loss_per:
-					item["qty"] -= flt(
-						item["qty"] * (item.process_loss_per / 100),
-						self.precision("fg_completed_qty"),
-					)
-
 			self.add_to_stock_entry_detail(secondary_items_dict, bom_no=self.bom_no)
 
 	def set_process_loss_qty(self):
@@ -4621,10 +4609,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 				or {}
 			)
 
+		# net of the BOM's rounded loss qty, as BOM costing counts it; that loss can take the whole qty
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for item in item_dict.values():
 			item.from_warehouse = ""
+			item.qty = flt(item.qty - flt(item.process_loss_qty), precision)
 
-		return item_dict
+		return {key: item for key, item in item_dict.items() if item.qty > 0}
 
 	def set_secondary_items_from_job_card(self):
 		if self.purpose not in ["Manufacture", "Repack"]:
