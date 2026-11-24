@@ -16,6 +16,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	OverlapError,
 	make_corrective_job_card,
 	make_material_request,
+	make_stock_return_entry,
 )
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
@@ -817,6 +818,191 @@ class TestJobCard(ERPNextTestSuite):
 		work_order.update_required_items()
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, min(completed_qty))
+
+	def test_return_components_from_draft_job_card(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.insert()
+		transfer_entry.submit()
+
+		return_entry = make_stock_return_entry(job_card.name)
+		self.assertEqual(return_entry.fg_completed_qty, 2)
+		self.assertEqual(
+			sorted((row.item_code, row.qty, row.s_warehouse, row.t_warehouse) for row in return_entry.items),
+			sorted(
+				(row.item_code, row.qty, row.t_warehouse, row.s_warehouse) for row in transfer_entry.items
+			),
+		)
+		self.assertTrue(all(row.job_card_item for row in return_entry.items))
+		return_entry.insert()
+		return_entry.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 0)
+		self.assertEqual([row.transferred_qty for row in job_card.items], [0, 0])
+
+		self.work_order.reload()
+		for row in self.work_order.required_items:
+			self.assertEqual((row.transferred_qty, row.returned_qty, row.consumed_qty), (0, 0, 0))
+
+		transfer_again = make_stock_entry_from_jc(job_card.name)
+		self.assertEqual(
+			sorted((row.item_code, row.qty) for row in transfer_again.items),
+			sorted((row.item_code, row.qty) for row in transfer_entry.items),
+		)
+		transfer_again.insert()
+		transfer_again.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 2)
+
+	def test_return_components_within_job_card_transfer(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.insert()
+		transfer_entry.submit()
+
+		return_entry = make_stock_return_entry(job_card.name)
+		return_entry.items[0].qty += 1
+		self.assertRaisesRegex(frappe.ValidationError, "left unconsumed", return_entry.insert)
+
+		return_entry = make_stock_return_entry(job_card.name)
+		return_entry.fg_completed_qty += 1
+		self.assertRaisesRegex(frappe.ValidationError, "transferred against Job Card", return_entry.insert)
+
+		return_entry = make_stock_return_entry(job_card.name)
+		return_entry.items[0].qty -= 1
+		return_entry.fg_completed_qty = 0
+		return_entry.insert()
+		return_entry.submit()
+
+		job_card.reload()
+		returned_item = job_card.get("items", {"item_code": return_entry.items[0].item_code})[0]
+		self.assertEqual(returned_item.transferred_qty, 1)
+
+	def test_cancel_transfer_after_components_returned(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.insert()
+		transfer_entry.submit()
+		for row in transfer_entry.items:
+			make_stock_entry(item_code=row.item_code, target=row.t_warehouse, qty=row.qty, basic_rate=100)
+
+		return_entry = make_stock_return_entry(job_card.name)
+		return_entry.items[0].qty -= 1
+		return_entry.fg_completed_qty = 1
+		return_entry.insert()
+		return_entry.submit()
+
+		transfer_entry.reload()
+		frappe.db.savepoint("cancel_transfer")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Cancel its return entries first", transfer_entry.cancel
+		)
+		frappe.db.rollback(save_point="cancel_transfer")
+
+		return_entry.cancel()
+		transfer_entry.reload()
+		transfer_entry.cancel()
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, 0)
+		self.assertEqual([row.transferred_qty for row in job_card.items], [0, 0])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+			"disable_capacity_planning": 1,
+		},
+	)
+	def test_returned_components_issued_to_another_work_order(self):
+		def make_work_order():
+			return make_wo_order_test_record(
+				item="_Test FG Item 2",
+				qty=2,
+				transfer_material_against="Job Card",
+				source_warehouse="Stores - _TC",
+			)
+
+		first_work_order, second_work_order = make_work_order(), make_work_order()
+		for item in first_work_order.required_items:
+			make_stock_entry(
+				item_code=item.item_code, target="Stores - _TC", qty=item.required_qty, basic_rate=100
+			)
+
+		first_job_card = frappe.get_last_doc("Job Card", {"work_order": first_work_order.name})
+		make_stock_entry_from_jc(first_job_card.name).submit()
+		make_stock_return_entry(first_job_card.name).submit()
+
+		second_job_card = frappe.get_last_doc("Job Card", {"work_order": second_work_order.name})
+		transfer_entry = make_stock_entry_from_jc(second_job_card.name)
+		transfer_entry.submit()
+		second_job_card.reload()
+		second_job_card.append(
+			"time_logs", {"from_time": now(), "to_time": add_to_date(now(), hours=1), "completed_qty": 2}
+		)
+		second_job_card.submit()
+
+		manufacture = frappe.get_doc(
+			make_stock_entry_for_work_order(second_work_order.name, "Manufacture", qty=2)
+		)
+		manufacture.submit()
+		self.assertEqual(
+			sorted((row.item_code, row.qty) for row in manufacture.items if not row.is_finished_item),
+			sorted((row.item_code, row.qty) for row in transfer_entry.items),
+		)
+
+		second_work_order.reload()
+		self.assertEqual(second_work_order.status, "Completed")
+		first_work_order.reload()
+		self.assertEqual([row.transferred_qty for row in first_work_order.required_items], [0, 0])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+			"disable_capacity_planning": 1,
+		},
+	)
+	def test_job_card_return_after_work_order_consumed_components(self):
+		work_order = make_wo_order_test_record(
+			item="_Test FG Item 2",
+			qty=2,
+			transfer_material_against="Job Card",
+			source_warehouse="Stores - _TC",
+		)
+		for item in work_order.required_items:
+			make_stock_entry(
+				item_code=item.item_code, target="Stores - _TC", qty=item.required_qty, basic_rate=100
+			)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
+		transfer_entry.submit()
+		for row in transfer_entry.items:
+			make_stock_entry(item_code=row.item_code, target=row.t_warehouse, qty=row.qty, basic_rate=100)
+
+		job_card.reload()
+		job_card.append(
+			"time_logs", {"from_time": now(), "to_time": add_to_date(now(), hours=1), "completed_qty": 2}
+		)
+		job_card.submit()
+		frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", qty=2)).submit()
+
+		return_entry = make_stock_return_entry(job_card.name)
+		self.assertRaisesRegex(frappe.ValidationError, "left unconsumed", return_entry.insert)
 
 	def test_job_card_material_transfer_correctness(self):
 		"""
