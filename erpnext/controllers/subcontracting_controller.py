@@ -2139,8 +2139,7 @@ def add_return_items(ste_doc, row, qty, qty_left, rm_details, rm_detail_field, b
 	"""Split a return over the order rows its material was sent on, each up to what the row has left."""
 	precision = frappe.get_precision("Stock Entry Detail", "qty")
 	# a fully consumed material can leave a float remainder
-	qty = flt(qty, precision)
-	if qty <= 0:
+	if flt(qty, precision) <= 0:
 		return
 
 	order_rows = [name for name in qty_left if name in rm_details and name in row.get(f"{rm_detail_field}s")]
