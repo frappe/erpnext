@@ -1424,7 +1424,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	uom(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-		item.pricing_rules = ''
 		if(item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
