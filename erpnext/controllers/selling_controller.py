@@ -841,7 +841,7 @@ class SellingController(StockController):
 		sl_entries = []
 		# Loop over items and packed items table
 		for d in self.get_item_list():
-			if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
+			if self.posts_stock_ledger_entry(d.item_code, d.qty):
 				if flt(d.conversion_factor) == 0.0:
 					d.conversion_factor = (
 						get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
@@ -866,6 +866,10 @@ class SellingController(StockController):
 					sl_entries.append(self.get_sle_for_source_warehouse(d))
 
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+
+	def posts_stock_ledger_entry(self, item_code, stock_qty) -> bool:
+		"""Whether a row posts stock ledger entries: a row of a stock item whose stock qty is not 0."""
+		return frappe.get_cached_value("Item", item_code, "is_stock_item") == 1 and bool(flt(stock_qty))
 
 	def get_sle_for_source_warehouse(self, item_row):
 		serial_and_batch_bundle = (
