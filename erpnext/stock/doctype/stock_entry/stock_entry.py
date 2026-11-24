@@ -2457,7 +2457,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components
 		)
 		sub_assemblies_made = boms_made * flt(frappe.get_cached_value("BOM", bom_no, "quantity"))
-		return component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made)
+		# its own-cost rows can be worth more than its posted components: it then takes nothing
+		return max(component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made), 0)
 
 	def get_consumed_rates(self) -> dict:
 		"""Consumed value of each component per unit consumed, or per unit the entry's BOM needs when
