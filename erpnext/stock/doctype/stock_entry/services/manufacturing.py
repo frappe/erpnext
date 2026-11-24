@@ -1845,9 +1845,9 @@ def get_secondary_item_qty(row, fg_qty):
 	if flt(row.stock_qty):
 		qty = qty * (row.stock_qty - flt(row.process_loss_qty)) / row.stock_qty
 
-	# at the row's precision first, so a qty that saves as 0 is skipped and SQL division noise adds no unit
-	qty = flt(qty, frappe.get_precision("Stock Entry Detail", "qty"))
-	return ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
+	qty = ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
+	# at the row's precision, so a qty that saves as 0 is left out
+	return flt(qty, frappe.get_precision("Stock Entry Detail", "qty"))
 
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
