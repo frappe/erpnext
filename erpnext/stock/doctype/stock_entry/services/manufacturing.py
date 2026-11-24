@@ -119,12 +119,11 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					"BOM", self.doc.bom_no, "default_target_warehouse"
 				)
 
-			# net of the BOM's rounded loss qty, as BOM costing: rounding the loss here can add a whole unit
-			row.qty = row.qty * flt(self.doc.fg_completed_qty) * (1 - flt(row.get("process_loss_share")))
-
-			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
-			item_args["transfer_qty"] = item_args["qty"]
-			self.doc.append("items", item_args)
+			item_args["qty"] = get_secondary_item_qty(row, self.doc.fg_completed_qty)
+			# the BOM's rounded loss can take the whole qty
+			if item_args["qty"]:
+				item_args["transfer_qty"] = item_args["qty"]
+				self.doc.append("items", item_args)
 
 	def get_secondary_item_warehouse(self, secondary_item_type):
 		if secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
@@ -1558,8 +1557,8 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 		return query.select(
 			doctype.name,
 			doctype.cost_allocation_per,
-			doctype.process_loss_per,
-			(doctype.process_loss_qty / NullIf(doctype.stock_qty, 0)).as_("process_loss_share"),
+			doctype.stock_qty,
+			doctype.process_loss_qty,
 			doctype.secondary_item_type,
 			doctype.valuation_type,
 			(doctype.base_cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
@@ -1837,6 +1836,16 @@ def set_previous_operation_serial_batch(parent_doc, row):
 	if bundle and bundle.get("name"):
 		row.serial_and_batch_bundle = bundle.name
 		row.use_serial_batch_fields = 0
+
+
+def get_secondary_item_qty(row, fg_qty):
+	"""Qty of a BOM secondary row for fg_qty, net of the BOM's rounded loss qty as BOM costing counts it.
+	Rounding the loss of a fractional qty here instead can add a whole unit."""
+	qty = flt(row.qty) * flt(fg_qty)
+	if flt(row.stock_qty):
+		qty = qty * (row.stock_qty - flt(row.process_loss_qty)) / row.stock_qty
+
+	return ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
 
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
