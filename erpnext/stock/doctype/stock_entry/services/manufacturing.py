@@ -121,9 +121,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 
 			row.qty = row.qty * flt(self.doc.fg_completed_qty)
 			if row.get("process_loss_per"):
-				row.qty -= flt(
-					row.qty * row.get("process_loss_per") / 100, self.doc.precision("fg_completed_qty")
-				)
+				row.qty -= row.qty * row.get("process_loss_per") / 100
 
 			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
 			item_args["transfer_qty"] = item_args["qty"]
