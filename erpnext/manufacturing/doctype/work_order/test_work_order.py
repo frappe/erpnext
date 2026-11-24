@@ -3739,6 +3739,44 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 2)
 
+	def test_disassembly_from_bom_takes_the_co_product_qty_manufacture_makes(self):
+		# 33.33% of 3 Nos is a BOM loss of 1, so 100 FG make 200, not 201
+		rm_item, fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(3)
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=100, basic_rate=100
+		)
+		bom = make_co_product_bom(
+			fg_item, [(rm_item, 1, None)], co_product, co_product_qty=3, process_loss_per=33.33
+		)
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom,
+			qty=100,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		manufacture = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 100))
+		manufacture.insert()
+		disassembly = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Disassemble",
+				"stock_entry_type": "Disassemble",
+				"company": "_Test Company",
+				"from_bom": 1,
+				"bom_no": bom,
+				"fg_completed_qty": 100,
+				"from_warehouse": "_Test Warehouse - _TC",
+				"to_warehouse": "_Test Warehouse - _TC",
+			}
+		)
+		disassembly.get_items()
+
+		for entry in (manufacture, disassembly):
+			self.assertEqual(next(d.qty for d in entry.items if d.item_code == co_product), 200)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
