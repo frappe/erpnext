@@ -11,7 +11,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import validate_pricing_context
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
-from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
+from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
+	_get_item_details,
+	has_source_doc_permission,
+)
 from erpnext.stock.utils import _get_incoming_rate
 
 
@@ -190,23 +194,21 @@ class TransactionBase(StatusUpdater):
 					ref_rate = reference_details.get(d.get(ref_link_field))
 
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
+						message = self.get_rate_mismatch_message(d, ref_dt, d.get(ref_dn_field), ref_rate)
 						if action == "Stop":
 							if role_allowed_to_override not in frappe.get_roles():
-								stop_actions.append(
-									_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-										d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate
-									)
-								)
+								stop_actions.append(message)
 						else:
-							frappe.msgprint(
-								_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-									d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate
-								),
-								title=_("Warning"),
-								indicator="orange",
-							)
+							frappe.msgprint(message, title=_("Warning"), indicator="orange")
 		if stop_actions:
 			frappe.throw(stop_actions, as_list=True)
+
+	def get_rate_mismatch_message(self, row, ref_dt, ref_dn, ref_rate):
+		if has_source_doc_permission(ref_dt, ref_dn, frappe.session.user):
+			return _("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
+				row.idx, ref_dt, ref_dn, row.rate, ref_rate
+			)
+		return _("Row #{0}: Rate must be same as {1}: {2}").format(row.idx, ref_dt, ref_dn)
 
 	def get_reference_details(self, reference_names, reference_doctype):
 		return frappe._dict(
