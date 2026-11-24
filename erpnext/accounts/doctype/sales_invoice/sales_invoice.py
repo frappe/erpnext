@@ -1230,7 +1230,8 @@ class SalesInvoice(SellingController):
 			elif d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
-		for dn in set(updated_delivery_notes):
+		updated_delivery_notes = set(updated_delivery_notes)
+		for dn in updated_delivery_notes:
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 		# Returns of all deliveries of a Sales Order row share the row's over-billed qty.
@@ -1241,8 +1242,8 @@ class SalesInvoice(SellingController):
 			pluck="parent",
 			distinct=True,
 		)
-		for dn in set(updated_delivery_notes + sibling_delivery_notes):
-			update_billing_percentage_of_returns(dn)
+		for dn in updated_delivery_notes.union(sibling_delivery_notes):
+			update_billing_percentage_of_returns(dn, already_updated=updated_delivery_notes)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		super().on_recurring(reference_doc, auto_repeat_doc)
