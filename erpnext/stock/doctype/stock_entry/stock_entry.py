@@ -36,6 +36,12 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_scrap_items_from_sub_assemblies,
 	validate_bom_no,
 )
+<<<<<<< HEAD
+=======
+from erpnext.manufacturing.doctype.bom.services.costing import get_exploded_good_qty
+from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
+from erpnext.manufacturing.doctype.work_order.services.required_items import get_allowed_transfer_qty
+>>>>>>> b1818cd (refactor(stock): reuse the work order transfer allowance for pick list rows)
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import stock_ledger
@@ -4231,16 +4237,10 @@ class StockEntry(StockController):
 			for row in frappe.get_all(
 				"Pick List Item",
 				filters={"name": ("in", list(pick_list_items))},
-				fields=[
-					"name",
-					"item_code",
-					"warehouse",
-					"picked_qty",
-					"transferred_qty",
-					"material_request_item",
-				],
+				fields=["name", "item_code", "warehouse", "picked_qty", "transferred_qty"],
 			)
 		}
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 		work_order = self.work_order or (
@@ -4261,6 +4261,8 @@ class StockEntry(StockController):
 					)
 				)
 
+=======
+>>>>>>> b1818cd (refactor(stock): reuse the work order transfer allowance for pick list rows)
 		precision = frappe.get_precision("Pick List Item", "transferred_qty")
 >>>>>>> 7052cff (fix(stock): respect over transfer allowance in stock entry against pick list)
 		transfer_qty = defaultdict(float)
@@ -4302,6 +4304,7 @@ class StockEntry(StockController):
 						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
 =======
 			transferred_qty = flt(flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item], precision)
+<<<<<<< HEAD
 
 			if work_order:
 				allowed_qty = flt(picked_row.picked_qty) + (flt(picked_row.picked_qty) * (wo_allowance / 100))
@@ -4318,12 +4321,18 @@ class StockEntry(StockController):
 					msg = _("Row #{0}: Item {1} is transferred more than the {2} allowed in {3}.").format(
 						d.idx, frappe.bold(d.item_code), flt(allowed_qty, precision), self.pick_list
 >>>>>>> 7052cff (fix(stock): respect over transfer allowance in stock entry against pick list)
+=======
+			allowed_qty = flt(
+				get_allowed_transfer_qty(picked_row.picked_qty) if self.work_order else picked_row.picked_qty,
+				precision,
+			)
+			if transferred_qty > allowed_qty:
+				frappe.throw(
+					_("Row #{0}: Item {1} is transferred more than the {2} allowed in {3}.").format(
+						d.idx, frappe.bold(d.item_code), allowed_qty, self.pick_list
+>>>>>>> b1818cd (refactor(stock): reuse the work order transfer allowance for pick list rows)
 					)
-				else:
-					msg = _("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
-						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty, precision), self.pick_list
-					)
-				frappe.throw(msg)
+				)
 
 	def validate_batch(self):
 		if self.purpose in [
