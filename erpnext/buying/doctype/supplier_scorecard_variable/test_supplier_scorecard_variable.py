@@ -151,7 +151,7 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 0)
 
-	def test_on_time_receipt_is_compared_at_stock_qty_precision(self):
+	def test_on_time_receipt_off_by_conversion_dust_counts_as_on_time(self):
 		supplier = create_scorecard_supplier()
 		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=300, rate=100, submit=False)
 		po.items[0].uom = "Box"
@@ -162,6 +162,18 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 		receipt.submit()
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
+	def test_short_receipt_rounding_to_ordered_stock_qty_is_late(self):
+		supplier = create_scorecard_supplier()
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=1000, rate=100, submit=False)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 0.001
+		po.submit()
+		receipt = make_pr_from_po(po.name)
+		receipt.items[0].qty = 996
+		receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 0)
 
 
 def create_scorecard_supplier(supplier_name="_Test Supplier Scorecard"):
