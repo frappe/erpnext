@@ -62,6 +62,39 @@ def get_sle(**args):
 	)
 
 
+def make_equal_rows_receipt_with_additional_costs(costs):
+	"""Submitted Material Receipt of three equal rows, with an additional cost per expense account."""
+	receipt = make_stock_entry(
+		company="_Test Company with perpetual inventory", purpose="Material Receipt", do_not_save=True
+	)
+	receipt.items = []
+	for _ in range(3):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		receipt.append(
+			"items",
+			stock_entry_row(
+				item_code, 1, t_warehouse="Stores - TCP1", cost_center="Main - TCP1", basic_rate=100
+			),
+		)
+
+	for expense_account, amount in costs.items():
+		receipt.append(
+			"additional_costs",
+			{"expense_account": expense_account, "description": "Freight", "amount": amount},
+		)
+	receipt.insert()
+	receipt.submit()
+	receipt.reload()
+	return receipt
+
+
+def get_credit(voucher_no, account):
+	credit = frappe.get_all(
+		"GL Entry", filters={"voucher_no": voucher_no, "account": account, "is_cancelled": 0}, pluck="credit"
+	)
+	return flt(sum(credit), 2)
+
+
 def stock_entry_row(item_code, qty, **kwargs):
 	stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
 	return {
@@ -3127,34 +3160,23 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 	def test_additional_cost_split_over_equal_rows_adds_up_to_the_cost(self):
-		receipt = make_stock_entry(
-			company="_Test Company with perpetual inventory", purpose="Material Receipt", do_not_save=True
-		)
-		receipt.items = []
-		for _ in range(3):
-			item_code = make_item(properties={"is_stock_item": 1}).name
-			receipt.append(
-				"items",
-				stock_entry_row(
-					item_code, 1, t_warehouse="Stores - TCP1", cost_center="Main - TCP1", basic_rate=100
-				),
-			)
-
 		expense_account = "Miscellaneous Expenses - TCP1"
-		receipt.append(
-			"additional_costs", {"expense_account": expense_account, "description": "Freight", "amount": 100}
-		)
-		receipt.insert()
-		receipt.submit()
-		receipt.reload()
+		receipt = make_equal_rows_receipt_with_additional_costs({expense_account: 100})
 
 		self.assertEqual(flt(sum(d.additional_cost for d in receipt.items), 2), 100)
-		cost_credit = frappe.get_all(
-			"GL Entry",
-			filters={"voucher_no": receipt.name, "account": expense_account, "is_cancelled": 0},
-			pluck="credit",
-		)
-		self.assertEqual(flt(sum(cost_credit), 2), 100)
+		self.assertEqual(get_credit(receipt.name, expense_account), 100)
+
+	def test_additional_costs_of_several_accounts_split_evenly_over_equal_rows(self):
+		expense_accounts = [
+			"Miscellaneous Expenses - TCP1",
+			"Expenses Included In Valuation - TCP1",
+			"_Test Account Customs Duty - TCP1",
+		]
+		receipt = make_equal_rows_receipt_with_additional_costs(dict.fromkeys(expense_accounts, 10))
+
+		self.assertEqual([d.additional_cost for d in receipt.items], [10, 10, 10])
+		for expense_account in expense_accounts:
+			self.assertEqual(get_credit(receipt.name, expense_account), 10)
 
 	def test_conversion_factor_change(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
