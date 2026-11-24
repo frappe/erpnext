@@ -2857,6 +2857,19 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		returned_inv.insert()
 		self.assertEqual(returned_inv.items[0].rate, 500)
 
+		# so is a stale price list rate on a return saved without a currency and price list
+		returned_inv.update(
+			{
+				"currency": None,
+				"buying_price_list": None,
+				"price_list_currency": None,
+				"plc_conversion_rate": 50,
+			}
+		)
+		returned_inv.items[0].rate = 0
+		returned_inv.save()
+		self.assertEqual(returned_inv.items[0].rate, 500)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
