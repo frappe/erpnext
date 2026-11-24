@@ -596,10 +596,8 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 	)
 
 	# An invoice that made a delivery bills that delivery first, before the FIFO gives the rest
-	# to the other deliveries.
-	billed_by_deliveries_from_invoice = sum(
-		flt(dnd.stock_qty) - flt(dnd.returned_qty) for dnd in dn_details if dnd.si_detail
-	)
+	# to the other deliveries. Its returns stay with it: credit or deduct them on that invoice.
+	billed_by_deliveries_from_invoice = sum(flt(dnd.stock_qty) for dnd in dn_details if dnd.si_detail)
 	billed_stock_qty_against_so = max(
 		get_billed_against_so(so_detail, "stock_qty") - billed_by_deliveries_from_invoice, 0
 	)

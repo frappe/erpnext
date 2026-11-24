@@ -6299,6 +6299,39 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(delivery.per_billed, 100)
 			self.assertEqual(delivery.items[0].billed_amt, delivery.items[0].amount)
 
+	def test_return_of_delivery_from_invoice_stays_with_its_invoice(self):
+		"""An uncredited return of a delivery made from an invoice does not free billing for other deliveries."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note as make_dn_from_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.services.billing_status import get_invoiced_qty_based_on_so
+
+		so = make_sales_order(qty=10)
+		first_invoice = make_si_from_so(so.name)
+		first_invoice.items[0].qty = 5
+		first_invoice.submit()
+		first_delivery = make_dn_from_invoice(first_invoice.name)
+		first_delivery.insert()
+		first_delivery.submit()
+
+		second_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		second_invoice = make_si_from_so(so.name)
+		second_invoice.items[0].qty = 2
+		second_invoice.submit()
+
+		first_return = make_sales_return(first_delivery.name)
+		first_return.items[0].qty = -2
+		first_return.submit()
+		second_return = make_sales_return(second_delivery.name)
+		second_return.items[0].qty = -2
+		second_return.submit()
+
+		# The first invoice billed the 2 units returned from the first delivery: credit them.
+		self.assertEqual(make_sales_invoice(first_return.name).items[0].qty, -2)
+		# The second delivery keeps 3 and is billed for 2.
+		billed_qty = get_invoiced_qty_based_on_so(so.items[0].name)
+		self.assertEqual(billed_qty[second_delivery.items[0].name], 2)
+
 	def test_settled_return_of_free_items_leaves_billing_selector(self):
 		"""A zero-value return that the invoice settled is not offered for billing."""
 		from erpnext.controllers.queries import get_delivery_notes_to_be_billed
