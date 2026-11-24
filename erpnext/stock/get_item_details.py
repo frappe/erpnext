@@ -1510,7 +1510,8 @@ def is_party_price(item_prices):
 def get_prices_fitting_packing_unit(item_prices, desired_qty):
 	for item_price in item_prices:
 		packing_unit = flt(item_price[3])
-		if not packing_unit or flt(desired_qty) % packing_unit == 0:
+		# a qty that rounds to 0 fits no packing unit
+		if not packing_unit or (flt(desired_qty) and flt(desired_qty) % packing_unit == 0):
 			return [item_price]
 
 	return []
