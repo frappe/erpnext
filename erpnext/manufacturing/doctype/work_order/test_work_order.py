@@ -3716,6 +3716,30 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 2)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_sub_assembly_from_two_boms_takes_each_bom_yield(self):
+		# FG: 8 SA from BOM A (4 RMA make 8 of 10, 10 co-product) and 2 SA from BOM B (5 RMA make 10)
+		rm_a, rm_b = make_co_product_raw_materials()
+		sub_assembly, fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(3)
+		)
+		bom_a = make_co_product_bom(
+			sub_assembly,
+			[(rm_a, 4, None)],
+			co_product,
+			quantity=10,
+			co_product_qty=10,
+			process_loss_percentage=20,
+		)
+		bom_b = make_co_product_bom(sub_assembly, [(rm_a, 5, None)], quantity=10)
+		bom = make_co_product_bom(fg_item, [(sub_assembly, 8, bom_a), (sub_assembly, 2, bom_b)])
+		se_doc = make_multi_level_manufacture_entry(fg_item, bom)
+
+		# 8 good SA from BOM A take one run of 10, which makes 10 co-product
+		self.assertEqual(next(d.qty for d in se_doc.items if d.item_code == co_product), 10)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
 	def test_get_rm_cost_from_consumption_entry(self):
