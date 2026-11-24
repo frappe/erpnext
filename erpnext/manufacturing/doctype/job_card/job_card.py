@@ -434,17 +434,16 @@ class JobCard(Document):
 			values = frappe._dict(values)
 			secondary_item = {
 				"item_code": values.item_code,
-				"stock_qty": values.qty,
+				# net of the BOM's rounded loss qty, as manufacture and disassembly from the BOM count it
+				"stock_qty": flt(
+					values.qty - flt(values.process_loss_qty),
+					frappe.get_precision("Job Card Secondary Item", "stock_qty"),
+				),
 				"item_name": values.item_name,
 				"stock_uom": values.stock_uom,
 				"secondary_item_type": values.secondary_item_type,
 				"bom_secondary_item": values.name,
 			}
-
-			secondary_item["stock_qty"] -= flt(
-				secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
-				self.precision("for_quantity"),
-			)
 
 			self.append("secondary_items", secondary_item)
 

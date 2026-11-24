@@ -35,7 +35,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
-	get_exploded_good_qty,
+	get_bom_items_as_dict,
 	get_op_cost_from_sub_assemblies,
 	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
@@ -2158,14 +2158,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		items = []
 		# Set basic rate for incoming items
-		# Own-cost rows first, then sub-assembly percentage rows: their value is deducted from
-		# the basis the other percentage rows and the finished good split.
+		# Own-cost rows first, then sub-assembly percentage rows, inner BOMs first: their value is
+		# deducted from the basis the outer BOMs' rows and the finished good split.
 		finished_items_last = sorted(
 			self.get("items"),
 			key=lambda row: (
 				cint(row.is_finished_item),
 				cint(not self.is_costed_out(row)),
 				cint(not is_costed_out_of_finished_item(row)),
+				self.count_secondary_items_under(row),
 			),
 		)
 		for d in finished_items_last:
@@ -2447,13 +2448,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no, self.company).get(
 			row.bom_secondary_item, 0
 		)
-		bom = frappe.get_cached_value(
-			"BOM", bom_no, ["quantity", "process_loss_qty", "is_phantom_bom"], as_dict=True
-		)
-		sub_assemblies_made = (
-			qty_per_finished_good * flt(self.fg_completed_qty) * flt(bom.quantity) / flt(qty_per_bom)
-		)
-		boms_made = sub_assemblies_made / get_exploded_good_qty(bom)
+		boms_made = qty_per_finished_good * flt(self.fg_completed_qty) / flt(qty_per_bom)
 		consumed_rates = self.get_consumed_rates()
 		components = frappe.get_all(
 			"BOM Explosion Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
@@ -2461,10 +2456,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 		component_cost = sum(
 			flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components
 		)
-		return component_cost - self.get_own_cost_secondary_items_cost(bom_no)
+		sub_assemblies_made = boms_made * flt(frappe.get_cached_value("BOM", bom_no, "quantity"))
+		# its own-cost rows can be worth more than its posted components: it then takes nothing
+		return max(component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made), 0)
 
 	def get_consumed_rates(self) -> dict:
-		"""Average consumed rate of each component, keyed by the BOM item it was consumed for."""
+		"""Consumed value of each component per unit consumed, or per unit the entry's BOM needs when
+		that is more, keyed by the BOM item it was consumed for. A sub-assembly's share of what the BOM
+		needs then takes no more than the value posted, which rounding can make less than the need."""
 		rows = self.get("items")
 		if self.is_rm_cost_from_consumption_entries():
 			rows = frappe.get_all(
@@ -2480,17 +2479,44 @@ class StockEntry(StockController, SubcontractingInwardController):
 				qty[item_code] += flt(d.transfer_qty)
 				value[item_code] += flt(d.basic_amount)
 
-		return {item_code: value[item_code] / qty[item_code] for item_code in qty if qty[item_code]}
+		required = defaultdict(float)
+		for d in get_bom_items_as_dict(self.bom_no, self.company, qty=self.fg_completed_qty).values():
+			required[d.item_code] += flt(d.qty)
 
-	def get_own_cost_secondary_items_cost(self, bom_no) -> float:
-		"""Value of the BOM's Valuation Rate and Manual secondary rows, which its percentages exclude."""
-		return sum(
-			flt(d.basic_amount)
-			for d in self.get("items")
-			if d.bom_secondary_item
-			and is_costed_out_of_finished_item(d)
-			and frappe.get_cached_value("BOM Secondary Item", d.bom_secondary_item, "parent") == bom_no
-		)
+		return {
+			item_code: value[item_code] / max(qty[item_code], required[item_code])
+			for item_code in qty
+			if qty[item_code]
+		}
+
+	def get_secondary_items_cost_within(self, bom_no, qty) -> float:
+		"""Value of the BOM's Valuation Rate and Manual secondary rows, and of what its sub-assemblies
+		make of every sub-assembly secondary row for qty of its item, which its percentages exclude."""
+		qty_within = get_sub_assembly_secondary_qty(bom_no, self.company)
+		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no, self.company)
+		total = 0.0
+		for d in self.get("items"):
+			if qty_within.get(d.bom_secondary_item):
+				# the finished good may also make the row through other sub-assemblies
+				total_qty = qty_per_finished_good.get(d.bom_secondary_item, 0) * flt(self.fg_completed_qty)
+				if total_qty:
+					total += flt(d.basic_amount) * qty_within[d.bom_secondary_item] * qty / total_qty
+			elif (
+				d.bom_secondary_item
+				and is_costed_out_of_finished_item(d)
+				and frappe.get_cached_value("BOM Secondary Item", d.bom_secondary_item, "parent") == bom_no
+			):
+				total += flt(d.basic_amount)
+
+		return total
+
+	def count_secondary_items_under(self, row) -> int:
+		"""Secondary rows under the BOM a sub-assembly secondary row comes from: fewer for inner BOMs."""
+		if not self.is_sub_assembly_secondary_item(row):
+			return 0
+
+		bom_no = frappe.get_cached_value("BOM Secondary Item", row.bom_secondary_item, "parent")
+		return len(get_sub_assembly_secondary_qty(bom_no, self.company))
 
 	def get_secondary_items_cost_basis(self, outgoing_items_cost) -> float:
 		"""The cost a BOM allocation splits: the consumed rows, or the entry that replaced them."""
@@ -3955,12 +3981,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 				item["to_warehouse"] = ""
 				item["is_finished_item"] = 0
 
-				if item.get("process_loss_per"):
-					item["qty"] -= flt(
-						item["qty"] * (item["process_loss_per"] / 100),
-						self.precision("fg_completed_qty"),
-					)
-
 			self.add_to_stock_entry_detail(secondary_items, bom_no=self.bom_no)
 
 		# Finished goods
@@ -4290,12 +4310,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 					if self.pro_doc.scrap_warehouse and item.secondary_item_type == "Scrap":
 						item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
-				if item.process_loss_per:
-					item["qty"] -= flt(
-						item["qty"] * (item.process_loss_per / 100),
-						self.precision("fg_completed_qty"),
-					)
-
 			self.add_to_stock_entry_detail(secondary_items_dict, bom_no=self.bom_no)
 
 	def set_process_loss_qty(self):
@@ -4607,10 +4621,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 				or {}
 			)
 
+		# net of the BOM's rounded loss qty, as BOM costing counts it; that loss can take the whole qty
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for item in item_dict.values():
 			item.from_warehouse = ""
+			item.qty = flt(item.qty - flt(item.process_loss_qty), precision)
 
-		return item_dict
+		return {key: item for key, item in item_dict.items() if item.qty > 0}
 
 	def set_secondary_items_from_job_card(self):
 		if self.purpose not in ["Manufacture", "Repack"]:
