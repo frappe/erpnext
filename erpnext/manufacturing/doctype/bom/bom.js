@@ -935,7 +935,9 @@ erpnext.bom.calculate_op_cost = function (doc) {
 				base_cost_per_unit: base_cost_per_unit,
 			});
 
-			if (item.set_cost_based_on_bom_qty) {
+			// as is_costed_per_batch in bom.py
+			const batch_based = doc.__onload?.batch_based_operations?.includes(item.operation);
+			if (!item.fixed_time && (item.set_cost_based_on_bom_qty || batch_based)) {
 				operating_cost = cost_per_unit * flt(doc.quantity);
 				base_operating_cost = base_cost_per_unit * flt(doc.quantity);
 			}
