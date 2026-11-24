@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Count, DateDiff, Sum
-from frappe.utils import date_diff
+from frappe.utils import date_diff, flt
 
 
 class VariablePathNotFound(frappe.ValidationError):
@@ -193,7 +193,7 @@ def get_on_time_shipments(scorecard):
 	PR = frappe.qb.DocType("Purchase Receipt")
 	PR_Item = frappe.qb.DocType("Purchase Receipt Item")
 
-	on_time_lines = (
+	rows = (
 		frappe.qb.from_(PR_Item)
 		.join(PR)
 		.on(PR_Item.parent == PR.name)
@@ -201,18 +201,19 @@ def get_on_time_shipments(scorecard):
 		.on(PR_Item.purchase_order_item == PO_Item.name)
 		.join(PO)
 		.on(PO_Item.parent == PO.name)
-		.select(PO_Item.name)
+		.select(
+			(PO_Item.qty * PO_Item.conversion_factor).as_("ordered"),
+			Sum(PR_Item.received_qty * PR_Item.conversion_factor).as_("received_on_time"),
+		)
 		.where(PO.supplier == scorecard.supplier)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
 		.where(PO_Item.schedule_date >= PR.posting_date)
 		.where(PR_Item.docstatus == 1)
 		.groupby(PO_Item.name, PO_Item.qty, PO_Item.conversion_factor)
-		.having(
-			Sum(PR_Item.received_qty * PR_Item.conversion_factor) >= PO_Item.qty * PO_Item.conversion_factor
-		)
-	).run()
+	).run(as_dict=True)
 
-	return len(on_time_lines)
+	precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+	return sum(1 for row in rows if flt(row.received_on_time, precision) >= flt(row.ordered, precision))
 
 
 def get_late_shipments(scorecard):
