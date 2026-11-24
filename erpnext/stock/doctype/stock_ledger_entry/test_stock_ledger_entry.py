@@ -1196,6 +1196,28 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		backdated.cancel()
 		self.assertEqual([1], ordered_qty_after_transaction())
 
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_same_time_entries_keep_bin_value_without_repost(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		warehouse = "_Test Warehouse - _TC"
+		posting = {"posting_date": add_days(today(), -1), "posting_time": "10:00:00"}
+
+		vouchers = [
+			make_stock_entry(item_code=item, target=warehouse, qty=10, basic_rate=5, **posting).name,
+			make_stock_entry(item_code=item, source=warehouse, qty=4, **posting).name,
+			make_stock_entry(item_code=item, target=warehouse, qty=2, basic_rate=7, **posting).name,
+		]
+
+		bin = frappe.db.get_value(
+			"Bin", {"item_code": item, "warehouse": warehouse}, ["actual_qty", "stock_value"], as_dict=True
+		)
+		self.assertEqual((bin.actual_qty, bin.stock_value), (8, 44))
+		self.assertFalse(
+			frappe.get_all(
+				"Repost Item Valuation", or_filters={"item_code": item, "voucher_no": ["in", vouchers]}
+			)
+		)
+
 	def test_repost_does_not_revive_entry_cancelled_midway(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 

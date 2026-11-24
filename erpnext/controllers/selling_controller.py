@@ -889,7 +889,7 @@ class SellingController(StockController):
 		sle = self.get_sl_entries(
 			item_row,
 			{
-				"actual_qty": -1 * get_ledger_qty(item_row.qty),
+				"actual_qty": -1 * self.get_source_warehouse_ledger_qty(item_row),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
 				"serial_and_batch_bundle": serial_and_batch_bundle,
@@ -899,6 +899,21 @@ class SellingController(StockController):
 			sle.dependant_sle_voucher_detail_no = item_row.name
 
 		return sle
+
+	def get_source_warehouse_ledger_qty(self, item_row) -> float:
+		"""Stock qty an item row moves in its warehouse. A return puts back no more than its delivered
+		row took out, less the row's other returns to any warehouse. A row with a package, a packed item
+		and an internal transfer keep their own qty."""
+		row = item_row.item_row
+		if (
+			not self.is_return
+			or item_row.serial_and_batch_bundle
+			or item_row.target_warehouse
+			or row.doctype == "Packed Item"
+		):
+			return get_ledger_qty(item_row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, item_row.warehouse)
 
 	def get_sle_for_target_warehouse(self, item_row):
 		sle = self.get_sl_entries(
@@ -961,13 +976,28 @@ class SellingController(StockController):
 				if d.get("po_no")
 			]
 
+	@frappe.whitelist()
+	def process_item_selection(
+		self, item_idx: int, reset_item_details: bool = False, parentfield: str = "items"
+	):
+		super().process_item_selection(item_idx, reset_item_details, parentfield)
+		if item := self.get_selected_item_row(parentfield, item_idx):
+			self.set_item_gross_profit(item)
+
 	def set_gross_profit(self):
-		if self.doctype in ["Sales Order", "Quotation"]:
-			for item in self.items:
-				item.gross_profit = flt(
-					((flt(item.stock_uom_rate) - flt(item.valuation_rate)) * item.stock_qty),
-					self.precision("amount", item),
-				)
+		for item in self.items:
+			self.set_item_gross_profit(item)
+
+	def set_item_gross_profit(self, item):
+		if self.doctype not in ["Sales Order", "Quotation"]:
+			return
+
+		# stock_uom_rate is not reset yet when an item is selected
+		rate = flt(item.rate) / (flt(item.conversion_factor) or 1)
+		item.gross_profit = flt(
+			(rate - flt(item.valuation_rate)) * flt(item.stock_qty),
+			self.precision("amount", item),
+		)
 
 	def set_customer_address(self):
 		address_dict = {

@@ -2753,6 +2753,56 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(po.supplier, "_Test Supplier")
 
+	def test_deleting_rows_with_update_items_refreshes_their_other_bins(self):
+		"""Deleting a row refreshes the requested qty of its Material Request's warehouse and the
+		reserved qty of a bundle row's components."""
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		def bin_qty(item_code, warehouse, field):
+			return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, field)
+
+		def keep_only_second_row(doc):
+			row = doc.items[1]
+			trans_item = [
+				{
+					"docname": row.name,
+					"item_code": row.item_code,
+					"qty": row.qty,
+					"rate": row.rate,
+					"conversion_factor": row.conversion_factor,
+				}
+			]
+			update_child_qty_rate(doc.doctype, json.dumps(trans_item), doc.name)
+
+		item_code, other_item = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		mr = make_material_request(item_code=item_code, qty=10, warehouse="_Test Warehouse 1 - _TC")
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.append(
+			"items",
+			dict(
+				po.items[0].as_dict(),
+				name=None,
+				item_code=other_item,
+				material_request=None,
+				material_request_item=None,
+			),
+		)
+		po.submit()
+		keep_only_second_row(po)
+		self.assertEqual(bin_qty(item_code, "_Test Warehouse 1 - _TC", "indented_qty"), 10)
+
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [item_code], 2)
+		so = make_sales_order(item_code=bundle, qty=5, do_not_submit=True)
+		so.append("items", dict(so.items[0].as_dict(), name=None, item_code=other_item))
+		so.submit()
+		keep_only_second_row(so)
+		self.assertEqual(bin_qty(item_code, "_Test Warehouse - _TC", "reserved_qty"), 0)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (

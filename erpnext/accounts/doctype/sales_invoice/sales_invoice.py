@@ -1246,7 +1246,6 @@ class SalesInvoice(SellingController):
 		if (
 			cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
@@ -3526,6 +3525,9 @@ def get_loyalty_programs(customer: str):
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):
+	frappe.has_permission("Sales Invoice", doc=source_name, throw=True)
+	frappe.has_permission("Invoice Discounting", ptype="create", throw=True)
+
 	invoice = frappe.get_doc("Sales Invoice", source_name)
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company

@@ -1023,7 +1023,7 @@ class PickList(TransactionBase):
 					Case()
 					.when(
 						(pi_item.picked_qty > 0) & (pi_item.docstatus == 1),
-						pi_item.picked_qty - pi_item.delivered_qty,
+						pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty,
 					)
 					.else_(pi_item.stock_qty)
 				).as_("picked_qty"),
@@ -1498,6 +1498,8 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 				row.serial_nos = [
 					serial_no for serial_no in row.serial_nos if serial_no not in picked_serial_nos
 				]
+				# a partly moved pick list row can still list more serial nos than it holds
+				row.qty = min(row.qty, len(row.serial_nos))
 
 		if flt(row.qty, precision) > 0:
 			filterd_locations.append(row)

@@ -687,7 +687,9 @@ class SalesOrder(SellingController):
 		if status == "Draft" and self.docstatus == 1:
 			self.check_credit_limit()
 		self.update_reserved_qty()
-		self.update_subcontracting_order_status()
+		# hold and reopen leave the inward orders as they are: a user may have closed them on purpose
+		if status == "Closed":
+			self.close_inward_orders()
 		self.notify_update()
 		clear_doctype_notifications(self)
 		self.update_blanket_order()
@@ -701,7 +703,7 @@ class SalesOrder(SellingController):
 				)
 			)
 
-	def update_subcontracting_order_status(self):
+	def close_inward_orders(self):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
 			set_subcontracting_inward_order_status as update_scio_status,
 		)
@@ -710,7 +712,7 @@ class SalesOrder(SellingController):
 			for scio in frappe.get_all(
 				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}, pluck="name"
 			):
-				update_scio_status(scio, "Closed" if self.status == "Closed" else None)
+				update_scio_status(scio, "Closed")
 
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""

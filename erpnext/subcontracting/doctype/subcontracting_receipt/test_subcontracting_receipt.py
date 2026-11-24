@@ -39,6 +39,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	get_mapped_subcontracting_receipt,
 	make_subcontracting_receipt,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
@@ -591,6 +592,27 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr_return.items[1].rate, 15)
 		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
 
+	def test_finished_good_takes_the_share_of_a_co_product_not_received(self):
+		scr = make_receipt_with_scrap(co_product_allocation=20, do_not_submit=True)
+		scr.items = [row for row in scr.items if row.secondary_item_type != "Co-Product"]
+		scr.save()
+
+		fg, scrap = scr.items
+		consumed = sum(row.amount for row in scr.supplied_items)
+		self.assertEqual(fg.amount, consumed + 200 - scrap.amount)
+
+	def test_return_of_a_receipt_without_the_co_product_keeps_the_receipt_rate(self):
+		scr = make_receipt_with_scrap(co_product_allocation=20, do_not_submit=True)
+		scr.items = [row for row in scr.items if row.secondary_item_type != "Co-Product"]
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.items[1].reference_name = scr_return.items[0].name
+		scr_return.submit()
+
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+
 	def test_return_values_percentage_secondary_items_at_the_receipt_rate(self):
 		scr = make_receipt_with_scrap(co_product_allocation=10)
 
@@ -609,6 +631,32 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			"stock_value_difference",
 		)
 		self.assertEqual(stock_value_difference, co_product.amount)
+
+	def test_partial_receipts_take_the_order_additional_costs_once(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+		second.submit()
+
+		self.assertEqual(first.total_additional_costs + second.total_additional_costs, 1000)
+
+	def test_receipt_mapped_for_selected_qty_takes_its_share_of_order_additional_costs(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 4}])
+		first.save()
+		first.submit()
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+		second.submit()
+
+		self.assertEqual(first.total_additional_costs, 400)
+		self.assertEqual(second.total_additional_costs, 600)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
@@ -2509,6 +2557,31 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(service_credit, [100])
 
+	def test_service_cost_of_rejected_and_lost_qty_is_credited_to_the_service_account(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
+		rejected_warehouse = create_warehouse(
+			"_Test Rejected Warehouse", company="_Test Company with perpetual inventory"
+		)
+		for fg_row_values in (
+			{"qty": 8, "rejected_qty": 2, "rejected_warehouse": rejected_warehouse},
+			{"qty": 9, "process_loss_qty": 1},
+		):
+			scr = make_service_receipt(
+				"Subcontracted Service Item 10", "Subcontracted Item SA10", 10, 100, 10, fg_row_values
+			)
+			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+			scr_return.submit()
+
+			for voucher_no, side in ((scr.name, "credit"), (scr_return.name, "debit")):
+				service_amount = frappe.get_all(
+					"GL Entry",
+					filters={"voucher_no": voucher_no, "account": service_expense_account, "is_cancelled": 0},
+					pluck=side,
+				)
+				self.assertEqual(service_amount, [1000])
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
@@ -2741,6 +2814,100 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(len(subcontracting_receipt.supplied_items), 2)
 		self.assertEqual(subcontracting_receipt.supplied_items[0].consumed_qty, 10)
 		self.assertEqual(subcontracting_receipt.supplied_items[1].consumed_qty, 10)
+
+	def test_repost_revalues_the_secondary_items_with_the_finished_good(self):
+		scr = make_receipt_with_scrap(co_product_allocation=20)
+		create_stock_reconciliation(
+			item_code=scr.supplied_items[0].rm_item_code,
+			warehouse=scr.supplier_warehouse,
+			qty=100,
+			rate=50,
+			posting_date=add_days(today(), -1),
+		)
+
+		scr.load_from_db()
+		consumed = sum(row.amount for row in scr.supplied_items)
+		self.assertNotEqual(consumed, 200)
+
+		fg, scrap, co_product = scr.items
+		self.assertEqual(scrap.amount, 20)
+		self.assertAlmostEqual(co_product.amount, (consumed + 200 - 20) * 0.2)
+		self.assertAlmostEqual(fg.amount + scrap.amount + co_product.amount, consumed + 200)
+		stock_values = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": scr.name, "is_cancelled": 0, "actual_qty": (">", 0)},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		for row in scr.items:
+			self.assertAlmostEqual(stock_values[row.name], row.amount, places=2)
+
+	def test_backdated_receipt_values_valuation_rate_secondary_items_at_its_posting_date(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("BOM")
+		posting_date = add_days(today(), -2)
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		bom = make_bom_with_secondary_item(fg_item, secondary_qty=1)
+		scrap_item = bom.secondary_items[0].item_code
+		make_stock_entry(
+			item_code=scrap_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=5,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse - _TC", qty=10, basic_rate=50)
+		make_stock_entry(
+			item_code=bom.items[0].item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -5),
+		)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 10,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		transfer = frappe.get_doc(
+			make_rm_stock_entry(
+				sco.name,
+				[
+					{
+						"item_code": fg_item,
+						"rm_item_code": row.rm_item_code,
+						"item_name": row.rm_item_code,
+						"qty": row.required_qty,
+						"rate": 100,
+						"stock_uom": row.stock_uom,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+					for row in sco.supplied_items
+				],
+			)
+		)
+		transfer.set_posting_time = 1
+		transfer.posting_date = add_days(today(), -3)
+		transfer.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.set_posting_time = 1
+		scr.posting_date = posting_date
+		scr.save()
+		scr.get_secondary_items(recalculate_rate=True)
+		scr.save()
+
+		self.assertEqual(scr.items[1].item_code, scrap_item)
+		self.assertEqual(scr.items[1].rate, 5)
 
 	def test_supplied_items_cost_after_reposting(self):
 		# Set Backflush Based On as "BOM"
@@ -4383,6 +4550,30 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			frappe.copy_doc(purchase_receipt).insert,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_subcontracted_service_cannot_be_received_beyond_the_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt as make_po_receipt,
+		)
+		from erpnext.controllers.status_updater import OverAllowanceError
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		make_po_receipt(sco.purchase_order).submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		self.assertRaises(OverAllowanceError, make_purchase_receipt(scr.name).submit)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -5358,10 +5549,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		rm_items[0]["qty"] = 2
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		ste_dict = make_rm_stock_entry(sco.name)
-		doc = frappe.get_doc(ste_dict)
-		self.assertEqual(doc.items[0].qty, 0)
-		doc.items[0].qty = 2
+		self.assertFalse(frappe.get_doc(make_rm_stock_entry(sco.name)).items)
+		row = sco.supplied_items[0]
+		doc = frappe.get_doc(make_rm_stock_entry(sco.name, [{**row.as_dict(), "qty": 2}]))
 		doc.submit()
 
 		frappe.flags["args"] = {"items": [{"name": sco.items[0].name, "qty": 2}]}
@@ -5936,7 +6126,7 @@ def set_service_expense_account(service_item):
 	return service_expense_account
 
 
-def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
+def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_values=None):
 	service_items = [
 		{
 			"warehouse": "Stores - TCP1",
@@ -5962,6 +6152,7 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	)
 
 	scr = make_subcontracting_receipt(sco.name)
+	scr.items[0].update(fg_row_values or {})
 	scr.submit()
 	return scr
 
@@ -6024,3 +6215,21 @@ def make_receipt_with_scrap(
 	if not do_not_submit:
 		scr.submit()
 	return scr
+
+
+def make_order_with_additional_cost_and_transfer(amount):
+	set_backflush_based_on("BOM")
+	sco = get_subcontracting_order(do_not_submit=1)
+	sco.append(
+		"additional_costs",
+		{"expense_account": "Cost of Goods Sold - _TC", "description": "Freight", "amount": amount},
+	)
+	sco.submit()
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name,
+		rm_items=rm_items,
+		itemwise_details=copy.deepcopy(itemwise_details),
+	)
+	return sco

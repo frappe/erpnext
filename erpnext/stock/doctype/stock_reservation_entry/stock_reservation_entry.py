@@ -673,8 +673,11 @@ class StockReservationEntry(Document):
 			)
 			frappe.throw(msg)
 
-		if self.delivered_qty > 0:
-			msg = _("Stock Reservation Entry cannot be updated as it has been delivered.")
+		used_qty = flt(self.delivered_qty) + flt(self.consumed_qty) + flt(self.transferred_qty)
+		if flt(used_qty, self.precision("reserved_qty")) > 0 and not self.is_child_table_same("sb_entries"):
+			msg = _(
+				"Serial and Batch Reservation cannot be updated as the Stock Reservation Entry has already been delivered, consumed or transferred."
+			)
 			frappe.throw(msg)
 
 	def validate_with_allowed_qty(self, qty_to_be_reserved: float) -> None:
@@ -703,6 +706,15 @@ class StockReservationEntry(Document):
 			if is_packed_item:
 				# the row's delivered qty is in bundle units; scale it to component units
 				voucher_delivered_qty *= flt(self.voucher_qty) / (flt(stock_qty) or 1)
+		elif (
+			self.voucher_type == "Work Order"
+			and not self.from_voucher_type
+			and self.get("_action") == "submit"
+		):
+			# a Subcontracting Order reserves and sends what it took over, so new reservations leave it out
+			voucher_delivered_qty = flt(
+				frappe.db.get_value("Work Order Item", self.voucher_detail_no, "subcontracted_qty")
+			)
 
 		allowed_qty = min(self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty))
 		allowed_qty = flt(allowed_qty, self.precision("reserved_qty"))
@@ -1105,6 +1117,19 @@ def get_sre_reserved_qty_for_voucher_detail_no(
 	reserved_qty = query.run(as_list=True)
 
 	return flt(reserved_qty[0][0])
+
+
+def get_sre_held_qty_for_voucher_detail_nos(voucher_detail_nos: list[str]) -> dict[str, float]:
+	"""Qty the reservations of each voucher row still hold in any warehouse; consumed stock stays counted."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	data = (
+		frappe.qb.from_(sre)
+		.select(sre.voucher_detail_no, Sum(sre.reserved_qty - sre.transferred_qty - sre.delivered_qty))
+		.where((sre.docstatus == 1) & sre.voucher_detail_no.isin(voucher_detail_nos))
+		.groupby(sre.voucher_detail_no)
+	).run(as_list=True)
+
+	return {voucher_detail_no: flt(qty) for voucher_detail_no, qty in data}
 
 
 def get_sre_reserved_serial_nos_details(
@@ -2264,8 +2289,11 @@ def get_status(sre) -> str:
 		return "Cancelled"
 	if sre.docstatus != 1:
 		return "Draft"
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 	if sre.transferred_qty:
-		return "Partially Used" if sre.transferred_qty < sre.reserved_qty else "Closed"
+		# a supplier warehouse reservation is both consumed and returned
+		used_qty = flt(flt(sre.transferred_qty) + flt(sre.consumed_qty), precision)
+		return "Partially Used" if used_qty < flt(sre.reserved_qty, precision) else "Closed"
 	if flt(sre.delivered_qty) + flt(sre.consumed_qty) >= flt(sre.reserved_qty):
 		return "Delivered"
 	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")

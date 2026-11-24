@@ -437,7 +437,6 @@ class ProductionPlan(Document):
 				(so_item.stock_qty - _reserved_qty_from_stock(so_item)).as_("qty"),
 				_reserved_work_order_output_qty(so_item).as_("reserved_work_order_output_qty"),
 				so_item.work_order_qty,
-				so_item.stock_qty,
 				so_item.production_plan_qty,
 				so_item.delivered_qty,
 				so_item.conversion_factor,
@@ -450,7 +449,7 @@ class ProductionPlan(Document):
 				(so_item.parent.isin(so_list))
 				& (so_item.docstatus == 1)
 				& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
-				& (so_item.stock_qty > so_item.production_plan_qty)
+				& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 			)
 		)
 
@@ -471,9 +470,7 @@ class ProductionPlan(Document):
 				item.reserved_work_order_output_qty
 			)
 			pending_qty = flt(item.qty) - max(item.work_order_qty, delivered_or_reserved_qty, 0)
-			item.pending_qty = flt(
-				min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty)), precision
-			)
+			item.pending_qty = flt(min(pending_qty, flt(item.qty) - flt(item.production_plan_qty)), precision)
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -691,14 +688,7 @@ class ProductionPlan(Document):
 			return
 
 		already_planned = self.get_so_wise_planned_qty(list({key[0] for key in planned_qty}))
-		so_items = {
-			row.name: row
-			for row in frappe.get_all(
-				"Sales Order Item",
-				filters={"name": ("in", [key[1] for key in planned_qty])},
-				fields=["name", "item_code", "stock_qty", "stock_uom"],
-			)
-		}
+		so_items = self.get_so_items_to_validate([key[1] for key in planned_qty])
 		allowance = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
@@ -707,7 +697,9 @@ class ProductionPlan(Document):
 		for (sales_order, so_item), qty in planned_qty.items():
 			row = so_items[so_item]
 			unplanned_qty = flt(
-				flt(row.stock_qty) * (1 + allowance / 100) - flt(already_planned.get((sales_order, so_item))),
+				flt(row.stock_qty) * (1 + allowance / 100)
+				- flt(row.reserved_qty)
+				- flt(already_planned.get((sales_order, so_item))),
 				precision,
 			)
 			if flt(qty, precision) > unplanned_qty:
@@ -719,6 +711,24 @@ class ProductionPlan(Document):
 					),
 					title=_("Sales Order Qty Exceeded"),
 				)
+
+	@staticmethod
+	def get_so_items_to_validate(so_items):
+		"""Sales Order Items by name, with the reserved qty that is not their own Work Order output."""
+		so_item = frappe.qb.DocType("Sales Order Item")
+		rows = (
+			frappe.qb.from_(so_item)
+			.select(
+				so_item.name,
+				so_item.item_code,
+				so_item.stock_qty,
+				_reserved_qty_from_stock(so_item).as_("reserved_qty"),
+				so_item.stock_uom,
+			)
+			.where(so_item.name.isin(so_items))
+			.run(as_dict=True)
+		)
+		return {row.name: row for row in rows}
 
 	def get_so_item_planned_qty(self):
 		"""Planned qty per Sales Order line, excluding product bundle components."""
@@ -1769,8 +1779,17 @@ def get_subitems(
 		if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
 			continue
 
+		# a planned sub-assembly is made or subcontracted, so only its components are requested
+		sub_assembly_type = (data.get("planned_sub_assemblies") or {}).get((d.item_code, d.line_bom_no))
+		if sub_assembly_type == "Subcontract" and not include_subcontracted_items:
+			continue
+
 		explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
-		explode = explodable and _should_explode_subitem(d, include_subcontracted_items) and d.qty > 0
+		explode = (
+			explodable
+			and (sub_assembly_type or _should_explode_subitem(d, include_subcontracted_items))
+			and d.qty > 0
+		)
 		if not explode:
 			_merge_subitem(item_details, d)
 		else:
@@ -1888,16 +1907,17 @@ def consolidate_subcontracted_po(subcontracted_po, subcontracted_qty):
 	return {key: value for key, value in subcontracted_po.items() if value}
 
 
-def get_requested_sub_assemblies(doc):
-	requested_sub_assemblies = {}
+def _get_sub_assemblies_by_plan_row(doc):
+	"""(item, BOM) of each plan row's sub-assemblies: the ones to request, and the type of the others."""
+	requested, planned = defaultdict(set), defaultdict(dict)
 	for row in doc.get("sub_assembly_items") or []:
 		row = frappe._dict(row)
+		key = (row.production_item, row.bom_no)
 		if row.type_of_manufacturing == "Material Request":
-			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
-				(row.production_item, row.bom_no)
-			)
-
-	return requested_sub_assemblies
+			requested[row.production_plan_item].add(key)
+		else:
+			planned[row.production_plan_item][key] = row.type_of_manufacturing
+	return requested, planned
 
 
 def round_up_whole_uom(quantity, uom):
@@ -2052,7 +2072,7 @@ def get_sales_orders(self):
 			& (so.docstatus == 1)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == self.company)
-			& (so_item.stock_qty > so_item.production_plan_qty)
+			& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.production_plan_qty)
 		)
 	)
 
@@ -2296,16 +2316,19 @@ def get_items_for_material_requests(
 			)
 		sub_assembly_items = {k[:2]: v for k, v in sub_assembly_items.items()}
 
-	requested_sub_assemblies = get_requested_sub_assemblies(doc)
+	requested_sub_assemblies, planned_sub_assemblies = _get_sub_assemblies_by_plan_row(doc)
 	all_requested = set().union(*requested_sub_assemblies.values())
+	all_planned = {key: value for rows in planned_sub_assemblies.values() for key, value in rows.items()}
+	combined = doc.get("combine_sub_items")
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
 
 		data["requested_sub_assemblies"] = (
-			all_requested
-			if doc.get("combine_sub_items")
-			else requested_sub_assemblies.get(data.get("name"), set())
+			all_requested if combined else requested_sub_assemblies.get(data.get("name"), set())
+		)
+		data["planned_sub_assemblies"] = (
+			all_planned if combined else planned_sub_assemblies.get(data.get("name"), {})
 		)
 
 		planned_qty = data.get("required_qty") or data.get("planned_qty")
@@ -2943,7 +2966,10 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 		.on(table.parent == so_table.name)
 		.select(table.parent)
 		.distinct()
-		.where((table.stock_qty > table.production_plan_qty) & (table.docstatus == 1))
+		.where(
+			((table.stock_qty - _reserved_qty_from_stock(table)) > table.production_plan_qty)
+			& (table.docstatus == 1)
+		)
 	)
 
 	if filters.get("company"):

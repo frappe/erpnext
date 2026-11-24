@@ -1172,6 +1172,18 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		frappe.set_user("test@example.com")
 
+	def test_item_query_checks_pos_profile(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import item_query
+
+		def query(pos_profile):
+			return item_query("Item", "", "name", 0, 5, {"pos_profile": ["=", pos_profile]})
+
+		self.assertTrue(query(self.pos_profile.name))
+		assert_refused(self, query, {"warehouse": ["like", "%"]})
+		with as_user(make_fenced_user("pos-items@example.com", ["Sales User"])):
+			assert_refused(self, query, self.pos_profile.name)
+			assert_refused(self, query, "_Test Missing POS Profile")
+
 	def test_make_merge_log_respects_customer_user_permission(self):
 		inside = create_pos_invoice(pos_profile=self.pos_profile.name, do_not_submit=1)
 		outside = create_pos_invoice(

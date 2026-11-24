@@ -277,7 +277,7 @@ frappe.ui.form.on("Work Order", {
 
 	has_unreserved_stock(frm) {
 		let has_unreserved_stock = frm.doc.required_items.some(
-			(item) => flt(item.required_qty) > flt(item.stock_reserved_qty)
+			(item) => erpnext.stock_reservation.get_work_order_unreserved_qty(item) > 0
 		);
 
 		return has_unreserved_stock;
