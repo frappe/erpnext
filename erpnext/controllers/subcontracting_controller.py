@@ -1927,7 +1927,8 @@ class SubcontractingController(StockController):
 def update_serial_nos_at_supplier(details, serial_nos, is_return):
 	"""Add the serial nos a transfer sent to the supplier, or take out those a return brought back."""
 	if not is_return:
-		details.serial_no.extend(serial_nos)
+		# a voucher's bundles repeat the serial nos of its rows that use the Serial No field
+		details.serial_no.extend(serial_no for serial_no in serial_nos if serial_no not in details.serial_no)
 		return
 
 	for serial_no in serial_nos:
