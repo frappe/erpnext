@@ -476,9 +476,8 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	return query.run(as_dict=True)
 =======
 def make_split_serial_bundle(item_code, warehouse, company, from_bundle_id, batch_no):
-	serial_nos = frappe.get_all(
-		"Serial and Batch Entry", filters={"parent": from_bundle_id}, pluck="serial_no", order_by="idx"
-	)
+	from erpnext.stock.serial_batch_bundle import get_serial_nos
+
 	bundle = frappe.get_doc(
 		{
 			"doctype": "Serial and Batch Bundle",
@@ -488,7 +487,10 @@ def make_split_serial_bundle(item_code, warehouse, company, from_bundle_id, batc
 			"voucher_type": "Stock Entry",
 			"type_of_transaction": "Inward",
 			"posting_datetime": combine_datetime(today(), nowtime()),
-			"entries": [{"serial_no": serial_no, "batch_no": batch_no, "qty": 1} for serial_no in serial_nos],
+			"entries": [
+				{"serial_no": serial_no, "batch_no": batch_no, "qty": 1}
+				for serial_no in get_serial_nos(from_bundle_id)
+			],
 		}
 	)
 	return bundle.save().name
