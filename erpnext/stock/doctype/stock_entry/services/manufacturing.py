@@ -120,7 +120,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				)
 
 			item_args["qty"] = get_secondary_item_qty(row, self.doc.fg_completed_qty)
-			# the BOM's rounded loss can take the whole qty
+			# the BOM's rounded loss or the row's precision can take the whole qty
 			if item_args["qty"]:
 				item_args["transfer_qty"] = item_args["qty"]
 				self.doc.append("items", item_args)
@@ -1845,6 +1845,8 @@ def get_secondary_item_qty(row, fg_qty):
 	if flt(row.stock_qty):
 		qty = qty * (row.stock_qty - flt(row.process_loss_qty)) / row.stock_qty
 
+	# at the row's precision first, so a qty that saves as 0 is skipped and SQL division noise adds no unit
+	qty = flt(qty, frappe.get_precision("Stock Entry Detail", "qty"))
 	return ceil_qty_if_uom_has_whole_number(qty, row.stock_uom)
 
 
