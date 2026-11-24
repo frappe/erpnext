@@ -843,6 +843,7 @@ cur_frm.cscript.hour_rate = function (doc) {
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
 cur_frm.cscript.batch_size = cur_frm.cscript.hour_rate;
 cur_frm.cscript.set_cost_based_on_bom_qty = cur_frm.cscript.hour_rate;
+cur_frm.cscript.fixed_time = cur_frm.cscript.hour_rate;
 
 cur_frm.cscript.bom_no = function (doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn, false);
@@ -935,7 +936,9 @@ erpnext.bom.calculate_op_cost = function (doc) {
 				base_cost_per_unit: base_cost_per_unit,
 			});
 
-			if (item.set_cost_based_on_bom_qty) {
+			// as is_costed_per_batch in bom.py
+			const batch_based = doc.__onload?.batch_based_operations?.includes(item.operation);
+			if (!item.fixed_time && (item.set_cost_based_on_bom_qty || batch_based)) {
 				operating_cost = cost_per_unit * flt(doc.quantity);
 				base_operating_cost = base_cost_per_unit * flt(doc.quantity);
 			}
