@@ -370,7 +370,9 @@ class BuyingController(SubcontractingController):
 		if not row.uom:
 			# a factor sent without a UOM is not the factor of the UOM the row gets
 			row.uom = item.purchase_uom or item.stock_uom
-			row.conversion_factor = get_conversion_factor(row.item_code, row.uom).get("conversion_factor")
+			row.conversion_factor = get_conversion_factor(row.item_code, row.uom, throw_if_missing=True).get(
+				"conversion_factor"
+			)
 
 		if row.uom == item.stock_uom:
 			return 1.0
