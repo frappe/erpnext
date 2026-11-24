@@ -134,10 +134,22 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 		receipt.items[0].qty = 8
 		receipt.items[0].rejected_qty = 2
 		receipt.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
-		receipt.insert()
 		receipt.submit()
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
+	def test_on_time_receipt_is_compared_in_po_uom(self):
+		# 10 boxes of 6 received against 10 boxes of 12 ordered is half the line
+		supplier = create_scorecard_supplier()
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=10, rate=100, submit=False)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 12
+		po.submit()
+		receipt = make_pr_from_po(po.name)
+		receipt.items[0].conversion_factor = 6
+		receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 0)
 
 
 def create_scorecard_supplier(supplier_name="_Test Supplier Scorecard"):
