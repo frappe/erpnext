@@ -11,6 +11,7 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_item_or_template_bom_query,
+	get_reserved_packed_item_qty,
 	get_reserved_qty_from_stock,
 	get_reserved_work_order_output_qty,
 	get_sales_orders,
@@ -192,7 +193,12 @@ class SalesOrderSourcingService:
 		)
 		if self.doc.item_code:
 			query = query.where(so_item.item_code == self.doc.item_code)
-		return query.run(as_dict=True)
+
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
+		items = query.run(as_dict=True)
+		for item in items:
+			item.pending_qty = max(flt(item.pending_qty, precision), 0)
+		return items
 
 	def get_mr_items(self):
 		# Check for empty table or empty rows
@@ -347,7 +353,7 @@ def _so_packed_columns(so_item, pi):
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty),
 		)
 		.else_(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
-	)
+	) - get_reserved_packed_item_qty(pi)
 	return [
 		pi.parent,
 		pi.item_code,
