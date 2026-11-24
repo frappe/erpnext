@@ -769,7 +769,7 @@ class SubcontractingController(StockController):
 				supplied_item.batch_no,
 				supplied_item.consumed_qty,
 				supplied_item.main_item_code,
-				supplied_item.parent.as_("voucher_no"),
+				supplied_item.serial_and_batch_bundle,
 			)
 			.where(
 				(supplied_item.docstatus == 1)
@@ -778,9 +778,6 @@ class SubcontractingController(StockController):
 			)
 			.orderby(receipt.posting_date, receipt.posting_time, receipt.creation, supplied_item.idx)
 		)
-
-		if self.subcontract_data.receipt_supplied_items_field != "Purchase Receipt Item Supplied":
-			query = query.select(supplied_item.serial_and_batch_bundle)
 
 		return query.run(as_dict=True)
 
@@ -866,7 +863,6 @@ class SubcontractingController(StockController):
 	def deduct_consumed_qty(self, consumed_qty):
 		"""Take each finished good's consumption from its own transfer first, then from the order's other
 		transfers of the raw material; what none has left, and a net return, goes on its own transfer."""
-		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for own_transfer in (True, False):
 			for (key, batch_no), qty in consumed_qty.items():
 				for transfer_key in self.get_transfer_keys(key):
@@ -876,7 +872,7 @@ class SubcontractingController(StockController):
 
 					details = self.available_materials[transfer_key]
 					qty_left = details.batch_no.get(batch_no, 0) if batch_no else details.qty
-					deducted = flt(min(qty, max(qty_left, 0)), precision)
+					deducted = min(qty, max(qty_left, 0))
 					if deducted > 0:
 						self.deduct_from_transfer(transfer_key, batch_no, deducted)
 						qty -= deducted
@@ -914,18 +910,18 @@ class SubcontractingController(StockController):
 		"""Round what each transfer has left, and spread its consumption over the order rows it was sent on."""
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for key, details in self.available_materials.items():
-			details.qty = flt(details.qty, precision)
-			for batch_no, qty in details.batch_no.items():
-				details.batch_no[batch_no] = flt(qty, precision)
-
 			consumed_qty = max(self.__transferred_items[key].qty - details.qty, 0)
 			qty_left = details[f"{self.subcontract_data.rm_detail_field}s"]
 			for order_row, sent_qty in qty_left.items():
 				# a return of components can take back more than was sent on its row
 				qty = min(consumed_qty, max(sent_qty, 0))
-				qty_left[order_row] = flt(sent_qty - qty, precision)
+				qty_left[order_row] = sent_qty - qty
 				consumed_qty -= qty
 >>>>>>> ced8174 (fix(subcontracting): allocate consumption to the transfers it was taken from)
+
+			details.qty = flt(details.qty, precision)
+			for batch_no, qty in details.batch_no.items():
+				details.batch_no[batch_no] = flt(qty, precision)
 
 	def get_available_materials(self):
 		"""Get the available raw materials which has been transferred to the supplier.
