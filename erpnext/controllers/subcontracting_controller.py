@@ -1582,6 +1582,9 @@ class SubcontractingController(StockController):
 			"is_old_subcontracting_flow"
 		):
 			self.__get_subcontract_orders()
+			if self.doctype == "Subcontracting Order":
+				self.subcontract_orders = [self.name]
+
 			self.initialized_fields()
 			self.get_available_materials()
 			self.__update_consumed_qty_in_subcontract_order()
