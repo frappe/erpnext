@@ -501,6 +501,82 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		stock_bin = {"item_code": item, "warehouse": pr.items[0].warehouse}
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 1.0)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_rows_of_one_return_of_parts_of_a_receipt_take_back_only_its_stock_qty(self):
+		"""Rows of one return of parts of a row share what the row put in (1.01 Kg and 1.00 Kg of 2.01 Kg),
+		and cancelling the return puts back what it took."""
+		pr = self.receive_for_returns_of_parts(0.3356, 6)
+		pr_return = self.return_receipt_rows(pr, [-3, -3])
+		self.assertEqual(self.get_returns_of_parts_bin_qty(pr), 0)
+
+		pr_return.cancel()
+		self.assertEqual(self.get_returns_of_parts_bin_qty(pr), 2.01)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_rows_of_one_return_of_parts_of_a_receipt_take_what_is_left_in_turn(self):
+		"""Of 7 Box at 0.004 Kg (0.03 Kg), rows of 3, 3 and 1 Box take 0.01 Kg, the 0.02 Kg left once the
+		rest of the row rounds to nothing, and nothing."""
+		pr = self.receive_for_returns_of_parts(0.004, 7)
+		pr_return = self.return_receipt_rows(pr, [-3, -3, -1])
+
+		posted_qty = [
+			frappe.db.get_value("Stock Ledger Entry", {"voucher_detail_no": d.name}, "actual_qty") or 0
+			for d in pr_return.items
+		]
+		self.assertEqual(posted_qty, [-0.01, -0.02, 0])
+		self.assertEqual(self.get_returns_of_parts_bin_qty(pr), 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_return_takes_back_nothing_once_returns_took_all_its_receipt_row_put_in(self):
+		"""Returns of 1 Box of 3 Box at 0.006 Kg take 0.01 Kg each of 0.02 Kg, so the last one takes nothing,
+		and cancelling it puts nothing back."""
+		pr = self.receive_for_returns_of_parts(0.006, 3)
+		for _ in range(3):
+			pr_return = self.return_receipt_rows(pr, [-1])
+		self.assertEqual(self.get_returns_of_parts_bin_qty(pr), 0)
+
+		pr_return.cancel()
+		self.assertEqual(self.get_returns_of_parts_bin_qty(pr), 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_return_that_took_nothing_counts_among_the_returns_of_its_receipt_row(self):
+		"""Of 4 Box at 0.006 Kg (0.02 Kg), a return of 2 Box after one of 1 + 1 Box takes nothing. Once the
+		first is cancelled, a return of the other 2 Box takes the 0.02 Kg left."""
+		pr = self.receive_for_returns_of_parts(0.006, 4)
+		first_return = self.return_receipt_rows(pr, [-1, -1])
+		self.return_receipt_rows(pr, [-2])
+		first_return.cancel()
+
+		self.return_receipt_rows(pr, [-2])
+		self.assertEqual(self.get_returns_of_parts_bin_qty(pr), 0)
+
+	def receive_for_returns_of_parts(self, conversion_factor, qty):
+		"""Receipt of qty Box of an item kept in Kg."""
+		item = self.make_item_for_returns_of_parts(conversion_factor)
+		return make_purchase_receipt(
+			item_code=item, qty=qty, uom="Box", conversion_factor=conversion_factor, rate=100
+		)
+
+	def return_receipt_rows(self, pr, qtys):
+		"""Submit a return of the receipt's row as rows of the given qtys."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		row = pr_return.items[0].as_dict(no_default_fields=True)
+		pr_return.items = []
+		for qty in qtys:
+			pr_return.append("items", row | {"qty": qty, "received_qty": qty})
+		pr_return.submit()
+		return pr_return
+
+	def get_returns_of_parts_bin_qty(self, pr):
+		stock_bin = {"item_code": pr.items[0].item_code, "warehouse": pr.items[0].warehouse}
+		return frappe.db.get_value("Bin", stock_bin, "actual_qty")
+
 	def return_receipt_in_parts(self, conversion_factor=0.3356):
 		"""Receipt of 6 Box, returned as two parts of 3 Box, whose stock qty rounds unevenly: at 0.3356 Kg
 		the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down (1.00 Kg each of 2.01 Kg)."""

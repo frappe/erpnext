@@ -271,6 +271,7 @@ def validate_returned_items(doc):
 				validate_quantity(doc, key, d, ref, valid_items, already_returned_items)
 				if doc.doctype == "Delivery Note":
 					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
+				add_returned_row(doc, key, d, already_returned_items)
 
 				if (
 					ref.rate
@@ -459,16 +460,27 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 
 
 def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
-	"""Hold all returns of an item, with or without dn_detail and across rows, to its total delivered qty."""
+	"""Hold all returns of an item, with or without dn_detail, to its total delivered qty."""
 	if key != row.item_code:
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
+		add_returned_row(doc, row.item_code, row, already_returned_items)
 
+
+def add_returned_row(doc, key, row, already_returned_items):
+	"""Count a validated row so that the next rows of the same return see it."""
+	conversion_factor = flt(row.conversion_factor or 1)
 	stock_qty = get_counted_stock_qty(doc, row)
-	for returned_key in {key, row.item_code}:
-		returned = already_returned_items.setdefault(returned_key, frappe._dict(qty=0, stock_qty=0))
-		returned.qty = flt(returned.qty) + abs(flt(row.qty))
-		returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
+	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
+		rejected_qty += stock_qty
+		stock_qty = 0
+
+	returned = already_returned_items.setdefault(key, frappe._dict())
+	returned.qty = flt(returned.qty) + abs(flt(row.qty))
+	returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
+	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
 
 
 def get_counted_stock_qty(doc, row):
@@ -541,7 +553,7 @@ def get_already_returned_items(doc):
 
 	stock_qty = Abs(child.qty) * child.conversion_factor
 	if doc.doctype == "Delivery Note":
-		# as in validate_delivery_note_item_qty, a row without dn_detail counts at its stored stock qty
+		# as in add_returned_row, a row without dn_detail counts at its stored stock qty
 		stock_qty = Case().when(IfNull(child.dn_detail, "") == "", Abs(child.stock_qty)).else_(stock_qty)
 
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor

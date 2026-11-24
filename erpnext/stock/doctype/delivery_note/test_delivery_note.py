@@ -523,23 +523,62 @@ class TestDeliveryNote(ERPNextTestSuite):
 		stock_bin = {"item_code": dn.items[0].item_code, "warehouse": "Stores - _TC"}
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 2.01)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_rows_of_one_return_of_parts_of_a_delivery_put_back_only_its_stock_qty(self):
+		"""Rows of one return of parts of a row share what the row took out (1.01 Kg and 1.00 Kg of 2.01 Kg)."""
+		dn = self.deliver_for_returns_of_parts(0.3356)
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = -3
+		dn_return.append("items", dn_return.items[0].as_dict(no_default_fields=True))
+		dn_return.submit()
+
+		stock_bin = {"item_code": dn.items[0].item_code, "warehouse": dn.items[0].warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 10)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_row_of_a_return_whose_stock_qty_rounds_to_nothing_puts_back_nothing(self):
+		"""Of 504 Box at 0.004 Kg (2.02 Kg), rows of 502, 1 and 2 Box put back 2.01 Kg, nothing as the
+		1 Box row's stock qty rounds to 0, and the 0.01 Kg left."""
+		dn = self.deliver_for_returns_of_parts(0.004, 504)
+		dn_return = make_sales_return(dn.name)
+		row = dn_return.items[0].as_dict(no_default_fields=True)
+		dn_return.items = []
+		for qty in (-502, -1, -2):
+			dn_return.append("items", row | {"qty": qty})
+		dn_return.submit()
+
+		posted_qty = [
+			frappe.db.get_value("Stock Ledger Entry", {"voucher_detail_no": d.name}, "actual_qty") or 0
+			for d in dn_return.items
+		]
+		self.assertEqual(posted_qty, [2.01, 0, 0.01])
+		stock_bin = {"item_code": dn.items[0].item_code, "warehouse": dn.items[0].warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 10)
+
 	def return_delivery_in_parts(self, conversion_factor=0.3356):
 		"""Delivery of 6 Box out of 10 Kg in stock, returned as two parts of 3 Box, whose stock qty rounds
 		unevenly: at 0.3356 Kg the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down
 		(1.00 Kg each of 2.01 Kg)."""
+		dn = self.deliver_for_returns_of_parts(conversion_factor)
+		first_return = make_sales_return(dn.name)
+		first_return.items[0].qty = -3
+		first_return.submit()
+		make_sales_return(dn.name).submit()
+		return dn
+
+	def deliver_for_returns_of_parts(self, conversion_factor, qty=6):
+		"""Delivery of qty Box out of 10 Kg in stock of an item kept in Kg."""
 		item = make_item(
 			f"_Test Item For Returns Of Parts {conversion_factor}",
 			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
 		).name
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		dn = create_delivery_note(item_code=item, qty=6, rate=100, do_not_submit=True)
+		dn = create_delivery_note(item_code=item, qty=qty, rate=100, do_not_submit=True)
 		dn.items[0].update({"uom": "Box", "conversion_factor": conversion_factor})
 		dn.submit()
-
-		first_return = make_sales_return(dn.name)
-		first_return.items[0].qty = -3
-		first_return.submit()
-		make_sales_return(dn.name).submit()
 		return dn
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
