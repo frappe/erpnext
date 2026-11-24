@@ -165,27 +165,25 @@ frappe.ui.form.on("Timesheet", {
 			frm.doc.currency != base_currency
 		);
 
-		if (frm.doc.time_logs.length > 0) {
-			frm.set_currency_labels(
-				["base_billing_rate", "base_billing_amount", "base_costing_rate", "base_costing_amount"],
-				base_currency,
-				"time_logs"
-			);
-			frm.set_currency_labels(
-				["billing_rate", "billing_amount", "costing_rate", "costing_amount"],
-				frm.doc.currency,
-				"time_logs"
-			);
+		frm.set_currency_labels(
+			["base_billing_rate", "base_billing_amount", "base_costing_rate", "base_costing_amount"],
+			base_currency,
+			"time_logs"
+		);
+		frm.set_currency_labels(
+			["billing_rate", "billing_amount", "costing_rate", "costing_amount"],
+			frm.doc.currency,
+			"time_logs"
+		);
 
-			let time_logs_grid = frm.fields_dict.time_logs.grid;
-			$.each(
-				["base_billing_rate", "base_billing_amount", "base_costing_rate", "base_costing_amount"],
-				function (i, d) {
-					if (frappe.meta.get_docfield(time_logs_grid.doctype, d))
-						time_logs_grid.set_column_disp(d, frm.doc.currency != base_currency);
-				}
-			);
-		}
+		let time_logs_grid = frm.fields_dict.time_logs.grid;
+		$.each(
+			["base_billing_rate", "base_billing_amount", "base_costing_rate", "base_costing_amount"],
+			function (i, d) {
+				if (frappe.meta.get_docfield(time_logs_grid.doctype, d))
+					time_logs_grid.set_column_disp(d, frm.doc.currency != base_currency);
+			}
+		);
 		frm.refresh_fields();
 	},
 
