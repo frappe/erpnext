@@ -180,33 +180,43 @@ class TransactionBase(StatusUpdater):
 		stop_actions = []
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
-			reference_details = self.get_reference_details(reference_names, ref_dt + " Item")
+			reference_rows = self.get_reference_rows(reference_names, ref_dt + " Item")
 			for d in self.get("items"):
 				if d.get(ref_link_field):
-					ref_rate = reference_details.get(d.get(ref_link_field))
+					ref_row = reference_rows.get(d.get(ref_link_field))
 
-					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
-						message = self.get_rate_mismatch_message(
-							d, ref_dt, d.get(ref_dn_field), ref_rate, d.get(ref_link_field)
-						)
+					if abs(flt(d.rate - ref_row.rate, d.precision("rate"))) >= 0.01:
 						if action == "Stop":
 							if role_allowed_to_override not in frappe.get_roles():
-								stop_actions.append(message)
+								stop_actions.append(
+									self.get_rate_mismatch_message(d, ref_dt, d.get(ref_dn_field), ref_row)
+								)
 						else:
-							frappe.msgprint(message, title=_("Warning"), indicator="orange")
+							frappe.msgprint(
+								self.get_rate_mismatch_message(d, ref_dt, d.get(ref_dn_field), ref_row),
+								title=_("Warning"),
+								indicator="orange",
+							)
 		if stop_actions:
 			frappe.throw(stop_actions, as_list=True)
 
-	def get_rate_mismatch_message(self, row, ref_dt, ref_dn, ref_rate, ref_row):
+	def get_rate_mismatch_message(self, row, ref_dt, ref_dn, ref_row):
 		from erpnext.stock.get_item_details import has_source_doc_permission
 
 		# the rate comes from ref_row, so check the document that holds it
-		ref_parent = frappe.db.get_value(f"{ref_dt} Item", ref_row, "parent")
-		if has_source_doc_permission(ref_dt, ref_parent, frappe.session.user):
+		if has_source_doc_permission(ref_dt, ref_row.parent, frappe.session.user):
 			return _("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-				row.idx, ref_dt, ref_dn, row.rate, ref_rate
+				row.idx, ref_dt, ref_dn, row.rate, ref_row.rate
 			)
 		return _("Row #{0}: Rate must be same as {1}: {2}").format(row.idx, ref_dt, ref_dn)
+
+	def get_reference_rows(self, reference_names, reference_doctype):
+		rows = frappe.get_all(
+			reference_doctype,
+			filters={"name": ("in", reference_names)},
+			fields=["name", "rate", "parent"],
+		)
+		return {row.name: row for row in rows}
 
 	def get_reference_details(self, reference_names, reference_doctype):
 		return frappe._dict(
