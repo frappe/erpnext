@@ -1235,7 +1235,11 @@ class SubcontractingInwardController:
 				short_qty[scio_detail] = missing_qty
 
 		if short_qty:
-			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
+			release_unused_inward_reservations(
+				self.subcontracting_inward_order,
+				short_qty,
+				lower_voucher_qty=self.purpose == "Receive from Customer",
+			)
 
 	def adjust_inward_reservations(self, release):
 		for item in self.items:
