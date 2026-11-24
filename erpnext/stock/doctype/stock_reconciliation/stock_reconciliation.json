@@ -11,6 +11,7 @@
   "naming_series",
   "company",
   "purpose",
+  "is_made_from_valuation_comparison",
   "col1",
   "posting_date",
   "posting_time",
@@ -58,6 +59,15 @@
    "label": "Purpose",
    "options": "\nOpening Stock\nStock Reconciliation\nAdjustment Entry",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_made_from_valuation_comparison",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Made from Stock Valuation Comparison",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col1",
@@ -193,7 +203,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 12:00:00.000000",
+ "modified": "2026-10-27 10:40:42.811876",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",

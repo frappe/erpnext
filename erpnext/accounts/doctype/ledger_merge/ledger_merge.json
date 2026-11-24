@@ -15,6 +15,7 @@
   "company",
   "status",
   "is_group",
+  "account_type",
   "section_break_5",
   "merge_accounts"
  ],
@@ -90,12 +91,20 @@
    "fieldtype": "Check",
    "label": "Is Group",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.account && !doc.is_group",
+   "fetch_from": "account.account_type",
+   "fieldname": "account_type",
+   "fieldtype": "Data",
+   "label": "Account Type",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "merge",
  "links": [],
- "modified": "2024-03-27 13:10:02.198009",
+ "modified": "2026-10-31 10:36:44.128727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Merge",

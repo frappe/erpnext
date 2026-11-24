@@ -124,7 +124,7 @@
   },
   {
    "default": "0",
-   "description": "If enabled, a weekly scheduler scans the Stock Ledger Variance for item-warehouses with incorrect valuation in the current financial year and auto-creates Item & Warehouse based reposts to fix them.",
+   "description": "If enabled, a weekly job checks the stock ledger entries of the current fiscal year. For each item and warehouse with an incorrect entry, it creates a Repost Item Valuation from that entry.",
    "fieldname": "repost_incorrect_valuation_entries",
    "fieldtype": "Check",
    "label": "Auto Repost Incorrect Valuation Entries (Weekly)"
@@ -134,7 +134,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-01 14:41:51.499245",
+ "modified": "2026-11-24 11:54:49.120357",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",

@@ -64,6 +64,7 @@ class DeliveryTrip(Document):
 			frappe.throw(_("A driver must be set to submit."))
 
 		if self._action == "submit":
+			self.validate_driver()
 			self.validate_delivery_note_not_draft()
 		self.validate_delivery_notes_not_on_other_trips()
 		self.validate_stop_addresses()
@@ -114,6 +115,13 @@ class DeliveryTrip(Document):
 						stop.idx, frappe.bold(stop.contact), frappe.bold(stop.customer)
 					)
 				)
+
+	def validate_driver(self):
+		status, expiry_date = frappe.db.get_value("Driver", self.driver, ["status", "expiry_date"])
+		if status != "Active":
+			frappe.throw(_("The driver must be active to submit a Delivery Trip."))
+		if expiry_date and getdate(expiry_date) < getdate(self.departure_time):
+			frappe.throw(_("The driver's licence must be valid on the departure date."))
 
 	def validate_delivery_note_not_draft(self):
 		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
@@ -374,8 +382,11 @@ class DeliveryTrip(Document):
 
 		try:
 			directions = maps_client.directions(**directions_data)
-		except Exception as e:
-			frappe.throw(_(str(e)))
+		except googlemaps.exceptions.ApiError as e:
+			frappe.throw(str(e))
+		except Exception:
+			frappe.log_error(_("Google Maps directions request failed"))
+			frappe.throw(_("Could not get directions from Google Maps. Please check the Error Log."))
 
 		return directions[0] if directions else False
 
@@ -501,7 +512,10 @@ def check_contact_customer_permission(contact):
 		)
 		.run(pluck=True)
 	)
-	if not any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers):
+	if not (
+		frappe.has_permission("Delivery Trip", "read")
+		and any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers)
+	):
 		frappe.throw(_("Not permitted to view Contact {0}").format(contact), frappe.PermissionError)
 
 
@@ -531,6 +545,9 @@ def notify_customers(delivery_trip: str):
 	delivery_trip.check_permission()
 	if delivery_trip.docstatus != 1:
 		frappe.throw(_("Customers can be notified only for a submitted Delivery Trip"))
+
+	for delivery_note in {stop.delivery_note for stop in delivery_trip.delivery_stops if stop.delivery_note}:
+		frappe.has_permission("Delivery Note", "read", doc=delivery_note, throw=True)
 
 	dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
 	if not dispatch_template_name:
@@ -599,6 +616,15 @@ def get_attachments(delivery_stop):
 def get_driver_email(driver: str):
 	frappe.has_permission("Driver", "select", doc=driver, throw=True)
 
-	employee = frappe.db.get_value("Driver", driver, "employee")
-	email = frappe.db.get_value("Employee", employee, "prefered_email")
+	driver_data = frappe.db.get_value("Driver", driver, ["user", "employee"], as_dict=True)
+	email = driver_data.user
+	if (
+		not email
+		and driver_data.employee
+		and frappe.has_permission("Employee", "read", doc=driver_data.employee)
+	):
+		employee = frappe.db.get_value(
+			"Employee", driver_data.employee, ["company_email", "prefered_email"], as_dict=True
+		)
+		email = employee.company_email or employee.prefered_email
 	return {"email": email}

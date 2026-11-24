@@ -6,10 +6,14 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	if not frappe.db.get_single_value("Video Settings", "enable_youtube_tracking") or not filters:
 		return [], []
+
+	validate_date_range(filters)
 
 	columns = get_columns()
 	data = get_data(filters)
@@ -30,18 +34,28 @@ def get_columns():
 
 
 def get_data(filters):
-	return frappe.db.sql(
-		"""
-		SELECT
-			publish_date, title, provider, duration,
-			view_count, like_count, dislike_count, comment_count
-		FROM `tabVideo`
-		WHERE view_count is not null
-			and publish_date between %(from_date)s and %(to_date)s
-		ORDER BY view_count desc""",
-		filters,
-		as_dict=1,
+	video = frappe.qb.DocType("Video")
+	query = (
+		frappe.qb.from_(video)
+		.select(
+			video.publish_date,
+			video.title,
+			video.provider,
+			video.duration,
+			video.view_count,
+			video.like_count,
+			video.dislike_count,
+			video.comment_count,
+		)
+		.where(video.view_count.isnotnull())
+		.orderby(video.view_count, order=frappe.qb.desc)
 	)
+	if filters.get("from_date"):
+		query = query.where(video.publish_date >= filters.get("from_date"))
+	if filters.get("to_date"):
+		query = query.where(video.publish_date <= filters.get("to_date"))
+
+	return query.run(as_dict=True)
 
 
 def get_chart_summary_data(data):

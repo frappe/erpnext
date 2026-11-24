@@ -88,11 +88,16 @@ class CallLog(Document):
 			return
 
 		if _is_call_missed(doc_before_save, self):
-			frappe.publish_realtime(f"call_{self.id}_missed", self)
+			self.notify_call_agents(doc_before_save, "missed")
 			self.trigger_call_popup()
 
 		if _is_call_ended(doc_before_save, self):
-			frappe.publish_realtime(f"call_{self.id}_ended", self)
+			self.notify_call_agents(doc_before_save, "ended")
+
+	def notify_call_agents(self, doc_before_save: "CallLog", event: str):
+		# Skip the schedule check: an agent whose slot ended mid-call must still close the popup.
+		for email in doc_before_save.get_agent_emails():
+			frappe.publish_realtime(f"call_{self.id}_{event}", self, user=email)
 
 	def is_incoming_call(self):
 		return self.type == "Incoming"
@@ -136,13 +141,19 @@ class CallLog(Document):
 		for email in emails:
 			frappe.publish_realtime("show_call_popup", self, user=email)
 
+	def get_agent_emails(self) -> set[str]:
+		if not self.is_incoming_call():
+			return set()
+
+		return {employee.get("user_id") for employee in get_employees_with_number(self.to)}
+
 	def update_received_by(self):
 		if employees := get_employees_with_number(self.get("to")):
 			self.call_received_by = employees[0].get("name")
 			self.employee_user_id = employees[0].get("user_id")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str | None = None):
 	validate_call_type(call_type)
 	doc = frappe.get_doc("Call Log", call_log)

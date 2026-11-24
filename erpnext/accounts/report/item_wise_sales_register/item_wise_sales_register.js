@@ -88,7 +88,15 @@ frappe.query_reports["Item-wise Sales Register"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		if (column.fieldname === "delivery_note" && value && value.includes(", ")) {
+			// an order item delivered in parts lists every delivery note; link each one separately
+			value = value
+				.split(", ")
+				.map((delivery_note) => default_formatter(delivery_note, row, column, data))
+				.join(", ");
+		} else {
+			value = default_formatter(value, row, column, data);
+		}
 		if (data && data.bold) {
 			value = value.bold();
 		}

@@ -36,6 +36,10 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		)
 		return list(execute(filters)[1])
 
+	def test_rejects_reversed_date_range(self):
+		with self.assertRaises(frappe.ValidationError):
+			self.run_report("_Test Item", from_date=add_days(today(), 1), to_date=today())
+
 	def test_in_out_quantities_and_running_balance(self):
 		item = "_Test Item"
 		self.make_movements(

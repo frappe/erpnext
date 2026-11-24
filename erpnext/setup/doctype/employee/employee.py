@@ -128,6 +128,14 @@ class Employee(NestedSet):
 		self.validate_email()
 		self.validate_status()
 		self.validate_reports_to()
+		department_to_restore = self.flags.pop("department_to_restore", None)
+		if (
+			self.department
+			and self.has_value_changed("department")
+			and self.department != department_to_restore
+		):
+			if frappe.db.get_value("Department", self.department, "disabled"):
+				frappe.throw(_("Cannot assign a disabled Department"))
 		self.set_preferred_email()
 		self.validate_preferred_email()
 
@@ -253,18 +261,6 @@ class Employee(NestedSet):
 		if self.image:
 			if not user.user_image or self.has_value_changed("image"):
 				user.user_image = self.image
-				try:
-					frappe.get_doc(
-						{
-							"doctype": "File",
-							"file_url": self.image,
-							"attached_to_doctype": "User",
-							"attached_to_name": self.user_id,
-						}
-					).insert(ignore_if_duplicate=True)
-				except frappe.DuplicateEntryError:
-					# already exists
-					pass
 
 		user.save()
 
@@ -321,11 +317,40 @@ class Employee(NestedSet):
 			return
 
 		user = frappe.get_doc("User", self.user_id)
-		enabled = user.enabled
-		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
-			user.enabled = not enabled
-			# Keep linked User status in sync from the Employee lifecycle and record the audit log.
-			user.save(ignore_permissions=True)
+		enable = self.status == "Active"
+		if user.enabled == enable:
+			return
+
+		if enable and not self.can_reenable_user(user):
+			frappe.msgprint(
+				_("User {0} is disabled. Only a user who can edit Users can enable it.").format(
+					frappe.bold(self.user_id)
+				)
+			)
+			return
+
+		user.enabled = enable
+		# Keep linked User status in sync from the Employee lifecycle and record the audit log,
+		# which can_reenable_user reads.
+		user.save(ignore_permissions=True, ignore_version=False)
+
+	def can_reenable_user(self, user):
+		"""Allow if the session user can edit the User, or if an Employee status change disabled it last."""
+		if frappe.has_permission("User", "write", user):
+			return True
+
+		last_change = frappe.get_all(
+			"Version",
+			filters={"ref_doctype": "User", "docname": user.name, "data": ("like", '%["enabled",%')},
+			pluck="owner",
+			order_by="creation desc",
+			limit=1,
+		)
+		# Without User write access, the only way to disable a User is an Employee status change.
+		# Every user has their own User shared with them, so check role permissions only.
+		return bool(last_change) and not frappe.has_permission(
+			"User", "write", user=last_change[0], ignore_share_permissions=True
+		)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
@@ -430,9 +455,9 @@ def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False,
 	        :param only_non_weekly: Check only non-weekly holidays, default is False
 	"""
 
-	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception, as_on=date)
 
 	if not holiday_list:
 		return False
@@ -458,7 +483,7 @@ def deactivate_sales_person(status=None, employee=None):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_user(employee: str, email: str | None = None, create_user_permission: int = 0) -> str:
 	emp = frappe.get_doc("Employee", employee)
 	emp.check_permission("write")

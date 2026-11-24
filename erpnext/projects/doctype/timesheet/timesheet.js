@@ -58,37 +58,44 @@ frappe.ui.form.on("Timesheet", {
 		if (frm.doc.docstatus < 1) {
 			let button = __("Start Timer");
 			$.each(frm.doc.time_logs || [], function (i, row) {
-				if (row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
+				if (row.from_time <= frappe.datetime.system_datetime() && !row.completed) {
 					button = __("Resume Timer");
 				}
 			});
 
-			frm.add_custom_button(__(button), function () {
-				var flag = true;
-				$.each(frm.doc.time_logs || [], function (i, row) {
-					// Fetch the row for which from_time is not present
-					if (flag && row.activity_type && !row.from_time) {
-						erpnext.timesheet.timer(frm, row);
-						row.from_time = frappe.datetime.now_datetime();
-						frm.refresh_fields("time_logs");
-						frm.save();
-						flag = false;
+			frm.add_custom_button(
+				__(button),
+				function () {
+					var flag = true;
+					$.each(frm.doc.time_logs || [], function (i, row) {
+						// Fetch the row for which from_time is not present
+						if (flag && row.activity_type && !row.from_time) {
+							erpnext.timesheet.timer(frm, row);
+							row.from_time = frappe.datetime.get_datetime_as_string(
+								frappe.datetime.system_datetime()
+							);
+							frm.refresh_fields("time_logs");
+							frm.save();
+							flag = false;
+						}
+						// Fetch the row for timer where activity is not completed and from_time is before now_time
+						if (flag && row.from_time <= frappe.datetime.system_datetime() && !row.completed) {
+							let timestamp = moment(frappe.datetime.system_datetime()).diff(
+								moment(row.from_time),
+								"seconds"
+							);
+							erpnext.timesheet.timer(frm, row, timestamp);
+							flag = false;
+						}
+					});
+					// If no activities found to start a timer, create new
+					if (flag) {
+						erpnext.timesheet.timer(frm);
 					}
-					// Fetch the row for timer where activity is not completed and from_time is before now_time
-					if (flag && row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
-						let timestamp = moment(frappe.datetime.now_datetime()).diff(
-							moment(row.from_time),
-							"seconds"
-						);
-						erpnext.timesheet.timer(frm, row, timestamp);
-						flag = false;
-					}
-				});
-				// If no activities found to start a timer, create new
-				if (flag) {
-					erpnext.timesheet.timer(frm);
-				}
-			}).addClass("btn-primary");
+				},
+				null,
+				"primary"
+			);
 		}
 
 		let filters = {
@@ -371,7 +378,12 @@ var calculate_end_time = function (frm, cdt, cdn) {
 
 	if (!child.from_time) {
 		// if from_time value is not available then set the current datetime
-		frappe.model.set_value(cdt, cdn, "from_time", frappe.datetime.get_datetime_as_string());
+		frappe.model.set_value(
+			cdt,
+			cdn,
+			"from_time",
+			frappe.datetime.get_datetime_as_string(frappe.datetime.system_datetime())
+		);
 	}
 
 	let d = moment(child.from_time);

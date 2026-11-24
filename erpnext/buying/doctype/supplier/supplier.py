@@ -41,12 +41,14 @@ class Supplier(TransactionBase):
 		from erpnext.buying.doctype.customer_number_at_supplier.customer_number_at_supplier import (
 			CustomerNumberAtSupplier,
 		)
+		from erpnext.stock.doctype.company_restriction.company_restriction import CompanyRestriction
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		accounts: DF.Table[PartyAccount]
 		alias: DF.Data | None
 		allow_purchase_invoice_creation_without_purchase_order: DF.Check
 		allow_purchase_invoice_creation_without_purchase_receipt: DF.Check
+		allowed_companies: DF.TableMultiSelect[CompanyRestriction]
 		companies: DF.Table[AllowedToTransactWith]
 		country: DF.Link | None
 		customer_numbers: DF.Table[CustomerNumberAtSupplier]
@@ -72,6 +74,7 @@ class Supplier(TransactionBase):
 		primary_address: DF.TextEditor | None
 		release_date: DF.Date | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		supplier_details: DF.Text | None
 		supplier_group: DF.Link | None
 		supplier_name: DF.Data
@@ -158,10 +161,21 @@ class Supplier(TransactionBase):
 
 		validate_party_accounts(self)
 		validate_default_price_list_side(self.default_price_list, "buying")
+		self.validate_supplier_group()
 		self.validate_internal_supplier()
 		self.validate_primary_contact_and_address()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+
+	def validate_supplier_group(self):
+		if not self.supplier_group:
+			return
+
+		if frappe.db.get_value("Supplier Group", self.supplier_group, "is_group"):
+			frappe.throw(
+				_("Cannot select a Group type Supplier Group. Please select a non-group Supplier Group."),
+				title=_("Invalid Supplier Group"),
+			)
 
 	def validate_primary_contact_and_address(self):
 		for fieldname, link_doctype in (
@@ -189,7 +203,7 @@ class Supplier(TransactionBase):
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
-		doc = frappe.get_doc("Supplier Group", self.supplier_group)
+		doc = frappe.get_doc("Supplier Group", self.supplier_group, check_permission="read")
 		self.payment_terms = ""
 		self.accounts = []
 

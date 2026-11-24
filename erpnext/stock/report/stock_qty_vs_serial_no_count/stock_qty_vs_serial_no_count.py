@@ -9,6 +9,7 @@ from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cstr, flt
 from pypika import analytics as an
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.serial_batch_bundle import get_serial_no_status
 
 
@@ -61,9 +62,14 @@ def get_data(warehouse, show_disabled_items):
 	filters = {"has_serial_no": True}
 	if not show_disabled_items:
 		filters["disabled"] = False
+
+	item_filters = [filters]
+	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
+		item_filters.append(condition)
+
 	serial_item_list = frappe.get_all(
 		"Item",
-		filters=filters,
+		filters=item_filters,
 		fields=["item_code", "item_name"],
 	)
 
@@ -163,22 +169,19 @@ def restore_serial_nos_in_stock(item_code, warehouses):
 
 def get_serial_nos_received_in(item_code, warehouses):
 	entry = frappe.qb.DocType("Serial and Batch Entry")
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
 	serial_no = frappe.qb.DocType("Serial No")
 	return (
 		frappe.qb.from_(entry)
-		.inner_join(bundle)
-		.on(entry.parent == bundle.name)
 		.inner_join(serial_no)
 		.on(serial_no.name == entry.serial_no)
 		.select(entry.serial_no)
 		.distinct()
 		.where(
-			(bundle.item_code == item_code)
-			& (bundle.docstatus == 1)
-			& (Coalesce(bundle.is_cancelled, 0) == 0)
+			(entry.item_code == item_code)
+			& (entry.docstatus == 1)
+			& (Coalesce(entry.is_cancelled, 0) == 0)
 			& (entry.qty > 0)
-			& (Coalesce(entry.warehouse, bundle.warehouse).isin(warehouses))
+			& (entry.warehouse.isin(warehouses))
 			& (
 				(serial_no.status.notin(["Active", "Expired"]))
 				| (Coalesce(serial_no.warehouse, "").notin(warehouses))

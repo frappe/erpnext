@@ -62,6 +62,7 @@
   "lost_detail_section",
   "lost_reasons",
   "order_lost_reason",
+  "lost_on",
   "column_break_56",
   "competitors",
   "contact_info",
@@ -184,6 +185,14 @@
    "fieldname": "order_lost_reason",
    "fieldtype": "Small Text",
    "label": "Detailed Reason",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "lost_on",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Lost On",
    "no_copy": 1,
    "read_only": 1
   },
@@ -659,7 +668,7 @@
  "icon": "user-star",
  "idx": 195,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-19 15:46:57.718694",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

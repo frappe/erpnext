@@ -6,9 +6,7 @@ from typing import Any
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import DocType, Interval
-from frappe.query_builder.functions import Now
-from frappe.utils import cint, cstr, date_diff, today
+from frappe.utils import add_days, cint, cstr, date_diff, now, today
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
 	get_leaf_boms,
@@ -17,6 +15,7 @@ from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
 	replace_bom,
 	set_values_in_log,
 )
+from erpnext.utilities import clear_logs_with_references
 
 
 class BOMMissingError(frappe.ValidationError):
@@ -48,10 +47,12 @@ class BOMUpdateLog(Document):
 	@staticmethod
 	def clear_old_logs(days=None):
 		days = days or 90
-		table = DocType("BOM Update Log")
-		frappe.db.delete(
-			table,
-			filters=((table.creation < (Now() - Interval(days=days))) & (table.update_type == "Update Cost")),
+		clear_logs_with_references(
+			"BOM Update Log",
+			{
+				"creation": ("<", add_days(now(), -days)),
+				"update_type": "Update Cost",
+			},
 		)
 
 	def validate(self):
@@ -171,6 +172,7 @@ def run_replace_bom_job(
 		doc.db_set("status", "In Progress")
 
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		frappe.db.auto_commit_on_many_writes = 1

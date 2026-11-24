@@ -16,6 +16,7 @@ from pypika import Order
 from pypika.analytics import RowNumber
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -46,7 +47,17 @@ SLEntry = dict[str, Any]
 
 
 def execute(filters: StockBalanceFilter | None = None):
+	validate_date_range(filters)
+
 	return StockBalanceReport(filters).run()
+
+
+def execute_snapshot_report(filters: StockBalanceFilter | None = None):
+	from erpnext.stock.report.stock_balance.stock_balance_snapshot import execute as execute_from_snapshot
+
+	validate_date_range(filters)
+
+	return execute_from_snapshot(filters)
 
 
 class StockBalanceReport:
@@ -60,6 +71,7 @@ class StockBalanceReport:
 		self.columns = []
 		self.sle_entries: list[SLEntry] = []
 		self.item_warehouse_balances = {}
+		self.latest_valuation_rates = {}
 		self.set_company_currency()
 
 	def set_company_currency(self) -> None:
@@ -228,7 +240,6 @@ class StockBalanceReport:
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
 		self.adjustment_netting = AdjustmentNetting()
-		self.latest_valuation_rates = {}
 		track_rates = self.shows_whole_pools
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
@@ -518,9 +529,7 @@ class StockBalanceReport:
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
-		if balance is not qty_dict:
-			balance.bal_qty += qty_diff
-			balance.bal_val += value_diff
+		self.add_to_item_warehouse_balance(balance, qty_dict, qty_diff, value_diff)
 
 	def is_reconciled_balance(self, entry) -> bool:
 		"""A write-off of stranded value moves nothing, so it is a plain delta. An Adjustment Entry
@@ -541,6 +550,11 @@ class StockBalanceReport:
 			self.item_warehouse_balances[key] = frappe._dict(bal_qty=opening.bal_qty, bal_val=opening.bal_val)
 
 		return self.item_warehouse_balances[key]
+
+	def add_to_item_warehouse_balance(self, balance, qty_dict, qty_diff, value_diff):
+		if balance is not qty_dict:
+			balance.bal_qty += qty_diff
+			balance.bal_val += value_diff
 
 	def initialize_data(self, group_by_key, entry):
 		self.item_warehouse_map[group_by_key] = frappe._dict(

@@ -6,7 +6,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, flt, nowdate
 
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
 from erpnext.selling.doctype.customer.test_customer import make_customer, set_credit_limit
@@ -16,6 +16,27 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestJournalEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Journal Entry")
+
+	def test_unregistered_party_type_on_untyped_account_is_rejected(self):
+		account = create_account(
+			account_name="_Test Party Type Untyped",
+			parent_account=frappe.get_value("Account", "Debtors - _TC", "parent_account"),
+			company="_Test Company",
+		)
+		journal = make_journal_entry(account, "_Test Cash - _TC", 10, save=False)
+		journal.accounts[0].update({"party_type": "User", "party": "Administrator"})
+		self.assertRaises(frappe.ValidationError, journal.insert)
+
+	def test_registered_party_type_on_untyped_account_is_accepted(self):
+		account = create_account(
+			account_name="_Test Party Type Untyped",
+			parent_account=frappe.get_value("Account", "Debtors - _TC", "parent_account"),
+			company="_Test Company",
+		)
+		journal = make_journal_entry(account, "_Test Cash - _TC", 10, save=False)
+		journal.accounts[0].update({"party_type": "Customer", "party": "_Test Customer"})
+		journal.insert().submit()
+		self.assertTrue(frappe.db.exists("GL Entry", {"voucher_no": journal.name, "party_type": "Customer"}))
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_journal_entry_with_against_jv(self):

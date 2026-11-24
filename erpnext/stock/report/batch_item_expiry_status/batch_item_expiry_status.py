@@ -11,8 +11,13 @@ from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, today
 
+from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	validate_filters(filters)
 
 	columns = get_columns()
@@ -88,6 +93,9 @@ def get_batch_details(filters):
 
 	if filters.get("item"):
 		query = query.where(batch.item == filters["item"])
+
+	if condition := get_allowed_masters_condition(batch.item, "Item"):
+		query = query.where(condition)
 
 	batches = query.run(as_dict=True)
 	set_permitted_batch_qty(batches)

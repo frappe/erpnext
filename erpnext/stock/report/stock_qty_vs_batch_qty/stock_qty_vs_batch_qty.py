@@ -6,7 +6,8 @@ import json
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 
 
 def execute(filters=None):
@@ -45,7 +46,7 @@ def get_data(filters=None):
 	batch_no = filters.get("batch")
 
 	batch_sle_data = (
-		get_batch_qty(
+		get_batch_qty_for_stock(
 			item_code=item,
 			batch_no=batch_no,
 			for_stock_levels=True,
@@ -74,6 +75,9 @@ def get_data(filters=None):
 		query = query.where(batch.item == item)
 	if batch_no:
 		query = query.where(batch.name == batch_no)
+
+	if condition := get_allowed_masters_condition(batch.item, "Item"):
+		query = query.where(condition)
 
 	batch_records = query.run(as_dict=True) or []
 
@@ -109,7 +113,7 @@ def update_batch_qty(selected_batches=None):
 	for row in selected_batches:
 		batch_name = row.get("batch")
 
-		batches = get_batch_qty(
+		batches = get_batch_qty_for_stock(
 			batch_no=batch_name,
 			item_code=row.get("item_code"),
 			for_stock_levels=True,

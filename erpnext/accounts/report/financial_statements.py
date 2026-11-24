@@ -24,6 +24,7 @@ from erpnext.accounts.report.utils import (
 	convert_to_presentation_currency,
 	get_currency,
 	has_gl_entry_restrictions,
+	validate_date_range,
 )
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
@@ -138,7 +139,7 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	return period_list
 
 
-def build_period_list(filters: frappe._dict) -> list[dict]:
+def build_period_list(filters: frappe._dict, accumulated_values=False) -> list[dict]:
 	"""
 	Build the report `period_list` from filters.
 
@@ -155,6 +156,7 @@ def build_period_list(filters: frappe._dict) -> list[dict]:
 		filters.period_end_date,
 		filters.filter_based_on,
 		filters.periodicity,
+		accumulated_values=accumulated_values,
 		company=filters.company,
 	)
 
@@ -273,7 +275,9 @@ def get_period_list(
 				label = get_label(periodicity, opts["from_date"], opts["to_date"])
 			else:
 				if reset_period_on_fy_change:
-					label = get_label(periodicity, opts.from_date_fiscal_year_start_date, opts["to_date"])
+					# a date range can start after its fiscal year does
+					label_start_date = max(opts.from_date_fiscal_year_start_date, year_start_date)
+					label = get_label(periodicity, label_start_date, opts["to_date"])
 				else:
 					label = get_label(periodicity, period_list[0].from_date, opts["to_date"])
 
@@ -318,8 +322,7 @@ def validate_dates(from_date, to_date):
 	if not from_date or not to_date:
 		frappe.throw(_("From Date and To Date are mandatory"))
 
-	if to_date < from_date:
-		frappe.throw(_("To Date cannot be less than From Date"))
+	validate_date_range({"from_date": from_date, "to_date": to_date})
 
 
 def get_months(start_date, end_date):
@@ -432,7 +435,7 @@ def calculate_values(
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
-						not ignore_accumulated_values_for_fy
+						not (accumulated_values and ignore_accumulated_values_for_fy)
 						or entry.fiscal_year == period.to_date_fiscal_year
 					):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
@@ -971,20 +974,13 @@ def compute_growth_view_data(data, columns):
 			data[row_idx][current_period_key] = growth_percent
 
 
-def compute_margin_view_data(data, columns):
-	if not columns:
+def compute_margin_view_data(data, columns, base_row: dict | None):
+	"""Express every row as a percentage of `base_row`, the income total row."""
+	if not columns or not base_row:
 		return
 
 	data_copy = copy.deepcopy(data)
-
-	base_row = None
-	for row in data_copy:
-		if row.get("account_name") == _("Income"):
-			base_row = row
-			break
-
-	if not base_row:
-		return
+	base_row = copy.deepcopy(base_row)
 
 	for row_idx in range(len(data_copy)):
 		# Taking the total income from each column (for all the financial years) as the base (100%)

@@ -37,6 +37,31 @@ class TestSupplier(ERPNextTestSuite):
 		s_doc.delete()
 		doc.delete()
 
+	def test_supplier_group_details_need_supplier_group_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		supplier_group = frappe.get_doc(
+			{
+				"doctype": "Supplier Group",
+				"supplier_group_name": f"_Test Group Details {frappe.generate_hash(length=6)}",
+				"payment_terms": "_Test Payment Term Template 3",
+				"accounts": [{"company": "_Test Company", "account": "Creditors - _TC"}],
+			}
+		).insert()
+		supplier = frappe.new_doc("Supplier")
+		supplier.supplier_name = "_Test Supplier Group Details"
+		supplier.supplier_group = supplier_group.name
+
+		with as_user(make_fenced_user("_test_sgd_stock@example.com", ["Stock User"])):
+			self.assertRaises(frappe.PermissionError, supplier.get_supplier_group_details)
+
+		with as_user(make_fenced_user("_test_sgd_purchase@example.com", ["Purchase Manager"])):
+			supplier.get_supplier_group_details()
+		self.assertEqual(supplier.payment_terms, "_Test Payment Term Template 3")
+		self.assertEqual(
+			[(row.company, row.account) for row in supplier.accounts], [("_Test Company", "Creditors - _TC")]
+		)
+
 	def test_supplier_default_payment_terms(self):
 		# Payment Term based on Days after invoice date
 		frappe.db.set_value(
@@ -150,6 +175,30 @@ class TestSupplier(ERPNextTestSuite):
 	def test_party_account_must_be_payable(self):
 		self.assertRaises(frappe.ValidationError, create_supplier, party_account="Debtors - _TC")
 		create_supplier(party_account="Creditors - _TC")
+
+	def test_supplier_group_must_be_a_leaf_on_insert(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot select a Group type Supplier Group",
+			create_supplier,
+			supplier_group="All Supplier Groups",
+		)
+
+	def test_supplier_group_must_be_a_leaf_on_update(self):
+		supplier = create_supplier(supplier_group="Services")
+		supplier.supplier_group = "All Supplier Groups"
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Cannot select a Group type Supplier Group", supplier.save
+		)
+
+	def test_supplier_group_remains_optional(self):
+		supplier = create_supplier(without_supplier_group=True)
+		self.assertFalse(supplier.supplier_group)
+		supplier.supplier_group = "Services"
+		supplier.save()
+		supplier.supplier_group = None
+		supplier.save()
+		self.assertFalse(supplier.reload().supplier_group)
 
 	def test_hold_all_blocks_receipts_and_quotations(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
@@ -280,6 +329,18 @@ class TestSupplier(ERPNextTestSuite):
 
 		# Rollback
 		address.delete()
+
+	def test_dashboard_hidden_from_user_with_only_a_shared_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.accounts.party import get_dashboard_info
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		pi = make_purchase_invoice(supplier="_Test Supplier")
+		user = create_user_with_roles("supplier-dashboard-user@example.com", "Stock User").name
+		frappe.share.add_docshare(pi.doctype, pi.name, user, read=1, flags={"ignore_share_permission": True})
+
+		with self.set_user(user):
+			self.assertIsNone(get_dashboard_info("Supplier", "_Test Supplier"))
 
 
 def create_supplier(**args):

@@ -247,3 +247,14 @@ class TestStockControllerConversions(ERPNextTestSuite):
 			self._reposts_queued_for(item, warehouse, entry.name),
 			"A Repost Item Valuation was queued for an entry with nothing posted after it",
 		)
+
+	def test_stock_uom_rate_uses_the_reset_conversion_factor(self):
+		"""A stock UOM row sent with another factor gets factor 1, and its stock UOM rate follows."""
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		dn = create_delivery_note(do_not_save=True)
+		dn.items[0].update({"uom": dn.items[0].stock_uom, "conversion_factor": 5, "rate": 100})
+		dn.insert()
+
+		self.assertEqual(dn.items[0].conversion_factor, 1)
+		self.assertEqual(dn.items[0].stock_uom_rate, 100)

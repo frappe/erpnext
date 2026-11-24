@@ -186,14 +186,12 @@ class AccountsSettings(Document):
 			)
 
 	def validate_and_sync_auto_reconcile_config(self):
-		if self.has_value_changed("auto_reconciliation_job_trigger"):
-			if (
-				cint(self.auto_reconciliation_job_trigger) > 0
-				and cint(self.auto_reconciliation_job_trigger) < 60
-			):
-				sync_auto_reconcile_config(self.auto_reconciliation_job_trigger)
-			else:
-				frappe.throw(_("Cron Interval should be between 1 and 59 Min"))
+		interval_changed = self.has_value_changed("auto_reconciliation_job_trigger")
+		if interval_changed and not 0 < cint(self.auto_reconciliation_job_trigger) < 60:
+			frappe.throw(_("Cron Interval should be between 1 and 59 Min"))
+
+		if self.auto_reconcile_payments:
+			sync_auto_reconcile_config(self.auto_reconciliation_job_trigger)
 
 		if self.has_value_changed("reconciliation_queue_size"):
 			if cint(self.reconciliation_queue_size) < 5 or cint(self.reconciliation_queue_size) > 100:

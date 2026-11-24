@@ -110,6 +110,27 @@ class TestSalesPersonTargetVarianceBasedOnItemGroup(ERPNextTestSuite):
 		self.assertEqual(flt(rows[person_on_order.name].total_achieved, 2), 20)
 		self.assertEqual(flt(rows[person_on_invoice.name].total_achieved, 2), 0)
 
+	def test_company_filter_excludes_other_company_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_company_filter,
+		)
+
+		check_company_filter(self, "Sales Person", "sales_person_name", execute)
+
+	def test_duplicate_target_inputs_count_actuals_once(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_duplicate_targets,
+		)
+
+		check_duplicate_targets(self, "Sales Person", "sales_person_name", execute)
+
+	def test_group_target_includes_descendant_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_group_target,
+		)
+
+		check_group_target(self, "Sales Person", "sales_person_name", execute)
+
 
 def create_target_distribution(fiscal_year):
 	distribution = frappe.new_doc("Monthly Distribution")

@@ -22,6 +22,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 				query: "erpnext.controllers.queries.item_query",
 				filters: {
 					is_stock_item: 1,
+					company: doc.company,
 				},
 			};
 		});
@@ -190,11 +191,11 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 	set_valuation_rate_and_qty_for_all_items: function (frm) {
 		frm.doc.items.forEach((row) => {
-			frm.events.set_valuation_rate_and_qty(frm, row.doctype, row.name);
+			frm.events.set_valuation_rate_and_qty(frm, row.doctype, row.name, true);
 		});
 	},
 
-	set_valuation_rate_and_qty: function (frm, cdt, cdn) {
+	set_valuation_rate_and_qty: function (frm, cdt, cdn, keep_counted_values = false) {
 		var d = frappe.model.get_doc(cdt, cdn);
 
 		if (d.item_code && d.warehouse) {
@@ -211,14 +212,25 @@ frappe.ui.form.on("Stock Reconciliation", {
 				},
 				callback: function (r) {
 					const row = frappe.model.get_doc(cdt, cdn);
-					if (!frm.doc.scan_mode) {
+					// a value the user changed is kept; one still at the book value follows the book
+					const is_changed = (field, current_field) =>
+						flt(row[field], precision(field, row)) !=
+						flt(row[current_field], precision(field, row));
+					const keep_qty = keep_counted_values && is_changed("qty", "current_qty");
+					const keep_rate =
+						keep_counted_values && is_changed("valuation_rate", "current_valuation_rate");
+
+					if (!frm.doc.scan_mode && !keep_qty) {
 						frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
 					}
-					frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
+					if (!keep_rate) {
+						frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
+					}
 					frappe.model.set_value(cdt, cdn, "current_qty", r.message.qty);
 					frappe.model.set_value(cdt, cdn, "current_valuation_rate", r.message.rate);
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "amount", row.qty * row.valuation_rate);
+					frm.events.set_amount_quantity(frm, cdt, cdn);
 					frappe.model.set_value(cdt, cdn, "current_serial_no", r.message.serial_nos);
 					frappe.model.set_value(
 						cdt,
@@ -227,7 +239,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 						r.message.use_serial_batch_fields
 					);
 
-					if (frm.doc.purpose == "Stock Reconciliation" && !frm.doc.scan_mode) {
+					if (frm.doc.purpose == "Stock Reconciliation" && !frm.doc.scan_mode && !keep_qty) {
 						frappe.model.set_value(cdt, cdn, "serial_no", r.message.serial_nos);
 					}
 				},
@@ -237,11 +249,20 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 	set_amount_quantity: function (doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
-		if (d.qty && d.valuation_rate) {
-			frappe.model.set_value(cdt, cdn, "amount", flt(d.qty) * flt(d.valuation_rate));
-			frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
-			frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));
-		}
+		// a blank qty or rate keeps the current one on save
+		const qty = d.qty ?? d.current_qty;
+		const rate = d.valuation_rate ?? d.current_valuation_rate;
+		const amount = flt(flt(qty) * flt(rate), precision("amount", d));
+		const current_amount = flt(
+			flt(d.current_qty) * flt(d.current_valuation_rate),
+			precision("current_amount", d)
+		);
+		frappe.model.set_value(cdt, cdn, {
+			amount: amount,
+			current_amount: current_amount,
+			quantity_difference: flt(flt(qty) - flt(d.current_qty), precision("qty", d)),
+			amount_difference: flt(amount - current_amount, precision("amount_difference", d)),
+		});
 	},
 	toggle_display_account_head: function (frm) {
 		frm.toggle_display(

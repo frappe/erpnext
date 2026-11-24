@@ -27,7 +27,10 @@ frappe.ui.form.on("Sales Order", {
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
-			} else if (doc.stock_qty - doc.delivered_qty <= doc.actual_qty) {
+			} else if (
+				flt(doc.stock_qty - doc.delivered_qty * doc.conversion_factor, precision("stock_qty", doc)) <=
+				doc.actual_qty
+			) {
 				color = "green";
 			} else {
 				color = "orange";
@@ -123,22 +126,12 @@ frappe.ui.form.on("Sales Order", {
 					() => frm.events.cancel_stock_reservation_entries(frm),
 					__("Stock Reservation")
 				);
-			}
 
-			if (!frm.doc.is_subcontracted) {
-				frm.doc.items.forEach((item) => {
-					if (
-						flt(item.stock_reserved_qty) > 0 &&
-						frappe.model.can_read("Stock Reservation Entry")
-					) {
-						frm.add_custom_button(
-							__("Reserved Stock"),
-							() => frm.events.show_reserved_stock(frm),
-							__("Stock Reservation")
-						);
-						return;
-					}
-				});
+				frm.add_custom_button(
+					__("Reserved Stock"),
+					() => frm.events.show_reserved_stock(frm),
+					__("Stock Reservation")
+				);
 			}
 		}
 
@@ -271,13 +264,19 @@ frappe.ui.form.on("Sales Order", {
 					default: frm.doc.set_warehouse,
 					get_query: () => {
 						return {
-							filters: [["Warehouse", "is_group", "!=", 1]],
+							filters: [
+								["Warehouse", "is_group", "!=", 1],
+								["Warehouse", "company", "=", frm.doc.company],
+							],
 						};
 					},
 					onchange: () => {
 						if (dialog.get_value("set_warehouse")) {
 							dialog.fields_dict.items.df.data.forEach((row) => {
-								row.warehouse = dialog.get_value("set_warehouse");
+								// a bundle component reserves in its packed row's warehouse
+								if (!row.is_packed_item) {
+									row.warehouse = dialog.get_value("set_warehouse");
+								}
 							});
 							dialog.fields_dict.items.grid.refresh();
 						}
@@ -305,12 +304,7 @@ frappe.ui.form.on("Sales Order", {
 						if (sales_order_item) {
 							frm.doc.items.forEach((item) => {
 								if (item.name === sales_order_item) {
-									let unreserved_qty =
-										(flt(item.stock_qty) -
-											(item.stock_reserved_qty
-												? flt(item.stock_reserved_qty)
-												: flt(item.delivered_qty) * flt(item.conversion_factor))) /
-										flt(item.conversion_factor);
+									let unreserved_qty = get_unreserved_qty(item);
 
 									if (unreserved_qty > 0) {
 										dialog.fields_dict.items.df.data.forEach((row) => {
@@ -325,6 +319,7 @@ frappe.ui.form.on("Sales Order", {
 										item_code: item.item_code,
 										warehouse: dialog.get_value("set_warehouse") || item.warehouse,
 										qty_to_reserve: Math.max(unreserved_qty, 0),
+										is_packed_item: 0,
 									});
 									dialog.fields_dict.items.grid.refresh();
 									dialog.set_value("add_item", undefined);
@@ -345,9 +340,8 @@ frappe.ui.form.on("Sales Order", {
 					fields: [
 						{
 							fieldname: "sales_order_item",
-							fieldtype: "Link",
-							label: __("Sales Order Item"),
-							options: "Sales Order Item",
+							fieldtype: "Data",
+							label: __("Item"),
 							reqd: 1,
 							in_list_view: 1,
 							get_query: () => {
@@ -391,9 +385,13 @@ frappe.ui.form.on("Sales Order", {
 							options: "Warehouse",
 							reqd: 1,
 							in_list_view: 1,
+							read_only_depends_on: "eval:doc.is_packed_item",
 							get_query: () => {
 								return {
-									filters: [["Warehouse", "is_group", "!=", 1]],
+									filters: [
+										["Warehouse", "is_group", "!=", 1],
+										["Warehouse", "company", "=", frm.doc.company],
+									],
 								};
 							},
 						},
@@ -403,6 +401,12 @@ frappe.ui.form.on("Sales Order", {
 							label: __("Qty"),
 							reqd: 1,
 							in_list_view: 1,
+						},
+						{
+							fieldname: "is_packed_item",
+							fieldtype: "Check",
+							label: __("Is Packed Item"),
+							hidden: 1,
 						},
 					],
 				},
@@ -436,12 +440,7 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.doc.items.forEach((item) => {
 			if (item.reserve_stock) {
-				let unreserved_qty =
-					(flt(item.stock_qty) -
-						(item.stock_reserved_qty
-							? flt(item.stock_reserved_qty)
-							: flt(item.delivered_qty) * flt(item.conversion_factor))) /
-					flt(item.conversion_factor);
+				let unreserved_qty = get_unreserved_qty(item);
 
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
@@ -450,13 +449,40 @@ frappe.ui.form.on("Sales Order", {
 						item_code: item.item_code,
 						warehouse: item.warehouse,
 						qty_to_reserve: unreserved_qty,
+						is_packed_item: 0,
 					});
 				}
 			}
 		});
 
-		dialog.fields_dict.items.grid.refresh();
-		dialog.show();
+		frappe.call({
+			doc: frm.doc,
+			method: "has_unreserved_stock",
+			args: {
+				table_name: "packed_items",
+			},
+			callback: (r) => {
+				if (r.message) {
+					frm.doc.packed_items.forEach((item) => {
+						if (item.reserve_stock && r.message[item.name]) {
+							const unreserved_qty = r.message[item.name];
+							if (unreserved_qty > 0) {
+								dialog.fields_dict.items.df.data.push({
+									__checked: 1,
+									sales_order_item: item.name,
+									item_code: item.item_code,
+									warehouse: item.warehouse,
+									qty_to_reserve: unreserved_qty,
+									is_packed_item: 1,
+								});
+							}
+						}
+					});
+				}
+				dialog.fields_dict.items.grid.refresh();
+				dialog.show();
+			},
+		});
 	},
 
 	cancel_stock_reservation_entries(frm) {
@@ -798,6 +824,14 @@ frappe.ui.form.on("Sales Order", {
 			args: {
 				service_item: service_item,
 			},
+		});
+	},
+
+	reserve_stock(frm) {
+		["items", "packed_items"].forEach((table) => {
+			(frm.doc[table] || []).forEach((row) => {
+				frappe.model.set_value(row.doctype, row.name, "reserve_stock", frm.doc.reserve_stock);
+			});
 		});
 	},
 });
@@ -1143,27 +1177,17 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						this.frm.add_custom_button(__("Project"), () => this.make_project(), __("Create"));
 					}
 
-					if (
-						doc.docstatus === 1 &&
-						!doc.inter_company_order_reference &&
-						frappe.model.can_create("Purchase Order")
-					) {
-						let me = this;
-						let internal = me.frm.doc.is_internal_customer;
-						if (internal) {
-							let button_label =
-								me.frm.doc.company === me.frm.doc.represents_company
-									? __("Internal Purchase Order")
-									: __("Inter Company Purchase Order");
+					if (doc.docstatus === 1 && doc.is_internal_customer) {
+						let button_label =
+							doc.company === doc.represents_company
+								? __("Internal Purchase Order")
+								: __("Inter Company Purchase Order");
 
-							me.frm.add_custom_button(
-								button_label,
-								function () {
-									me.make_inter_company_order();
-								},
-								__("Create")
-							);
-						}
+						this.add_inter_company_order_button(
+							button_label,
+							"Purchase Order",
+							"sales_order_item"
+						);
 					}
 				}
 				// payment request
@@ -1870,4 +1894,15 @@ function prevent_past_delivery_dates(frm) {
 			minDate: new Date(frm.doc.transaction_date),
 		});
 	}
+}
+
+function get_unreserved_qty(item) {
+	// stock_reserved_qty is what is still reserved, so the delivered qty comes off as well
+	const unreserved_stock_qty =
+		flt(item.stock_qty) -
+		flt(item.delivered_qty) * flt(item.conversion_factor) -
+		flt(item.stock_reserved_qty);
+	// left unrounded so the server gets back the stock qty it computes itself
+	if (flt(unreserved_stock_qty, precision("stock_qty", item)) <= 0) return 0;
+	return unreserved_stock_qty / flt(item.conversion_factor);
 }

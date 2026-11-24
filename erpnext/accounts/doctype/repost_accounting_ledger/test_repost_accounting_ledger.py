@@ -74,6 +74,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		def repost_voucher(doc, delete_cancelled_entries):
 			reposted.append(doc.name)
 			if doc.doctype in fail_for:
+				# nosemgrep: frappe-semgrep-rules.rules.frappe-missing-translate-function-python -- test-only message
 				frappe.throw(SIMULATED_FAILURE)
 			_repost_vouchers(doc, delete_cancelled_entries)
 
@@ -409,6 +410,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		# the job dies after the loop committed the invoice, e.g. killed or timed out
 		try:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-missing-translate-function-python -- test-only message
 			frappe.throw(SIMULATED_FAILURE)
 		except frappe.ValidationError:
 			_record_repost_failure(ral)

@@ -28,6 +28,7 @@ frappe.ui.form.on("Request for Quotation", {
 				is_group: 0,
 			},
 		}));
+		frm.set_query("supplier", "suppliers", () => erpnext.queries.supplier(frm.doc));
 
 		frm.set_indicator_formatter("item_code", function (doc) {
 			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";
@@ -339,6 +340,7 @@ frappe.ui.form.on("Request for Quotation Supplier", {
 			args: {
 				party: d.supplier,
 				party_type: "Supplier",
+				company: frm.doc.company,
 			},
 			callback: function (r) {
 				if (r.message) {

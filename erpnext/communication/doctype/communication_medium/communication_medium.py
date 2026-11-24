@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import to_timedelta
 
 
 class CommunicationMedium(Document):
@@ -27,4 +29,14 @@ class CommunicationMedium(Document):
 		timeslots: DF.Table[CommunicationMediumTimeslot]
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		self.validate_timeslots()
+
+	def validate_timeslots(self):
+		for slot in self.timeslots:
+			if to_timedelta(slot.from_time) >= to_timedelta(slot.to_time):
+				frappe.throw(
+					_("Row {0}: To Time must be later than From Time. Split overnight slots by day.").format(
+						slot.idx
+					)
+				)

@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Asset Repair", {
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Stock Entry"];
 
 		frm.fields_dict.cost_center.get_query = function (doc) {
 			return {
@@ -161,6 +161,31 @@ frappe.ui.form.on("Asset Repair", {
 			frm.refresh_field("stock_items");
 		}
 	},
+
+	set_consumed_item_rate: function (frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+		// submit issues the stock at completion_date, so price the outgoing qty at that moment
+		let posting_datetime = frm.doc.completion_date || frappe.datetime.now_datetime();
+		let [posting_date, posting_time] = posting_datetime.split(" ");
+
+		frappe.call({
+			method: "erpnext.stock.utils.get_incoming_rate",
+			args: {
+				args: {
+					item_code: item.item_code,
+					warehouse: item.warehouse,
+					posting_date: posting_date,
+					posting_time: posting_time,
+					qty: -1 * flt(item.consumed_quantity),
+					serial_no: item.serial_no,
+					company: frm.doc.company,
+				},
+			},
+			callback: function (r) {
+				frappe.model.set_value(cdt, cdn, "valuation_rate", r.message);
+			},
+		});
+	},
 });
 
 frappe.ui.form.on("Asset Repair Purchase Invoice", {
@@ -220,28 +245,21 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 			return;
 		}
 
-		let item_args = {
-			item_code: item.item_code,
-			warehouse: item.warehouse,
-			qty: item.consumed_quantity,
-			serial_no: item.serial_no,
-			company: frm.doc.company,
-		};
-
-		frappe.call({
-			method: "erpnext.stock.utils.get_incoming_rate",
-			args: {
-				args: item_args,
-			},
-			callback: function (r) {
-				frappe.model.set_value(cdt, cdn, "valuation_rate", r.message);
-			},
-		});
+		frm.events.set_consumed_item_rate(frm, cdt, cdn);
 	},
 
 	consumed_quantity: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, "total_value", row.consumed_quantity * row.valuation_rate);
+		frappe.model.set_value(cdt, cdn, "total_value", flt(row.consumed_quantity) * flt(row.valuation_rate));
+
+		if (row.warehouse && !row.serial_and_batch_bundle) {
+			frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		}
+	},
+
+	valuation_rate: function (frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "total_value", flt(row.consumed_quantity) * flt(row.valuation_rate));
 	},
 
 	pick_serial_and_batch(frm, cdt, cdn) {

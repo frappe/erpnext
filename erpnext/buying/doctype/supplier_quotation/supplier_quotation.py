@@ -8,11 +8,13 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
+from pypika.terms import ExistsCriterion
 
-from erpnext.buying.utils import validate_for_items
+from erpnext.buying.utils import get_qty_to_order, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.deprecation_dumpster import deprecated
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -90,7 +92,9 @@ class SupplierQuotation(BuyingController):
 		shipping_address: DF.Link | None
 		shipping_address_display: DF.TextEditor | None
 		shipping_rule: DF.Link | None
-		status: DF.Literal["", "Draft", "Submitted", "Stopped", "Cancelled", "Expired"]
+		status: DF.Literal[
+			"", "Draft", "Submitted", "Partially Ordered", "Ordered", "Stopped", "Cancelled", "Expired"
+		]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
 		supplier_name: DF.Data | None
@@ -116,25 +120,30 @@ class SupplierQuotation(BuyingController):
 
 	def validate(self):
 		super().validate()
+		self.set_status()
 
 		if not self.status:
 			self.status = "Draft"
 
 		from erpnext.controllers.status_updater import validate_status
 
-		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
+		validate_status(
+			self.status,
+			["Draft", "Submitted", "Partially Ordered", "Ordered", "Stopped", "Cancelled", "Expired"],
+		)
 
 		validate_for_items(self)
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_valid_till()
 
 	def on_submit(self):
-		self.db_set("status", "Submitted")
+		self.set_status(update=True)
 		self.update_rfq_supplier_status(1)
 
 	def on_cancel(self):
-		self.db_set("status", "Cancelled")
+		self.set_status(update=True)
 		self.update_rfq_supplier_status(0)
 
 	def on_trash(self):
@@ -170,6 +179,24 @@ class SupplierQuotation(BuyingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till Date cannot be before Transaction Date"))
+
+	def get_ordered_status(self):
+		ordered_items = get_ordered_items(self.name)
+
+		if not ordered_items:
+			return "Submitted"
+
+		for row in self.items:
+			if row.name not in ordered_items or row.stock_qty > ordered_items[row.name]:
+				return "Partially Ordered"
+
+		return "Ordered"
+
+	def is_fully_ordered(self):
+		return self.get_ordered_status() == "Ordered"
+
+	def is_partially_ordered(self):
+		return self.get_ordered_status() == "Partially Ordered"
 
 	def get_request_for_quotations(self) -> set[str]:
 		return {item.request_for_quotation for item in self.items if item.request_for_quotation}
@@ -243,10 +270,16 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None, args=None):
+	supplier_quotation = frappe.get_doc("Supplier Quotation", source_name)
+	if supplier_quotation.get_status()["status"] == "Expired":
+		frappe.throw(_("Supplier Quotation {0} has expired.").format(source_name))
+
 	if args is None:
 		args = {}
 	if isinstance(args, str):
 		args = json.loads(args)
+
+	qty_to_order = get_qty_to_order(supplier_quotation.items, "supplier_quotation_item")
 
 	mapped_items = get_qty_already_mapped(target_doc, "supplier_quotation_item")
 
@@ -256,7 +289,8 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+		target.qty = max(qty_to_order[obj.name], 0)
+		target.stock_qty = target.qty * flt(obj.conversion_factor)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -284,12 +318,11 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 					["sales_order", "sales_order"],
 				],
 				"postprocess": update_item,
-				# no qty tracking between the two, so dedupe on the row reference alone
-				"condition": lambda d: d.name not in mapped_items and select_item(d),
+				"condition": lambda item: item.name not in mapped_items
+				and (qty_to_order[item.name] > 0 or item.qty == 0)
+				and select_item(item),
 			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -317,7 +350,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				},
 			},
 			"Supplier Quotation Item": {"doctype": "Purchase Invoice Item"},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 	)
@@ -336,6 +369,7 @@ def make_quotation(source_name, target_doc=None):
 				"field_map": {
 					"name": "supplier_quotation",
 				},
+				"postprocess": lambda source, target, source_parent: clear_inapplicable_terms(target),
 			},
 			"Supplier Quotation Item": {
 				"doctype": "Quotation Item",
@@ -350,24 +384,40 @@ def make_quotation(source_name, target_doc=None):
 
 
 def set_expired_status():
-	frappe.db.sql(
-		"""
-		UPDATE
-			`tabSupplier Quotation` SET `status` = 'Expired'
-		WHERE
-			`status` not in ('Cancelled', 'Stopped') AND `valid_till` < %s
-		""",
-		(nowdate()),
+	supplier_quotation = frappe.qb.DocType("Supplier Quotation")
+	purchase_order = frappe.qb.DocType("Purchase Order")
+	purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+
+	purchase_order_against_quotation = (
+		frappe.qb.from_(purchase_order)
+		.from_(purchase_order_item)
+		.select(purchase_order.name)
+		.where(
+			(purchase_order_item.docstatus == 1)
+			& (purchase_order.docstatus == 1)
+			& (purchase_order_item.parent == purchase_order.name)
+			& (purchase_order_item.supplier_quotation == supplier_quotation.name)
+		)
 	)
 
+	(
+		frappe.qb.update(supplier_quotation)
+		.set(supplier_quotation.status, "Expired")
+		.where(
+			(supplier_quotation.docstatus == 1)
+			& (supplier_quotation.status.notin(["Expired", "Stopped"]))
+			& (supplier_quotation.valid_till < nowdate())
+			& ExistsCriterion(purchase_order_against_quotation).negate()
+		)
+	).run()
 
-def get_purchased_items(supplier_quotation: str):
+
+def get_ordered_items(supplier_quotation: str) -> frappe._dict:
 	return frappe._dict(
 		frappe.get_all(
-			"Purchase Order Item",
-			filters={"supplier_quotation": supplier_quotation, "docstatus": 1},
-			fields=["supplier_quotation_item", {"SUM": "qty"}],
-			group_by="supplier_quotation_item",
-			as_list=1,
+			"Supplier Quotation Item",
+			{"docstatus": 1, "parent": supplier_quotation, "ordered_qty": (">", 0)},
+			["name", "ordered_qty"],
+			as_list=True,
 		)
 	)

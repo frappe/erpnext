@@ -34,8 +34,13 @@ class CRMSettings(Document):
 
 	def validate(self):
 		frappe.db.set_default("campaign_naming_by", self.get("campaign_naming_by", ""))
+		self.validate_default_valid_till()
 		self.validate_enable_opportunity_creation_from_contact_us()
 		self.validate_allowed_users()
+
+	def validate_default_valid_till(self):
+		if self.default_valid_till and not str(self.default_valid_till).strip().isdigit():
+			frappe.throw(_("Default Quotation Validity Days must be a whole number of days, 0 or more."))
 
 	def validate_enable_opportunity_creation_from_contact_us(self):
 		contact_disabled = frappe.get_single_value("Contact Us Settings", "is_disabled")

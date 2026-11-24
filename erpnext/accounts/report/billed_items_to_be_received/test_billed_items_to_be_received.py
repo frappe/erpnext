@@ -114,6 +114,38 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 		self.assertNotIn(pi.name, names)
 		self.assertNotIn(debit_note.name, names)
 
+	def test_debit_note_in_another_uom_is_counted_in_invoice_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "_Test UOM 1", "conversion_factor": 10}],
+			}
+		).name
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code=item_code, update_stock=0, do_not_submit=True
+		)
+		pi.items[0].update(
+			{"uom": "_Test UOM 1", "conversion_factor": 10, "qty": 1, "rate": 1000, "price_list_rate": 1000}
+		)
+		pi.submit()
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].update(
+			{"uom": "Nos", "conversion_factor": 1, "qty": -1, "rate": 100, "price_list_rate": 100}
+		)
+		debit_note.submit()
+
+		receipt = make_purchase_receipt(pi.name)
+		rows = self.get_rows_for(self.run_report(), pi.name)
+
+		self.assertEqual((receipt.items[0].qty, receipt.items[0].received_qty), (0.9, 0.9))
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(1, 0, 0.1)])
+
+		receipt.submit()
+		self.assertFalse(self.get_rows_for(self.run_report(), pi.name))
+
 	def test_service_rows_are_not_listed(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier", item_code="_Test Non Stock Item", qty=1, rate=300, update_stock=0

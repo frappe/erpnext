@@ -4,7 +4,9 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.desk.reportview import build_match_conditions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
 from pypika.terms import Bracket, LiteralValue
@@ -24,6 +26,7 @@ from erpnext.accounts.report.utils import (
 	convert_to_presentation_currency,
 	get_currency,
 	has_gl_entry_restrictions,
+	validate_date_range,
 )
 from erpnext.accounts.utils import get_zero_cutoff
 
@@ -38,10 +41,28 @@ value_fields = (
 
 
 def execute(filters=None):
+	validate_company_permission(filters.company)
 	validate_filters(filters)
 	data = get_data(filters)
 	columns = get_columns()
 	return columns, data
+
+
+def validate_company_permission(company: str | None) -> None:
+	"""Check role access to Company and the user's User Permissions that apply to Company.
+
+	Only the user permissions on the Company itself apply. A document check would also match
+	the Company's link fields, such as its default accounts, against the user's restrictions,
+	and refuse a user who is restricted to some accounts.
+	"""
+	if not company:
+		return
+
+	allowed_companies = get_allowed_docs_for_doctype(get_user_permissions().get("Company", []), "Company")
+	if not frappe.has_permission("Company", "select") or (
+		allowed_companies and company not in allowed_companies
+	):
+		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
 def validate_filters(filters):
@@ -66,8 +87,7 @@ def validate_filters(filters):
 	filters.from_date = getdate(filters.from_date)
 	filters.to_date = getdate(filters.to_date)
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date cannot be greater than To Date"))
+	validate_date_range(filters)
 
 	if (filters.from_date < filters.year_start_date) or (filters.from_date > filters.year_end_date):
 		frappe.msgprint(
@@ -603,6 +623,7 @@ def execute_snapshot_report(filters):
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
+		validate_company_permission(filters.company)
 		validate_filters(filters)
 		columns = get_columns()
 		data = get_data_duckdb(filters, conn)

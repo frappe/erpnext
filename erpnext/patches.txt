@@ -260,6 +260,7 @@ execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Deta
 erpnext.patches.v14_0.update_proprietorship_to_individual
 erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
+erpnext.patches.v16_0.deduplicate_bank_account_balances
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -473,6 +474,7 @@ erpnext.patches.v16_0.enable_serial_batch_setting
 erpnext.patches.v16_0.update_requested_qty_packed_item
 erpnext.patches.v16_0.remove_payables_receivables_workspace
 erpnext.patches.v16_0.co_by_product_patch
+erpnext.patches.v16_0.set_idx_of_migrated_secondary_items
 erpnext.patches.v16_0.depends_on_inv_dimensions
 erpnext.patches.v16_0.uom_category
 erpnext.patches.v16_0.merge_repost_settings_to_accounts_settings
@@ -516,6 +518,7 @@ erpnext.patches.v16_0.disable_add_total_row_in_trends_reports
 erpnext.patches.v16_0.mirror_release_perms_to_custom_docperm #2026-10-05
 erpnext.patches.v16_0.mirror_warehouse_stock_manager_perms
 erpnext.patches.v16_0.remove_all_role_from_payment_terms_template
+erpnext.patches.v16_0.restrict_customer_group_permissions
 execute:from erpnext.setup.install import grant_address_read_to_accounts_manager; grant_address_read_to_accounts_manager()
 erpnext.patches.v16_0.remove_invalid_fetch_from_italy_payment_schedule_swift_number
 erpnext.patches.v16_0.set_stock_value_in_stock_closing_balance
@@ -532,6 +535,36 @@ erpnext.patches.v16_0.rebuild_production_plan_requested_qty
 erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
 erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
 erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
+erpnext.patches.v16_0.restore_in_words_print_defaults
 erpnext.patches.v16_0.apply_selling_settings_section_toggles
 erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
 erpnext.patches.v16_0.set_output_qty_in_work_order_operations
+erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
+erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers
+execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
+execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
+execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
+execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superseded_dunnings")()
+erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
+erpnext.patches.v16_0.set_outstanding_for_zero_portion_payment_terms
+erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
+erpnext.patches.v16_0.set_supplier_quotation_order_status
+erpnext.patches.v16_0.set_work_order_requested_and_picked_qty
+erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
+erpnext.patches.v16_0.set_lost_on_in_opportunity
+erpnext.patches.v16_0.restore_auto_reconciliation_job
+erpnext.patches.v16_0.share_assigned_appointments_with_agents
+erpnext.patches.v16_0.set_base_change_amount_on_pos_invoices
+erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
+erpnext.patches.v16_0.drop_item_code_warehouse_posting_datetime_index_from_sabb
+erpnext.patches.v16_0.drop_unfolded_item_search_index #2026-11-09
+erpnext.patches.v16_0.round_open_job_card_required_qty
+erpnext.patches.v16_0.restrict_company_address_flag
+erpnext.patches.v16_0.add_accounting_dimensions_to_request_for_quotation_item
+erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion
+erpnext.patches.v16_0.recalculate_ordered_qty_of_material_requests_ordered_in_parts
+erpnext.patches.v16_0.recalculate_received_qty_of_material_requests_received_in_parts
+erpnext.patches.v16_0.restrict_employee_project_perms_to_select
+erpnext.patches.v16_0.recalculate_returned_qty_of_customer_material_returned_in_parts
+erpnext.patches.v16_0.recalculate_transferred_qty_of_work_orders_with_mixed_transfers
+erpnext.patches.v16_0.set_reserved_components_return_cutoff

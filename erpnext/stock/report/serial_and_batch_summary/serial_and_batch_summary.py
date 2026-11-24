@@ -4,8 +4,12 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	data = get_data(filters)
 	columns = get_columns(filters, data)
 
@@ -39,25 +43,32 @@ def get_data(filters):
 
 def get_filter_conditions(filters):
 	filter_conditions = [
-		["Serial and Batch Bundle", "docstatus", "=", 1],
-		["Serial and Batch Bundle", "is_cancelled", "=", 0],
+		["Serial and Batch Entry", "docstatus", "=", 1],
+		["Serial and Batch Entry", "is_cancelled", "=", 0],
 	]
+
+	# show reserving bundles only when asked for
+	if not filters.get("voucher_type"):
+		filter_conditions.append(
+			["Serial and Batch Bundle", "voucher_type", "not in", RESERVING_VOUCHER_TYPES]
+		)
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
 			if field == "warehouse":
 				filter_conditions.append(
-					["Serial and Batch Bundle", field, "descendants of (inclusive)", filters.get(field)]
+					["Serial and Batch Entry", field, "descendants of (inclusive)", filters.get(field)]
 				)
 			elif field == "voucher_no":
 				filter_conditions.append(["Serial and Batch Bundle", field, "in", filters.get(field)])
 			else:
-				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])
+				doctype = "Serial and Batch Entry" if field == "item_code" else "Serial and Batch Bundle"
+				filter_conditions.append([doctype, field, "=", filters.get(field)])
 
 	if filters.get("from_date") and filters.get("to_date"):
 		filter_conditions.append(
 			[
-				"Serial and Batch Bundle",
+				"Serial and Batch Entry",
 				"posting_datetime",
 				"between",
 				[filters.get("from_date"), filters.get("to_date")],
@@ -232,7 +243,7 @@ def get_serial_nos(doctype: str, txt: str, searchfield: str, start: int, page_le
 
 	else:
 		query_filters["item_code"] = filters.get("item_code")
-		return frappe.get_all("Serial No", filters=query_filters, as_list=True)
+		return frappe.get_list("Serial No", filters=query_filters, as_list=True)
 
 
 @frappe.whitelist()
@@ -274,7 +285,7 @@ def get_batch_nos(doctype: str, txt: str, searchfield: str, start: int, page_len
 			query_filters["name"] = ["like", f"%{txt}%"]
 
 		query_filters["item"] = filters.get("item_code")
-		return frappe.get_all("Batch", filters=query_filters, as_list=True)
+		return frappe.get_list("Batch", filters=query_filters, as_list=True)
 
 
 def has_filter_scope(filters):

@@ -152,7 +152,7 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 		)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 

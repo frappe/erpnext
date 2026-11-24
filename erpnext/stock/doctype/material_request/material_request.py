@@ -181,13 +181,14 @@ class MaterialRequest(BuyingController):
 
 	def validate(self):
 		self.clear_source_warehouse()
+		self.validate_material_request_type()
 		super().validate()
 
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-		self.validate_material_request_type()
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
 		if not self.status:
 			self.status = "Draft"
@@ -237,7 +238,11 @@ class MaterialRequest(BuyingController):
 			self.buying_price_list = default_price_list
 
 	def on_update(self):
-		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
+		if (
+			self.get_doc_before_save()
+			and self.buying_price_list
+			and self.has_value_changed("buying_price_list")
+		):
 			self.update_item_rates()
 
 	def update_item_rates(self):
@@ -260,7 +265,13 @@ class MaterialRequest(BuyingController):
 				item.item_code,
 			)
 			if rate is not None:
-				item.db_set({"rate": rate, "amount": flt(rate * item.qty, item.precision("amount"))})
+				item.db_set(
+					{
+						"price_list_rate": rate,
+						"rate": rate,
+						"amount": flt(rate * item.qty, item.precision("amount")),
+					}
+				)
 
 		frappe.msgprint(
 			_("Item rates have been updated based on the selected Buying Price List {0}").format(
@@ -361,6 +372,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
 		self.update_requested_qty_in_job_card()
+		self.update_requested_qty_in_work_order()
 		self.update_prevdoc_status()
 		if self.material_request_type == "Purchase" and frappe.db.exists(
 			"Budget", {"applicable_on_material_request": 1, "docstatus": 1}
@@ -372,6 +384,25 @@ class MaterialRequest(BuyingController):
 
 	def before_submit(self):
 		self.set_status(update=True)
+		self.validate_pending_qty_in_job_card()
+		self.validate_pending_qty_in_work_order()
+
+	def validate_pending_qty_in_job_card(self):
+		if self.job_card:
+			job_card = frappe.get_doc("Job Card", self.job_card, for_update=True)
+			job_card.validate_incoming_material_demand(self)
+
+	def validate_pending_qty_in_work_order(self):
+		"""Job card requests are tracked on the job card, not the work order."""
+		if not self.work_order or self.job_card or self.material_request_type != "Material Transfer":
+			return
+
+		work_order = frappe.get_doc("Work Order", self.work_order, for_update=True)
+		incoming = {}
+		for row in self.items:
+			incoming[row.item_code] = incoming.get(row.item_code, 0.0) + flt(row.stock_qty)
+
+		work_order.validate_incoming_material_demand(incoming)
 
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
@@ -392,6 +423,7 @@ class MaterialRequest(BuyingController):
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_requested_qty_in_job_card()
+		self.update_requested_qty_in_work_order()
 
 	def status_can_change(self, status):
 		"""
@@ -422,6 +454,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
 		self.update_requested_qty_in_job_card()
+		self.update_requested_qty_in_work_order()
 		self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
@@ -501,6 +534,10 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
+		self.update_per_ordered(update_modified)
+		self.update_requested_qty_in_work_order()
+
+	def update_per_ordered(self, update_modified=True):
 		self._update_percent_field(
 			{
 				"target_dt": "Material Request Item",
@@ -512,6 +549,15 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
+
+	def update_requested_qty_in_work_order(self):
+		"""Refresh both counters: stop and cancel also flip pick list coverage."""
+		if not self.work_order or self.material_request_type != "Material Transfer":
+			return
+
+		work_order = frappe.get_doc("Work Order", self.work_order)
+		work_order.update_requested_qty_for_required_items()
+		work_order.update_picked_qty_for_required_items()
 
 	def update_requested_qty_in_job_card(self):
 		if self.job_card:
@@ -572,12 +618,15 @@ class MaterialRequest(BuyingController):
 			return
 
 		update_plan_item_requested_qty({d.material_request_plan_item for d in items_from_pp})
+		update_production_plan_status({d.production_plan for d in items_from_pp})
 
-		for production_plan in {d.production_plan for d in items_from_pp}:
-			doc = frappe.get_doc("Production Plan", production_plan)
-			doc.flags.ignore_permissions = True
-			doc.set_status()
-			doc.db_set("status", doc.status)
+
+def update_production_plan_status(production_plans):
+	for production_plan in production_plans:
+		doc = frappe.get_doc("Production Plan", production_plan)
+		doc.flags.ignore_permissions = True
+		doc.set_status()
+		doc.db_set("status", doc.status)
 
 
 def update_plan_item_requested_qty(plan_item_names):
@@ -762,6 +811,9 @@ def make_purchase_order(
 		if obj.name in requested_qty:
 			obj = get_source_item_for_qty(obj, requested_qty[obj.name])
 		update_item(obj, target, source_parent)
+		if not target.rate and not target.price_list_rate:
+			# unpriced rows fetch the price for the Purchase Order's supplier
+			target.rate = target.price_list_rate = None
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -957,6 +1009,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 					["name", "material_request_item"],
 					["parent", "material_request"],
 					["project", "project_name"],
+					["cost_center", "cost_center"],
 				],
 				"postprocess": update_item,
 				"condition": select_item,
@@ -1236,7 +1289,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
 	return doclist
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def raise_work_orders(material_request: str, company: str):
 	mr = frappe.get_doc("Material Request", material_request)
 	mr.check_permission("read")

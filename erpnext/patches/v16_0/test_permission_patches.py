@@ -7,6 +7,7 @@ from frappe.permissions import add_permission, update_permission_property
 from erpnext.patches.v16_0 import (
 	mirror_release_perms_to_custom_docperm,
 	remove_all_role_from_payment_terms_template,
+	restrict_employee_project_perms_to_select,
 )
 from erpnext.setup.install import grant_address_read_to_accounts_manager
 from erpnext.tests.utils import ERPNextTestSuite
@@ -27,7 +28,7 @@ RIGHTS = (
 	"print",
 	"email",
 )
-TOUCHED_DOCTYPES = ("Payment Terms Template", "POS Invoice", "Serial and Batch Bundle", "Address")
+TOUCHED_DOCTYPES = ("Payment Terms Template", "POS Invoice", "Serial and Batch Bundle", "Address", "Project")
 ROLES_NEW_IN_RELEASE = {
 	"Payment Terms Template": (
 		"HR Manager",
@@ -44,6 +45,7 @@ ROLES_NEW_IN_RELEASE = {
 }
 SELECT_ONLY_IN_PREVIOUS_RELEASE = {"POS Invoice": ("Sales Manager", "Sales User")}
 PREVIOUS_ALL_ROW = ("select", "report", "export", "share", "print", "email")
+PREVIOUS_EMPLOYEE_PROJECT_ROW = ("select", "report", "export", "share", "print", "email")
 
 
 class TestPermissionPatches(ERPNextTestSuite):
@@ -216,3 +218,64 @@ class TestPermissionPatches(ERPNextTestSuite):
 
 		self.assertEqual(self.get_rights("Address", "Accounts Manager"), [])
 		self.assertEqual(self.get_rules("Address"), before)
+
+	def customise_project_with_previous_employee_rule(self, employee_rights=PREVIOUS_EMPLOYEE_PROJECT_ROW):
+		frappe.db.delete("Custom DocPerm", {"parent": "Project"})
+		for perm in frappe.get_all("DocPerm", filters={"parent": "Project"}, fields=["*"]):
+			if perm.role == "Employee":
+				continue
+			rights = []
+			for right in RIGHTS:
+				if perm.get(right):
+					rights.append(right)
+			self.insert_custom_docperm("Project", perm.role, rights, perm.permlevel)
+		self.insert_custom_docperm("Project", "Employee", employee_rights)
+		frappe.clear_cache(doctype="Project")
+
+	def get_employee_project_rights(self, permlevel):
+		rows = []
+		for perm in frappe.get_all(
+			"Custom DocPerm",
+			filters={"parent": "Project", "role": "Employee", "permlevel": permlevel},
+			fields=list(RIGHTS),
+		):
+			rights = []
+			for right in RIGHTS:
+				if perm.get(right):
+					rights.append(right)
+			rows.append(rights)
+		return rows
+
+	def test_employee_project_rule_keeps_only_select(self):
+		self.customise_project_with_previous_employee_rule()
+		other_rules = [rule for rule in self.get_rules("Project") if rule[0] != "Employee"]
+
+		restrict_employee_project_perms_to_select.execute()
+
+		self.assertEqual(self.get_employee_project_rights(0), [["select"]])
+		self.assertEqual([rule for rule in self.get_rules("Project") if rule[0] != "Employee"], other_rules)
+
+	def test_employee_project_rule_with_read_is_kept(self):
+		self.customise_project_with_previous_employee_rule(("read", *PREVIOUS_EMPLOYEE_PROJECT_ROW))
+		before = self.get_employee_project_rights(0)
+
+		restrict_employee_project_perms_to_select.execute()
+
+		self.assertEqual(self.get_employee_project_rights(0), before)
+
+	def test_employee_project_rule_at_higher_level_is_kept(self):
+		self.customise_project_with_previous_employee_rule()
+		self.insert_custom_docperm("Project", "Employee", PREVIOUS_EMPLOYEE_PROJECT_ROW, permlevel=1)
+		before = self.get_employee_project_rights(1)
+
+		restrict_employee_project_perms_to_select.execute()
+
+		self.assertEqual(self.get_employee_project_rights(1), before)
+
+	def test_employee_project_patch_skips_a_project_without_custom_rules(self):
+		frappe.db.delete("Custom DocPerm", {"parent": "Project"})
+		frappe.clear_cache(doctype="Project")
+
+		restrict_employee_project_perms_to_select.execute()
+
+		self.assertEqual(self.get_rules("Project"), [])

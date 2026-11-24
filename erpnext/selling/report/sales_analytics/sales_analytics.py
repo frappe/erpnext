@@ -7,10 +7,13 @@ from frappe import N_, _, scrub
 from frappe.query_builder import DocType
 from frappe.utils import add_days, add_to_date, flt, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	filters = frappe._dict(filters or {})
 	# Special report showing all doctype totals on a single chart; overrides some filters
 	if filters.doc_type == "All":

@@ -6,13 +6,17 @@ import frappe
 from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.custom import GROUP_CONCAT
-from frappe.query_builder.functions import Date
+from frappe.utils.nestedset import get_descendants_of
+
+from erpnext.accounts.report.utils import validate_date_range
 
 Opportunity = DocType("Opportunity")
 OpportunityLostReasonDetail = DocType("Opportunity Lost Reason Detail")
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 
@@ -92,7 +96,7 @@ def get_data(filters):
 		.where(
 			(Opportunity.status == "Lost")
 			& (Opportunity.company == filters.get("company"))
-			& (Date(Opportunity.modified).between(filters.get("from_date"), filters.get("to_date")))
+			& (Opportunity.lost_on.between(filters.get("from_date"), filters.get("to_date")))
 		)
 		.groupby(Opportunity.name)
 		.orderby(Opportunity.creation)
@@ -105,7 +109,8 @@ def get_data(filters):
 
 def get_conditions(filters, query):
 	if filters.get("territory"):
-		query = query.where(Opportunity.territory == filters.get("territory"))
+		territories = [filters.get("territory"), *get_descendants_of("Territory", filters.get("territory"))]
+		query = query.where(Opportunity.territory.isin(territories))
 
 	if filters.get("opportunity_from"):
 		query = query.where(Opportunity.opportunity_from == filters.get("opportunity_from"))
@@ -114,6 +119,15 @@ def get_conditions(filters, query):
 		query = query.where(Opportunity.party_name == filters.get("party_name"))
 
 	if filters.get("lost_reason"):
-		query = query.where(OpportunityLostReasonDetail.lost_reason == filters.get("lost_reason"))
+		query = query.where(
+			Opportunity.name.isin(
+				frappe.qb.from_(OpportunityLostReasonDetail)
+				.select(OpportunityLostReasonDetail.parent)
+				.where(
+					(OpportunityLostReasonDetail.parenttype == "Opportunity")
+					& (OpportunityLostReasonDetail.lost_reason == filters.get("lost_reason"))
+				)
+			)
+		)
 
 	return query

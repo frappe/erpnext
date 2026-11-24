@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import IfNull
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
 # Percentages at this threshold count as complete.
@@ -22,12 +23,14 @@ def validate_status(status, options):
 
 status_map = {
 	"Lead": [
+		["Open", "eval:self.status in ('Opportunity', 'Quotation', 'Lost Quotation')"],
 		["Lost Quotation", "has_lost_quotation"],
 		["Opportunity", "has_opportunity"],
 		["Quotation", "has_quotation"],
 		["Converted", "has_customer"],
 	],
 	"Opportunity": [
+		["Open", "eval:self.status=='Quotation'"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Lost", "has_lost_quotation"],
 		["Quotation", "has_active_quotation"],
@@ -38,6 +41,18 @@ status_map = {
 		["Draft", None],
 		["Open", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
+		["Partially Ordered", "is_partially_ordered"],
+		["Ordered", "is_fully_ordered"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Supplier Quotation": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		[
+			"Expired",
+			"eval:self.docstatus==1 and self.valid_till and getdate(self.valid_till) < getdate(nowdate())",
+		],
+		["Stopped", "eval:self.status=='Stopped'"],
 		["Partially Ordered", "is_partially_ordered"],
 		["Ordered", "is_fully_ordered"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -333,6 +348,19 @@ class StatusUpdater(Document):
 			# cancelling a note only reduces it, so don't re-enforce the limit on cancel
 			skip_on_cancel = self.docstatus == 2 and args.get("overflow_type") == "installation"
 
+			if self.get("is_return") and args.get("overflow_type") == "billing":
+				if args.get("billing_flag") and not self.get(args["billing_flag"]):
+					# the return never changes the order's billed amount
+					items_to_validate = []
+				elif self.docstatus != 2:
+					# a return row lowers billing unless its rate is negative, so check only rows that add to it;
+					# use qty and rate since the stored amount is stale when one field is set through the api
+					items_to_validate = [
+						d
+						for d in items_to_validate
+						if flt(d.child_doc.get("qty")) * flt(d.child_doc.get("rate")) > 0
+					]
+
 			if items_to_validate and not skip_on_cancel:
 				pp_sub_assembly_items = [
 					item.production_plan_sub_assembly_item
@@ -432,11 +460,17 @@ class StatusUpdater(Document):
 		# installation is not a stock movement, so bundles and non-stock items are installable too
 		if is_qty_check and not is_installation:
 			item_table = frappe.qb.DocType("Item")
-			query = (
-				query.join(item_table)
-				.on(item_table.name == item_field_col)
-				.where(item_table.is_stock_item == 1)
+			bundle = frappe.qb.DocType("Product Bundle")
+			# a bundle parent is non-stock, but its packed items move real stock, so limit it like a stock item
+			active_bundle_items = (
+				frappe.qb.from_(bundle).select(bundle.new_item_code).where(bundle.disabled == 0)
 			)
+			is_limited = (item_table.is_stock_item == 1) | item_field_col.isin(active_bundle_items)
+			if args["target_dt"] == "Purchase Order Item":
+				# a subcontracted service row is received with its finished goods, so limit it too
+				is_limited |= IfNull(doctype.fg_item, "") != ""
+
+			query = query.join(item_table).on(item_table.name == item_field_col).where(is_limited)
 
 		return query.run(as_dict=True)
 
@@ -508,6 +542,7 @@ class StatusUpdater(Document):
 
 		if args["source_dt"] != "Pick List Item" and args["target_dt"] not in [
 			"Quotation Item",
+			"Supplier Quotation Item",
 			"Packed Item",
 		]:
 			if args.get("target_dt") == "Material Request Item":
@@ -598,6 +633,7 @@ class StatusUpdater(Document):
 				if not args.get("second_source_extra_cond"):
 					args["second_source_extra_cond"] = ""
 
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 				args["second_source_condition"] = frappe.db.sql(
 					""" select ifnull((select sum({second_source_field})
 					from `tab{second_source_dt}`
@@ -612,6 +648,7 @@ class StatusUpdater(Document):
 					args["extra_cond"] = ""
 
 				args["source_dt_value"] = (
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 					frappe.db.sql(
 						"""
 						(select ifnull(sum({source_field}), 0)
@@ -626,10 +663,20 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
+				round_total = args.get("round_to_target_precision")
+				if callable(round_total):
+					round_total = round_total(d)
+
+				if round_total:
+					args["source_dt_value"] = flt(
+						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
+					)
+
 				target_value = args["source_dt_value"]
 				if args.get("target_conversion_factor"):
 					target_value = f"{target_value} / {args['target_conversion_factor']}"
 
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 				frappe.db.sql(
 					"""update `tab{target_dt}`
 					set {target_field} = {target_value} {update_modified}

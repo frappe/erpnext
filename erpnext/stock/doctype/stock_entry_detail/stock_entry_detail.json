@@ -434,7 +434,8 @@
    "no_copy": 1,
    "options": "Pick List Item",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "original_item",
@@ -518,7 +519,8 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project"
+   "options": "Project",
+   "search_index": 1
   },
   {
    "fieldname": "po_detail",

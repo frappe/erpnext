@@ -9,21 +9,15 @@ frappe.ui.form.on("Subcontracting BOM", {
 	set_queries: (frm) => {
 		frm.set_query("finished_good", () => {
 			return {
-				filters: {
-					disabled: 0,
-					is_stock_item: 1,
-					default_bom: ["!=", ""],
-					is_sub_contracted_item: 1,
-				},
+				query: "erpnext.controllers.queries.subcontracted_item_query",
 			};
 		});
 
 		frm.set_query("finished_good_bom", () => {
 			return {
+				query: "erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom.finished_good_bom_query",
 				filters: {
-					docstatus: 1,
-					is_active: 1,
-					item: frm.doc.finished_good,
+					finished_good: frm.doc.finished_good,
 				},
 			};
 		});

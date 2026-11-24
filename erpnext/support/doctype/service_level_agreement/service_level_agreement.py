@@ -139,10 +139,8 @@ class ServiceLevelAgreement(Document):
 			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
 	def validate_doc(self):
-		if (
-			self.enabled
-			and self.document_type == "Issue"
-			and not frappe.db.get_single_value("Support Settings", "track_service_level_agreement")
+		if self.enabled and not frappe.db.get_single_value(
+			"Support Settings", "track_service_level_agreement"
 		):
 			frappe.throw(
 				_("{0} is not enabled in {1}").format(
@@ -834,12 +832,13 @@ def get_response_and_resolution_duration(doc):
 	return priority
 
 
-@frappe.whitelist()
-def reset_service_level_agreement(doctype: str, docname: str, reason, user=None):
+@frappe.whitelist(methods=["POST"])
+def reset_service_level_agreement(doctype: str, docname: str, reason: str, user: str | None = None):
 	if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 		frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
 
 	doc = frappe.get_doc(doctype, docname)
+	doc.check_permission("write")
 	frappe.get_doc(
 		{
 			"doctype": "Comment",

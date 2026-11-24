@@ -7,11 +7,14 @@ from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 SALES_VOUCHER_TYPES = ("Delivery Note", "Sales Invoice")
 PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	columns = get_columns(filters)
 	consumed_details = get_consumed_details(filters)
 	supplier_details = get_suppliers_details(filters)
@@ -94,12 +97,12 @@ def get_consumed_details(filters):
 			sle.voucher_type,
 			sle.voucher_detail_no,
 		)
-		# the stock an Adjustment Entry counts out comes back in, it is not consumed
+		# a Stock Reconciliation recounts stock, it does not consume it
 		.where(
 			(sle.is_cancelled == 0)
 			& (sle.item_code == item.name)
 			& ((sle.actual_qty < 0) | (sle.voucher_type.isin(SALES_VOUCHER_TYPES)))
-			& (sle.is_adjustment_entry == 0)
+			& (sle.voucher_type != "Stock Reconciliation")
 		)
 	)
 

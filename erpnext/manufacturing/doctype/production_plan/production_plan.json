@@ -14,6 +14,7 @@
   "column_break1",
   "posting_date",
   "reserve_stock",
+  "consider_process_loss",
   "filters",
   "item_code",
   "customer",
@@ -448,6 +449,13 @@
    "fieldname": "reserve_stock",
    "fieldtype": "Check",
    "label": "Reserve Stock"
+  },
+  {
+   "default": "0",
+   "description": "Work Orders are made larger to cover their BOM's % Process Loss",
+   "fieldname": "consider_process_loss",
+   "fieldtype": "Check",
+   "label": "Consider Process Loss"
   }
  ],
  "grid_page_length": 50,
@@ -455,7 +463,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-07 00:00:00.000000",
+ "modified": "2026-10-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
