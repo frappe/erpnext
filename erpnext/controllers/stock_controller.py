@@ -1460,7 +1460,7 @@ class StockController(AccountsController):
 		if frappe.get_meta(row.doctype).has_field("rejected_warehouse"):
 			fields += [item.rejected_qty, item.rejected_warehouse]
 
-		rows = (
+		query = (
 			frappe.qb.from_(item)
 			.select(*fields)
 			.where(
@@ -1470,8 +1470,12 @@ class StockController(AccountsController):
 					| ((item[reference_field] == original_row) & (item.parent != self.name))
 				)
 			)
-			.run(as_dict=True)
 		)
+		if self.meta.has_field("update_stock"):
+			parent = frappe.qb.DocType(self.doctype)
+			query = query.inner_join(parent).on(parent.name == item.parent).select(parent.update_stock)
+
+		rows = query.run(as_dict=True)
 		earlier_rows = [d for d in self.items if d.get(reference_field) == original_row and d.idx < row.idx]
 		warehouses = (
 			[warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows + earlier_rows})
@@ -1484,8 +1488,8 @@ class StockController(AccountsController):
 			unrounded_stock_qty=0.0, stock_qty=sum(posted_qty.values()) * self.get_stock_qty_sign()
 		)
 		for d in rows:
-			if d.name not in posted_qty:
-				continue  # moved no stock, like a return without Update Stock
+			if not d.get("update_stock", 1):
+				continue  # a return without Update Stock moves no stock
 			if d.warehouse in warehouses:
 				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
 			if d.get("rejected_warehouse") in warehouses:
