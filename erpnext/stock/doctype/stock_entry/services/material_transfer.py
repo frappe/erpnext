@@ -334,11 +334,21 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if not (self.doc.is_return and self.wo_doc):
 			return
 
-		doctype, name = (
-			("Job Card", self.doc.job_card) if self.doc.job_card else ("Work Order", self.wo_doc.name)
+		returned_qty_by_item = self.get_returned_qty_by_item()
+		if self.doc.job_card:
+			self.validate_returned_qty_within(
+				returned_qty_by_item, "Job Card", self.doc.job_card, self.get_returnable_qty()
+			)
+
+		self.validate_returned_qty_within(
+			returned_qty_by_item,
+			"Work Order",
+			self.wo_doc.name,
+			self.get_returnable_qty(scope_to_job_card=False),
 		)
-		returnable_qty = self.get_returnable_qty()
-		for item_code, returned_qty in self.get_returned_qty_by_item().items():
+
+	def validate_returned_qty_within(self, returned_qty_by_item, doctype, name, returnable_qty):
+		for item_code, returned_qty in returned_qty_by_item.items():
 			if flt(returned_qty, 6) > flt(returnable_qty[item_code], 6):
 				frappe.throw(
 					_(
@@ -370,10 +380,11 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 				title=_("Excess Return"),
 			)
 
-	def get_returnable_qty(self) -> dict:
+	def get_returnable_qty(self, scope_to_job_card=True) -> dict:
 		from .manufacturing import ManufactureStockEntry
 
 		available = ManufactureStockEntry(self.doc)
+		available.scope_return_to_job_card = scope_to_job_card
 		available.prepare_available_materials_based_on_transfer()
 		returnable_qty = defaultdict(float)
 		for row in available._transfer_entries or []:

@@ -280,6 +280,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 
 
 class ManufactureStockEntry(BaseManufactureStockEntry):
+	scope_return_to_job_card = True
+
 	def before_validate(self):
 		self.set_default_warehouse()
 		self.set_job_card_data()
@@ -1049,7 +1051,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return self.filter_job_card_return(query, stock_entry).run(as_dict=1)
 
 	def filter_job_card_return(self, query, stock_entry):
-		if self.doc.get("is_return") and self.doc.job_card:
+		if self.scope_return_to_job_card and self.doc.get("is_return") and self.doc.job_card:
 			return query.where(stock_entry.job_card == self.doc.job_card)
 
 		return query
