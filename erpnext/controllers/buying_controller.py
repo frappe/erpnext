@@ -318,6 +318,7 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
 			# set_missing_values sets the exchange rate only later
 			self.set_price_list_currency("Buying")
+			exchange_rate = self.get_standalone_debit_note_exchange_rate()
 			for row in self.items:
 				if row.rate <= 0:
 					# override the rate with valuation rate, converted to the row's UOM and currency
@@ -338,7 +339,7 @@ class BuyingController(SubcontractingController):
 						raise_error_if_no_rate=False,
 					)
 					row.rate = flt(
-						valuation_rate * conversion_factor / (flt(self.conversion_rate) or 1),
+						valuation_rate * conversion_factor / exchange_rate,
 						row.precision("rate"),
 					)
 					if not row.rate and flt(valuation_rate) > 0:
@@ -351,6 +352,13 @@ class BuyingController(SubcontractingController):
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
 					row.margin_rate_or_amount = 0.0
+
+	def get_standalone_debit_note_exchange_rate(self):
+		# without a price list, a missing currency is set from the supplier only later
+		currency = self.currency or frappe.get_cached_value("Supplier", self.supplier, "default_currency")
+		if (currency or self.company_currency) == self.company_currency:
+			return 1.0
+		return flt(self.conversion_rate) or 1.0
 
 	@staticmethod
 	def get_standalone_debit_note_conversion_factor(row):
