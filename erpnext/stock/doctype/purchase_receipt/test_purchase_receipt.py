@@ -8486,6 +8486,49 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(receipt.items[0].received_qty, 3)
 		self.assertEqual(receipt.items[0].received_stock_qty, 36)
 
+	def test_internal_receipt_keeps_the_cost_of_each_serial_no(self):
+		"""Serial Nos that leave in one internal delivery row keep their own cost in the receiving warehouse."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		prepare_data_for_internal_transfer()
+		item = make_item(properties={"has_serial_no": 1, "serial_no_series": "SN-ITC-.#####"}).name
+		lots = [get_serial_nos_from_bundle(bundle) for bundle in receive_lots(item, (101, 133))]
+		dn = make_internal_delivery_of_lots(item, {"serial_nos": [lots[0][0], *lots[1]]})
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		self.assertEqual(
+			get_stock_value_by_warehouse(pr.name),
+			{"Work In Progress - TCP1": -367.0, "Finished Goods - TCP1": 367.0},
+		)
+		self.assertEqual(
+			get_package_rates(pr.name, "Finished Goods - TCP1"),
+			{lots[0][0]: 101.0, lots[1][0]: 133.0, lots[1][1]: 133.0},
+		)
+
+	def test_internal_receipt_keeps_the_cost_of_each_batch(self):
+		"""Batches that leave in one internal delivery row keep their own cost in the receiving warehouse."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		prepare_data_for_internal_transfer()
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 1}).name
+		batches = [get_batch_from_bundle(bundle) for bundle in receive_lots(item, (101, 133))]
+		dn = make_internal_delivery_of_lots(item, {"batches": {batches[0]: 1, batches[1]: 2}})
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		self.assertEqual(
+			get_stock_value_by_warehouse(pr.name),
+			{"Work In Progress - TCP1": -367.0, "Finished Goods - TCP1": 367.0},
+		)
+		self.assertEqual(
+			get_package_rates(pr.name, "Finished Goods - TCP1"), {batches[0]: 101.0, batches[1]: 133.0}
+		)
+
 
 def create_company_without_ledger_entries():
 	return (
@@ -9179,6 +9222,92 @@ def make_internal_delivery_of_fractional_boxes():
 	dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
 	dn.submit()
 	return dn, transit_warehouse
+
+
+def receive_lots(item_code, rates):
+	"""Receive 2 units of the item into Stores - TCP1 at each rate; returns the package of each receipt."""
+	return [
+		make_purchase_receipt(
+			item_code=item_code,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			qty=2,
+			rate=rate,
+			posting_date=add_days(today(), -2),
+		)
+		.items[0]
+		.serial_and_batch_bundle
+		for rate in rates
+	]
+
+
+def make_internal_delivery_of_lots(item_code, lots, doctype="Delivery Note"):
+	"""Internal delivery of the given serial nos or batches in one row from Stores to Work In Progress."""
+	company = "_Test Company with perpetual inventory"
+	qty = len(lots.get("serial_nos") or []) or sum(lots["batches"].values())
+	package = make_serial_batch_bundle(
+		{
+			"item_code": item_code,
+			"warehouse": "Stores - TCP1",
+			"company": company,
+			"qty": -qty,
+			"voucher_type": doctype,
+			"serial_nos": lots.get("serial_nos"),
+			"batches": frappe._dict({batch: -qty for batch, qty in (lots.get("batches") or {}).items()}),
+			"type_of_transaction": "Outward",
+			"do_not_submit": True,
+		}
+	).name
+
+	doc = frappe.new_doc(doctype)
+	doc.update({"company": company, "customer": "_Test Internal Customer 2", "currency": "INR"})
+	if doctype == "Sales Invoice":
+		doc.update({"update_stock": 1, "debit_to": "Debtors - TCP1"})
+
+	doc.append(
+		"items",
+		{
+			"item_code": item_code,
+			"qty": qty,
+			"rate": 500,
+			"warehouse": "Stores - TCP1",
+			"target_warehouse": "Work In Progress - TCP1",
+			"serial_and_batch_bundle": package,
+			"cost_center": "Main - TCP1",
+			"expense_account": "Cost of Goods Sold - TCP1",
+			"income_account": "Sales - TCP1",
+		},
+	)
+	doc.submit()
+	return doc
+
+
+def get_package_rates(voucher_no, warehouse):
+	"""Rate of each serial no or batch in the package of the voucher's entry into the warehouse."""
+	package = frappe.db.get_value(
+		"Stock Ledger Entry",
+		{"voucher_no": voucher_no, "warehouse": warehouse, "is_cancelled": 0},
+		"serial_and_batch_bundle",
+	)
+	return {
+		entry.serial_no or entry.batch_no: entry.incoming_rate
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": package},
+			fields=["serial_no", "batch_no", "incoming_rate"],
+		)
+	}
+
+
+def get_stock_value_by_warehouse(voucher_no):
+	return {
+		d.warehouse: flt(d.stock_value_difference, 2)
+		for d in frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": voucher_no, "is_cancelled": 0},
+			fields=["warehouse", "stock_value_difference"],
+		)
+	}
 
 
 def make_purchase_receipt(**args):
