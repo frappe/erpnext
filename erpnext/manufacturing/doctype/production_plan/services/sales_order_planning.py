@@ -11,6 +11,7 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_item_or_template_bom_query,
+	get_reserved_packed_item_qty,
 	get_reserved_qty_from_stock,
 	get_reserved_work_order_output_qty,
 	get_sales_orders,
@@ -192,7 +193,12 @@ class SalesOrderSourcingService:
 		)
 		if self.doc.item_code:
 			query = query.where(so_item.item_code == self.doc.item_code)
-		return query.run(as_dict=True)
+
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
+		items = query.run(as_dict=True)
+		for item in items:
+			item.pending_qty = max(flt(item.pending_qty, precision), 0)
+		return items
 
 	def get_mr_items(self):
 		# Check for empty table or empty rows
@@ -340,16 +346,18 @@ def _set_so_item_pending_qty(items):
 
 
 def _so_packed_columns(so_item, pi):
-	pending_qty = (
+	per_bundle = pi.qty / so_item.qty
+	work_order_qty = so_item.work_order_qty * per_bundle
+	# reserved stock may be Work Order output, so like deliveries it overlaps work_order_qty
+	delivered_or_reserved_qty = so_item.delivered_qty * per_bundle + get_reserved_packed_item_qty(pi)
+	pending_qty = pi.qty - (
 		frappe.qb.terms.Case()
-		.when(
-			(so_item.work_order_qty > so_item.delivered_qty),
-			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty),
-		)
-		.else_(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
+		.when(work_order_qty > delivered_or_reserved_qty, work_order_qty)
+		.else_(delivered_or_reserved_qty)
 	)
 	return [
 		pi.parent,
+		pi.name.as_("packed_item"),
 		pi.item_code,
 		pi.warehouse.as_("warehouse"),
 		pending_qty.as_("pending_qty"),
