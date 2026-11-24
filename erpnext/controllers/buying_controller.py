@@ -417,16 +417,20 @@ class BuyingController(SubcontractingController):
 
 	@staticmethod
 	def get_standalone_debit_note_conversion_factor(row):
-		"""Factor of the UOM the row gets, as its UOM and stock UOM are set from the item only later."""
+		"""Factor of the row's UOM, as its UOM and stock UOM are set from the item only later."""
 		item = (
 			frappe.get_cached_value("Item", row.item_code, ["stock_uom", "purchase_uom"], as_dict=True)
 			or frappe._dict()
 		)
-		uom = row.uom or item.purchase_uom or item.stock_uom
-		if uom == item.stock_uom:
+		if not row.uom:
+			# a factor sent without a UOM is not the factor of the UOM the row gets
+			row.uom = item.purchase_uom or item.stock_uom
+			row.conversion_factor = get_conversion_factor(row.item_code, row.uom).get("conversion_factor")
+
+		if row.uom == item.stock_uom:
 			return 1.0
 
-		return flt(row.conversion_factor) or get_conversion_factor(row.item_code, uom).get(
+		return flt(row.conversion_factor) or get_conversion_factor(row.item_code, row.uom).get(
 			"conversion_factor"
 		)
 
