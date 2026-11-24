@@ -2394,7 +2394,25 @@ class TestBOM(ERPNextTestSuite):
 			bom.update_cost(update_hour_rate=update_hour_rate)
 			bom.reload()
 			self.assertEqual(bom.operating_cost, 10)
-			self.assertTrue(bom.operations[0].set_cost_based_on_bom_qty)
+			# derived from the Operation, not stored on the row
+			self.assertFalse(bom.operations[0].set_cost_based_on_bom_qty)
+
+	def test_operation_no_longer_batch_based_is_not_costed_per_batch(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
+		operation = make_operation(operation="_Test BOM Batch Op Turned Off", workstation=workstation)
+		operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
+		operation.save()
+		bom = make_batch_operation_bom(operation.name, workstation)
+		self.assertEqual(bom.operating_cost, 10)
+
+		operation.create_job_card_based_on_batch_size = 0
+		operation.save()
+		bom.update_cost()
+		bom.reload()
+		self.assertEqual(bom.operating_cost, 100)
 
 	def test_fixed_time_operation_is_not_costed_per_batch(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -2407,7 +2425,6 @@ class TestBOM(ERPNextTestSuite):
 
 		bom = make_batch_operation_bom(operation.name, workstation, fixed_time=1, set_cost_based_on_bom_qty=1)
 		self.assertEqual(bom.operating_cost, 100)
-		self.assertFalse(bom.operations[0].set_cost_based_on_bom_qty)
 
 
 def make_batch_operation_bom(operation, workstation, **row_values):
