@@ -4419,8 +4419,10 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 	return row_wise_serial_batch
 
 
-def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -> None:
-	"""Give each inward order row back, up to its `short_qty`, the customer material Work Orders hold beyond their required or used qty."""
+def release_unused_inward_reservations(
+	scio: str, short_qty: dict[str, float], lower_voucher_qty: bool = False
+) -> None:
+	"""Give each inward order row back, up to its `short_qty`, the customer material Work Orders hold beyond their required or used qty; `lower_voucher_qty` when that material is gone for good."""
 	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 	sres = get_inward_reservations(scio, list(short_qty))
 	unused_qty = get_unused_inward_qty(sres)
@@ -4436,7 +4438,7 @@ def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -
 		if release_qty <= 0:
 			continue
 
-		released_qty = release_inward_reservation(sre, release_qty)
+		released_qty = release_inward_reservation(sre, release_qty, lower_voucher_qty)
 		unused_qty[sre.voucher_detail_no] -= released_qty
 		short_qty[sre.from_voucher_detail_no] -= released_qty
 
@@ -4506,13 +4508,19 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 	).run(as_dict=True)
 
 
-def release_inward_reservation(sre: dict, qty: float) -> float:
+def release_inward_reservation(sre: dict, qty: float, lower_voucher_qty: bool = False) -> float:
 	"""Lower a Work Order reservation by `qty` (raise it when negative), not below what it used, and give the change back to the inward order reservation it came from."""
 	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
 	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
 	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
 	released_qty = doc.reserved_qty - reserved_qty
 	doc.db_set("reserved_qty", reserved_qty, update_modified=False)
+	if lower_voucher_qty:
+		doc.db_set(
+			"voucher_qty",
+			flt(doc.voucher_qty - released_qty, doc.precision("voucher_qty")),
+			update_modified=False,
+		)
 	doc.update_status()
 	doc.update_reserved_qty_in_voucher()
 	doc.update_delivered_qty_in_from_voucher_reservations()

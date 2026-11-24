@@ -1097,6 +1097,7 @@ class SubcontractingInwardController:
 
 	def cancel_stock_reservation_entries_for_inward(self):
 		if self.purpose == "Receive from Customer":
+			self.release_unused_work_order_reservations()
 			self.adjust_inward_reservations(release=True)
 
 	def remove_reference_for_additional_items(self):
@@ -1210,31 +1211,35 @@ class SubcontractingInwardController:
 			if self._action == "cancel":
 				self.validate_no_later_work_order_reservation()
 				self.adjust_inward_reservations(release=False)
-				restore_inward_reservations(self.subcontracting_inward_order, self.get_return_qty())
+				restore_inward_reservations(self.subcontracting_inward_order, self.get_inward_row_qty())
 			else:
 				self.release_unused_work_order_reservations()
 				self.adjust_inward_reservations(release=True)
 
-	def get_return_qty(self) -> dict[str, float]:
-		"""Returned stock qty of each inward order row."""
-		return_qty = defaultdict(float)
+	def get_inward_row_qty(self) -> dict[str, float]:
+		"""Stock qty of each inward order row in this entry."""
+		row_qty = defaultdict(float)
 		for item in self.items:
-			return_qty[item.scio_detail] += item.transfer_qty
-		return return_qty
+			row_qty[item.scio_detail] += item.transfer_qty
+		return row_qty
 
 	def release_unused_work_order_reservations(self):
 		"""Take the qty the inward order no longer holds from the unused part of its Work Order reservations."""
-		return_qty = self.get_return_qty()
+		row_qty = self.get_inward_row_qty()
 		reserved_qty = get_sre_reserved_qty_details_for_voucher(
 			"Subcontracting Inward Order", self.subcontracting_inward_order
 		)
 		short_qty = {}
-		for scio_detail, qty in return_qty.items():
+		for scio_detail, qty in row_qty.items():
 			if (missing_qty := qty - flt(reserved_qty.get(scio_detail))) > 0:
 				short_qty[scio_detail] = missing_qty
 
 		if short_qty:
-			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
+			release_unused_inward_reservations(
+				self.subcontracting_inward_order,
+				short_qty,
+				lower_voucher_qty=self.purpose == "Receive from Customer",
+			)
 
 	def adjust_inward_reservations(self, release):
 		for item in self.items:
