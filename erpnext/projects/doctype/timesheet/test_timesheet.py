@@ -220,12 +220,12 @@ class TestTimesheet(ERPNextTestSuite):
 				],
 			}
 		)
+		# submit looks the rate up again, so it stays under the patch
 		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", return_value=0):
 			timesheet.insert()
-
-		self.assertEqual(timesheet.exchange_rate, 0)
-		self.assertEqual(timesheet.base_total_costing_amount, 0)
-		self.assertRaises(frappe.ValidationError, timesheet.submit)
+			self.assertEqual(timesheet.exchange_rate, 0)
+			self.assertEqual(timesheet.base_total_costing_amount, 0)
+			self.assertRaises(frappe.ValidationError, timesheet.submit)
 
 	def test_amounts_follow_the_rates_without_an_activity_type(self):
 		from_time = now_datetime()
