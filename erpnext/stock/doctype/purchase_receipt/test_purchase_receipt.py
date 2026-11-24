@@ -488,6 +488,27 @@ class TestPurchaseReceipt(FrappeTestCase):
 		stock_bin = {"item_code": item, "warehouse": pr.items[0].warehouse}
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 1.0)
 
+	@change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_rows_of_one_return_of_parts_of_a_receipt_take_back_only_its_stock_qty(self):
+		"""Rows of one return of parts of a row share what the row put in (1.01 Kg and 1.00 Kg of 2.01 Kg),
+		and cancelling the return puts back what it took."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item_for_returns_of_parts(0.3356)
+		pr = make_purchase_receipt(item_code=item, qty=6, uom="Box", conversion_factor=0.3356, rate=100)
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].update({"qty": -3, "received_qty": -3})
+		pr_return.append("items", pr_return.items[0].as_dict(no_default_fields=True))
+		pr_return.submit()
+
+		stock_bin = {"item_code": item, "warehouse": pr.items[0].warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 0)
+
+		pr_return.cancel()
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 2.01)
+
 	@change_settings("System Settings", {"float_precision": 2})
 	def test_return_takes_back_nothing_once_returns_took_all_its_receipt_row_put_in(self):
 		"""Returns of 1 Box of 3 Box at 0.006 Kg take 0.01 Kg each of 0.02 Kg, so the last one takes nothing,
