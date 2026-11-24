@@ -1097,6 +1097,7 @@ class SubcontractingInwardController:
 
 	def cancel_stock_reservation_entries_for_inward(self):
 		if self.purpose == "Receive from Customer":
+			self.release_unused_work_order_reservations()
 			self.adjust_inward_reservations(release=True)
 
 	def remove_reference_for_additional_items(self):
