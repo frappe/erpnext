@@ -215,7 +215,7 @@ def get_on_time_shipments(scorecard):
 	).run(as_dict=True)
 
 	# fully received as the PO's per_received counts it
-	return sum(1 for row in rows if flt(row.received_on_time) * 100 >= flt(row.ordered) * COMPLETE_PERCENTAGE)
+	return sum(1 for row in rows if flt(row.received_on_time / row.ordered * 100, 6) >= COMPLETE_PERCENTAGE)
 
 
 def get_late_shipments(scorecard):
