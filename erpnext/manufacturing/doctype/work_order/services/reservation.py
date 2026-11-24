@@ -532,6 +532,9 @@ class WorkOrderStockReservation:
 			sre.update_reserved_stock_in_bin()
 			sre.update_reserved_qty_in_voucher()
 
+		self.doc.reload()
+		self.doc.refresh_status()
+
 	def _subcontract_transferred_qty_by_item(self):
 		"""Qty sent to subcontractors for this Work Order, keyed by (item_code, source warehouse).
 

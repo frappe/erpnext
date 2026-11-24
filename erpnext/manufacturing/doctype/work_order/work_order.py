@@ -1257,6 +1257,9 @@ class WorkOrder(Document):
 	def update_status(self, status=None):
 		return StatusService(self).update_status(status)
 
+	def refresh_status(self):
+		return StatusService(self).refresh_status()
+
 	def get_status(self, status=None):
 		return StatusService(self).get_status(status)
 
