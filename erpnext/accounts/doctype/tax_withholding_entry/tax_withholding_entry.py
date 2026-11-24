@@ -267,6 +267,7 @@ class TaxWithholdingEntry(Document):
 		}
 
 		if self.is_taxable_different:
+			self._validate_no_return_reversed_tax()
 			frappe.db.set_value(
 				DOCTYPE,
 				filters,
@@ -296,6 +297,51 @@ class TaxWithholdingEntry(Document):
 						"status": "Over Withheld",
 					},
 				)
+
+	def _validate_no_return_reversed_tax(self):
+		"""
+		A return against the taxable document reverses the tax this document withheld for it.
+		Cancelling would leave that reversal with no tax to reverse.
+		"""
+		if not self.withholding_amount or not frappe.get_meta(self.taxable_doctype).has_field(
+			"return_against"
+		):
+			return
+
+		returns = frappe.get_all(
+			self.taxable_doctype,
+			filters={"return_against": self.taxable_name, "is_return": 1, "docstatus": 1},
+			pluck="name",
+		)
+		if not returns:
+			return
+
+		reversed_in = frappe.get_all(
+			DOCTYPE,
+			filters={
+				"parenttype": self.taxable_doctype,
+				"parent": ["in", returns],
+				"tax_withholding_category": self.tax_withholding_category,
+				"withholding_amount": ["!=", 0],
+				"docstatus": 1,
+			},
+			pluck="parent",
+			distinct=True,
+		)
+		if not reversed_in:
+			return
+
+		frappe.throw(
+			_(
+				"Cannot cancel {0} {1} because it withheld tax for {2} {3}, and the return {4} reversed that tax. Cancel the return first."
+			).format(
+				_(self.withholding_doctype),
+				frappe.bold(self.withholding_name),
+				_(self.taxable_doctype),
+				frappe.bold(self.taxable_name),
+				", ".join(frappe.bold(name) for name in reversed_in),
+			)
+		)
 
 	def _handle_return_invoice_cancellation(self, filters):
 		# Get old entries that need adjustment - inspired by _adjust_against_old_entries
