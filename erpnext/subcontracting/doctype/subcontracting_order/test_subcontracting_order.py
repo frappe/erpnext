@@ -1582,6 +1582,22 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		"Buying Settings",
 		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
 	)
+	def test_receipt_refuses_a_returned_serial_no_in_the_serial_no_field(self):
+		sco, received = make_order_sent_to_supplier(
+			"Serial Field Return", {"has_serial_no": 1, "serial_no_series": "SCOSF-.####"}
+		)
+		ste = get_return_of_components(sco)
+		ste.items[0].update({"qty": 1, "serial_no": received.serial_no[0]})
+		ste.submit()
+
+		scr = make_receipt_consuming_serial_no(sco, received.serial_no[0])
+
+		self.assertRaisesRegex(frappe.ValidationError, "have not been supplied", scr.save)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
 	def test_return_of_components_skips_batch_qty_returned_by_the_supplier(self):
 		sco, received = make_order_sent_to_supplier(
 			"Batch Return", {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCOBR-.####"}
@@ -2770,6 +2786,17 @@ def get_return_of_components(sco):
 		order_doctype=sco.doctype,
 	)
 	return get_materials_from_supplier(sco.name)
+
+
+def make_receipt_consuming_serial_no(sco, serial_no):
+	"""Draft receipt of 1 whose supplied item names `serial_no` in its Serial No field."""
+	scr = make_subcontracting_receipt(sco.name)
+	scr.items[0].qty = scr.items[0].received_qty = 1
+	scr.insert()
+	scr.supplied_items[0].update(
+		{"serial_no": serial_no, "serial_and_batch_bundle": None, "use_serial_batch_fields": 1}
+	)
+	return scr
 
 
 def transfer_shared_raw_material(sco, fg_item, qty):
