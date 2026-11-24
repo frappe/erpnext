@@ -3806,6 +3806,19 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(get_secondary_item_qty(get_secondary_items(bom)[0], 120000), 40000)
 
+	def test_job_card_default_takes_the_co_product_qty_manufacture_makes(self):
+		# 33.33% of 3 Nos is a BOM loss of 1, so 100 FG make 200, not 200.01
+		rm_item, fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name for _ in range(3)
+		)
+		bom = make_co_product_bom(
+			fg_item, [(rm_item, 1, None)], co_product, co_product_qty=3, process_loss_per=33.33
+		)
+		job_card = frappe.new_doc("Job Card", company="_Test Company", bom_no=bom, for_quantity=100)
+		job_card.set_secondary_items()
+
+		self.assertEqual(job_card.secondary_items[0].stock_qty, 200)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
