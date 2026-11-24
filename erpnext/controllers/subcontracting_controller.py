@@ -1551,7 +1551,11 @@ class SubcontractingController(StockController):
 	def __validate_serial_no(self, row, key, bundle_entries):
 		serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
 		serial_nos.update(get_serial_nos(row.get("serial_no")))
-		incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
+		# serial nos match case-insensitively, as in SerialBatchIdentity
+		transferred = {
+			serial_no.casefold() for serial_no in self.__transferred_items.get(key).get("serial_no")
+		}
+		incorrect_sn = {serial_no for serial_no in serial_nos if serial_no.casefold() not in transferred}
 
 		if incorrect_sn:
 			incorrect_sn = "\n".join(incorrect_sn)
