@@ -474,6 +474,20 @@ class TestQuotation(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", maintain_rate)
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"maintain_same_sales_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
+	def test_maintain_rate_from_quotation_for_internal_customer(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		customer = create_internal_customer(represents_company="_Test Company")
+		quotation = make_quotation(party_name=customer, rate=100)
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = add_days(nowdate(), 1)
+		sales_order.items[0].rate = 150
+
+		self.assertRaisesRegex(frappe.ValidationError, "Rate must be same as Quotation", sales_order.insert)
+
 	def test_make_sales_order_with_different_currency(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
