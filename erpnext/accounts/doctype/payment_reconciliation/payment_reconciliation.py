@@ -498,13 +498,8 @@ class PaymentReconciliation(Document):
 			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
 		)
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
-		account_type, account_currency = frappe.get_cached_value(
-			"Account", self.receivable_payable_account, ["account_type", "account_currency"]
-		)
-		allocated_amount_precision = get_field_precision(
-			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount"),
-			currency=account_currency,
-		)
+		account_type = frappe.get_cached_value("Account", self.receivable_payable_account, "account_type")
+		allocated_amount_precision = self.get_allocation_precision()
 
 		entries = []
 		for pay in args.get("payments"):
@@ -558,6 +553,17 @@ class PaymentReconciliation(Document):
 				row = self.append("allocation", {})
 				row.update(entry)
 
+	def get_allocation_precision(self):
+		account_currency = None
+		if self.receivable_payable_account:
+			account_currency = frappe.get_cached_value(
+				"Account", self.receivable_payable_account, "account_currency"
+			)
+		return get_field_precision(
+			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount"),
+			currency=account_currency,
+		)
+
 	def update_dimension_values_in_allocated_entries(self, res):
 		for x in self.dimensions:
 			dimension = x.fieldname
@@ -591,6 +597,7 @@ class PaymentReconciliation(Document):
 		dr_or_cr = (
 			"credit_in_account_currency" if account_type == "Receivable" else "debit_in_account_currency"
 		)
+		precision = self.get_allocation_precision()
 
 		entry_list = []
 		dr_or_cr_notes = []
@@ -603,6 +610,7 @@ class PaymentReconciliation(Document):
 					reconciled_entry = entry_list
 
 				payment_details = self.get_payment_details(row, dr_or_cr)
+				payment_details.precision = precision
 				reconciled_entry.append(payment_details)
 
 		if entry_list:
@@ -779,28 +787,44 @@ class PaymentReconciliation(Document):
 
 	def validate_allocation(self):
 		unreconciled_invoices = frappe._dict()
+		unreconciled_payments = frappe._dict()
+		precision = self.get_allocation_precision()
 
-		for inv in self.get("invoices"):
+		for inv in self.get("invoices") or []:
 			unreconciled_invoices.setdefault(inv.invoice_type, {}).setdefault(
 				inv.invoice_number, inv.outstanding_amount
 			)
+
+		for pay in self.get("payments") or []:
+			key = (pay.reference_type, pay.reference_name, pay.get("reference_row") or "")
+			unreconciled_payments.setdefault(key, pay.amount)
 
 		invoices_to_reconcile = []
 		for row in self.get("allocation"):
 			if row.invoice_type and row.invoice_number and row.allocated_amount:
 				invoices_to_reconcile.append(row.invoice_number)
 
-				if flt(row.amount) - flt(row.allocated_amount) < 0:
+				payment_key = (
+					(row.reference_type, row.reference_name, row.get("reference_row") or "")
+					if row.reference_name
+					else row.idx
+				)
+				payment_amount = unreconciled_payments.get(payment_key, flt(row.amount))
+				allocated_amount = flt(row.allocated_amount)
+
+				if flt(allocated_amount - payment_amount, precision) > 0:
 					frappe.throw(
 						_(
 							"Row {0}: Allocated amount {1} must be less than or equal to remaining payment amount {2}"
-						).format(row.idx, row.allocated_amount, row.amount)
+						).format(row.idx, row.allocated_amount, payment_amount)
 					)
+
+				unreconciled_payments[payment_key] = payment_amount - allocated_amount
 
 				invoice_outstanding = unreconciled_invoices.get(row.invoice_type, {}).get(
 					row.invoice_number, 0
 				)
-				if flt(row.allocated_amount) - invoice_outstanding > 0.009:
+				if flt(allocated_amount - invoice_outstanding, precision) > 0:
 					frappe.throw(
 						_(
 							"Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2}"
@@ -808,7 +832,7 @@ class PaymentReconciliation(Document):
 					)
 
 				unreconciled_invoices.setdefault(row.invoice_type, {})[row.invoice_number] = (
-					invoice_outstanding - flt(row.allocated_amount)
+					invoice_outstanding - allocated_amount
 				)
 
 		if not invoices_to_reconcile:

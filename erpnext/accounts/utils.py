@@ -770,22 +770,54 @@ def update_reference_in_payment_entry(
 		reference_details.update({"reconcile_effect_on": reconcile_on})
 
 	if d.voucher_detail_no:
-		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
+		existing_rows = payment_entry.get("references", {"name": d["voucher_detail_no"]})
+		if not existing_rows:
+			frappe.throw(
+				_(
+					"Reference row {0} not found in {1} {2}. Please refresh the reconciliation to fetch latest entries."
+				).format(d["voucher_detail_no"], payment_entry.doctype, payment_entry.name)
+			)
+		existing_row = existing_rows[0]
 
-		if d.allocated_amount <= existing_row.allocated_amount:
-			existing_row.allocated_amount -= d.allocated_amount
+		precision = d.get("precision")
+		if precision is None:
+			ref_df = frappe.get_meta("Payment Entry Reference").get_field("allocated_amount")
+			party_currency = payment_entry.get("party_account_currency")
+			if not party_currency:
+				party_account = payment_entry.get(
+					"paid_from" if payment_entry.payment_type == "Receive" else "paid_to"
+				)
+				party_currency = get_account_currency(party_account)
+			precision = get_field_precision(ref_df, doc=existing_row, currency=party_currency)
 
-			new_row = payment_entry.append("references")
-			new_row.docstatus = 1
-			for field in list(reference_details):
-				new_row.set(field, reference_details[field])
+		if flt(d.allocated_amount, precision) > flt(existing_row.allocated_amount, precision):
+			frappe.throw(
+				_(
+					"Cannot allocate {0} against {1} {2}. Only {3} is unallocated in row #{4} of {5} {6}."
+				).format(
+					d.allocated_amount,
+					d.against_voucher_type,
+					d.against_voucher,
+					existing_row.allocated_amount,
+					existing_row.idx,
+					payment_entry.doctype,
+					payment_entry.name,
+				)
+			)
 
-			if existing_row.reference_doctype in advance_payment_doctypes:
-				new_row.advance_voucher_type = existing_row.reference_doctype
-				new_row.advance_voucher_no = existing_row.reference_name
-				new_row.payment_request = existing_row.payment_request
+		existing_row.allocated_amount = flt(existing_row.allocated_amount - d.allocated_amount, precision)
 
-			row = new_row
+		new_row = payment_entry.append("references")
+		new_row.docstatus = 1
+		for field in list(reference_details):
+			new_row.set(field, reference_details[field])
+
+		if existing_row.reference_doctype in advance_payment_doctypes:
+			new_row.advance_voucher_type = existing_row.reference_doctype
+			new_row.advance_voucher_no = existing_row.reference_name
+			new_row.payment_request = existing_row.payment_request
+
+		row = new_row
 
 	else:
 		new_row = payment_entry.append("references")
