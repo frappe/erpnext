@@ -314,6 +314,12 @@ frappe.ui.form.on("BOM", {
 		frm.doc.operations.forEach((d) => {
 			frappe.model.set_value(d.doctype, d.name, "fg_warehouse", frm.doc.default_target_warehouse);
 		});
+		// Valuation Rate secondary items are valued in this warehouse
+		frm.doc.secondary_items.forEach((d) => {
+			if (d.valuation_type === "Valuation Rate") {
+				erpnext.bom.fetch_secondary_item_cost(frm.doc, d.doctype, d.name);
+			}
+		});
 	},
 
 	refresh(frm) {
@@ -1384,16 +1390,17 @@ erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
 		method: "erpnext.manufacturing.doctype.bom.bom.get_secondary_item_valuation_rate",
 		args: args,
 		callback(r) {
-			// the item, company or warehouse may have changed while the rate was being fetched
 			const row = locals[cdt][cdn];
 			doc = locals[doc.doctype][doc.name];
+			if (!row || row.valuation_type !== "Valuation Rate") return;
+
+			// the item, company or warehouse changed while the rate was being fetched
 			if (
-				!row ||
-				row.valuation_type !== "Valuation Rate" ||
 				row.item_code !== args.item_code ||
 				doc.company !== args.company ||
 				(doc.default_target_warehouse || "") !== args.warehouse
 			) {
+				erpnext.bom.fetch_secondary_item_cost(doc, cdt, cdn);
 				return;
 			}
 
