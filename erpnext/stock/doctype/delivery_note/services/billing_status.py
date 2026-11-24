@@ -484,9 +484,10 @@ def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = Tru
 		.run(as_dict=True)
 	)
 
-	# Billed against Sales Order directly. An invoice that made a delivery bills that delivery.
-	invoice_rows_of_deliveries = [dnd.si_detail for dnd in dn_details if dnd.si_detail]
-	billed_against_so = get_billed_against_so(so_detail, "amount", invoice_rows_of_deliveries)
+	# Billed against Sales Order directly. An invoice that made a delivery bills that delivery
+	# first, before the FIFO gives the rest to the other deliveries.
+	billed_by_deliveries_from_invoice = sum(flt(dnd.amount) for dnd in dn_details if dnd.si_detail)
+	billed_against_so = max(get_billed_against_so(so_detail, "amount") - billed_by_deliveries_from_invoice, 0)
 
 	updated_dn = []
 	for dnd in dn_details:
@@ -594,9 +595,14 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 		.run(as_dict=True)
 	)
 
-	# An invoice that made a delivery bills that delivery, not the earlier ones.
-	invoice_rows_of_deliveries = [dnd.si_detail for dnd in dn_details if dnd.si_detail]
-	billed_stock_qty_against_so = get_billed_against_so(so_detail, "stock_qty", invoice_rows_of_deliveries)
+	# An invoice that made a delivery bills that delivery first, before the FIFO gives the rest
+	# to the other deliveries.
+	billed_by_deliveries_from_invoice = sum(
+		flt(dnd.stock_qty) - flt(dnd.returned_qty) for dnd in dn_details if dnd.si_detail
+	)
+	billed_stock_qty_against_so = max(
+		get_billed_against_so(so_detail, "stock_qty") - billed_by_deliveries_from_invoice, 0
+	)
 
 	billed_qty_against_dns = {}
 	if dn_details_without_si := [dnd.name for dnd in dn_details if not dnd.si_detail]:
@@ -626,13 +632,13 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 	return qty_map
 
 
-def get_billed_against_so(so_detail: str, field: str, excluded_invoice_rows: list[str]) -> float:
+def get_billed_against_so(so_detail: str, field: str) -> float:
 	"""Sum of `field` of the invoice rows billed against the Sales Order row without a Delivery
-	Note, leaving out `excluded_invoice_rows`."""
+	Note."""
 	si = frappe.qb.DocType("Sales Invoice").as_("si")
 	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
 
-	query = (
+	result = (
 		frappe.qb.from_(si_item)
 		.join(si)
 		.on(si.name == si_item.parent)
@@ -643,9 +649,6 @@ def get_billed_against_so(so_detail: str, field: str, excluded_invoice_rows: lis
 			& (si_item.docstatus == 1)
 			& (si.update_stock == 0)
 		)
+		.run()
 	)
-	if excluded_invoice_rows:
-		query = query.where(si_item.name.notin(excluded_invoice_rows))
-
-	result = query.run()
 	return flt(result[0][0]) if result else 0.0

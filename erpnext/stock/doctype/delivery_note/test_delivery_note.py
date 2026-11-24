@@ -6273,6 +6273,26 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(first_delivery.per_billed, 0)
 		self.assertEqual(make_sales_invoice(first_delivery.name).items[0].qty, 3)
 
+	def test_sales_order_invoice_covers_delivery_from_invoice_and_from_order(self):
+		"""An invoice that made a partial delivery still bills its rest for a delivery from the order."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note as make_dn_from_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+
+		so = make_sales_order(qty=10)
+		so_invoice = make_si_from_so(so.name)
+		so_invoice.submit()
+
+		first_delivery = make_dn_from_invoice(so_invoice.name)
+		first_delivery.items[0].qty = 5
+		first_delivery.insert()
+		first_delivery.submit()
+		second_delivery = create_dn_against_so(so.name, delivered_qty=5)
+
+		for delivery in (first_delivery, second_delivery):
+			delivery.reload()
+			self.assertEqual(delivery.per_billed, 100)
+			self.assertEqual(delivery.items[0].billed_amt, delivery.items[0].amount)
+
 	def test_settled_return_of_free_items_leaves_billing_selector(self):
 		from erpnext.controllers.queries import get_delivery_notes_to_be_billed
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
