@@ -1372,27 +1372,17 @@ frappe.ui.form.on("BOM Secondary Item", {
 });
 
 erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
-	const row = locals[cdt][cdn];
-	if (!row.item_code) return;
+	const item_code = locals[cdt][cdn].item_code;
+	if (!item_code) return;
 
+	// not a doc method: its reply syncs back the row as sent, undoing later edits
 	frappe.call({
-		doc: doc,
-		method: "get_bom_material_detail",
-		args: {
-			company: doc.company,
-			item_code: row.item_code,
-			uom: row.uom,
-			stock_uom: row.stock_uom,
-			conversion_factor: row.conversion_factor,
-			warehouse: doc.default_target_warehouse,
-			set_rate_based_on_warehouse: 1,
-			force_valuation_rate: 1,
-			fetch_rate: 1,
-			bom_no: "",
-		},
+		method: "erpnext.manufacturing.doctype.bom.bom.get_secondary_item_valuation_rate",
+		args: { item_code: item_code, company: doc.company, warehouse: doc.default_target_warehouse },
 		callback(r) {
-			// the row may have left Valuation Rate while the rate was being fetched
-			if (row.valuation_type !== "Valuation Rate") return;
+			// the row may have changed item or left Valuation Rate while the rate was being fetched
+			const row = locals[cdt][cdn];
+			if (!row || row.item_code !== item_code || row.valuation_type !== "Valuation Rate") return;
 
 			const loss_qty = Math.min(
 				flt(
@@ -1402,11 +1392,12 @@ erpnext.bom.fetch_secondary_item_cost = function (doc, cdt, cdn) {
 				flt(row.stock_qty)
 			);
 			const produced_qty = flt(row.stock_qty) - loss_qty;
-			const cost = flt(r.message.rate) * produced_qty;
+			const conversion_rate = flt(doc.conversion_rate || 1);
+			const cost = (flt(r.message) / conversion_rate) * produced_qty;
 			frappe.model
 				.set_value(cdt, cdn, {
 					cost: cost,
-					base_cost: cost * flt(doc.conversion_rate || 1),
+					base_cost: cost * conversion_rate,
 				})
 				.then(() => erpnext.bom.calculate_total(doc));
 		},
