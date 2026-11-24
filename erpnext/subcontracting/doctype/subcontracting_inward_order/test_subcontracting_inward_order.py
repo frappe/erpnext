@@ -1298,6 +1298,26 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			0,
 		)
 
+	def test_cancel_receipt_of_extra_material_held_by_completed_work_order(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		extra_receipt = receive_customer_material(scio, "Basic RM", 2, 100)
+		wo = submit_work_order(scio)
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 5)).submit()
+
+		extra_receipt.cancel()
+		receive_customer_material(scio, "Basic RM", 2, 100)
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.submit()
+		rm_return.cancel()
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Item", {"parent": wo.name, "item_code": "Basic RM"}, "stock_reserved_qty"
+			),
+			0,
+		)
+
 	def test_redo_cancelled_manufacture_using_extra_customer_material(self):
 		scio, wo = make_work_order_with_extra_material()
 		manufacture = frappe.new_doc("Stock Entry").update(
@@ -2222,11 +2242,16 @@ def make_work_order_with_extra_material():
 	next(row for row in rm_in.items if row.item_code == "Basic RM").qty = 7
 	rm_in.submit()
 	scio.reload()
+	return scio, submit_work_order(scio)
+
+
+def submit_work_order(scio):
+	"""Submit a skip-transfer Work Order for the whole inward order item."""
 	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
 	wo.skip_transfer = 1
 	wo.required_items[-1].source_warehouse = "Stores - _TC"
 	wo.submit()
-	return scio, wo
+	return wo
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
