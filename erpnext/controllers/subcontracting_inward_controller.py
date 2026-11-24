@@ -3,9 +3,17 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.query_builder import Case, Order
+from frappe.query_builder.functions import Sum
 from frappe.utils import escape_html, flt, get_link_to_form
 
-from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	release_unused_inward_reservations,
+	restore_inward_reservations,
+)
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_reserved_qty_details_for_voucher,
+)
+from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_batch_list_from_item
 
 
 class SubcontractingInwardController:
@@ -14,6 +22,7 @@ class SubcontractingInwardController:
 		self.set_allow_zero_valuation_rate()
 		self.validate_warehouse_()
 		self.validate_serial_batch_for_return_or_delivery()
+		self.validate_returned_batch_qty()
 		self.validate_delivery()
 		self.update_customer_provided_item_cost()
 
@@ -139,6 +148,7 @@ class SubcontractingInwardController:
 			item.scio_detail = row_names.get((item.item_code, item.against_fg))
 
 	def validate_returns(self):
+		qty_by_row = defaultdict(float)
 		for item in self.items:
 			if not item.scio_detail:
 				frappe.throw(
@@ -160,6 +170,7 @@ class SubcontractingInwardController:
 					)
 				)
 
+			qty_by_row[item.scio_detail] += item.transfer_qty
 			precision = item.precision("transfer_qty")
 			if self.purpose == "Return Raw Material to Customer":
 				data = frappe.get_value(
@@ -168,7 +179,7 @@ class SubcontractingInwardController:
 					["received_qty", "returned_qty", "work_order_qty"],
 					as_dict=True,
 				)
-				if flt(data.returned_qty + item.transfer_qty, precision) > flt(
+				if flt(data.returned_qty + qty_by_row[item.scio_detail], precision) > flt(
 					data.received_qty - data.work_order_qty, precision
 				):
 					frappe.throw(
@@ -183,7 +194,9 @@ class SubcontractingInwardController:
 					["returned_qty", "delivered_qty"],
 					as_dict=True,
 				)
-				if flt(item.transfer_qty, precision) > flt(data.delivered_qty - data.returned_qty, precision):
+				if flt(qty_by_row[item.scio_detail], precision) > flt(
+					data.delivered_qty - data.returned_qty, precision
+				):
 					frappe.throw(
 						_(
 							"Row #{0}: Returned quantity cannot be greater than available quantity to return for Item {1}"
@@ -211,7 +224,7 @@ class SubcontractingInwardController:
 				for wo_item in work_order_items
 			}
 		)
-		item_codes = []
+		qty_by_item = defaultdict(float)
 		for item in self.items:
 			if not frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item"):
 				continue
@@ -223,19 +236,12 @@ class SubcontractingInwardController:
 						get_link_to_form("Warehouse", customer_warehouse),
 					)
 				)
-			elif item.item_code in item_codes:
-				frappe.throw(
-					_(
-						"Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
-					).format(
-						item.idx,
-						get_link_to_form("Item", item.item_code),
-					)
-				)
 			else:
 				if wo_item := wo_item_dict.get(item.item_code):
-					if wo_item.transferred_qty + item.transfer_qty > max(
-						wo_item.required_qty, wo_item.stock_reserved_qty
+					qty_by_item[item.item_code] += item.transfer_qty
+					precision = item.precision("transfer_qty")
+					if flt(wo_item.transferred_qty + qty_by_item[item.item_code], precision) > flt(
+						max(wo_item.required_qty, wo_item.stock_reserved_qty), precision
 					):
 						frappe.throw(
 							_(
@@ -246,8 +252,6 @@ class SubcontractingInwardController:
 								get_link_to_form("Work Order", self.work_order),
 							)
 						)
-					else:
-						item_codes.append(item.item_code)
 				else:
 					frappe.throw(
 						_("Row #{0}: Customer Provided Item {1} is not a part of Work Order {2}").format(
@@ -389,23 +393,20 @@ class SubcontractingInwardController:
 		throw messages are supplied as callbacks. `extra_check` runs an extra per-item
 		validation (the source-warehouse check on the skip-transfer path).
 		"""
-		seen = []
+		qty_by_item = defaultdict(float)
 		for item in items:
 			record = lookup.get(item.item_code)
 			if not record:
 				on_missing(item)
-			elif record.consumed_qty + item.transfer_qty > record.available_qty:
+
+			qty_by_item[item.item_code] += item.transfer_qty
+			precision = item.precision("transfer_qty")
+			if flt(record.consumed_qty + qty_by_item[item.item_code], precision) > flt(
+				record.available_qty, precision
+			):
 				on_overconsumption(item)
-			else:
-				if extra_check:
-					extra_check(item)
-				if item.item_code in seen:
-					frappe.throw(
-						_(
-							"Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
-						).format(item.idx, get_link_to_form("Item", item.item_code))
-					)
-				seen.append(item.item_code)
+			elif extra_check:
+				extra_check(item)
 
 	def set_allow_zero_valuation_rate(self):
 		if self.subcontracting_inward_order:
@@ -492,6 +493,58 @@ class SubcontractingInwardController:
 						)
 					)
 
+	def validate_returned_batch_qty(self):
+		"""A Subcontracting Return takes back no more of a batch than was delivered from it and not returned yet."""
+		if not self.subcontracting_inward_order or self.purpose != "Subcontracting Return":
+			return
+
+		rows = [
+			(item, batch_no, qty)
+			for item in self.items
+			for batch_no, qty in get_batch_qty_of_row(item).items()
+		]
+		if not rows:
+			return
+
+		open_qty = self.get_unreturned_batch_qty([item.scio_detail for item in self.items])
+		for item, batch_no, qty in rows:
+			key = (item.scio_detail, batch_no)
+			precision = item.precision("transfer_qty")
+			allowed_qty = flt(open_qty.get(key), precision)
+			open_qty[key] = allowed_qty - qty
+			if flt(qty, precision) > allowed_qty:
+				frappe.throw(
+					_(
+						"Row #{0}: Only {1} of Batch {2} delivered against Subcontracting Inward Order {3} is left to return."
+					).format(
+						item.idx,
+						bold(allowed_qty),
+						get_link_to_form("Batch", batch_no),
+						get_link_to_form("Subcontracting Inward Order", self.subcontracting_inward_order),
+					)
+				)
+
+	def get_unreturned_batch_qty(self, scio_details):
+		"""Delivered minus returned qty of each finished good batch, by inward order row."""
+		entry = frappe.qb.DocType("Stock Entry")
+		entry_item = frappe.qb.DocType("Stock Entry Detail")
+		batch_entry = frappe.qb.DocType("Serial and Batch Entry")
+		result = (
+			frappe.qb.from_(entry_item)
+			.join(entry)
+			.on(entry.name == entry_item.parent)
+			.join(batch_entry)
+			.on(batch_entry.parent == entry_item.serial_and_batch_bundle)
+			.select(entry_item.scio_detail, batch_entry.batch_no, Sum(batch_entry.qty).as_("qty"))
+			.where(
+				(entry.docstatus == 1)
+				& entry.purpose.isin(["Subcontracting Delivery", "Subcontracting Return"])
+				& entry_item.scio_detail.isin(scio_details)
+			)
+			.groupby(entry_item.scio_detail, batch_entry.batch_no)
+		).run(as_dict=True)
+		return {(row.scio_detail, row.batch_no): -row.qty for row in result}
+
 	def get_serial_nos_and_batches_from_sres(self, scio_detail, only_pending=True):
 		serial_nos, batch_nos = [], frappe._dict()
 
@@ -542,6 +595,7 @@ class SubcontractingInwardController:
 			"Selling Settings", "allow_delivery_of_overproduced_qty"
 		)
 
+		qty_by_row = defaultdict(float)
 		for item in self.items:
 			if not item.scio_detail:
 				frappe.throw(
@@ -552,6 +606,7 @@ class SubcontractingInwardController:
 					)
 				)
 
+			qty_by_row[item.scio_detail] += item.transfer_qty
 			table = frappe.qb.DocType("Subcontracting Inward Order Item")
 			allowed_qty = table.produced_qty
 			if not allow_delivery_of_overproduced_qty:
@@ -575,7 +630,8 @@ class SubcontractingInwardController:
 				)
 				max_allowed_qty = query.run(pluck="max_allowed_qty")[0]
 
-			if item.transfer_qty > max_allowed_qty:
+			precision = item.precision("transfer_qty")
+			if flt(qty_by_row[item.scio_detail], precision) > flt(max_allowed_qty, precision):
 				frappe.throw(
 					_(
 						"Row #{0}: Quantity of Item {1} cannot be more than {2} {3} against Subcontracting Inward Order {4}"
@@ -637,6 +693,12 @@ class SubcontractingInwardController:
 					)
 				)
 
+			secondary_qty = defaultdict(float)
+			for item in self.items:
+				if item.secondary_item_type or item.valuation_type:
+					secondary_qty[(item.item_code, item.t_warehouse)] += item.transfer_qty
+
+			consumed_by_item = defaultdict(float)
 			for item in [item for item in self.items if not item.is_finished_item]:
 				if item.secondary_item_type or item.valuation_type:
 					scio_secondary_item = frappe.get_value(
@@ -650,10 +712,10 @@ class SubcontractingInwardController:
 						["produced_qty", "delivered_qty"],
 						as_dict=True,
 					)
-					if (
-						scio_secondary_item
-						and scio_secondary_item.delivered_qty
-						> scio_secondary_item.produced_qty - item.transfer_qty
+					precision = item.precision("transfer_qty")
+					if scio_secondary_item and flt(scio_secondary_item.delivered_qty, precision) > flt(
+						scio_secondary_item.produced_qty - secondary_qty[(item.item_code, item.t_warehouse)],
+						precision,
 					):
 						frappe.throw(
 							_(
@@ -665,6 +727,8 @@ class SubcontractingInwardController:
 						"Subcontracting Inward Order Received Item",
 						{
 							"docstatus": 1,
+							"parent": self.subcontracting_inward_order,
+							"reference_name": fg_item_name,
 							"rm_item_code": item.item_code,
 							"warehouse": item.s_warehouse,
 							"is_customer_provided_item": 0,
@@ -673,9 +737,12 @@ class SubcontractingInwardController:
 						["consumed_qty", "billed_qty", "returned_qty"],
 						as_dict=True,
 					)
-					if scio_rm_item and (scio_rm_item.billed_qty - scio_rm_item.returned_qty) > (
-						scio_rm_item.consumed_qty - item.transfer_qty
-					):
+					key = (item.item_code, item.s_warehouse)
+					consumed_by_item[key] += item.transfer_qty
+					precision = item.precision("transfer_qty")
+					if scio_rm_item and flt(
+						scio_rm_item.billed_qty - scio_rm_item.returned_qty, precision
+					) > flt(scio_rm_item.consumed_qty - consumed_by_item[key], precision):
 						frappe.throw(
 							_(
 								"Row #{0}: Cannot cancel this Manufacturing Stock Entry as billed quantity of Item {1} cannot be greater than consumed quantity."
@@ -720,12 +787,11 @@ class SubcontractingInwardController:
 				case "Manufacture":
 					self.update_inward_order_received_items_for_manufacture()
 				case "Return Raw Material to Customer":
-					scio_rm_names = {
-						item.scio_detail: item.transfer_qty
-						if self._action == "submit"
-						else -item.transfer_qty
-						for item in self.items
-					}
+					scio_rm_names = defaultdict(float)
+					for item in self.items:
+						scio_rm_names[item.scio_detail] += (
+							item.transfer_qty if self._action == "submit" else -item.transfer_qty
+						)
 					table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 					doc_updates = {
 						scio_rm_name: {"returned_qty": table.returned_qty + qty}
@@ -845,17 +911,16 @@ class SubcontractingInwardController:
 		if not items:
 			return
 
-		item_code_wh = frappe._dict(
-			{
-				(
-					item.item_code,
-					customer_warehouse
-					if frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
-					else item.s_warehouse,
-				): item.transfer_qty if self._action == "submit" else -item.transfer_qty
-				for item in items
-			}
-		)
+		item_code_wh = defaultdict(float)
+		for item in items:
+			warehouse = (
+				customer_warehouse
+				if frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
+				else item.s_warehouse
+			)
+			item_code_wh[(item.item_code, warehouse)] += (
+				item.transfer_qty if self._action == "submit" else -item.transfer_qty
+			)
 		item_codes, warehouses = zip(*list(item_code_wh.keys()), strict=True)
 
 		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
@@ -886,6 +951,7 @@ class SubcontractingInwardController:
 		)
 
 		if data := data.run(as_dict=True):
+			precision = frappe.get_precision("Subcontracting Inward Order Received Item", "consumed_qty")
 			used_item_wh = []
 			doc_updates = {}
 			for d in data:
@@ -897,7 +963,7 @@ class SubcontractingInwardController:
 					)
 					used_item_wh.append((d.rm_item_code, d.warehouse))
 
-				qty = d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)]
+				qty = flt(d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)], precision)
 				if qty or d.is_customer_provided_item or not d.is_additional_item:
 					doc_updates[d.name] = {"consumed_qty": qty}
 				else:
@@ -921,13 +987,13 @@ class SubcontractingInwardController:
 				)
 				+ 1
 			)
-			for extra_item in [
-				item
-				for item in items
-				if not frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
-				and (item.item_code, item.s_warehouse)
-				not in [(d.rm_item_code, d.warehouse) for d in data if not d.is_customer_provided_item]
-			]:
+			existing_rows = [(d.rm_item_code, d.warehouse) for d in data if not d.is_customer_provided_item]
+			for (item_code, warehouse), qty in item_code_wh.items():
+				if (item_code, warehouse) in existing_rows or frappe.get_cached_value(
+					"Item", item_code, "is_customer_provided_item"
+				):
+					continue
+
 				doc = frappe.new_doc(
 					"Subcontracting Inward Order Received Item",
 					parent=self.subcontracting_inward_order,
@@ -935,14 +1001,14 @@ class SubcontractingInwardController:
 					parentfield="received_items",
 					idx=next_received_idx,
 					main_item_code=main_item_code,
-					rm_item_code=extra_item.item_code,
-					stock_uom=extra_item.stock_uom,
+					rm_item_code=item_code,
+					stock_uom=frappe.get_cached_value("Item", item_code, "stock_uom"),
 					reference_name=frappe.get_cached_value(
 						"Work Order", self.work_order, "subcontracting_inward_order_item"
 					),
 					required_qty=0,
-					consumed_qty=extra_item.transfer_qty,
-					warehouse=extra_item.s_warehouse,
+					consumed_qty=flt(qty, precision),
+					warehouse=warehouse,
 					is_additional_item=True,
 				)
 				doc.flags.skip_docstatus_validation = True
@@ -961,7 +1027,8 @@ class SubcontractingInwardController:
 				secondary_items[(item.item_code, item.t_warehouse)] += (
 					item.transfer_qty if self._action == "submit" else -item.transfer_qty
 				)
-			secondary_items = frappe._dict(secondary_items)
+			precision = frappe.get_precision("Subcontracting Inward Order Secondary Item", "produced_qty")
+			secondary_items = frappe._dict({key: flt(qty, precision) for key, qty in secondary_items.items()})
 
 			if secondary_items:
 				item_codes, warehouses = zip(*list(secondary_items.keys()), strict=True)
@@ -992,6 +1059,8 @@ class SubcontractingInwardController:
 					)
 					doc_updates = {}
 					for key, value in secondary_items_dict.items():
+						if key not in secondary_items:
+							continue
 						if (
 							self._action == "cancel"
 							and value.produced_qty - abs(secondary_items.get(key)) == 0
@@ -1018,11 +1087,11 @@ class SubcontractingInwardController:
 				next_secondary_idx = (
 					frappe.db.count("Subcontracting Inward Order Secondary Item", {"parent": scio}) + 1
 				)
-				for secondary_item in [
-					item
-					for item in secondary_items_list
-					if (item.item_code, item.t_warehouse) not in [(d.item_code, d.warehouse) for d in result]
-				]:
+				existing_keys = {(d.item_code, d.warehouse) for d in result}
+				new_rows = {(item.item_code, item.t_warehouse): item for item in secondary_items_list}
+				for key, secondary_item in new_rows.items():
+					if key in existing_keys:
+						continue
 					doc = frappe.new_doc(
 						"Subcontracting Inward Order Secondary Item",
 						parent=scio,
@@ -1033,7 +1102,7 @@ class SubcontractingInwardController:
 						fg_item_code=fg_item_code,
 						stock_uom=secondary_item.stock_uom,
 						warehouse=secondary_item.t_warehouse,
-						produced_qty=secondary_item.transfer_qty,
+						produced_qty=secondary_items[key],
 						secondary_item_type=secondary_item.secondary_item_type,
 						delivered_qty=0,
 						reference_name=frappe.get_value(
@@ -1099,7 +1168,32 @@ class SubcontractingInwardController:
 		if self.purpose == "Return Raw Material to Customer":
 			if self._action == "cancel":
 				self.validate_no_later_work_order_reservation()
-			self.adjust_inward_reservations(release=self._action == "submit")
+				self.adjust_inward_reservations(release=False)
+				restore_inward_reservations(self.subcontracting_inward_order, self.get_return_qty())
+			else:
+				self.release_unused_work_order_reservations()
+				self.adjust_inward_reservations(release=True)
+
+	def get_return_qty(self) -> dict[str, float]:
+		"""Returned stock qty of each inward order row."""
+		return_qty = defaultdict(float)
+		for item in self.items:
+			return_qty[item.scio_detail] += item.transfer_qty
+		return return_qty
+
+	def release_unused_work_order_reservations(self):
+		"""Take the qty the inward order no longer holds from the unused part of its Work Order reservations."""
+		return_qty = self.get_return_qty()
+		reserved_qty = get_sre_reserved_qty_details_for_voucher(
+			"Subcontracting Inward Order", self.subcontracting_inward_order
+		)
+		short_qty = {}
+		for scio_detail, qty in return_qty.items():
+			if (missing_qty := qty - flt(reserved_qty.get(scio_detail))) > 0:
+				short_qty[scio_detail] = missing_qty
+
+		if short_qty:
+			release_unused_inward_reservations(self.subcontracting_inward_order, short_qty)
 
 	def validate_no_later_work_order_reservation(self):
 		"""Cancel gives batch qty back newest reservation first, which is wrong once a later Work Order took from them."""
@@ -1257,6 +1351,14 @@ class SubcontractingInwardController:
 			)
 
 			set_subcontracting_inward_order_status(self.subcontracting_inward_order)
+
+
+def get_batch_qty_of_row(item):
+	if item.serial_and_batch_bundle:
+		return {
+			batch_no: abs(row.qty) for batch_no, row in get_batch_nos(item.serial_and_batch_bundle).items()
+		}
+	return {item.batch_no: item.transfer_qty} if item.batch_no else {}
 
 
 @frappe.whitelist()

@@ -20,6 +20,7 @@ from frappe.utils import (
 	get_link_to_form,
 	get_string_between,
 	get_time,
+	getdate,
 	nowdate,
 	nowtime,
 	today,
@@ -152,6 +153,7 @@ class Project(Document):
 				project_tasks.append(task)
 
 			self.dependency_mapping(tmp_task_details, project_tasks)
+			self.reschedule_tasks_moved_by_holidays(tmp_task_details, project_tasks)
 
 	def create_task_from_template(self, task_details):
 		return frappe.get_doc(
@@ -169,6 +171,8 @@ class Project(Document):
 			color=task_details.color,
 			template_task=task_details.name,
 			priority=task_details.priority,
+			expected_time=task_details.expected_time,
+			is_milestone=task_details.is_milestone,
 		).insert()
 
 	def calculate_start_date(self, task_details):
@@ -195,6 +199,18 @@ class Project(Document):
 			self.check_depends_on_value(template_task, project_task, project_tasks)
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
 
+	def reschedule_tasks_moved_by_holidays(self, template_tasks, project_tasks):
+		"""A holiday can push a task past the start of a task that depends on it."""
+		for template_task, project_task in zip(template_tasks, project_tasks, strict=True):
+			start_date = getdate(add_days(self.expected_start_date, template_task.start))
+			end_date = add_days(start_date, template_task.duration)
+			if (
+				getdate(project_task.exp_start_date) != start_date
+				or getdate(project_task.exp_end_date) != end_date
+			):
+				project_task.reload()
+				project_task.reschedule_dependent_tasks()
+
 	def set_consumed_material_cost(self):
 		self.total_consumed_material_cost = ProjectCostQueries(self.name).material_cost()
 
@@ -214,9 +230,23 @@ class Project(Document):
 		if template_task.get("parent_task") and not project_task.get("parent_task"):
 			for pt in project_tasks:
 				if pt.template_task == template_task.parent_task:
+					self.extend_group_to_cover(pt, project_task.exp_end_date, project_tasks)
 					project_task.parent_task = pt.name
 					project_task.save()
 					break
+
+	def extend_group_to_cover(self, group, end_date, project_tasks):
+		"""A holiday can push a child task past the end of its group, so the group ends later too."""
+		if not end_date or not group.exp_end_date or getdate(end_date) <= getdate(group.exp_end_date):
+			return
+
+		group.reload()
+		if group.parent_task:
+			parent_group = next(pt for pt in project_tasks if pt.name == group.parent_task)
+			self.extend_group_to_cover(parent_group, end_date, project_tasks)
+
+		group.exp_end_date = end_date
+		group.save()
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data:

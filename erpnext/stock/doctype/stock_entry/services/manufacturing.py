@@ -8,6 +8,9 @@ from frappe.query_builder.functions import Coalesce, IfNull, Max, Min, NullIf, S
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -100,8 +103,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		return item_args
 
 	def add_secondary_items(self):
-		secondary_items = get_secondary_items(self.doc.bom_no, self.doc.work_order)
-		for row in secondary_items:
+		for row in self.get_bom_secondary_items():
 			item_args = self.get_item_dict(row)
 			item_args["valuation_type"] = row.get("valuation_type")
 			item_args["secondary_item_type"] = row.secondary_item_type
@@ -110,11 +112,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				item_args["set_basic_rate_manually"] = 1
 				item_args["basic_rate"] = flt(row.get("manual_rate"))
 
-			if row.secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
-				item_args["t_warehouse"] = self.wo_doc.scrap_warehouse
-			else:
-				item_args["t_warehouse"] = self.doc.to_warehouse
-
+			item_args["t_warehouse"] = self.get_secondary_item_warehouse(row.secondary_item_type)
 			if not item_args.get("t_warehouse"):
 				item_args["t_warehouse"] = frappe.get_cached_value(
 					"BOM", self.doc.bom_no, "default_target_warehouse"
@@ -129,6 +127,14 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, row.stock_uom)
 			item_args["transfer_qty"] = item_args["qty"]
 			self.doc.append("items", item_args)
+
+	def get_secondary_item_warehouse(self, secondary_item_type):
+		if secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
+			return self.wo_doc.scrap_warehouse
+		return self.doc.to_warehouse
+
+	def get_bom_secondary_items(self):
+		return get_secondary_items(self.doc.bom_no, self.doc.work_order)
 
 	def set_process_loss_qty(self):
 		process_loss_qty = self.doc.get_pending_process_loss_qty()
@@ -287,9 +293,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
 		self.validate_manufactured_qty()
+		self.validate_qty_against_transferred_qty()
 		self.check_if_operations_completed()
 		self.check_duplicate_entry_for_work_order()
-		self.validate_component_and_quantities()
 		self.validate_finished_good_serial_batch_for_work_order()
 		self.validate_alternative_items()
 
@@ -427,6 +433,53 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 		if not self.doc.fg_completed_qty:
 			frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"), ManufacturedQtyMandatoryError)
+
+	def validate_qty_against_transferred_qty(self):
+		"""Once material is transferred to the Work Order, refuse to manufacture more than it covers,
+		so BOM backflush does not take other orders' stock from the shared WIP warehouse."""
+		wo = self.wo_doc
+		if (
+			not wo
+			or wo.skip_transfer
+			or wo.track_semi_finished_goods
+			or wo.transfer_material_against == "Job Card"
+			or not flt(wo.material_transferred_for_manufacturing)
+		):
+			return
+
+		allowance_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		# lock on submit so concurrent Manufacture entries see each other's produced qty
+		is_submitting = self.doc.docstatus == 1
+		if is_submitting and wo.production_plan:
+			# plan row before Work Order, the order update_work_order_qty locks them in
+			ProductionPlanWorkOrderQuantities(wo.production_plan).lock_plan_row(wo)
+
+		transferred_qty, produced_qty, process_loss_qty = frappe.db.get_value(
+			"Work Order",
+			wo.name,
+			["material_transferred_for_manufacturing", "produced_qty", "process_loss_qty"],
+			for_update=is_submitting,
+		)
+		precision = self.doc.precision("fg_completed_qty")
+		allowed_qty = flt(
+			flt(transferred_qty)
+			+ flt(wo.qty) * allowance_percentage / 100
+			- flt(produced_qty)
+			- flt(process_loss_qty),
+			precision,
+		)
+		if flt(self.doc.fg_completed_qty, precision) > allowed_qty:
+			frappe.throw(
+				_(
+					"For Quantity ({0}) cannot be more than {1}, the qty transferred to Work Order {2} that is not yet produced."
+				).format(
+					flt(self.doc.fg_completed_qty, precision),
+					allowed_qty,
+					get_link_to_form("Work Order", self.doc.work_order),
+				)
+			)
 
 	def check_if_operations_completed(self):
 		"""Require operation (job card) completion before manufacture, so operating costs are captured."""
@@ -790,19 +843,68 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			return
 
 		for material in self.available_materials.values():
-			# a material is only covered by the entries that consumed it
-			pending_qty = transferred_qty - sum(material.consumed_for.values())
-			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, precision) <= 0:
+			pending_qty, covered_qty = self.get_material_pending_qty(
+				material, transferred_qty, pending_qty_to_mfg
+			)
+			if flt(covered_qty - fg_completed_qty, precision) <= 0:
 				# an entry for all that is pending consumes what is left
 				pending_qty = fg_completed_qty
 			self._append_transfer_based_rm(material, pending_qty)
+
+	def get_material_pending_qty(self, material, transferred_qty, pending_qty_to_mfg):
+		"""Qty the material left in WIP is for, and the part of it that is ready to manufacture."""
+		if self.wo_doc.transfer_material_against == "Job Card":
+			pending_qty = self.get_job_card_material_pending_qty(material, transferred_qty)
+			return pending_qty, pending_qty
+
+		# a material is only covered by the entries that consumed it
+		pending_qty = transferred_qty - sum(material.consumed_for.values())
+		return pending_qty, min(pending_qty_to_mfg, pending_qty)
+
+	def get_job_card_material_pending_qty(self, material, transferred_qty):
+		"""The Work Order's transferred qty follows the completed operations, not the moved material,
+		so use the item's moved share of its required qty, over its alternatives and warehouses."""
+		item_code = material.original_item or material.item_code
+		consumed_for = {}
+		for row in self.available_materials.values():
+			if (row.original_item or row.item_code) == item_code:
+				consumed_for.update(row.consumed_for)
+
+		# material moved in excess is spread over the order qty
+		transferred_for_qty = min(
+			self.get_material_transferred_for_qty(item_code), max(flt(self.wo_doc.qty), transferred_qty)
+		)
+		return transferred_for_qty - sum(consumed_for.values())
+
+	def get_material_transferred_for_qty(self, item_code):
+		"""Finished goods qty the item moved to WIP is for, as its share of the required qty."""
+		required_qty = sum(
+			flt(d.required_qty) for d in self.wo_doc.required_items if d.item_code == item_code
+		)
+		if not required_qty:
+			return flt(self.wo_doc.qty)
+
+		return self.transferred_qty_by_item[item_code] * flt(self.wo_doc.qty) / required_qty
+
+	@cached_property
+	def transferred_qty_by_item(self):
+		qty = defaultdict(float)
+		for row in self._transfer_entries:
+			qty[row.original_item or row.item_code] += flt(row.transfer_qty)
+
+		return qty
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
 		if row.original_item:
 			item_args["original_item"] = row.original_item
 		is_return = self.doc.get("is_return")
-		qty = row.qty if is_return else (flt(row.qty) * flt(self.doc.fg_completed_qty)) / pending_qty_to_mfg
+		# drop float noise only, so 7.000000000000001 is not ceiled to 8 and 0.004 still is to 1
+		qty = (
+			row.qty
+			if is_return
+			else flt(flt(row.qty) * flt(self.doc.fg_completed_qty) / pending_qty_to_mfg, 9)
+		)
 		item_args["qty"] = ceil_qty_if_uom_has_whole_number(qty, row.uom)
 		item_args["transfer_qty"] = item_args["qty"]
 		if not flt(item_args["qty"], frappe.get_precision("Stock Entry Detail", "qty")):
@@ -812,7 +914,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		else:
 			item_args["t_warehouse"], item_args["s_warehouse"] = None, row.warehouse
 		if row.serial_nos or row.batches:
-			self.assign_serial_batches_to_materials(item_args, row, qty)
+			self.assign_serial_batches_to_materials(item_args, row, item_args["qty"])
 		else:
 			self.doc.append("items", item_args)
 
@@ -1077,7 +1179,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.qty = ceil_qty_if_uom_has_whole_number(row.stock_qty, row.stock_uom)
 			row.transfer_qty = row.qty
 			row.s_warehouse = None
-			row.t_warehouse = row.warehouse or self.doc.to_warehouse
+			row.t_warehouse = self.get_secondary_item_warehouse(row.secondary_item_type)
 			bom_row = bom_rows.get(row.bom_secondary_item, frappe._dict())
 			row.valuation_type = bom_row.get("valuation_type")
 			if row.valuation_type == "Manual":
@@ -1103,10 +1205,24 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			)
 		}
 
-	def get_secondary_items_from_job_card(self):
-		if not self.wo_doc.operations:
+	def get_bom_secondary_items(self):
+		"""Skip the BOM estimate of a secondary item whose actual qty the Job Cards recorded."""
+		recorded = {(row.item_code, row.secondary_item_type) for row in self.get_job_card_secondary_items()}
+		return [
+			row
+			for row in super().get_bom_secondary_items()
+			if (row.item_code, row.secondary_item_type) not in recorded
+		]
+
+	def get_job_card_secondary_items(self):
+		if not self.wo_doc or not self.wo_doc.operations:
 			return []
-		secondary_items = get_secondary_items_from_job_card(self.doc.work_order, self.doc.job_card)
+		return get_secondary_items_from_job_card(self.doc.work_order, self.doc.job_card)
+
+	def get_secondary_items_from_job_card(self):
+		secondary_items = self.get_job_card_secondary_items()
+		if not secondary_items:
+			return []
 		pending_qty = self._get_pending_secondary_qty()
 		used_secondary_items = self.get_used_secondary_items()
 		self._adjust_secondary_item_qtys(secondary_items, used_secondary_items, pending_qty)
@@ -1281,13 +1397,8 @@ class RepackStockEntry(BaseManufactureStockEntry):
 		self.validate_conversion_output_qty(consumed_qty, production_item)
 
 		is_submitting = self.doc.docstatus == 1
-		produced_qty = flt(
-			frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty", for_update=is_submitting)
-		)
-		available_qty = flt(
-			produced_qty
-			- get_converted_fg_qty(self.doc.work_order, exclude=self.doc.name, for_update=is_submitting),
-			precision,
+		available_qty = get_available_fg_qty(
+			self.doc.work_order, exclude=self.doc.name, for_update=is_submitting
 		)
 		if consumed_qty > available_qty:
 			frappe.throw(
@@ -1376,14 +1487,16 @@ def get_production_item_details(work_order=None, bom_no=None):
 
 def _check_bom_component_qty(doc, bom_items):
 	"""Validate that stock entry items match BOM quantities."""
-	precision = frappe.get_precision("Stock Entry Detail", "qty")
+	precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 	for row in bom_items:
-		row.qty = row.qty * doc.fg_completed_qty
+		# Get Items rounds a whole number qty up
+		row.qty = ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
 		matched_items = [
 			item for item in doc.items if item.s_warehouse and get_original_item(item) == row.item_code
 		]
 		if matched_items:
-			if flt(row.qty, precision) != flt(sum(flt(item.qty) for item in matched_items), precision):
+			stock_qty = sum(flt(item.transfer_qty) for item in matched_items)
+			if flt(row.qty, precision) != flt(stock_qty, precision):
 				frappe.throw(
 					_(
 						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
@@ -1485,15 +1598,16 @@ def get_secondary_items(bom_no, work_order=None):
 		return get_bom_items(bom_no, fetch_secondary_items=True)
 
 
-def get_secondary_items_from_sub_assemblies(bom_no):
+def get_secondary_items_from_sub_assemblies(bom_no, qty=1):
+	"""Secondary items of the sub-assembly BOMs at every level, for qty of the BOM's item."""
 	items = []
-	bom_items = get_bom_items(bom_no)
+	bom_items = get_bom_items(bom_no, qty=qty)
 	for row in bom_items:
 		if not row.bom_no:
 			continue
 
 		items.extend(get_bom_items(row.bom_no, qty=row.qty, fetch_secondary_items=True))
-		items.extend(get_secondary_items_from_sub_assemblies(row.bom_no))
+		items.extend(get_secondary_items_from_sub_assemblies(row.bom_no, row.qty))
 
 	return items
 
@@ -1721,7 +1835,8 @@ def set_previous_operation_serial_batch(parent_doc, row):
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
 	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
-		qty = ceil(qty)
+		# rounding to 9 decimals first keeps float noise (0.07 * 100) from adding a unit
+		qty = ceil(flt(qty, 9))
 
 	return qty
 
@@ -1897,6 +2012,18 @@ def get_alternative_finished_goods(production_item):
 		pluck="item_code",
 	)
 	return list(dict.fromkeys(alternatives))
+
+
+def get_available_fg_qty(work_order, exclude=None, for_update=False):
+	"""Produced qty of the Work Order not yet disassembled or converted to an alternative item."""
+	produced_qty, disassembled_qty = frappe.db.get_value(
+		"Work Order", work_order, ["produced_qty", "disassembled_qty"], for_update=for_update
+	)
+	converted_qty = get_converted_fg_qty(work_order, exclude=exclude, for_update=for_update)
+	return flt(
+		flt(produced_qty) - flt(disassembled_qty) - converted_qty,
+		frappe.get_precision("Work Order", "produced_qty"),
+	)
 
 
 def get_converted_fg_qty(work_order, exclude=None, for_update=False):

@@ -12,6 +12,7 @@ from erpnext.projects.doctype.project_template.test_project_template import make
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.mapper import make_project as make_project_from_so
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -34,24 +35,27 @@ class TestProject(ERPNextTestSuite):
 		self.assertGreaterEqual(sum(data.values()), 1)
 
 	def test_project_total_costing_and_billing_amount(self):
-		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet, patch_usd_rate
 		from erpnext.setup.doctype.employee.test_employee import make_employee
 
 		project_name = "Test Project Costing"
 		employee = make_employee("employee@frappe.io", company="_Test Company")
 		project = make_project({"project_name": project_name})
-		timesheet = make_timesheet(
-			employee=employee,
-			is_billable=1,
-			currency="USD",
-			project=project.name,
-			simulate=True,
-			exchange_rate=80,
-		)
+		with patch_usd_rate(80):
+			timesheet = make_timesheet(
+				employee=employee,
+				is_billable=1,
+				currency="USD",
+				timesheet_currency="USD",
+				project=project.name,
+				simulate=True,
+				exchange_rate=80,
+			)
 		timesheet.reload()
 		project.reload()
-		self.assertEqual(project.total_costing_amount, 3200)
-		self.assertEqual(project.total_billable_amount, 8000)
+		# 2 hours at 20 INR, logged as 0.25 USD a hour at 80
+		self.assertEqual(project.total_costing_amount, 40)
+		self.assertEqual(project.total_billable_amount, timesheet.base_total_billable_amount)
 
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"
@@ -193,6 +197,112 @@ class TestProject(ERPNextTestSuite):
 		).insert()
 
 		self.assertEqual(frappe.db.count("Task", {"project": project.name}), len(template.tasks))
+
+	def test_template_task_copies_expected_time_and_milestone(self):
+		template_task = create_task(
+			subject="_Test Template Milestone Task", is_template=1, begin=0, duration=2, save=False
+		)
+		template_task.expected_time = 8
+		template_task.is_milestone = 1
+		template_task.save()
+		template = make_project_template("_Test Template With Milestone", [template_task])
+
+		project = get_project("_Test Project With Milestone", template)
+
+		task = frappe.get_value(
+			"Task", {"project": project.name}, ["expected_time", "is_milestone"], as_dict=True
+		)
+		self.assertEqual(task.expected_time, 8)
+		self.assertEqual(task.is_milestone, 1)
+
+	def test_holiday_under_child_task_extends_its_groups(self):
+		start_date = getdate(nowdate())
+		holiday_list = make_holiday_list(
+			"_Test Holiday Under Child Task",
+			from_date=start_date,
+			to_date=add_days(start_date, 30),
+			holiday_dates=[{"holiday_date": add_days(start_date, 2), "description": "Child start"}],
+		)
+		outer_group = create_task(
+			subject="_Test Template Outer Group", is_template=1, is_group=1, begin=0, duration=4
+		)
+		inner_group = create_task(
+			subject="_Test Template Inner Group",
+			is_template=1,
+			is_group=1,
+			begin=1,
+			duration=3,
+			parent_task=outer_group.name,
+		)
+		child = create_task(
+			subject="_Test Template Child Under Holiday",
+			is_template=1,
+			begin=2,
+			duration=2,
+			parent_task=inner_group.name,
+		)
+		template = make_project_template(
+			"_Test Template With Holiday Under Child", [child, inner_group, outer_group]
+		)
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Holiday Under Child {frappe.generate_hash(length=6)}",
+			project_template=template.name,
+			expected_start_date=start_date,
+			holiday_list=holiday_list.name,
+			company="_Test Company",
+		).insert()
+
+		end_dates = {
+			task.template_task: getdate(task.exp_end_date)
+			for task in frappe.get_all(
+				"Task", filters={"project": project.name}, fields=["template_task", "exp_end_date"]
+			)
+		}
+		self.assertEqual(end_dates[child.name], add_days(start_date, 5))
+		self.assertEqual(end_dates[inner_group.name], add_days(start_date, 5))
+		self.assertEqual(end_dates[outer_group.name], add_days(start_date, 5))
+
+	def test_holiday_on_template_task_moves_its_dependent(self):
+		start_date = getdate(nowdate())
+		holiday_list = make_holiday_list(
+			"_Test Holiday On Project Start",
+			from_date=start_date,
+			to_date=add_days(start_date, 30),
+			holiday_dates=[{"holiday_date": start_date, "description": "Project start"}],
+		)
+		task_a = create_task(
+			subject="_Test Template Task Moved By Holiday", is_template=1, begin=0, duration=2
+		)
+		task_b = create_task(
+			subject="_Test Template Task After Holiday Task",
+			depends_on=task_a.name,
+			is_template=1,
+			begin=3,
+			duration=1,
+		)
+		template = make_project_template("_Test Template With Holiday Dependency", [task_a, task_b])
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Template With Holiday Dependency {frappe.generate_hash(length=6)}",
+			project_template=template.name,
+			expected_start_date=start_date,
+			holiday_list=holiday_list.name,
+			company="_Test Company",
+		).insert()
+
+		dates = {
+			task.template_task: (getdate(task.exp_start_date), getdate(task.exp_end_date))
+			for task in frappe.get_all(
+				"Task",
+				filters={"project": project.name},
+				fields=["template_task", "exp_start_date", "exp_end_date"],
+			)
+		}
+		self.assertEqual(dates[task_a.name], (add_days(start_date, 1), add_days(start_date, 3)))
+		self.assertEqual(dates[task_b.name], (add_days(start_date, 4), add_days(start_date, 5)))
 
 	def test_deleted_template_tasks_are_not_recreated_on_save(self):
 		template = make_project_template("_Test Template Tasks Not Recreated")

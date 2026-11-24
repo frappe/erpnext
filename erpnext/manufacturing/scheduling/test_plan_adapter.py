@@ -16,6 +16,7 @@ from erpnext.manufacturing.scheduling.plan_adapter import (
 	apply_schedule,
 	build_plan_tasks,
 	get_schedule_preview,
+	get_supplier_lead_times,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
@@ -718,6 +719,17 @@ class TestPlanAdapter(ERPNextTestSuite):
 			}
 		).insert()
 
+	def test_supplier_lead_times_follow_renamed_item(self):
+		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
+		old_item = create_item("Test PPS Renamed RM Old").name
+		self.make_supplier_lead_time(old_item, suppliers)
+		new_item = frappe.rename_doc("Item", old_item, "Test PPS Renamed RM New")
+		create_item(old_item)
+
+		supplier_lead_times = get_supplier_lead_times([old_item, new_item])
+		self.assertEqual(set(supplier_lead_times), {new_item})
+		self.assertEqual(supplier_lead_times[new_item][suppliers[0]].purchase_time, 3)
+
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_schedule_uses_supplier_wise_lead_time(self):
 		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
@@ -826,3 +838,20 @@ class TestPlanAdapter(ERPNextTestSuite):
 		for row in plan.sub_assembly_items:
 			self.assertIn(get_datetime(row.schedule_date), sub_starts)
 			self.assertIsNotNone(row.schedule_end_date)
+
+	def test_batch_based_operation_is_scheduled_per_batch(self):
+		operation = "Test PPS Op Per Batch"
+		if not frappe.db.exists("Operation", operation):
+			make_operation(operation=operation, workstation=self.workstation)
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+
+		item = "Test PPS FG 6"
+		create_item(item, valuation_rate=100)
+		self.make_bom_with_operation(
+			item, ["Test PPS RM"], time_in_mins=60, operations=[operation], batch_size=10
+		)
+		bom_no = frappe.db.get_value("BOM", {"item": item, "docstatus": 1})
+
+		# 60 mins per batch of 10, as the Work Order plans it
+		tasks, _terminal_keys = loaders.build_bom_operation_tasks(bom_no, 10, "row")
+		self.assertEqual(tasks[0].duration_mins, 60)

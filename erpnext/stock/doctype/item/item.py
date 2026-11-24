@@ -739,12 +739,19 @@ class Item(Document):
 			)
 
 		frappe.db.set_value("Item", new_name, "item_code", new_name)
+		self.rename_lead_time(new_name)
 
 		if merge:
 			self.set_last_purchase_rate(new_name)
 			self.recalculate_bin_qty(new_name)
 
 		queue_item(new_name, drop=old_name)
+
+	def rename_lead_time(self, new_name):
+		"""Keep Item Lead Time named after its item."""
+		lead_time = frappe.db.get_value("Item Lead Time", {"item_code": new_name})
+		if lead_time and lead_time != new_name:
+			frappe.rename_doc("Item Lead Time", lead_time, new_name, show_alert=False)
 
 	def delete_old_bins(self, old_name, new_name=None):
 		if not new_name:
@@ -1513,8 +1520,8 @@ def validate_cancelled_item(item_code, docstatus=None):
 
 
 @frappe.request_cache
-def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
-	"""returns last purchase details in stock uom"""
+def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0, conversion_factor=1.0):
+	"""returns last purchase details per stock uom, or per the uom of `conversion_factor`"""
 	# the latest by date wins, a Purchase Order before a Receipt before an Invoice on the same date
 	last_purchases = []
 	for doctype in ("Purchase Order", "Purchase Receipt", "Purchase Invoice"):
@@ -1527,12 +1534,12 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 	purchase_date, last_purchase = max(last_purchases, key=lambda purchase: purchase[0])
 
-	conversion_factor = flt(last_purchase.conversion_factor)
+	uom_factor = (flt(conversion_factor) or 1.0) / flt(last_purchase.conversion_factor)
 	out = frappe._dict(
 		{
-			"base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
-			"base_rate": flt(last_purchase.base_rate) / conversion_factor,
-			"base_net_rate": flt(last_purchase.base_net_rate) / conversion_factor,
+			"base_price_list_rate": flt(last_purchase.base_price_list_rate) * uom_factor,
+			"base_rate": flt(last_purchase.base_rate) * uom_factor,
+			"base_net_rate": flt(last_purchase.base_net_rate) * uom_factor,
 			"discount_percentage": flt(last_purchase.discount_percentage),
 			"purchase_date": purchase_date,
 		}

@@ -5,7 +5,7 @@
 
 import frappe
 from frappe.query_builder.functions import Count, IfNull, Max, Sum
-from frappe.utils import flt
+from frappe.utils import flt, now
 from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
@@ -339,4 +339,50 @@ def get_subcontracted_received_qty(po_details):
 		)
 		.groupby(sco_item.purchase_order_item)
 		.run()
+	)
+
+
+def update_subcontracted_received_qty(subcontracting_order_items: list[str]):
+	"""Set the accepted finished good qty received on the plan's subcontracted sub-assembly rows."""
+	if not subcontracting_order_items:
+		return
+
+	po_item = frappe.qb.DocType("Purchase Order Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	sub_assembly_items = (
+		frappe.qb.from_(sco_item)
+		.inner_join(po_item)
+		.on(po_item.name == sco_item.purchase_order_item)
+		.select(po_item.production_plan_sub_assembly_item)
+		.distinct()
+		.where(
+			sco_item.name.isin(subcontracting_order_items)
+			& (IfNull(po_item.production_plan_sub_assembly_item, "") != "")
+		)
+		.run(pluck=True)
+	)
+	if not sub_assembly_items:
+		return
+
+	po_items = frappe.get_all(
+		"Purchase Order Item",
+		filters={"production_plan_sub_assembly_item": ("in", sub_assembly_items), "docstatus": 1},
+		fields=["name", "production_plan_sub_assembly_item", "production_plan"],
+	)
+	received_qty = get_subcontracted_received_qty([row.name for row in po_items])
+
+	sub_assembly_received_qty = dict.fromkeys(sub_assembly_items, 0.0)
+	for row in po_items:
+		sub_assembly_received_qty[row.production_plan_sub_assembly_item] += flt(received_qty.get(row.name))
+
+	precision = frappe.get_precision("Production Plan Sub Assembly Item", "received_qty")
+	for name, qty in sub_assembly_received_qty.items():
+		frappe.db.set_value("Production Plan Sub Assembly Item", name, "received_qty", flt(qty, precision))
+
+	# so an open plan form can't save its stale received qty back
+	frappe.db.set_value(
+		"Production Plan",
+		{"name": ("in", list({row.production_plan for row in po_items}))},
+		{"modified": now(), "modified_by": frappe.session.user},
+		update_modified=False,
 	)

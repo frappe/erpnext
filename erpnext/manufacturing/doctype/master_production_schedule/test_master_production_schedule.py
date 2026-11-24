@@ -88,6 +88,26 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual([(row.item_code, row.planned_qty) for row in mps.items], [(item, 3)])
 
+	def test_fetch_buttons_clear_saved_rows_when_nothing_matches(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item("_Test MPS Refetch Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=5)
+		make_material_request(item_code=item, qty=5, material_request_type="Manufacture")
+		mps = make_mps(to_date=add_days(today(), 60), select_items=[item])
+		mps.fetch_sales_orders(customer=order.customer)
+		mps.fetch_materials_requests(material_request_type="Manufacture")
+		self.assertTrue(mps.sales_orders and mps.material_requests)
+
+		mps.fetch_sales_orders(customer="_Test Customer With No Orders")
+		mps.reload()
+		self.assertEqual(mps.sales_orders, [])
+
+		mps.fetch_materials_requests(from_date=add_days(today(), 30))
+		mps.reload()
+		self.assertEqual(mps.material_requests, [])
+
 	def test_demand_rows_keep_their_warehouse(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
@@ -224,7 +244,7 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 	def test_lead_time_is_not_int_truncated(self):
 		lead_time = frappe._dict(manufacturing_time_in_mins=720, shift_time_in_hours=8, buffer_time=0)
-		self.assertAlmostEqual(get_own_lead_time(lead_time, 1, True), 1.5, places=2)
+		self.assertAlmostEqual(get_own_lead_time(lead_time, 1), 1.5, places=2)
 
 	def test_cumulative_lead_time_follows_the_longest_path(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -251,6 +271,28 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		mps.get_actual_demand()
 
 		self.assertEqual(mps.items[0].cumulative_lead_time, 24)
+
+	def test_purchased_item_lead_time_uses_supplier_and_item_lead_times(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		rm_a = make_item("_Test MPS Supplier Lead RM A", {"is_stock_item": 1, "lead_time_days": 4}).name
+		rm_b = make_item("_Test MPS Supplier Lead RM B", {"is_stock_item": 1, "lead_time_days": 9}).name
+		fg_item = make_item("_Test MPS Supplier Lead FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_a, rm_b])
+		make_lead_time(
+			rm_a,
+			supplier_lead_times=[
+				{"supplier": "_Test Supplier", "purchase_time": 20, "buffer_time": 1, "is_default": 1}
+			],
+		)
+
+		order = make_sales_order(item_code=fg_item, qty=1)
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+
+		self.assertEqual(mps.items[0].cumulative_lead_time, 21)
+		self.assertEqual(mps.get_cumulative_lead_time(rm_b, None, 1), 9)
 
 	def test_row_uom_needs_a_conversion_factor(self):
 		self.assertRaises(frappe.ValidationError, make_mps, items=[make_mps_row(uom="Box")])
@@ -316,6 +358,7 @@ def make_mps(**args):
 			"from_date": args.from_date or today(),
 			"to_date": args.to_date,
 			"parent_warehouse": args.parent_warehouse,
+			"sales_forecast": args.sales_forecast,
 			"select_items": [{"item_code": item} for item in args.select_items or []],
 			"sales_orders": [{"sales_order": name} for name in args.sales_orders or []],
 			"material_requests": [{"material_request": name} for name in args.material_requests or []],

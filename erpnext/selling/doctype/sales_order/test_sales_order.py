@@ -37,6 +37,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	get_potentially_billable_sales_orders,
 	has_potentially_billable_items,
 )
+from erpnext.stock.doctype.item.item import make_item_price
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
@@ -436,6 +437,36 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		product_bundle.db_set("disabled", 1)
 		frappe.get_doc("Sales Order", so.name).cancel()
+		self.assertEqual(reserved_qty(), 0)
+
+	def test_deleting_a_disabled_bundle_row_releases_its_components(self):
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=5, warehouse="_Test Warehouse - _TC", do_not_submit=True)
+		so.append("items", dict(so.items[0].as_dict(), name=None, item_code="_Test Item"))
+		so.submit()
+
+		def reserved_qty():
+			return frappe.db.get_value(
+				"Bin", {"item_code": component, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+			)
+
+		self.assertEqual(reserved_qty(), 10)
+
+		product_bundle.db_set("disabled", 1)
+		row = so.items[1]
+		trans_item = [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": row.qty,
+				"rate": row.rate,
+				"conversion_factor": row.conversion_factor,
+			}
+		]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
 		self.assertEqual(reserved_qty(), 0)
 
 	def test_over_delivery_keeps_whole_number_uom_qty(self):
@@ -1362,6 +1393,16 @@ class TestSalesOrder(ERPNextTestSuite):
 			[{"item_code": "_Test Item", "rate": 200, "qty": 2, "docname": so.items[0].name}]
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+
+		other_so = make_sales_order(item_code="_Test Item", qty=4)
+		trans_item = json.dumps(
+			[
+				{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": so.items[0].name},
+				{"item_code": "_Test Item", "rate": 3, "qty": 9, "docname": other_so.items[0].name},
+			]
+		)
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", other_so.items[0].name, "qty"), 4)
 
 	def test_update_child_qty_with_conversion_factor_after_delivery(self):
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
@@ -4347,6 +4388,73 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(si2.items[0].qty, 20)
 
 	@change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_selling_price_validation_for_product_bundle(self):
+		bundle = make_item("_Test Bundle For Selling Price Validation", {"is_stock_item": 0}).name
+		component = make_item(
+			"_Test Component For Selling Price Validation",
+			{
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			},
+		).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_product_bundle(bundle, [component])
+
+		self.assertRaises(
+			frappe.ValidationError, make_sales_order, item_code=bundle, qty=1, rate=1, do_not_submit=True
+		)
+
+	@change_settings("Selling Settings", {"validate_selling_price": 1, "editable_bundle_item_rates": 1})
+	def test_selling_price_validation_for_bundle_priced_from_components(self):
+		bundle = make_item("_Test Bundle Priced From Components", {"is_stock_item": 0}).name
+		component = make_item("_Test Component Priced For Bundle", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_item_price(component, "Standard Selling", 400)
+		make_product_bundle(bundle, [component])
+
+		so = make_sales_order(item_code=bundle, qty=1, rate=1, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 400)
+
+	@change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_selling_price_validation_for_bundle_row_version(self):
+		bundle = make_item("_Test Bundle Checked From Its Version", {"is_stock_item": 0}).name
+		component = make_item("_Test Component Checked From Its Version", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		row_version = make_bundle_version(bundle, [{"item_code": component, "qty": 1}])
+		make_bundle_version(bundle, [{"item_code": component, "qty": 1}]).db_set("disabled", 1)
+
+		so = make_sales_order(item_code=bundle, qty=1, rate=1, do_not_save=True)
+		so.items[0].product_bundle = row_version.name
+		self.assertRaises(frappe.ValidationError, so.insert)
+
+	def test_product_bundle_valuation_rate_from_row_version(self):
+		bundle = make_item("_Test Bundle Valued From Its Version", {"is_stock_item": 0}).name
+		component = make_item("_Test Component Valued From Its Version", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_bundle_version(bundle, [{"item_code": component, "qty": 1}])
+		so = make_sales_order(item_code=bundle, qty=1, rate=150, do_not_submit=True)
+
+		make_bundle_version(bundle, [{"item_code": component, "qty": 10}])
+		so.save()
+		self.assertEqual(so.items[0].valuation_rate, 100)
+
+	def test_product_bundle_valuation_rate_in_component_stock_uom(self):
+		bundle = make_item("_Test Bundle Valued In Stock UOM", {"is_stock_item": 0}).name
+		component = make_item(
+			"_Test Component Valued In Stock UOM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Gram", "conversion_factor": 0.001}],
+			},
+		).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_bundle_version(bundle, [{"item_code": component, "qty": 100, "uom": "Gram"}])
+
+		so = make_sales_order(item_code=bundle, qty=1, rate=20, do_not_submit=True)
+		self.assertEqual(so.items[0].valuation_rate, 10)
+
+	@change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_selling_price_validation_for_manufactured_item(self):
 		"""
 		Unit test to check the selling price validation for manufactured item, without last purchae rate in Item master.
@@ -4758,6 +4866,11 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(reserved_qty, 5)
 
+	def test_sales_order_without_items_raises_mandatory_error(self):
+		so = make_sales_order(do_not_save=True)
+		so.items = []
+		self.assertRaises(frappe.MandatoryError, so.insert)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
@@ -4924,3 +5037,10 @@ def make_sales_order_edit_perm_workflow():
 	workflow.insert(ignore_permissions=True)
 
 	return workflow
+
+
+def make_bundle_version(parent, items):
+	bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": parent, "items": items})
+	bundle.insert()
+	bundle.submit()
+	return bundle

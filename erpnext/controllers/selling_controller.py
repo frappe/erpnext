@@ -16,6 +16,7 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
+from erpnext.stock.doctype.packed_item.packed_item import get_bundle_version_for_row
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
@@ -248,12 +249,12 @@ class SellingController(StockController):
 
 		if self.meta.get_field("base_in_words"):
 			base_amount = abs(
-				self.base_grand_total if self.is_rounded_total_disabled() else self.base_rounded_total
+				flt(self.base_grand_total if self.is_rounded_total_disabled() else self.base_rounded_total)
 			)
 			self.base_in_words = money_in_words(base_amount, self.company_currency)
 
 		if self.meta.get_field("in_words"):
-			amount = abs(self.grand_total if self.is_rounded_total_disabled() else self.rounded_total)
+			amount = abs(flt(self.grand_total if self.is_rounded_total_disabled() else self.rounded_total))
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
@@ -462,6 +463,8 @@ class SellingController(StockController):
 			return
 
 		is_internal_customer = self.get("is_internal_customer")
+		# bundle rows priced from their components get their final rate only once packed
+		check_bundles = not frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 		for item in self.items:
 			if not item.item_code or item.is_free_item:
@@ -478,7 +481,9 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			if is_internal_customer or not is_stock_item:
+			# a bundle row is valued from the version it is packed from, so match that one
+			is_bundle = check_bundles and not is_stock_item and get_bundle_version_for_row(item, self)
+			if is_internal_customer or not (is_stock_item or is_bundle):
 				continue
 
 			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
@@ -907,7 +912,7 @@ class SellingController(StockController):
 		sle = self.get_sl_entries(
 			item_row,
 			{
-				"actual_qty": -1 * get_ledger_qty(item_row.qty),
+				"actual_qty": -1 * self.get_source_warehouse_ledger_qty(item_row),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
 				"serial_and_batch_bundle": serial_and_batch_bundle,
@@ -917,6 +922,21 @@ class SellingController(StockController):
 			sle.dependant_sle_voucher_detail_no = item_row.name
 
 		return sle
+
+	def get_source_warehouse_ledger_qty(self, item_row) -> float:
+		"""Stock qty an item row moves in its warehouse. A return puts back no more than its delivered
+		row took out, less the row's other returns to any warehouse. A row with a package, a packed item
+		and an internal transfer keep their own qty."""
+		row = item_row.item_row
+		if (
+			not self.is_return
+			or item_row.serial_and_batch_bundle
+			or item_row.target_warehouse
+			or row.doctype == "Packed Item"
+		):
+			return get_ledger_qty(item_row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, item_row.warehouse)
 
 	def get_sle_for_target_warehouse(self, item_row):
 		sle = self.get_sl_entries(
@@ -979,14 +999,28 @@ class SellingController(StockController):
 				if d.get("po_no")
 			]
 
+	@frappe.whitelist()
+	def process_item_selection(
+		self, item_idx: int, reset_item_details: bool = False, parentfield: str = "items"
+	):
+		super().process_item_selection(item_idx, reset_item_details, parentfield)
+		if item := self.get_selected_item_row(parentfield, item_idx):
+			self.set_item_gross_profit(item)
+
 	def set_gross_profit(self):
-		if self.doctype in ["Sales Order", "Quotation"]:
-			for item in self.items:
-				item.gross_profit = flt(
-					(flt(item.stock_uom_rate) * flt(self.conversion_rate) - flt(item.valuation_rate))
-					* item.stock_qty,
-					self.precision("gross_profit", item),
-				)
+		for item in self.items:
+			self.set_item_gross_profit(item)
+
+	def set_item_gross_profit(self, item):
+		if self.doctype not in ["Sales Order", "Quotation"]:
+			return
+
+		# stock_uom_rate is not reset yet when an item is selected
+		rate = flt(item.rate) * flt(self.conversion_rate) / (flt(item.conversion_factor) or 1)
+		item.gross_profit = flt(
+			(rate - flt(item.valuation_rate)) * flt(item.stock_qty),
+			self.precision("gross_profit", item),
+		)
 
 	def set_customer_address(self):
 		address_dict = {
@@ -1387,6 +1421,7 @@ def get_serial_and_batch_bundle(
 	child, parent, delivery_note_child=None, picked_serial_nos=None, picked_batches=None
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
+	from erpnext.stock.doctype.packed_item.packed_item import set_incoming_rate_from_bundle
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation, add_picked_batches
 
 	if parent.get("is_return") and parent.get("packed_items"):
@@ -1422,6 +1457,7 @@ def get_serial_and_batch_bundle(
 
 	doc = sn_doc.make_serial_and_batch_bundle()
 	child.db_set("serial_and_batch_bundle", doc.name)
+	set_incoming_rate_from_bundle(child, doc)
 	if picked_serial_nos is not None:
 		picked_serial_nos[child.item_code].extend(
 			d.serial_no for d in doc.get("entries") or [] if d.serial_no

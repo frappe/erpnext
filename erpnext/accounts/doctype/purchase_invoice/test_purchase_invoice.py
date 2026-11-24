@@ -462,6 +462,22 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(return_pi.on_hold, 0)
 		self.assertLess(return_pi.outstanding_amount, 0)
 
+	def test_stock_return_after_a_debit_note_without_update_stock_takes_back_its_own_qty(self):
+		"""A debit note without Update Stock moves no stock, so it does not count towards the stock left to return."""
+		pi = make_purchase_invoice(qty=10, update_stock=1)
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.update_stock = 0
+		debit_note.items[0].update({"qty": -5, "received_qty": -5})
+		debit_note.submit()
+
+		stock_return = make_return_doc(pi.doctype, pi.name)
+		stock_return.submit()
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": stock_return.name, "is_cancelled": 0}, "actual_qty"
+		)
+		self.assertEqual(actual_qty, -5)
+
 	def test_settled_purchase_invoice_cannot_be_held(self):
 		pi = make_purchase_invoice()
 
@@ -2744,6 +2760,100 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		rate = flt(sle.stock_value_difference) / flt(sle.actual_qty)
 		self.assertAlmostEqual(rate, 500)
 
+	def test_standalone_debit_note_rate_is_in_the_row_uom(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_method": "FIFO",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+				"purchase_uom": "Box",
+			}
+		)
+		make_purchase_invoice(item_code=item.name, qty=6, rate=100, uom=item.stock_uom, update_stock=True)
+		make_purchase_invoice(item_code=item.name, qty=18, rate=200, uom=item.stock_uom, update_stock=True)
+
+		# a Box takes 6 at 100 and 6 at 200; a missing factor comes from the item
+		for uom, conversion_factor, stock_uom, rate in (
+			("Box", 12, item.stock_uom, 1800),
+			("Box", 0, item.stock_uom, 1800),
+			(item.stock_uom, 1, item.stock_uom, 100),
+			(item.stock_uom, 12, item.stock_uom, 100),  # a stale factor on the stock UOM is reset
+			("Box", 12, "Box", 1800),  # the stock UOM comes from the item, not the row
+			(None, 0, item.stock_uom, 1800),  # a missing UOM is the item's purchase UOM
+		):
+			returned_inv = make_purchase_invoice(
+				item_code=item.name,
+				qty=-1,
+				uom=stock_uom,
+				update_stock=True,
+				is_return=True,
+				do_not_save=True,
+			)
+			returned_inv.items[0].update({"uom": uom, "conversion_factor": conversion_factor, "rate": 0})
+			returned_inv.insert()
+			self.assertEqual(returned_inv.items[0].rate, rate)
+
+	def test_standalone_debit_note_rate_rounding_to_zero_is_rejected(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_purchase_invoice(item_code=item_code, qty=1, rate=1, update_stock=True)
+
+		returned_inv = make_purchase_invoice(
+			item_code=item_code,
+			qty=-1,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			update_stock=True,
+			is_return=True,
+			do_not_save=True,
+		)
+		returned_inv.credit_to = "_Test Payable USD - _TC"
+		returned_inv.items[0].rate = 0
+		# 1 in company currency is a tenth of the smallest rate
+		returned_inv.conversion_rate = 10 ** (returned_inv.items[0].precision("rate") + 1)
+		self.assertRaisesRegex(frappe.ValidationError, "rounds to 0", returned_inv.insert)
+
+	def test_standalone_debit_note_rate_is_in_the_invoice_currency(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_purchase_invoice(item_code=item_code, qty=1, rate=500, update_stock=True)
+
+		returned_inv = make_purchase_invoice(
+			item_code=item_code,
+			qty=-1,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=50,
+			update_stock=True,
+			is_return=True,
+			do_not_save=True,
+		)
+		returned_inv.credit_to = "_Test Payable USD - _TC"
+		returned_inv.items[0].rate = 0
+		returned_inv.insert()
+		self.assertEqual(returned_inv.items[0].rate, 10)
+
+		# a missing exchange rate is fetched before pricing
+		returned_inv = frappe.copy_doc(returned_inv)
+		returned_inv.conversion_rate = 0
+		returned_inv.items[0].rate = 0
+		returned_inv.insert()
+		self.assertEqual(
+			returned_inv.items[0].rate,
+			flt(500 / returned_inv.conversion_rate, returned_inv.items[0].precision("rate")),
+		)
+
+		# a stale exchange rate on a company currency return is ignored
+		returned_inv = make_purchase_invoice(
+			item_code=item_code,
+			qty=-1,
+			conversion_rate=50,
+			update_stock=True,
+			is_return=True,
+			do_not_save=True,
+		)
+		returned_inv.items[0].rate = 0
+		returned_inv.insert()
+		self.assertEqual(returned_inv.items[0].rate, 500)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
 	def test_payment_allocation_for_payment_terms(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
@@ -4169,7 +4279,10 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		first_return.items[0].qty = -4
 		first_return.save().submit()
 
-		self.assertEqual(first_return.items[0].received_qty, -10)
+		self.assertEqual(first_return.items[0].received_qty, 0)
+
+		# received_qty left on rows saved before it was reset without Update Stock
+		frappe.db.set_value("Purchase Invoice Item", first_return.items[0].name, "received_qty", -10)
 
 		second_return = make_return_doc(invoice.doctype, invoice.name)
 		second_return.items[0].qty = -6
@@ -4467,6 +4580,21 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pr.items[0].qty = pr.items[0].received_qty = 4
 		pr.submit()
 		self.assertFalse(make_purchase_receipt_from_pi(pi.name).items)
+
+	def test_purchase_receipt_from_invoice_after_update_stock_turned_off(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+
+		pi = make_purchase_invoice(update_stock=1, qty=5, do_not_submit=True)
+		self.assertEqual(pi.items[0].received_qty, 5)
+
+		pi.update_stock = 0
+		pi.save()
+		pi.submit()
+
+		pr = make_purchase_receipt_from_pi(pi.name)
+		self.assertEqual(pr.items[0].qty, 5)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):

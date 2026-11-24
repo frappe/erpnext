@@ -6,11 +6,15 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate, now, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
-from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_received_stock_qty_status_args,
+	get_returned_stock_qty_status_args,
+)
 from erpnext.controllers.item_close import validate_parent_reopen
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
@@ -255,7 +259,7 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_dt": "Purchase Receipt",
 				"target_parent_field": "per_returned",
 				"target_ref_field": "received_stock_qty",
-				"source_field": "-1 * received_stock_qty",
+				**get_returned_stock_qty_status_args(),
 				"percent_join_field_parent": "return_against",
 			},
 		]
@@ -328,11 +332,7 @@ class PurchaseReceipt(BuyingController):
 			}
 		)
 
-		if (
-			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
-			and not self.is_return
-			and not self.is_internal_supplier
-		):
+		if cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")) and not self.is_return:
 			self.validate_rate_with_reference_doc(
 				[["Purchase Order", "purchase_order", "purchase_order_item"]]
 			)
@@ -395,59 +395,6 @@ class PurchaseReceipt(BuyingController):
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
 		PurchaseReceiptStockReservation(self).reserve_stock()
-		self.update_received_qty_if_from_pp()
-
-	def update_received_qty_if_from_pp(self):
-		from frappe.query_builder.functions import Coalesce, NullIf, Sum
-
-		items_from_po = [item.purchase_order_item for item in self.items if item.purchase_order_item]
-		if items_from_po:
-			table = frappe.qb.DocType("Purchase Order Item")
-			subquery = (
-				frappe.qb.from_(table)
-				.select(table.production_plan_sub_assembly_item)
-				.distinct()
-				.where(
-					table.name.isin(items_from_po)
-					& Coalesce(table.production_plan_sub_assembly_item, "").ne("")
-				)
-			)
-			result = subquery.run(as_dict=True)
-			if result:
-				result = [item.production_plan_sub_assembly_item for item in result]
-				production_plan_names = set(
-					frappe.db.get_all(
-						"Production Plan Sub Assembly Item",
-						filters={"name": ("in", result)},
-						pluck="parent",
-					)
-				)
-				query = (
-					frappe.qb.from_(table)
-					.select(
-						table.production_plan_sub_assembly_item,
-						Sum(table.received_qty / NullIf(table.qty / NullIf(table.fg_item_qty, 0), 0)).as_(
-							"received_qty"
-						),
-					)
-					.where(table.production_plan_sub_assembly_item.isin(result))
-					.groupby(table.production_plan_sub_assembly_item)
-				)
-				for row in query.run(as_dict=True):
-					frappe.db.set_value(
-						"Production Plan Sub Assembly Item",
-						row.production_plan_sub_assembly_item,
-						"received_qty",
-						row.received_qty,
-					)
-
-				for production_plan_name in production_plan_names:
-					frappe.db.set_value(
-						"Production Plan",
-						production_plan_name,
-						{"modified": now(), "modified_by": frappe.session.user},
-						update_modified=False,
-					)
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -471,7 +418,6 @@ class PurchaseReceipt(BuyingController):
 		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
-		self.update_received_qty_if_from_pp()
 
 	def before_cancel(self):
 		super().before_cancel()

@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.get_item_details import get_default_bom
 from erpnext.utilities.transaction_base import get_whole_number_uoms, validate_qty_is_integer
@@ -100,6 +100,39 @@ class SubcontractingService:
 
 		return result
 
+	def validate_item_close(self, items) -> None:
+		"""Refuse to close rows that are still on an open Subcontracting Order."""
+		if not self.doc.is_subcontracted:
+			return
+
+		order = frappe.qb.DocType("Subcontracting Order")
+		order_item = frappe.qb.DocType("Subcontracting Order Item")
+		open_orders = dict(
+			frappe.qb.from_(order_item)
+			.inner_join(order)
+			.on(order.name == order_item.parent)
+			.select(order_item.purchase_order_item, order.name)
+			.where(
+				order_item.purchase_order_item.isin([item.name for item in items])
+				& (order.docstatus == 1)
+				& order.status.notin(["Closed", "Completed"])
+				& (order_item.received_qty < order_item.qty)
+			)
+			.run()
+		)
+
+		for item in items:
+			if subcontracting_order := open_orders.get(item.name):
+				frappe.throw(
+					_(
+						"Row #{0}: {1} is on the open Subcontracting Order {2}. Close it before closing the row."
+					).format(
+						item.idx,
+						frappe.bold(item.item_code),
+						get_link_to_form("Subcontracting Order", subcontracting_order),
+					)
+				)
+
 	def auto_create_subcontracting_order(self) -> None:
 		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 
@@ -107,7 +140,7 @@ class SubcontractingService:
 			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
 				make_subcontracting_order(self.doc.name, save=True, notify=True)
 
-	def update_subcontracting_order_status(self) -> None:
+	def close_subcontracting_orders(self) -> None:
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			set_subcontracting_order_status as update_sco_status,
 		)
@@ -117,4 +150,4 @@ class SubcontractingService:
 			for sco in frappe.get_all(
 				"Subcontracting Order", {"purchase_order": doc.name, "docstatus": 1}, pluck="name"
 			):
-				update_sco_status(sco, "Closed" if doc.status == "Closed" else None)
+				update_sco_status(sco, "Closed")

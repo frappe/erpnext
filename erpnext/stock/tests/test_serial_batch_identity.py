@@ -815,6 +815,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			item_details={
 				"rm_item_code": self.item.name,
 				"main_item_code": "Finished Item",
+				"stock_uom": self.item.stock_uom,
 				"rate": 10,
 				"s_warehouse": "_Test Warehouse - _TC",
 				"t_warehouse": "_Test Warehouse 1 - _TC",
@@ -882,6 +883,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 						"name": "Subcontracting-Row",
 						"item_code": self.item.name,
 						"scio_detail": "Subcontracting-Order-Row",
+						"transfer_qty": 2,
 						"use_serial_batch_fields": 1,
 					}
 				],
@@ -890,7 +892,14 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			with (
 				self.subTest(purpose=purpose),
 				patch.object(
-					service, "get_serial_nos_and_batches_from_sres", return_value=(serial_ids, batches)
+					service,
+					"get_reserved_entries_by_scio_detail",
+					side_effect=lambda: {
+						"Subcontracting-Order-Row": [
+							frappe._dict(serial_no=serial_no, batch_no=batch.name, available=1)
+							for serial_no in serial_ids
+						]
+					},
 				) as lookup,
 			):
 				self.assertEqual(
@@ -900,12 +909,10 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				row = doc.items[0]
 				self.assertEqual(row.serial_no, "Subcontracting-002\nSubcontracting-001")
 				self.assertEqual(row.batch_no, batch.name)
-				lookup.assert_called_once_with(
-					"Subcontracting-Order-Row", only_pending=purpose != "Subcontracting Return"
-				)
-				row.serial_no = "Manual-Selection"
+				lookup.assert_called_once_with()
+				row.serial_no = "Subcontracting-001"
 				service.get_serial_batch_fields_for_subcontracting_inward()
-				self.assertEqual(row.serial_no, "Manual-Selection")
+				self.assertEqual(row.serial_no, "Subcontracting-001")
 
 	def test_subcontracting_inward_reserved_batches_come_in_number_order(self):
 		first_by_id = self.make_number("Batch", "Reserved-B")

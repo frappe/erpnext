@@ -9,13 +9,20 @@ from frappe.utils import add_days, flt, formatdate, getdate, today
 
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.manufacturing.doctype.master_production_schedule.test_master_production_schedule import (
+	make_mps,
+	make_mps_row,
+)
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.sales_forecast.test_sales_forecast import make_sales_forecast
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
 	MaterialRequirementsPlanningReport,
 	convert_to_daily_bucket_data,
 	execute,
-	get_item_lead_time,
+	get_item_lead_times,
+	get_manufacture_lead_time,
+	get_purchase_lead_days,
 	make_order,
 )
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -63,7 +70,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		):
 			report.update_sales_forecast_data()
 
-		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
+		self.assertEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
 		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [4, 6])
 
 	def test_forecasts_of_one_date_are_added_before_splitting(self):
@@ -101,6 +108,50 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			report.update_sales_forecast_data()
 
 		self.assertAlmostEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
+
+	def test_mps_demand_uses_up_the_forecast_of_its_period(self):
+		item, mps = make_forecast_with_mps_demand(50)
+
+		rows = get_mrp_row_list(mps)
+
+		self.assertAlmostEqual(sum(row.demand_qty for row in rows if row.item_code == item), 100)
+
+	def test_forecast_used_up_by_mps_demand_adds_no_rows(self):
+		item, mps = make_forecast_with_mps_demand(150)
+
+		rows = get_mrp_row_list(mps)
+
+		self.assertEqual([row.demand_qty for row in rows if row.item_code == item], [150])
+
+	def test_mps_demand_before_the_report_dates_uses_up_its_forecast_period(self):
+		item, mps = make_forecast_with_mps_demand(150)
+
+		rows = get_mrp_row_list(mps, from_date=add_days(today(), 20))
+
+		self.assertFalse([row for row in rows if row.item_code == item])
+
+	def test_overlapping_forecast_periods_use_up_demand_in_any_row_order(self):
+		start_date = getdate(today())
+		mps_data = [
+			frappe._dict(item_code="_Test Item", delivery_date=add_days(start_date, days), planned_qty=100)
+			for days in (10, 33)
+		]
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+
+		for offsets in ((0, 7), (7, 0)):
+			forecast = [
+				frappe._dict(
+					item_code="_Test Item",
+					delivery_date=add_days(start_date, offset),
+					frequency="Monthly",
+					qty=100,
+				)
+				for offset in offsets
+			]
+			with patch.object(MaterialRequirementsPlanningReport, "get_mps_data", return_value=mps_data):
+				report.consume_forecast(forecast)
+
+			self.assertEqual([row.qty for row in forecast], [0, 0])
 
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
@@ -146,7 +197,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			}
 		).insert()
 
-		lead_time = get_item_lead_time(item, "Manufacture")
+		lead_time = get_manufacture_lead_time(get_item_lead_times([item])[item], 1)
 		self.assertAlmostEqual(lead_time, 7 / 1440 + 2, places=8)
 
 	def test_purchase_lead_time_uses_supplier_and_item_lead_times(self):
@@ -162,8 +213,9 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			}
 		).insert()
 
-		self.assertEqual(get_item_lead_time(rm_a, "Purchase"), 21)
-		self.assertEqual(get_item_lead_time(rm_b, "Purchase"), 9)
+		lead_days = get_purchase_lead_days([rm_a, rm_b], get_item_lead_times([rm_a, rm_b]))
+		self.assertEqual(lead_days[rm_a], 21)
+		self.assertEqual(lead_days[rm_b], 9)
 
 	def test_purchase_lead_time_uses_ordering_supplier(self):
 		rm = make_item("_Test MRP Ordering Supplier Lead RM", {"is_stock_item": 1}).name
@@ -176,8 +228,9 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			}
 		).insert()
 
-		self.assertEqual(get_item_lead_time(rm, "Purchase"), 3)
-		self.assertEqual(get_item_lead_time(rm, "Purchase", supplier=SUPPLIER), 11)
+		lead_times = get_item_lead_times([rm])
+		self.assertEqual(get_purchase_lead_days([rm], lead_times)[rm], 3)
+		self.assertEqual(get_purchase_lead_days([rm], lead_times, {rm: SUPPLIER})[rm], 11)
 
 	@freeze_time("2026-09-01 10:00:00.123456")
 	def test_manufacturing_buffer_moves_release_date_earlier(self):
@@ -875,6 +928,29 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 				self.assertTrue(buckets)
 				self.assertEqual({bucket.parent_warehouse for bucket in buckets}, {WAREHOUSE})
 
+	def test_monthly_forecast_is_spread_from_its_own_date(self):
+		row = frappe._dict(frequency="Monthly", item_code="_Test Item", delivery_date="2026-10-27", qty=31)
+
+		buckets = convert_to_daily_bucket_data([row])
+
+		self.assertEqual(getdate(buckets[0].delivery_date), getdate("2026-10-27"))
+		self.assertEqual(getdate(buckets[-1].delivery_date), getdate("2026-11-26"))
+		self.assertAlmostEqual(sum(bucket.qty for bucket in buckets), 31)
+
+	def test_forecast_is_limited_to_the_report_dates(self):
+		forecast = make_sales_forecast(from_date=add_days(today(), 10), demand_number=1)
+		from_date, to_date = add_days(today(), 20), add_days(today(), 30)
+		report = MaterialRequirementsPlanningReport(frappe._dict(from_date=from_date, to_date=to_date))
+
+		dates = [
+			row.delivery_date
+			for row in report.get_sales_forecast_data()
+			if row.sales_forecast == forecast.name
+		]
+
+		self.assertEqual(min(dates), getdate(from_date))
+		self.assertEqual(max(dates), getdate(to_date))
+
 	def test_float_noise_in_qty_does_not_round_up_chart_and_lead_time(self):
 		qty = 7 / 3 * 27  # 63.00000000000001
 		report = MaterialRequirementsPlanningReport(frappe._dict())
@@ -888,6 +964,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		row = frappe._dict(
 			item_code=item, type_of_material="Manufacture", required_qty=qty, delivery_date=today()
 		)
+		report.lead_times = get_item_lead_times([item])
 		report.set_lead_time(row)
 		self.assertEqual(row.lead_time, 7)
 
@@ -923,6 +1000,26 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rows = get_mrp_row_list(mps)
 		rm_rows = sorted((row.indent, row.required_qty) for row in rows if row.item_code == plan.rm_item)
 		self.assertEqual(rm_rows, [(0, 5), (1, 10)])
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_closed_sales_order_rows_are_not_planned(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		plan = make_mrp_plan(self, rm_qty=1)
+		order = make_sales_order(
+			item_list=[
+				{"item_code": item, "qty": qty, "rate": 100, "warehouse": WAREHOUSE}
+				for item, qty in ((plan.fg_item, 3), (plan.rm_item, 2), (plan.rm_item, 4))
+			]
+		)
+		update_closed_status("Sales Order", order.name, [order.items[0].name, order.items[2].name], 1)
+
+		rows = get_mrp_row_list(frappe.get_doc("Master Production Schedule", plan.mps))
+		demand = {
+			item: sum(row.planned_qty for row in rows if row.item_code == item)
+			for item in (plan.fg_item, plan.rm_item)
+		}
+		self.assertEqual(demand, {plan.fg_item: 10, plan.rm_item: 12})
 
 
 def make_chart_row(delivery_date, planned_qty=1):
@@ -1018,7 +1115,6 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 			],
 		}
 	)
-	# left in draft: on_submit enqueues MRP Log creation in a background job
 	mps.insert()
 
 	_, data, _, _ = execute(
@@ -1048,6 +1144,22 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 		rm_qty=rm_qty,
 		rows=rows,
 	)
+
+
+def make_forecast_with_mps_demand(planned_qty):
+	"""Return an item with a monthly forecast of 100 and an MPS for it with demand in that month."""
+	item = make_item(properties={"is_stock_item": 1}).name
+	start_date = add_days(today(), 1)
+	forecast = make_sales_forecast(item_code=item, from_date=start_date, demand_number=1, do_not_submit=True)
+	forecast.items[0].demand_qty = 100
+	forecast.submit()
+
+	mps = make_mps(
+		parent_warehouse="All Warehouses - _TC",
+		sales_forecast=forecast.name,
+		items=[make_mps_row(item, delivery_date=add_days(start_date, 14), planned_qty=planned_qty)],
+	)
+	return item, mps
 
 
 def get_mrp_rows(mps):

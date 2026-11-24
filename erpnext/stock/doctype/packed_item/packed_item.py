@@ -19,6 +19,7 @@ from erpnext.stock.get_item_details import (
 	get_item_details,
 	get_price_list_rate,
 )
+from erpnext.stock.utils import is_serial_no_wise_valuation_disabled
 
 
 class PackedItem(Document):
@@ -80,7 +81,10 @@ def make_packing_list(doc, order_packed_items=None):
 		return
 
 	parent_items_price, reset = {}, False
-	set_price_from_children = frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
+	# a return keeps its original's rates
+	set_price_from_children = not doc.get("return_against") and frappe.get_single_value(
+		"Selling Settings", "editable_bundle_item_rates"
+	)
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 	if order_packed_items is None:
@@ -151,8 +155,8 @@ def get_bundle_components(doc, item_row, bundle_name, order_packed_items):
 
 
 def get_kept_packed_items(doc):
-	"""Yield (packed row, stock qty) for each packed row of the last build that make_packing_list
-	keeps for the bundle rows as they are now."""
+	"""Yield a copy of each packed row that make_packing_list makes from the last build
+	for the bundle rows as they are now."""
 	packed_items_table = get_indexed_packed_items_table(doc)
 	order_packed_items = get_order_packed_items(doc)
 	# only a bundle row that has packed rows can keep one
@@ -171,7 +175,7 @@ def get_kept_packed_items(doc):
 
 
 def get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_items_table):
-	"""Yield (packed row, stock qty) for each stale row of the component that a re-pack keeps,
+	"""Yield a copy of each row a re-pack makes of the component's stale rows,
 	one per Pick List location it is packed from."""
 	stale_rows = get_stale_packed_rows(
 		doc, item_row, bundle_item, packed_items_table, get_linked_packed_item(doc, so_packed_item)
@@ -179,14 +183,23 @@ def get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_i
 	if not stale_rows:
 		return
 
-	precision = frappe.get_precision("Packed Item", "qty")
-	qty_per_unit = get_component_stock_qty_per_unit(bundle_item, stale_rows[0].uom, so_packed_item)
-	qty = flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision)
+	uom = stale_rows[0].uom
+	qty_per_unit = get_component_stock_qty_per_unit(bundle_item, uom, so_packed_item)
+	qty = flt(qty_per_unit * get_bundle_row_stock_qty(item_row), frappe.get_precision("Packed Item", "qty"))
 	locations = get_pick_list_locations(doc, item_row, bundle_item, qty, so_packed_item, packed_items_table)
 	for location in locations or [None]:
 		if stale_rows:
-			packed_row = stale_rows.pop(get_stale_row_idx(stale_rows, location))
-			yield packed_row, flt(location.pack_qty, precision) if location else qty
+			packed_row = frappe.get_doc(stale_rows.pop(get_stale_row_idx(stale_rows, location)).as_dict())
+		else:
+			# a location with no stale row left gets a new row, as in add_packed_item_row
+			packed_row = frappe.get_doc(
+				{"doctype": "Packed Item", "item_code": bundle_item.item_code, "uom": uom}
+			)
+
+		packed_row.qty = qty
+		if location:
+			update_packed_item_with_pick_list_info(item_row, packed_row, location)
+		yield packed_row
 
 
 def is_product_bundle(item_code: str) -> bool:
@@ -296,7 +309,7 @@ def get_bundle_version_for_row(item_row, doc=None):
 	"""
 	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 
-	chosen = item_row.get("product_bundle") if item_row.meta.has_field("product_bundle") else None
+	chosen = item_row.get("product_bundle")
 	if chosen:
 		bundle = frappe.db.get_value(
 			"Product Bundle", chosen, ["new_item_code", "docstatus", "disabled"], as_dict=True
@@ -375,6 +388,13 @@ def get_stale_row_idx(stale_rows, location=None):
 	if not location:
 		return 0
 	return next((idx for idx, row in enumerate(stale_rows) if is_packed_from(row, location)), 0)
+
+
+def set_incoming_rate_from_bundle(row, bundle):
+	"""Rate of the serial or batch nos picked on submit; validate looked it up before they were picked."""
+	# serial nos valued as one pool carry no rate of their own
+	if not is_serial_no_wise_valuation_disabled(row.item_code):
+		row.db_set("incoming_rate", flt(bundle.avg_rate, row.precision("incoming_rate")))
 
 
 def get_location_filters(row) -> dict:
@@ -810,7 +830,8 @@ def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 	if not rate:
 		parent_items_price[key] = 0.0
 
-	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.stock_qty)
+	# the row's rate is per its own UOM, so divide by its qty, not its stock qty
+	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.qty)
 
 
 def set_product_bundle_rate_amount(doc, parent_items_price):

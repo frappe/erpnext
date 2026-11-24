@@ -39,6 +39,7 @@ from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries
 	get_raw_materials_of_sub_assembly_items,
 	get_sub_assembly_items,
 )
+from erpnext.manufacturing.scheduling.plan_adapter import get_supplier_lead_times
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -330,28 +331,37 @@ def _collect_item_details(doc, po_items):
 	so_item_details = frappe._dict()
 	qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
-	requested_sub_assemblies = {}
-	for row in doc.get("sub_assembly_items") or []:
-		row = frappe._dict(row)
-		if row.type_of_manufacturing == "Material Request":
-			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
-				(row.production_item, row.bom_no)
-			)
-
+	requested_sub_assemblies, planned_sub_assemblies = _get_sub_assemblies_by_plan_row(doc)
 	all_requested = set().union(*requested_sub_assemblies.values())
+	all_planned = {key: value for rows in planned_sub_assemblies.values() for key, value in rows.items()}
+	combined = doc.get("combine_sub_items")
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
 		data["requested_sub_assemblies"] = (
-			all_requested
-			if doc.get("combine_sub_items")
-			else requested_sub_assemblies.get(data.get("name"), set())
+			all_requested if combined else requested_sub_assemblies.get(data.get("name"), set())
+		)
+		data["planned_sub_assemblies"] = (
+			all_planned if combined else planned_sub_assemblies.get(data.get("name"), {})
 		)
 		item_details = _item_details_for_row(
 			doc, data, company, sub_assembly_items, existing_sub_assembly_items
 		)
 		_accumulate_so_items(so_item_details, data.get("sales_order"), item_details, qty_precision)
 	return so_item_details
+
+
+def _get_sub_assemblies_by_plan_row(doc):
+	"""(item, BOM) of each plan row's sub-assemblies: the ones to request, and the type of the others."""
+	requested, planned = defaultdict(set), defaultdict(dict)
+	for row in doc.get("sub_assembly_items") or []:
+		row = frappe._dict(row)
+		key = (row.production_item, row.bom_no)
+		if row.type_of_manufacturing == "Material Request":
+			requested[row.production_plan_item].add(key)
+		else:
+			planned[row.production_plan_item][key] = row.type_of_manufacturing
+	return requested, planned
 
 
 def _item_details_for_row(doc, data, company, sub_assembly_items, existing_sub_assembly_items):
@@ -533,8 +543,14 @@ def _mr_item_for_details(
 		shortage_warehouse = target_warehouse
 		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
 	elif transfer_warehouses and not warehouse:
-		# no warehouse: availability spans all warehouses, the selected ones included
-		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse not in transfer_warehouses)
+		# no warehouse: availability spans all warehouses, the selected ones included, so leave
+		# those out, but keep the item group's default warehouse, which receives the material
+		receiving_warehouse = get_item_group_defaults(details.item_code, company).get("default_warehouse")
+		shortage_bin = aggregate_bin_details(
+			row
+			for row in bins
+			if row.warehouse == receiving_warehouse or row.warehouse not in transfer_warehouses
+		)
 	return get_material_request_items(
 		doc,
 		details,
@@ -578,9 +594,10 @@ def _get_transfer_locations(mr_items, warehouses, company):
 			0, flt(item.get("quantity")) * flt(item.get("conversion_factor"))
 		)
 
+	# keep all locations, so a skipped receiving warehouse does not crowd out the others
 	return {
 		item_code: get_available_item_locations(
-			item_code, warehouses, required_qty, company, ignore_validation=True
+			item_code, warehouses, required_qty, company, ignore_validation=True, keep_all_locations=True
 		)
 		if required_qty > 0
 		else []
@@ -610,16 +627,12 @@ def _set_default_suppliers(mr_items, company):
 
 
 def _get_default_lead_time_suppliers(items):
-	table = frappe.qb.DocType("Item Lead Time Supplier")
-	rows = (
-		frappe.qb.from_(table)
-		.select(table.parent, table.supplier)
-		.where(
-			table.parent.isin(list(items)) & (table.parenttype == "Item Lead Time") & (table.is_default == 1)
-		)
-		.run(as_dict=True)
-	)
-	return {row.parent: row.supplier for row in rows}
+	return {
+		item_code: row.supplier
+		for item_code, rows in get_supplier_lead_times(items).items()
+		for row in rows.values()
+		if row.is_default
+	}
 
 
 def _get_item_default_suppliers(items, company):
@@ -927,6 +940,10 @@ def _transfer_from_locations(item, locations, new_mr_items, required_qty):
 	for d in locations:
 		if flt(required_qty, precision) <= 0:
 			return required_qty
+
+		# stock is not transferred from the receiving warehouse to itself
+		if d.get("warehouse") == item.get("warehouse"):
+			continue
 
 		quantity = flt(min(required_qty, d.get("qty")), precision)
 		if quantity <= 0:

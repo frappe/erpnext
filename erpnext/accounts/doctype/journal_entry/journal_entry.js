@@ -250,6 +250,11 @@ Object.assign(erpnext.journal_entry, {
 			);
 		}
 
+		if ((frm.doc.accounts || []).some((row) => ["Receivable", "Payable"].includes(row.account_type))) {
+			erpnext.accounts.show_payment_ledger(frm);
+			erpnext.accounts.ledger_preview.show_payment_ledger_preview(frm);
+		}
+
 		if (frm.doc.docstatus == 1 && !frm.doc.reversal_of) {
 			frm.add_custom_button(
 				__("Reverse Journal Entry"),
@@ -636,6 +641,9 @@ Object.assign(erpnext.journal_entry, {
 	},
 
 	set_debit_credit_in_company_currency(frm, cdt, cdn) {
+		// Exchange gain/loss journals adjust base and account currency amounts independently.
+		if (frm.doc.voucher_type === "Exchange Gain Or Loss" && frm.doc.multi_currency) return;
+
 		const row = frappe.get_doc(cdt, cdn);
 		frappe.model.set_value(
 			cdt,

@@ -1323,6 +1323,10 @@ class update_entries_after:
 		else:
 			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
 
+		# secondary items of a Subcontracting Receipt are valued from its finished good row
+		if sle.voucher_type == "Subcontracting Receipt":
+			dependant_sles += self.get_secondary_item_sles_of_receipt(sle)
+
 		for depend_sle in dependant_sles:
 			item_wh_key = self.mark_walk_start(depend_sle)
 			if item_wh_key in self.distinct_dependant_item_wh:
@@ -1429,6 +1433,27 @@ class update_entries_after:
 				],
 			)
 			or []
+		)
+
+	@staticmethod
+	def get_secondary_item_sles_of_receipt(sle):
+		secondary_rows = frappe.get_all(
+			"Subcontracting Receipt Item",
+			filters={"parent": sle.voucher_no, "reference_name": sle.dependant_sle_voucher_detail_no},
+			pluck="name",
+		)
+		if not secondary_rows:
+			return []
+
+		return frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"voucher_type": sle.voucher_type,
+				"voucher_no": sle.voucher_no,
+				"voucher_detail_no": ("in", secondary_rows),
+				"is_cancelled": 0,
+			},
+			fields=["item_code", "warehouse", "posting_date", "posting_time", "posting_datetime", "creation"],
 		)
 
 	def has_stock_reco_with_serial_batch(self, sle):
@@ -2334,7 +2359,9 @@ class update_entries_after:
 					as_dict=True,
 				)
 				if details.is_internal_supplier or (details.is_return and not details.return_against):
-					rate = outgoing_rate if details.is_return else sle.outgoing_rate
+					rate = (
+						outgoing_rate if details.is_return else self.get_internal_receipt_valuation_rate(sle)
+					)
 
 					frappe.db.set_value(
 						f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", rate
@@ -2350,6 +2377,16 @@ class update_entries_after:
 			doc.update_valuation_rate(reset_outgoing_rate=False)
 			for d in doc.items + doc.supplied_items:
 				d.db_update()
+
+	def get_internal_receipt_valuation_rate(self, sle):
+		"""Rate of the stock an internal receipt row accepted: what its transit leg gives back plus
+		the landed cost over the accepted qty, as the receipt itself values it."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		row = frappe.get_doc(sle.voucher_type + " Item", sle.voucher_detail_no)
+		return flt(sle.outgoing_rate) + get_landed_cost_rate(
+			row.doctype, row.name, get_stock_qty(row, row.qty)
+		)
 
 	def update_rate_on_subcontracting_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists("Subcontracting Receipt Item", sle.voucher_detail_no):
@@ -3086,9 +3123,7 @@ def get_valuation_rate(
 		if rate := (
 			frappe.db.get_value("Item", item_code, "valuation_rate")
 			or frappe.db.get_value("Item", item_code, "standard_rate")
-			or frappe.db.get_value(
-				"Item Price", dict(item_code=item_code, buying=1, currency=currency), "price_list_rate"
-			)
+			or get_buying_price_per_stock_uom(item_code, currency)
 		):
 			return flt(rate)
 
@@ -3129,6 +3164,22 @@ def get_valuation_rate(
 		msg = message + solutions + sub_solutions + "</li>"
 
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
+
+
+def get_buying_price_per_stock_uom(item_code, currency):
+	"""A buying Item Price of the item, converted from the price's UOM to the stock UOM."""
+	from erpnext.stock.get_item_details import get_conversion_factor
+
+	price = frappe.db.get_value(
+		"Item Price",
+		{"item_code": item_code, "buying": 1, "currency": currency},
+		["price_list_rate", "uom"],
+		as_dict=True,
+	)
+	if not price:
+		return 0.0
+
+	return flt(price.price_list_rate) / get_conversion_factor(item_code, price.uom)["conversion_factor"]
 
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
@@ -3530,7 +3581,6 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	For inter company transfer, incoming rate is the average of the outgoing rate
 	"""
 	rate = 0.0
-	lcv_rate = 0.0
 
 	field = "delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
 
@@ -3557,13 +3607,21 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			"incoming_rate",
 		)
 
-	# add lcv amount in incoming_rate
-	lcv_amount = frappe.db.get_value(child_doctype, sle.voucher_detail_no, "landed_cost_voucher_amount")
+	# the landed cost is added to the stock accepted, not to what leaves transit or was rejected
+	rejected_warehouse = frappe.get_cached_value(child_doctype, sle.voucher_detail_no, "rejected_warehouse")
+	if sle.actual_qty < 0 or sle.warehouse == rejected_warehouse:
+		return rate
 
-	if lcv_amount:
-		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
+	return rate + get_landed_cost_rate(child_doctype, sle.voucher_detail_no, abs(sle.actual_qty))
 
-	return rate + lcv_rate
+
+def get_landed_cost_rate(child_doctype, voucher_detail_no, stock_qty) -> float:
+	"""Landed cost of a receipt row per unit of stock_qty."""
+	if not stock_qty:
+		return 0.0
+
+	lcv_amount = frappe.db.get_value(child_doctype, voucher_detail_no, "landed_cost_voucher_amount")
+	return flt(lcv_amount) / stock_qty
 
 
 def is_internal_transfer(sle):
