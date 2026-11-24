@@ -1946,7 +1946,7 @@ class BuyingController(SubcontractingController):
 		if any(d.schedule_date for d in self.get("items")):
 			# Select earliest schedule_date.
 			self.schedule_date = min(
-				d.schedule_date for d in self.get("items") if d.schedule_date is not None
+				getdate(d.schedule_date) for d in self.get("items") if d.schedule_date is not None
 			)
 
 		if self.schedule_date:
