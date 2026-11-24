@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import set_bundle_header_values
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 from erpnext.stock.utils import get_bin_qty_map
 
@@ -340,10 +341,8 @@ class POSInvoice(SalesInvoice):
 		for row in self.items:
 			if row.serial_and_batch_bundle:
 				if not self.consolidated_invoice:
-					frappe.db.set_value(
-						"Serial and Batch Bundle",
-						row.serial_and_batch_bundle,
-						{"is_cancelled": 1, "voucher_no": ""},
+					set_bundle_header_values(
+						row.serial_and_batch_bundle, {"is_cancelled": 1, "voucher_no": ""}
 					)
 
 				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
@@ -1106,17 +1105,27 @@ def add_return_modes(doc, pos_profile):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
-	if pos_profile := filters.get("pos_profile")[1]:
-		pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
+	if pos_profile := get_permitted_pos_profile(filters.pop("pos_profile", None)):
 		if item_groups := get_item_group(pos_profile):
 			filters["item_group"] = ["in", tuple(item_groups)]
 
-		del filters["pos_profile"]
-
-	else:
-		filters.pop("pos_profile", None)
-
 	return _item_query(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+
+def get_permitted_pos_profile(condition):
+	if not condition or not condition[1]:
+		return
+
+	pos_profile = condition[1]
+	# doctype check first, so an unentitled caller can't tell missing names from existing ones
+	if not (
+		isinstance(pos_profile, str)
+		and frappe.has_permission("POS Profile", "select")
+		and frappe.has_permission("POS Profile", "select", doc=pos_profile)
+	):
+		_refuse()
+
+	return frappe.get_cached_doc("POS Profile", pos_profile)
 
 
 def get_item_group(pos_profile):

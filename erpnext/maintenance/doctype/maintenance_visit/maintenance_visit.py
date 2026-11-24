@@ -364,19 +364,16 @@ def has_delivery_to(deliveries: list, customer: str) -> bool:
 
 
 def get_bundle_deliveries(serial_no: str) -> list:
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
 	entry = frappe.qb.DocType("Serial and Batch Entry")
 	return (
-		frappe.qb.from_(bundle)
-		.inner_join(entry)
-		.on(entry.parent == bundle.name)
-		.select(bundle.voucher_type, bundle.voucher_no)
+		frappe.qb.from_(entry)
+		.select(entry.voucher_type, entry.voucher_no)
 		.where(
 			(entry.serial_no == serial_no)
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-			& (bundle.type_of_transaction == "Outward")
-			& bundle.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+			& (entry.docstatus == 1)
+			& (entry.is_cancelled == 0)
+			& (entry.type_of_transaction == "Outward")
+			& entry.voucher_type.isin(["Delivery Note", "Sales Invoice"])
 		)
 	).run(as_dict=True)
 

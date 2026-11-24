@@ -211,6 +211,7 @@ class Item(Document):
 		self.validate_description()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
+		self.validate_removed_uoms_not_in_item_price()
 		self.validate_item_type()
 		self.validate_naming_series()
 		if self.is_new():
@@ -482,6 +483,29 @@ class Item(Document):
 				frappe.throw(
 					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx)
 				)
+
+	def validate_removed_uoms_not_in_item_price(self):
+		"""An Item Price is per one of the Item's UOMs, so that UOM cannot be removed while one uses it."""
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		removed_uoms = {d.uom for d in doc_before_save.uoms} - {d.uom for d in self.uoms}
+		if not removed_uoms:
+			return
+
+		item_price = frappe.db.get_value(
+			"Item Price",
+			{"item_code": self.name, "uom": ("in", list(removed_uoms))},
+			["name", "uom"],
+			as_dict=True,
+		)
+		if item_price:
+			frappe.throw(
+				_("UOM {0} cannot be removed from the Item as Item Price {1} uses it.").format(
+					bold(item_price.uom), get_link_to_form("Item Price", item_price.name)
+				)
+			)
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
@@ -1347,8 +1371,8 @@ def validate_cancelled_item(item_code, docstatus=None):
 
 
 @frappe.request_cache
-def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
-	"""returns last purchase details in stock uom"""
+def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0, conversion_factor=1.0):
+	"""returns last purchase details per stock uom, or per the uom of `conversion_factor`"""
 	# the latest by date wins, a Purchase Order before a Receipt before an Invoice on the same date
 	last_purchases = []
 	for doctype in ("Purchase Order", "Purchase Receipt", "Purchase Invoice"):
@@ -1361,12 +1385,12 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 	purchase_date, last_purchase = max(last_purchases, key=lambda purchase: purchase[0])
 
-	conversion_factor = flt(last_purchase.conversion_factor)
+	uom_factor = (flt(conversion_factor) or 1.0) / flt(last_purchase.conversion_factor)
 	out = frappe._dict(
 		{
-			"base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
-			"base_rate": flt(last_purchase.base_rate) / conversion_factor,
-			"base_net_rate": flt(last_purchase.base_net_rate) / conversion_factor,
+			"base_price_list_rate": flt(last_purchase.base_price_list_rate) * uom_factor,
+			"base_rate": flt(last_purchase.base_rate) * uom_factor,
+			"base_net_rate": flt(last_purchase.base_net_rate) * uom_factor,
 			"discount_percentage": flt(last_purchase.discount_percentage),
 			"purchase_date": purchase_date,
 		}

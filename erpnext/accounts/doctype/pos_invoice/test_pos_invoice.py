@@ -1468,6 +1468,20 @@ class TestPOSInvoice(unittest.TestCase):
 		make_merge_log_for(pos)
 		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 1)
 
+	def test_item_query_checks_pos_profile(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import item_query
+
+		def query(pos_profile):
+			return item_query("Item", "", "name", 0, 5, {"pos_profile": ["=", pos_profile]})
+
+		self.assertTrue(query(self.pos_profile.name))
+		assert_refused(self, query, {"warehouse": ["like", "%"]})
+		with as_user("Administrator"):
+			user = make_fenced_user("pos-items@example.com", ["Sales User"])
+		with as_user(user):
+			assert_refused(self, query, self.pos_profile.name)
+			assert_refused(self, query, "_Test Missing POS Profile")
+
 	def test_write_off_counts_as_paid(self):
 		pos = create_pos_invoice(rate=1000, do_not_save=1)
 		pos.write_off_amount = 10

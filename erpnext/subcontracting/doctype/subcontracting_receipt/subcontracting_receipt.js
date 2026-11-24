@@ -89,13 +89,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 						});
 					};
 
-					let has_rejected_items = frm.doc.items.filter((item) => {
-						if (item.rejected_qty > 0) {
-							return true;
-						}
-					});
-
-					if (has_rejected_items && has_rejected_items.length > 0) {
+					if (frm.doc.__onload?.has_rejected_qty_to_return) {
 						frappe.prompt(
 							[
 								{
@@ -427,6 +421,13 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 
 	rate(frm) {
 		set_missing_values(frm);
+	},
+
+	before_items_remove(frm, cdt, cdn) {
+		// scrap rows of the removed finished good row go with it
+		frm.doc.items
+			.filter((item) => item.reference_name === cdn)
+			.forEach((item) => frappe.model.clear_doc(item.doctype, item.name));
 	},
 
 	items_delete: (frm) => {

@@ -420,8 +420,9 @@ class WorkOrder(Document):
 			self.actual_operating_cost if self.actual_operating_cost else self.planned_operating_cost
 		)
 
-		self.total_operating_cost = (
-			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost)
+		self.total_operating_cost = flt(
+			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost),
+			self.precision("total_operating_cost"),
 		)
 
 	@staticmethod
@@ -917,9 +918,10 @@ class WorkOrder(Document):
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
 
-		planned_end_date = self.operations and self.operations[-1].planned_end_time
-		if planned_end_date:
-			self.db_set("planned_end_date", planned_end_date)
+		# operations with the same Sequence ID run in parallel, so the last row may not end last
+		end_times = [get_datetime(row.planned_end_time) for row in self.operations if row.planned_end_time]
+		if end_times:
+			self.db_set("planned_end_date", max(end_times))
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
@@ -1124,14 +1126,16 @@ class WorkOrder(Document):
 		query = (
 			frappe.qb.from_(wo)
 			.select(Sum(qty_against_sales_order(wo, wo.qty)))
-			.where((wo.sales_order == self.sales_order) & (wo.docstatus == 1))
+			.where(
+				(wo.sales_order == self.sales_order)
+				& (wo.sales_order_item == self.sales_order_item)
+				& (wo.docstatus == 1)
+			)
 		)
 		if self.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.product_bundle_item)
 		else:
-			query = query.where(
-				(wo.production_item == self.production_item) & (wo.sales_order_item == self.sales_order_item)
-			)
+			query = query.where(wo.production_item == self.production_item)
 
 		return query.run(as_list=1)
 
@@ -1563,10 +1567,10 @@ class WorkOrder(Document):
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# When only direct stock entries (fg_completed_qty > 0) transferred, preserve the
 		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
 		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty("Material Transfer for Manufacture")
-		if sum_fg_completed_qty:
+		if sum_fg_completed_qty and not self._has_transfer_without_for_quantity():
 			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
 			return
 
@@ -1586,8 +1590,24 @@ class WorkOrder(Document):
 			for item_code, required_qty in required_by_item.items()
 		)
 		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.qty)
-		self.db_set("material_transferred_for_manufacturing", material_transferred)
+		material_transferred = max(min_fraction * flt(self.qty), sum_fg_completed_qty)
+		self.db_set(
+			"material_transferred_for_manufacturing",
+			flt(material_transferred, self.precision("material_transferred_for_manufacturing")),
+		)
+
+	def _has_transfer_without_for_quantity(self):
+		return frappe.db.exists(
+			"Stock Entry",
+			{
+				"work_order": self.name,
+				"docstatus": 1,
+				"purpose": "Material Transfer for Manufacture",
+				"is_return": 0,
+				"fg_completed_qty": 0,
+				"job_card": ("is", "not set"),
+			},
+		)
 
 	def update_returned_qty(self):
 		ste = frappe.qb.DocType("Stock Entry")
@@ -2050,7 +2070,9 @@ def make_stock_entry(
 @frappe.whitelist()
 def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | None = None) -> float:
 	frappe.has_permission("Stock Entry", "read", doc=stock_entry_name, throw=True)
-	se = frappe.db.get_value("Stock Entry", stock_entry_name, ["fg_completed_qty"], as_dict=True)
+	se = frappe.db.get_value(
+		"Stock Entry", stock_entry_name, ["fg_completed_qty", "process_loss_qty"], as_dict=True
+	)
 	if not se:
 		return 0.0
 
@@ -2068,7 +2090,7 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 	)
 
 	return flt(
-		flt(se.fg_completed_qty) - already_disassembled,
+		flt(se.fg_completed_qty) - flt(se.process_loss_qty) - already_disassembled,
 		frappe.get_precision("Stock Entry", "fg_completed_qty"),
 	)
 

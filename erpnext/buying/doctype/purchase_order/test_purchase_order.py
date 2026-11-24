@@ -135,21 +135,35 @@ class TestPurchaseOrder(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
-		item = make_item_with_fractional_box()
-		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
-		po = make_purchase_order(mr.name)
-		po.supplier = "_Test Supplier"
-		po.submit()
-
-		for _ in range(3):
-			pr = make_purchase_receipt(po.name)
-			pr.items[0].qty = pr.items[0].received_qty = 1
-			pr.submit()
-
-		mr.reload()
+		mr = receive_material_request_in_parts()
 		self.assertEqual(
 			mr.items[0].received_qty, flt(mr.items[0].stock_qty, mr.precision("stock_qty", "items"))
 		)
+		self.assertEqual(mr.per_received, 100)
+
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_receipts_for_parts_of_a_material_request_add_up_to_its_unrounded_stock_qty(self):
+		mr = receive_material_request_in_parts()
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_received, 100)
+
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_receipt_of_a_material_request_in_a_whole_number_uom_completes_it(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3333}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.3333)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+		make_purchase_receipt(po.name).submit()
+
+		mr.reload()
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
 		self.assertEqual(mr.per_received, 100)
 
 	@change_settings(
@@ -2420,6 +2434,56 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(po.supplier, "_Test Supplier")
 
+	def test_deleting_rows_with_update_items_refreshes_their_other_bins(self):
+		"""Deleting a row refreshes the requested qty of its Material Request's warehouse and the
+		reserved qty of a bundle row's components."""
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		def bin_qty(item_code, warehouse, field):
+			return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, field)
+
+		def keep_only_second_row(doc):
+			row = doc.items[1]
+			trans_item = [
+				{
+					"docname": row.name,
+					"item_code": row.item_code,
+					"qty": row.qty,
+					"rate": row.rate,
+					"conversion_factor": row.conversion_factor,
+				}
+			]
+			update_child_qty_rate(doc.doctype, json.dumps(trans_item), doc.name)
+
+		item_code, other_item = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		mr = make_material_request(item_code=item_code, qty=10, warehouse="_Test Warehouse 1 - _TC")
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.append(
+			"items",
+			dict(
+				po.items[0].as_dict(),
+				name=None,
+				item_code=other_item,
+				material_request=None,
+				material_request_item=None,
+			),
+		)
+		po.submit()
+		keep_only_second_row(po)
+		self.assertEqual(bin_qty(item_code, "_Test Warehouse 1 - _TC", "indented_qty"), 10)
+
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [item_code], 2)
+		so = make_sales_order(item_code=bundle, qty=5, do_not_submit=True)
+		so.append("items", dict(so.items[0].as_dict(), name=None, item_code=other_item))
+		so.submit()
+		keep_only_second_row(so)
+		self.assertEqual(bin_qty(item_code, "_Test Warehouse - _TC", "reserved_qty"), 0)
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
@@ -2689,6 +2753,23 @@ def make_po_for_sales_order_row(sales_order_row):
 	po = make_po_from_so(sales_order_row.parent, selected_items=selected_items)
 	po.supplier = "_Test Supplier"
 	return po
+
+
+def receive_material_request_in_parts():
+	"""Material Request for 3 fractional Boxes, ordered at once and received one Box at a time."""
+	item = make_item_with_fractional_box()
+	mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+	po = make_purchase_order(mr.name)
+	po.supplier = "_Test Supplier"
+	po.submit()
+
+	for _ in range(3):
+		pr = make_purchase_receipt(po.name)
+		pr.items[0].qty = pr.items[0].received_qty = 1
+		pr.submit()
+
+	mr.reload()
+	return mr
 
 
 def make_item_with_fractional_box(uom="Box"):

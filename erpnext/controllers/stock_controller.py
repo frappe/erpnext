@@ -21,6 +21,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.controllers.sales_and_purchase_return import (
 	available_serial_batch_for_return,
 	filter_serial_batches,
+	get_return_reference_field,
 	make_serial_batch_bundle_for_return,
 	remove_picked_serial_batches,
 )
@@ -33,6 +34,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_type_of_transaction,
 )
+from erpnext.stock.serial_batch_bundle import set_bundle_header_values
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
@@ -1052,17 +1054,13 @@ class StockController(AccountsController):
 
 				if row.get("serial_and_batch_bundle"):
 					update_values["serial_and_batch_bundle"] = None
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
-					)
+					set_bundle_header_values(row.serial_and_batch_bundle, {"is_cancelled": 1})
 
 				if update_values:
 					row.db_set(update_values)
 
 				if table_name == "items" and row.get("rejected_serial_and_batch_bundle"):
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, {"is_cancelled": 1}
-					)
+					set_bundle_header_values(row.rejected_serial_and_batch_bundle, {"is_cancelled": 1})
 
 					row.db_set("rejected_serial_and_batch_bundle", None)
 
@@ -1109,6 +1107,87 @@ class StockController(AccountsController):
 			include_bundle=include_bundle,
 			exclude_serial_nos=exclude_serial_nos,
 		)
+
+	def get_return_stock_qty(self, row, qty, warehouse) -> float:
+		"""Stock qty a return row moves, signed as its qty: no more than its original row moved in the
+		warehouse, less the row's other returns, and all that is left once it returns the rest of the
+		row's qty."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		stock_qty = get_stock_qty(row, qty)
+		if self.docstatus == 2:
+			return flt(self.get_posted_return_qty(row, warehouse)) or stock_qty
+
+		left = self.get_row_left_to_return(row, warehouse)
+		if flt(left.stock_qty) <= 0:
+			return stock_qty
+
+		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
+		if flt(unreturned_stock_qty, row.precision("stock_qty")) <= 0:
+			return -left.stock_qty
+
+		return max(stock_qty, -left.stock_qty)
+
+	def get_row_left_to_return(self, row, warehouse) -> frappe._dict:
+		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
+		returns have not moved back. A delivery counts every warehouse its rows used, as a return can put
+		its stock back in another one."""
+		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row
+
+		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
+		reference_field = get_return_reference_field(self.doctype)
+		original_row = row.get(reference_field)
+		if not original_row:
+			return left
+
+		item = frappe.qb.DocType(row.doctype)
+		fields = [item.name, item.qty, item.conversion_factor, item.warehouse]
+		if frappe.get_meta(row.doctype).has_field("rejected_warehouse"):
+			fields += [item.rejected_qty, item.rejected_warehouse]
+
+		rows = (
+			frappe.qb.from_(item)
+			.select(*fields)
+			.where(
+				(item.docstatus == 1)
+				& (
+					(item.name == original_row)
+					| ((item[reference_field] == original_row) & (item.parent != self.name))
+				)
+			)
+			.run(as_dict=True)
+		)
+		warehouses = [warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows})
+		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouses)
+		for d in rows:
+			if d.name not in posted_qty:
+				continue  # moved no stock, like a return without Update Stock
+			if d.warehouse in warehouses:
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
+			if d.get("rejected_warehouse") in warehouses:
+				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
+
+		left.stock_qty = flt(sum(posted_qty.values()) * self.get_stock_qty_sign(), row.precision("stock_qty"))
+		return left
+
+	def get_posted_return_qty(self, row, warehouse):
+		"""Qty the return row's entry moved in the warehouse, signed as its qty."""
+		sign = self.get_stock_qty_sign()
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_detail_no": row.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"actual_qty": ("<", 0) if sign > 0 else (">", 0),
+			},
+			"actual_qty",
+		)
+		return flt(actual_qty) * sign
+
+	def get_stock_qty_sign(self) -> int:
+		"""1 where a row's stock qty goes into the warehouse, as on a receipt, -1 where it goes out."""
+		return 1 if self.is_stock_receipt() else -1
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
@@ -1671,6 +1750,7 @@ class StockController(AccountsController):
 				"voucher_no": self.name,
 				"company": self.company,
 				"via_landed_cost_voucher": via_landed_cost_voucher,
+				"skip_unchanged_entries": 1,
 			}
 		)
 
@@ -1691,6 +1771,7 @@ class StockController(AccountsController):
 					voucher_type=self.doctype,
 					voucher_no=self.name,
 					via_landed_cost_voucher=via_landed_cost_voucher,
+					skip_unchanged_entries=True,
 				)
 			else:
 				create_repost_item_valuation_entry(args)
@@ -2171,12 +2252,17 @@ def create_repost_item_valuation_entry(args):
 	repost_entry.flags.ignore_links = True
 	repost_entry.flags.ignore_permissions = True
 	repost_entry.via_landed_cost_voucher = args.via_landed_cost_voucher
+	repost_entry.skip_unchanged_entries = args.skip_unchanged_entries
 	repost_entry.save()
 	repost_entry.submit()
 
 
 def create_item_wise_repost_entries(
-	voucher_type, voucher_no, allow_zero_rate=False, via_landed_cost_voucher=False
+	voucher_type,
+	voucher_no,
+	allow_zero_rate=False,
+	via_landed_cost_voucher=False,
+	skip_unchanged_entries=False,
 ):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
@@ -2202,6 +2288,7 @@ def create_item_wise_repost_entries(
 		repost_entry.flags.ignore_links = True
 		repost_entry.flags.ignore_permissions = True
 		repost_entry.via_landed_cost_voucher = via_landed_cost_voucher
+		repost_entry.skip_unchanged_entries = skip_unchanged_entries
 		repost_entry.submit()
 		repost_entries.append(repost_entry)
 
@@ -2254,6 +2341,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 		row.warehouse = kwargs.warehouse
 
+	bundle_doc.set_child_details()
 	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()
 	bundle_doc.flags.ignore_permissions = True

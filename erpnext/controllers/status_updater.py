@@ -301,11 +301,16 @@ class StatusUpdater(Document):
 						item["idx"] = d.idx
 						item["target_ref_field"] = args["target_ref_field"].replace("_", " ")
 
-						# skip qty over-allowance check for non-stock items
+						# skip qty over-allowance check for non-stock items, except a subcontracted
+						# service row, which is received with its finished goods
 						if (
 							"qty" in args.get("target_ref_field", "")
 							and not is_installation
 							and not frappe.get_cached_value("Item", item["item_code"], "is_stock_item")
+							and not (
+								args["target_dt"] == "Purchase Order Item"
+								and frappe.db.get_value("Purchase Order Item", args["name"], "fg_item")
+							)
 						):
 							continue
 
@@ -491,7 +496,11 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
-				if args.get("round_to_target_precision"):
+				round_total = args.get("round_to_target_precision")
+				if callable(round_total):
+					round_total = round_total(d)
+
+				if round_total:
 					args["source_dt_value"] = flt(
 						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
 					)

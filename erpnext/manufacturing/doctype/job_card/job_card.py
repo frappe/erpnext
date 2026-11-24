@@ -29,6 +29,8 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 
+RUNNING_TIME_LOG_END = datetime.datetime(9999, 12, 31)
+
 
 class OverlapError(frappe.ValidationError):
 	pass
@@ -156,7 +158,11 @@ class JobCard(Document):
 		self.validate_job_card_qty()
 
 	def set_hour_rate(self):
-		if self.is_corrective_job_card or not (self.workstation and self.operation_id):
+		if self.is_corrective_job_card:
+			self.set_corrective_hour_rate()
+			return
+
+		if not (self.workstation and self.operation_id):
 			return
 
 		operation = frappe.db.get_value(
@@ -165,6 +171,17 @@ class JobCard(Document):
 		if operation and operation.workstation == self.workstation and flt(operation.hour_rate):
 			self.hour_rate = operation.hour_rate
 		else:
+			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
+
+	def set_corrective_hour_rate(self):
+		"""Keep a manual rate until the workstation changes, starting from the amended or source card's."""
+		previous = self.get_doc_before_save()
+		previous_workstation = (
+			previous.workstation
+			if previous
+			else frappe.db.get_value("Job Card", self.amended_from or self.for_job_card, "workstation")
+		)
+		if self.workstation and self.workstation != previous_workstation:
 			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
 	def validate_job_card_qty(self):
@@ -231,7 +248,7 @@ class JobCard(Document):
 				if d.get("employee"):
 					open_job_cards = self.get_open_job_cards(d.get("employee"), workstation=self.workstation)
 
-				data = self.get_overlap_for(d, open_job_cards=open_job_cards)
+				data = self.get_overlap_for(d, open_job_cards=open_job_cards, include_running=True)
 				if data:
 					frappe.throw(
 						_("Row {0}: From Time and To Time of {1} is overlapping with {2}").format(
@@ -302,10 +319,10 @@ class JobCard(Document):
 		).run(as_dict=True)
 		return clashes[0] if clashes else None
 
-	def get_overlap_for(self, args, open_job_cards=None):
+	def get_overlap_for(self, args, open_job_cards=None, include_running=False):
 		time_logs = []
 
-		time_logs.extend(self.get_time_logs(args, "Job Card Time Log"))
+		time_logs.extend(self.get_time_logs(args, "Job Card Time Log", include_running=include_running))
 
 		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time", open_job_cards=open_job_cards))
 
@@ -366,18 +383,22 @@ class JobCard(Document):
 			return True
 		return overlap
 
-	def get_time_logs(self, args, doctype, open_job_cards=None):
+	def get_time_logs(self, args, doctype, open_job_cards=None, include_running=False):
 		if args.get("remaining_time_in_mins") and get_datetime(args.from_time) >= get_datetime(args.to_time):
 			args.to_time = add_to_date(args.from_time, minutes=args.get("remaining_time_in_mins"))
 
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType(doctype)
 
+		# a running time log has no To Time yet and keeps the workstation busy
+		to_time = (args.to_time or RUNNING_TIME_LOG_END) if include_running else args.to_time
 		time_conditions = [
 			((jctl.from_time < args.from_time) & (jctl.to_time > args.from_time)),
-			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
-			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
+			((jctl.from_time < to_time) & (jctl.to_time > to_time)),
+			((jctl.from_time >= args.from_time) & (jctl.to_time <= to_time)),
 		]
+		if include_running and args.from_time:
+			time_conditions.append(jctl.to_time.isnull() & (jc.docstatus == 0) & (jctl.from_time < to_time))
 
 		query = (
 			frappe.qb.from_(jctl)
@@ -421,7 +442,9 @@ class JobCard(Document):
 			query = query.where((jc.docstatus == 0) & (jc.total_time_in_mins == 0))
 
 		time_logs = query.run(as_dict=True)
-
+		for log in time_logs:
+			# only a running time log comes back without a To Time
+			log.to_time = log.to_time or RUNNING_TIME_LOG_END
 		return time_logs
 
 	def get_open_job_cards(self, employee, workstation=None):
@@ -514,9 +537,10 @@ class JobCard(Document):
 
 		if not self.workstation:
 			workstations = get_workstations(self.workstation_type)
-			if workstations:
-				# Get the first workstation
-				self.workstation = workstations[0]
+			if not workstations:
+				frappe.throw(_("Workstation Type {0} has no Workstation").format(bold(self.workstation_type)))
+
+			self.workstation = workstations[0]
 
 		if not data:
 			row.planned_start_time = args.from_time
@@ -684,14 +708,10 @@ class JobCard(Document):
 		)
 
 	def reset_required_items(self):
-		"""Rebuild the items for a changed For Quantity until material moves against them."""
+		"""Rescale the items' Required Qty to a changed For Quantity."""
 		if self.is_new() or not self.items or not self.has_value_changed("for_quantity"):
 			return
 
-		if any(flt(row.transferred_qty) for row in self.items):
-			return
-
-		self.items = []
 		self.set_required_items()
 
 	@frappe.whitelist()
@@ -707,26 +727,13 @@ class JobCard(Document):
 			return
 
 		other_job_cards_qty = self.get_other_job_cards_qty()
+		unmatched_rows = list(self.items)
 		for d in doc.required_items:
-			if not d.operation:
-				frappe.throw(
-					_("Row {0} : Operation is required against the raw material item {1}").format(
-						d.idx, d.item_code
-					)
-				)
+			self.set_required_item(doc, d, other_job_cards_qty, unmatched_rows)
 
-			if self.get("operation") == d.operation or self.is_corrective_job_card:
-				self.append(
-					"items",
-					{
-						"item_code": d.item_code,
-						"source_warehouse": d.source_warehouse,
-						"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
-						"item_name": d.item_name,
-						"description": d.description,
-						"required_qty": self.get_required_qty(d, doc.qty, other_job_cards_qty),
-					},
-				)
+		for row in unmatched_rows:
+			if not flt(row.transferred_qty):
+				self.remove(row)
 
 	def get_other_job_cards_qty(self) -> frappe._dict:
 		"""For Quantity and Required Qty per item of the other job cards of this operation."""
@@ -749,6 +756,35 @@ class JobCard(Document):
 			.groupby(job_card_item.item_code)
 		)
 		return frappe._dict(for_quantity=flt(for_quantity.run()[0][0]), required_qty=dict(required_qty.run()))
+
+	def set_required_item(self, doc, d, other_job_cards_qty, unmatched_rows):
+		if not d.operation:
+			frappe.throw(
+				_("Row {0} : Operation is required against the raw material item {1}").format(
+					d.idx, d.item_code
+				)
+			)
+
+		if self.get("operation") != d.operation and not self.is_corrective_job_card:
+			return
+
+		required_qty = self.get_required_qty(d, doc.qty, other_job_cards_qty)
+		if row := next((row for row in unmatched_rows if row.item_code == d.item_code), None):
+			unmatched_rows.remove(row)
+			row.required_qty = max(required_qty, flt(row.transferred_qty))
+			return
+
+		self.append(
+			"items",
+			{
+				"item_code": d.item_code,
+				"source_warehouse": d.source_warehouse,
+				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+				"item_name": d.item_name,
+				"description": d.description,
+				"required_qty": required_qty,
+			},
+		)
 
 	def get_required_qty(self, d, operation_qty, other_job_cards_qty) -> float:
 		"""This job card's share of the work order item: the rounded qty up to the operation's
@@ -929,13 +965,17 @@ class JobCard(Document):
 			self.update_work_order_data(for_quantity, process_loss_qty, time_in_mins, wo)
 
 	def update_corrective_in_work_order(self, wo):
-		wo.corrective_operation_cost = 0.0
-		for row in frappe.get_all(
-			"Job Card",
-			fields=["total_time_in_mins", "hour_rate"],
-			filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
-		):
-			wo.corrective_operation_cost += (flt(row.total_time_in_mins) / 60) * flt(row.hour_rate)
+		corrective_operation_cost = sum(
+			flt(row.total_time_in_mins) / 60 * flt(row.hour_rate)
+			for row in frappe.get_all(
+				"Job Card",
+				fields=["total_time_in_mins", "hour_rate"],
+				filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
+			)
+		)
+		wo.corrective_operation_cost = flt(
+			corrective_operation_cost, wo.precision("corrective_operation_cost")
+		)
 
 		wo.calculate_operating_cost()
 		wo.flags.ignore_validate_update_after_submit = True

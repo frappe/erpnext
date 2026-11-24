@@ -32,6 +32,7 @@ from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
+	set_bundle_header_values,
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -442,11 +443,7 @@ class PickList(TransactionBase):
 				and frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "docstatus")
 				== 1
 			):
-				frappe.db.set_value(
-					"Serial and Batch Bundle",
-					row.serial_and_batch_bundle,
-					{"is_cancelled": 1, "voucher_no": ""},
-				)
+				set_bundle_header_values(row.serial_and_batch_bundle, {"is_cancelled": 1, "voucher_no": ""})
 
 				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
 				row.db_set("serial_and_batch_bundle", None)
@@ -952,7 +949,7 @@ class PickList(TransactionBase):
 					Case()
 					.when(
 						(pi_item.picked_qty > 0) & (pi_item.docstatus == 1),
-						pi_item.picked_qty - pi_item.delivered_qty,
+						pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty,
 					)
 					.else_(pi_item.stock_qty)
 				).as_("picked_qty"),
@@ -1418,6 +1415,8 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 				row.serial_nos = [
 					serial_no for serial_no in row.serial_nos if serial_no not in picked_serial_nos
 				]
+				# a partly moved pick list row can still list more serial nos than it holds
+				row.qty = min(row.qty, len(row.serial_nos))
 
 		if flt(row.qty, precision) > 0:
 			filterd_locations.append(row)

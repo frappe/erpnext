@@ -171,7 +171,7 @@ class calculate_taxes_and_totals:
 		self.validate_item_tax_templates_are_usable()
 
 	def validate_item_tax_templates_are_usable(self):
-		if self.doc.get("_action") not in ("save", "submit") or self.doc.get("is_consolidated"):
+		if self.doc.get("_action") not in ("save", "submit") or self.doc.flags.is_consolidated:
 			return
 
 		for template in self.get_changed_item_tax_templates():
@@ -228,7 +228,7 @@ class calculate_taxes_and_totals:
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
 	def calculate_item_values(self):
-		if self.doc.get("is_consolidated"):
+		if self.doc.flags.is_consolidated:
 			return
 
 		if not self.discount_amount_applied:
@@ -315,7 +315,7 @@ class calculate_taxes_and_totals:
 
 	@property
 	def has_mapped_discount(self):
-		return not self.doc.get("is_consolidated") and any(
+		return not self.doc.flags.is_consolidated and any(
 			item.get("mapped_additional_discount_amount") for item in self._items
 		)
 
@@ -897,7 +897,7 @@ class calculate_taxes_and_totals:
 					self.doc.total_net_weight += d.total_weight
 
 	def set_rounded_total(self):
-		if self.doc.get("is_consolidated") and self.doc.get("rounding_adjustment"):
+		if self.doc.flags.is_consolidated and self.doc.get("rounding_adjustment"):
 			return
 
 		if self.doc.meta.get_field("rounded_total"):
@@ -1214,7 +1214,7 @@ class calculate_taxes_and_totals:
 				self.doc.doctype == "Sales Invoice"
 				and self.doc.get("is_pos")
 				and self.doc.get("pos_profile")
-				and self.doc.get("is_consolidated")
+				and self.doc.flags.is_consolidated
 			):
 				write_off_limit = flt(
 					frappe.db.get_value("POS Profile", self.doc.pos_profile, "write_off_limit")
@@ -1226,7 +1226,7 @@ class calculate_taxes_and_totals:
 				self.doc.doctype == "Sales Invoice"
 				and self.doc.get("is_pos")
 				and self.doc.get("is_return")
-				and not self.doc.get("is_consolidated")
+				and not self.doc.flags.is_consolidated
 			):
 				self.set_total_amount_to_default_mop(total_amount_to_pay)
 				self.calculate_paid_amount()

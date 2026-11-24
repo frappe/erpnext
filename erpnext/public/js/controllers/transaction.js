@@ -1645,7 +1645,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
 			this.frm.doc.price_list_currency != company_currency);
 
-		let show = cint(this.frm.doc.discount_amount) ||
+		let show = flt(this.frm.doc.discount_amount) ||
 				((this.frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
 		if(this.frm.doc.doctype && frappe.meta.get_docfield(this.frm.doc.doctype, "net_total")) {
@@ -1767,7 +1767,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 		});
 
-		var show = (cint(this.frm.doc.discount_amount)) ||
+		var show = (flt(this.frm.doc.discount_amount)) ||
 			((this.frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
 		$.each(["net_rate", "net_amount"], function(i, fname) {
@@ -2903,6 +2903,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 };
 
+// bundle qty is in the stock UOM; the row qty is in the row's UOM when the row has a stock qty
+erpnext.get_serial_batch_row_qty = function (doc, row, stock_qty) {
+	const stock_qty_field = ["stock_qty", "transfer_qty"].find((field) =>
+		frappe.meta.has_field(row.doctype, field)
+	);
+	const conversion_factor = stock_qty_field ? flt(row.conversion_factor) || 1 : 1;
+	const stock_precision = precision(stock_qty_field || "qty", row);
+	const row_qty = Math.abs(flt(row.qty));
+
+	// keep a row qty that already matches, as dividing back by a fractional factor can drift
+	const qty =
+		flt(row_qty * conversion_factor, stock_precision) === flt(stock_qty, stock_precision)
+			? row_qty
+			: flt(stock_qty / conversion_factor, precision("qty", row));
+
+	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
+};
+
 erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close, show_dialog) {
 	let warehouse, receiving_stock, existing_stock;
 
@@ -2958,9 +2976,9 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 	new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 		if (r) {
 			let update_values = {
-				"serial_and_batch_bundle": r.name,
-				"qty": Math.abs(r.total_qty)
-			}
+				serial_and_batch_bundle: r.name,
+				qty: erpnext.get_serial_batch_row_qty(frm.doc, item_row, Math.abs(r.total_qty)),
+			};
 
 			if (r.warehouse) {
 				update_values[warehouse_field] = r.warehouse;

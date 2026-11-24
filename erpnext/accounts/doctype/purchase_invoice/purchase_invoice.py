@@ -41,8 +41,8 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
 from erpnext.controllers.buying_controller import (
 	BuyingController,
+	get_received_stock_qty_status_args,
 	get_stock_qty,
-	get_stock_qty_status_args,
 	get_transit_amount,
 )
 from erpnext.controllers.mapper import get_qty_already_mapped
@@ -277,6 +277,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_posting_time()
 
 		super().validate()
+		self.reset_receipt_qty()
 
 		if not self.is_return:
 			self.po_required()
@@ -318,6 +319,16 @@ class PurchaseInvoice(BuyingController):
 
 		if self.on_hold:
 			self.validate_invoice_hold()
+
+	def reset_receipt_qty(self):
+		"""Clear qty left over from Update Stock once it is turned off."""
+		if self.update_stock:
+			return
+
+		for row in self.items:
+			if not row.pr_detail:
+				row.received_qty = 0
+				row.rejected_qty = 0
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
@@ -544,11 +555,7 @@ class PurchaseInvoice(BuyingController):
 			}
 		)
 
-		if (
-			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
-			and not self.is_return
-			and not self.is_internal_supplier
-		):
+		if cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")) and not self.is_return:
 			self.validate_rate_with_reference_doc(
 				[
 					["Purchase Order", "purchase_order", "po_detail"],
@@ -853,9 +860,9 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_dt": "Material Request",
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
-					**get_stock_qty_status_args(),
+					**get_received_stock_qty_status_args(),
 					"second_source_dt": "Purchase Receipt Item",
-					"second_source_field": get_stock_qty_status_args()["source_field"],
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "material_request_item",
 					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
