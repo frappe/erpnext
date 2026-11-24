@@ -25,6 +25,7 @@ from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_varia
 	get_total_days_late,
 	get_total_workdays,
 )
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -151,15 +152,21 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 0)
 
-	def test_on_time_receipt_off_by_conversion_dust_counts_as_on_time(self):
+	def test_receipts_short_only_by_conversion_rounding_count_as_on_time(self):
+		# factors as set from edited stock qtys (332 and 333.42); the PO shows them fully received
 		supplier = create_scorecard_supplier()
-		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=300, rate=100, submit=False)
+		item_code = make_item(properties={"stock_uom": "Kg"}).name
+		po = create_scorecard_po(
+			supplier, add_days(nowdate(), 5), qty=1467, rate=100, submit=False, item_code=item_code
+		)
 		po.items[0].uom = "Box"
-		po.items[0].conversion_factor = 0.333333333
+		po.items[0].conversion_factor = 0.45359237
 		po.submit()
-		receipt = make_pr_from_po(po.name)
-		receipt.items[0].conversion_factor = 0.333333332
-		receipt.submit()
+		for qty, conversion_factor in ((733, 0.452933151), (734, 0.454250681)):
+			receipt = make_pr_from_po(po.name)
+			receipt.items[0].qty = qty
+			receipt.items[0].conversion_factor = conversion_factor
+			receipt.submit()
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
@@ -188,9 +195,16 @@ def create_scorecard_supplier(supplier_name="_Test Supplier Scorecard"):
 	return supplier_name
 
 
-def create_scorecard_po(supplier, schedule_date, transaction_date=None, qty=10, rate=100, submit=True):
+def create_scorecard_po(
+	supplier, schedule_date, transaction_date=None, qty=10, rate=100, submit=True, item_code=None
+):
 	po = create_purchase_order(
-		supplier=supplier, transaction_date=transaction_date, qty=qty, rate=rate, do_not_save=True
+		supplier=supplier,
+		item_code=item_code,
+		transaction_date=transaction_date,
+		qty=qty,
+		rate=rate,
+		do_not_save=True,
 	)
 	po.schedule_date = schedule_date
 	po.items[0].schedule_date = schedule_date
