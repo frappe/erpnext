@@ -13,9 +13,9 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
 from .manufacturing import (
-	ceil_qty_if_uom_has_whole_number,
 	get_bom_items,
 	get_production_item_details,
+	get_secondary_item_qty,
 	get_secondary_items,
 )
 from .stock_entry_base import BaseStockEntry
@@ -390,12 +390,9 @@ class DisassembleStockEntry(BaseStockEntry):
 			item_args["uom"] = item_args.get("uom") or item_args.get("stock_uom")
 			item_args["bom_secondary_item"] = row.get("name")
 
-			row.qty = row.qty * self.doc.fg_completed_qty
-			if row.get("process_loss_per"):
-				row.qty -= flt(row.qty * row.get("process_loss_per") / 100)
-			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, item_args["uom"])
-
-			self.doc.append("items", item_args)
+			item_args["qty"] = get_secondary_item_qty(row, self.doc.fg_completed_qty)
+			if item_args["qty"]:
+				self.doc.append("items", item_args)
 
 	def add_finished_goods(self):
 		item_details = get_production_item_details(self.doc.work_order, self.doc.bom_no)
