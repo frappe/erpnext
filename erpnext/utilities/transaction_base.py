@@ -162,7 +162,8 @@ class TransactionBase(StatusUpdater):
 		return prev_doc_detail_map
 
 	def validate_rate_with_reference_doc(self, ref_details):
-		if self.is_internal_transfer():
+		# a Quotation's rate binds the Sales Order even for an internal transfer
+		if self.doctype != "Sales Order" and self.is_internal_transfer():
 			return
 
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
