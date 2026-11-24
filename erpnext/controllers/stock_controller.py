@@ -10,7 +10,7 @@ from frappe import _, bold
 from frappe.query_builder import Case, Criterion, Order, Tuple
 from frappe.query_builder.functions import Count, Max, Min
 from frappe.query_builder.terms import ParameterizedValueWrapper
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -976,7 +976,10 @@ class StockController(AccountsController):
 
 		for row in rows:
 			row.key = (row.subcontracting_order, row.item_code, row.s_warehouse)
-		return rows
+
+		# returns submitted before the upgrade left the reservations alone
+		cutoff = frappe.db.get_default("reserved_components_return_cutoff")
+		return [row for row in rows if not cutoff or row.submitted_at > get_datetime(cutoff)]
 
 	def get_usage_query(self, parent, child, qty_field: str, field: str):
 		"""Rows of the submitted and cancelled `parent` vouchers, with their bundle entries, oldest first.
