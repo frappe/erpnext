@@ -1675,9 +1675,9 @@ class SubcontractingController(StockController):
 		serial_batches_consumed = get_consumed_serial_batches(consumed_bundles)
 		for own_rows in (True, False):
 			for consumption, qty in serial_batches_consumed.items():
-				key, serial_no, batch_no = consumption
+				key, warehouse, serial_no, batch_no = consumption
 				item_code, finished_good, order = key
-				sent_on_rows = serial_batches_sent.get((item_code, order, serial_no, batch_no), {})
+				sent_on_rows = serial_batches_sent.get((item_code, order, warehouse, serial_no, batch_no), {})
 				for row in rows:
 					row_sent = items_sent.get(row.name, {})
 					counted = min(
@@ -1718,7 +1718,9 @@ class SubcontractingController(StockController):
 			.on(bundle.voucher_detail_no == se_detail.name)
 			.inner_join(entry)
 			.on(entry.parent == bundle.name)
-			.select(se_detail.item_code, order, serial_no, batch_no, rm_detail, Sum(entry.qty))
+			.select(
+				se_detail.item_code, order, bundle.warehouse, serial_no, batch_no, rm_detail, Sum(entry.qty)
+			)
 			.where(
 				(se.docstatus == 1)
 				& order.isin(self.subcontract_orders)
@@ -1726,12 +1728,12 @@ class SubcontractingController(StockController):
 				& (bundle.docstatus == 1)
 				& (bundle.type_of_transaction == supplier_side)
 			)
-			.groupby(se_detail.item_code, order, serial_no, batch_no, rm_detail)
+			.groupby(se_detail.item_code, order, bundle.warehouse, serial_no, batch_no, rm_detail)
 		).run()
 
 		serial_batches = defaultdict(dict)
-		for item_code, order_name, serial_no, batch_no, order_row, qty in rows:
-			serial_batches[(item_code, order_name, serial_no, batch_no)][order_row] = qty
+		for item_code, order_name, warehouse, serial_no, batch_no, order_row, qty in rows:
+			serial_batches[(item_code, order_name, warehouse, serial_no, batch_no)][order_row] = qty
 
 		return serial_batches
 
@@ -2022,15 +2024,21 @@ def get_consumed_qty_beyond_sent(rows, items_sent, itemwise_consumed_qty):
 
 
 def get_consumed_serial_batches(bundles):
-	"""Net qty of each serial no and batch the bundles consumed, by the consumption they belong to."""
+	"""Net qty of each serial no and batch the bundles consumed, by the consumption and warehouse."""
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	entries = (
+		frappe.qb.from_(bundle)
+		.inner_join(entry)
+		.on(entry.parent == bundle.name)
+		.select(bundle.name, bundle.warehouse, entry.serial_no, entry.batch_no, entry.qty)
+		.where(bundle.name.isin(list(bundles)))
+	).run()
+
 	consumed = defaultdict(float)
-	for entry in frappe.get_all(
-		"Serial and Batch Entry",
-		filters={"parent": ("in", list(bundles))},
-		fields=["parent", "serial_no", "batch_no", "qty"],
-	):
+	for name, warehouse, serial_no, batch_no, qty in entries:
 		# a consumption's entries are negative, a return's positive
-		consumed[(bundles[entry.parent], entry.serial_no or "", entry.batch_no or "")] -= entry.qty
+		consumed[(bundles[name], warehouse, serial_no or "", batch_no or "")] -= qty
 
 	return consumed
 
