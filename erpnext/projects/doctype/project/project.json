@@ -37,7 +37,9 @@
   "column_break_accounting",
   "cost_center",
   "tasks_tab",
-  "tasks_html",
+  "tasks_toolbar",
+  "tasks_list",
+  "tasks_board",
   "more_info_tab",
   "customer_details",
   "customer",
@@ -546,9 +548,20 @@
    "label": "Tasks"
   },
   {
-   "fieldname": "tasks_html",
+   "fieldname": "tasks_toolbar",
    "fieldtype": "HTML",
-   "label": "Tasks"
+   "label": "Tasks Toolbar"
+  },
+  {
+   "fieldname": "tasks_list",
+   "fieldtype": "Vue Component",
+   "label": "Tasks",
+   "options": "erpnext.project_tasks"
+  },
+  {
+   "fieldname": "tasks_board",
+   "fieldtype": "HTML",
+   "label": "Tasks Board"
   },
   {
    "fieldname": "accounting_section",
