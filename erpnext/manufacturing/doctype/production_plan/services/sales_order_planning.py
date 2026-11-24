@@ -346,16 +346,18 @@ def _set_so_item_pending_qty(items):
 
 
 def _so_packed_columns(so_item, pi):
-	pending_qty = (
+	per_bundle = pi.qty / so_item.qty
+	work_order_qty = so_item.work_order_qty * per_bundle
+	# reserved stock may be Work Order output, so like deliveries it overlaps work_order_qty
+	delivered_or_reserved_qty = so_item.delivered_qty * per_bundle + get_reserved_packed_item_qty(pi)
+	pending_qty = pi.qty - (
 		frappe.qb.terms.Case()
-		.when(
-			(so_item.work_order_qty > so_item.delivered_qty),
-			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty),
-		)
-		.else_(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
-	) - get_reserved_packed_item_qty(pi)
+		.when(work_order_qty > delivered_or_reserved_qty, work_order_qty)
+		.else_(delivered_or_reserved_qty)
+	)
 	return [
 		pi.parent,
+		pi.name.as_("packed_item"),
 		pi.item_code,
 		pi.warehouse.as_("warehouse"),
 		pending_qty.as_("pending_qty"),
