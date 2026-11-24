@@ -3267,6 +3267,64 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assert_plan_pulls_the_unmade_qty(sales_order).submit()
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_output_of_a_planned_work_order_without_sales_order_item_counts_once(self):
+		sales_order = self.make_sales_order_with_reserved_work_order_output(
+			"_Test FG For Planned Unlinked WO Output", link_sales_order_item=False, from_production_plan=True
+		)
+		self.assert_plan_pulls_the_unmade_qty(sales_order)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_bundle_component_is_not_planned_again(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item("_Test Reserved Bundle Component", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=[make_item("_Test Reserved Bundle Component RM").name])
+		make_stock_entry(item_code=component, target=warehouse, qty=4, basic_rate=100)
+		bundle = make_item("_Test Bundle With Reserved Component", {"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=10)
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		pick_list.create_stock_reservation_entries(notify=False)
+
+		self.assert_plan_pulls_the_unmade_qty(sales_order, 6)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_row_of_a_repeated_bundle_component_is_planned_on_its_own(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item("_Test Repeated Bundle Component", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=[make_item("_Test Repeated Bundle Component RM").name])
+		make_stock_entry(item_code=component, target=warehouse, qty=10, basic_rate=100)
+		bundle = make_item("_Test Bundle With Repeated Component", {"is_stock_item": 0}).name
+		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		for qty in (1, 2):
+			product_bundle.append("items", {"item_code": component, "qty": qty})
+		product_bundle.insert()
+		if product_bundle.meta.is_submittable:
+			product_bundle.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=10)
+		sales_order.create_stock_reservation_entries(
+			items_details=[
+				{
+					"sales_order_item": sales_order.packed_items[1].name,
+					"item_code": component,
+					"qty_to_reserve": 10,
+					"warehouse": warehouse,
+				}
+			],
+			notify=False,
+		)
+
+		plan = create_production_plan(
+			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
+		)
+		self.assertEqual(sorted(row.planned_qty for row in plan.po_items), [10, 10])
+
 	def make_sales_order_with_reserved_work_order_output(
 		self, fg_item, link_sales_order_item, reserved_stock_qty=0, from_production_plan=False
 	):
@@ -3324,11 +3382,11 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		return sales_order
 
-	def assert_plan_pulls_the_unmade_qty(self, sales_order):
+	def assert_plan_pulls_the_unmade_qty(self, sales_order, unmade_qty=4):
 		plan = create_production_plan(
 			get_items_from="Sales Order", sales_order=sales_order, skip_getting_mr_items=True, do_not_save=1
 		)
-		self.assertEqual([row.planned_qty for row in plan.po_items], [4])
+		self.assertEqual([row.planned_qty for row in plan.po_items], [unmade_qty])
 		return plan
 
 	def test_production_plan_cannot_exceed_sales_order_qty(self):

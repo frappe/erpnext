@@ -474,13 +474,14 @@ class ProductionPlan(Document):
 
 		pi = frappe.qb.DocType("Packed Item")
 
-		pending_qty = (
+		per_bundle = pi.qty / so_item.qty
+		work_order_qty = so_item.work_order_qty * per_bundle
+		# reserved stock may be Work Order output, so like deliveries it overlaps work_order_qty
+		delivered_or_reserved_qty = so_item.delivered_qty * per_bundle + _reserved_packed_item_qty(pi)
+		pending_qty = pi.qty - (
 			frappe.qb.terms.Case()
-			.when(
-				(so_item.work_order_qty > so_item.delivered_qty),
-				(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty),
-			)
-			.else_(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
+			.when(work_order_qty > delivered_or_reserved_qty, work_order_qty)
+			.else_(delivered_or_reserved_qty)
 		)
 
 		packed_items_query = (
@@ -488,6 +489,7 @@ class ProductionPlan(Document):
 			.from_(pi)
 			.select(
 				pi.parent,
+				pi.name.as_("packed_item"),
 				pi.item_code,
 				pi.warehouse.as_("warehouse"),
 				pending_qty.as_("pending_qty"),
@@ -499,7 +501,7 @@ class ProductionPlan(Document):
 			.where(
 				(so_item.parent == pi.parent)
 				& (so_item.docstatus == 1)
-				& (pi.parent_item == so_item.item_code)
+				& (pi.parent_detail_docname == so_item.name)
 				& (so_item.parent.isin(so_list))
 				& (
 					(
@@ -524,7 +526,10 @@ class ProductionPlan(Document):
 		if self.item_code:
 			packed_items_query = packed_items_query.where(so_item.item_code == self.item_code)
 
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
 		packed_items = packed_items_query.run(as_dict=True)
+		for item in packed_items:
+			item.pending_qty = max(flt(item.pending_qty, precision), 0)
 
 		self.add_items(items + packed_items)
 		self.calculate_total_planned_qty()
@@ -1424,26 +1429,45 @@ def _reserved_qty_from_stock(so_item):
 
 
 def _reserved_work_order_output_qty(so_item):
-	"""Open reservations of the output of a Sales Order Item's own Work Orders."""
+	"""Open reservations of the output of a Sales Order Item's own Work Orders, or of Work Orders
+	planned for it, which production_plan_qty already counts."""
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	stock_entry = frappe.qb.DocType("Stock Entry")
 	work_order = frappe.qb.DocType("Work Order")
+	plan_item = frappe.qb.DocType("Production Plan Item")
 	work_order_output_qty = (
 		frappe.qb.from_(sre)
 		.inner_join(stock_entry)
 		.on(stock_entry.name == sre.from_voucher_no)
 		.inner_join(work_order)
 		.on(work_order.name == stock_entry.work_order)
+		.left_join(plan_item)
+		.on(plan_item.name == work_order.production_plan_item)
 		.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
 		.where(
 			(sre.docstatus == 1)
 			& (sre.voucher_type == "Sales Order")
 			& (sre.voucher_detail_no == so_item.name)
 			& (sre.from_voucher_type == "Stock Entry")
-			& (work_order.sales_order_item == so_item.name)
+			& ((work_order.sales_order_item == so_item.name) | (plan_item.sales_order_item == so_item.name))
 		)
 	)
 	return IfNull(work_order_output_qty, 0)
+
+
+def _reserved_packed_item_qty(packed_item):
+	"""Open reservations of a bundle component, which reserves against its Packed Item."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	reserved_qty = (
+		frappe.qb.from_(sre)
+		.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_detail_no == packed_item.name)
+		)
+	)
+	return IfNull(reserved_qty, 0)
 
 
 def get_mr_item_planned_qty_query(mr_item):
