@@ -1680,8 +1680,13 @@ class SubcontractingController(StockController):
 		field = self.subcontract_data.order_supplied_items_field
 		precision = frappe.get_precision(field, "consumed_qty")
 		filters = {"docstatus": 1, "parent": ("in", self.subcontract_orders)}
-		for order_row in frappe.get_all(field, filters=filters, pluck="name"):
-			frappe.db.set_value(field, order_row, "consumed_qty", flt(consumed_qty[order_row], precision))
+		updates = {}
+		for row in frappe.get_all(field, filters=filters, fields=["name", "consumed_qty"]):
+			qty = flt(consumed_qty[row.name], precision)
+			if qty != row.consumed_qty:
+				updates[row.name] = {"consumed_qty": qty}
+
+		frappe.db.bulk_update(field, updates)
 
 	def set_consumed_qty_in_subcontract_order(self):
 		# Update consumed qty back in the subcontract order
