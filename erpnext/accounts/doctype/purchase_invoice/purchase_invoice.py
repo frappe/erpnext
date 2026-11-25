@@ -251,6 +251,8 @@ class PurchaseInvoice(BuyingController):
 				"billing_flag": "update_billed_amount_in_purchase_order",
 				"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 				where name=`tabPurchase Invoice Item`.parent and (is_return=0 or update_billed_amount_in_purchase_order=1))""",
+				# billing a receipt is allowed after its order row is closed
+				"closed_check_exclude_if_field": "purchase_receipt",
 			}
 		]
 		self.closed_source_links = [

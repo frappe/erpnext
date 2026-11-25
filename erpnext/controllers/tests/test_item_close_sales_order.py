@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.controllers.item_close import update_closed_status
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
@@ -139,3 +140,22 @@ class TestSalesOrderItemClose(ERPNextTestSuite):
 
 		so.reload()
 		self.assertRaises(frappe.ValidationError, self.close_items, so, [so.items[0]])
+
+	def test_delivered_goods_of_a_closed_row_can_be_returned(self):
+		so = self.make_sales_order()
+		note = make_delivery_note(so.name)
+		note.items[0].qty = 4
+		note.insert()
+		note.submit()
+
+		so.reload()
+		self.close_items(so, [so.items[0]])
+
+		return_note = make_return_doc("Delivery Note", note.name)
+		return_note.items = [row for row in return_note.items if row.item_code == self.first_item]
+		return_note.items[0].qty = -2
+		return_note.insert()
+		return_note.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].returned_qty, 2)
