@@ -658,10 +658,61 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(first.total_additional_costs, 400)
 		self.assertEqual(second.total_additional_costs, 600)
 
+<<<<<<< HEAD
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_batch_return_uses_accepted_receipt_rate(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+=======
+	def test_draft_receipts_take_their_share_of_order_additional_costs(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.append(
+			"additional_costs",
+			{"expense_account": "Cost of Goods Sold - _TC", "description": "Handling", "amount": 500},
+		)
+		first.save()
+		second = make_subcontracting_receipt(sco.name)
+		second.items[0].qty = 6
+		second.save()
+		first.submit()
+		second.submit()
+
+		self.assertEqual([row.amount for row in first.additional_costs], [400, 500])
+		self.assertEqual([row.amount for row in second.additional_costs], [600])
+
+	def test_receipt_of_two_orders_takes_each_order_share_of_additional_costs(self):
+		first_order = make_order_with_additional_cost_and_transfer(1000)
+		second_order = make_order_with_additional_cost_and_transfer(100)
+
+		scr = make_subcontracting_receipt(first_order.name)
+		scr = get_mapped_subcontracting_receipt(second_order.name, target_doc=scr)
+		scr.items[0].qty = 5
+		scr.save()
+		scr.submit()
+		next_scr = make_subcontracting_receipt(first_order.name)
+
+		self.assertEqual([row.amount for row in scr.additional_costs], [500, 100])
+		self.assertEqual([row.amount for row in next_scr.additional_costs], [500])
+
+	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].process_loss_qty = 2
+		scr.save()
+		scr.submit()
+>>>>>>> c60d88c (test: receipt drafts and multi-order receipts take their share of order additional costs)
 
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
