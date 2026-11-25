@@ -27,6 +27,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.add_manually",
    "fieldname": "voucher_type",
    "fieldtype": "Link",
    "label": "Voucher Type",
@@ -64,6 +65,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.add_manually || !doc.__islocal || (doc.repost_vouchers && doc.repost_vouchers.length)",
    "fieldname": "repost_vouchers",
    "fieldtype": "Table",
    "label": "Selected Vouchers",
@@ -95,10 +97,15 @@
    "label": "Repost Error Log"
   }
  ],
+<<<<<<< HEAD
  "index_web_pages_for_search": 1,
+=======
+ "icon": "list-restart",
+>>>>>>> 13bae6c (fix(accounts): fix repost payment ledger form and child grid)
  "is_submittable": 1,
+ "link_display_mode": "Search",
  "links": [],
- "modified": "2024-06-03 17:31:04.472279",
+ "modified": "2026-11-25 21:27:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Payment Ledger",
@@ -156,7 +163,12 @@
    "write": 1
   }
  ],
+<<<<<<< HEAD
  "sort_field": "modified",
+=======
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+>>>>>>> 13bae6c (fix(accounts): fix repost payment ledger form and child grid)
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
