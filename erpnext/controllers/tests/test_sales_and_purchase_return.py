@@ -425,8 +425,10 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		dn = submit_one_box(create_delivery_note(item_code=item_code, do_not_submit=True))
 		self.assertRaises(frappe.ValidationError, return_in_nos(dn, -5, 2400).insert)
 		return_in_nos(dn, -5, 200).submit()
-		# what is left is 7 Nos, mapped in the delivered row's UOM
-		self.assertAlmostEqual(make_return_doc(dn.doctype, dn.name).items[0].qty, -7 / 12, places=2)
+		# what is left is 7 Nos, which a whole number Box cannot hold, so it maps in stock UOM
+		rest = make_return_doc(dn.doctype, dn.name)
+		self.assertEqual((rest.items[0].uom, rest.items[0].qty, rest.items[0].rate), ("Nos", -7, 200))
+		rest.insert()
 
 		si = submit_one_box(create_sales_invoice(item_code=item_code, do_not_submit=True))
 		return_in_nos(si, -5, 200).insert()
