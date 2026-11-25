@@ -2593,7 +2593,7 @@ class TestPricingRule(ERPNextTestSuite):
 		make_item_price(item_c, "_Test Price List", 100)
 
 		# Mixed rule on Item Group for Items A and B
-		make_item_pricing_rule(
+		pr_mixed = make_item_pricing_rule(
 			title="_Test PR Sibling Mixed Group",
 			apply_on="Item Group",
 			item_group="_Test Item Group Desktops",
@@ -2621,8 +2621,9 @@ class TestPricingRule(ERPNextTestSuite):
 			"company": "_Test Company",
 			"has_priority": 1,
 			"priority": "2",
+			"apply_multiple_pricing_rules": 1,
 		}
-		frappe.get_doc(rule_other_record).insert()
+		rule_other = frappe.get_doc(rule_other_record).insert()
 
 		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
 		si.append(
@@ -2679,14 +2680,23 @@ class TestPricingRule(ERPNextTestSuite):
 		}
 
 		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
-		# row-1 (item A) and repriced sibling row-2 (item B)
-		self.assertGreaterEqual(len(out), 2)
+		# row-1 (item A), repriced sibling row-2 (item B), and target row-3 (item C)
+		self.assertGreaterEqual(len(out), 3)
 
 		row_2_details = next(d for d in out if d.get("name") == "row-2")
+		# Verify sibling B only receives its own 5% mixed condition discount, not C's 20%
+		self.assertEqual(row_2_details.get("discount_percentage"), 5.0)
+		self.assertIn(pr_mixed.name, row_2_details.get("pricing_rules"))
+		self.assertNotIn(rule_other.name, row_2_details.get("pricing_rules") or "")
+		self.assertFalse(row_2_details.get("apply_rule_on_other_items"))
 
-		# Verify that sibling B's apply_rule_on_other_items is preserved and targets C
-		self.assertTrue(row_2_details.get("apply_rule_on_other_items"))
-		target_items = json.loads(row_2_details.get("apply_rule_on_other_items"))
+		# Verify target C receives the 20% discount separately
+		row_3_details = next(d for d in out if d.get("name") == "row-3")
+		self.assertEqual(row_3_details.get("discount_percentage"), 20.0)
+		self.assertIn(rule_other.name, row_3_details.get("pricing_rules"))
+		self.assertNotIn(pr_mixed.name, row_3_details.get("pricing_rules") or "")
+		self.assertTrue(row_3_details.get("apply_rule_on_other_items"))
+		target_items = json.loads(row_3_details.get("apply_rule_on_other_items"))
 		self.assertIn(item_c, target_items)
 		self.assertNotIn(item_b, target_items)
 

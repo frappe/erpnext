@@ -577,10 +577,9 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 
 		if row_matches:
 			sibling_args = copy.deepcopy(args)
-			if not row_dict.get("doctype"):
-				parent_dt = args.get("doctype") or (doc.get("doctype") if hasattr(doc, "get") else None)
-				if parent_dt and not parent_dt.endswith(" Item"):
-					row_dict["doctype"] = f"{parent_dt} Item"
+			parent_dt = args.get("doctype") or (doc.get("doctype") if hasattr(doc, "get") else None)
+			if not row_dict.get("doctype") and parent_dt and not parent_dt.endswith(" Item"):
+				row_dict["doctype"] = f"{parent_dt} Item"
 
 			sibling_args.update(row_dict)
 			sibling_args.setdefault("child_docname", row_name)
@@ -596,8 +595,113 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 			if sibling_data.get("applied_on_items") or sibling_data.get("apply_on"):
 				sibling_data["applied_on_items"] = ""
 				sibling_data["apply_on"] = ""
-			out.append(sibling_data)
-			priced_row_names.add(row_name)
+
+			applied_rules = get_applied_pricing_rules(sibling_data.get("pricing_rules"))
+			target_rules = [
+				r for r in applied_rules if frappe.get_cached_value("Pricing Rule", r, "apply_rule_on_other")
+			]
+
+			if target_rules:
+				# Target rules discount other items, not this sibling. Strip target rules from
+				# the sibling so Desk does not copy the sibling's combined discount onto target items
+				# or skip discounting the sibling row itself.
+				sibling_own_rules = [r for r in applied_rules if r not in target_rules]
+				sibling_data["pricing_rules"] = frappe.as_json(sibling_own_rules) if sibling_own_rules else ""
+				sibling_data["discount_percentage"] = 0.0
+				sibling_data["discount_amount"] = 0.0
+				sibling_data["apply_rule_on_other_items"] = ""
+				sibling_data["apply_rule_on"] = ""
+				if sibling_own_rules:
+					own_price_rules = [frappe.get_cached_doc("Pricing Rule", r) for r in sibling_own_rules]
+					for pr in own_price_rules:
+						if pr.rate_or_discount == "Rate":
+							apply_price_discount_rule(pr, sibling_data, sibling_args)
+					for pr in own_price_rules:
+						apply_pricing_rule_margin(pr, sibling_data, sibling_args)
+					for pr in own_price_rules:
+						if pr.rate_or_discount != "Rate":
+							apply_price_discount_rule(pr, sibling_data, sibling_args)
+				else:
+					sibling_data["has_pricing_rule"] = 0
+
+				out.append(sibling_data)
+				priced_row_names.add(row_name)
+
+				# Return target rules separately so target items receive their intended discounts
+				for target_rule_name in target_rules:
+					target_pr = frappe.get_cached_doc("Pricing Rule", target_rule_name)
+					target_apply_on = frappe.scrub(target_pr.apply_rule_on_other)
+					target_items = get_pricing_rule_items(target_pr, other_items=True) or []
+
+					matching_target_rows = []
+					if doc and doc.get("items"):
+						for d in doc.get("items"):
+							d_dict = d.as_dict() if hasattr(d, "as_dict") else dict(d)
+							if d_dict.get("is_free_item"):
+								continue
+							val = d_dict.get(target_apply_on) or frappe.get_cached_value(
+								"Item", d_dict.get("item_code"), target_apply_on
+							)
+							if val in target_items:
+								matching_target_rows.append(d_dict)
+
+					if matching_target_rows:
+						for target_row_dict in matching_target_rows:
+							target_row_name = target_row_dict.get("name") or target_row_dict.get(
+								"child_docname"
+							)
+							if target_row_name in priced_row_names:
+								continue
+							target_data = frappe._dict(
+								{
+									"doctype": target_row_dict.get("doctype")
+									or (f"{parent_dt} Item" if parent_dt else None),
+									"name": target_row_name,
+									"child_docname": target_row_name,
+									"item_code": target_row_dict.get("item_code"),
+									"price_or_product_discount": target_pr.price_or_product_discount,
+									"pricing_rule_for": target_pr.rate_or_discount,
+									"pricing_rules": frappe.as_json([target_pr.name]),
+									"apply_rule_on_other_items": json.dumps(target_items),
+									"apply_rule_on": target_apply_on,
+								}
+							)
+							if target_pr.rate_or_discount == "Discount Percentage":
+								target_data.discount_percentage = flt(target_pr.discount_percentage)
+							elif target_pr.rate_or_discount == "Discount Amount":
+								target_data.discount_amount = flt(target_pr.discount_amount)
+							elif target_pr.rate_or_discount == "Rate":
+								target_data.rate = flt(target_pr.rate)
+								target_data.price_list_rate = flt(target_pr.rate)
+
+							out.append(target_data)
+							priced_row_names.add(target_row_name)
+					else:
+						standalone_name = f"{row_name}__target__{target_pr.name}"
+						target_data = frappe._dict(
+							{
+								"doctype": args.get("doctype"),
+								"name": standalone_name,
+								"child_docname": standalone_name,
+								"price_or_product_discount": target_pr.price_or_product_discount,
+								"pricing_rule_for": target_pr.rate_or_discount,
+								"pricing_rules": frappe.as_json([target_pr.name]),
+								"apply_rule_on_other_items": json.dumps(target_items),
+								"apply_rule_on": target_apply_on,
+							}
+						)
+						if target_pr.rate_or_discount == "Discount Percentage":
+							target_data.discount_percentage = flt(target_pr.discount_percentage)
+						elif target_pr.rate_or_discount == "Discount Amount":
+							target_data.discount_amount = flt(target_pr.discount_amount)
+						elif target_pr.rate_or_discount == "Rate":
+							target_data.rate = flt(target_pr.rate)
+							target_data.price_list_rate = flt(target_pr.rate)
+
+						out.append(target_data)
+			else:
+				out.append(sibling_data)
+				priced_row_names.add(row_name)
 
 
 def update_pricing_rule_uom(pricing_rule, args):
