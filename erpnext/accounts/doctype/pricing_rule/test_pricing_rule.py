@@ -2276,6 +2276,75 @@ class TestPricingRule(ERPNextTestSuite):
 
 		self.assertEqual(get_qty_and_rate_for_mixed_conditions(doc, rule, args)[:2], (11, 600))
 
+	def test_mixed_conditions_does_not_set_apply_rule_on_other_items(self):
+		item_a = make_item(
+			"PR Mixed Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		item_b = make_item(
+			"PR Mixed Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_price(item_a, "_Test Price List", 100)
+		make_item_price(item_b, "_Test Price List", 100)
+
+		# Rule 1: Item Group mixed conditions rule
+		pr1 = make_item_pricing_rule(
+			title="_Test PR Mixed Group",
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			apply_multiple_pricing_rules=1,
+			min_amt=200,
+			discount_percentage=5,
+			has_priority=1,
+			priority="1",
+		)
+		# Rule 2: Item A specific rule
+		pr2 = make_item_pricing_rule(
+			title="_Test PR Item A Only",
+			apply_on="Item Code",
+			item_code=item_a,
+			apply_multiple_pricing_rules=1,
+			min_qty=2,
+			discount_percentage=10,
+			has_priority=1,
+			priority="2",
+		)
+
+		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
+		si.append(
+			"items",
+			{
+				"item_code": item_b,
+				"item_name": item_b,
+				"stock_uom": "_Test UOM",
+				"uom": "_Test UOM",
+				"cost_center": si.items[0].cost_center,
+				"expense_account": si.items[0].expense_account,
+				"warehouse": si.items[0].warehouse,
+				"conversion_factor": 1,
+				"qty": 1,
+				"price_list_rate": 100,
+			},
+		)
+		si.items[0].name = "row-1"
+		si.items[1].name = "row-2"
+		si.items[0].stock_qty = 2
+		si.items[1].stock_qty = 1
+		si.selling_price_list = "_Test Price List"
+
+		details_a = get_pricing_details_for_row(si, si.items[0])
+		details_b = get_pricing_details_for_row(si, si.items[1])
+
+		# Row A has both rules (5% + 10%)
+		self.assertEqual(details_a.discount_percentage, 15)
+		self.assertIsNone(details_a.get("apply_rule_on_other_items"))
+
+		# Row B has only Rule 1 (5%), not Row A's multiple rules
+		self.assertEqual(details_b.discount_percentage, 5)
+		self.assertIsNone(details_b.get("apply_rule_on_other_items"))
+		self.assertIn(pr1.name, details_b.pricing_rules)
+		self.assertNotIn(pr2.name, details_b.pricing_rules)
+
 	def test_recursive_product_rule_on_transaction_is_not_allowed(self):
 		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
 		rule = frappe.get_doc(
