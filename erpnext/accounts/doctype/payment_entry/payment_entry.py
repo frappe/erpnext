@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, Tuple
 from frappe.query_builder.functions import Abs, Count, Max
-from frappe.utils import cint, comma_or, flt, formatdate, getdate, nowdate
+from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
 from pypika.functions import Coalesce, Sum
 
@@ -41,6 +41,7 @@ from erpnext.accounts.party import (
 	complete_contact_details,
 	get_default_contact,
 	get_party_account,
+	get_party_account_currency,
 	validate_party_company,
 )
 from erpnext.accounts.utils import (
@@ -175,6 +176,16 @@ class PaymentEntry(AccountsController):
 			self.party_account_field = "paid_to"
 			self.party_account = self.paid_to
 			self.party_account_currency = self.paid_to_account_currency
+
+	@property
+	def total_outstanding_amount(self):
+		return sum(flt(row.outstanding_amount) for row in self.get("references"))
+
+	@property
+	def mode_of_payment_type(self):
+		return self.mode_of_payment and frappe.get_cached_value(
+			"Mode of Payment", self.mode_of_payment, "type"
+		)
 
 	def validate(self):
 		validate_enabled_mode_of_payment(self.mode_of_payment)
@@ -1452,6 +1463,8 @@ class PaymentEntry(AccountsController):
 		allocated_rows = self.get("references", {"allocated_amount": ["not in", [0, None, ""]]})
 		self.flags.removed_unallocated_references = len(self.get("references")) - len(allocated_rows)
 		self.set("references", allocated_rows)
+		for idx, row in enumerate(self.references, start=1):
+			row.idx = idx
 		# A new document has no rows yet; the delete would only take gap locks that deadlock concurrent inserts.
 		if not self.is_new():
 			frappe.db.delete("Payment Entry Reference", {"parent": self.name, "allocated_amount": 0})
@@ -2392,6 +2405,7 @@ def _get_outstanding_reference_documents(args, validate=False):
 			max_outstanding=args.get("outstanding_amt_less_than"),
 			accounting_dimensions=accounting_dimensions_filter,
 			vouchers=args.get("vouchers") or None,
+			limit=cint(args.get("limit")) or None,
 		)
 
 		outstanding_invoices = split_refdocs_based_on_payment_terms(outstanding_invoices, args.get("company"))
@@ -2449,19 +2463,33 @@ def _get_outstanding_reference_documents(args, validate=False):
 			ref_document_type = "orders"
 
 		if not validate:
-			party_type = _(args.get("party_type")).lower()
 			party = frappe.bold(args.get("party"))
-			if ref_document_type == "invoices" and args.get("from_posting_date"):
-				message = _(
-					"The {0} {1} has no outstanding invoices posted on or after {2}. Clear the From Date under Posting Date to include older invoices."
-				).format(party_type, party, formatdate(args.get("from_posting_date")))
+			if has_reference_filters(args):
+				message = _("No outstanding {0} found for {1} with these filters.").format(
+					_(ref_document_type), party
+				)
 			else:
-				message = _(
-					"No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
-				).format(_(ref_document_type), party_type, party)
+				message = _("{0} has no outstanding {1}.").format(party, _(ref_document_type))
 			frappe.msgprint(message)
 
 	return data
+
+
+def has_reference_filters(args) -> bool:
+	filter_fields = [
+		"from_posting_date",
+		"from_due_date",
+		"to_due_date",
+		"outstanding_amt_greater_than",
+		"outstanding_amt_less_than",
+		"cost_center",
+		*(dimension.fieldname for dimension in get_dimensions()[0]),
+	]
+	if any(args.get(fieldname) for fieldname in filter_fields):
+		return True
+
+	to_date = args.get("to_posting_date")
+	return bool(to_date and getdate(to_date) < getdate(args.get("posting_date") or nowdate()))
 
 
 def split_refdocs_based_on_payment_terms(refdocs, company) -> list:
@@ -2726,12 +2754,9 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 	_party_name = frappe.get_meta(party_type).get_title_field()
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 
-	party_balance = None
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
 		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
-		if frappe.has_permission(party_type, "read", party):
-			party_balance = get_balance_on(date=date, party_type=party_type, party=party, company=company)
 
 	return {
 		"party_account": party_account,
@@ -2739,7 +2764,17 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 		"party_account_currency": account_currency,
 		"party_bank_account": party_bank_account,
 		"bank_account": bank_account,
-		"party_balance": party_balance,
+	}
+
+
+@frappe.whitelist()
+def get_party_balance(company: str, party_type: str, party: str, date: str) -> dict | None:
+	if party_type not in ("Customer", "Supplier") or not frappe.has_permission(party_type, "read", party):
+		return None
+
+	return {
+		"balance": get_balance_on(date=date, party_type=party_type, party=party, company=company),
+		"currency": get_party_account_currency(party_type, party, company),
 	}
 
 
