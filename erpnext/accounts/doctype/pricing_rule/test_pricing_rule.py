@@ -2276,137 +2276,71 @@ class TestPricingRule(ERPNextTestSuite):
 
 		self.assertEqual(get_qty_and_rate_for_mixed_conditions(doc, rule, args)[:2], (11, 600))
 
-	def test_mixed_conditions_does_not_set_apply_rule_on_other_items(self):
-		item_a = make_item(
-			"PR Mixed Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_b = make_item(
-			"PR Mixed Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		make_item_price(item_a, "_Test Price List", 100)
-		make_item_price(item_b, "_Test Price List", 100)
+	def _make_priced_items(self, *names, item_group="_Test Item Group Desktops", uom=None):
+		if uom and not frappe.db.exists("UOM", uom):
+			frappe.get_doc({"doctype": "UOM", "uom_name": uom}).insert()
+		items = []
+		for name in names:
+			doc = make_item(name, {"is_stock_item": 0, "item_group": item_group})
+			if uom:
+				doc.append("uoms", {"uom": uom, "conversion_factor": 10})
+				doc.save()
+			make_item_price(doc.name, "_Test Price List", 100)
+			items.append(doc.name)
+		return items
 
-		# Rule 1: Item Group mixed conditions rule
-		pr1 = make_item_pricing_rule(
-			title="_Test PR Mixed Group",
+	def _make_mixed_group_rule(self, **fields):
+		return make_item_pricing_rule(
 			apply_on="Item Group",
 			item_group="_Test Item Group Desktops",
 			mixed_conditions=1,
 			apply_multiple_pricing_rules=1,
-			min_amt=200,
 			discount_percentage=5,
 			has_priority=1,
 			priority="1",
-		)
-		# Rule 2: Item A specific rule
-		pr2 = make_item_pricing_rule(
-			title="_Test PR Item A Only",
-			apply_on="Item Code",
-			item_code=item_a,
-			apply_multiple_pricing_rules=1,
-			min_qty=2,
-			discount_percentage=10,
-			has_priority=1,
-			priority="2",
+			**fields,
 		)
 
-		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
-		si.append(
-			"items",
-			{
-				"item_code": item_b,
-				"item_name": item_b,
-				"stock_uom": "_Test UOM",
-				"uom": "_Test UOM",
-				"cost_center": si.items[0].cost_center,
-				"expense_account": si.items[0].expense_account,
-				"warehouse": si.items[0].warehouse,
-				"conversion_factor": 1,
-				"qty": 1,
-				"price_list_rate": 100,
-			},
-		)
+	def _make_mixed_rule_sales_invoice(self, rows):
+		first = rows[0]
+		si = create_sales_invoice(item_code=first["item_code"], qty=first.get("qty", 1), do_not_save=True)
+		template = si.items[0]
+		si.items[0].update({"price_list_rate": first.get("price_list_rate", 100), **first})
+		si.items[0].stock_qty = si.items[0].qty * (si.items[0].conversion_factor or 1)
 		si.items[0].name = "row-1"
-		si.items[1].name = "row-2"
-		si.items[0].stock_qty = 2
-		si.items[1].stock_qty = 1
+
+		for idx, spec in enumerate(rows[1:], 2):
+			qty = spec.get("qty", 1)
+			cf = spec.get("conversion_factor", 1)
+			row = si.append(
+				"items",
+				{
+					"stock_uom": "_Test UOM",
+					"uom": "_Test UOM",
+					"cost_center": template.cost_center,
+					"expense_account": template.expense_account,
+					"warehouse": template.warehouse,
+					"conversion_factor": cf,
+					"qty": qty,
+					"stock_qty": qty * cf,
+					"price_list_rate": 100,
+					**spec,
+					"item_name": spec["item_code"],
+				},
+			)
+			row.name = f"row-{idx}"
+
 		si.selling_price_list = "_Test Price List"
+		return si
 
-		details_a = get_pricing_details_for_row(si, si.items[0])
-		details_b = get_pricing_details_for_row(si, si.items[1])
-
-		# Row A has both rules (5% + 10%)
-		self.assertEqual(details_a.discount_percentage, 15)
-		self.assertIsNone(details_a.get("apply_rule_on_other_items"))
-
-		# Row B has only Rule 1 (5%), not Row A's multiple rules
-		self.assertEqual(details_b.discount_percentage, 5)
-		self.assertIsNone(details_b.get("apply_rule_on_other_items"))
-		self.assertIn(pr1.name, details_b.pricing_rules)
-		self.assertNotIn(pr2.name, details_b.pricing_rules)
-
-	def test_mixed_conditions_reprices_sibling_rows_independently(self):
+	def _apply_pricing_rule_for_row(self, si, row_idx=0):
 		import copy
 
 		from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
 
-		item_a = make_item(
-			"PR Sibling Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_b = make_item(
-			"PR Sibling Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		make_item_price(item_a, "_Test Price List", 100)
-		make_item_price(item_b, "_Test Price List", 100)
-
-		# Mixed conditions rule: min combined qty = 3, 5% discount
-		pr_mixed = make_item_pricing_rule(
-			title="_Test PR Sibling Mixed",
-			apply_on="Item Group",
-			item_group="_Test Item Group Desktops",
-			mixed_conditions=1,
-			apply_multiple_pricing_rules=1,
-			min_qty=3,
-			discount_percentage=5,
-			has_priority=1,
-			priority="1",
-		)
-		# Item A specific rule: min qty = 2, 10% discount
-		pr_item_a = make_item_pricing_rule(
-			title="_Test PR Sibling A Only",
-			apply_on="Item Code",
-			item_code=item_a,
-			apply_multiple_pricing_rules=1,
-			min_qty=2,
-			discount_percentage=10,
-			has_priority=1,
-			priority="2",
-		)
-
-		si = create_sales_invoice(item_code=item_a, qty=1, do_not_save=True)
-		si.append(
-			"items",
-			{
-				"item_code": item_b,
-				"item_name": item_b,
-				"stock_uom": "_Test UOM",
-				"uom": "_Test UOM",
-				"cost_center": si.items[0].cost_center,
-				"expense_account": si.items[0].expense_account,
-				"warehouse": si.items[0].warehouse,
-				"conversion_factor": 1,
-				"qty": 1,
-				"stock_qty": 1,
-				"price_list_rate": 100,
-			},
-		)
-		si.items[0].name = "row-1"
-		si.items[1].name = "row-2"
-		si.items[0].stock_qty = 1
-		si.selling_price_list = "_Test Price List"
-
+		row = si.items[row_idx]
 		args = {
-			"items": [si.items[0].as_dict()],
+			"items": [{**row.as_dict(), "child_docname": row.name}],
 			"customer": si.customer,
 			"customer_group": si.customer_group,
 			"company": si.company,
@@ -2419,88 +2353,80 @@ class TestPricingRule(ERPNextTestSuite):
 			"doctype": si.doctype,
 			"name": si.name,
 		}
+		return apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
 
-		# Initially both rows at qty 1 (total qty 2 < 3) -> mixed rule does not qualify
-		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
+	def test_mixed_conditions_does_not_set_apply_rule_on_other_items(self):
+		item_a, item_b = self._make_priced_items("PR Mixed Item A", "PR Mixed Item B")
+		pr1 = self._make_mixed_group_rule(min_amt=200)
+		pr2 = make_item_pricing_rule(
+			item_a,
+			apply_multiple_pricing_rules=1,
+			min_qty=2,
+			discount_percentage=10,
+			has_priority=1,
+			priority="2",
+		)
+
+		si = self._make_mixed_rule_sales_invoice(
+			[{"item_code": item_a, "qty": 2}, {"item_code": item_b, "qty": 1}]
+		)
+		details_a = get_pricing_details_for_row(si, si.items[0])
+		details_b = get_pricing_details_for_row(si, si.items[1])
+
+		self.assertEqual(details_a.discount_percentage, 15)
+		self.assertIsNone(details_a.get("apply_rule_on_other_items"))
+		self.assertEqual(details_b.discount_percentage, 5)
+		self.assertIsNone(details_b.get("apply_rule_on_other_items"))
+		self.assertIn(pr1.name, details_b.pricing_rules)
+		self.assertNotIn(pr2.name, details_b.pricing_rules)
+
+	def test_mixed_conditions_reprices_sibling_rows_independently(self):
+		item_a, item_b = self._make_priced_items("PR Sibling Item A", "PR Sibling Item B")
+		pr_mixed = self._make_mixed_group_rule(min_qty=3)
+		pr_item_a = make_item_pricing_rule(
+			item_a,
+			apply_multiple_pricing_rules=1,
+			min_qty=2,
+			discount_percentage=10,
+			has_priority=1,
+			priority="2",
+		)
+
+		si = self._make_mixed_rule_sales_invoice(
+			[{"item_code": item_a, "qty": 1}, {"item_code": item_b, "qty": 1}]
+		)
+
+		out = self._apply_pricing_rule_for_row(si)
 		self.assertEqual(len(out), 1)
 		self.assertFalse(out[0].get("discount_percentage"))
 		self.assertFalse(out[0].get("pricing_rules"))
 
-		# Increase row-1 qty to 2: total qty is now 3 >= 3 -> mixed rule qualifies for both rows
-		si.items[0].qty = 2
-		si.items[0].stock_qty = 2
-		args["items"] = [si.items[0].as_dict()]
-
-		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
-		# apply_pricing_rule must return both the edited row and the matching sibling row
+		si.items[0].qty = si.items[0].stock_qty = 2
+		out = self._apply_pricing_rule_for_row(si)
 		self.assertEqual(len(out), 2)
+		self.assertEqual((out[0].name, out[1].name), ("row-1", "row-2"))
+		self.assertEqual(out[0].discount_percentage, 15)
+		self.assertIn(pr_mixed.name, out[0].pricing_rules)
+		self.assertIn(pr_item_a.name, out[0].pricing_rules)
+		self.assertEqual(out[1].discount_percentage, 5)
+		self.assertIn(pr_mixed.name, out[1].pricing_rules)
+		self.assertNotIn(pr_item_a.name, out[1].pricing_rules)
 
-		row_1_details = out[0]
-		row_2_details = out[1]
-		self.assertEqual(row_1_details.name, "row-1")
-		self.assertEqual(row_2_details.name, "row-2")
-
-		# Row 1 has both rules (mixed 5% + item-specific 10%)
-		self.assertEqual(row_1_details.discount_percentage, 15)
-		self.assertIn(pr_mixed.name, row_1_details.pricing_rules)
-		self.assertIn(pr_item_a.name, row_1_details.pricing_rules)
-
-		# Row 2 receives the mixed discount independently without inheriting Row 1's specific rule
-		self.assertEqual(row_2_details.discount_percentage, 5)
-		self.assertIn(pr_mixed.name, row_2_details.pricing_rules)
-		self.assertNotIn(pr_item_a.name, row_2_details.pricing_rules)
-
-		# Decrease row-1 qty back to 1: total qty is now 2 < 3 -> mixed rule disqualifies for both
-		# Simulate client state where row-2 currently has pr_mixed applied
-		si.items[0].qty = 1
-		si.items[0].stock_qty = 1
+		si.items[0].qty = si.items[0].stock_qty = 1
 		si.items[0].pricing_rules = f"{pr_mixed.name},{pr_item_a.name}"
 		si.items[1].pricing_rules = pr_mixed.name
-		args["items"] = [si.items[0].as_dict()]
-
-		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
+		out = self._apply_pricing_rule_for_row(si)
 		self.assertEqual(len(out), 2)
-		self.assertEqual(out[0].name, "row-1")
-		self.assertEqual(out[1].name, "row-2")
-		# Both rows have mixed rule removed and discounts reset
-		self.assertEqual(out[0].discount_percentage, 0)
-		self.assertEqual(out[0].pricing_rules, "")
-		self.assertEqual(out[1].discount_percentage, 0)
-		self.assertEqual(out[1].pricing_rules, "")
+		self.assertEqual((out[0].discount_percentage, out[0].pricing_rules), (0, ""))
+		self.assertEqual((out[1].discount_percentage, out[1].pricing_rules), (0, ""))
 		self.assertFalse(out[1].get("applied_on_items"))
 		self.assertFalse(out[1].get("apply_on"))
 
 	def test_mixed_conditions_sibling_cleanup_does_not_clear_other_discounts(self):
-		import copy
-
-		from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
-
-		item_a = make_item(
-			"PR Cleanup Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_b = make_item(
-			"PR Cleanup Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		make_item_price(item_a, "_Test Price List", 100)
-		make_item_price(item_b, "_Test Price List", 100)
-
-		# Mixed rule: min qty 3, 5% discount
-		pr_mixed = make_item_pricing_rule(
-			title="_Test PR Cleanup Mixed",
-			apply_on="Item Group",
-			item_group="_Test Item Group Desktops",
-			mixed_conditions=1,
-			apply_multiple_pricing_rules=1,
-			min_qty=3,
-			discount_percentage=5,
-			has_priority=1,
-			priority="1",
-		)
-		# Item A specific rule: min qty 1, 10% discount
+		item_a, item_b = self._make_priced_items("PR Cleanup Item A", "PR Cleanup Item B")
+		pr_mixed = self._make_mixed_group_rule(min_qty=3)
 		pr_item_a = make_item_pricing_rule(
-			title="_Test PR Cleanup A Only",
-			apply_on="Item Code",
-			item_code=item_a,
+			item_a,
 			apply_multiple_pricing_rules=1,
 			min_qty=1,
 			discount_percentage=10,
@@ -2508,185 +2434,60 @@ class TestPricingRule(ERPNextTestSuite):
 			priority="2",
 		)
 
-		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
-		si.append(
-			"items",
-			{
-				"item_code": item_b,
-				"item_name": item_b,
-				"stock_uom": "_Test UOM",
-				"uom": "_Test UOM",
-				"cost_center": si.items[0].cost_center,
-				"expense_account": si.items[0].expense_account,
-				"warehouse": si.items[0].warehouse,
-				"conversion_factor": 1,
-				"qty": 1,
-				"stock_qty": 1,
-				"price_list_rate": 100,
-			},
+		si = self._make_mixed_rule_sales_invoice(
+			[
+				{"item_code": item_a, "qty": 1, "pricing_rules": f"{pr_mixed.name},{pr_item_a.name}"},
+				{"item_code": item_b, "qty": 1, "pricing_rules": pr_mixed.name},
+			]
 		)
-		si.items[0].name = "row-1"
-		si.items[1].name = "row-2"
-		si.items[0].stock_qty = 2
-		si.selling_price_list = "_Test Price List"
-
-		# Both rules active on Row 1 (15%), mixed rule active on Row 2 (5%)
-		si.items[0].pricing_rules = f"{pr_mixed.name},{pr_item_a.name}"
-		si.items[1].pricing_rules = pr_mixed.name
-
-		# Decrease Row 1 qty to 1: total qty becomes 2 < 3 -> mixed rule removed, but Row 1 keeps pr_item_a
-		si.items[0].qty = 1
-		si.items[0].stock_qty = 1
-
-		args = {
-			"items": [si.items[0].as_dict()],
-			"customer": si.customer,
-			"customer_group": si.customer_group,
-			"company": si.company,
-			"currency": si.currency,
-			"conversion_rate": si.conversion_rate,
-			"price_list": si.selling_price_list,
-			"plc_conversion_rate": si.plc_conversion_rate,
-			"price_list_currency": si.price_list_currency,
-			"transaction_date": si.posting_date,
-			"doctype": si.doctype,
-			"name": si.name,
-		}
-
-		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
+		out = self._apply_pricing_rule_for_row(si)
 		self.assertEqual(len(out), 2)
-
-		row_1_details = out[0]
-		row_2_details = out[1]
-
-		# Row 1 keeps its item-specific discount
-		self.assertEqual(row_1_details.discount_percentage, 10)
-		self.assertIn(pr_item_a.name, row_1_details.pricing_rules)
-		self.assertNotIn(pr_mixed.name, row_1_details.pricing_rules)
-
-		# Sibling Row 2 loses the mixed rule
-		self.assertEqual(row_2_details.discount_percentage, 0)
-		self.assertEqual(row_2_details.pricing_rules, "")
-
-		# Sibling Row 2 must have row-only cleanup (no applied_on_items / apply_on)
-		# so Desk does not clear Row 1's discount
-		self.assertFalse(row_2_details.get("applied_on_items"))
-		self.assertFalse(row_2_details.get("apply_on"))
+		self.assertEqual(out[0].discount_percentage, 10)
+		self.assertIn(pr_item_a.name, out[0].pricing_rules)
+		self.assertNotIn(pr_mixed.name, out[0].pricing_rules)
+		self.assertEqual((out[1].discount_percentage, out[1].pricing_rules), (0, ""))
+		self.assertFalse(out[1].get("applied_on_items"))
+		self.assertFalse(out[1].get("apply_on"))
 
 	def test_mixed_conditions_preserves_apply_rule_on_other_for_siblings(self):
-		import copy
-
-		from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
-
-		item_a = make_item(
-			"PR Trigger Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_b = make_item(
-			"PR Trigger Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_c_same_group = make_item(
-			"PR Target Item C Same", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_d_other_group = make_item(
-			"PR Target Item D Other", {"is_stock_item": 0, "item_group": "All Item Groups"}
-		).name
-		for it in [item_a, item_b, item_c_same_group, item_d_other_group]:
-			make_item_price(it, "_Test Price List", 100)
-
-		# Mixed rule on Item Group Desktops (5% when total Desktops qty >= 3)
-		pr_mixed = make_item_pricing_rule(
-			title="_Test PR Sibling Mixed Group",
-			apply_on="Item Group",
-			item_group="_Test Item Group Desktops",
-			mixed_conditions=1,
-			apply_multiple_pricing_rules=1,
-			min_qty=3,
-			discount_percentage=5,
-			has_priority=1,
-			priority="1",
+		item_a, item_b, item_c_same_group = self._make_priced_items(
+			"PR Trigger Item A", "PR Trigger Item B", "PR Target Item C Same"
 		)
-		# Triggered on B -> 20% on C (same group as mixed rule)
-		rule_other_c = frappe.get_doc(
-			{
-				"doctype": "Pricing Rule",
-				"title": "_Test PR Buy B Discount C",
-				"apply_on": "Item Code",
-				"apply_rule_on_other": "Item Code",
-				"price_or_product_discount": "Price",
-				"rate_or_discount": "Discount Percentage",
-				"other_item_code": item_c_same_group,
-				"items": [{"item_code": item_b}],
-				"selling": 1,
-				"currency": "INR",
-				"min_qty": 1,
-				"discount_percentage": 20,
-				"company": "_Test Company",
-				"has_priority": 1,
-				"priority": "2",
-				"apply_multiple_pricing_rules": 1,
-			}
-		).insert()
-		# Triggered on B -> 20% on D (different group from mixed rule)
-		rule_other_d = frappe.get_doc(
-			{
-				"doctype": "Pricing Rule",
-				"title": "_Test PR Buy B Discount D",
-				"apply_on": "Item Code",
-				"apply_rule_on_other": "Item Code",
-				"price_or_discount": "Price",
-				"rate_or_discount": "Discount Percentage",
-				"other_item_code": item_d_other_group,
-				"items": [{"item_code": item_b}],
-				"selling": 1,
-				"currency": "INR",
-				"min_qty": 1,
-				"discount_percentage": 20,
-				"company": "_Test Company",
-				"has_priority": 1,
-				"priority": "3",
-				"apply_multiple_pricing_rules": 1,
-			}
-		).insert()
+		(item_d_other_group,) = self._make_priced_items(
+			"PR Target Item D Other", item_group="All Item Groups"
+		)
 
-		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
-		for it in [item_b, item_c_same_group, item_d_other_group]:
-			si.append(
-				"items",
-				{
-					"item_code": it,
-					"item_name": it,
-					"stock_uom": "_Test UOM",
-					"uom": "_Test UOM",
-					"cost_center": si.items[0].cost_center,
-					"expense_account": si.items[0].expense_account,
-					"warehouse": si.items[0].warehouse,
-					"conversion_factor": 1,
-					"qty": 1,
-					"stock_qty": 1,
-					"price_list_rate": 100,
-				},
-			)
-		for i, row in enumerate(si.items, 1):
-			row.name = f"row-{i}"
-		si.items[0].stock_qty = 2
-		si.selling_price_list = "_Test Price List"
+		pr_mixed = self._make_mixed_group_rule(min_qty=3)
+		rule_other_c = make_item_pricing_rule(
+			item_b,
+			apply_rule_on_other="Item Code",
+			other_item_code=item_c_same_group,
+			min_qty=1,
+			discount_percentage=20,
+			has_priority=1,
+			priority="2",
+			apply_multiple_pricing_rules=1,
+		)
+		rule_other_d = make_item_pricing_rule(
+			item_b,
+			apply_rule_on_other="Item Code",
+			other_item_code=item_d_other_group,
+			min_qty=1,
+			discount_percentage=20,
+			has_priority=1,
+			priority="3",
+			apply_multiple_pricing_rules=1,
+		)
 
-		args = {
-			"items": [si.items[0].as_dict()],
-			"customer": si.customer,
-			"customer_group": si.customer_group,
-			"company": si.company,
-			"currency": si.currency,
-			"conversion_rate": si.conversion_rate,
-			"price_list": si.selling_price_list,
-			"plc_conversion_rate": si.plc_conversion_rate,
-			"price_list_currency": si.price_list_currency,
-			"transaction_date": si.posting_date,
-			"doctype": si.doctype,
-			"name": si.name,
-		}
-
-		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
+		si = self._make_mixed_rule_sales_invoice(
+			[
+				{"item_code": item_a, "qty": 2},
+				{"item_code": item_b},
+				{"item_code": item_c_same_group},
+				{"item_code": item_d_other_group},
+			]
+		)
+		out = self._apply_pricing_rule_for_row(si)
 		self.assertGreaterEqual(len(out), 4)
 
 		# Sibling B only gets its own 5% mixed rule, without target rule discount or forwarding
@@ -2712,196 +2513,65 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertFalse(row_4.get("apply_rule_on_other_items"))
 
 	def test_mixed_conditions_sibling_and_target_respect_margin_uom_and_validate_rule(self):
-		import copy
+		(item_a,) = self._make_priced_items("PR Edge Item A")
+		(item_b,) = self._make_priced_items("PR Edge Item B", uom="Box")
+		(item_c,) = self._make_priced_items("PR Edge Item C", item_group="All Item Groups", uom="Box")
+		(item_d,) = self._make_priced_items("PR Edge Item D", item_group="All Item Groups")
 
-		from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
-
-		if not frappe.db.exists("UOM", "Box"):
-			frappe.get_doc({"doctype": "UOM", "uom_name": "Box"}).insert()
-
-		item_a = make_item(
-			"PR Edge Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_b = make_item(
-			"PR Edge Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
-		).name
-		item_c = make_item("PR Edge Item C", {"is_stock_item": 0, "item_group": "All Item Groups"}).name
-		item_d = make_item("PR Edge Item D", {"is_stock_item": 0, "item_group": "All Item Groups"}).name
-
-		for it in [item_b, item_c]:
-			item_doc = frappe.get_doc("Item", it)
-			item_doc.append("uoms", {"uom": "Box", "conversion_factor": 10})
-			item_doc.save()
-
-		for it in [item_a, item_b, item_c, item_d]:
-			make_item_price(it, "_Test Price List", 100)
-
-		pr_mixed = make_item_pricing_rule(
-			title="_Test PR Edge Mixed",
-			apply_on="Item Group",
-			item_group="_Test Item Group Desktops",
-			mixed_conditions=1,
-			apply_multiple_pricing_rules=1,
-			min_qty=3,
-			discount_percentage=5,
+		pr_mixed = self._make_mixed_group_rule(min_qty=3)
+		pr_b_own = make_item_pricing_rule(
+			item_b,
+			rate_or_discount="Rate",
+			rate=500,
+			margin_type="Percentage",
+			margin_rate_or_amount=10,
+			uom="Box",
+			min_qty=1,
 			has_priority=1,
-			priority="1",
+			priority="2",
+			apply_multiple_pricing_rules=1,
 		)
-		# Sibling B has own Rate rule in Box UOM + 10% Margin
-		pr_b_own = frappe.get_doc(
-			{
-				"doctype": "Pricing Rule",
-				"title": "_Test PR Edge B Own Box Rate And Margin",
-				"apply_on": "Item Code",
-				"price_or_product_discount": "Price",
-				"rate_or_discount": "Rate",
-				"rate": 500,
-				"margin_type": "Percentage",
-				"margin_rate_or_amount": 10,
-				"items": [{"item_code": item_b, "uom": "Box"}],
-				"selling": 1,
-				"currency": "INR",
-				"min_qty": 1,
-				"company": "_Test Company",
-				"has_priority": 1,
-				"priority": "2",
-				"apply_multiple_pricing_rules": 1,
-			}
-		).insert()
-		# Sibling B also has validate_applied_rule=1 own discount (must NOT apply 30% automatically)
-		pr_b_validate = frappe.get_doc(
-			{
-				"doctype": "Pricing Rule",
-				"title": "_Test PR Edge B Own Validate Rule",
-				"apply_on": "Item Code",
-				"price_or_product_discount": "Price",
-				"rate_or_discount": "Discount Percentage",
-				"discount_percentage": 30,
-				"validate_applied_rule": 1,
-				"items": [{"item_code": item_b}],
-				"selling": 1,
-				"currency": "INR",
-				"min_qty": 1,
-				"company": "_Test Company",
-				"has_priority": 1,
-				"priority": "2",
-				"apply_multiple_pricing_rules": 1,
-			}
-		).insert()
-		# Sibling B also triggers stock-unit Rate rule on Target C (sold in Box UOM -> 50 * 10 = 500)
-		pr_c_rate = frappe.get_doc(
-			{
-				"doctype": "Pricing Rule",
-				"title": "_Test PR Edge B To C Rate",
-				"apply_on": "Item Code",
-				"apply_rule_on_other": "Item Code",
-				"price_or_product_discount": "Price",
-				"rate_or_discount": "Rate",
-				"rate": 50,
-				"other_item_code": item_c,
-				"items": [{"item_code": item_b}],
-				"selling": 1,
-				"currency": "INR",
-				"min_qty": 1,
-				"company": "_Test Company",
-				"has_priority": 1,
-				"priority": "3",
-				"apply_multiple_pricing_rules": 1,
-			}
-		).insert()
-		# Sibling B also triggers validate_applied_rule on Target D (must not auto-overwrite manual discount)
-		pr_d_validate = frappe.get_doc(
-			{
-				"doctype": "Pricing Rule",
-				"title": "_Test PR Edge B To D Validate",
-				"apply_on": "Item Code",
-				"apply_rule_on_other": "Item Code",
-				"price_or_product_discount": "Price",
-				"rate_or_discount": "Discount Percentage",
-				"discount_percentage": 25,
-				"validate_applied_rule": 1,
-				"other_item_code": item_d,
-				"items": [{"item_code": item_b}],
-				"selling": 1,
-				"currency": "INR",
-				"min_qty": 1,
-				"company": "_Test Company",
-				"has_priority": 1,
-				"priority": "4",
-				"apply_multiple_pricing_rules": 1,
-			}
-		).insert()
+		pr_b_validate = make_item_pricing_rule(
+			item_b,
+			discount_percentage=30,
+			validate_applied_rule=1,
+			min_qty=1,
+			has_priority=1,
+			priority="2",
+			apply_multiple_pricing_rules=1,
+		)
+		pr_c_rate = make_item_pricing_rule(
+			item_b,
+			apply_rule_on_other="Item Code",
+			rate_or_discount="Rate",
+			rate=50,
+			other_item_code=item_c,
+			min_qty=1,
+			has_priority=1,
+			priority="3",
+			apply_multiple_pricing_rules=1,
+		)
+		pr_d_validate = make_item_pricing_rule(
+			item_b,
+			apply_rule_on_other="Item Code",
+			discount_percentage=25,
+			validate_applied_rule=1,
+			other_item_code=item_d,
+			min_qty=1,
+			has_priority=1,
+			priority="4",
+			apply_multiple_pricing_rules=1,
+		)
 
-		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
-		si.append(
-			"items",
-			{
-				"item_code": item_b,
-				"item_name": item_b,
-				"stock_uom": "_Test UOM",
-				"uom": "Box",
-				"cost_center": si.items[0].cost_center,
-				"expense_account": si.items[0].expense_account,
-				"warehouse": si.items[0].warehouse,
-				"conversion_factor": 10,
-				"qty": 1,
-				"stock_qty": 10,
-				"price_list_rate": 1000,
-			},
+		si = self._make_mixed_rule_sales_invoice(
+			[
+				{"item_code": item_a, "qty": 2},
+				{"item_code": item_b, "uom": "Box", "conversion_factor": 10, "price_list_rate": 1000},
+				{"item_code": item_c, "uom": "Box", "conversion_factor": 10, "price_list_rate": 1000},
+				{"item_code": item_d},
+			]
 		)
-		si.append(
-			"items",
-			{
-				"item_code": item_c,
-				"item_name": item_c,
-				"stock_uom": "_Test UOM",
-				"uom": "Box",
-				"cost_center": si.items[0].cost_center,
-				"expense_account": si.items[0].expense_account,
-				"warehouse": si.items[0].warehouse,
-				"conversion_factor": 10,
-				"qty": 1,
-				"stock_qty": 10,
-				"price_list_rate": 1000,
-			},
-		)
-		si.append(
-			"items",
-			{
-				"item_code": item_d,
-				"item_name": item_d,
-				"stock_uom": "_Test UOM",
-				"uom": "_Test UOM",
-				"cost_center": si.items[0].cost_center,
-				"expense_account": si.items[0].expense_account,
-				"warehouse": si.items[0].warehouse,
-				"conversion_factor": 1,
-				"qty": 1,
-				"stock_qty": 1,
-				"price_list_rate": 100,
-			},
-		)
-		for i, row in enumerate(si.items, 1):
-			row.name = f"row-{i}"
-		si.items[0].stock_qty = 2
-		si.selling_price_list = "_Test Price List"
-
-		args = {
-			"items": [si.items[0].as_dict()],
-			"customer": si.customer,
-			"customer_group": si.customer_group,
-			"company": si.company,
-			"currency": si.currency,
-			"conversion_rate": si.conversion_rate,
-			"price_list": si.selling_price_list,
-			"plc_conversion_rate": si.plc_conversion_rate,
-			"price_list_currency": si.price_list_currency,
-			"transaction_date": si.posting_date,
-			"doctype": si.doctype,
-			"name": si.name,
-		}
-
-		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
+		out = self._apply_pricing_rule_for_row(si)
 
 		# Sibling B: Box Rate = 500 (not 5000), Margin = 10% (not 20%), Mixed Discount = 5% (30% validate rule NOT applied)
 		row_2 = next(d for d in out if d.get("name") == "row-2")
