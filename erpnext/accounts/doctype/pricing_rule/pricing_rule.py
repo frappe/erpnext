@@ -583,15 +583,11 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 			rules.append(get_pricing_rule_details(args, pricing_rule))
 
-			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
+			if pricing_rule.apply_rule_on_other:
 				item_details.update(
 					{
 						"price_or_product_discount": pricing_rule.price_or_product_discount,
-						"apply_rule_on": (
-							frappe.scrub(pricing_rule.apply_rule_on_other)
-							if pricing_rule.apply_rule_on_other
-							else frappe.scrub(pricing_rule.get("apply_on"))
-						),
+						"apply_rule_on": frappe.scrub(pricing_rule.apply_rule_on_other),
 					}
 				)
 

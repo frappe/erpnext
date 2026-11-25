@@ -319,8 +319,6 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 
 		if pricing_rules[0].mixed_conditions and doc:
 			stock_qty, amount, items = get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args)
-			for pricing_rule_args in pricing_rules:
-				pricing_rule_args.apply_rule_on_other_items = items
 
 		elif pricing_rules[0].is_cumulative:
 			cumulative_qty, cumulative_amount = get_cumulative_qty_and_amount_for_row(pr_doc, args, doc)
