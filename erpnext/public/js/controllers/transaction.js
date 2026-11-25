@@ -1707,6 +1707,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				const discount = flt(item.discount_amount * factor, precision("discount_amount", item));
 				frappe.model.set_value(item.doctype, item.name, "discount_amount", discount);
 			}
+			// apply_price_list re-prices only items with an Item Price; a rate follows its price list rate
+			const rate_field = item.price_list_rate ? "price_list_rate" : "rate";
+			if (item[rate_field]) {
+				const rate = flt(item[rate_field] * factor, precision(rate_field, item));
+				frappe.model.set_value(item.doctype, item.name, rate_field, rate);
+			}
 		}
 	}
 
