@@ -2695,6 +2695,51 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 		self.assertRaises(SerialNoExistsInFutureTransactionError, transfer.submit)
 
+	def test_backdated_serial_transfer_into_a_reconciled_warehouse_is_blocked(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			SerialNoExistsInFutureTransactionError,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"has_serial_no": 1, "serial_no_series": "TSRW-.#####"}).name
+		source, target = "_Test Warehouse 1 - _TC", "_Test Warehouse - _TC"
+		receipts = [
+			make_stock_entry(
+				item_code=item, target=warehouse, qty=qty, rate=100, posting_date=add_days(nowdate(), -5)
+			)
+			for warehouse, qty in ((source, 2), (target, 1))
+		]
+		create_stock_reconciliation(
+			item_code=item,
+			warehouse=target,
+			qty=1,
+			rate=207,
+			serial_no=get_serial_nos_from_bundle(receipts[1].items[0].serial_and_batch_bundle)[0],
+			use_serial_batch_fields=1,
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		transfers = [
+			make_stock_entry(
+				item_code=item,
+				source=source,
+				target=warehouse,
+				qty=1,
+				serial_no=serial_no,
+				use_serial_batch_fields=1,
+				posting_date=add_days(nowdate(), -3),
+				do_not_submit=True,
+			)
+			for serial_no, warehouse in zip(
+				get_serial_nos_from_bundle(receipts[0].items[0].serial_and_batch_bundle),
+				("_Test Warehouse 2 - _TC", target),
+				strict=True,
+			)
+		]
+		transfers[0].submit()
+		self.assertRaises(SerialNoExistsInFutureTransactionError, transfers[1].submit)
+
 	def test_backdated_entry_shifts_balance_across_batch_reconciliation(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
