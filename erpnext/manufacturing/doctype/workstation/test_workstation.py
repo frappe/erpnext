@@ -288,6 +288,39 @@ class TestWorkstation(ERPNextTestSuite):
 			operating_cost = sum(row.amount for row in entry.additional_costs if row.has_operating_cost)
 			self.assertAlmostEqual(operating_cost, recorded_cost / 2, delta=0.02)
 
+	def test_component_wise_operating_cost_adds_up_to_the_actual_cost(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		workstation = make_workstation_with_equal_components("_Test WS Split Cost")
+		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=20)
+
+		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
+		amounts = [row.amount for row in entry.additional_costs if row.has_operating_cost]
+		self.assertEqual(sorted(amounts), [0.33, 0.33, 0.34])
+
+	def test_later_manufacture_splits_only_the_remaining_operating_cost(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
+
+		workstation = make_workstation_with_equal_components("_Test WS Remaining Cost")
+		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=20, qty=20)
+		submit_manufacture(work_order, 10)
+
+		operation = work_order.reload().operations[0].as_dict()
+		make_job_card(work_order.name, [{**operation, "qty": 10, "pending_qty": 10}])
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name, "docstatus": 0})
+		complete_job_card(job_card, minutes=0.2, days=2)
+
+		self.assertEqual(submit_manufacture(work_order, 10), [0, 0.01, 0])
+
+	def test_each_partial_manufacture_records_every_component(self):
+		workstation = make_workstation_with_equal_components("_Test WS Partial Cost")
+		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=0.6)
+
+		entries = [submit_manufacture(work_order, qty) for qty in (2, 2, 6)]
+		self.assertEqual(entries, [[0, 0, 0.01], [0, 0, 0], [0.01, 0, 0.01]])
+
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
 	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
 		shifts = [("13:00:00", "17:00:00"), ("08:00:00", "12:00:00")]
@@ -429,10 +462,16 @@ def make_workstation(*args, **kwargs):
 	return frappe.get_doc("Workstation", workstation_name)
 
 
-def make_work_order_with_completed_job_card(workstation, job_card_workstation=None):
-	"""Work Order for 10 with one operation on the workstation, its Job Card run for 60 minutes."""
-	from frappe.utils import add_to_date, now
+def make_workstation_with_equal_components(workstation_name):
+	workstation = make_workstation(workstation_name=workstation_name)
+	for component in (_("Rent"), _("Wages"), _("Electricity")):
+		workstation.append("workstation_costs", {"operating_component": component, "operating_cost": 1})
+	workstation.save()
+	return workstation
 
+
+def make_work_order_with_completed_job_card(workstation, job_card_workstation=None, minutes=60, qty=10):
+	"""Work Order with one operation on the workstation, its first Job Card run for 10 in the given minutes."""
 	from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
 	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 	from erpnext.stock.doctype.item.test_item import make_item
@@ -444,22 +483,47 @@ def make_work_order_with_completed_job_card(workstation, job_card_workstation=No
 	rm_item = make_item(f"_Test RM {workstation}", {"is_stock_item": 1}).name
 	routing = create_routing(routing_name=f"Route {workstation}", operations=operations)
 	bom = setup_bom(
-		item_code=fg_item, routing=routing.name, raw_materials=[rm_item], source_warehouse="Stores - _TC"
+		item_code=fg_item,
+		routing=routing.name,
+		raw_materials=[rm_item],
+		source_warehouse="Stores - _TC",
+		currency="INR",
 	)
-	make_test_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=50)
+	make_test_entry(item_code=rm_item, target="Stores - _TC", qty=qty, basic_rate=50)
 
 	work_order = make_wo_order_test_record(
-		production_item=fg_item, bom_no=bom.name, qty=10, skip_transfer=1, source_warehouse="Stores - _TC"
+		production_item=fg_item, bom_no=bom.name, qty=qty, skip_transfer=1, source_warehouse="Stores - _TC"
 	)
 	job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
 	job_card.workstation = job_card_workstation or workstation
-	from_time = add_to_date(now(), days=1)
+	complete_job_card(job_card, minutes)
+	return work_order
+
+
+def submit_manufacture(work_order, qty):
+	"""Submit a Manufacture entry for the qty and return its operating cost amounts."""
+	from erpnext.manufacturing.doctype.work_order.work_order import (
+		make_stock_entry as make_wo_stock_entry,
+	)
+
+	entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", qty))
+	for item in entry.items:
+		item.allow_zero_valuation_rate = 1
+	entry.submit()
+	return [row.amount for row in entry.additional_costs if row.has_operating_cost]
+
+
+def complete_job_card(job_card, minutes, days=1):
+	"""Complete 10 on the Job Card in the given minutes."""
+	from frappe.utils import add_to_date, now
+
+	from_time = add_to_date(now(), days=days)
+	job_card.for_quantity = 10
 	job_card.append(
 		"time_logs",
-		{"from_time": from_time, "to_time": add_to_date(from_time, minutes=60), "completed_qty": 10},
+		{"from_time": from_time, "to_time": add_to_date(from_time, minutes=minutes), "completed_qty": 10},
 	)
 	job_card.submit()
-	return work_order
 
 
 def schedule_one_operation(workstation_name, shifts, minutes, planned_start, holiday_list=None):
