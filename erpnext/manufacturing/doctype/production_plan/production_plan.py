@@ -22,6 +22,7 @@ from frappe.utils import (
 	get_filtered_list_link,
 	get_link_to_form,
 	getdate,
+	now,
 	now_datetime,
 	nowdate,
 	parse_json,
@@ -3091,3 +3092,80 @@ def cancel_stock_reservation_entries(doc, sre_list):
 	sre.cancel_stock_reservation_entries(sre_list)
 
 	doc.reload()
+
+
+def get_subcontracted_received_qty(po_details):
+	"""Accepted finished good qty from Subcontracting Receipts, by Purchase Order Item."""
+	if not po_details:
+		return {}
+
+	scr_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	# return rows don't carry purchase_order_item, so link via the subcontracting order item
+	return_against = frappe.qb.DocType("Subcontracting Receipt Item").as_("return_against")
+
+	return frappe._dict(
+		frappe.qb.from_(scr_item)
+		.inner_join(sco_item)
+		.on(scr_item.subcontracting_order_item == sco_item.name)
+		.left_join(return_against)
+		.on(scr_item.subcontracting_receipt_item == return_against.name)
+		.select(sco_item.purchase_order_item, Sum(scr_item.qty))
+		.where(
+			(scr_item.docstatus == 1)
+			& sco_item.purchase_order_item.isin(po_details)
+			# skip returns of rejected qty, they come out of the rejected warehouse
+			& (
+				return_against.name.isnull()
+				| (scr_item.warehouse != IfNull(return_against.rejected_warehouse, ""))
+			)
+		)
+		.groupby(sco_item.purchase_order_item)
+		.run()
+	)
+
+
+def update_subcontracted_received_qty(subcontracting_order_items: list[str]):
+	"""Set the accepted finished good qty received on the plan's subcontracted sub-assembly rows."""
+	if not subcontracting_order_items:
+		return
+
+	po_item = frappe.qb.DocType("Purchase Order Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	sub_assembly_items = (
+		frappe.qb.from_(sco_item)
+		.inner_join(po_item)
+		.on(po_item.name == sco_item.purchase_order_item)
+		.select(po_item.production_plan_sub_assembly_item)
+		.distinct()
+		.where(
+			sco_item.name.isin(subcontracting_order_items)
+			& (IfNull(po_item.production_plan_sub_assembly_item, "") != "")
+		)
+		.run(pluck=True)
+	)
+	if not sub_assembly_items:
+		return
+
+	po_items = frappe.get_all(
+		"Purchase Order Item",
+		filters={"production_plan_sub_assembly_item": ("in", sub_assembly_items), "docstatus": 1},
+		fields=["name", "production_plan_sub_assembly_item", "production_plan"],
+	)
+	received_qty = get_subcontracted_received_qty([row.name for row in po_items])
+
+	sub_assembly_received_qty = dict.fromkeys(sub_assembly_items, 0.0)
+	for row in po_items:
+		sub_assembly_received_qty[row.production_plan_sub_assembly_item] += flt(received_qty.get(row.name))
+
+	precision = frappe.get_precision("Production Plan Sub Assembly Item", "received_qty")
+	for name, qty in sub_assembly_received_qty.items():
+		frappe.db.set_value("Production Plan Sub Assembly Item", name, "received_qty", flt(qty, precision))
+
+	# so an open plan form can't save its stale received qty back
+	frappe.db.set_value(
+		"Production Plan",
+		{"name": ("in", list({row.production_plan for row in po_items}))},
+		{"modified": now(), "modified_by": frappe.session.user},
+		update_modified=False,
+	)
