@@ -889,8 +889,12 @@ def calculate_value_after_depreciation_on_disposal_date(
 
 	validate_disposal_date(asset_doc.available_for_use_date, getdate(disposal_date), "available for use")
 
+	# start from the value the disposal entries credit, which includes revaluations and capitalised costs
 	if asset_doc.available_for_use_date == getdate(disposal_date):
-		return flt(asset_doc.net_purchase_amount - asset_doc.opening_accumulated_depreciation)
+		return flt(
+			get_gross_asset_value(asset_doc, finance_book) - flt(asset_doc.opening_accumulated_depreciation),
+			asset_doc.precision("net_purchase_amount"),
+		)
 
 	if not asset_doc.calculate_depreciation:
 		return flt(asset_doc.value_after_depreciation)
@@ -911,7 +915,7 @@ def calculate_value_after_depreciation_on_disposal_date(
 	].accumulated_depreciation_amount
 
 	return flt(
-		flt(asset_doc.net_purchase_amount) - accumulated_depr_amount,
+		get_gross_asset_value(asset_doc, finance_book) - flt(accumulated_depr_amount),
 		asset_doc.precision("net_purchase_amount"),
 	)
 
