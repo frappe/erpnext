@@ -428,7 +428,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					net_total.rounded += item.net_amount;
 				}
 
-				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
+				const billed_qty = me.get_billed_qty(item);
+				item.net_rate = billed_qty
+					? flt(item.net_amount / billed_qty, precision("net_rate", item))
+					: 0;
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
 			}
@@ -1061,7 +1064,13 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 						(flt(me.frm.doc.discount_amount) * net_amount) / total_for_discount_amount;
 					item._unrounded_net_amount = use_unrounded_net ? adjusted_net_amount : null;
 					net_total.unrounded += adjusted_net_amount;
+					const distributed_amount =
+						item.net_amount - flt(adjusted_net_amount, precision("net_amount", item));
 					item.net_amount = flt(adjusted_net_amount, precision("net_amount", item));
+					item.distributed_discount_amount = flt(
+						distributed_amount,
+						precision("distributed_discount_amount", item)
+					);
 					net_total.rounded += item.net_amount;
 
 					// discount amount rounding adjustment
@@ -1075,10 +1084,16 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 							item.net_amount + rounding_difference,
 							precision("net_amount", item)
 						);
+						// net_amount went up by rounding_difference, so its discount share goes down
+						item.distributed_discount_amount = flt(
+							distributed_amount - rounding_difference,
+							precision("distributed_discount_amount", item)
+						);
 						net_total.rounded += rounding_difference;
 					}
-					item.net_rate = item.qty
-						? flt(item.net_amount / item.qty, precision("net_rate", item))
+					const billed_qty = me.get_billed_qty(item);
+					item.net_rate = billed_qty
+						? flt(item.net_amount / billed_qty, precision("net_rate", item))
 						: 0;
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
 				});
