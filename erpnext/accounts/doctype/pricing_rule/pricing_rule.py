@@ -431,6 +431,17 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	if args.get("doctype") == "Material Request":
 		return out
 
+	if doc and isinstance(doc, str):
+		try:
+			doc = frappe.get_doc(frappe.parse_json(doc))
+		except Exception:
+			doc = frappe.parse_json(doc)
+	elif doc and isinstance(doc, dict) and not isinstance(doc, Document):
+		try:
+			doc = frappe.get_doc(doc)
+		except Exception:
+			doc = frappe._dict(doc)
+
 	item_list = args.get("items")
 	args.pop("items")
 
@@ -452,7 +463,136 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
+	if doc:
+		reprice_mixed_conditions_sibling_items(args, doc, item_list, out)
+
 	return out
+
+
+def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
+	"""Reprice sibling rows in `doc.items` matching any affected mixed conditions pricing rules.
+
+	When `apply_pricing_rule` is called for a subset of items (e.g. editing a row's quantity in Desk),
+	sibling rows matching mixed conditions rules must be repriced independently so they gain or lose
+	discounts dynamically without overwriting each other's specific pricing rules.
+	"""
+	doc_items = doc.get("items") if doc else None
+	if not doc_items:
+		return
+
+	priced_row_names = {
+		d.get("name") or d.get("child_docname")
+		for d in item_list
+		if (d.get("name") or d.get("child_docname"))
+	}
+
+	unpriced_rows = []
+	for idx, row in enumerate(doc_items):
+		row_dict = row.as_dict() if hasattr(row, "as_dict") else dict(row)
+		if row_dict.get("is_free_item"):
+			continue
+		row_name = row_dict.get("name") or row_dict.get("child_docname") or f"row_{idx}"
+		if row_name in priced_row_names:
+			continue
+		unpriced_rows.append((row_dict, row_name))
+
+	if not unpriced_rows:
+		return
+
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		get_pricing_rule_items,
+	)
+
+	candidate_rules = set()
+	for d in out:
+		candidate_rules.update(get_applied_pricing_rules(d.get("pricing_rules")))
+	for d in item_list:
+		candidate_rules.update(get_applied_pricing_rules(d.get("pricing_rules")))
+	for row_dict, _row_name in unpriced_rows:
+		candidate_rules.update(get_applied_pricing_rules(row_dict.get("pricing_rules")))
+
+	if not candidate_rules:
+		return
+
+	mixed_rule_criteria = []
+	for rule_name in candidate_rules:
+		if not rule_name:
+			continue
+		if not frappe.get_cached_value("Pricing Rule", rule_name, "mixed_conditions"):
+			continue
+		if frappe.get_cached_value("Pricing Rule", rule_name, "disable"):
+			continue
+
+		pr_doc = frappe.get_cached_doc("Pricing Rule", rule_name)
+		apply_on_field = frappe.scrub(pr_doc.apply_on)
+		rule_items = set(get_pricing_rule_items(pr_doc) or [])
+		if not rule_items:
+			continue
+
+		affects_rule = False
+		for item in item_list:
+			item_val = item.get(apply_on_field) or frappe.get_cached_value(
+				"Item", item.get("item_code"), apply_on_field
+			)
+			if item_val in rule_items or rule_name in get_applied_pricing_rules(item.get("pricing_rules")):
+				affects_rule = True
+				break
+
+		if not affects_rule:
+			for item_data in out:
+				if rule_name in get_applied_pricing_rules(item_data.get("pricing_rules")):
+					affects_rule = True
+					break
+
+		if not affects_rule:
+			for row_dict, _row_name in unpriced_rows:
+				if rule_name in get_applied_pricing_rules(row_dict.get("pricing_rules")):
+					affects_rule = True
+					break
+
+		if affects_rule:
+			mixed_rule_criteria.append((rule_name, apply_on_field, rule_items))
+
+	if not mixed_rule_criteria:
+		return
+
+	for row_dict, row_name in unpriced_rows:
+		if row_name in priced_row_names:
+			continue
+
+		row_matches = False
+		applied_on_row = set(get_applied_pricing_rules(row_dict.get("pricing_rules")))
+
+		for rule_name, apply_on_field, rule_items in mixed_rule_criteria:
+			if rule_name in applied_on_row:
+				row_matches = True
+				break
+			row_val = row_dict.get(apply_on_field) or frappe.get_cached_value(
+				"Item", row_dict.get("item_code"), apply_on_field
+			)
+			if row_val in rule_items:
+				row_matches = True
+				break
+
+		if row_matches:
+			sibling_args = copy.deepcopy(args)
+			if not row_dict.get("doctype"):
+				parent_dt = args.get("doctype") or (doc.get("doctype") if hasattr(doc, "get") else None)
+				if parent_dt and not parent_dt.endswith(" Item"):
+					row_dict["doctype"] = f"{parent_dt} Item"
+
+			sibling_args.update(row_dict)
+			sibling_args.setdefault("child_docname", row_name)
+			sibling_args.setdefault("name", row_name)
+			sibling_args.setdefault("parenttype", args.get("doctype") or row_dict.get("parenttype"))
+			sibling_args.setdefault(
+				"parent", args.get("name") or (doc.get("name") if hasattr(doc, "get") else None)
+			)
+			set_transaction_type(sibling_args)
+			sibling_data = get_pricing_rule_for_item(sibling_args, doc=doc)
+			out.append(sibling_data)
+			priced_row_names.add(row_name)
 
 
 def update_pricing_rule_uom(pricing_rule, args):
