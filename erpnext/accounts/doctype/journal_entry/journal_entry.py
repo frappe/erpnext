@@ -1651,6 +1651,9 @@ def get_outstanding(args):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	if args.get("doctype") in ("Journal Entry", "Sales Invoice", "Purchase Invoice"):
+		frappe.has_permission(args["doctype"], "read", doc=args.get("docname"), throw=True)
+
 	company_currency = erpnext.get_company_currency(args.get("company"))
 	due_date = None
 
