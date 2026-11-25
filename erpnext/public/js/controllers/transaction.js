@@ -963,7 +963,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					(item) =>
 						!item.closed &&
 						flt(
-							(item.stock_qty - flt(received_items[item.name])) / item.conversion_factor,
+							flt(
+								item.stock_qty - flt(received_items[item.name]),
+								precision("stock_qty", item)
+							) / item.conversion_factor,
 							precision("qty", item)
 						) > 0
 				);
