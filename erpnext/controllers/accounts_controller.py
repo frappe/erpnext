@@ -1197,10 +1197,10 @@ class AccountsController(TransactionBase):
 		).run()
 
 	@frappe.whitelist()
-	def apply_shipping_rule(self):
+	def apply_shipping_rule(self, previous_shipping_rule: str | None = None):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
-			shipping_rule.apply(self)
+			shipping_rule.apply(self, previous_shipping_rule)
 			self.calculate_taxes_and_totals()
 
 	def get_shipping_address(self):

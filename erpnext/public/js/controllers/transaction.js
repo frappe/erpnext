@@ -677,6 +677,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// real currency change can be told apart from a mere exchange rate refresh
 		// (e.g. triggered by a date change).
 		this._doc_currency = this.frm.doc.currency;
+		this._applied_shipping_rule = this.frm.doc.shipping_rule;
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
@@ -1665,7 +1666,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				.call({
 					doc: this.frm.doc,
 					method: "apply_shipping_rule",
+					args: { previous_shipping_rule: this._applied_shipping_rule },
 					callback: function (r) {
+						me._applied_shipping_rule = me.frm.doc.shipping_rule;
 						me.calculate_discounted_totals();
 					},
 				})
