@@ -1184,11 +1184,15 @@ def get_outstanding(
 		party = legacy_payload.get("party")
 		account_currency = legacy_payload.get("account_currency")
 
+	if doctype not in ("Journal Entry", "Sales Invoice", "Purchase Invoice"):
+		return None
+
+	frappe.has_permission(doctype, "read", doc=docname, throw=True)
+
 	if doctype == "Journal Entry":
 		return _get_journal_entry_outstanding(docname, account, party)
 
-	if doctype in ("Sales Invoice", "Purchase Invoice"):
-		return _get_invoice_outstanding(doctype, docname, company, account_currency)
+	return _get_invoice_outstanding(doctype, docname, company, account_currency)
 
 
 def _get_journal_entry_outstanding(docname: str, account: str | None, party: str | None) -> dict:
