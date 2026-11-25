@@ -9385,6 +9385,44 @@ class TestWorkOrder(ERPNextTestSuite):
 			"Stock Reservation Entry", filters=filters, fields=["reserved_qty", "consumed_qty"]
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "BOM", "validate_components_quantities_per_bom": 1},
+	)
+	def test_bom_component_check_compares_the_stock_qty(self):
+		def make_manufacture(rm_props, fg_uom, bom_qty, wo_qty):
+			rm_item = make_item(properties={"is_stock_item": 1, **rm_props}).name
+			fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": fg_uom}).name
+			bom = make_bom(item=fg_item, raw_materials=[rm_item], quantity=bom_qty)
+			test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10)
+			work_order = make_wo_order_test_record(
+				production_item=fg_item,
+				bom_no=bom.name,
+				qty=wo_qty,
+				skip_transfer=1,
+				source_warehouse="_Test Warehouse - _TC",
+				stock_uom=fg_uom,
+			)
+			manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+			return manufacture, next(row for row in manufacture.items if row.item_code == rm_item)
+
+		manufacture, row = make_manufacture(
+			{"stock_uom": "Kg", "uoms": [{"uom": "Gram", "conversion_factor": 0.001}]}, "Kg", 1, 2
+		)
+		row.update({"uom": "Gram", "conversion_factor": 0.001, "qty": 1000})
+		manufacture.save()
+
+		# a stale conversion factor on a stock UOM row is reset to 1 before the check
+		manufacture, row = make_manufacture({"stock_uom": "Kg"}, "Kg", 1, 2)
+		row.update({"qty": 2, "conversion_factor": 0.5})
+		self.assertRaises(frappe.ValidationError, manufacture.save)
+
+		# Get Items does not round up here, so the whole unit is set by hand
+		manufacture, row = make_manufacture({"stock_uom": "Nos"}, "Nos", 2, 4)
+		self.assertEqual(row.qty, 0.5)
+		row.qty = 1
+		manufacture.save()
+
 	def test_available_qty_skips_warehouse_user_permission(self):
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
