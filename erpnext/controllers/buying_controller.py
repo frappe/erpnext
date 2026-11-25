@@ -151,9 +151,7 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.is_internal_transfer() and (
-			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
-		):
+		if self.get("is_internal_supplier") and self.is_stock_receipt():
 			field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 
 			doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
@@ -179,7 +177,7 @@ class BuyingController(SubcontractingController):
 				elif item.serial_and_batch_bundle:
 					self.resize_package(item, "serial_and_batch_bundle", "qty")
 
-				if reference and bundle_ids.get(reference) and item.get(field):
+				if reference and bundle_ids.get(reference):
 					self.set_rejected_package(item, bundle_ids.get(reference))
 
 	def get_component_incoming_rates(self) -> dict:
@@ -220,9 +218,10 @@ class BuyingController(SubcontractingController):
 		A row that rejects nothing keeps the package of the in-transit warehouse it came out of. A
 		row that rejects material needs a package of the accepted warehouse instead, since that is
 		the entry it belongs to; the material leaving the in-transit warehouse gets a package of its
-		own when the receipt is submitted.
+		own when the receipt is submitted. An inter-company receipt has no in-transit warehouse, so it
+		always gets a package of the accepted warehouse.
 		"""
-		if not self.has_rejected_stock(row):
+		if self.keeps_transit_package(row):
 			return self.make_package_for_transfer(
 				package,
 				row.from_warehouse,
@@ -255,33 +254,40 @@ class BuyingController(SubcontractingController):
 	def set_rejected_package(self, row, package) -> None:
 		"""Package of the material the row rejects.
 
-		A receipt of an internal transfer builds no package for it on its own, so rejected material
+		A receipt from an internal supplier builds no package for it on its own, so rejected material
 		of a tracked item would have nothing to say where it came from.
 		"""
 		if self.is_return:
 			return
 
-		if not self.has_rejected_stock(row):
+		if not get_stock_qty(row, row.rejected_qty):
 			self.remove_package(row, "rejected_serial_and_batch_bundle")
 			return
 
-		if row.get("rejected_serial_and_batch_bundle"):
+		rejected_package = row.get("rejected_serial_and_batch_bundle")
+		if rejected_package:
 			self.resize_package(row, "rejected_serial_and_batch_bundle", "rejected_qty")
-			return
+			if (
+				frappe.db.get_value("Serial and Batch Bundle", rejected_package, "warehouse")
+				== row.rejected_warehouse
+			):
+				return
 
-		if not row.rejected_warehouse:
-			return
+		# the rejected warehouse changed: the selected rejected batches move with it
+		new_package = None
+		if row.rejected_warehouse:
+			new_package = self.make_package_for_transfer(
+				rejected_package or package,
+				row.rejected_warehouse,
+				type_of_transaction="Inward",
+				do_not_submit=True,
+				qty=get_stock_qty(row, row.rejected_qty),
+				exclude_serial_nos=self.get_accepted_serial_nos(row),
+			)
+			frappe.db.set_value("Serial and Batch Bundle", new_package, "is_rejected", 1)
 
-		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
-			package,
-			row.rejected_warehouse,
-			type_of_transaction="Inward",
-			do_not_submit=True,
-			qty=get_stock_qty(row, row.rejected_qty),
-			exclude_serial_nos=self.get_accepted_serial_nos(row),
-		)
-
-		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
+		self.remove_package(row, "rejected_serial_and_batch_bundle")
+		row.rejected_serial_and_batch_bundle = new_package
 
 	def remove_package(self, row, bundle_field) -> None:
 		"""Drop the draft package of a row that no longer moves that material."""
@@ -332,9 +338,10 @@ class BuyingController(SubcontractingController):
 
 		A row that rejects material carries the package of its accepted warehouse; a row that
 		rejects nothing carries the package of the in-transit warehouse it came out of. Editing the
-		split moves the package from one to the other.
+		split rebuilds the package from the delivered one; a change of warehouse only moves the
+		package's batches. An inter-company row always carries the package of its accepted warehouse.
 		"""
-		if not self.is_internal_receipt() or self.is_return:
+		if not (self.get("is_internal_supplier") and self.is_stock_receipt()) or self.is_return:
 			return
 
 		for row in self.get("items"):
@@ -351,17 +358,20 @@ class BuyingController(SubcontractingController):
 			if not details or details.docstatus != 0:
 				continue
 
-			if self.has_rejected_stock(row):
-				wanted = (row.warehouse, "Inward")
-			else:
+			if self.keeps_transit_package(row):
 				wanted = (row.from_warehouse, "Outward")
+			else:
+				wanted = (row.warehouse, "Inward")
 
 			if (details.warehouse, details.type_of_transaction) == wanted:
 				continue
 
-			row.serial_and_batch_bundle = self.make_accepted_package(
-				row, self.get_delivered_package(row) or package
-			)
+			if details.type_of_transaction != wanted[1]:
+				source = self.get_delivered_package(row) or package
+			else:
+				source = package
+
+			row.serial_and_batch_bundle = self.make_accepted_package(row, source)
 			frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
 	def get_rejected_serial_nos(self, row) -> list:
@@ -1264,6 +1274,10 @@ class BuyingController(SubcontractingController):
 
 	def is_internal_receipt(self) -> bool:
 		return self.is_internal_transfer() and self.is_stock_receipt()
+
+	def keeps_transit_package(self, row) -> bool:
+		"""An internal transfer row that rejects nothing keeps the package of the in-transit warehouse."""
+		return self.is_internal_transfer() and not self.has_rejected_stock(row)
 
 	def has_rejected_stock(self, row) -> bool:
 		"""An internal receipt row whose rejected qty doesn't round to 0 in the stock UOM."""
