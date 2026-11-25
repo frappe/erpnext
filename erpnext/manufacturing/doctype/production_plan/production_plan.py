@@ -2163,12 +2163,14 @@ def get_materials_from_other_locations(
 ):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 
+	# keep all locations, so a skipped receiving warehouse does not crowd out the others
 	locations = get_available_item_locations(
 		item.get("item_code"),
 		warehouses,
 		item.get("quantity") * item.get("conversion_factor"),
 		company,
 		ignore_validation=True,
+		keep_all_locations=True,
 	)
 
 	required_qty = item.get("quantity")
@@ -2181,6 +2183,10 @@ def get_materials_from_other_locations(
 	for d in locations:
 		if required_qty <= 0:
 			break
+
+		# stock is not transferred from the receiving warehouse to itself
+		if d.get("warehouse") == item.get("warehouse"):
+			continue
 
 		new_dict = copy.deepcopy(item)
 		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
