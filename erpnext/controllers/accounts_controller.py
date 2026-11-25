@@ -35,6 +35,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (
 	apply_pricing_rule_on_transaction,
 	get_applied_pricing_rules,
 )
+from erpnext.accounts.doctype.shipping_rule.shipping_rule import validate_untaxed_shipping_charge
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import (
 	PURCHASE_TRANSACTION_TYPES,
@@ -323,6 +324,8 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
+			if self.get("shipping_rule") and self.get("_action") in ("save", "submit"):
+				validate_untaxed_shipping_charge(self)
 
 			if not self.meta.get_field("is_return") or not self.is_return:
 				if not self.is_negative_grand_total_allowed():

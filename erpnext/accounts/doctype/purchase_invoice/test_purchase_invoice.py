@@ -1592,8 +1592,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(pi.net_total, 1250)
 
-		self.assertEqual(pi.total_taxes_and_charges, 354.1)
-		self.assertEqual(pi.grand_total, 1604.1)
+		self.assertEqual(pi.total_taxes_and_charges, 462.3)
+		self.assertEqual(pi.grand_total, 1712.3)
 
 	def test_make_pi_without_terms(self):
 		pi = make_purchase_invoice(do_not_save=1)

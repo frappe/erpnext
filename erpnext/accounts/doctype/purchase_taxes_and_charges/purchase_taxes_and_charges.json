@@ -16,6 +16,7 @@
   "description",
   "section_break_uhfl",
   "set_by_item_tax_template",
+  "set_by_shipping_rule",
   "is_tax_withholding_account",
   "allocate_full_amount_to_stock_items",
   "column_break_zqtz",
@@ -278,6 +279,16 @@
   },
   {
    "default": "0",
+   "fieldname": "set_by_shipping_rule",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Set by Shipping Rule",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
    "fieldname": "dont_recompute_tax",
    "fieldtype": "Check",
    "hidden": 1,
@@ -298,7 +309,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-21 17:13:05.586544",
+ "modified": "2026-11-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
