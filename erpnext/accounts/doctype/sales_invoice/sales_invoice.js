@@ -175,14 +175,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.toggle_get_items();
 
 		this.set_default_print_format();
-		if (doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
-			let internal = me.frm.doc.is_internal_customer;
-			if (internal) {
-				let button_label =
-					me.frm.doc.company === me.frm.doc.represents_company
-						? "Internal Purchase Invoice"
-						: "Inter Company Purchase Invoice";
+		if (doc.docstatus == 1 && doc.is_internal_customer) {
+			let button_label =
+				doc.company === doc.represents_company
+					? __("Internal Purchase Invoice")
+					: __("Inter Company Purchase Invoice");
 
+<<<<<<< HEAD
 				frappe.call({
 					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
 					args: {
@@ -215,6 +214,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					},
 				});
 			}
+=======
+			this.add_inter_company_button(button_label, "Purchase Invoice", "sales_invoice_item", () =>
+				this.make_inter_company_invoice()
+			);
+>>>>>>> c08fb51 (fix(selling): use the shared inter company button check on sales invoice)
 		}
 
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
