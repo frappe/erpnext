@@ -31,6 +31,8 @@ frappe.ui.form.on("Repost Payment Ledger", {
 		};
 	},
 	refresh: function (frm) {
+		frm.trigger("toggle_vouchers_read_only");
+
 		if (frm.doc.docstatus == 1 && ["Queued", "Failed"].find((x) => x == frm.doc.repost_status)) {
 			frm.set_intro(
 				__(
@@ -49,5 +51,19 @@ frappe.ui.form.on("Repost Payment Ledger", {
 				frappe.msgprint(__("Reposting in the background."));
 			});
 		}
+	},
+	add_manually: function (frm) {
+		frm.trigger("toggle_vouchers_read_only");
+	},
+	toggle_vouchers_read_only: function (frm) {
+		if (frm.doc.docstatus !== 0) return;
+
+		const read_only = frm.doc.add_manually ? 0 : 1;
+		const grid = frm.fields_dict.repost_vouchers?.grid;
+		// Clear stale "Read" grid status before ControlTable.get_status() checks it
+		if (grid && !read_only) {
+			grid.display_status = "Write";
+		}
+		frm.set_df_property("repost_vouchers", "read_only", read_only);
 	},
 });
