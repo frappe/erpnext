@@ -3771,6 +3771,8 @@ class TestJobCard(ERPNextTestSuite):
 				"cost_allocation_per": 20,
 			}
 		)
+		# version-16 rates the Job Card secondary rows on save
+		stock_entry.insert()
 		row = next(row for row in stock_entry.items if row.item_code == bom.secondary_items[0].item_code)
 		self.assertEqual(row.bom_secondary_item, bom.secondary_items[0].name)
 		self.assertEqual(row.basic_amount, 200)
