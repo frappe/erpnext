@@ -220,6 +220,11 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	return pi_row
 
 
+def set_incoming_rate_from_bundle(row, bundle):
+	"""Rate of the serial or batch nos picked on submit; validate looked it up before they were picked."""
+	row.db_set("incoming_rate", flt(bundle.avg_rate, row.precision("incoming_rate")))
+
+
 def get_packed_item_details(item_code, company):
 	item = frappe.qb.DocType("Item")
 	item_default = frappe.qb.DocType("Item Default")
