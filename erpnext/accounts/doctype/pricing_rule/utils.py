@@ -36,7 +36,20 @@ CUMULATIVE_APPLICABLE_FOR_FIELDS = {
 }
 
 
-def get_pricing_rules(args, doc=None):
+def is_non_target_other_rule(rule, args) -> bool:
+	"""Return True when an `apply_rule_on_other` rule matched `args` as a trigger rather than a target."""
+	if not rule.get("apply_rule_on_other"):
+		return False
+
+	apply_on_other_field = frappe.scrub(rule.get("apply_rule_on_other"))
+	target_value = rule.get(f"other_{apply_on_other_field}")
+	if not target_value:
+		return False
+
+	return args.get(apply_on_other_field) != target_value
+
+
+def get_pricing_rules(args, doc=None, *, exclude_other_trigger_rules=False, extra_pricing_rules=None):
 	pricing_rules = []
 	values = {}
 
@@ -52,8 +65,19 @@ def get_pricing_rules(args, doc=None):
 		candidates = [
 			rule
 			for rule in _get_pricing_rules(apply_on, args, values)
-			if not rule.coupon_code_based or rule.name == coupon_pricing_rule
+			if (not rule.coupon_code_based or rule.name == coupon_pricing_rule)
+			and not (exclude_other_trigger_rules and is_non_target_other_rule(rule, args))
 		]
+		if extra_pricing_rules:
+			existing_names = {rule.name for rule in candidates}
+			for extra_rule in extra_pricing_rules:
+				if (
+					extra_rule.apply_on == apply_on
+					and extra_rule.name not in existing_names
+					and (not extra_rule.coupon_code_based or extra_rule.name == coupon_pricing_rule)
+				):
+					candidates.append(copy.copy(extra_rule))
+
 		pricing_rules.extend(filter_pricing_rule_based_on_condition(candidates, doc))
 		if pricing_rules and pricing_rules[0].has_priority:
 			continue
@@ -318,7 +342,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 		pr_doc = frappe.get_cached_doc("Pricing Rule", pricing_rules[0].name)
 
 		if pricing_rules[0].mixed_conditions and doc:
-			stock_qty, amount, items = get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args)
+			stock_qty, amount, _items = get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args)
 
 		elif pricing_rules[0].is_cumulative:
 			cumulative_qty, cumulative_amount = get_cumulative_qty_and_amount_for_row(pr_doc, args, doc)
