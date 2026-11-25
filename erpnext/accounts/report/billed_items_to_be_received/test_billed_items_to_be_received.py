@@ -117,6 +117,35 @@ class TestBilledItemsToBeReceived(FrappeTestCase):
 		self.assertNotIn(pi.name, names)
 		self.assertNotIn(debit_note.name, names)
 
+	def test_debit_note_in_another_uom_is_counted_in_invoice_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "_Test UOM 1", "conversion_factor": 10}],
+			}
+		).name
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code=item_code, update_stock=0, do_not_submit=True
+		)
+		pi.items[0].update(
+			{"uom": "_Test UOM 1", "conversion_factor": 10, "qty": 1, "rate": 1000, "price_list_rate": 1000}
+		)
+		pi.submit()
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].update(
+			{"uom": "Nos", "conversion_factor": 1, "qty": -1, "rate": 100, "price_list_rate": 100}
+		)
+		debit_note.submit()
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(1, 0, 0.1)])
+
+		self.receive(pi.name, today(), qty=0.9)
+		self.assertFalse(self.get_rows_for(self.run_report(), pi.name))
+
 	def test_invoice_made_from_receipt_is_received(self):
 		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
 		pi = make_invoice_from_receipt(receipt.name)
