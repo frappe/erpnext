@@ -14,7 +14,14 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import flt, format_datetime, get_datetime, get_link_to_form
+
+from erpnext.stock.utils import get_combine_datetime
+
+SOURCE_DOCUMENT = {
+	"Purchase Receipt": ("Delivery Note", "inter_company_reference"),
+	"Purchase Invoice": ("Sales Invoice", "inter_company_invoice_reference"),
+}
 
 
 class StockInternalTransferService:
@@ -27,6 +34,7 @@ class StockInternalTransferService:
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
+				self.validate_posting_datetime()
 
 				if (
 					self.doc.get("is_internal_supplier")
@@ -75,6 +83,35 @@ class StockInternalTransferService:
 	def validate_packed_items(self):
 		if self.doc.doctype == "Sales Invoice" and self.doc.get("packed_items"):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
+
+	def validate_posting_datetime(self):
+		"""The receipt takes the cost of the delivery, so it cannot be posted before the delivery."""
+		if self.doc.get("is_return") or not self.doc.is_stock_receipt():
+			return
+
+		source_doctype, reference_field = SOURCE_DOCUMENT[self.doc.doctype]
+		source_name = self.doc.get(reference_field)
+		if not source_name:
+			return
+
+		source_datetime = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": source_doctype, "voucher_no": source_name, "is_cancelled": 0},
+			"posting_datetime",
+		)
+		posting_datetime = get_combine_datetime(self.doc.posting_date, self.doc.posting_time)
+		if not source_datetime or posting_datetime >= get_datetime(source_datetime):
+			return
+
+		frappe.throw(
+			_("Posting Date and Time {0} cannot be before {1}, when {2} {3} sent this material.").format(
+				bold(format_datetime(posting_datetime)),
+				bold(format_datetime(source_datetime)),
+				source_doctype,
+				get_link_to_form(source_doctype, source_name),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
 
 	def validate_internal_transfer_qty(self):
 		if self.doc.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
