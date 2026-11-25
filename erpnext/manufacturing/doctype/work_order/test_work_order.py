@@ -3303,6 +3303,47 @@ class TestWorkOrder(FrappeTestCase):
 		work_order, _ = make_work_order([5, 5])
 		self.assertEqual(disassembled_rm_qty(work_order), 10)
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "BOM", "overproduction_percentage_for_work_order": 50},
+	)
+	def test_work_order_details_propose_the_qty_for_the_purpose(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_work_order_details
+
+		rm_item = make_item("Test Proposed Qty RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item("Test Proposed Qty FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=1)
+		bom.process_loss_percentage = 10
+		bom.insert()
+		bom.submit()
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=40)
+
+		def proposed_qty(work_order, purpose):
+			return get_work_order_details(work_order.name, "_Test Company", purpose)["fg_completed_qty"]
+
+		def new_work_order(**kwargs):
+			return make_wo_order_test_record(
+				production_item=fg_item,
+				bom_no=bom.name,
+				qty=10,
+				source_warehouse="_Test Warehouse - _TC",
+				stock_uom="Kg",
+				**kwargs,
+			)
+
+		work_order = new_work_order()
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 4)).submit()
+		self.assertEqual(proposed_qty(work_order, "Material Transfer for Manufacture"), 6)
+
+		work_order = new_work_order(skip_transfer=1)
+		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5)).submit()
+		self.assertEqual(proposed_qty(work_order, "Manufacture"), 5)
+		self.assertEqual(proposed_qty(work_order, "Disassemble"), 4.5)
+
+		work_order = new_work_order()
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 15)).submit()
+		self.assertEqual(proposed_qty(work_order, "Manufacture"), 10)
+
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
 		raw_item = make_item("Test Raw for Disassembly", {"is_stock_item": 1}).name
