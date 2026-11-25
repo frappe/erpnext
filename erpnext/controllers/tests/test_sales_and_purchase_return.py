@@ -474,6 +474,40 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 
 		self.assertEqual(make_purchase_return(pr.name).items[0].qty, -3)
 
+	def test_purchase_return_maps_rejected_qty_after_return_in_another_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			uom="Box",
+			stock_uom="Nos",
+			conversion_factor=12,
+			qty=2,
+			rejected_qty=2,
+			rate=1200,
+		)
+		first_return = make_purchase_return(pr.name)
+		first_return.items[0].update(
+			{"uom": "Nos", "conversion_factor": 1, "qty": -12, "rejected_qty": -12, "received_qty": -24}
+		)
+		first_return.submit()
+
+		# 12 Nos accepted and 12 Nos rejected are left, mapped in the receipt row's UOM
+		self.assertEqual(make_purchase_return(pr.name).items[0].rejected_qty, -1)
+		self.assertEqual(make_purchase_return_against_rejected_warehouse(pr.name).items[0].qty, -1)
+
 	def test_purchase_invoice_return_maps_received_qty_after_return_in_another_uom(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
