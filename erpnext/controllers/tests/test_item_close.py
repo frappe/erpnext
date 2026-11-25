@@ -10,7 +10,11 @@ from erpnext.buying.doctype.purchase_order.mapper import (
 )
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.controllers.item_close import update_closed_status
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.purchase_receipt.mapper import (
+	make_purchase_invoice as make_purchase_invoice_from_receipt,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 WAREHOUSE = "_Test Warehouse - _TC"
@@ -199,3 +203,25 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 		amended.insert()
 
 		self.assertFalse(any(row.closed for row in amended.items))
+
+	def test_received_goods_of_a_closed_row_can_be_billed_and_returned(self):
+		po = self.make_purchase_order()
+		receipt = make_purchase_receipt(po.name)
+		receipt.insert()
+		receipt.submit()
+
+		po.reload()
+		self.close_items(po, [po.items[0]])
+
+		invoice = make_purchase_invoice_from_receipt(receipt.name)
+		invoice.insert()
+		invoice.submit()
+
+		return_receipt = make_return_doc("Purchase Receipt", receipt.name)
+		return_receipt.items = [row for row in return_receipt.items if row.item_code == self.first_item]
+		return_receipt.items[0].qty = return_receipt.items[0].received_qty = -2
+		return_receipt.insert()
+		return_receipt.submit()
+
+		po.reload()
+		self.assertEqual(po.items[0].returned_qty, 2)

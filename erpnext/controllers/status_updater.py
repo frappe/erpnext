@@ -229,27 +229,40 @@ class StatusUpdater(Document):
 		instead, so their invoices declare the link in `closed_source_links`.
 		"""
 		links = [
-			(args["source_dt"], args["join_field"], args["target_dt"], args["target_parent_dt"])
+			(
+				args["source_dt"],
+				args["join_field"],
+				args["target_dt"],
+				args["target_parent_dt"],
+				args.get("closed_check_exclude_if_field"),
+			)
 			for args in self.status_updater
 			if args.get("target_dt")
 			and args.get("target_parent_dt")
 			and has_closable_items(args["target_parent_dt"])
 		]
 
-		return links + list(getattr(self, "closed_source_links", []))
+		return links + [(*link, None) for link in getattr(self, "closed_source_links", [])]
 
 	def validate_closed_source_items(self):
 		"""Block submitting against rows that were closed on the source document."""
-		if self.docstatus != 1:
+		# returns are allowed against a closed document too
+		if self.docstatus != 1 or self.get("is_return"):
 			return
 
-		for source_dt, join_field, target_dt, target_parent_dt in self.get_closed_source_links():
+		for (
+			source_dt,
+			join_field,
+			target_dt,
+			target_parent_dt,
+			exclude_if_field,
+		) in self.get_closed_source_links():
 			if not frappe.get_meta(target_dt).has_field("closed"):
 				continue
 
 			row_idx = {}
 			for d in self.get_all_children(source_dt):
-				if d.get(join_field):
+				if d.get(join_field) and not (exclude_if_field and d.get(exclude_if_field)):
 					row_idx[d.get(join_field)] = d.idx
 
 			if not row_idx:
