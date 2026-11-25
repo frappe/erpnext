@@ -2758,6 +2758,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			})
+		} else if (
+			!doc.payment_terms_template &&
+			this.frm.updating_party_details &&
+			doc.payment_schedule?.length
+		) {
+			// the new party has no terms, so drop the previous party's schedule
+			this.frm.clear_table("payment_schedule");
+			this.frm.refresh_field("payment_schedule");
 		}
 	}
 
