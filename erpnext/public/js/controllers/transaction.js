@@ -1678,7 +1678,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	shipping_rule() {
 		var me = this;
-		if (this.frm.doc.shipping_rule) {
+		// with no rule, the server removes the row the previous rule added
+		if (this.frm.doc.shipping_rule || this.frm.doc.taxes?.some((tax) => tax.set_by_shipping_rule)) {
 			return this.frm
 				.call({
 					doc: this.frm.doc,

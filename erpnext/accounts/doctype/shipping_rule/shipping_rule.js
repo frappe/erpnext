@@ -27,6 +27,11 @@ frappe.ui.form.on("Shipping Rule", {
 		});
 
 		frm.trigger("toggle_reqd");
+		frm.set_intro(
+			__(
+				"Shipping charges are added after the taxes, so no tax is charged on them. To charge tax on shipping, add it to the transaction as a service item instead."
+			)
+		);
 	},
 	calculate_based_on: function (frm) {
 		frm.trigger("toggle_reqd");

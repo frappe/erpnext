@@ -107,6 +107,98 @@ class TestShippingRule(ERPNextTestSuite):
 			calculate_taxes_and_totals(so)
 			self.assertEqual(so.taxes[0].base_tax_amount, 50)
 
+	def test_charge_on_shipping_account_is_kept(self):
+		shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount")
+		freight = {
+			"charge_type": "Actual",
+			"account_head": shipping_rule.account,
+			"cost_center": shipping_rule.cost_center,
+			"description": "Freight",
+			"tax_amount": 50,
+		}
+		for shipping_first in (False, True):
+			with self.subTest(shipping_first=shipping_first):
+				so = make_sales_order(qty=1, rate=120, do_not_save=True)
+				so.set("taxes", [])
+				so.shipping_rule = shipping_rule.name
+				if shipping_first:
+					calculate_taxes_and_totals(so)
+
+				so.append("taxes", freight)
+				calculate_taxes_and_totals(so)
+				self.assertEqual(sorted(tax.tax_amount for tax in so.taxes), [50, 100])
+				self.assertEqual(so.total_taxes_and_charges, 150)
+
+	def test_shipping_charge_cannot_be_taxed(self):
+		for shipping_first in (False, True):
+			with self.subTest(shipping_first=shipping_first):
+				so = make_sales_order(qty=1, rate=120, do_not_save=True)
+				so.set("taxes", [])
+				so.shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount").name
+				if shipping_first:
+					calculate_taxes_and_totals(so)
+
+				so.append("taxes", {"charge_type": "On Net Total", "rate": 10})
+				so.append("taxes", {"charge_type": "On Previous Row Total", "row_id": "1", "rate": 5})
+				for tax in so.taxes:
+					tax.description = tax.description or "Tax"
+					tax.account_head = tax.account_head or "_Test Account Education Cess - _TC"
+
+				if shipping_first:
+					with self.assertRaisesRegex(frappe.ValidationError, "cannot be charged on the shipping"):
+						so.insert()
+				else:
+					so.insert()
+					self.assertTrue(so.taxes[-1].set_by_shipping_rule)
+
+	def test_switching_shipping_rule_replaces_its_row(self):
+		rule_a = create_shipping_rule("Selling", "_Test Shipping Rule - Discount")
+		for label, account in (
+			("_Test Shipping Rule - Same Account", rule_a.account),
+			("_Test Shipping Rule - Other Account", "_Test Account Customs Duty - _TC"),
+		):
+			with self.subTest(label=label):
+				rule_b = frappe.copy_doc(rule_a)
+				rule_b.label = label
+				rule_b.account = account
+				rule_b.insert()
+
+				so = make_sales_order(qty=1, rate=120, do_not_save=True)
+				so.set("taxes", [])
+				so.shipping_rule = rule_a.name
+				so.insert()
+
+				so.shipping_rule = rule_b.name
+				so.save()
+
+				self.assertEqual(len(so.taxes), 1)
+				self.assertEqual(so.taxes[0].account_head, account)
+				self.assertEqual(so.taxes[0].description, label)
+				self.assertEqual(so.taxes[0].tax_amount, 100)
+
+	def test_clearing_shipping_rule_removes_its_row(self):
+		so = make_sales_order(qty=1, rate=120, do_not_save=True)
+		so.set("taxes", [])
+		so.append("taxes", {"charge_type": "On Net Total", "rate": 10})
+		so.shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount").name
+		calculate_taxes_and_totals(so)
+
+		so.append("taxes", {"charge_type": "Actual", "tax_amount": 50})
+		so.append("taxes", {"charge_type": "On Previous Row Amount", "row_id": "3", "rate": 10})
+		for tax in so.taxes:
+			tax.description = tax.description or "Tax"
+			tax.account_head = tax.account_head or "_Test Account Education Cess - _TC"
+
+		so.shipping_rule = ""
+		calculate_taxes_and_totals(so)
+
+		self.assertFalse([tax for tax in so.taxes if tax.set_by_shipping_rule])
+		self.assertEqual(
+			[tax.charge_type for tax in so.taxes], ["On Net Total", "Actual", "On Previous Row Amount"]
+		)
+		self.assertEqual(so.taxes[2].row_id, "2")
+		self.assertEqual(so.taxes[2].tax_amount, 5)
+
 
 def create_shipping_rule(shipping_rule_type, shipping_rule_name):
 	if frappe.db.exists("Shipping Rule", shipping_rule_name):
