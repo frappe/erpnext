@@ -104,11 +104,7 @@ def make_packing_list(doc, order_packed_items=None):
 
 	for item_row in doc.get("items"):
 		if is_product_bundle(item_row.item_code):
-			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
-			so_packed_items = list(order_packed_items.get(order_row, []))
-			component_rows = get_component_order_rows(
-				doc, item_row.item_code, get_product_bundle_items(item_row.item_code), so_packed_items
-			)
+			component_rows = get_bundle_components(doc, item_row, order_packed_items)
 			return_qty = get_return_qty(doc, item_row, component_rows, returned_packed_qty)
 			for bundle_item, so_packed_item in component_rows:
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
@@ -146,6 +142,43 @@ def make_packing_list(doc, order_packed_items=None):
 
 	if parent_items_price:
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
+
+
+def get_bundle_components(doc, item_row, order_packed_items):
+	"""Components of ``item_row``'s bundle, each with the order's packed row it delivers."""
+	order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
+	so_packed_items = list(order_packed_items.get(order_row, []))
+	return get_component_order_rows(
+		doc, item_row.item_code, get_product_bundle_items(item_row.item_code), so_packed_items
+	)
+
+
+def get_kept_packed_items(doc):
+	"""Yield (packed row, bundle row, stock qty per bundle unit) for each packed row of the last
+	build that make_packing_list keeps for the bundle rows as they are now."""
+	packed_items_table = get_indexed_packed_items_table(doc)
+	order_packed_items = get_order_packed_items(doc)
+	# only a bundle row that has packed rows can keep one
+	parent_items = {row.parent_item for row in doc.get("packed_items")}
+	for item_row in doc.get("items"):
+		if item_row.item_code not in parent_items:
+			continue
+
+		for bundle_item, so_packed_item in get_bundle_components(doc, item_row, order_packed_items):
+			stale_rows = get_stale_packed_rows(
+				doc,
+				item_row,
+				bundle_item,
+				packed_items_table,
+				get_linked_packed_item(doc, so_packed_item),
+			)
+			if stale_rows:
+				packed_row = stale_rows.pop(0)
+				yield (
+					packed_row,
+					item_row,
+					get_component_stock_qty_per_unit(bundle_item, packed_row.uom, so_packed_item),
+				)
 
 
 def is_product_bundle(item_code: str) -> bool:
@@ -248,12 +281,11 @@ def add_packed_item_row(
 	"""
 	exists, pi_row = False, {}
 
-	key = get_packed_item_key(
-		doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item
-	)
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
-	if stale_rows := packed_items_table.get(key):
+	if stale_rows := get_stale_packed_rows(
+		doc, main_item_row, packing_item, packed_items_table, linked_packed_item
+	):
 		pi_row, exists = stale_rows.pop(get_stale_row_idx(stale_rows, location)), True
 
 	if not exists:
@@ -271,6 +303,14 @@ def add_packed_item_row(
 		pi_row.reserve_stock = 1
 
 	return pi_row
+
+
+def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, linked_packed_item):
+	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
+	key = get_packed_item_key(
+		doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item
+	)
+	return packed_items_table.get(key)
 
 
 def get_packed_item_key(doc, main_item_row, item_code, packed_items_table, linked_packed_item=None):
