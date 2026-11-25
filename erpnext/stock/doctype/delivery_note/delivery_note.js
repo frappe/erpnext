@@ -23,7 +23,7 @@ frappe.ui.form.on("Delivery Note", {
 			Shipment: "Shipment",
 		}),
 			frm.set_indicator_formatter("item_code", function (doc) {
-				return doc.docstatus == 1 || doc.qty <= doc.actual_qty ? "green" : "orange";
+				return doc.docstatus == 1 || doc.stock_qty <= doc.actual_qty ? "green" : "orange";
 			});
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {

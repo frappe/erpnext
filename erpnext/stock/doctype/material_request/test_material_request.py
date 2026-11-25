@@ -1726,6 +1726,37 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(row.amount, 1250)
 		self.assertEqual(row.material_request_item, mr.items[0].name)
 
+	def test_item_rates_refresh_only_on_price_list_change(self):
+		item_code = create_item("_Test MR Typed Rate Item").name
+		for price_list, rate in (("Standard Buying", 0.16), ("_Test Buying Price List", 9)):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": price_list,
+					"price_list_rate": rate,
+				}
+			).insert()
+
+		mr = frappe.new_doc("Material Request")
+		mr.update({"company": "_Test Company", "buying_price_list": "Standard Buying"})
+		mr.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": 1,
+				"rate": 6,
+				"schedule_date": today(),
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		)
+		mr.insert()
+		self.assertEqual(mr.items[0].rate, 6)
+
+		mr.buying_price_list = "_Test Buying Price List"
+		mr.save()
+		self.assertEqual(mr.items[0].rate, 9)
+
 	def test_make_purchase_orders_by_supplier_invalid_rows(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_orders_by_supplier
 
@@ -2124,6 +2155,39 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.save()
 
 		self.assertIsNone(mr.customer)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_indent": 1})
+	def test_variant_without_reorder_levels_is_reordered_from_its_template(self):
+		"""A variant with no re-order levels of its own uses its template's levels."""
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.reorder_item import reorder_item
+
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"reorder_levels": [
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"warehouse_reorder_level": 20,
+						"warehouse_reorder_qty": 50,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.reorder_levels = []
+		variant.insert()
+		make_stock_entry(item_code=variant.name, target="_Test Warehouse - _TC", qty=5, basic_rate=10)
+
+		requests = reorder_item() or []
+
+		requested_qty = [d.stock_qty for mr in requests for d in mr.items if d.item_code == variant.name]
+		self.assertEqual(requested_qty, [50])
 
 
 def create_item_with_default_supplier(item_code, supplier):

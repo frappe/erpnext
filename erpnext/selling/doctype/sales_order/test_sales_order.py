@@ -33,6 +33,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	make_sales_invoice,
 	make_work_orders,
 )
+from erpnext.stock.doctype.item.item import make_item_price
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
@@ -334,6 +335,54 @@ class TestSalesOrder(ERPNextTestSuite):
 		dn.items[0].qty = 5
 		self.assertRaises(frappe.ValidationError, dn.submit)
 
+	def test_cancel_releases_components_of_a_disabled_bundle(self):
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=5, warehouse="_Test Warehouse - _TC")
+
+		def reserved_qty():
+			return frappe.db.get_value(
+				"Bin", {"item_code": component, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+			)
+
+		self.assertEqual(reserved_qty(), 10)
+
+		product_bundle.db_set("disabled", 1)
+		frappe.get_doc("Sales Order", so.name).cancel()
+		self.assertEqual(reserved_qty(), 0)
+
+	def test_deleting_a_disabled_bundle_row_releases_its_components(self):
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=5, warehouse="_Test Warehouse - _TC", do_not_submit=True)
+		so.append("items", dict(so.items[0].as_dict(), name=None, item_code="_Test Item"))
+		so.submit()
+
+		def reserved_qty():
+			return frappe.db.get_value(
+				"Bin", {"item_code": component, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+			)
+
+		self.assertEqual(reserved_qty(), 10)
+
+		product_bundle.db_set("disabled", 1)
+		row = so.items[1]
+		trans_item = [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": row.qty,
+				"rate": row.rate,
+				"conversion_factor": row.conversion_factor,
+			}
+		]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+		self.assertEqual(reserved_qty(), 0)
+
 	def test_make_production_plan(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
@@ -470,6 +519,22 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertNotIn(so.name, [row.name for row in rows])
 
 			self.assertEqual(len(make_sales_invoice(so.name).get("items")), 0)
+
+	def test_billable_orders_filtered_by_item_code(self):
+		so = make_sales_order(qty=10, rate=100)
+
+		def is_offered(item_code):
+			filters = [
+				["Sales Order", "docstatus", "=", 1],
+				["Sales Order", "company", "=", so.company],
+				["Sales Order", "customer", "=", so.customer],
+				["Sales Order Item", "item_code", "=", item_code],
+			]
+			rows = get_potentially_billable_sales_orders("Sales Order", "", "name", 0, 50, filters)
+			return so.name in [row.name for row in rows]
+
+		self.assertTrue(is_offered(so.items[0].item_code))
+		self.assertFalse(is_offered("_Test Item 2"))
 
 	def test_full_qty_billed_below_amount_is_offered_with_zero_qty(self):
 		so = make_sales_order(qty=1, rate=1000)
@@ -1231,6 +1296,16 @@ class TestSalesOrder(ERPNextTestSuite):
 			[{"item_code": "_Test Item", "rate": 200, "qty": 2, "docname": so.items[0].name}]
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+
+		other_so = make_sales_order(item_code="_Test Item", qty=4)
+		trans_item = json.dumps(
+			[
+				{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": so.items[0].name},
+				{"item_code": "_Test Item", "rate": 3, "qty": 9, "docname": other_so.items[0].name},
+			]
+		)
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", other_so.items[0].name, "qty"), 4)
 
 	def test_update_child_qty_with_conversion_factor_after_delivery(self):
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
@@ -4071,6 +4146,56 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(si2.items[0].qty, 20)
 
 	@change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_selling_price_validation_for_product_bundle(self):
+		bundle = make_item("_Test Bundle For Selling Price Validation", {"is_stock_item": 0}).name
+		component = make_item(
+			"_Test Component For Selling Price Validation",
+			{
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			},
+		).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_product_bundle(bundle, [component])
+
+		self.assertRaises(
+			frappe.ValidationError, make_sales_order, item_code=bundle, qty=1, rate=1, do_not_submit=True
+		)
+
+	@change_settings("Selling Settings", {"validate_selling_price": 1, "editable_bundle_item_rates": 1})
+	def test_selling_price_validation_for_bundle_priced_from_components(self):
+		bundle = make_item("_Test Bundle Priced From Components", {"is_stock_item": 0}).name
+		component = make_item("_Test Component Priced For Bundle", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_item_price(component, "Standard Selling", 400)
+		make_product_bundle(bundle, [component])
+
+		so = make_sales_order(item_code=bundle, qty=1, rate=1, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 400)
+
+	def test_product_bundle_valuation_rate_in_component_stock_uom(self):
+		bundle = make_item("_Test Bundle Valued In Stock UOM", {"is_stock_item": 0}).name
+		component = make_item(
+			"_Test Component Valued In Stock UOM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Gram", "conversion_factor": 0.001}],
+			},
+		).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		frappe.get_doc(
+			{
+				"doctype": "Product Bundle",
+				"new_item_code": bundle,
+				"items": [{"item_code": component, "qty": 100, "uom": "Gram"}],
+			}
+		).insert()
+
+		so = make_sales_order(item_code=bundle, qty=1, rate=20, do_not_submit=True)
+		self.assertEqual(so.items[0].valuation_rate, 10)
+
+	@change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_selling_price_validation_for_manufactured_item(self):
 		"""
 		Unit test to check the selling price validation for manufactured item, without last purchae rate in Item master.
@@ -4279,6 +4404,33 @@ class TestSalesOrder(ERPNextTestSuite):
 				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_sales_invoice, so.name)
 		finally:
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"dont_reserve_sales_order_qty_on_sales_return": 1})
+	def test_replacement_delivery_after_return_reserves_nothing(self):
+		"""A row delivered again after a return must not take its negative share off other orders."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=100, basic_rate=10)
+		make_sales_order(item_code=item_code, qty=5)
+		so = make_sales_order(item_code=item_code, qty=10)
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		sales_return = make_sales_return(dn.name)
+		sales_return.items[0].qty = -4
+		sales_return.submit()
+		make_delivery_note(so.name).submit()
+
+		reserved_qty = frappe.db.get_value(
+			"Bin", {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+		)
+		self.assertEqual(reserved_qty, 5)
+
+	def test_sales_order_without_items_raises_mandatory_error(self):
+		so = make_sales_order(do_not_save=True)
+		so.items = []
+		self.assertRaises(frappe.MandatoryError, so.insert)
 
 
 def compare_payment_schedules(doc, doc1, doc2):

@@ -18,7 +18,11 @@ import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.controllers.accounts_controller import merge_taxes
-from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_received_stock_qty_status_args,
+	get_returned_stock_qty_status_args,
+)
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock import get_warehouse_account
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -266,7 +270,7 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_dt": "Purchase Receipt",
 				"target_parent_field": "per_returned",
 				"target_ref_field": "received_stock_qty",
-				"source_field": "-1 * received_stock_qty",
+				**get_returned_stock_qty_status_args(),
 				"percent_join_field_parent": "return_against",
 			},
 		]
@@ -351,11 +355,7 @@ class PurchaseReceipt(BuyingController):
 			}
 		)
 
-		if (
-			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
-			and not self.is_return
-			and not self.is_internal_supplier
-		):
+		if cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")) and not self.is_return:
 			self.validate_rate_with_reference_doc(
 				[["Purchase Order", "purchase_order", "purchase_order_item"]]
 			)
@@ -550,6 +550,7 @@ class PurchaseReceipt(BuyingController):
 		)
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
+		rows_at_invoice_rate = get_rows_at_invoice_rate(self, net_rate_map)
 
 		def validate_account(account_type):
 			frappe.throw(_("{0} account not found while submitting purchase receipt").format(account_type))
@@ -605,6 +606,16 @@ class PurchaseReceipt(BuyingController):
 					get_stock_value_difference(self.name, item.name, item.from_warehouse)
 				)
 				credit_amount = outgoing_amount
+			elif (
+				self.get("is_return")
+				and item.return_qty_from_rejected_warehouse
+				and not self.is_internal_transfer()
+				and item.purchase_receipt_item
+				and flt(frappe.db.get_value("Purchase Receipt Item", item.purchase_receipt_item, "qty"))
+			):
+				# A receipt with accepted qty credited its rejected stock qty at the net rate, without charges.
+				outgoing_amount = flt(item.stock_qty) * flt(item.base_net_rate) / flt(item.conversion_factor)
+				credit_amount = outgoing_amount
 
 			if (
 				item.get("rejected_qty")
@@ -641,7 +652,7 @@ class PurchaseReceipt(BuyingController):
 					if (
 						exchange_rate_map[item.purchase_invoice]
 						and self.conversion_rate != exchange_rate_map[item.purchase_invoice]
-						and item.net_rate == net_rate_map[item.purchase_invoice_item]
+						and item.name in rows_at_invoice_rate
 					):
 						discrepancy_caused_by_exchange_rate_difference = flt(
 							item.qty
@@ -1208,6 +1219,25 @@ class PurchaseReceipt(BuyingController):
 			.where(sle_table.voucher_type == "Purchase Receipt")
 			.where(sle_table.warehouse.notin(rejected_warehouses))
 		).run()
+
+
+def get_rows_at_invoice_rate(doc, net_rate_map: dict) -> set:
+	"""Rows received at the Purchase Invoice net rate; a return row follows its original row."""
+	if not doc.is_return:
+		return {row.name for row in doc.items if row.net_rate == net_rate_map.get(row.purchase_invoice_item)}
+
+	receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+	original_rows = (
+		frappe.qb.from_(receipt_item)
+		.join(invoice_item)
+		.on(invoice_item.name == receipt_item.purchase_invoice_item)
+		.select(receipt_item.name)
+		.where(receipt_item.name.isin([row.purchase_receipt_item for row in doc.items]))
+		.where(receipt_item.net_rate == invoice_item.net_rate)
+		.run(pluck=True)
+	)
+	return {row.name for row in doc.items if row.purchase_receipt_item in original_rows}
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):

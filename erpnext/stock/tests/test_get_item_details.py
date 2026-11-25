@@ -223,6 +223,46 @@ class TestGetItemDetail(ERPNextTestSuite):
 			self.assertEqual(details.valuation_rate, 50)
 			self.assertEqual(details.actual_qty, 1)
 
+	def get_material_transfer_details(self, item_code, from_warehouse):
+		ctx = {
+			"item_code": item_code,
+			"company": "_Test Company",
+			"doctype": "Material Request",
+			"material_request_type": "Material Transfer",
+			"warehouse": "_Test Warehouse 1 - _TC",
+			"from_warehouse": from_warehouse,
+			"transaction_date": today(),
+			"currency": "INR",
+			"conversion_rate": 1.0,
+			"ignore_pricing_rule": 1,
+			"qty": 1,
+		}
+		return get_item_details(ctx, overwrite_warehouse=False)
+
+	def test_material_request_source_warehouse_hides_stock_outside_user_permission(self):
+		item_code = self.make_stock_item_in_two_warehouses()
+
+		with as_user(self.make_warehouse_fenced_user(["Stock User", "Purchase User"])):
+			for from_warehouse, actual_qty in (("_Test Warehouse - _TC", 0), ("_Test Warehouse 1 - _TC", 1)):
+				with self.subTest(from_warehouse=from_warehouse):
+					details = self.get_material_transfer_details(item_code, from_warehouse)
+					self.assertEqual(details.actual_qty, actual_qty)
+
+	def test_material_request_source_warehouse_hides_stock_outside_company_permission(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, to_warehouse="Stores - TCP1", qty=1, rate=100)
+		user = make_fenced_user(
+			"_test_company_fenced_user@example.com",
+			["Stock User", "Purchase User"],
+			[("Company", "_Test Company")],
+		)
+
+		with as_user(user):
+			self.assertEqual(self.get_material_transfer_details(item_code, "Stores - TCP1").actual_qty, 0)
+
 	def test_stock_qty_methods_apply_warehouse_user_permission(self):
 		item_code = self.make_stock_item_in_two_warehouses()
 
@@ -756,6 +796,57 @@ class TestGetItemDetail(ERPNextTestSuite):
 		self.assertEqual(pi.items[0].rate, 28)
 		self.assertEqual(pi.items[1].rate, 275)  # used to collapse onto the first row (28)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
+	def test_rate_lock_for_inter_company_supplier(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import get_rate_locked_source_row
+
+		supplier = create_internal_supplier("_Test Sister Supplier", "_Test Company 1", "_Test Company")
+		po = create_purchase_order(supplier=supplier, rate=90)
+		ctx = frappe._dict(
+			doctype="Purchase Receipt", is_internal_supplier=1, purchase_order_item=po.items[0].name
+		)
+		pr_doc = {
+			"doctype": "Purchase Receipt",
+			"company": po.company,
+			"represents_company": "_Test Company 1",
+		}
+
+		self.assertEqual(get_rate_locked_source_row(ctx.copy(), pr_doc).rate, 90)
+
+		pr_doc["represents_company"] = po.company
+		self.assertIsNone(get_rate_locked_source_row(ctx.copy(), pr_doc))
+
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"maintain_same_sales_rate": 1, "maintain_same_rate_action": "Stop"}
+	)
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_auto_picked_batch_keeps_sales_order_rate(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item_code, batches = self.make_batched_item_with_stock([1])
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": "Standard Selling",
+				"item_code": item_code,
+				"batch_no": batches[0],
+				"price_list_rate": 200,
+			}
+		).insert()
+
+		so = make_sales_order(item_code=item_code, qty=1, rate=100)
+		dn = make_delivery_note(so.name)
+		dn.items[0].use_serial_batch_fields = 1
+		dn.save()
+
+		self.assertEqual(dn.items[0].batch_no, batches[0])
+		self.assertEqual(dn.items[0].rate, 100)
+
 	def make_batched_item_with_stock(self, quantities, uoms=None, **properties):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -1119,6 +1210,108 @@ class TestGetItemDetail(ERPNextTestSuite):
 				details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
 				self.assertEqual(details.price_list_rate, expected_rate)
 
+	def test_party_price_in_stock_uom_comes_before_general_price_in_row_uom(self):
+		from erpnext.stock.get_item_details import apply_price_list
+
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer")
+
+		details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
+
+		self.assertEqual(details.price_list_rate, 80)
+
+		# the bulk path must resolve a missing conversion factor before pricing
+		row = frappe._dict(
+			doctype="Sales Order Item", item_code=item_code, uom="_Test UOM 1", stock_uom="_Test UOM", qty=1
+		)
+		ctx = self.get_uom_rate_context(item_code, price_list.name)
+		ctx.pop("conversion_factor")
+		ctx.items = [row]
+		self.assertEqual(apply_price_list(ctx)["children"][0].price_list_rate, 80)
+
+	def test_party_price_in_stock_uom_fits_packing_unit_in_stock_qty(self):
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 9, uom="_Test UOM")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(
+			item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer", packing_unit=10
+		)
+
+		for qty, expected_rate in ((1, 80), (1.5, 100)):
+			with self.subTest(qty=qty):
+				ctx = self.get_uom_rate_context(item_code, price_list.name)
+				ctx.qty = qty
+				self.assertEqual(get_item_details(ctx).price_list_rate, expected_rate)
+
+	def test_party_price_in_stock_uom_packing_unit_uses_row_stock_qty_precision(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.get_item_details import apply_price_list
+
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(
+			item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer", packing_unit=10
+		)
+		ctx = self.get_uom_rate_context(item_code, price_list.name)
+		# stock qty 9.99996 falls short of the packing unit at a stock qty precision of 6
+		ctx.qty = 0.999996
+
+		get_precision = frappe.get_precision
+
+		def get_row_precision(doctype, fieldname, *args, **kwargs):
+			if (doctype, fieldname) == ("Sales Order Item", "stock_qty"):
+				return 6
+			return get_precision(doctype, fieldname, *args, **kwargs)
+
+		with patch("frappe.get_precision", side_effect=get_row_precision):
+			self.assertEqual(get_item_details(ctx.copy()).price_list_rate, 100)
+
+			ctx.items = [
+				frappe._dict(
+					doctype="Sales Order Item",
+					item_code=item_code,
+					uom="_Test UOM 1",
+					stock_uom="_Test UOM",
+					conversion_factor=10,
+					qty=ctx.qty,
+				)
+			]
+			self.assertEqual(apply_price_list(ctx)["children"][0].price_list_rate, 100)
+
+	def test_party_price_in_stock_uom_for_a_context_without_a_row_doctype(self):
+		from erpnext.stock.get_item_details import get_price_list_rate_for
+
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer")
+		ctx = dict(self.get_uom_rate_context(item_code, price_list.name), stock_uom="_Test UOM")
+
+		# a plain dict without a doctype, and a doctype whose rows have no stock qty
+		for doctype in (None, "Blanket Order"):
+			with self.subTest(doctype=doctype):
+				self.assertEqual(get_price_list_rate_for(dict(ctx, doctype=doctype), item_code), 80)
+
+	def test_party_price_in_stock_uom_packing_unit_skips_a_stock_qty_rounding_to_zero(self):
+		from erpnext.stock.get_item_details import get_price_list_rate_for
+
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100, uom="_Test UOM 1")
+		self.make_item_price(
+			item_code, price_list.name, 8, uom="_Test UOM", customer="_Test Customer", packing_unit=1
+		)
+		ctx = self.get_uom_rate_context(item_code, price_list.name)
+		# the stock qty rounds to 0 at any stock qty precision
+		ctx.update(stock_uom="_Test UOM", conversion_factor=1e-10)
+
+		self.assertEqual(get_price_list_rate_for(ctx, item_code), 100)
+
 	def test_fallback_price_list_uses_its_own_uom_setting(self):
 		item_code = self.make_multi_uom_item()
 		selected_list = self.make_selling_price_list("_Test UOM Price List", not_uom_dependent=1)
@@ -1132,6 +1325,67 @@ class TestGetItemDetail(ERPNextTestSuite):
 			details = get_item_details(self.get_uom_rate_context(item_code, selected_list.name))
 
 		self.assertEqual(details.price_list_rate, 1000)
+
+	def test_last_purchase_rate_fallback_in_row_uom(self):
+		item_code = self.make_item_with_last_purchase_fallback()
+
+		details = get_item_details(
+			{
+				"item_code": item_code,
+				"company": "_Test Company",
+				"supplier": "_Test Supplier 1",
+				"doctype": "Purchase Order",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"price_list": "Standard Buying",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1,
+				"uom": "_Test UOM 1",
+				"conversion_factor": 10,
+				"qty": 1,
+			}
+		)
+
+		self.assertEqual(details.rate, 100)
+
+	def test_apply_price_list_fallback_without_conversion_factor(self):
+		from erpnext.stock.get_item_details import apply_price_list
+
+		item_code = self.make_item_with_last_purchase_fallback()
+
+		details = apply_price_list(
+			{
+				"doctype": "Purchase Order",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier 1",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"buying_price_list": "Standard Buying",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1,
+				"items": [
+					{
+						"doctype": "Purchase Order Item",
+						"item_code": item_code,
+						"uom": "_Test UOM 1",
+						"stock_uom": "_Test UOM",
+						"qty": 1,
+					}
+				],
+			}
+		)
+
+		self.assertEqual(details["children"][0].rate, 100)
+
+	def make_item_with_last_purchase_fallback(self) -> str:
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		item_code = self.make_multi_uom_item()
+		create_purchase_order(item_code=item_code, qty=10, rate=10)
+		# a zero price makes the row fall back to the last purchase rate
+		frappe.db.delete("Item Price", {"item_code": item_code})
+		self.make_item_price(item_code, "Standard Buying", 0)
+		return item_code
 
 	def make_multi_uom_item(self) -> str:
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -1153,13 +1407,14 @@ class TestGetItemDetail(ERPNextTestSuite):
 		price_list.price_not_uom_dependent = not_uom_dependent
 		return price_list.save()
 
-	def make_item_price(self, item_code: str, price_list: str, rate: float) -> None:
+	def make_item_price(self, item_code: str, price_list: str, rate: float, **fields) -> None:
 		frappe.get_doc(
 			{
 				"doctype": "Item Price",
 				"item_code": item_code,
 				"price_list": price_list,
 				"price_list_rate": rate,
+				**fields,
 			}
 		).insert()
 
@@ -1207,3 +1462,53 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		with as_user(make_fenced_user("_test_tax_info_sales@example.com", ["Sales User"])):
 			self.assertEqual(get_item_tax_info(**kwargs), expected)
+
+	def test_batch_and_serial_item_details_without_doc(self):
+		"""``doc`` is optional, so a Delivery Note row of a batch or serial item works without it."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		warehouse = "_Test Warehouse - _TC"
+		batch_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TGID-B-.#####",
+			}
+		).name
+		serial_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TGID-S-.#####"}
+		).name
+		for item_code in (batch_item, serial_item):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=10)
+
+		ctx = {
+			"company": "_Test Company",
+			"doctype": "Delivery Note",
+			"customer": "_Test Customer",
+			"qty": 2,
+			"warehouse": warehouse,
+			"use_serial_batch_fields": 1,
+			"currency": "INR",
+			"price_list": "Standard Selling",
+			"price_list_currency": "INR",
+			"plc_conversion_rate": 1,
+			"conversion_rate": 1,
+			"transaction_date": today(),
+		}
+
+		batch_no = frappe.db.get_value("Batch", {"item": batch_item})
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": batch_item,
+				"price_list": "Standard Selling",
+				"batch_no": batch_no,
+				"price_list_rate": 99,
+			}
+		).insert()
+
+		details = get_item_details(dict(ctx, item_code=batch_item))
+		self.assertEqual((details.batch_no, details.price_list_rate), (batch_no, 99))
+		self.assertEqual(len(get_item_details(dict(ctx, item_code=serial_item)).serial_no.split("\n")), 2)

@@ -93,6 +93,21 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(filtered_locations[0].serial_nos, ["SN-1", "SN-3"])
 
+	def test_filter_locations_offers_no_more_qty_than_free_serial_nos(self):
+		"""A partly transferred row still lists both picked serial nos while it holds only 1."""
+		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
+
+		warehouse = "Test Warehouse"
+		locations = [
+			_dict(warehouse=warehouse, batch_no=None, qty=4, serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"])
+		]
+		picked_item_details = {warehouse: {"picked_qty": 1, "serial_no": ["SN-1", "SN-2"]}}
+
+		filtered_locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+		self.assertEqual(filtered_locations[0].qty, 2)
+		self.assertEqual(filtered_locations[0].serial_nos, ["SN-3", "SN-4"])
+
 	def test_get_items_with_location_trims_allocated_serial_nos(self):
 		from erpnext.stock.doctype.pick_list.pick_list import get_items_with_location_and_quantity
 
@@ -2456,6 +2471,37 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.reload()
 		self.assertEqual((pick_list.locations[0].delivered_qty, pick_list.status), (10, "Completed"))
 
+	def test_delivery_from_pick_list_refuses_another_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		picked_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item in (picked_item, other_item):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"purpose": "Delivery",
+				"locations": [
+					{
+						"item_code": picked_item,
+						"qty": 10,
+						"stock_qty": 10,
+						"picked_qty": 10,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		for target in ("Delivery Note", "Sales Invoice"):
+			target_doc = frappe.new_doc(target, company="_Test Company", currency="INR")
+			delivery = create_delivery(pick_list.name, target_doc=target_doc, target=target)
+			delivery.items[0].update({"item_code": other_item, "item_name": other_item})
+			self.assertRaisesRegex(frappe.ValidationError, "is not the item", delivery.save)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_sales_invoice_from_pick_list_copies_old_batch_serial_fields(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -3361,6 +3407,47 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
 		self.assertEqual(pick_list.status, "Partially Transferred")
 
+	def test_stock_entry_transfers_the_picked_qty_in_a_fractional_uom(self):
+		"""0.1 + 0.2 is 0.30000000000000004 in float, which must still match the 0.3 picked."""
+		frappe.db.set_value("UOM", "Kg", "must_be_whole_number", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Nos", "conversion_factor": 0.1}],
+			}
+		).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 0.3,
+						"stock_qty": 0.3,
+						"picked_qty": 0.3,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		for qty in (1, 2):
+			stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+			row = stock_entry.items[0]
+			row.uom, row.conversion_factor, row.qty = "Nos", 0.1, qty
+			row.t_warehouse = "_Test Warehouse 1 - _TC"
+			stock_entry.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", pick_list.locations[0].name, "transferred_qty"), 0.3
+		)
+
 	def test_get_items_keeps_pick_list_rows_on_stock_entry(self):
 		"""Entering fg_completed_qty on a Stock Entry mapped from a Pick List triggers get_items();
 		it must not refetch from the BOM, or the pick_list_item links transferred_qty rides on are
@@ -3567,6 +3654,86 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(second_transfer.items[0].qty, 1)
 		self.assertEqual(get_serial_nos(second_transfer.items[0].serial_no), picked_serial_nos[2:])
 		second_transfer.save().submit()
+
+	def test_stock_entry_moves_only_the_picked_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		picked_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item in (picked_item, other_item):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [
+					{
+						"item_code": picked_item,
+						"qty": 10,
+						"stock_qty": 10,
+						"picked_qty": 10,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		def transfer(item_code, original_item=None):
+			stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+			row = stock_entry.items[0]
+			row.item_code, row.item_name, row.original_item = item_code, item_code, original_item
+			row.t_warehouse = "_Test Warehouse 1 - _TC"
+			return stock_entry.submit()
+
+		for original_item in (None, picked_item):
+			self.assertRaisesRegex(
+				frappe.ValidationError, "is not the item", transfer, other_item, original_item
+			)
+
+		transfer(picked_item, original_item=other_item)
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", pick_list.locations[0].name, "transferred_qty"), 10
+		)
+
+	def test_stock_entry_from_work_order_pick_list_moves_an_alternative_item(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			create_pick_list as create_pick_list_from_wo,
+		)
+
+		warehouse = "Stores - _TC"
+		picked_item = make_item(properties={"is_stock_item": 1, "allow_alternative_item": 1}).name
+		alternative_item = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Alternative",
+				"item_code": picked_item,
+				"alternative_item_code": alternative_item,
+			}
+		).insert()
+		bom = make_bom(item=finished_good, raw_materials=[picked_item])
+		for item in (picked_item, alternative_item):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=2, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=2,
+			source_warehouse=warehouse,
+			allow_alternative_item=1,
+		)
+		pick_list = create_pick_list_from_wo(work_order.name, None, 2).submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		row = stock_entry.items[0]
+		row.item_code, row.item_name, row.original_item = alternative_item, alternative_item, picked_item
+		stock_entry.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", pick_list.locations[0].name, "transferred_qty"), 2
+		)
 
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -4270,6 +4437,27 @@ class TestPickList(ERPNextTestSuite):
 		delivery_note = create_delivery_note(pick_list.name)
 		self.assertEqual([(row.item_code, row.qty) for row in delivery_note.items], [(item_with_so, 3)])
 
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_currency": "USD"})
+	def test_sales_invoice_from_pick_list_without_so_takes_company_currency(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=2, basic_rate=100)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"purpose": "Delivery",
+				"locations": [
+					{"item_code": item, "qty": 2, "stock_qty": 2, "picked_qty": 2, "warehouse": warehouse}
+				],
+			}
+		).submit()
+
+		sales_invoice = create_delivery(pick_list.name, target="Sales Invoice")
+		self.assertEqual((sales_invoice.currency, sales_invoice.conversion_rate), ("INR", 1))
+
 	def test_creating_dn_from_so_with_different_addresses(self):
 		warehouse = "_Test Warehouse - _TC"
 		item1 = make_item().name
@@ -4377,6 +4565,36 @@ class TestPickList(ERPNextTestSuite):
 		self.assertRaises(
 			frappe.ValidationError, get_pick_list_query, "Pick List", "", "name", 0, 20, filters
 		)
+
+	def test_transferred_qty_is_no_longer_held_by_the_pick_list(self):
+		"""Stock a Stock Entry moved out for a Material Transfer pick list is not held there any more."""
+		warehouse = "_Test Warehouse - _TC"
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, qty=10, rate=10, to_warehouse=warehouse)
+		row = {
+			"item_code": item_code,
+			"qty": 10,
+			"stock_qty": 10,
+			"picked_qty": 10,
+			"warehouse": warehouse,
+			"conversion_factor": 1,
+		}
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [row],
+			}
+		).submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.items[0].qty = 6
+		stock_entry.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		stock_entry.submit()
+
+		(held,) = frappe.new_doc("Pick List")._get_pick_list_items([_dict(item_code=item_code)])
+		self.assertEqual(held.picked_qty, 4)
 
 
 def make_work_order_pick_list_with_reserved_serials():

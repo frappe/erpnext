@@ -335,6 +335,10 @@ class SalesInvoice(SellingController):
 			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 	def validate(self):
+		# Only POS consolidation may mark an invoice as consolidated.
+		if not self.flags.is_consolidated:
+			self.is_consolidated = 0
+
 		self.validate_auto_set_posting_time()
 		super().validate()
 
@@ -410,6 +414,7 @@ class SalesInvoice(SellingController):
 					row.billing_amount = -abs(row.billing_amount)
 
 		self.validate_update_stock_for_pick_list_reference()
+		self.validate_against_pick_list_items()
 		self.set_serial_and_batch_bundle_from_pick_list()
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
@@ -1241,7 +1246,6 @@ class SalesInvoice(SellingController):
 		if (
 			cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
@@ -1342,7 +1346,7 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		# Consolidation posts payments already accepted on submitted POS invoices.
-		if not self.get("is_consolidated"):
+		if not self.flags.is_consolidated:
 			for payment in self.get("payments") or []:
 				validate_enabled_mode_of_payment(payment.mode_of_payment)
 
@@ -2632,7 +2636,7 @@ class SalesInvoice(SellingController):
 
 	def counts_coupon_use(self):
 		# Returns and POS consolidation do not redeem the coupon again.
-		if self.is_return or self.get("is_consolidated"):
+		if self.is_return or (self.doctype == "Sales Invoice" and self.is_consolidated):
 			return False
 
 		if not self.items or any(
@@ -3521,6 +3525,9 @@ def get_loyalty_programs(customer: str):
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):
+	frappe.has_permission("Sales Invoice", doc=source_name, throw=True)
+	frappe.has_permission("Invoice Discounting", ptype="create", throw=True)
+
 	invoice = frappe.get_doc("Sales Invoice", source_name)
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company

@@ -30,9 +30,9 @@ How an entry is valued
 * Outward stock is valued from what is on hand: the pool at its average or its
   oldest (FIFO) / newest (LIFO) layers, a batch at its average, a serial at its
   receipt rate.
-* A FIFO purchase return first takes the layer carrying the rate of the receipt
-  it returns. A moving average return leaves at the current average, and a LIFO
-  return from the top of the stack, as the stock ledger does.
+* A FIFO or LIFO purchase return first takes the layer carrying the rate of the
+  receipt it returns, as the stock ledger does (LIFO looks from the top of the stack).
+  A moving average return leaves at the current average, as a repost of the ledger does.
 * A Stock Reconciliation without serial / batch nos sets the qty and the rate.
   With them, it is an issue of the counted-out lots and a receipt of the counted-in ones.
   For an item valued in the pool alone (serial no wise valuation off, no batches) both
@@ -45,7 +45,7 @@ How an entry is valued
   or last rate. If the warehouse never had a rate, the ledger's own rate is taken,
   as there is nothing to check it against.
 * Like the ledger, the stock value is rounded to the currency precision after
-  every entry, and a reconciled rate is rounded before it is applied.
+  every entry.
 * An Adjustment Entry (erpnext.stock.valuation_adjustment) resets the stock to its rows. Its
   entries count out whatever the ledger holds, right or wrong, so they are taken as they are, up
   to the last one of each item-warehouse, after which the stock must be what the rows count in.
@@ -208,8 +208,8 @@ class QueuePool:
 	def issue(self, qty: float, preferred_rate: float | None = None) -> float:
 		"""Take qty out layer by layer and return the value taken out.
 
-		For FIFO, a layer carrying `preferred_rate` is taken first. If the queue runs
-		dry, the rest goes negative at the last rate consumed.
+		A layer carrying `preferred_rate` is taken first. If the queue runs dry, the rest
+		goes negative at the last rate consumed.
 		"""
 		value_before = self.value
 
@@ -235,15 +235,16 @@ class QueuePool:
 		return value_before - self.value
 
 	def get_layer_to_consume(self, preferred_rate: float | None) -> int:
+		indexes = range(len(self.layers))
 		if self.last_in_first_out:
-			return -1
+			indexes = reversed(indexes)
 
 		if preferred_rate is not None:
-			for index, (_qty, rate) in enumerate(self.layers):
-				if rate == preferred_rate:
+			for index in indexes:
+				if self.layers[index][1] == preferred_rate:
 					return index
 
-		return 0
+		return -1 if self.last_in_first_out else 0
 
 	def set_balance(self, qty: float, rate: float) -> None:
 		self.layers = [[qty, rate]]
@@ -375,6 +376,7 @@ class ItemWarehouseStock:
 		self.batch_lots = {}
 		self.serial_rates = {}
 		self.serials_issued_before_receipt = {}
+		self.carried_value = 0.0
 
 	def write_off_leftover_value(self) -> None:
 		"""With no stock left in the warehouse, no value should be left either."""
@@ -520,22 +522,31 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 	stock.clear()
 
 	for row in details.data.adjustment_rows.get((entry.voucher_no, entry.item_code, entry.warehouse), []):
-		rate = flt(row.valuation_rate)
-		if row.serial_no:
-			for serial_no in get_serial_nos(row.serial_no):
-				if details.values_everything_in_pool:
-					stock.receive_into_pool(1, rate)
-				else:
-					stock.receive_serial(serial_no, rate)
-		elif row.batch_no and details.is_valued_batch_wise(row.batch_no):
-			stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
-		elif flt(row.qty):
-			stock.receive_into_pool(flt(row.qty), rate)
+		value_before = stock.value
+		count_in_adjustment_row(stock, row, details)
 
-	stock.carried_value = flt(stock.value, details.currency_precision)
+		# the ledger counts in every row as an entry of its own
+		stock.carried_value = flt(
+			stock.carried_value + stock.value - value_before, details.currency_precision
+		)
+
 	carry_moving_average_rate_from_rounded_value(stock)
 
 	return make_expected_values(stock, carried_value_before, BASIS_ADJUSTED)
+
+
+def count_in_adjustment_row(stock: ItemWarehouseStock, row, details: "ValuationDetails") -> None:
+	rate = flt(row.valuation_rate)
+	if row.serial_no:
+		for serial_no in get_serial_nos(row.serial_no):
+			if details.values_everything_in_pool:
+				stock.receive_into_pool(1, rate)
+			else:
+				stock.receive_serial(serial_no, rate)
+	elif row.batch_no and details.is_valued_batch_wise(row.batch_no):
+		stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
+	elif flt(row.qty):
+		stock.receive_into_pool(flt(row.qty), rate)
 
 
 def carry_moving_average_rate_from_rounded_value(stock: ItemWarehouseStock) -> None:
@@ -715,7 +726,7 @@ class ValuationDetails:
 			if flt(entry.actual_qty) < 0 and (entry.serial_and_batch_bundle or entry.serial_no):
 				rate = reconciled.current_valuation_rate
 
-			return flt(reconciled.qty), flt(rate, self.currency_precision)
+			return flt(reconciled.qty), flt(rate)
 
 		return flt(entry.qty_after_transaction), flt(entry.valuation_rate)
 
@@ -763,10 +774,10 @@ class ValuationDetails:
 		return [LotMovement(qty=qty, rate=flt(entry.incoming_rate), batch_no=entry.batch_no)]
 
 	def get_purchase_return_rate(self, entry) -> float | None:
-		"""For a FIFO purchase return, the rate of the receipt row it returns. None when the
-		entry is not one, or the receipt cannot be found."""
+		"""For a FIFO or LIFO purchase return, the rate of the receipt row it returns. None when
+		the entry is not one, or the receipt cannot be found."""
 		if (
-			self.valuation_method != "FIFO"
+			self.valuation_method not in ("FIFO", "LIFO")
 			or self.values_everything_in_pool
 			or entry.voucher_type not in RETURNABLE_PURCHASE_DOCTYPES
 		):

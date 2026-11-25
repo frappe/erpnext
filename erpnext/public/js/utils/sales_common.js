@@ -373,12 +373,16 @@ erpnext.sales_common = {
 			calculate_commission() {
 				if (!this.frm.fields_dict.commission_rate || this.frm.doc.docstatus === 1) return;
 
-				if (this.frm.doc.commission_rate > 100) {
-					this.frm.set_value("commission_rate", 100);
+				if (this.frm.doc.commission_rate < 0 || this.frm.doc.commission_rate > 100) {
+					this.frm.set_value("commission_rate", this.frm.doc.commission_rate < 0 ? 0 : 100);
 					frappe.throw(
-						`${__(
-							frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)
-						)} ${__("cannot be greater than 100")}`
+						__("{0} must be between 0 and 100", [
+							frappe.meta.get_translated_label(
+								this.frm.doc.doctype,
+								"commission_rate",
+								this.frm.doc.name
+							),
+						])
 					);
 				}
 

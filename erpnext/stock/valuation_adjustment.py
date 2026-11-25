@@ -142,10 +142,9 @@ def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, 
 		plan.reason = _("Its stock should be negative on this date, which cannot be counted in.")
 		return
 
-	precision = details.currency_precision
 	serial_nos_by_rate = defaultdict(list)
 	for serial_no, rate in stock.serial_rates.items():
-		serial_nos_by_rate[flt(rate, precision)].append(serial_no)
+		serial_nos_by_rate[rate].append(serial_no)
 
 	for rate, serial_nos in sorted(serial_nos_by_rate.items()):
 		plan.rows.append(
@@ -155,9 +154,7 @@ def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, 
 	for batch_no, lot in sorted(stock.batch_lots.items()):
 		if lot.qty >= details.qty_tolerance:
 			plan.rows.append(
-				AdjustmentRow(
-					qty=lot.qty, valuation_rate=flt(lot.value / lot.qty, precision), batch_no=batch_no
-				)
+				AdjustmentRow(qty=lot.qty, valuation_rate=lot.value / lot.qty, batch_no=batch_no)
 			)
 
 	pooled_lots = get_pooled_lots(plan, details, posting_datetime, exclude_voucher_no)
@@ -172,13 +169,12 @@ def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, 
 def get_pool_layers(stock, details, posting_datetime) -> list[tuple[float, float]]:
 	"""The [qty, rate] layers the pool should hold, oldest first: counted in in this order, they
 	give a FIFO queue or a LIFO stack back as it should be. A moving average pool is one layer."""
-	precision = details.currency_precision
 	pool = stock.pool
 
 	if isinstance(pool, QueuePool):
-		layers = [(qty, flt(rate, precision)) for qty, rate in pool.layers]
+		layers = pool.layers
 	else:
-		layers = [(pool.qty, flt(pool.rate, precision))]
+		layers = [(pool.qty, pool.rate)]
 
 	return [(qty, rate) for qty, rate in layers if abs(qty) >= details.qty_tolerance]
 
@@ -452,8 +448,10 @@ class AdjustmentEntry:
 				if index == 0 and plan.ledger_qty
 				else 0
 			)
-			row.quantity_difference = flt(row.qty) - flt(row.current_qty)
-			row.amount_difference = flt(row.amount) - flt(row.current_amount)
+			row.quantity_difference = flt(flt(row.qty) - flt(row.current_qty), row.precision("qty"))
+			row.amount_difference = flt(
+				flt(row.amount) - flt(row.current_amount), row.precision("amount_difference")
+			)
 
 	def post(self) -> None:
 		from erpnext.stock.serial_batch_bundle import update_batch_qty
@@ -922,7 +920,7 @@ def validate_no_later_adjustment_entry(sle) -> None:
 			& (reconciliation.name != sle.voucher_no)
 			& (ledger.is_cancelled == 0)
 			& (ledger.item_code == sle.item_code)
-			& (ledger.posting_datetime > get_datetime(sle.posting_datetime))
+			& get_later_than(ledger, sle)
 			& of_item
 		)
 		.orderby(ledger.posting_datetime, order=frappe.qb.desc)
@@ -942,6 +940,29 @@ def validate_no_later_adjustment_entry(sle) -> None:
 			title=_("Backdated Entry Before Adjustment Entry"),
 			exc=BackdatedEntryBeforeAdjustmentError,
 		)
+
+
+def get_later_than(ledger, sle):
+	"""Ledger rows after `sle`. A cancellation sits where the entry it reverses was made, so an
+	Adjustment Entry at the same time but made after that entry is later too."""
+	posting_datetime = get_datetime(sle.posting_datetime)
+	later = ledger.posting_datetime > posting_datetime
+	if not sle.is_cancelled:
+		return later
+
+	created = frappe.db.get_value(
+		"Stock Ledger Entry",
+		{
+			"voucher_type": sle.voucher_type,
+			"voucher_no": sle.voucher_no,
+			"item_code": sle.item_code,
+			"warehouse": sle.warehouse,
+			"is_cancelled": 1,
+		},
+		"creation",
+		order_by="creation asc",
+	)
+	return later | ((ledger.posting_datetime == posting_datetime) & (ledger.creation > created))
 
 
 def get_serial_and_batch_nos(sle) -> tuple[list[str], list[str]]:

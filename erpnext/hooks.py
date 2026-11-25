@@ -92,7 +92,10 @@ page_js = {"print": "public/js/print.js"}
 
 extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
-override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
+override_whitelisted_methods = {
+	"frappe.www.contact.send_message": "erpnext.templates.utils.send_message",
+	"erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions": "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
+}
 
 welcome_email = "erpnext.setup.utils.welcome_email"
 
@@ -565,7 +568,7 @@ scheduler_events = {
 	],
 	"weekly": [
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
-		"erpnext.stock.doctype.stock_reposting_settings.stock_reposting_settings.repost_incorrect_valuation_entries",
+		"erpnext.stock.stock_ledger_audit.audit_stock_ledger_entries",
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",

@@ -17,6 +17,8 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	make_service_items,
 	make_subcontracted_items,
 )
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -64,3 +66,27 @@ class TestSubcontractOrderSummary(ERPNextTestSuite):
 
 		self.assertIn(permitted.name, orders)
 		self.assertNotIn(other.name, orders)
+
+	def test_order_row_without_supplied_materials_is_listed(self):
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[raw_material], currency="INR", do_not_submit=True)
+		bom.items[0].sourced_by_supplier = 1
+		bom.save()
+		bom.submit()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		rows = [row for row in self.run_report(name=sco.name) if row.get("item_code") == fg_item]
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0]["qty"], 5)
+		self.assertEqual(rows[0]["received_qty"], 0)

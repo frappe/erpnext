@@ -25,6 +25,7 @@ ORDER_DOCTYPES_BY_TYPE = {
 
 ORDER_TYPE_BY_DOCTYPE = {
 	"Sales Order": ("Selling", "customer"),
+	"Quotation": ("Selling", "party_name"),
 	"Purchase Order": ("Purchasing", "supplier"),
 }
 
@@ -123,7 +124,7 @@ class BlanketOrder(Document):
 		self.set(f"{other_party_field}_name", None)
 
 	def validate_order_matches(self, order_doc) -> None:
-		order_type, party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
+		order_type, order_party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
 		if self.blanket_order_type != order_type:
 			frappe.throw(
 				_("Blanket Order {0} is a {1} order and cannot be used on a {2}").format(
@@ -131,12 +132,19 @@ class BlanketOrder(Document):
 				)
 			)
 
-		if self.get(party_field) != order_doc.get(party_field):
+		party = self.get(blanket_order_pricing.get_order_type_config(order_type)["party_field"])
+		order_party = order_doc.get(order_party_field)
+		if order_doc.doctype == "Quotation":
+			from erpnext.selling.doctype.quotation.quotation import get_existing_customer_name
+
+			order_party = get_existing_customer_name(order_doc.quotation_to, order_party)
+
+		if party != order_party:
 			frappe.throw(
 				_("Blanket Order {0} is for {1}, not {2}").format(
 					frappe.bold(self.name),
-					frappe.bold(self.get(party_field)),
-					frappe.bold(order_doc.get(party_field)),
+					frappe.bold(party),
+					frappe.bold(order_doc.get(order_party_field)),
 				)
 			)
 
@@ -146,6 +154,18 @@ class BlanketOrder(Document):
 					frappe.bold(self.name), self.currency, order_doc.currency
 				)
 			)
+
+		self.validate_order_items(order_doc)
+
+	def validate_order_items(self, order_doc) -> None:
+		item_codes = {row.item_code for row in self.items}
+		for row in order_doc.get("items"):
+			if row.blanket_order == self.name and row.item_code not in item_codes:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not in Blanket Order {2}").format(
+						row.idx, frappe.bold(row.item_code), frappe.bold(self.name)
+					)
+				)
 
 	def set_order_rates(self, order_doc) -> None:
 		rates = {row.item_code: flt(row.rate) for row in self.items}
@@ -346,7 +366,7 @@ def make_order(source_name: str):
 
 
 def validate_against_blanket_order(order_doc):
-	if order_doc.doctype not in ("Sales Order", "Purchase Order"):
+	if order_doc.doctype not in ORDER_TYPE_BY_DOCTYPE:
 		return
 
 	order_data = {}
@@ -359,7 +379,8 @@ def validate_against_blanket_order(order_doc):
 	for bo_name, item_data in sorted(order_data.items()):
 		bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
 		bo_doc.validate_order_matches(order_doc)
-		bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
+		if order_doc.doctype != "Quotation":
+			bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
 		bo_doc.set_order_rates(order_doc)
 
 

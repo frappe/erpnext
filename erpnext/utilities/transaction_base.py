@@ -8,9 +8,14 @@ from frappe import _
 from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import validate_pricing_context
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
-from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
+from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
+	_get_item_details,
+	has_source_doc_permission,
+)
 from erpnext.stock.utils import _get_incoming_rate
 
 
@@ -161,7 +166,8 @@ class TransactionBase(StatusUpdater):
 		return prev_doc_detail_map
 
 	def validate_rate_with_reference_doc(self, ref_details):
-		if self.get("is_internal_supplier"):
+		# a Quotation's rate binds the Sales Order even for an internal transfer
+		if self.doctype != "Sales Order" and self.is_internal_transfer():
 			return
 
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
@@ -182,29 +188,41 @@ class TransactionBase(StatusUpdater):
 		stop_actions = []
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
-			reference_details = self.get_reference_details(reference_names, ref_dt + " Item")
+			reference_rows = self.get_reference_rows(reference_names, ref_dt + " Item")
 			for d in self.get("items"):
 				if d.get(ref_link_field):
-					ref_rate = reference_details.get(d.get(ref_link_field))
+					ref_row = reference_rows.get(d.get(ref_link_field))
 
-					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
+					if abs(flt(d.rate - ref_row.rate, d.precision("rate"))) >= 0.01:
 						if action == "Stop":
 							if role_allowed_to_override not in frappe.get_roles():
 								stop_actions.append(
-									_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-										d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate
-									)
+									self.get_rate_mismatch_message(d, ref_dt, d.get(ref_dn_field), ref_row)
 								)
 						else:
 							frappe.msgprint(
-								_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-									d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate
-								),
+								self.get_rate_mismatch_message(d, ref_dt, d.get(ref_dn_field), ref_row),
 								title=_("Warning"),
 								indicator="orange",
 							)
 		if stop_actions:
 			frappe.throw(stop_actions, as_list=True)
+
+	def get_rate_mismatch_message(self, row, ref_dt, ref_dn, ref_row):
+		# the rate comes from ref_row, so check the document that holds it
+		if has_source_doc_permission(ref_dt, ref_row.parent, frappe.session.user):
+			return _("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
+				row.idx, ref_dt, ref_dn, row.rate, ref_row.rate
+			)
+		return _("Row #{0}: Rate must be same as {1}: {2}").format(row.idx, ref_dt, ref_dn)
+
+	def get_reference_rows(self, reference_names, reference_doctype):
+		rows = frappe.get_all(
+			reference_doctype,
+			filters={"name": ("in", reference_names)},
+			fields=["name", "rate", "parent"],
+		)
+		return {row.name: row for row in rows}
 
 	def get_reference_details(self, reference_names, reference_doctype):
 		return frappe._dict(
@@ -318,59 +336,62 @@ class TransactionBase(StatusUpdater):
 					)
 
 	def fetch_item_details(self, item: dict) -> dict:
-		return _get_item_details(
-			frappe._dict(
-				{
-					"item_code": item.get("item_code"),
-					"barcode": item.get("barcode"),
-					"serial_no": item.get("serial_no"),
-					"batch_no": item.get("batch_no"),
-					"set_warehouse": self.get("set_warehouse"),
-					"warehouse": item.get("warehouse"),
-					"customer": self.get("customer") or self.get("party_name"),
-					"quotation_to": self.get("quotation_to"),
-					"supplier": self.get("supplier"),
-					"currency": self.get("currency"),
-					"is_internal_supplier": self.get("is_internal_supplier"),
-					"is_internal_customer": self.get("is_internal_customer"),
-					"update_stock": self.update_stock
-					if self.doctype in ["Purchase Invoice", "Sales Invoice"]
-					else False,
-					"conversion_rate": self.get("conversion_rate"),
-					"price_list": self.get("selling_price_list") or self.get("buying_price_list"),
-					"price_list_currency": self.get("price_list_currency"),
-					"plc_conversion_rate": self.get("plc_conversion_rate"),
-					"company": self.get("company"),
-					"order_type": self.get("order_type"),
-					"is_pos": cint(self.get("is_pos")),
-					"is_return": cint(self.get("is_return")),
-					"is_subcontracted": self.get("is_subcontracted"),
-					"ignore_pricing_rule": self.get("ignore_pricing_rule"),
-					"doctype": self.get("doctype"),
-					"name": self.get("name"),
-					"project": item.get("project") or self.get("project"),
-					"qty": item.get("qty") or 1,
-					"net_rate": item.get("rate"),
-					"base_net_rate": item.get("base_net_rate"),
-					"stock_qty": item.get("stock_qty"),
-					"conversion_factor": item.get("conversion_factor"),
-					"weight_per_unit": item.get("weight_per_unit"),
-					"uom": item.get("uom"),
-					"weight_uom": item.get("weight_uom"),
-					"manufacturer": item.get("manufacturer"),
-					"stock_uom": item.get("stock_uom"),
-					"pos_profile": self.get("pos_profile") if cint(self.get("is_pos")) else "",
-					"cost_center": item.get("cost_center"),
-					"tax_category": self.get("tax_category"),
-					"item_tax_template": item.get("item_tax_template"),
-					"child_doctype": item.get("doctype"),
-					"child_docname": item.get("name"),
-					"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
-					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
-				}
-			),
-			self,
+		ctx = frappe._dict(
+			{
+				"item_code": item.get("item_code"),
+				"barcode": item.get("barcode"),
+				"serial_no": item.get("serial_no"),
+				"batch_no": item.get("batch_no"),
+				"set_warehouse": self.get("set_warehouse"),
+				"warehouse": item.get("warehouse"),
+				"customer": self.get("customer") or self.get("party_name"),
+				"quotation_to": self.get("quotation_to"),
+				"supplier": self.get("supplier"),
+				"currency": self.get("currency"),
+				"is_internal_supplier": self.get("is_internal_supplier"),
+				"is_internal_customer": self.get("is_internal_customer"),
+				"update_stock": self.update_stock
+				if self.doctype in ["Purchase Invoice", "Sales Invoice"]
+				else False,
+				"conversion_rate": self.get("conversion_rate"),
+				"price_list": self.get("selling_price_list") or self.get("buying_price_list"),
+				"price_list_currency": self.get("price_list_currency"),
+				"plc_conversion_rate": self.get("plc_conversion_rate"),
+				"company": self.get("company"),
+				"order_type": self.get("order_type"),
+				"is_pos": cint(self.get("is_pos")),
+				"is_return": cint(self.get("is_return")),
+				"is_subcontracted": self.get("is_subcontracted"),
+				"ignore_pricing_rule": self.get("ignore_pricing_rule"),
+				"return_against": self.get("return_against"),
+				"doctype": self.get("doctype"),
+				"name": self.get("name"),
+				"project": item.get("project") or self.get("project"),
+				"qty": item.get("qty") or 1,
+				"net_rate": item.get("rate"),
+				"base_net_rate": item.get("base_net_rate"),
+				"stock_qty": item.get("stock_qty"),
+				"conversion_factor": item.get("conversion_factor"),
+				"weight_per_unit": item.get("weight_per_unit"),
+				"uom": item.get("uom"),
+				"weight_uom": item.get("weight_uom"),
+				"manufacturer": item.get("manufacturer"),
+				"stock_uom": item.get("stock_uom"),
+				"pos_profile": self.get("pos_profile") if cint(self.get("is_pos")) else "",
+				"cost_center": item.get("cost_center"),
+				"tax_category": self.get("tax_category"),
+				"item_tax_template": item.get("item_tax_template"),
+				"child_doctype": item.get("doctype"),
+				"child_docname": item.get("name"),
+				"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
+				"use_serial_batch_fields": item.get("use_serial_batch_fields"),
+				"against_blanket_order": item.get("against_blanket_order"),
+				"blanket_order": item.get("blanket_order"),
+			}
 		)
+		# the doc may be client-built, so check the parties and price list it names
+		validate_pricing_context(ctx)
+		return _get_item_details(ctx, self)
 
 	@frappe.whitelist()
 	def process_item_selection(
@@ -431,13 +452,17 @@ class TransactionBase(StatusUpdater):
 		if (
 			self.get("is_internal_customer") or self.get("is_internal_supplier")
 		) and fetch_valuation_rate_for_internal_transaction:
+			stock_qty = item_obj.qty * item_obj.conversion_factor
+			# a delivery takes the stock out, so ask for its outgoing rate as set_incoming_rate does
+			is_outgoing = self.get("is_internal_customer") and not self.get("is_return")
+
 			args = frappe._dict(
 				{
 					"item_code": item_obj.item_code,
 					"warehouse": item_obj.from_warehouse
 					if self.doctype in ["Purchase Receipt", "Purchase Invoice"]
 					else item_obj.warehouse,
-					"qty": item_obj.qty * item_obj.conversion_factor,
+					"qty": -stock_qty if is_outgoing else stock_qty,
 					"voucher_type": self.doctype,
 					"company": self.company,
 				}

@@ -487,6 +487,7 @@ class TestSubscription(ERPNextTestSuite):
 	def test_multi_currency_subscription(self):
 		party = "_Test Subscription Customer"
 		frappe.db.set_value("Customer", party, "default_currency", "USD")
+		make_usd_to_inr_rate("2018-01-01")
 		subscription = create_subscription(
 			start_date="2018-01-01",
 			generate_invoice_at="Beginning of the current subscription period",
@@ -509,6 +510,7 @@ class TestSubscription(ERPNextTestSuite):
 	def test_multi_currency_subscription_with_default_company_currency(self):
 		party = "Test Subscription Customer Multi Currency"
 		frappe.db.set_value("Customer", party, "default_currency", "USD")
+		make_usd_to_inr_rate("2018-01-01")
 		subscription = create_subscription(
 			start_date="2018-01-01",
 			generate_invoice_at="Beginning of the current subscription period",
@@ -1039,6 +1041,18 @@ def create_plan(**kwargs):
 		plan.billing_interval_count = kwargs.get("billing_interval_count") or 1
 		plan.currency = kwargs.get("currency")
 		plan.insert()
+
+
+def make_usd_to_inr_rate(date):
+	frappe.get_doc(
+		{
+			"doctype": "Currency Exchange",
+			"date": date,
+			"from_currency": "USD",
+			"to_currency": "INR",
+			"exchange_rate": 62.9,
+		}
+	).insert()
 
 
 def create_parties():

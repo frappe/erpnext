@@ -110,8 +110,11 @@ frappe.ui.form.on("Job Card", {
 
 		if (!can_make_stock_entry) return;
 
-		frm.add_custom_button(__("Record Output"), () => frm.events.confirm_record_output(frm)).addClass(
-			"btn-primary"
+		frm.add_custom_button(
+			__("Record Output"),
+			() => frm.events.confirm_record_output(frm),
+			null,
+			"primary"
 		);
 	},
 
@@ -258,6 +261,19 @@ frappe.ui.form.on("Job Card", {
 			frm.add_custom_button(
 				__("Material Transfer"),
 				() => frm.trigger("make_stock_entry"),
+				__("Create")
+			);
+		}
+
+		const to_return =
+			doc.docstatus === 0 &&
+			has_items &&
+			doc.items.some((row) => flt(row.transferred_qty) > flt(row.consumed_qty));
+
+		if (to_return) {
+			frm.add_custom_button(
+				__("Return Components"),
+				() => frm.trigger("make_stock_return_entry"),
 				__("Create")
 			);
 		}
@@ -586,12 +602,17 @@ frappe.ui.form.on("Job Card", {
 
 	make_subcontracting_po(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
-			frm.add_custom_button(__("Make Subcontracting PO"), () => {
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
-					frm: frm,
-				});
-			}).addClass("btn-primary");
+			frm.add_custom_button(
+				__("Make Subcontracting PO"),
+				() => {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
+						frm: frm,
+					});
+				},
+				null,
+				"primary"
+			);
 		}
 	},
 
@@ -952,14 +973,11 @@ frappe.ui.form.on("Job Card", {
 			timer_el.text(`${pad(h)}:${pad(m)}:${pad(s)}`);
 		};
 
-		let current_increment = frm.events.get_current_time(frm);
-		update_stopwatch(current_increment);
+		const tick = () => update_stopwatch(frm.events.get_current_time(frm));
+		tick();
 
 		if (is_actively_running) {
-			frm._jcd_timer_interval = setInterval(() => {
-				current_increment += 1;
-				update_stopwatch(current_increment);
-			}, 1000);
+			frm._jcd_timer_interval = setInterval(tick, 1000);
 		}
 
 		// Demote Submit to btn-default when an action button is already primary.
@@ -974,20 +992,30 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	get_current_time(frm) {
-		let current_time = 0;
+		// union of the intervals, so parallel operators count once; UTC gives wall-clock diffs, as on the server
+		const now = frappe.datetime.system_datetime();
+		const intervals = frm.doc.time_logs
+			.filter((d) => d.from_time)
+			.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
+			.sort((a, b) => a[0] - b[0]);
 
-		frm.doc.time_logs.forEach((d) => {
-			if (d.to_time) {
-				if (d.time_in_mins) {
-					current_time += flt(d.time_in_mins, 2) * 60;
-				} else {
-					current_time += get_seconds_diff(d.to_time, d.from_time);
-				}
-			} else {
-				current_time += get_seconds_diff(frappe.datetime.system_datetime(), d.from_time);
+		let current_time = 0;
+		let current_start = null;
+		let current_end = null;
+		intervals.forEach(([start, end]) => {
+			if (current_end && start <= current_end) {
+				current_end = moment.max(current_end, end);
+				return;
 			}
+			if (current_end) {
+				current_time += current_end.diff(current_start, "seconds", true);
+			}
+			[current_start, current_end] = [start, end];
 		});
 
+		if (current_end) {
+			current_time += current_end.diff(current_start, "seconds", true);
+		}
 		return current_time;
 	},
 
@@ -1000,7 +1028,6 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	for_quantity(frm) {
-		frm.doc.items = [];
 		frm.call({
 			method: "get_required_items",
 			doc: frm.doc,
@@ -1024,6 +1051,18 @@ frappe.ui.form.on("Job Card", {
 			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_entry",
 			frm: frm,
 			run_link_triggers: true,
+		});
+	},
+
+	make_stock_return_entry(frm) {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_return_entry",
+			args: { job_card: frm.doc.name },
+			callback(r) {
+				if (r.exc) return;
+				const doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			},
 		});
 	},
 
@@ -1067,10 +1106,6 @@ frappe.ui.form.on("Job Card Time Log", {
 		frm.events.set_total_completed_qty(frm);
 	},
 });
-
-function get_seconds_diff(d1, d2) {
-	return moment(d1).diff(d2, "seconds");
-}
 
 function get_last_completed_row(time_logs) {
 	const completed_rows = time_logs.filter((d) => d.to_time);

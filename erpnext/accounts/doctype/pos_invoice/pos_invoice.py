@@ -968,8 +968,18 @@ def get_stock_availability(item_code, warehouse):
 	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
 	frappe.has_permission("POS Profile", ptype, throw=True)
 
-	# the caller picks the warehouse when allow_warehouse_change is set; costs nobody who has no
-	# Warehouse User Permission
+	# and keep a company-restricted caller inside their own companies, which costs nobody who has
+	# no Company User Permission
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "POS Profile")
+	if allowed_companies:
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+	# the caller picks the warehouse when allow_warehouse_change is set, and the company check above
+	# does not narrow within a company; costs nobody who has no Warehouse User Permission
 	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 
 	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
@@ -1188,17 +1198,27 @@ def add_return_modes(doc, pos_profile):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
-	if pos_profile := filters.get("pos_profile")[1]:
-		pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
+	if pos_profile := get_permitted_pos_profile(filters.pop("pos_profile", None)):
 		if item_groups := get_item_group(pos_profile):
 			filters["item_group"] = ["in", tuple(item_groups)]
 
-		del filters["pos_profile"]
-
-	else:
-		filters.pop("pos_profile", None)
-
 	return _item_query(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+
+def get_permitted_pos_profile(condition):
+	if not condition or not condition[1]:
+		return
+
+	pos_profile = condition[1]
+	# doctype check first, so an unentitled caller can't tell missing names from existing ones
+	if not (
+		isinstance(pos_profile, str)
+		and frappe.has_permission("POS Profile", "select")
+		and frappe.has_permission("POS Profile", "select", doc=pos_profile)
+	):
+		_refuse()
+
+	return frappe.get_cached_doc("POS Profile", pos_profile)
 
 
 def get_item_group(pos_profile):

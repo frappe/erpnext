@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Coalesce, CombineDatetime, Count, IfNull, Max, Min, Sum
 from frappe.utils import (
 	cint,
@@ -49,6 +49,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
 	clear_reserve_stock_if_disabled,
+	get_sre_reserved_qty_details_for_voucher,
 )
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
@@ -735,8 +736,9 @@ class WorkOrder(Document):
 			self.actual_operating_cost if self.actual_operating_cost else self.planned_operating_cost
 		)
 
-		self.total_operating_cost = (
-			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost)
+		self.total_operating_cost = flt(
+			flt(self.additional_operating_cost) + flt(variable_cost) + flt(self.corrective_operation_cost),
+			self.precision("total_operating_cost"),
 		)
 
 	@staticmethod
@@ -867,7 +869,11 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if flt(self.material_transferred_for_manufacturing) > 0 or self._has_transferred_material():
+				if (
+					flt(self.material_transferred_for_manufacturing) > 0
+					or self._has_transferred_material()
+					or self._has_consumed_material()
+				):
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -888,13 +894,30 @@ class WorkOrder(Document):
 				status = "In Process"
 
 		if status == "Not Started" and self.reserve_stock:
-			if any(row.stock_reserved_qty for row in self.required_items):
-				if any(row.stock_reserved_qty < row.required_qty for row in self.required_items):
+			if any(row.stock_reserved_qty or row.subcontracted_qty for row in self.required_items):
+				if any(self.get_unreserved_qty(row) > 0 for row in self.required_items):
 					status = "Stock Partially Reserved"
 				else:
 					status = "Stock Reserved"
 
 		return status
+
+	def refresh_status(self):
+		"""Save the computed status if it changed, unless the order is Stopped or Closed or another transaction changed its status."""
+		status = self.get_status()
+		if status == self.status:
+			return
+
+		saved_status = frappe.db.get_value("Work Order", self.name, "status", for_update=True)
+		if saved_status == self.status and saved_status not in ("Stopped", "Closed"):
+			self.db_set("status", status)
+
+	@staticmethod
+	def get_unreserved_qty(row):
+		# a Subcontracting Order reserves and sends what it took over
+		return flt(
+			row.required_qty - row.subcontracted_qty - row.stock_reserved_qty, row.precision("required_qty")
+		)
 
 	def _has_transferred_material(self):
 		"""True if any raw material transferred against this work order via a pick list or a
@@ -946,6 +969,19 @@ class WorkOrder(Document):
 			.where(common_filters & (ste.is_return == 1))
 		).run()[0][0]
 		return flt(transferred_qty) - flt(returned_qty) > 0
+
+	def _has_consumed_material(self):
+		"""True if a submitted Material Consumption entry exists, e.g. on a skip-transfer order."""
+		return bool(
+			frappe.db.exists(
+				"Stock Entry",
+				{
+					"work_order": self.name,
+					"docstatus": 1,
+					"purpose": "Material Consumption for Manufacture",
+				},
+			)
+		)
 
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
@@ -1456,14 +1492,33 @@ class WorkOrder(Document):
 
 		for idx, row in enumerate(self.operations):
 			qty = get_operation_qty(self, row)
+			card_times = []
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self, row, qty)
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
+					card_times.append(
+						(get_datetime(row.planned_start_time), get_datetime(row.planned_end_time))
+					)
 
-		planned_end_date = self.operations and self.operations[-1].planned_end_time
-		if planned_end_date:
-			self.db_set("planned_end_date", planned_end_date)
+			self.set_batch_operation_time(row, card_times)
+
+		# operations with the same Sequence ID run in parallel, so the last row may not end last
+		end_times = [get_datetime(row.planned_end_time) for row in self.operations if row.planned_end_time]
+		if end_times:
+			self.db_set("planned_end_date", max(end_times))
+
+	@staticmethod
+	def set_batch_operation_time(row, card_times):
+		"""Batch cards can be scheduled out of order, so the operation spans all of them."""
+		if len(card_times) < 2:
+			return
+
+		start = min(start for start, _end in card_times)
+		end = max(end for _start, end in card_times)
+		if (start, end) != card_times[-1]:
+			row.planned_start_time, row.planned_end_time = start, end
+			row.db_update()
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
@@ -1665,14 +1720,16 @@ class WorkOrder(Document):
 			.left_join(plan_item)
 			.on(plan_item.name == wo.production_plan_item)
 			.select(Sum(qty_against_sales_order(wo, plan_item)))
-			.where((wo.sales_order == self.sales_order) & (wo.docstatus == 1))
+			.where(
+				(wo.sales_order == self.sales_order)
+				& (wo.sales_order_item == self.sales_order_item)
+				& (wo.docstatus == 1)
+			)
 		)
 		if self.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.product_bundle_item)
 		else:
-			query = query.where(
-				(wo.production_item == self.production_item) & (wo.sales_order_item == self.sales_order_item)
-			)
+			query = query.where(wo.production_item == self.production_item)
 
 		return query.run(as_list=1)
 
@@ -2004,8 +2061,7 @@ class WorkOrder(Document):
 
 		self.validate_reserved_qty()
 
-		if self.status == "Closed":
-			self.update_subcontracting_inward_order_received_items()
+		self.update_subcontracting_inward_order_received_items()
 
 	def update_reserved_qty_for_production(self, items=None):
 		"""update reserved_qty_for_production in bins"""
@@ -2126,15 +2182,23 @@ class WorkOrder(Document):
 			transferred_items[item_code] = flt(transferred_items.get(item_code)) + qty
 
 		row_wise_serial_batch = frappe._dict({})
+		sent_to_subcontractor = {}
 		if self.reserve_stock:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
+			sent_to_subcontractor = self._subcontract_transferred_qty_by_item()
 
 		transferred_by_row = distribute_transfers_over_rows(self.required_items, transferred_by_key)
 		for row in self.required_items:
 			transferred_qty = transferred_by_row[row.name]
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
 			if self.reserve_stock:
-				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
+				# stock sent to a subcontractor uses the reservation too; rows of the same item share it
+				key = (row.item_code, row.source_warehouse)
+				sent_qty = sent_to_subcontractor.get(key, 0.0)
+				unused_qty = self.update_qty_in_stock_reservation(
+					row, transferred_qty + sent_qty, row_wise_serial_batch
+				)
+				sent_to_subcontractor[key] = min(sent_qty, unused_qty)
 
 		self.recompute_material_transferred_for_manufacturing(transferred_items)
 
@@ -2162,14 +2226,9 @@ class WorkOrder(Document):
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
+				fn.Sum(self._signed_transfer_qty(ste, ste_child)).as_("qty"),
 			)
-			.where(
-				(ste.docstatus == 1)
-				& (ste.work_order == self.name)
-				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == is_return)
-			)
+			.where(self._material_transfer_filter(ste, is_return))
 			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
@@ -2185,6 +2244,24 @@ class WorkOrder(Document):
 			return self._cap_returned_qty_to_transferred(transferred_items)
 
 		return transferred_items
+
+	def _material_transfer_filter(self, ste, is_return):
+		has_job_card = IfNull(ste.job_card, "") != ""
+		if is_return:
+			return_filter = (ste.is_return == 1) & ~has_job_card
+		else:
+			return_filter = (ste.is_return == 0) | has_job_card
+
+		return (
+			(ste.docstatus == 1)
+			& (ste.work_order == self.name)
+			& (ste.purpose == "Material Transfer for Manufacture")
+			& return_filter
+		)
+
+	def _signed_transfer_qty(self, ste, ste_child):
+		is_job_card_return = (ste.is_return == 1) & (IfNull(ste.job_card, "") != "")
+		return Case().when(is_job_card_return, -ste_child.transfer_qty).else_(ste_child.transfer_qty)
 
 	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
 		transferred_qty_by_item = self._material_transfer_qty_by_item(is_return=0)
@@ -2209,28 +2286,28 @@ class WorkOrder(Document):
 				ste_child.item_code,
 				ste_child.original_item,
 				ste_child.s_warehouse,
+				ste_child.t_warehouse,
+				ste.is_return,
 				job_card.operation_row_id,
 				job_card.operation,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
+				fn.Sum(self._signed_transfer_qty(ste, ste_child)).as_("qty"),
 			)
-			.where(
-				(ste.docstatus == 1)
-				& (ste.work_order == self.name)
-				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 0)
-			)
+			.where(self._material_transfer_filter(ste, 0))
 			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(
 				ste_child.item_code,
 				ste_child.original_item,
 				ste_child.s_warehouse,
+				ste_child.t_warehouse,
+				ste.is_return,
 				job_card.operation_row_id,
 				job_card.operation,
 			)
 		)
 		qty_by_key = {}
 		for d in query.run(as_dict=1) or []:
-			key = (d.original_item or d.item_code, d.s_warehouse, d.operation_row_id, d.operation)
+			warehouse = d.t_warehouse if d.is_return else d.s_warehouse
+			key = (d.original_item or d.item_code, warehouse, d.operation_row_id, d.operation)
 			qty_by_key[key] = qty_by_key.get(key, 0.0) + flt(d.qty)
 
 		return qty_by_key
@@ -2241,12 +2318,12 @@ class WorkOrder(Document):
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# When only direct stock entries (fg_completed_qty > 0) transferred, preserve the
 		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
 		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		if sum_fg_completed_qty:
+		if sum_fg_completed_qty and not self._has_transfer_without_for_quantity():
 			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
 			return
 
@@ -2266,10 +2343,28 @@ class WorkOrder(Document):
 			for item_code, required_qty in required_by_item.items()
 		)
 		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.qty)
-		self.db_set("material_transferred_for_manufacturing", material_transferred)
+		material_transferred = max(min_fraction * flt(self.qty), sum_fg_completed_qty)
+		self.db_set(
+			"material_transferred_for_manufacturing",
+			flt(material_transferred, self.precision("material_transferred_for_manufacturing")),
+		)
+
+	def _has_transfer_without_for_quantity(self):
+		return frappe.db.exists(
+			"Stock Entry",
+			{
+				"work_order": self.name,
+				"docstatus": 1,
+				"purpose": "Material Transfer for Manufacture",
+				"is_return": 0,
+				"is_additional_transfer_entry": 0,
+				"fg_completed_qty": 0,
+				"job_card": ("is", "not set"),
+			},
+		)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
+		"""Set `transferred_qty` on the row's reservations and return the qty none of them could take."""
 		filters = {
 			"voucher_no": self.name,
 			"item_code": row.item_code,
@@ -2278,8 +2373,10 @@ class WorkOrder(Document):
 		}
 		names = frappe.get_all(
 			"Stock Reservation Entry",
-			filters={**filters, "status": ("not in", ["Closed", "Cancelled", "Completed"])},
+			# a fully transferred reservation is Closed, and must reopen when its transfer is cancelled
+			filters={**filters, "docstatus": 1},
 			pluck="name",
+			order_by="creation",
 		)
 		if self.status == "Closed":
 			names += frappe.get_all(
@@ -2318,6 +2415,8 @@ class WorkOrder(Document):
 				doc.update_status()
 				doc.update_reserved_stock_in_bin()
 				doc.update_reserved_qty_in_voucher()
+
+		return transferred_qty
 
 	def update_returned_qty(self):
 		returned_by_row = distribute_over_rows(
@@ -2582,7 +2681,7 @@ class WorkOrder(Document):
 			.on(se.name == sed.parent)
 			.select(sed.item_code, sed.s_warehouse, Sum(sed.transfer_qty).as_("qty"))
 			.where(
-				(se.purpose == "Manufacture")
+				se.purpose.isin(["Manufacture", "Material Consumption for Manufacture"])
 				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
 				& (se.docstatus == 1)
 				& (se.work_order == self.name)
@@ -2992,6 +3091,10 @@ class WorkOrder(Document):
 			sre.db_set("transferred_qty", qty_to_set, update_modified=False)
 			sre.update_status()
 			sre.update_reserved_stock_in_bin()
+			sre.update_reserved_qty_in_voucher()
+
+		self.reload()
+		self.refresh_status()
 
 	def _subcontract_transferred_qty_by_item(self):
 		"""Qty sent to subcontractors for this Work Order, keyed by (item_code, source warehouse).
@@ -3220,9 +3323,17 @@ def get_consumed_qty(work_order, item_code):
 
 
 def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) -> dict[str, float]:
-	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty."""
+	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty or the qty it used if more."""
 	work_order = frappe.qb.DocType("Work Order")
 	work_order_item = frappe.qb.DocType("Work Order Item")
+	used_qty = (
+		Case()
+		.when(
+			work_order_item.transferred_qty > work_order_item.consumed_qty,
+			work_order_item.transferred_qty - work_order_item.returned_qty,
+		)
+		.else_(work_order_item.consumed_qty - work_order_item.returned_qty)
+	)
 	return dict(
 		frappe.qb.from_(work_order_item)
 		.join(work_order)
@@ -3232,13 +3343,8 @@ def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) 
 			Sum(
 				Case()
 				.when(
-					(work_order.status == "Closed")
-					& (work_order_item.transferred_qty > work_order_item.consumed_qty),
-					work_order_item.transferred_qty - work_order_item.returned_qty,
-				)
-				.when(
-					work_order.status == "Closed",
-					work_order_item.consumed_qty - work_order_item.returned_qty,
+					(work_order.status == "Closed") | (used_qty > work_order_item.required_qty),
+					used_qty,
 				)
 				.else_(work_order_item.required_qty)
 			),
@@ -3539,7 +3645,9 @@ def make_stock_entry(
 @frappe.whitelist()
 def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | None = None) -> float:
 	frappe.has_permission("Stock Entry", "read", doc=stock_entry_name, throw=True)
-	se = frappe.db.get_value("Stock Entry", stock_entry_name, ["fg_completed_qty"], as_dict=True)
+	se = frappe.db.get_value(
+		"Stock Entry", stock_entry_name, ["fg_completed_qty", "process_loss_qty"], as_dict=True
+	)
 	if not se:
 		return 0.0
 
@@ -3555,7 +3663,7 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 	already_disassembled = flt(frappe.db.get_value("Stock Entry", filters, [{"SUM": "fg_completed_qty"}]))
 
 	return flt(
-		flt(se.fg_completed_qty) - already_disassembled,
+		flt(se.fg_completed_qty) - flt(se.process_loss_qty) - already_disassembled,
 		frappe.get_precision("Stock Entry", "fg_completed_qty"),
 	)
 
@@ -3667,7 +3775,8 @@ def get_batch_size_flags(operation_names):
 
 
 def get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
-	if batch_size_flags.get(d.operation) and flt(d.batch_size):
+	is_per_batch = batch_size_flags.get(d.operation) or d.set_cost_based_on_bom_qty
+	if is_per_batch and flt(d.batch_size):
 		return d.time_in_mins * flt(units) / flt(d.batch_size)
 	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
 
@@ -4308,6 +4417,115 @@ def get_row_wise_serial_batch(work_order, purpose=None):
 			details.batch_nos[entry.batch_no] += abs(entry.qty)
 
 	return row_wise_serial_batch
+
+
+def release_unused_inward_reservations(
+	scio: str, short_qty: dict[str, float], lower_voucher_qty: bool = False
+) -> None:
+	"""Give each inward order row back, up to its `short_qty`, the customer material Work Orders hold beyond their required or used qty; `lower_voucher_qty` when that material is gone for good."""
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	sres = get_inward_reservations(scio, list(short_qty))
+	unused_qty = get_unused_inward_qty(sres)
+	for sre in sres:
+		release_qty = flt(
+			min(
+				sre.reserved_qty - sre.used_qty,
+				unused_qty[sre.voucher_detail_no],
+				short_qty[sre.from_voucher_detail_no],
+			),
+			precision,
+		)
+		if release_qty <= 0:
+			continue
+
+		released_qty = release_inward_reservation(sre, release_qty, lower_voucher_qty)
+		unused_qty[sre.voucher_detail_no] -= released_qty
+		short_qty[sre.from_voucher_detail_no] -= released_qty
+
+
+def restore_inward_reservations(scio: str, return_qty: dict[str, float]) -> None:
+	"""Give Work Orders back, up to `return_qty` per inward order row, the customer material a return released from them."""
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	free_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio)
+	for sre in get_inward_reservations(scio, list(return_qty)):
+		restore_qty = flt(
+			min(
+				sre.voucher_qty - sre.reserved_qty,
+				flt(free_qty.get(sre.from_voucher_detail_no)),
+				return_qty[sre.from_voucher_detail_no],
+			),
+			precision,
+		)
+		if restore_qty <= 0:
+			continue
+
+		release_inward_reservation(sre, -restore_qty)
+		free_qty[sre.from_voucher_detail_no] -= restore_qty
+		return_qty[sre.from_voucher_detail_no] -= restore_qty
+
+
+def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
+	"""Reserved qty of each Work Order row beyond its need."""
+	sres_by_row = defaultdict(list)
+	for sre in sres:
+		sres_by_row[sre.voucher_detail_no].append(sre)
+
+	unused_qty = {}
+	for voucher_detail_no, rows in sres_by_row.items():
+		needed_qty = max(rows[0].required_qty, sum(row.used_qty for row in rows))
+		unused_qty[voucher_detail_no] = sum(row.reserved_qty for row in rows) - needed_qty
+
+	return unused_qty
+
+
+def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
+	"""Qty based Work Order reservations taken from these inward order rows, newest first, locked for update."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	wo_item = frappe.qb.DocType("Work Order Item")
+	return (
+		frappe.qb.from_(sre)
+		.inner_join(wo_item)
+		.on(wo_item.name == sre.voucher_detail_no)
+		.select(
+			sre.name,
+			sre.voucher_detail_no,
+			sre.from_voucher_detail_no,
+			sre.reserved_qty,
+			sre.voucher_qty,
+			(sre.delivered_qty + sre.transferred_qty + sre.consumed_qty).as_("used_qty"),
+			wo_item.required_qty,
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Work Order")
+			& (sre.from_voucher_type == "Subcontracting Inward Order")
+			& (sre.reservation_based_on == "Qty")
+			& (sre.from_voucher_no == scio)
+			& (sre.from_voucher_detail_no.isin(scio_details))
+		)
+		.orderby(sre.creation, order=Order.desc)
+		.for_update()
+	).run(as_dict=True)
+
+
+def release_inward_reservation(sre: dict, qty: float, lower_voucher_qty: bool = False) -> float:
+	"""Lower a Work Order reservation by `qty` (raise it when negative), not below what it used, and give the change back to the inward order reservation it came from."""
+	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
+	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
+	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
+	released_qty = doc.reserved_qty - reserved_qty
+	doc.db_set("reserved_qty", reserved_qty, update_modified=False)
+	if lower_voucher_qty:
+		doc.db_set(
+			"voucher_qty",
+			flt(doc.voucher_qty - released_qty, doc.precision("voucher_qty")),
+			update_modified=False,
+		)
+	doc.update_status()
+	doc.update_reserved_qty_in_voucher()
+	doc.update_delivered_qty_in_from_voucher_reservations()
+	doc.update_reserved_stock_in_bin()
+	return released_qty
 
 
 @frappe.request_cache

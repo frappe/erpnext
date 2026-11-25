@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
 from collections import defaultdict
 
 import frappe
@@ -8,12 +9,13 @@ from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Abs, IfNull, NullIf, Sum
-from frappe.utils import cint, flt, format_datetime, get_datetime
+from frappe.utils import cint, flt, fmt_money, format_datetime, get_datetime, get_link_to_form
 
 import erpnext
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method, getdate
+from erpnext.stock.valuation import round_rate
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -41,6 +43,116 @@ def validate_return(doc):
 		validate_return_against(doc)
 
 		validate_returned_items(doc)
+		validate_return_warehouse_stock(doc)
+
+
+def validate_return_warehouse_stock(doc):
+	"""Refuse a purchase return from a warehouse the receipt row did not stock
+	unless that warehouse holds the returned qty at the receipt rate."""
+	if doc.docstatus != 1 or doc.doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		return
+
+	if doc.doctype == "Purchase Invoice" and not doc.update_stock:
+		return
+
+	moved_rows = get_moved_rows(doc)
+	qty_left = {}
+	for row in get_rows_taking_moved_stock(doc, moved_rows):
+		rate = round_rate(
+			get_rate_for_return(doc.doctype, doc.name, row.item_code, doc.return_against, item_row=row)
+		)
+		key = (row.item_code, row.warehouse, rate)
+		if key not in qty_left:
+			qty_left[key] = get_qty_held_at_rate(doc, row, rate)
+
+		# stock_qty and the factor reset to 1 for the stock UOM come later in validate
+		conversion_factor = 1 if row.uom == row.stock_uom else flt(row.conversion_factor) or 1
+		qty_left[key] -= abs(flt(flt(row.qty) * conversion_factor, row.precision("stock_qty")))
+		if row.idx in moved_rows and flt(qty_left[key], row.precision("stock_qty")) < 0:
+			frappe.throw(
+				_(
+					"Row #{0}: {1} does not hold enough of item {2} at the rate of {3}, at which {4} received it. Move the goods back to {5} and return them from there."
+				).format(
+					row.idx,
+					bold(row.warehouse),
+					bold(row.item_code),
+					bold(fmt_money(rate, currency=erpnext.get_company_currency(doc.company))),
+					get_link_to_form(doc.doctype, doc.return_against),
+					bold(moved_rows[row.idx][0]),
+				),
+				title=_("Return Warehouse"),
+			)
+
+
+def get_moved_rows(doc) -> dict:
+	"""Receipt warehouses of each return row, by idx, that takes FIFO or LIFO stock from another warehouse."""
+	receipt_rows = frappe.get_all(
+		f"{doc.doctype} Item",
+		filters={"parent": doc.return_against},
+		fields=["name", "item_code", "warehouse", "rejected_warehouse"],
+		limit_page_length=0,
+	)
+	moved_rows = {}
+	for row in doc.items:
+		if receipt_warehouses := get_receipt_warehouses_if_moved(doc, row, receipt_rows):
+			moved_rows[row.idx] = receipt_warehouses
+
+	return moved_rows
+
+
+def get_rows_taking_moved_stock(doc, moved_rows) -> list:
+	"""Return rows that take stock of a moved row's item and warehouse, moved rows last."""
+	moved_stock = {(row.item_code, row.warehouse) for row in doc.items if row.idx in moved_rows}
+	rows = [row for row in doc.items if flt(row.qty) < 0 and (row.item_code, row.warehouse) in moved_stock]
+	# a row returned from its receipt warehouse takes the receipt lot first
+	return sorted(rows, key=lambda row: row.idx in moved_rows)
+
+
+def get_receipt_warehouses_if_moved(doc, row, receipt_rows) -> list:
+	"""Warehouses of the receipt row, if the return row takes FIFO or LIFO stock from another one."""
+	if flt(row.qty) >= 0 or not (row.item_code and row.warehouse):
+		return []
+
+	# serial and batch items go back at their own rate
+	item = frappe.get_cached_value(
+		"Item", row.item_code, ["is_stock_item", "has_serial_no", "has_batch_no"], as_dict=True
+	)
+	if (
+		not item.is_stock_item
+		or item.has_serial_no
+		or item.has_batch_no
+		or get_valuation_method(row.item_code, doc.company) not in ("FIFO", "LIFO")
+	):
+		return []
+
+	# a row added by hand has no reference and goes back against any receipt row of its item
+	reference = row.get(get_return_against_item_fields(doc.doctype))
+	receipt_warehouses = [
+		warehouse
+		for receipt_row in receipt_rows
+		if receipt_row.name == reference or (not reference and receipt_row.item_code == row.item_code)
+		for warehouse in (receipt_row.warehouse, receipt_row.rejected_warehouse)
+		if warehouse
+	]
+	if not receipt_warehouses or row.warehouse in receipt_warehouses:
+		return []
+
+	return receipt_warehouses
+
+
+def get_qty_held_at_rate(doc, row, rate) -> float:
+	"""Qty in the row's warehouse queue at the given rate, matched as the ledger matches a purchase return."""
+	from erpnext.stock.stock_ledger import get_previous_sle
+
+	previous_sle = get_previous_sle(
+		{
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+			"posting_datetime": get_combine_datetime(doc.posting_date, doc.posting_time),
+		}
+	)
+	queue = json.loads(previous_sle.get("stock_queue") or "[]")
+	return sum(flt(qty) for qty, bin_rate in queue if round_rate(bin_rate) == rate)
 
 
 def validate_return_against(doc):
@@ -101,9 +213,6 @@ def validate_returned_items(doc):
 	valid_items = frappe._dict()
 
 	select_fields = "item_code, qty, rate, parenttype, conversion_factor, name"
-	if doc.doctype != "Subcontracting Receipt":
-		select_fields += ", stock_qty"
-
 	if doc.doctype != "Purchase Invoice":
 		select_fields += ",serial_no, batch_no"
 
@@ -115,9 +224,7 @@ def validate_returned_items(doc):
 		doc.return_against,
 		as_dict=1,
 	):
-		if doc.doctype == "Subcontracting Receipt":
-			d.stock_qty = flt(d.qty) * flt(d.conversion_factor or 1)
-
+		d.stock_qty = flt(d.qty) * flt(d.conversion_factor or 1)
 		valid_items = get_ref_item_dict(valid_items, d)
 		if doc.doctype == "Delivery Note":
 			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None))
@@ -164,6 +271,7 @@ def validate_returned_items(doc):
 				validate_quantity(doc, key, d, ref, valid_items, already_returned_items)
 				if doc.doctype == "Delivery Note":
 					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
+				add_returned_row(doc, key, d, already_returned_items)
 
 				if (
 					ref.rate
@@ -241,9 +349,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if row.item_code not in components:
 			components[row.item_code] = get_product_bundle_items(row.item_code)
 
-		bundle_stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-		if frappe.db.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
-			bundle_stock_qty = flt(bundle_stock_qty, row.precision("stock_qty"))
+		bundle_stock_qty = get_stored_stock_qty(row)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component, so_packed_item in get_component_order_rows(
 			doc, row.item_code, components[row.item_code], so_packed_items
@@ -310,17 +416,15 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		):
 			returned_column = "rejected_qty"
 
-		returned_qty = (
-			flt(already_returned_data.get(returned_column, 0), field_precision)
-			if len(already_returned_data) > 0
-			else 0
-		)
+		returned_qty = flt(already_returned_data.get(returned_column, 0))
 
 		if column in ("stock_qty", "qty") and not args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get(column)
 			current_stock_qty = args.get(column)
 			if column == "stock_qty":
 				current_stock_qty = flt(args.get("qty")) * flt(args.get("conversion_factor") or 1)
+				if current_stock_qty < 0:
+					current_stock_qty = -get_counted_stock_qty(doc, args)
 		elif args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get("rejected_qty") * ref.get("conversion_factor", 1.0)
 			current_stock_qty = (
@@ -338,11 +442,15 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		if reference_qty or flt(current_stock_qty):
 			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif returned_qty >= reference_qty and returns_nothing:
+			elif (
+				flt(returned_qty, field_precision) >= flt(reference_qty, field_precision) and returns_nothing
+			):
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
-			elif abs(flt(current_stock_qty, field_precision)) > max_returnable_qty:
+			elif flt(returned_qty + abs(flt(current_stock_qty)), field_precision) > flt(
+				reference_qty, field_precision
+			):
 				frappe.throw(
 					_("Row # {0}: Cannot return more than {1} for Item {2}").format(
 						args.idx, max_returnable_qty, args.item_code
@@ -352,18 +460,43 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 
 
 def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
-	"""Hold all returns of an item, with or without dn_detail and across rows, to its total delivered qty."""
+	"""Hold all returns of an item, with or without dn_detail, to its total delivered qty."""
 	if key != row.item_code:
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
+		add_returned_row(doc, row.item_code, row, already_returned_items)
 
+
+def add_returned_row(doc, key, row, already_returned_items):
+	"""Count a validated row so that the next rows of the same return see it."""
+	conversion_factor = flt(row.conversion_factor or 1)
+	stock_qty = get_counted_stock_qty(doc, row)
+	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
+	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
+		rejected_qty += stock_qty
+		stock_qty = 0
+
+	returned = already_returned_items.setdefault(key, frappe._dict())
+	returned.qty = flt(returned.qty) + abs(flt(row.qty))
+	returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
+	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
+
+
+def get_counted_stock_qty(doc, row):
+	"""Stock qty a return row counts at. A Delivery Note row without dn_detail counts at the stock qty
+	it stores, as no delivered row caps what it posts."""
+	if doc.doctype == "Delivery Note" and not row.get("dn_detail"):
+		return get_stored_stock_qty(row)
+	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
+
+
+def get_stored_stock_qty(row):
+	"""Stock qty of a sales return row as it stores it, rounded when the row rounds its stock qty."""
 	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
 	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
-	for returned_key in {key, row.item_code}:
-		returned = already_returned_items.setdefault(returned_key, frappe._dict(qty=0, stock_qty=0))
-		returned.qty = flt(returned.qty) + abs(flt(row.qty))
-		returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	return stock_qty
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
@@ -407,15 +540,21 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	return valid_items
 
 
+def get_return_reference_field(doctype: str) -> str:
+	"""Field through which a return row of the doctype refers to its original row."""
+	return frappe.scrub(doctype) + "_item" if doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
+
+
 def get_already_returned_items(doc):
 	child = DocType(f"{doc.doctype} Item")
 	par = DocType(doc.doctype)
 
-	field = frappe.scrub(doc.doctype) + "_item" if doc.doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
+	field = get_return_reference_field(doc.doctype)
 
-	stock_qty = Abs(child.stock_qty)
-	if doc.doctype == "Subcontracting Receipt":
-		stock_qty = Abs(child.qty) * child.conversion_factor
+	stock_qty = Abs(child.qty) * child.conversion_factor
+	if doc.doctype == "Delivery Note":
+		# as in add_returned_row, a row without dn_detail counts at its stored stock qty
+		stock_qty = Case().when(IfNull(child.dn_detail, "") == "", Abs(child.stock_qty)).else_(stock_qty)
 
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES:
@@ -573,7 +712,6 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		fields += [
 			{"SUM": [{"ABS": f"`tab{child_doctype}`.rejected_qty"}], "as": "rejected_qty"},
-			{"SUM": [{"ABS": f"`tab{child_doctype}`.received_qty"}], "as": "received_qty"},
 		]
 
 		if doctype == "Purchase Receipt":
@@ -751,6 +889,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.purchase_order_item = source_doc.purchase_order_item
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.purchase_receipt_item = source_doc.name
+				target_doc.delivery_note_item = source_doc.delivery_note_item
 				target_doc.delivery_note_packed_item = source_doc.delivery_note_packed_item
 
 			if doctype == "Purchase Receipt" and return_against_rejected_qty:
@@ -765,13 +904,14 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
-			target_doc.received_qty = -1 * flt(
-				source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
-			)
 			target_doc.rejected_qty = -1 * flt(
 				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
 			)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			# debit notes without Update Stock store no received qty, so derive it
+			target_doc.received_qty = flt(
+				target_doc.qty + target_doc.rejected_qty, target_doc.precision("received_qty")
+			)
 
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 			target_doc.purchase_order = source_doc.purchase_order
@@ -930,6 +1070,16 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		target_doc,
 		set_missing_values,
 	)
+
+	if return_against_rejected_qty:
+		# rows whose rejected qty is all returned already
+		for row in [row for row in doclist.items if not flt(row.qty, row.precision("qty"))]:
+			doclist.remove(row)
+
+		if not doclist.items:
+			frappe.throw(
+				_("All rejected qty of {0} {1} is already returned.").format(_(doctype), source_name)
+			)
 
 	return doclist
 

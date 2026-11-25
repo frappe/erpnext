@@ -92,6 +92,25 @@ class TestStockEntry(ERPNextTestSuite):
 		se.save()
 		self.assertEqual(se.items[0].qty, 1)
 
+	def test_material_receipt_without_rate_takes_buying_price_per_stock_uom(self):
+		item_code = make_item(
+			properties={"is_stock_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 12}]
+		).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": "_Test Price List India",
+				"uom": "Box",
+				"price_list_rate": 1200,
+			}
+		).insert()
+
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5)
+
+		self.assertEqual(receipt.items[0].basic_rate, 100)
+		self.assertEqual(receipt.items[0].basic_amount, 500)
+
 	def test_fifo(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
@@ -1091,8 +1110,8 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertNotIn("Stock Adjustment - TCP1", gl_map)
 
 		stock_in_hand_account = get_inventory_account(company, warehouse)
-		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 99.99)
-		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 99.99)
+		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 100)
+		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 100)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[1])
@@ -3107,6 +3126,36 @@ class TestStockEntry(ERPNextTestSuite):
 			sorted([["Stock In Hand - TCP1", 100.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 100.0]]),
 		)
 
+	def test_additional_cost_split_over_equal_rows_adds_up_to_the_cost(self):
+		receipt = make_stock_entry(
+			company="_Test Company with perpetual inventory", purpose="Material Receipt", do_not_save=True
+		)
+		receipt.items = []
+		for _ in range(3):
+			item_code = make_item(properties={"is_stock_item": 1}).name
+			receipt.append(
+				"items",
+				stock_entry_row(
+					item_code, 1, t_warehouse="Stores - TCP1", cost_center="Main - TCP1", basic_rate=100
+				),
+			)
+
+		expense_account = "Miscellaneous Expenses - TCP1"
+		receipt.append(
+			"additional_costs", {"expense_account": expense_account, "description": "Freight", "amount": 100}
+		)
+		receipt.insert()
+		receipt.submit()
+		receipt.reload()
+
+		self.assertEqual(flt(sum(d.additional_cost for d in receipt.items), 2), 100)
+		cost_credit = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": receipt.name, "account": expense_account, "is_cancelled": 0},
+			pluck="credit",
+		)
+		self.assertEqual(flt(sum(cost_credit), 2), 100)
+
 	def test_conversion_factor_change(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		repack_entry = frappe.copy_doc(self.globalTestRecords["Stock Entry"][3])
@@ -3343,6 +3392,25 @@ class TestStockEntry(ERPNextTestSuite):
 
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
+
+	def test_additional_cost_split_gives_nothing_to_a_zero_value_row(self):
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Material Receipt",
+			additional_costs=[frappe._dict(base_amount=100)],
+			items=[
+				*[
+					frappe._dict(item_code=f"RECEIVED_{i}", basic_amount=100, t_warehouse="X")
+					for i in range(6)
+				],
+				frappe._dict(item_code="FREE", basic_amount=0, t_warehouse="X"),
+			],
+		)
+
+		se.distribute_additional_costs()
+
+		self.assertEqual(se.items[-1].additional_cost, 0)
+		self.assertEqual(flt(sum(d.additional_cost for d in se.items), 2), 100)
 
 	def test_independent_manufacture_entry(self):
 		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."
@@ -4561,6 +4629,95 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.total_incoming_value), 1000.0)
 		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
+
+	def make_co_product_repack(self):
+		"""Unsaved Repack of 2 FG from 2,000 of raw material, with a co-product at 20% of component cost."""
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		co_product = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=20, basic_rate=100)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": rm_item, "qty": 10})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 2,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		bom.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = entry.stock_entry_type = "Repack"
+		entry.update(
+			{
+				"company": "_Test Company",
+				"from_bom": 1,
+				"bom_no": bom.name,
+				"fg_completed_qty": 2,
+				"from_warehouse": warehouse,
+				"to_warehouse": warehouse,
+			}
+		)
+		entry.get_items()
+		return entry, fg_item, co_product
+
+	def append_manual_finished_good(self, entry, item_code, qty, rate):
+		entry.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": qty,
+				"t_warehouse": entry.to_warehouse,
+				"is_finished_item": 1,
+				"set_basic_rate_manually": 1,
+				"basic_rate": rate,
+			},
+		)
+
+	def test_repack_co_product_shares_the_cost_left_after_a_manual_finished_good(self):
+		"""A manual finished good takes its value first; the BOM percentages split what is left."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		next(d for d in entry.items if d.is_finished_item).qty = 1
+		self.append_manual_finished_good(entry, fg_item, qty=1, rate=300)
+		entry.insert()
+
+		amounts = {(d.item_code, d.set_basic_rate_manually): d.basic_amount for d in entry.items}
+		self.assertEqual(amounts[(co_product, 0)], 340)
+		self.assertEqual(amounts[(fg_item, 0)], 1360)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
+		entry.submit()
+		ledger = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": entry.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		for row in entry.items:
+			if row.t_warehouse:
+				self.assertEqual(ledger[row.name], row.basic_amount)
+		# in equals out, so nothing is left for Stock Adjustment
+		self.assertEqual(sum(ledger.values()), 0)
+
+	def test_repack_co_product_keeps_its_share_when_every_finished_good_is_manual(self):
+		"""With no automatic finished good, the co-product takes its percentage of the whole cost."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		entry.remove(next(d for d in entry.items if d.is_finished_item))
+		self.append_manual_finished_good(entry, fg_item, qty=2, rate=800)
+		entry.insert()
+
+		co_row = next(d for d in entry.items if d.item_code == co_product)
+		self.assertEqual(co_row.basic_amount, 400)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
 
 	def test_secondary_item_with_zero_cost_allocation_carries_no_value(self):
 		"""A BOM that allocates 0% to a secondary item gives the finished good everything."""
@@ -6348,6 +6505,59 @@ class TestStockEntry(ERPNextTestSuite):
 				get_warehouse_details,
 				{**args, "warehouse": "_Test Warehouse 2 - _TC1"},
 			)
+
+	def test_submit_locks_bins_before_validate(self):
+		from unittest.mock import patch
+
+		from frappe.utils import get_datetime
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+		from erpnext.stock.utils import lock_bins
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PTRB-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			do_not_submit=True,
+		)
+
+		calls = []
+		validate = StockEntry.validate
+		lock_time = get_datetime(f"{transfer.posting_date} 23:59:59.123456")
+		with (
+			patch(
+				"erpnext.stock.utils.lock_bins",
+				lambda item_warehouses: calls.append("lock_bins") or lock_bins(item_warehouses),
+			),
+			patch.object(StockEntry, "validate", lambda doc: calls.append("validate") or validate(doc)),
+			patch("erpnext.utilities.transaction_base.now_datetime", return_value=lock_time),
+		):
+			transfer.submit()
+
+		self.assertEqual(calls, ["lock_bins", "validate"])
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": transfer.name},
+			fields=["posting_datetime", "serial_and_batch_bundle"],
+		)
+		self.assertEqual(len(sles), 2)
+		for sle in sles:
+			self.assertEqual(get_datetime(sle.posting_datetime), lock_time)
+			bundle_time = frappe.db.get_value(
+				"Serial and Batch Bundle", sle.serial_and_batch_bundle, "posting_datetime"
+			)
+			self.assertEqual(get_datetime(bundle_time), lock_time)
 
 
 def make_serialized_item(self, **args):

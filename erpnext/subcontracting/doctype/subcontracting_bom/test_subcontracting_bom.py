@@ -109,6 +109,17 @@ class TestSubcontractingBOM(ERPNextTestSuite):
 			service_item=service_item.name,
 		)
 
+	def test_bom_of_active_subcontracting_bom_cannot_be_deactivated(self):
+		variant, _ = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])
+		create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=bom.name, service_item=service_item.name
+		)
+
+		bom.is_active = 0
+		self.assertRaisesRegex(frappe.ValidationError, "active Subcontracting BOM", bom.save)
+
 	def test_finished_good_bom_query_lists_variant_and_template_boms(self):
 		variant, template_bom = make_subcontracted_variant()
 		variant_bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])

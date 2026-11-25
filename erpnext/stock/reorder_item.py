@@ -12,6 +12,19 @@ from frappe.utils.nestedset import get_ancestors_of
 
 import erpnext
 
+ITEM_FIELDS = (
+	"name",
+	"stock_uom",
+	"purchase_uom",
+	"description",
+	"item_name",
+	"item_group",
+	"brand",
+	"variant_of",
+	"has_variants",
+	"lead_time_days",
+)
+
 
 def reorder_item():
 	"""Reorder item if stock reaches reorder level"""
@@ -125,16 +138,7 @@ def get_items_for_reorder() -> dict[str, list]:
 			reorder_table.material_request_type,
 			reorder_table.warehouse_reorder_level,
 			reorder_table.warehouse_reorder_qty,
-			item_table.name,
-			item_table.stock_uom,
-			item_table.purchase_uom,
-			item_table.description,
-			item_table.item_name,
-			item_table.item_group,
-			item_table.brand,
-			item_table.variant_of,
-			item_table.has_variants,
-			item_table.lead_time_days,
+			*[item_table[field] for field in ITEM_FIELDS],
 		)
 		.where(
 			(item_table.disabled == 0)
@@ -162,10 +166,7 @@ def get_reorder_levels_for_variants(itemwise_reorder):
 
 	query = (
 		frappe.qb.from_(item_table)
-		.select(
-			item_table.name,
-			item_table.variant_of,
-		)
+		.select(*[item_table[field] for field in ITEM_FIELDS])
 		.where(
 			(item_table.disabled == 0)
 			& (item_table.is_stock_item == 1)
@@ -181,7 +182,10 @@ def get_reorder_levels_for_variants(itemwise_reorder):
 	variants_item = query.run(as_dict=True)
 	for row in variants_item:
 		if not itemwise_reorder.get(row.name) and itemwise_reorder.get(row.variant_of):
-			itemwise_reorder.setdefault(row.name, []).extend(itemwise_reorder.get(row.variant_of, []))
+			# the template's levels with the variant's own item details
+			itemwise_reorder[row.name] = [
+				frappe._dict(level, **row) for level in itemwise_reorder.get(row.variant_of)
+			]
 
 	return itemwise_reorder
 

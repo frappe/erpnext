@@ -238,7 +238,11 @@ class MaterialRequest(BuyingController):
 			self.buying_price_list = default_price_list
 
 	def on_update(self):
-		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
+		if (
+			self.get_doc_before_save()
+			and self.buying_price_list
+			and self.has_value_changed("buying_price_list")
+		):
 			self.update_item_rates()
 
 	def update_item_rates(self):
@@ -261,7 +265,13 @@ class MaterialRequest(BuyingController):
 				item.item_code,
 			)
 			if rate is not None:
-				item.db_set({"rate": rate, "amount": flt(rate * item.qty, item.precision("amount"))})
+				item.db_set(
+					{
+						"price_list_rate": rate,
+						"rate": rate,
+						"amount": flt(rate * item.qty, item.precision("amount")),
+					}
+				)
 
 		frappe.msgprint(
 			_("Item rates have been updated based on the selected Buying Price List {0}").format(

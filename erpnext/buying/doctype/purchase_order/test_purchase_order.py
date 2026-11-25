@@ -851,6 +851,25 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(get_last_purchase_details(item).discount_amount, 39)
 
+	def test_last_purchase_rate_from_a_newer_purchase_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		item = make_item("_Test Last Purchase Rate From Invoice", {"is_stock_item": 1}).name
+		create_purchase_order(
+			item_code=item,
+			rate=100,
+			transaction_date=add_days(nowdate(), -10),
+			schedule_date=add_days(nowdate(), 1),
+		)
+		for days, rate in ((-1, 150), (-5, 120)):
+			invoice = make_purchase_invoice(
+				item_code=item, rate=rate, posting_date=add_days(nowdate(), days), do_not_save=True
+			)
+			invoice.set_posting_time = 1
+			invoice.submit()
+
+		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 150)
+
 	def test_update_rate_as_per_last_purchase_carries_discount_amount(self):
 		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
 		make_fully_discounted_purchase_order(item)
@@ -2707,6 +2726,82 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 			orders[1].cancel()
 			self.assertFalse(source.get_db_value("inter_company_order_reference"))
+
+	def test_supplier_from_first_item_default_found(self):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test Default Supplier Group",
+				"parent_item_group": "All Item Groups",
+				"item_group_defaults": [{"company": "_Test Company", "default_supplier": "_Test Supplier 1"}],
+			}
+		).insert()
+		item_with_default = make_item(
+			"_Test Item With Default Supplier",
+			{"item_defaults": [{"company": "_Test Company", "default_supplier": "_Test Supplier"}]},
+		)
+		item_from_group = make_item(
+			"_Test Item With Group Default Supplier",
+			{"item_group": item_group.name, "item_defaults": [{"company": "_Test Company"}]},
+		)
+
+		po = frappe.new_doc("Purchase Order")
+		po.company = "_Test Company"
+		po.append("items", {"item_code": item_with_default.name})
+		po.append("items", {"item_code": item_from_group.name})
+		po.set_supplier_from_item_default()
+
+		self.assertEqual(po.supplier, "_Test Supplier")
+
+	def test_deleting_rows_with_update_items_refreshes_their_other_bins(self):
+		"""Deleting a row refreshes the requested qty of its Material Request's warehouse and the
+		reserved qty of a bundle row's components."""
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		def bin_qty(item_code, warehouse, field):
+			return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, field)
+
+		def keep_only_second_row(doc):
+			row = doc.items[1]
+			trans_item = [
+				{
+					"docname": row.name,
+					"item_code": row.item_code,
+					"qty": row.qty,
+					"rate": row.rate,
+					"conversion_factor": row.conversion_factor,
+				}
+			]
+			update_child_qty_rate(doc.doctype, json.dumps(trans_item), doc.name)
+
+		item_code, other_item = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		mr = make_material_request(item_code=item_code, qty=10, warehouse="_Test Warehouse 1 - _TC")
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.append(
+			"items",
+			dict(
+				po.items[0].as_dict(),
+				name=None,
+				item_code=other_item,
+				material_request=None,
+				material_request_item=None,
+			),
+		)
+		po.submit()
+		keep_only_second_row(po)
+		self.assertEqual(bin_qty(item_code, "_Test Warehouse 1 - _TC", "indented_qty"), 10)
+
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [item_code], 2)
+		so = make_sales_order(item_code=bundle, qty=5, do_not_submit=True)
+		so.append("items", dict(so.items[0].as_dict(), name=None, item_code=other_item))
+		so.submit()
+		keep_only_second_row(so)
+		self.assertEqual(bin_qty(item_code, "_Test Warehouse - _TC", "reserved_qty"), 0)
 
 
 def create_po_for_sc_testing():

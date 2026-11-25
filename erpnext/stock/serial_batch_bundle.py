@@ -804,15 +804,21 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			self.calculate_stock_value_from_deprecarated_ledgers()
 
 	def get_serial_no_wise_incoming_rate(self, serial_nos):
+		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
+		posted_before_condition = None
+		if self.sle.posting_datetime:
+			posted_before_condition = get_posted_before_sle_condition(self.sle, bundle_child)
+
 		incoming_rates = frappe._dict()
 		for serial_nos_batch in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
-			for serial_no, incoming_rate in self.get_inward_serial_no_rates(serial_nos_batch):
+			for serial_no, incoming_rate in self.get_inward_serial_no_rates(
+				serial_nos_batch, bundle_child, posted_before_condition
+			):
 				incoming_rates.setdefault(serial_no, incoming_rate)
 
 		return incoming_rates
 
-	def get_inward_serial_no_rates(self, serial_nos):
-		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
+	def get_inward_serial_no_rates(self, serial_nos, bundle_child, posted_before_condition):
 		query = (
 			frappe.qb.from_(bundle_child)
 			.select(bundle_child.serial_no, bundle_child.incoming_rate)
@@ -832,8 +838,8 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		if self.sle.voucher_no:
 			query = query.where(bundle_child.voucher_no != self.sle.voucher_no)
 
-		if self.sle.posting_datetime:
-			query = query.where(bundle_child.posting_datetime <= self.sle.posting_datetime)
+		if posted_before_condition:
+			query = query.where(posted_before_condition)
 
 		return query.run()
 
@@ -879,6 +885,32 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 	def get_incoming_rate_of_serial_no(self, serial_no):
 		return self.serial_no_incoming_rate.get(serial_no, 0.0)
+
+
+def get_posted_before_sle_condition(sle, bundle_child):
+	"""Bundle entries posted before the SLE; on the same posting datetime, those whose own SLE was created earlier."""
+	sle_creation = sle.creation if sle.get("name") else None
+	if not sle.get("name") and sle.get("serial_and_batch_bundle"):
+		sle_creation = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"serial_and_batch_bundle": sle.serial_and_batch_bundle, "is_cancelled": 0},
+			"creation",
+		)
+
+	sle_table = frappe.qb.DocType("Stock Ledger Entry")
+	bundle_sle_exists = (sle_table.serial_and_batch_bundle == bundle_child.parent) & (
+		sle_table.is_cancelled == 0
+	)
+	if sle_creation:
+		bundle_sle_exists &= sle_table.creation < sle_creation
+
+	tie_condition = ExistsCriterion(
+		frappe.qb.from_(sle_table).select(sle_table.name).where(bundle_sle_exists)
+	)
+
+	return (bundle_child.posting_datetime < sle.posting_datetime) | (
+		(bundle_child.posting_datetime == sle.posting_datetime) & tie_condition
+	)
 
 
 def is_rejected(voucher_type, voucher_detail_no, warehouse):
@@ -976,45 +1008,9 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		child = frappe.qb.DocType("Serial and Batch Entry")
 
-		sle_creation = self.sle.creation if self.sle.get("name") else None
-		if not self.sle.get("name") and self.sle.get("serial_and_batch_bundle"):
-			sle_creation = frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"serial_and_batch_bundle": self.sle.serial_and_batch_bundle, "is_cancelled": 0},
-				"creation",
-			)
-
 		timestamp_condition = ""
 		if self.sle.posting_datetime:
-			timestamp_condition = child.posting_datetime < self.sle.posting_datetime
-
-			sle_table = frappe.qb.DocType("Stock Ledger Entry")
-			if sle_creation:
-				# bundle creation and SLE creation are different timelines (a
-				# bundle can be created much before its SLE), so break the tie
-				# using the creation of the bundle's own SLE
-				tie_condition = ExistsCriterion(
-					frappe.qb.from_(sle_table)
-					.select(sle_table.name)
-					.where(
-						(sle_table.serial_and_batch_bundle == child.parent)
-						& (sle_table.is_cancelled == 0)
-						& (sle_table.creation < sle_creation)
-					)
-				)
-			else:
-				# the current entry is not yet in the ledger and will get the
-				# latest creation, so the same-timestamp entries which are
-				# already in the ledger precede it
-				tie_condition = ExistsCriterion(
-					frappe.qb.from_(sle_table)
-					.select(sle_table.name)
-					.where(
-						(sle_table.serial_and_batch_bundle == child.parent) & (sle_table.is_cancelled == 0)
-					)
-				)
-
-			timestamp_condition |= (child.posting_datetime == self.sle.posting_datetime) & tie_condition
+			timestamp_condition = get_posted_before_sle_condition(self.sle, child)
 
 		query = (
 			frappe.qb.from_(child)

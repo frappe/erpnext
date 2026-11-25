@@ -51,6 +51,7 @@ from erpnext.accounts.utils import (
 	get_advance_payment_doctypes,
 	get_outstanding_invoices,
 	get_reconciliation_effect_date,
+	sync_payment_schedule_outstanding,
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
@@ -384,6 +385,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_linked_dunnings()
 		self.delink_advance_entry_references()
+		self.sync_payment_schedules()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
 
@@ -496,7 +498,7 @@ class PaymentEntry(AccountsController):
 
 		uniq_vouchers = {(x.reference_doctype, x.reference_name) for x in self.references}
 		vouchers = [frappe._dict({"voucher_type": x[0], "voucher_no": x[1]}) for x in uniq_vouchers]
-		latest_references = get_outstanding_reference_documents(
+		latest_references = _get_outstanding_reference_documents(
 			{
 				"posting_date": self.posting_date,
 				"company": self.company,
@@ -588,6 +590,12 @@ class PaymentEntry(AccountsController):
 			# Check for negative outstanding invoices as well
 			if allocated_amount < 0 and total_allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
+
+	def sync_payment_schedules(self):
+		"""Reconciled references carry no payment term, so cancel cannot reverse them term by term."""
+		for reference in {(d.reference_doctype, d.reference_name) for d in self.references}:
+			if reference[0] in ("Sales Invoice", "Purchase Invoice"):
+				sync_payment_schedule_outstanding(*reference)
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
@@ -943,12 +951,15 @@ class PaymentEntry(AccountsController):
 						"discount",
 						"outstanding",
 						"discount_type",
+						"discounted_amount",
 					],
 				)
 				for term in payment_schedule:
 					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
 					invoice_paid_amount_map.setdefault(invoice_key, {})
 					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
+					invoice_paid_amount_map[invoice_key]["paid_amount"] = term.paid_amount
+					invoice_paid_amount_map[invoice_key]["discounted_amount"] = term.discounted_amount
 					# Older payments booked the configured discount, even when it was not applied.
 					if self.payment_term_discounts_calculated or not (term.discount_type and term.discount):
 						continue
@@ -975,6 +986,14 @@ class PaymentEntry(AccountsController):
 
 			outstanding = flt(invoice_paid_amount_map.get(key, {}).get("outstanding"))
 			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get("discounted_amt"))
+
+			if cancel:
+				# Reconciliation can move paid amounts between terms, so reverse only what this term
+				# still has paid and discounted. sync_payment_schedules puts back the rest.
+				term = invoice_paid_amount_map.get(key, {})
+				discounted_amt = min(discounted_amt, flt(term.get("discounted_amount")))
+				paid = min(allocated_amount - discounted_amt, flt(term.get("paid_amount")))
+				allocated_amount = max(paid, 0) + discounted_amt
 
 			conversion_rate = frappe.db.get_value(key[2], {"name": key[1]}, "conversion_rate")
 			base_paid_amount_precision = get_field_precision(
@@ -2494,6 +2513,34 @@ def get_outstanding_reference_documents(args, validate=False):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	frappe.has_permission("Payment Entry", "create", throw=True)
+	if args.get("company"):
+		frappe.has_permission("Company", doc=args["company"], throw=True)
+
+	data = _get_outstanding_reference_documents(args, validate)
+	return filter_readable_vouchers(data) if data else data
+
+
+def filter_readable_vouchers(data):
+	"""Drop rows whose voucher the user cannot read."""
+	names_by_doctype = {}
+	for d in data:
+		names_by_doctype.setdefault(d["voucher_type"], set()).add(d["voucher_no"])
+
+	readable = set()
+	for doctype, names in names_by_doctype.items():
+		if not frappe.has_permission(doctype, "read"):
+			continue
+
+		readable.update(
+			(doctype, name)
+			for name in frappe.get_list(doctype, filters={"name": ("in", list(names))}, pluck="name", limit=0)
+		)
+
+	return [d for d in data if (d["voucher_type"], d["voucher_no"]) in readable]
+
+
+def _get_outstanding_reference_documents(args, validate=False):
 	if args.get("party_type") == "Member":
 		return
 
@@ -3161,7 +3208,13 @@ def get_payment_entry(
 
 	reference_date = getdate(reference_date)
 	paid_amount, received_amount, discount_amount, valid_discounts = apply_early_payment_discount(
-		paid_amount, received_amount, doc, party_account_currency, reference_date
+		paid_amount,
+		received_amount,
+		doc,
+		party_account_currency,
+		reference_date,
+		payment_type=payment_type,
+		bank_account_currency=bank.account_currency if bank else None,
 	)
 
 	pe = frappe.new_doc("Payment Entry")
@@ -3585,7 +3638,15 @@ def set_paid_amount_and_received_amount(
 	return paid_amount, received_amount
 
 
-def apply_early_payment_discount(paid_amount, received_amount, doc, party_account_currency, reference_date):
+def apply_early_payment_discount(
+	paid_amount,
+	received_amount,
+	doc,
+	party_account_currency,
+	reference_date,
+	payment_type=None,
+	bank_account_currency=None,
+):
 	total_discount = 0
 	valid_discounts = []
 	eligible_for_payments = ["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"]
@@ -3606,16 +3667,19 @@ def apply_early_payment_discount(paid_amount, received_amount, doc, party_accoun
 				else:
 					discount_amount = term.discount
 
-				# if accounting is done in the same currency, paid_amount = received_amount
+				# bank side gets the discount in the bank's currency
 				conversion_rate = doc.get("conversion_rate", 1) if is_multi_currency else 1
-				discount_amount_in_foreign_currency = discount_amount * conversion_rate
+				if bank_account_currency == party_account_currency:
+					conversion_rate = 1
+				bank_side_discount = discount_amount * conversion_rate
 
-				if doc.doctype == "Sales Invoice":
+				is_receive = (payment_type or set_payment_type(doc.doctype, doc)) == "Receive"
+				if is_receive:
 					paid_amount -= discount_amount
-					received_amount -= discount_amount_in_foreign_currency
+					received_amount -= bank_side_discount
 				else:
 					received_amount -= discount_amount
-					paid_amount -= discount_amount_in_foreign_currency
+					paid_amount -= bank_side_discount
 
 				valid_discounts.append({"type": term.discount_type, "discount": term.discount})
 				total_discount += discount_amount

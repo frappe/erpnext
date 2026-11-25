@@ -15,7 +15,9 @@ frappe.ui.form.on("Stock Entry", {
 			if (!doc.s_warehouse) {
 				return "blue";
 			} else {
-				return doc.qty <= doc.actual_qty ? "green" : "orange";
+				return flt(doc.transfer_qty, precision("transfer_qty", doc)) <= doc.actual_qty
+					? "green"
+					: "orange";
 			}
 		});
 
@@ -24,6 +26,7 @@ frappe.ui.form.on("Stock Entry", {
 				query: "erpnext.stock.doctype.stock_entry.stock_entry.get_pending_work_orders",
 				filters: {
 					company: frm.doc.company,
+					purpose: frm.doc.purpose,
 				},
 			};
 		});
@@ -849,7 +852,9 @@ frappe.ui.form.on("Stock Entry", {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
 
-		if (item.set_basic_rate_manually) {
+		// on a receipt the user gives the rate, as the server keeps it
+		const has_receipt_rate = frm.doc.purpose == "Material Receipt" && flt(item.basic_rate);
+		if (item.set_basic_rate_manually || has_receipt_rate) {
 			frm.events.calculate_basic_amount(frm, item);
 			return;
 		}
@@ -1137,27 +1142,11 @@ frappe.ui.form.on("Stock Entry", {
 			refresh_field("process_loss_qty");
 		}
 	},
-
-	set_fg_completed_qty(frm) {
-		let fg_completed_qty = 0;
-
-		frm.doc.items.forEach((item) => {
-			if (item.is_finished_item) {
-				fg_completed_qty += flt(item.transfer_qty + frm.doc.process_loss_qty);
-			}
-		});
-
-		frm.set_value("fg_completed_qty", fg_completed_qty);
-	},
 });
 
 frappe.ui.form.on("Stock Entry Detail", {
 	items_add(frm, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		if (item.is_finished_item) {
-			frm.events.set_fg_completed_qty(frm);
-		}
-
 		if (frm.doc.purpose === "Receive from Customer") {
 			const scio_row = frm.doc.items.find((row) => row.scio_detail);
 			if (scio_row) {
@@ -1268,8 +1257,10 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	item_code(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
-		// since some items may not have image, so empty the image field to avoid setting the image of previous item
+		// empty the fields the new item may not set, so the previous item's values do not stick
 		d.image = "";
+		d.basic_rate = 0;
+		frm.events.calculate_basic_amount(frm, d);
 
 		if (d.item_code) {
 			var args = {
@@ -1377,10 +1368,24 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 	}
 };
 
+// child handlers run on every parent form, the total is only on Stock Entry
+const update_total_additional_costs = (frm) => {
+	if (frm.doctype === "Stock Entry") {
+		frm.events.calculate_total_additional_costs(frm);
+	}
+};
+
 frappe.ui.form.on("Landed Cost Taxes and Charges", {
 	amount: function (frm, cdt, cdn) {
 		frm.events.set_base_amount(frm, cdt, cdn);
 	},
+
+	base_amount: update_total_additional_costs,
+	// duplicated rows keep their amounts
+	additional_costs_add: update_total_additional_costs,
+	additional_costs_remove: update_total_additional_costs,
+	// "Delete all rows" only fires this
+	additional_costs_delete: update_total_additional_costs,
 
 	expense_account: function (frm, cdt, cdn) {
 		frm.events.set_account_currency(frm, cdt, cdn);
@@ -1632,7 +1637,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 
-			if (!this.frm.doc.__onload?.load_after_mapping) {
+			if (!this.frm.doc.__onload?.load_after_mapping && frappe.model.can_read("Company")) {
 				this.set_default_account("cost_center", "cost_center");
 			}
 
@@ -1718,6 +1723,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			args: {
 				work_order: me.frm.doc.work_order,
 				company: me.frm.doc.company,
+				purpose: me.frm.doc.purpose,
 			},
 			callback: function (r) {
 				if (!r.exc) {
@@ -1773,8 +1779,11 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "cost_center"]);
 		}
 
-		if (this.frm.doc.from_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
-		if (this.frm.doc.to_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
+		// a duplicated row keeps its own warehouses; defaults can fill stock_uom, never item_name
+		if (!row.item_name) {
+			if (this.frm.doc.from_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
+			if (this.frm.doc.to_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
+		}
 
 		if (cint(frappe.user_defaults?.use_serial_batch_fields)) {
 			frappe.model.set_value(row.doctype, row.name, "use_serial_batch_fields", 1);

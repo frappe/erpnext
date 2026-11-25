@@ -6,6 +6,7 @@ import gc
 import gzip
 import json
 from collections import deque
+from datetime import datetime
 from heapq import heappop, heappush, nsmallest
 from itertools import count
 
@@ -71,6 +72,17 @@ REPOST_SLE_QUEUE_FIELDS = (
 	"posting_time",
 	"posting_datetime",
 	"creation",
+)
+
+BALANCE_FIELDS = ("qty_after_transaction", "valuation_rate", "stock_value", "stock_queue")
+STORED_RATE_PRECISION = 9
+OPEN_REPOST_STATUSES = ("Queued", "In Progress", "Failed")
+LINKED_RATE_VOUCHER_TYPES = (
+	"Delivery Note",
+	"Sales Invoice",
+	"Purchase Receipt",
+	"Purchase Invoice",
+	"Subcontracting Receipt",
 )
 
 
@@ -375,6 +387,7 @@ def repost_future_sle(
 	resume_item_wh_wise_last_posted_sle = (
 		get_item_wh_wise_last_posted_sle_from_reposting_data(doc, reposting_data) or {}
 	)
+	item_wh_reposted_till = get_item_wh_reposted_till_from_reposting_data(doc, reposting_data)
 	if not items_to_be_repost:
 		return
 
@@ -397,6 +410,7 @@ def repost_future_sle(
 				"repost_doc": doc,
 				"repost_affected_transaction": repost_affected_transaction,
 				"item_wh_wise_last_posted_sle": resume_item_wh_wise_last_posted_sle,
+				"item_wh_reposted_till": item_wh_reposted_till,
 				"pending_item_wh": pending_item_wh,
 			},
 			allow_zero_rate=allow_zero_rate,
@@ -408,8 +422,15 @@ def repost_future_sle(
 
 		resume_item_wh_wise_last_posted_sle = {}
 		repost_affected_transaction.update(obj.repost_affected_transaction)
-		skip_reposts_covered_by_dependant_repost(doc, obj.reposted_dependant_item_wh)
-		update_args_in_repost_item_valuation(doc, index, items_to_be_repost, repost_affected_transaction)
+		item_wh_reposted_till = obj.item_wh_reposted_till
+		skip_reposts_covered_by_dependant_repost(doc, obj.reposted_dependant_item_wh, item_wh_reposted_till)
+		update_args_in_repost_item_valuation(
+			doc,
+			index,
+			items_to_be_repost,
+			repost_affected_transaction,
+			item_wh_reposted_till=item_wh_reposted_till,
+		)
 
 
 def is_merged_repost(doc, items_to_be_repost):
@@ -424,14 +445,14 @@ def get_pending_item_wh(reposting_data, items_to_be_repost):
 	return [frappe._dict(row) for row in items_to_be_repost[1:]]
 
 
-def skip_reposts_covered_by_dependant_repost(doc, reposted_dependant_item_wh):
+def skip_reposts_covered_by_dependant_repost(doc, reposted_dependant_item_wh, item_wh_reposted_till=None):
 	"""Skip queued reposts that a Manufacture/Repack dependant repost has already covered.
 
 	While reposting a raw material, the finished goods produced from it are reposted as
-	dependants, from the posting datetime of the manufacture entry right through to the
-	end of their ledger. A separate repost queued for the same finished good and
-	warehouse at a later datetime therefore has nothing left to do, so it is marked as
-	Skipped instead of walking the same entries again.
+	dependants, from the posting datetime of the manufacture entry to the end of their
+	ledger, or to the entry where the repost stopped them. A separate repost queued for
+	the same finished good and warehouse inside that range therefore has nothing left to
+	do, so it is marked as Skipped instead of walking the same entries again.
 
 	Only `Item and Warehouse` reposts are skipped. A `Transaction` repost covers several
 	item-warehouse combinations, so covering one of them says nothing about the rest.
@@ -445,7 +466,7 @@ def skip_reposts_covered_by_dependant_repost(doc, reposted_dependant_item_wh):
 		if not posting_datetime:
 			continue
 
-		(
+		query = (
 			frappe.qb.update(riv)
 			.set(riv.status, "Skipped")
 			.where(
@@ -458,7 +479,18 @@ def skip_reposts_covered_by_dependant_repost(doc, reposted_dependant_item_wh):
 				& (CombineDatetime(riv.posting_date, riv.posting_time) >= posting_datetime)
 				& (riv.creation <= doc.get_repost_started_at())
 			)
-		).run()
+		)
+
+		if reposted_till := (item_wh_reposted_till or {}).get((item_code, warehouse)):
+			query = query.where(get_reposted_till_condition(riv, reposted_till))
+
+		query.run()
+
+
+def get_reposted_till_condition(riv, reposted_till):
+	return (riv.skip_unchanged_entries == 1) & (
+		CombineDatetime(riv.posting_date, riv.posting_time) < get_datetime(reposted_till)
+	)
 
 
 def release_reposting_memory():
@@ -492,6 +524,7 @@ def update_args_in_repost_item_valuation(
 	repost_affected_transaction,
 	item_wh_wise_last_posted_sle=None,
 	pending_item_wh=None,
+	item_wh_reposted_till=None,
 ):
 	file_name = ""
 	if not item_wh_wise_last_posted_sle:
@@ -506,6 +539,7 @@ def update_args_in_repost_item_valuation(
 			"repost_affected_transaction": repost_affected_transaction,
 			"item_wh_wise_last_posted_sle": {str(k): v for k, v in item_wh_wise_last_posted_sle.items()}
 			or {},
+			"item_wh_reposted_till": {str(k): v for k, v in (item_wh_reposted_till or {}).items()},
 			"pending_item_wh": list(pending_item_wh or []),
 			"repost_started_at": doc.flags.repost_started_at,
 		},
@@ -637,6 +671,18 @@ def get_item_wh_wise_last_posted_sle_from_reposting_data(doc, reposting_data=Non
 	return frappe._dict()
 
 
+def get_item_wh_reposted_till_from_reposting_data(doc, reposting_data=None):
+	if not reposting_data and doc and doc.reposting_data_file:
+		reposting_data = get_reposting_data(doc.reposting_data_file)
+
+	if not reposting_data or not reposting_data.get("item_wh_reposted_till"):
+		return {}
+
+	return {
+		frappe.safe_eval(item_wh): value for item_wh, value in reposting_data.item_wh_reposted_till.items()
+	}
+
+
 def get_reposting_data(file_path) -> dict:
 	file_name = frappe.db.get_value(
 		"File",
@@ -648,7 +694,11 @@ def get_reposting_data(file_path) -> dict:
 	)
 
 	if not file_name:
-		return frappe._dict()
+		frappe.throw(
+			_(
+				"The reposting data file {0} is missing. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	attached_file = frappe.get_doc("File", file_name)
 
@@ -657,12 +707,13 @@ def get_reposting_data(file_path) -> dict:
 		content = content.encode("utf-8")
 
 	try:
-		data = gzip.decompress(content)
+		data = json.loads(gzip.decompress(content).decode("utf-8"))
 	except Exception:
-		return frappe._dict()
-
-	if data := json.loads(data.decode("utf-8")):
-		data = data
+		frappe.throw(
+			_(
+				"The reposting data file {0} is corrupted. Resuming this repost without it would silently skip the affected transactions during GL reposting. Restart the repost to regenerate it."
+			).format(bold(file_path))
+		)
 
 	return parse_json(data)
 
@@ -670,6 +721,20 @@ def get_reposting_data(file_path) -> dict:
 def get_current_index(doc=None):
 	if doc and doc.current_index:
 		return doc.current_index
+
+
+def get_resume_point(row):
+	return frappe._dict(
+		{
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+			"posting_date": row.get("posting_date"),
+			"posting_time": row.get("posting_time"),
+			"posting_datetime": row.get("posting_datetime")
+			or get_combine_datetime(row.posting_date, row.posting_time),
+			"creation": row.get("creation"),
+		}
+	)
 
 
 class update_entries_after:
@@ -719,6 +784,7 @@ class update_entries_after:
 
 		self.new_items_found = False
 		self.reposted_dependant_item_wh = {}
+		self.item_wh_reposted_till = {}
 		self.recalculated_stock_entries = set()
 		self.reserved_stock = {}
 
@@ -840,6 +906,15 @@ class update_entries_after:
 		self.distinct_dependant_item_wh = set()
 		self.reposted_dependant_item_wh = {}
 		self.prev_sle_dict = frappe._dict({})
+		self.item_wh_reposted_till = dict(self.args.get("item_wh_reposted_till") or {})
+		self.can_skip_unchanged_entries = bool(
+			self.repost_doc and self.repost_doc.get("skip_unchanged_entries")
+		)
+		self.walk_start = {}
+		self.paused_item_wh = {}
+		self.last_balance_reset = {}
+		self.change_datetimes = {}
+		self.next_linked_rate_entry = {}
 
 	def get_item_wh_wise_last_posted_sle(self):
 		if self.args and self.args.get("item_wh_wise_last_posted_sle"):
@@ -869,6 +944,7 @@ class update_entries_after:
 			if (sle.item_code, sle.warehouse) not in self.distinct_dependant_item_wh:
 				self.distinct_dependant_item_wh.add((sle.item_code, sle.warehouse))
 
+			self.mark_walk_start(sle)
 			sles.extend(self.get_future_entries_to_repost(sle))
 
 		return sles
@@ -886,13 +962,11 @@ class update_entries_after:
 			if (queued_sle.item_code, queued_sle.warehouse) not in self.distinct_dependant_item_wh:
 				self.distinct_dependant_item_wh.add((queued_sle.item_code, queued_sle.warehouse))
 
-			if queued_sle.name in self.distinct_sles:
+			if queued_sle.name in self.distinct_sles or self.is_paused(queued_sle):
 				continue
 
 			i += 1
-			item_wh_key = (queued_sle.item_code, queued_sle.warehouse)
-			if item_wh_key not in self.prev_sle_dict:
-				self.prev_sle_dict[item_wh_key] = get_previous_sle_of_current_voucher(queued_sle)
+			self.prepare_item_wh_for_entry(queued_sle)
 
 			sle = self.get_sle_to_repost(queued_sle)
 			if not sle:
@@ -904,6 +978,7 @@ class update_entries_after:
 				)
 				continue
 
+			saved_balance = frappe._dict({field: sle.get(field) for field in BALANCE_FIELDS})
 			self.repost_stock_ledger_entry(sle)
 
 			# To avoid duplicate reposting of same sle in case of multiple dependant sle
@@ -913,8 +988,149 @@ class update_entries_after:
 				self.include_dependant_sle_in_reposting(sle)
 				self.update_item_wh_wise_last_posted_sle(sle)
 
+			if self.is_settled(sle, saved_balance):
+				self.pause_item_wh(sle)
+
 			if i % 2000 == 0:
 				self.update_data_in_repost(len(self._sles), i)
+
+	def prepare_item_wh_for_entry(self, queued_sle):
+		item_wh_key = (queued_sle.item_code, queued_sle.warehouse)
+		if self.paused_item_wh.pop(item_wh_key, None):
+			self.prev_sle_dict[item_wh_key] = get_previous_sle_of_current_voucher(
+				frappe._dict(queued_sle, sle_id=queued_sle.name)
+			)
+		elif item_wh_key not in self.prev_sle_dict:
+			self.prev_sle_dict[item_wh_key] = get_previous_sle_of_current_voucher(queued_sle)
+
+	def mark_walk_start(self, row):
+		item_wh_key = (row.item_code, row.warehouse)
+		posting_datetime = get_datetime(
+			row.posting_datetime or get_combine_datetime(row.posting_date, row.posting_time)
+		)
+		self.walk_start[item_wh_key] = max(
+			posting_datetime, self.walk_start.get(item_wh_key, posting_datetime)
+		)
+
+		if self.paused_item_wh.get(item_wh_key, posting_datetime) > posting_datetime:
+			self.paused_item_wh[item_wh_key] = posting_datetime
+			self.item_wh_wise_last_posted_sle[item_wh_key] = get_resume_point(row)
+
+		return item_wh_key
+
+	def is_paused(self, queued_sle):
+		resume_at = self.paused_item_wh.get((queued_sle.item_code, queued_sle.warehouse))
+		return bool(resume_at) and get_datetime(queued_sle.posting_datetime) < resume_at
+
+	def is_settled(self, sle, saved_balance):
+		item_wh_key = (sle.item_code, sle.warehouse)
+		posting_datetime = get_datetime(sle.posting_datetime)
+		is_balance_reset = self.is_balance_reset(sle)
+		if is_balance_reset:
+			self.last_balance_reset[item_wh_key] = posting_datetime
+
+		if not self.can_skip_unchanged_entries or posting_datetime <= self.walk_start.get(
+			item_wh_key, posting_datetime
+		):
+			return False
+
+		if is_balance_reset:
+			return True
+
+		return self.has_saved_balance(sle, saved_balance) and not self.is_ledger_shifted(
+			item_wh_key, posting_datetime
+		)
+
+	def is_balance_reset(self, sle):
+		if sle.voucher_type != "Stock Reconciliation" or sle.is_adjustment_entry:
+			return False
+
+		if sle.has_batch_no or sle.batch_no or sle.serial_no or self.has_inventory_dimensions(sle):
+			return False
+
+		return not sle.has_serial_no or self.skip_serial_batch_valuation
+
+	def has_saved_balance(self, sle, saved_balance):
+		if sle.serial_no or (
+			(sle.has_serial_no or sle.has_batch_no) and not self.skip_serial_batch_valuation
+		):
+			return False
+
+		running_balance = self.prev_sle_dict.get((sle.item_code, sle.warehouse))
+		if not running_balance:
+			return False
+
+		return self.get_comparable_balance(running_balance) == self.get_comparable_balance(saved_balance)
+
+	def get_comparable_balance(self, balance):
+		stock_queue = balance.stock_queue or []
+		if isinstance(stock_queue, str):
+			try:
+				stock_queue = json.loads(stock_queue)
+			except ValueError:
+				return None
+
+		return (
+			flt(balance.qty_after_transaction, self.flt_precision),
+			flt(balance.stock_value, self.currency_precision),
+			flt(balance.valuation_rate, STORED_RATE_PRECISION),
+			[[flt(value, STORED_RATE_PRECISION) for value in bucket] for bucket in stock_queue],
+		)
+
+	def is_ledger_shifted(self, item_wh_key, posting_datetime):
+		changes = [change for change in self.get_change_datetimes(item_wh_key) if change <= posting_datetime]
+		if not changes:
+			return False
+
+		last_reset = self.last_balance_reset.get(item_wh_key)
+		return not last_reset or last_reset <= max(changes)
+
+	def get_change_datetimes(self, item_wh_key):
+		if item_wh_key not in self.change_datetimes:
+			self.change_datetimes[item_wh_key] = [
+				get_datetime(
+					row.get("posting_datetime")
+					or get_combine_datetime(row.get("posting_date"), row.get("posting_time"))
+				)
+				for row in self.items_to_be_repost or []
+				if (row.get("item_code"), row.get("warehouse")) == item_wh_key
+			] + get_open_repost_datetimes(*item_wh_key, exclude=self.repost_doc.name)
+
+		return self.change_datetimes[item_wh_key]
+
+	def pause_item_wh(self, sle):
+		item_wh_key = (sle.item_code, sle.warehouse)
+		next_entry = self.get_next_linked_rate_entry(sle)
+		self.paused_item_wh[item_wh_key] = (
+			get_datetime(next_entry.posting_datetime) if next_entry else datetime.max
+		)
+		self.prev_sle_dict.pop(item_wh_key, None)
+
+		reposted_till = self.item_wh_reposted_till.get(item_wh_key)
+		if not reposted_till or get_datetime(sle.posting_datetime) < get_datetime(reposted_till):
+			self.item_wh_reposted_till[item_wh_key] = sle.posting_datetime
+
+		if next_entry:
+			self.item_wh_wise_last_posted_sle[item_wh_key] = get_resume_point(next_entry)
+		else:
+			self.item_wh_wise_last_posted_sle.pop(item_wh_key, None)
+
+	def get_next_linked_rate_entry(self, sle):
+		item_wh_key = (sle.item_code, sle.warehouse)
+		position = (get_datetime(sle.posting_datetime), get_datetime(sle.creation))
+		searched_from, next_entry = self.next_linked_rate_entry.get(item_wh_key, (None, None))
+		if searched_from and searched_from <= position and (not next_entry or position < next_entry.position):
+			return next_entry
+
+		next_entry = get_next_linked_rate_entry(sle)
+		if next_entry:
+			next_entry.position = (
+				get_datetime(next_entry.posting_datetime),
+				get_datetime(next_entry.creation),
+			)
+
+		self.next_linked_rate_entry[item_wh_key] = (position, next_entry)
+		return next_entry
 
 	def start_pending_item_wh(self):
 		"""Queue each pending item-warehouse once the repost reaches its posting datetime.
@@ -928,7 +1144,7 @@ class update_entries_after:
 			<= get_datetime(self._sles.first().posting_datetime)
 		):
 			pending = self.pending_item_wh.popleft()
-			item_wh_key = (pending.item_code, pending.warehouse)
+			item_wh_key = self.mark_walk_start(pending)
 			if item_wh_key in self.distinct_dependant_item_wh:
 				continue
 
@@ -953,7 +1169,7 @@ class update_entries_after:
 
 		names = [queued_sle.name]
 		for row in self._sles.peek(REPOST_SLE_BATCH_SIZE - 1):
-			if row.name not in self.distinct_sles:
+			if row.name not in self.distinct_sles and not self.is_paused(row):
 				names.append(row.name)
 
 		missing = [name for name in names if name not in self._sle_batch]
@@ -987,8 +1203,12 @@ class update_entries_after:
 		else:
 			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
 
+		# secondary items of a Subcontracting Receipt are valued from its finished good row
+		if sle.voucher_type == "Subcontracting Receipt":
+			dependant_sles += self.get_secondary_item_sles_of_receipt(sle)
+
 		for depend_sle in dependant_sles:
-			item_wh_key = (depend_sle.item_code, depend_sle.warehouse)
+			item_wh_key = self.mark_walk_start(depend_sle)
 			if item_wh_key in self.distinct_dependant_item_wh:
 				continue
 
@@ -1014,17 +1234,7 @@ class update_entries_after:
 			self.item_wh_wise_last_posted_sle = frappe._dict()
 			return
 
-		self.item_wh_wise_last_posted_sle[(sle.item_code, sle.warehouse)] = frappe._dict(
-			{
-				"item_code": sle.item_code,
-				"warehouse": sle.warehouse,
-				"posting_date": sle.posting_date,
-				"posting_time": sle.posting_time,
-				"posting_datetime": sle.posting_datetime
-				or get_combine_datetime(sle.posting_date, sle.posting_time),
-				"creation": sle.creation,
-			}
-		)
+		self.item_wh_wise_last_posted_sle[(sle.item_code, sle.warehouse)] = get_resume_point(sle)
 
 	def reset_vouchers_and_idx(self):
 		self.stock_ledgers_to_repost = []
@@ -1050,6 +1260,7 @@ class update_entries_after:
 			self.repost_affected_transaction,
 			self.item_wh_wise_last_posted_sle,
 			self.pending_item_wh,
+			self.item_wh_reposted_till,
 		)
 
 		if not frappe.in_test:
@@ -1101,6 +1312,27 @@ class update_entries_after:
 				],
 			)
 			or []
+		)
+
+	@staticmethod
+	def get_secondary_item_sles_of_receipt(sle):
+		secondary_rows = frappe.get_all(
+			"Subcontracting Receipt Item",
+			filters={"parent": sle.voucher_no, "reference_name": sle.dependant_sle_voucher_detail_no},
+			pluck="name",
+		)
+		if not secondary_rows:
+			return []
+
+		return frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"voucher_type": sle.voucher_type,
+				"voucher_no": sle.voucher_no,
+				"voucher_detail_no": ("in", secondary_rows),
+				"is_cancelled": 0,
+			},
+			fields=["item_code", "warehouse", "posting_date", "posting_time", "posting_datetime", "creation"],
 		)
 
 	def has_stock_reco_with_serial_batch(self, sle):
@@ -1220,12 +1452,7 @@ class update_entries_after:
 			elif rate:
 				sle.incoming_rate = rate
 
-		dimensions = get_inventory_dimensions()
-		has_dimensions = False
-		if dimensions:
-			for dimension in dimensions:
-				if sle.get(dimension.get("fieldname")):
-					has_dimensions = True
+		has_dimensions = self.has_inventory_dimensions(sle)
 
 		if self.has_bundle_valuation(sle):
 			self.calculate_valuation_for_serial_batch_bundle(sle)
@@ -1339,8 +1566,15 @@ class update_entries_after:
 		if not cint(erpnext.is_perpetual_inventory_enabled(sle.company)):
 			return
 
-		if self.args.item_code != sle.item_code or self.args.warehouse != sle.warehouse:
+		if (
+			self.args.item_code != sle.item_code
+			or self.args.warehouse != sle.warehouse
+			or key in self.item_wh_reposted_till
+		):
 			self.repost_affected_transaction.add((sle.voucher_type, sle.voucher_no))
+
+	def has_inventory_dimensions(self, sle):
+		return any(sle.get(dimension.get("fieldname")) for dimension in get_inventory_dimensions())
 
 	def update_sle_valuation_fields(self, sle):
 		# Write back only what the repost recomputes. A full db_update would also write the
@@ -1969,7 +2203,9 @@ class update_entries_after:
 					as_dict=True,
 				)
 				if details.is_internal_supplier or (details.is_return and not details.return_against):
-					rate = outgoing_rate if details.is_return else sle.outgoing_rate
+					rate = (
+						outgoing_rate if details.is_return else self.get_internal_receipt_valuation_rate(sle)
+					)
 
 					frappe.db.set_value(
 						f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", rate
@@ -1985,6 +2221,16 @@ class update_entries_after:
 			doc.update_valuation_rate(reset_outgoing_rate=False)
 			for d in doc.items + doc.supplied_items:
 				d.db_update()
+
+	def get_internal_receipt_valuation_rate(self, sle):
+		"""Rate of the stock an internal receipt row accepted: what its transit leg gives back plus
+		the landed cost over the accepted qty, as the receipt itself values it."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		row = frappe.get_doc(sle.voucher_type + " Item", sle.voucher_detail_no)
+		return flt(sle.outgoing_rate) + get_landed_cost_rate(
+			row.doctype, row.name, get_stock_qty(row, row.qty)
+		)
 
 	def update_rate_on_subcontracting_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists("Subcontracting Receipt Item", sle.voucher_detail_no):
@@ -2070,7 +2316,8 @@ class update_entries_after:
 						actual_qty * sle.outgoing_rate
 					)
 
-					self.wh_data.valuation_rate = new_stock_value / new_stock_qty
+					# an outflow at a set rate, like a purchase return, takes out at most the stock value
+					self.wh_data.valuation_rate = max(new_stock_value, 0) / new_stock_qty
 				else:
 					self.wh_data.valuation_rate = sle.outgoing_rate
 		else:
@@ -2548,6 +2795,75 @@ def get_sle_by_voucher_detail_no(voucher_detail_no):
 	)
 
 
+def get_next_linked_rate_entry(sle):
+	table = frappe.qb.DocType("Stock Ledger Entry")
+	posting_datetime = get_datetime(sle.posting_datetime)
+	entries = (
+		frappe.qb.from_(table)
+		.select(
+			table.item_code,
+			table.warehouse,
+			table.posting_date,
+			table.posting_time,
+			table.posting_datetime,
+			table.creation,
+		)
+		.where(
+			(table.item_code == sle.item_code)
+			& (table.warehouse == sle.warehouse)
+			& (table.is_cancelled == 0)
+			& (table.recalculate_rate == 1)
+			& table.voucher_type.isin(LINKED_RATE_VOUCHER_TYPES)
+			& (
+				(table.posting_datetime > posting_datetime)
+				| ((table.posting_datetime == posting_datetime) & (table.creation > sle.creation))
+			)
+		)
+		.orderby(table.posting_datetime)
+		.orderby(table.creation)
+		.limit(1)
+	).run(as_dict=True)
+
+	return entries[0] if entries else None
+
+
+def get_open_repost_datetimes(item_code, warehouse, exclude):
+	riv = frappe.qb.DocType("Repost Item Valuation")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	repost_datetime = CombineDatetime(riv.posting_date, riv.posting_time)
+	is_open = (
+		(riv.docstatus == 1)
+		& riv.status.isin(OPEN_REPOST_STATUSES)
+		& (riv.repost_only_accounting_ledgers == 0)
+		& (riv.name != exclude)
+	)
+
+	item_reposts = (
+		frappe.qb.from_(riv)
+		.select(repost_datetime)
+		.where(
+			is_open
+			& (riv.based_on == "Item and Warehouse")
+			& (riv.item_code == item_code)
+			& (riv.warehouse == warehouse)
+		)
+	)
+	transaction_reposts = (
+		frappe.qb.from_(riv)
+		.inner_join(sle)
+		.on((sle.voucher_type == riv.voucher_type) & (sle.voucher_no == riv.voucher_no))
+		.select(repost_datetime)
+		.where(
+			is_open
+			& (riv.based_on == "Transaction")
+			& (sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+		)
+	)
+
+	return [get_datetime(row[0]) for row in [*item_reposts.run(), *transaction_reposts.run()] if row[0]]
+
+
 def get_prior_ledger_condition(table, posting_datetime, creation):
 	"""Restrict a ledger lookup to the entries that precede a voucher in ledger order."""
 	if creation:
@@ -2657,9 +2973,7 @@ def get_valuation_rate(
 		if rate := (
 			frappe.db.get_value("Item", item_code, "valuation_rate")
 			or frappe.db.get_value("Item", item_code, "standard_rate")
-			or frappe.db.get_value(
-				"Item Price", dict(item_code=item_code, buying=1, currency=currency), "price_list_rate"
-			)
+			or get_buying_price_per_stock_uom(item_code, currency)
 		):
 			return flt(rate)
 
@@ -2700,6 +3014,22 @@ def get_valuation_rate(
 		msg = message + solutions + sub_solutions + "</li>"
 
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
+
+
+def get_buying_price_per_stock_uom(item_code, currency):
+	"""A buying Item Price of the item, converted from the price's UOM to the stock UOM."""
+	from erpnext.stock.get_item_details import get_conversion_factor
+
+	price = frappe.db.get_value(
+		"Item Price",
+		{"item_code": item_code, "buying": 1, "currency": currency},
+		["price_list_rate", "uom"],
+		as_dict=True,
+	)
+	if not price:
+		return 0.0
+
+	return flt(price.price_list_rate) / get_conversion_factor(item_code, price.uom)["conversion_factor"]
 
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
@@ -3135,17 +3465,23 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	For inter company transfer, incoming rate is the average of the outgoing rate
 	"""
 	rate = 0.0
-	lcv_rate = 0.0
 
 	field = "delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
 
 	doctype = "Delivery Note Item" if sle.voucher_type == "Purchase Receipt" else "Sales Invoice Item"
 
-	reference_name = frappe.get_cached_value(sle.voucher_type + " Item", sle.voucher_detail_no, field)
+	# a return row reaches the delivery row through the receipt row it returns
+	child_doctype = sle.voucher_type + " Item"
+	detail_no = (
+		frappe.get_cached_value(child_doctype, sle.voucher_detail_no, frappe.scrub(child_doctype))
+		or sle.voucher_detail_no
+	)
+
+	reference_name = frappe.get_cached_value(child_doctype, detail_no, field)
 	if sle.voucher_type == "Purchase Receipt" and not reference_name:
 		doctype = "Packed Item"
 		reference_name = frappe.get_cached_value(
-			"Purchase Receipt Item", sle.voucher_detail_no, "delivery_note_packed_item"
+			"Purchase Receipt Item", detail_no, "delivery_note_packed_item"
 		)
 
 	if reference_name:
@@ -3155,15 +3491,21 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			"incoming_rate",
 		)
 
-	# add lcv amount in incoming_rate
-	lcv_amount = frappe.db.get_value(
-		f"{sle.voucher_type} Item", sle.voucher_detail_no, "landed_cost_voucher_amount"
-	)
+	# the landed cost is added to the stock accepted, not to what leaves transit or was rejected
+	rejected_warehouse = frappe.get_cached_value(child_doctype, sle.voucher_detail_no, "rejected_warehouse")
+	if sle.actual_qty < 0 or sle.warehouse == rejected_warehouse:
+		return rate
 
-	if lcv_amount:
-		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
+	return rate + get_landed_cost_rate(child_doctype, sle.voucher_detail_no, abs(sle.actual_qty))
 
-	return rate + lcv_rate
+
+def get_landed_cost_rate(child_doctype, voucher_detail_no, stock_qty) -> float:
+	"""Landed cost of a receipt row per unit of stock_qty."""
+	if not stock_qty:
+		return 0.0
+
+	lcv_amount = frappe.db.get_value(child_doctype, voucher_detail_no, "landed_cost_voucher_amount")
+	return flt(lcv_amount) / stock_qty
 
 
 def is_internal_transfer(sle):

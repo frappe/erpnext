@@ -252,7 +252,10 @@ class DeliveryNote(SellingController):
 					"target_parent_dt": "Delivery Note",
 					"target_parent_field": "per_returned",
 					"target_ref_field": "stock_qty",
-					"source_field": "-1 * stock_qty",
+					"source_field": "-1 * qty * conversion_factor",
+					"round_to_target_precision": frappe.get_single_value(
+						"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
+					),
 					"percent_join_field_parent": "return_against",
 				},
 			]
@@ -321,6 +324,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
+		self.validate_against_pick_list_items()
 		self.set_serial_and_batch_bundle_from_pick_list()
 		make_packing_list(self)
 		self.update_current_stock()
@@ -398,7 +402,6 @@ class DeliveryNote(SellingController):
 		if (
 			cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[
