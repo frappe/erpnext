@@ -2802,12 +2802,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								tax.cost_center = me.frm.doc.cost_center;
 							}
 						});
-						if (me.frm.doc.shipping_rule && me.frm.doc.taxes) {
-							for (let tax of taxes) {
-								me.frm.add_child("taxes", tax);
-							}
-
-							refresh_field("taxes");
+						if (me.frm.doc.shipping_rule) {
+							me.set_taxes_after_shipping_charge(taxes);
 						} else {
 							me.frm.set_value("taxes", taxes);
 							me.calculate_taxes_and_totals();
@@ -2816,6 +2812,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 			});
 		}
+	}
+
+	set_taxes_after_shipping_charge(taxes) {
+		// drop the old template's rows; the server re-adds the shipping row first
+		this.frm.clear_table("taxes");
+		this.shipping_rule().always(() => {
+			const offset = this.frm.doc.taxes?.length || 0;
+			for (const tax of taxes) {
+				if (tax.row_id) tax.row_id = String(cint(tax.row_id) + offset);
+				this.frm.add_child("taxes", tax);
+			}
+
+			this.calculate_taxes_and_totals();
+		});
 	}
 
 	tax_category() {
