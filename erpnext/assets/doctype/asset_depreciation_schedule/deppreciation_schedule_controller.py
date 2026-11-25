@@ -66,9 +66,11 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			self.depreciation_amount = self.get_depreciation_amount(row_idx)
 
 			# if asset is being sold or scrapped
-			if self.disposal_date and getdate(self.schedule_date) >= getdate(self.disposal_date):
+			if self.is_disposed_within_period(row_idx):
 				self.set_depreciation_amount_for_disposal(row_idx)
 				break
+
+			is_disposed_on_schedule_date = self.is_disposed_on_schedule_date()
 
 			if row_idx == 0:
 				self.set_depreciation_amount_for_first_row(row_idx)
@@ -93,7 +95,24 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			if flt(self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")) > 0:
 				self.add_depr_schedule_row(row_idx)
 
+			if is_disposed_on_schedule_date:
+				break
+
 		self.add_remaining_booked_rows()
+
+	def is_disposed_within_period(self, row_idx) -> bool:
+		"""Whether the disposal falls inside this row's period, so the row is pro-rated to it."""
+		if not self.disposal_date:
+			return False
+
+		if self.is_disposed_on_schedule_date():
+			# the pro-rata last row ends before its regular schedule date, so it is still pro-rated
+			return self.has_pro_rata and row_idx == cint(self.final_number_of_depreciations) - 1
+
+		return getdate(self.schedule_date) > getdate(self.disposal_date)
+
+	def is_disposed_on_schedule_date(self) -> bool:
+		return bool(self.disposal_date) and getdate(self.schedule_date) == getdate(self.disposal_date)
 
 	def add_booked_row(self, schedule_date) -> bool:
 		"""Keep a row booked after an unbooked one in place of regenerating it."""
