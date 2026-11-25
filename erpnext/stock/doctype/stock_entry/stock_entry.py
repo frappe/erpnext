@@ -377,6 +377,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_warehouses_company()
 		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
+		MaterialTransferStockEntry(self).validate_posting_datetime_with_outgoing_entry()
 		self.validate_item()
 		validate_item_uoms(self.get("items"))
 		self.validate_customer_provided_item()
