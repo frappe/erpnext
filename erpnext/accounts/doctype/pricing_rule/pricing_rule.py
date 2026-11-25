@@ -469,14 +469,6 @@ def _get_row_field(row_dict, field):
 	return row_dict.get(field) or frappe.get_cached_value("Item", row_dict.get("item_code"), field)
 
 
-def _row_matches_rule(row_dict, rule_name, field, rule_items):
-	from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
-
-	return rule_name in get_applied_pricing_rules(row_dict.get("pricing_rules")) or (
-		_get_row_field(row_dict, field) in rule_items
-	)
-
-
 def _build_row_pricing_args(base_args, doc, row_dict, row_name):
 	row_args = copy.deepcopy(base_args)
 	parent_dt = base_args.get("doctype") or (doc.get("doctype") if hasattr(doc, "get") else None)
@@ -589,14 +581,12 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 
 	mixed_rule_criteria = []
 	for rule_name, pr_doc in candidate_docs.items():
-		if not pr_doc.mixed_conditions or pr_doc.disable:
-			continue
-		apply_on_field = frappe.scrub(pr_doc.apply_on)
-		rule_items = set(get_pricing_rule_items(pr_doc) or [])
-		if rule_items and any(
-			_row_matches_rule(d, rule_name, apply_on_field, rule_items) for d in item_list + out
-		):
-			mixed_rule_criteria.append((rule_name, apply_on_field, rule_items))
+		# Every candidate rule already came from an edited or sibling row, so keep sibling rules in scope.
+		if pr_doc.mixed_conditions and not pr_doc.disable:
+			apply_on_field = frappe.scrub(pr_doc.apply_on)
+			rule_items = set(get_pricing_rule_items(pr_doc) or [])
+			if rule_items:
+				mixed_rule_criteria.append((rule_name, apply_on_field, rule_items))
 
 	if not mixed_rule_criteria:
 		return
@@ -629,8 +619,10 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 			)
 
 	for row_name, row_dict in unpriced_rows.items():
+		row_rules = set(get_applied_pricing_rules(row_dict.get("pricing_rules")))
 		if row_name not in out_index_by_row_name and any(
-			_row_matches_rule(row_dict, rn, fld, r_items) for rn, fld, r_items in mixed_rule_criteria
+			rn in row_rules or _get_row_field(row_dict, fld) in r_items
+			for rn, fld, r_items in mixed_rule_criteria
 		):
 			_evaluate_and_record(row_dict, row_name)
 

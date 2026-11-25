@@ -2422,6 +2422,21 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertFalse(out[1].get("applied_on_items"))
 		self.assertFalse(out[1].get("apply_on"))
 
+		(item_other,) = self._make_priced_items("PR Sibling Other Item", item_group="All Item Groups")
+		si.items[0].update(
+			{
+				"item_code": item_other,
+				"item_group": "All Item Groups",
+				"pricing_rules": "",
+				"qty": 2,
+				"stock_qty": 2,
+			}
+		)
+		si.items[1].pricing_rules = pr_mixed.name
+		out = self._apply_pricing_rule_for_row(si)
+		self.assertEqual(len(out), 2)
+		self.assertEqual((out[1].name, out[1].discount_percentage, out[1].pricing_rules), ("row-2", 0, ""))
+
 	def test_mixed_conditions_sibling_cleanup_does_not_clear_other_discounts(self):
 		item_a, item_b = self._make_priced_items("PR Cleanup Item A", "PR Cleanup Item B")
 		pr_mixed = self._make_mixed_group_rule(min_qty=3)
