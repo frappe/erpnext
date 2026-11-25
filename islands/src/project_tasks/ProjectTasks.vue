@@ -9,10 +9,16 @@ import PhaseMeta from "./components/PhaseMeta.vue";
 import TaskListHeader from "./components/TaskListHeader.vue";
 import TaskRows from "./components/TaskRows.vue";
 import { grid, visible_columns } from "./lib/columns.js";
-import { DEFAULT_SORT, next_sort, sorter } from "./lib/tasks.js";
+import { DEFAULT_SORT, matches_search, next_sort, sorter } from "./lib/tasks.js";
 import { create_host_events } from "./host.js";
 import { provideTasks, useTaskEdits } from "./lib/context.js";
-import { FOLDED_STATUSES, finished_phases, parent_groups, status_groups } from "./lib/groups.js";
+import {
+	FOLDED_STATUSES,
+	finished_phases,
+	is_card_parent,
+	parent_groups,
+	status_groups,
+} from "./lib/groups.js";
 
 const props = defineProps({
 	doctype: { type: String, default: "Project" },
@@ -69,28 +75,29 @@ const view_key = computed(
 
 // every task with the edits still being saved, parent tasks included
 const all = computed(() => (data.value ? data.value.tasks.map(view) : []));
-const searching = computed(() => Boolean(props.search.trim()));
+const search_text = computed(() => props.search.trim().toLowerCase());
+const searching = computed(() => Boolean(search_text.value));
 
-// parent tasks hold other tasks, so they aren't rows of their own
-const work = computed(() => {
+// Grouped by parent task, a top-level parent task is its card's header, so it isn't a row as well;
+// a parent task under another one is a row in that card. Without that grouping every task is a
+// row, so a parent task can still be found, opened and changed.
+const rows = computed(() => {
 	if (!data.value) return [];
-	const text = props.search.trim().toLowerCase();
 	return all.value
-		.filter((task) => !task.is_group)
-		.filter(
-			(task) =>
-				!text ||
-				(task.subject || "").toLowerCase().includes(text) ||
-				task.name.toLowerCase().includes(text)
-		)
+		.filter((task) => props.group_by !== "parent" || !is_card_parent(task))
 		.sort(sorter(sort.value, data.value.options));
 });
+const work = computed(() => rows.value.filter((task) => matches_search(task, search_text.value)));
 
 const groups = computed(() => {
 	if (props.group_by === "status") return status_groups(work.value, data.value?.options.status);
-	if (props.group_by === "parent") return parent_groups(all.value, work.value, searching.value);
+	if (props.group_by === "parent") return parent_groups(all.value, rows.value, search_text.value);
 	return [];
 });
+// grouped by parent task, a search can match a card's parent task and none of its rows
+const no_match = computed(
+	() => searching.value && (props.group_by === "parent" ? !groups.value.length : !work.value.length)
+);
 
 // finished groups start folded, each time the grouping or the project changes; a search opens all
 const folded = ref(new Set());
@@ -150,7 +157,7 @@ const add_to = (group) => send("tasks-new-task", { defaults: group.defaults });
 			/>
 
 			<EmptyState
-				v-else-if="!work.length && props.search.trim()"
+				v-else-if="no_match"
 				icon="lucide-search-x"
 				:title="__('No tasks match this search')"
 				:actions="[{ label: __('Clear search'), onClick: () => send('tasks-clear-search') }]"

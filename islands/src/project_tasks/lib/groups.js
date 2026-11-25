@@ -1,4 +1,4 @@
-import { is_done } from "./tasks.js";
+import { is_done, matches_search } from "./tasks.js";
 
 const __ = (...args) => window.__(...args);
 
@@ -22,6 +22,9 @@ export function status_groups(work, statuses = []) {
 		.filter((group) => group.items.length || ALWAYS_SHOWN.includes(group.key));
 }
 
+/** A top-level parent task: grouped by parent task, it is a card's header, not a row. */
+export const is_card_parent = (task) => Boolean(task.is_group && !task.parent_task);
+
 /** Tasks under a top-level parent, however deep, that count towards its progress. */
 const tasks_under = (phase, tasks) =>
 	tasks.filter((task) => !task.is_group && task.top_parent === phase.name && task.status !== "Cancelled");
@@ -33,19 +36,22 @@ const by_plan = (a, b) =>
 
 /**
  * One group per top-level parent task, in plan order, then the tasks with no parent the user can
- * read. While searching, parents with no matching task are left out.
+ * read. While searching, a card shows its matching tasks, or all of them when its parent task
+ * matches; a card with neither is left out.
  */
-export function parent_groups(tasks, work, searching) {
+export function parent_groups(tasks, rows, text = "") {
+	const found = (task) => matches_search(task, text);
 	const groups = tasks
-		.filter((task) => task.is_group && !task.parent_task)
+		.filter(is_card_parent)
 		.sort(by_plan)
 		.map((phase) => {
 			const under = tasks_under(phase, tasks);
+			const in_card = rows.filter((task) => task.top_parent === phase.name);
 			return {
 				key: phase.name,
 				label: phase.subject || phase.name,
 				phase,
-				items: work.filter((task) => task.top_parent === phase.name),
+				items: found(phase) ? in_card : in_card.filter(found),
 				done: under.filter((task) => task.status === "Completed").length,
 				total: under.length,
 				people: [
@@ -57,8 +63,8 @@ export function parent_groups(tasks, work, searching) {
 				can_add: true,
 			};
 		})
-		.filter((group) => group.items.length || !searching);
-	const loose = work.filter((task) => !task.top_parent);
+		.filter((group) => !text || group.items.length || found(group.phase));
+	const loose = rows.filter((task) => !task.top_parent && found(task));
 	if (loose.length) {
 		groups.push({
 			key: "",

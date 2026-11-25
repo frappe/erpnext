@@ -1383,14 +1383,6 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(board, f"{lead_board}-2")
 		self.assertEqual(frappe.db.get_value("Kanban Board", board, "reference_doctype"), "Task")
 
-	def test_new_kanban_board_offers_parent_task_lanes(self):
-		project = make_project({"project_name": f"_Test Kanban Lanes {frappe.generate_hash(length=6)}"})
-		board = frappe.get_doc("Kanban Board", create_kanban_board_if_not_exists(project.name))
-
-		self.assertEqual([row.fieldname for row in board.group_by_fields], ["parent_task"])
-		# found again, not made twice
-		self.assertEqual(create_kanban_board_if_not_exists(project.name), board.name)
-
 	def test_kanban_board_skips_another_users_private_board(self):
 		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 

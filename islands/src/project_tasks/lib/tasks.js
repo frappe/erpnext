@@ -19,6 +19,10 @@ export const PRIORITY_ICONS = {
 	Low: "lucide-signal-low",
 };
 
+/** Whether a task's subject or ID has `text`, already trimmed and lower case. */
+export const matches_search = (task, text) =>
+	!text || (task.subject || "").toLowerCase().includes(text) || task.name.toLowerCase().includes(text);
+
 export const is_done = (task) => task.status === "Completed" || task.status === "Cancelled";
 
 // The sortable columns. `first` is the direction a column sorts in when first clicked.

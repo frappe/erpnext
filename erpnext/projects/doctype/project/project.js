@@ -34,13 +34,13 @@ frappe.ui.form.on("Project", {
 				.find((tab) => tab.df.fieldname === event.originalEvent.detail.fieldname)
 				?.set_active()
 		);
-		$(frm.wrapper).on("overview-new-task", () => frm.events.create_task(frm));
+		$(frm.wrapper).on("overview-new-task", () => frm.events.new_task(frm));
 		// and the Tasks tab for these, which open desk's own task dialogs
 		$(frm.wrapper).on("tasks-open-task", (event) =>
 			frm.events.open_task(frm, event.originalEvent.detail.name)
 		);
 		$(frm.wrapper).on("tasks-new-task", (event) =>
-			frm.events.create_task(frm, event.originalEvent.detail?.defaults)
+			frm.events.new_task(frm, event.originalEvent.detail?.defaults)
 		);
 		// a task changed in the tab changes the project's progress and status
 		$(frm.wrapper).on("tasks-changed", () => frm.events.refresh_project_progress(frm));
@@ -121,10 +121,7 @@ frappe.ui.form.on("Project", {
 		// the Overview tab holds only this field, so hiding it hides the tab; the Tasks tab's fields
 		// are shown and hidden by erpnext.ProjectTasksTab
 		frm.toggle_display("overview_dashboard", frappe.model.can_read("Task"));
-		// the Overview reads tasks, timesheets and invoices, which change without the Project
-		frm.wrapper.dispatchEvent(
-			new CustomEvent("project-overview-refresh", { bubbles: true, detail: { project: frm.doc.name } })
-		);
+		frm.events.refresh_overview(frm);
 		// Budget records are an Accounts Manager's; without them the Budgets tab hides
 		frm.toggle_display("budgets_html", frappe.model.can_read("Budget"));
 		frm.trigger("render_budgets");
@@ -212,173 +209,79 @@ frappe.ui.form.on("Project", {
 
 	// A task opened from the Tasks tab, read and updated without leaving the project
 	open_task: function (frm, name) {
-		// loaded as the form loads it, so the permissions come resolved for this task: If owner,
-		// user permissions and shares included
-		frappe
-			.call({
+		// the permission check and the dialog read Task's meta, which a fresh page hasn't loaded;
+		// without it every task would look read only and open in its form
+		Promise.all([
+			frappe.model.with_doctype("Task"),
+			// loaded as the form loads it, so the permissions come resolved for this task: If owner,
+			// user permissions and shares included
+			frappe.call({
 				method: "frappe.desk.form.load.getdoc",
 				type: "GET",
 				args: { doctype: "Task", name },
-			})
-			.then(({ docs: [task] }) => {
-				// the dialog only edits, so a task the user may not change opens read only in its form
-				if (!frappe.perm.has_perm("Task", 0, "write", task)) {
-					frappe.set_route("Form", "Task", name);
-					return;
-				}
-				// getdoc leaves out `_assign`; its docinfo has the open assignments, which the dialog changes
-				const assigned = (frappe.model.get_docinfo("Task", name)?.assignments || []).map(
-					(row) => row.owner
-				);
-				// Overdue and Template are set by the system, so only the task's own one of them is offered
-				const statuses = frappe.meta
-					.get_docfield("Task", "status")
-					.options.split("\n")
-					.filter((value) => !["Overdue", "Template"].includes(value) || value === task.status);
-				const dialog = new frappe.ui.Dialog({
-					title: task.name,
-					size: "large",
-					fields: [
-						{ fieldname: "subject", fieldtype: "Data", label: __("Subject"), reqd: 1 },
-						{ fieldtype: "Section Break", hide_border: 1 },
-						{
-							fieldname: "status",
-							fieldtype: "Select",
-							label: __("Status"),
-							options: statuses.map((value) => ({ label: __(value), value })),
-						},
-						{ fieldtype: "Column Break" },
-						{
-							fieldname: "priority",
-							fieldtype: "Select",
-							label: __("Priority"),
-							options: frappe.meta.get_docfield("Task", "priority").options,
-						},
-						{ fieldtype: "Section Break", hide_border: 1 },
-						{
-							fieldname: "assigned_to",
-							fieldtype: "MultiSelectPills",
-							label: __("Assigned to"),
-							get_data: (txt) =>
-								frappe.db.get_link_options("User", txt, {
-									user_type: "System User",
-									enabled: 1,
-								}),
-						},
-						{ fieldtype: "Section Break", hide_border: 1 },
-						{
-							fieldname: "exp_start_date",
-							fieldtype: "Datetime",
-							label: __("Expected start"),
-							description: task.act_start_date
-								? __("Started {0}", [frappe.datetime.str_to_user(task.act_start_date)])
-								: "",
-						},
-						{ fieldtype: "Column Break" },
-						{ fieldname: "exp_end_date", fieldtype: "Datetime", label: __("Expected end") },
-						{ fieldtype: "Column Break" },
-						{
-							fieldname: "expected_time",
-							fieldtype: "Float",
-							label: __("Expected hours"),
-							description: flt(task.actual_time)
-								? __("{0} h logged", [flt(task.actual_time, 2)])
-								: "",
-						},
-						{ fieldtype: "Section Break", hide_border: 1 },
-						{ fieldname: "description", fieldtype: "Text Editor", label: __("Description") },
-					],
-					primary_action_label: __("Save"),
-					primary_action: ({ assigned_to, ...values }) => {
-						const save = () =>
-							frm.events
-								.save_task(
-									frm,
-									task,
-									values,
-									dialog.shown_values,
-									assigned,
-									assigned_to || []
-								)
-								.then(() => {
-									dialog.hide();
-									frappe.show_alert({ message: __("Task updated"), indicator: "green" });
-								});
-						if (values.status === "Cancelled" && task.status !== "Cancelled") {
-							frappe.confirm(
-								__("Cancel task {0}?", [frappe.utils.escape_html(task.subject)]),
-								save
-							);
-						} else {
-							save();
-						}
-					},
-					secondary_action_label: __("Open full form"),
-					secondary_action: () => {
-						dialog.hide();
-						frappe.set_route("Form", "Task", task.name);
-					},
-				});
-				dialog
-					.set_values({
-						subject: task.subject,
-						status: task.status,
-						priority: task.priority,
-						assigned_to: assigned,
-						exp_start_date: task.exp_start_date,
-						exp_end_date: task.exp_end_date,
-						expected_time: task.expected_time,
-						description: task.description,
-					})
-					.then(() => {
-						// each control shows a value in its own form, so edits are measured against these
-						const { assigned_to, ...shown } = dialog.get_values(true);
-						dialog.shown_values = shown;
-					});
-				dialog.show();
+			}),
+		]).then(([, response]) => {
+			const task = response.docs[0];
+			// the dialog only edits, so a task the user may not change opens read only in its form
+			if (!frappe.perm.has_perm("Task", 0, "write", task)) {
+				frappe.set_route("Form", "Task", name);
+				return;
+			}
+			// getdoc leaves out `_assign`; its docinfo has the open assignments, which the dialog changes
+			const assigned = (frappe.model.get_docinfo("Task", name)?.assignments || []).map(
+				(row) => row.owner
+			);
+			erpnext.tasks.open_dialog({
+				task,
+				assigned,
+				people: frm.events.task_people(frm),
+				on_saved: () => frm.events.after_task_change(frm),
 			});
+		});
 	},
 
-	// Only the fields changed in the dialog are saved, on the task as it was opened, so a change made
-	// meanwhile is refused rather than overwritten. Assignments are added and removed for the
-	// difference only.
-	save_task: function (frm, task, values, shown, assigned, assigned_to) {
-		const add = assigned_to.filter((user) => !assigned.includes(user));
-		const remove = assigned.filter((user) => !assigned_to.includes(user));
-		// get_values leaves an empty field out, so a field cleared in the dialog is missing from `values`
-		const fields = new Set([...Object.keys(shown), ...Object.keys(values)]);
-		const changes = Object.fromEntries(
-			[...fields]
-				.map((field) => [field, values[field] ?? null])
-				.filter(([field, value]) => !frappe.utils.deep_equal(value, shown[field] ?? null))
-		);
-		const saved = Object.keys(changes).length
-			? frappe.xcall("frappe.client.save", { doc: { ...task, ...changes } })
-			: Promise.resolve();
-		return saved
-			.then(async () => {
-				// one at a time: each call rewrites the task's `_assign`, and calls in parallel deadlock on its row
-				if (add.length) {
-					await frappe.xcall("frappe.desk.form.assign_to.add", {
-						doctype: "Task",
-						name: task.name,
-						assign_to: add,
-						description: values.subject,
-					});
-				}
-				for (const user of remove) {
-					await frappe.xcall("frappe.desk.form.assign_to.remove", {
-						doctype: "Task",
-						name: task.name,
-						assign_to: user,
-					});
-				}
-			})
-			.then(() => {
-				// a task saved in the dialog leaves the Project as it was, so the tab reloads on its own
-				frm.tasks_tab?.reload();
-				frm.events.refresh_project_progress(frm);
+	// A new task in this project from the Tasks tab, in the task dialog (task_quick_entry.js).
+	// `defaults` fills in what the tab knows, such as the status of the group the "+" was on.
+	new_task: function (frm, defaults = {}) {
+		frappe.model.with_doctype("Task", () => {
+			// a site that customised Task's quick entry keeps it
+			if (!erpnext.tasks.can_use_dialog()) {
+				frm.events.create_task(frm, defaults);
+				return;
+			}
+			erpnext.tasks.open_dialog({
+				doc: { ...defaults, project: frm.doc.name },
+				fixed_project: true,
+				people: frm.events.task_people(frm),
+				on_created: () => frm.events.after_task_change(frm),
+				on_full_form: (values, assign_to) =>
+					erpnext.tasks.open_new_in_full_form(
+						Object.assign(frappe.model.get_new_doc("Task"), defaults, { project: frm.doc.name }),
+						values,
+						{ assign_to, after_insert: () => frm.events.after_task_change(frm) }
+					),
 			});
+		});
+	},
+
+	// the people on this project's tasks, offered first when assigning
+	task_people: function (frm) {
+		return [...new Set((frm.tasks_tab?.tasks?.tasks || []).flatMap((row) => row.assigned_to || []))];
+	},
+
+	// a task saved in a dialog leaves the Project as it was, so the tab and the progress reload
+	after_task_change: function (frm) {
+		frm.tasks_tab?.reload();
+		frm.events.refresh_overview(frm);
+		frm.events.refresh_project_progress(frm);
+	},
+
+	// the Overview reads tasks, timesheets and invoices, which change without the Project, so the
+	// form asks it to reload on each refresh and after a task changes in a dialog
+	refresh_overview: function (frm) {
+		frm.wrapper.dispatchEvent(
+			new CustomEvent("project-overview-refresh", { bubbles: true, detail: { project: frm.doc.name } })
+		);
 	},
 
 	update_costing_and_billing: function (frm) {

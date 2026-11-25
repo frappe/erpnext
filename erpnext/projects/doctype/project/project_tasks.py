@@ -3,7 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.model import get_permitted_fields, optional_fields
+from frappe.model import default_fields, get_permitted_fields, optional_fields
+from frappe.permissions import get_role_permissions
 
 from erpnext.projects.doctype.project.project_overview import check_access
 
@@ -48,7 +49,8 @@ def get_project_task_list(project: str) -> dict:
 	fields = [field for field in TASK_FIELDS if field in readable]
 	rows = frappe.qb.get_query(
 		"Task",
-		fields=["name", *fields],
+		# the owner decides write access where a role grants it only to the task's owner
+		fields=["name", "owner", *fields],
 		filters={"project": project},
 		order_by="creation asc",
 		limit=TASK_LIMIT + 1,
@@ -63,6 +65,7 @@ def get_project_task_list(project: str) -> dict:
 		row.assigned_to = frappe.parse_json(row.pop("_assign", None) or "[]")
 		row.pop("lft", None)
 		row.pop("rgt", None)
+		row.pop("owner", None)
 
 	meta = frappe.get_meta("Task")
 	# a save resets only fields above permlevel 0 that the user's roles can't write, so permlevel 0
@@ -114,9 +117,108 @@ def set_top_parents(rows: list[dict]) -> None:
 def set_write_access(rows: list[dict]) -> None:
 	"""Set `can_write` on each row, so the tab offers edits only where a save would go through.
 
-	Owner-only rules, user permissions and shared tasks make this differ between tasks, so it is
-	checked per task, except when no role or share lets the user write any task.
+	Checking each task loads it, one query a task, and the tab loads on every visit and edit. So
+	the answer is worked out once for all rows, unless something can make it differ between tasks
+	in a way only the task itself shows: a permission hook, or a User Permission on what Task links
+	to. Without those, a task is writable when a role lets the user write any task, or only their
+	own and they made it, or it is shared with them for writing.
 	"""
-	can_write_any = frappe.has_permission("Task", "write")
+	user = frappe.session.user
+	if user == "Administrator":
+		for row in rows:
+			row.can_write = True
+		return
+
+	# a role lets the user write every task, or only the ones they made; shares come separately
+	every_task = frappe.has_permission("Task", "write", ignore_share_permissions=True)
+	own_tasks = "write" in get_role_permissions(frappe.get_meta("Task"), user=user).get("if_owner", {})
+
+	if write_access_differs_per_task(user):
+		# Frappe's answer without a task leaves out "only if owner", so it can't stand in for the
+		# owner's own tasks; it is skipped only for a user who can write no task by any route
+		if not (every_task or own_tasks or frappe.share.get_shared("Task", user, ["write"], limit=1)):
+			for row in rows:
+				row.can_write = False
+			return
+		for row in rows:
+			row.can_write = bool(frappe.has_permission("Task", "write", doc=row.name))
+		return
+
+	shared = set() if every_task else set(frappe.share.get_shared("Task", user, ["write"]))
 	for row in rows:
-		row.can_write = bool(can_write_any and frappe.has_permission("Task", "write", doc=row.name))
+		row.can_write = bool(
+			every_task
+			or (own_tasks and (row.get("owner") or "").lower() == user.lower())
+			or row.name in shared
+		)
+
+
+# ERPNext's own hook for every doctype; it denies only where a doctype links to a company-restricted
+# master, which Task doesn't
+INHERITED_PERMISSION = (
+	"erpnext.stock.doctype.company_restriction.company_restriction.has_inherited_permission"
+)
+
+
+def write_access_differs_per_task(user: str) -> bool:
+	"""Whether a task's write access can depend on more than its owner and its shares."""
+	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_inherited_master_links
+
+	hooks = frappe.get_hooks("has_permission")
+	for method in [*hooks.get("Task", []), *hooks.get("*", [])]:
+		if method != INHERITED_PERMISSION or get_inherited_master_links("Task"):
+			return True
+
+	restricted = set(get_user_permissions(user))
+	if not restricted:
+		return False
+	# User Permissions apply through Task's links and its child tables' links
+	linked = {"Task"}
+	meta = frappe.get_meta("Task")
+	for each in [meta, *(frappe.get_meta(df.options) for df in meta.get_table_fields())]:
+		linked.update(df.options for df in each.get_link_fields() if not df.ignore_user_permissions)
+	return bool(restricted & linked)
+
+
+# the task tree's fields, which the system keeps
+SYSTEM_FIELDS = {"lft", "rgt", "old_parent"}
+
+
+@frappe.whitelist(methods=["POST"])
+def create_task(task: dict | str, assign_to: list | str | None = None) -> dict:
+	"""Create a task from the task dialog and assign it, in one go; return the saved task.
+
+	The dialog is Task's quick entry everywhere, so the project is optional, and `task` also holds
+	what the page that opened it filled in, such as the Issue the task is made from. Any Task field
+	is taken except the ones the system keeps. The task is inserted with the user's own
+	permissions and Task's usual checks, which also leave fields at a permlevel the user can't
+	write as they were, as desk's quick entry does. The assignments are added in the same request,
+	so a refused assignment leaves no task behind.
+	"""
+	values = frappe.parse_json(task) or {}
+	assign_to = frappe.parse_json(assign_to) or []
+
+	fields = set(frappe.get_meta("Task").get_valid_columns()) - set(default_fields) - SYSTEM_FIELDS
+	doc = frappe.get_doc(
+		{
+			"doctype": "Task",
+			**{
+				field: value for field, value in values.items() if field in fields and value not in (None, "")
+			},
+		}
+	)
+	doc.insert()
+
+	if assign_to:
+		from frappe.desk.form.assign_to import _add
+
+		# checked as the Assign dialog checks them: `add` checks assignees only when it is the
+		# endpoint called, not from Python, so a Website User or a disabled user would get through
+		_add(
+			{"doctype": "Task", "name": doc.name, "assign_to": assign_to, "description": doc.subject},
+			ignore_permissions=False,
+			validate_assignees=True,
+		)
+	return doc.copy_with_fieldlevel_read_permissions().as_dict()

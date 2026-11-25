@@ -177,7 +177,6 @@ erpnext.ProjectTasksTab = class ProjectTasksTab {
 			container: $container[0],
 			board_name,
 			filters: [["Task", "project", "=", project]],
-			page: this.frm.page,
 		});
 		this.board_filters();
 		await this.board.ready;
@@ -303,7 +302,7 @@ erpnext.ProjectTasksTab = class ProjectTasksTab {
 				.button({
 					label: __("Add task"),
 					icon: "plus",
-					onclick: () => this.frm.events.create_task(this.frm),
+					onclick: () => this.frm.events.new_task(this.frm),
 				})
 				.appendTo(this.$actions);
 		}

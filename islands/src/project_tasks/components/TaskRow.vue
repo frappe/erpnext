@@ -37,6 +37,7 @@ const progress = computed(() => Math.round(props.task.progress || 0));
 			<ListCell v-if="column.field === 'subject'">
 				<span
 					class="truncate text-base text-ink-gray-8"
+					:class="task.is_group && 'font-medium'"
 					:style="indent ? { paddingInlineStart: `${indent}px` } : null"
 					:title="`${task.subject} · ${task.name}`"
 				>

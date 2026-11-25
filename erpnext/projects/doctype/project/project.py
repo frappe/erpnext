@@ -939,11 +939,7 @@ def create_kanban_board_if_not_exists(project: str) -> str:
 		return board
 
 	board_name = append_number_if_name_exists("Kanban Board", project.project_name)
-	board = quick_kanban_board("Task", board_name, "status", project.name)
-	# the Tasks tab offers swimlanes by assignee and by parent task
-	board.append("group_by_fields", {"fieldname": "parent_task"})
-	board.save()
-	return board.name
+	return quick_kanban_board("Task", board_name, "status", project.name).name
 
 
 def get_project_kanban_board(project: str) -> str | None:
