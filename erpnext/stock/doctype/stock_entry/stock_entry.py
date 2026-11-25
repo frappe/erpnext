@@ -40,15 +40,10 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
 )
-<<<<<<< HEAD
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-=======
-from erpnext.manufacturing.doctype.bom.services.costing import get_exploded_good_qty
-from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
-from erpnext.manufacturing.doctype.work_order.services.required_items import get_allowed_transfer_qty
->>>>>>> b1818cd (refactor(stock): reuse the work order transfer allowance for pick list rows)
+from erpnext.manufacturing.doctype.work_order.work_order import get_allowed_transfer_qty
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_qty
