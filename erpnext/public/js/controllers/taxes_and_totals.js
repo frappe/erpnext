@@ -1025,6 +1025,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	apply_discount_amount() {
 		var me = this;
 		this.frm.doc.base_discount_amount = 0.0;
+		this.clear_distributed_discount();
 
 		if (this.frm.doc.discount_amount) {
 			if (!this.frm.doc.apply_discount_on) frappe.throw(__("Please select Apply Discount On"));
@@ -1101,6 +1102,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				this.discount_amount_applied = true;
 				this._calculate_taxes_and_totals();
 			}
+		}
+	}
+
+	clear_distributed_discount() {
+		for (const item of this.frm._items || []) {
+			item.distributed_discount_amount = 0;
 		}
 	}
 
