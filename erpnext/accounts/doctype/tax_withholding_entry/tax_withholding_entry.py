@@ -1395,7 +1395,9 @@ class JournalTaxWithholding(TaxWithholdingController):
 			sum(
 				d.get(self.reverse_field) - d.get(self.party_field)
 				for d in self.doc.get("accounts")
-				if account_type_map.get(d.account) not in ("Tax", "Chargeable")
+				# GST and other taxes are not part of the base. "Chargeable" is the type of
+				# ordinary expense accounts too (Freight, Marketing), so it must stay in.
+				if account_type_map.get(d.account) != "Tax"
 				and d.account != self.party_account
 				and not d.get("is_tax_withholding_account")
 			),
