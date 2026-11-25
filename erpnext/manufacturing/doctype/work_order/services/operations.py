@@ -11,7 +11,7 @@ are called from other modules.
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime, IfNull, Max, Min, Sum
+from frappe.query_builder.functions import Coalesce, CombineDatetime, IfNull, Max, Min, NullIf, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -100,11 +100,16 @@ class OperationsService:
 			return {}
 
 		job_card = frappe.qb.DocType("Job Card")
+		operation = frappe.qb.DocType("Work Order Operation")
+		# Job Cards made before they stored a rate are costed at the operation's rate, as they were booked
+		hour_rate = Coalesce(NullIf(job_card.hour_rate, 0), operation.hour_rate)
 		rows = (
 			frappe.qb.from_(job_card)
+			.join(operation)
+			.on(operation.name == job_card.operation_id)
 			.select(
 				job_card.operation_id,
-				Sum(job_card.total_time_in_mins * job_card.hour_rate / 60.0).as_("cost"),
+				Sum(job_card.total_time_in_mins * hour_rate / 60.0).as_("cost"),
 			)
 			.where(
 				(job_card.work_order == self.doc.name)
