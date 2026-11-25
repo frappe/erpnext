@@ -143,3 +143,13 @@ class TestOrder(ERPNextTestSuite):
 				"csrf_token": 'portal-csrf-token"<&',
 			},
 		)
+
+	def test_terms_are_sanitized_on_the_order_page(self):
+		so = make_sales_order()
+		frappe.db.set_value("Sales Order", so.name, "terms", '"<img src=x onerror=alert(1)>Pay in 30 days"')
+
+		html = get_html_for_route(f"/orders/{so.name}")
+		terms = BeautifulSoup(html, "html.parser").find(class_="terms-and-condition")
+
+		self.assertIn("Pay in 30 days", terms.get_text())
+		self.assertFalse(terms.find(attrs={"onerror": True}))
