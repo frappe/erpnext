@@ -160,7 +160,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 def get_assets_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
-		condition = f" and a.asset_category = '{filters.get('asset_category')}'"
+		condition = " and a.asset_category = %(asset_category)s"
 	finance_book_filter = f" and {get_finance_book_condition(filters)}"
 	if filters.get("finance_book"):
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
@@ -235,6 +235,7 @@ def get_assets_for_grouped_by_category(filters):
 			"to_date": filters.to_date,
 			"from_date": filters.from_date,
 			"company": filters.company,
+			"asset_category": filters.get("asset_category"),
 			"finance_book": filters.get("finance_book", ""),
 		},
 		as_dict=1,
@@ -414,7 +415,7 @@ def get_permitted_assets(asset_details: list) -> list:
 def get_assets_for_grouped_by_asset(filters):
 	condition = ""
 	if filters.get("asset"):
-		condition = f" and a.name = '{filters.get('asset')}'"
+		condition = " and a.name = %(asset)s"
 	finance_book_filter = f" and {get_finance_book_condition(filters)}"
 	if filters.get("finance_book"):
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
@@ -489,6 +490,7 @@ def get_assets_for_grouped_by_asset(filters):
 			"to_date": filters.to_date,
 			"from_date": filters.from_date,
 			"company": filters.company,
+			"asset": filters.get("asset"),
 			"finance_book": filters.get("finance_book", ""),
 		},
 		as_dict=1,
