@@ -3,7 +3,9 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, format_datetime, get_link_to_form
+
+from erpnext.stock.utils import get_combine_datetime
 
 from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
@@ -118,6 +120,30 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 							).format(item.idx),
 							title=_("Invalid Source and Target Warehouse"),
 						)
+
+	def validate_posting_datetime_with_outgoing_entry(self):
+		"""The stock-in takes the cost of the outgoing entry, so it cannot be posted before it."""
+		if not self.doc.outgoing_stock_entry:
+			return
+
+		outgoing = frappe.db.get_value(
+			"Stock Entry", self.doc.outgoing_stock_entry, ["posting_date", "posting_time"], as_dict=True
+		)
+		outgoing_datetime = get_combine_datetime(outgoing.posting_date, outgoing.posting_time)
+		posting_datetime = get_combine_datetime(self.doc.posting_date, self.doc.posting_time)
+		if posting_datetime >= outgoing_datetime:
+			return
+
+		frappe.throw(
+			_(
+				"Posting Date and Time {0} cannot be before {1}, when Stock Entry {2} sent this material."
+			).format(
+				frappe.bold(format_datetime(posting_datetime)),
+				frappe.bold(format_datetime(outgoing_datetime)),
+				get_link_to_form("Stock Entry", self.doc.outgoing_stock_entry),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
 
 	def update_transferred_qty(self):
 		if not self.doc.outgoing_stock_entry:
