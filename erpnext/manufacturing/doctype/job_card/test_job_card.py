@@ -3944,8 +3944,15 @@ class TestJobCard(ERPNextTestSuite):
 			{"secondary_item_type": "Scrap"}
 		)
 		stock_entry.get_items()
-		item_code = bom.secondary_items[0].item_code
-		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == item_code], [3])
+		secondary_item = bom.secondary_items[0]
+		self.assertEqual(
+			[
+				(row.qty, row.stock_uom)
+				for row in stock_entry.items
+				if row.item_code == secondary_item.item_code
+			],
+			[(3, secondary_item.stock_uom)],
+		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
 	def test_job_card_scrap_goes_to_work_order_scrap_warehouse(self):
