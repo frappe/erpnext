@@ -593,6 +593,27 @@ class TestProductionPlan(FrappeTestCase):
 			[(sales_order.items[0].name, 5)],
 		)
 
+	def test_combining_fetched_items_keeps_sales_order_links(self):
+		item = "Test Production Item 1"
+		sales_orders = [make_sales_order(item_code=item, qty=qty) for qty in (5, 3)]
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = sales_orders[0].company
+		plan.get_items_from = "Sales Order"
+		for sales_order in sales_orders:
+			plan.append("sales_orders", {"sales_order": sales_order.name})
+		plan.get_items()
+		plan.combine_items = 1
+		plan.combine_so_items()
+		plan.submit()
+
+		so_items = [sales_order.items[0].name for sales_order in sales_orders]
+		self.assertCountEqual([row.sales_order_item for row in plan.prod_plan_references], so_items)
+		self.assertEqual(
+			[frappe.db.get_value("Sales Order Item", name, "production_plan_qty") for name in so_items],
+			[5, 3],
+		)
+
 	def test_production_plan_subassembly_default_supplier(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -3216,6 +3237,56 @@ class TestProductionPlan(FrappeTestCase):
 		items = get_items_for_material_requests(plan.as_dict())
 
 		self.assertEqual({row.get("item_code"): row.get("warehouse") for row in items}, warehouses)
+
+	def test_sub_assembly_rows_are_not_requested_as_raw_materials(self):
+		rm_items = [
+			make_item(f"_Test PP Planned Sub RM {idx}", {"is_stock_item": 1}).name for idx in range(3)
+		]
+		subcontracted = make_item(
+			"_Test PP Planned Sub Subcontracted", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		in_house = make_item(
+			"_Test PP Planned Sub In House",
+			{"is_stock_item": 1, "default_material_request_type": "Material Transfer"},
+		).name
+		make_bom(item=subcontracted, raw_materials=[rm_items[1]], currency="INR")
+		make_bom(item=in_house, raw_materials=[rm_items[2]], currency="INR")
+		fg_item = make_item("_Test PP Planned Sub FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[subcontracted, in_house, rm_items[0]], currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+		plan.include_subcontracted_items = 0
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual(sorted(row.get("item_code") for row in items), sorted([rm_items[0], rm_items[2]]))
+
+	def test_do_not_explode_line_of_a_planned_sub_assembly_is_requested(self):
+		rm_item = make_item("_Test PP Unplanned Line RM", {"is_stock_item": 1}).name
+		subcontracted = make_item(
+			"_Test PP Unplanned Line Subcontracted", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		in_house = make_item("_Test PP Unplanned Line In House", {"is_stock_item": 1}).name
+		make_bom(item=subcontracted, raw_materials=[rm_item], currency="INR")
+		make_bom(item=in_house, raw_materials=[subcontracted], currency="INR")
+		fg_item = make_item("_Test PP Unplanned Line FG", {"is_stock_item": 1}).name
+		fg_bom = make_bom(
+			item=fg_item, raw_materials=[in_house, subcontracted], currency="INR", do_not_save=True
+		)
+		fg_bom.items[1].do_not_explode = 1
+		fg_bom.insert()
+		fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+		plan.include_subcontracted_items = 0
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual([row.get("item_code") for row in items], [subcontracted])
 
 	def test_transfer_type_raw_material_stays_in_stock_uom(self):
 		rm_item = make_item(

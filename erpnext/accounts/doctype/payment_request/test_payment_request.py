@@ -16,6 +16,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	PaymentRequest,
+	get_print_format_list,
 	make_payment_request,
 )
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -23,6 +24,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 
@@ -1173,6 +1175,31 @@ class TestPaymentRequest(FrappeTestCase):
 			pr.insert,
 		)
 
+	def test_print_format_list_follows_print_format_permissions(self):
+		print_format = frappe.get_doc(
+			{
+				"doctype": "Print Format",
+				"name": "_Test Payment Request Print Format",
+				"doc_type": "Sales Invoice",
+				"standard": "No",
+				"custom_format": 1,
+				"print_format_type": "Jinja",
+				"html": "<p>{{ doc.name }}</p>",
+			}
+		).insert()
+		# Accounts User has no Print Format role of its own, only select through Desk User
+		accounts_user = make_fenced_user("_test_pr_print_format_user@example.com", ["Accounts User"])
+		portal_user = make_portal_user("_test_pr_print_format_portal_user@example.com", "_Test Customer")
+
+		with as_user(accounts_user):
+			print_formats = get_print_format_list("Sales Invoice")["print_format"]
+		self.assertEqual(print_formats[0], "Standard")
+		self.assertIn(print_format.name, print_formats)
+
+		for user in (portal_user, "Guest"):
+			with self.subTest(user=user), as_user(user):
+				self.assertRaises(frappe.PermissionError, get_print_format_list, "Sales Invoice")
+
 	def test_resend_payment_email_uses_saved_values(self):
 		so = make_sales_order()
 		pr = make_payment_request(
@@ -1405,3 +1432,11 @@ def get_accounts_user():
 		user.add_roles("Accounts User")
 
 	return accounts_user
+
+
+def make_portal_user(email, customer):
+	user = make_fenced_user(email, ["Customer"])
+	customer_doc = frappe.get_doc("Customer", customer)
+	customer_doc.append("portal_users", {"user": user})
+	customer_doc.save()
+	return user

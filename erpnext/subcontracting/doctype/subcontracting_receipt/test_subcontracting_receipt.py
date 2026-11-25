@@ -1307,8 +1307,10 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		make_accepted_return(-3).submit()
 		self.assertRaises(StockOverReturnError, make_accepted_return(-1).save)
 
-		make_subcontract_return_against_rejected_warehouse(scr.name).submit()
+		rejected_return = make_subcontract_return_against_rejected_warehouse(scr.name)
 		over_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		rejected_return.submit()
+
 		over_return.items[0].qty = -2
 		self.assertRaises(StockOverReturnError, over_return.save)
 
@@ -3368,6 +3370,35 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
+	def test_no_rejected_warehouse_return_after_all_rejected_qty_is_returned(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.submit()
+		self.assertTrue(scr.has_rejected_qty_to_return())
+
+		make_return_doc("Subcontracting Receipt", scr.name, return_against_rejected_qty=True).submit()
+
+		self.assertFalse(scr.has_rejected_qty_to_return())
+		self.assertRaises(
+			frappe.ValidationError,
+			make_return_doc,
+			"Subcontracting Receipt",
+			scr.name,
+			return_against_rejected_qty=True,
+		)
+
 	def test_accepted_return_from_the_rejected_warehouse_brings_back_raw_materials_at_their_rate(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
@@ -3558,6 +3589,30 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr_return.items[0].warehouse = scr.items[0].warehouse
 		scr_return.save()
 		self.assertEqual(scr_return.items[0].service_cost_per_qty, scr.items[0].service_cost_per_qty)
+
+	@change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_subcontracted_service_cannot_be_received_beyond_the_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt as make_po_receipt,
+		)
+		from erpnext.controllers.status_updater import OverAllowanceError
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		make_po_receipt(sco.purchase_order).submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		self.assertRaises(OverAllowanceError, make_purchase_receipt(scr.name).submit)
 
 	def test_purchase_receipt_keeps_purchase_order_currency(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order

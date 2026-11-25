@@ -1134,18 +1134,24 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			if(["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)) {
+				// loyalty_amount is in company currency
+				let loyalty_amount =
+					this.frm.doc.party_account_currency == this.frm.doc.currency
+						? this.frm.doc.loyalty_amount / this.frm.doc.conversion_rate
+						: this.frm.doc.loyalty_amount;
 				let total_amount_for_payment = (this.frm.doc.redeem_loyalty_points && this.frm.doc.loyalty_amount)
-					? flt(total_amount_to_pay - this.frm.doc.loyalty_amount, precision("base_grand_total"))
+					? flt(total_amount_to_pay - loyalty_amount, precision("base_grand_total"))
 					: total_amount_to_pay;
 				this.set_default_payment(total_amount_for_payment, update_paid_amount);
 				this.calculate_paid_amount();
 			}
 			this.calculate_change_amount();
 
-			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
-				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
-				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
+			let in_party_currency = this.frm.doc.party_account_currency == this.frm.doc.currency;
+			let paid_amount = in_party_currency ? this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
+			let change_amount = in_party_currency ? this.frm.doc.change_amount : this.frm.doc.base_change_amount;
+			this.frm.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
+				precision("outstanding_amount"));
 		}
 	}
 

@@ -244,7 +244,10 @@ class DeliveryNote(SellingController):
 					"target_parent_dt": "Delivery Note",
 					"target_parent_field": "per_returned",
 					"target_ref_field": "stock_qty",
-					"source_field": "-1 * stock_qty",
+					"source_field": "-1 * qty * conversion_factor",
+					"round_to_target_precision": frappe.get_single_value(
+						"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
+					),
 					"percent_join_field_parent": "return_against",
 				},
 			]
@@ -309,6 +312,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
+		self.validate_against_pick_list_items()
 		self.set_serial_and_batch_bundle_from_pick_list()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
@@ -389,7 +393,6 @@ class DeliveryNote(SellingController):
 		if (
 			cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[
@@ -397,6 +400,29 @@ class DeliveryNote(SellingController):
 					["Sales Invoice", "against_sales_invoice", "si_detail"],
 				]
 			)
+
+	def validate_against_pick_list_items(self):
+		"""Refuse a row whose item is not the item picked on its Pick List row."""
+		pick_list_items = {row.pick_list_item for row in self.items if row.pick_list_item}
+		if not pick_list_items:
+			return
+
+		picked_items = dict(
+			frappe.get_all(
+				"Pick List Item",
+				filters={"name": ("in", list(pick_list_items))},
+				fields=["name", "item_code"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			picked_item = picked_items.get(row.pick_list_item)
+			if picked_item and row.item_code != picked_item:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not the item {2} picked in {3}.").format(
+						row.idx, frappe.bold(row.item_code), frappe.bold(picked_item), row.against_pick_list
+					)
+				)
 
 	def set_serial_and_batch_bundle_from_pick_list(self):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -845,7 +871,9 @@ class DeliveryNote(SellingController):
 
 def remove_delivered_entries(package, pick_list_item):
 	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
-	delivered = get_delivered_entries(pick_list_item)
+	from erpnext.stock.doctype.pick_list.pick_list import get_moved_entries
+
+	delivered = get_moved_entries([pick_list_item]).get(pick_list_item, [])
 	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}
 	delivered_batch_qty = defaultdict(float)
 	for row in delivered:
@@ -863,30 +891,6 @@ def remove_delivered_entries(package, pick_list_item):
 		row.qty = flt(abs(row.qty) - taken, row.precision("qty"))
 		if not row.qty:
 			package.remove(row)
-
-
-def get_delivered_entries(pick_list_item):
-	"""Return the serial and batch entries that submitted deliveries of a pick list row took."""
-	voucher_detail_nos = frappe.get_all(
-		"Delivery Note Item", filters={"pick_list_item": pick_list_item, "docstatus": 1}, pluck="name"
-	)
-	if not voucher_detail_nos:
-		return []
-
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
-	entry = frappe.qb.DocType("Serial and Batch Entry")
-	return (
-		frappe.qb.from_(entry)
-		.join(bundle)
-		.on(entry.parent == bundle.name)
-		.select(entry.serial_no, entry.batch_no, entry.qty)
-		.where(
-			bundle.voucher_detail_no.isin(voucher_detail_nos)
-			& (bundle.type_of_transaction == "Outward")
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-		)
-	).run(as_dict=True)
 
 
 def get_creditable_qty(return_doc) -> dict:

@@ -93,6 +93,25 @@ class TestStockEntry(FrappeTestCase):
 		se.save()
 		self.assertEqual(se.items[0].qty, 1)
 
+	def test_material_receipt_without_rate_takes_buying_price_per_stock_uom(self):
+		item_code = make_item(
+			properties={"is_stock_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 12}]
+		).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": "_Test Price List India",
+				"uom": "Box",
+				"price_list_rate": 1200,
+			}
+		).insert()
+
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5)
+
+		self.assertEqual(receipt.items[0].basic_rate, 100)
+		self.assertEqual(receipt.items[0].basic_amount, 500)
+
 	def test_fifo(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
@@ -1481,8 +1500,8 @@ class TestStockEntry(FrappeTestCase):
 		self.assertNotIn("Stock Adjustment - TCP1", gl_map)
 
 		stock_in_hand_account = get_inventory_account(company, warehouse)
-		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 99.99)
-		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 99.99)
+		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 100)
+		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 100)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[1])
@@ -1719,8 +1738,67 @@ class TestStockEntry(FrappeTestCase):
 		st1 = frappe.copy_doc(test_records[0])
 		st1.get("items")[0].t_warehouse = "_Test Warehouse 2 - _TC1"
 		st1.set_stock_entry_type()
-		st1.insert()
-		self.assertRaises(InvalidWarehouseCompany, st1.submit)
+		self.assertRaises(InvalidWarehouseCompany, st1.insert)
+
+	def test_warehouse_of_other_company_is_not_priced(self):
+		from erpnext.stock.utils import InvalidWarehouseCompany
+
+		item_code = make_item("_Test Steel Rod", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=40, basic_rate=123.45)
+
+		def new_material_issue(warehouse):
+			entry = make_stock_entry(
+				item_code=item_code, source=warehouse, qty=1, company="_Test Company", do_not_save=True
+			)
+			entry.items[0].basic_rate = 0
+			return entry
+
+		own_entry = new_material_issue("_Test Warehouse - _TC")
+		own_entry.get_stock_and_rate()
+		self.assertEqual(own_entry.items[0].basic_rate, 123.45)
+		own_entry.insert()
+		self.assertEqual(own_entry.items[0].basic_rate, 123.45)
+
+		other_entry = new_material_issue("_Test Warehouse 2 - _TC1")
+		self.assertRaises(InvalidWarehouseCompany, other_entry.get_stock_and_rate)
+		self.assertRaises(InvalidWarehouseCompany, other_entry.insert)
+
+	def test_header_warehouse_of_other_company_is_not_priced(self):
+		from erpnext.stock.utils import InvalidWarehouseCompany
+
+		item_code = make_item("_Test Steel Bar", {"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse 2 - _TC1",
+			qty=40,
+			basic_rate=123.45,
+			company="_Test Company 1",
+		)
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=40, basic_rate=67.89)
+
+		def new_material_issue(header_warehouse):
+			entry = make_stock_entry(
+				item_code=item_code,
+				source="_Test Warehouse - _TC",
+				qty=1,
+				company="_Test Company",
+				do_not_save=True,
+			)
+			entry.from_warehouse = header_warehouse
+			entry.items[0].s_warehouse = None
+			entry.items[0].basic_rate = 0
+			return entry
+
+		own_entry = new_material_issue("_Test Warehouse - _TC")
+		own_entry.insert()
+		self.assertEqual(own_entry.items[0].s_warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(own_entry.items[0].basic_rate, 67.89)
+
+		other_entry = new_material_issue("_Test Warehouse 2 - _TC1")
+		other_entry.get_stock_and_rate()
+		self.assertNotEqual(other_entry.items[0].basic_rate, 123.45)
+		self.assertRaises(InvalidWarehouseCompany, other_entry.insert)
+		self.assertNotEqual(other_entry.items[0].basic_rate, 123.45)
 
 	# permission tests
 	def test_warehouse_user(self):
@@ -2581,6 +2659,36 @@ class TestStockEntry(FrappeTestCase):
 			sorted([["Stock In Hand - TCP1", 100.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 100.0]]),
 		)
 
+	def test_additional_cost_split_over_equal_rows_adds_up_to_the_cost(self):
+		receipt = make_stock_entry(
+			company="_Test Company with perpetual inventory", purpose="Material Receipt", do_not_save=True
+		)
+		receipt.items = []
+		for _ in range(3):
+			item_code = make_item(properties={"is_stock_item": 1}).name
+			receipt.append(
+				"items",
+				stock_entry_row(
+					item_code, 1, t_warehouse="Stores - TCP1", cost_center="Main - TCP1", basic_rate=100
+				),
+			)
+
+		expense_account = "Miscellaneous Expenses - TCP1"
+		receipt.append(
+			"additional_costs", {"expense_account": expense_account, "description": "Freight", "amount": 100}
+		)
+		receipt.insert()
+		receipt.submit()
+		receipt.reload()
+
+		self.assertEqual(flt(sum(d.additional_cost for d in receipt.items), 2), 100)
+		cost_credit = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": receipt.name, "account": expense_account, "is_cancelled": 0},
+			pluck="credit",
+		)
+		self.assertEqual(flt(sum(cost_credit), 2), 100)
+
 	def test_conversion_factor_change(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		repack_entry = frappe.copy_doc(test_records[3])
@@ -2817,6 +2925,25 @@ class TestStockEntry(FrappeTestCase):
 
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
+
+	def test_additional_cost_split_gives_nothing_to_a_zero_value_row(self):
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Material Receipt",
+			additional_costs=[frappe._dict(base_amount=100)],
+			items=[
+				*[
+					frappe._dict(item_code=f"RECEIVED_{i}", basic_amount=100, t_warehouse="X")
+					for i in range(6)
+				],
+				frappe._dict(item_code="FREE", basic_amount=0, t_warehouse="X"),
+			],
+		)
+
+		se.distribute_additional_costs()
+
+		self.assertEqual(se.items[-1].additional_cost, 0)
+		self.assertEqual(flt(sum(d.additional_cost for d in se.items), 2), 100)
 
 	def test_independent_manufacture_entry(self):
 		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."

@@ -781,7 +781,7 @@ class SellingController(StockController):
 		sl_entries = []
 		# Loop over items and packed items table
 		for d in self.get_item_list():
-			if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
+			if self.posts_stock_ledger_entry(d.item_code, d.qty):
 				if flt(d.conversion_factor) == 0.0:
 					d.conversion_factor = (
 						get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
@@ -807,6 +807,10 @@ class SellingController(StockController):
 
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
+	def posts_stock_ledger_entry(self, item_code, stock_qty) -> bool:
+		"""Whether a row posts stock ledger entries: a row of a stock item whose stock qty is not 0."""
+		return frappe.get_cached_value("Item", item_code, "is_stock_item") == 1 and bool(flt(stock_qty))
+
 	def get_sle_for_source_warehouse(self, item_row):
 		serial_and_batch_bundle = (
 			item_row.serial_and_batch_bundle
@@ -829,7 +833,7 @@ class SellingController(StockController):
 		sle = self.get_sl_entries(
 			item_row,
 			{
-				"actual_qty": -1 * get_ledger_qty(item_row.qty),
+				"actual_qty": -1 * self.get_source_warehouse_ledger_qty(item_row),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
 				"serial_and_batch_bundle": serial_and_batch_bundle,
@@ -839,6 +843,21 @@ class SellingController(StockController):
 			sle.dependant_sle_voucher_detail_no = item_row.name
 
 		return sle
+
+	def get_source_warehouse_ledger_qty(self, item_row) -> float:
+		"""Stock qty an item row moves in its warehouse. A return puts back no more than its delivered
+		row took out, less the row's other returns to any warehouse. A row with a package, a packed item
+		and an internal transfer keep their own qty."""
+		row = item_row.item_row
+		if (
+			not self.is_return
+			or item_row.serial_and_batch_bundle
+			or item_row.target_warehouse
+			or row.doctype == "Packed Item"
+		):
+			return get_ledger_qty(item_row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, item_row.warehouse)
 
 	def get_sle_for_target_warehouse(self, item_row):
 		sle = self.get_sl_entries(
@@ -1275,6 +1294,7 @@ def get_serial_and_batch_bundle(
 	child, parent, delivery_note_child=None, picked_serial_nos=None, picked_batches=None
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
+	from erpnext.stock.doctype.packed_item.packed_item import set_incoming_rate_from_bundle
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 	if parent.get("is_return") and parent.get("packed_items"):
@@ -1310,6 +1330,7 @@ def get_serial_and_batch_bundle(
 
 	doc = sn_doc.make_serial_and_batch_bundle()
 	child.db_set("serial_and_batch_bundle", doc.name)
+	set_incoming_rate_from_bundle(child, doc)
 	if picked_serial_nos is not None:
 		picked_serial_nos[child.item_code].extend(
 			d.serial_no for d in doc.get("entries") or [] if d.serial_no

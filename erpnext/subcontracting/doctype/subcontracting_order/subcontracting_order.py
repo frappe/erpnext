@@ -104,6 +104,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_header_with_purchase_order()
 		self.validate_rows_with_purchase_order()
 		self.validate_supplied_items()
+		self.validate_additional_cost_accounts()
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
@@ -246,9 +247,13 @@ class SubcontractingOrder(SubcontractingController):
 					frappe.throw(_(msg))
 
 	def set_missing_values(self):
-		self.calculate_additional_costs()
 		self.calculate_service_costs()
 		self.calculate_supplied_items_qty_and_amount()
+		for item in self.items:
+			# additional costs split by Amount use the cost before them
+			item.amount = item.qty * (item.rm_cost_per_qty + item.service_cost_per_qty)
+
+		self.calculate_additional_costs()
 		self.calculate_items_qty_and_amount()
 
 	def calculate_service_costs(self):
@@ -436,6 +441,18 @@ class SubcontractingOrder(SubcontractingController):
 				qty = po_rows[po_item].qty
 
 			frappe.db.set_value("Purchase Order Item", po_item, "subcontracted_quantity", qty)
+
+	def get_raw_material_qty_at_supplier(self) -> dict:
+		"""Qty of each raw material sent for this order and not yet consumed or returned."""
+		self.initialized_fields()
+		self.subcontract_orders = [self.name]
+		self.get_available_materials()
+
+		qty_at_supplier = defaultdict(float)
+		for (rm_item_code, _finished_good, _order), details in self.available_materials.items():
+			qty_at_supplier[rm_item_code] += flt(details.qty)
+
+		return qty_at_supplier
 
 
 @frappe.whitelist()

@@ -1525,6 +1525,7 @@ class WorkOrder(Document):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 		job_card = frappe.qb.DocType("Job Card")
+		has_job_card = IfNull(ste.job_card, "") != ""
 
 		query = (
 			frappe.qb.from_(ste)
@@ -1535,13 +1536,15 @@ class WorkOrder(Document):
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
+				fn.Sum(
+					Case().when(ste.is_return == 1, -ste_child.transfer_qty).else_(ste_child.transfer_qty)
+				).as_("qty"),
 			)
 			.where(
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 0)
+				& ((ste.is_return == 0) | has_job_card)
 				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
 			)
 			.groupby(ste_child.item_code, ste_child.original_item)
@@ -1567,10 +1570,10 @@ class WorkOrder(Document):
 		if self.operations and self.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# When only direct stock entries (fg_completed_qty > 0) transferred, preserve the
 		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
 		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty("Material Transfer for Manufacture")
-		if sum_fg_completed_qty:
+		if sum_fg_completed_qty and not self._has_transfer_without_for_quantity():
 			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
 			return
 
@@ -1590,8 +1593,24 @@ class WorkOrder(Document):
 			for item_code, required_qty in required_by_item.items()
 		)
 		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.qty)
-		self.db_set("material_transferred_for_manufacturing", material_transferred)
+		material_transferred = max(min_fraction * flt(self.qty), sum_fg_completed_qty)
+		self.db_set(
+			"material_transferred_for_manufacturing",
+			flt(material_transferred, self.precision("material_transferred_for_manufacturing")),
+		)
+
+	def _has_transfer_without_for_quantity(self):
+		return frappe.db.exists(
+			"Stock Entry",
+			{
+				"work_order": self.name,
+				"docstatus": 1,
+				"purpose": "Material Transfer for Manufacture",
+				"is_return": 0,
+				"fg_completed_qty": 0,
+				"job_card": ("is", "not set"),
+			},
+		)
 
 	def update_returned_qty(self):
 		ste = frappe.qb.DocType("Stock Entry")
@@ -1611,6 +1630,7 @@ class WorkOrder(Document):
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 1)
+				& (IfNull(ste.job_card, "") == "")
 			)
 			.groupby(ste_child.item_code)
 		)

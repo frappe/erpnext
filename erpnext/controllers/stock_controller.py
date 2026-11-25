@@ -21,6 +21,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.controllers.sales_and_purchase_return import (
 	available_serial_batch_for_return,
 	filter_serial_batches,
+	get_return_reference_field,
 	make_serial_batch_bundle_for_return,
 	remove_picked_serial_batches,
 )
@@ -453,6 +454,10 @@ class StockController(AccountsController):
 		bundle_details["ignore_serial_nos"] = list(picked_serial_nos[item_code])
 		bundle_details["already_picked_batches"] = picked_batches
 		sn_doc = self.create_serial_batch_bundle(bundle_details, row)
+		if row.doctype == "Packed Item":
+			from erpnext.stock.doctype.packed_item.packed_item import set_incoming_rate_from_bundle
+
+			set_incoming_rate_from_bundle(row, sn_doc)
 		entries = sn_doc.get("entries") or []
 		picked_serial_nos[item_code].extend(d.serial_no for d in entries if d.serial_no)
 		# a row's own batch no is already counted in picked_batches
@@ -1106,6 +1111,124 @@ class StockController(AccountsController):
 			include_bundle=include_bundle,
 			exclude_serial_nos=exclude_serial_nos,
 		)
+
+	def get_return_stock_qty(self, row, qty, warehouse) -> float:
+		"""Stock qty a return row moves, signed as its qty: no more than its original row moved in the
+		warehouse, less the row's other returns, and all that is left once it returns the rest of the
+		row's qty."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		if self.docstatus == 2:
+			return self.get_posted_return_qty(row, warehouse)
+
+		left = self.get_row_left_to_return(row, warehouse)
+		if left is None:
+			return get_stock_qty(row, qty)
+
+		return self.take_from_row_left_to_return(left, row, qty)
+
+	def take_from_row_left_to_return(self, left, row, qty) -> float:
+		"""Stock qty a return row takes from what is left of its original row, signed as its qty, taken off
+		what is left: no more than is left, and all of it once the row returns the rest of the qty."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		precision = row.precision("stock_qty")
+		left.unrounded_stock_qty += flt(qty) * flt(row.conversion_factor)
+		if flt(left.unrounded_stock_qty, precision) <= 0:
+			taken = -left.stock_qty
+		else:
+			taken = max(get_stock_qty(row, qty), -left.stock_qty)
+
+		left.stock_qty = flt(left.stock_qty + taken, precision)
+		return taken
+
+	def get_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
+		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
+		returns and the earlier rows of this return have not moved back, or None if it moved no stock
+		there. A delivery counts every warehouse its rows used, as a return can put its stock back in
+		another one."""
+		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row
+
+		reference_field = get_return_reference_field(self.doctype)
+		original_row = row.get(reference_field)
+		if not original_row:
+			return None
+
+		item = frappe.qb.DocType(row.doctype)
+		fields = [item.name, item.qty, item.conversion_factor, item.warehouse]
+		if frappe.get_meta(row.doctype).has_field("rejected_warehouse"):
+			fields += [item.rejected_qty, item.rejected_warehouse]
+
+		query = (
+			frappe.qb.from_(item)
+			.select(*fields)
+			.where(
+				(item.docstatus == 1)
+				& (
+					(item.name == original_row)
+					| ((item[reference_field] == original_row) & (item.parent != self.name))
+				)
+			)
+		)
+		if self.meta.has_field("update_stock"):
+			parent = frappe.qb.DocType(self.doctype)
+			query = query.inner_join(parent).on(parent.name == item.parent).select(parent.update_stock)
+
+		rows = query.run(as_dict=True)
+		earlier_rows = [d for d in self.items if d.get(reference_field) == original_row and d.idx < row.idx]
+		warehouses = (
+			[warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows + earlier_rows})
+		)
+		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouses)
+		if original_row not in posted_qty:
+			return None
+
+		left = frappe._dict(
+			unrounded_stock_qty=0.0, stock_qty=sum(posted_qty.values()) * self.get_stock_qty_sign()
+		)
+		for d in rows:
+			if not d.get("update_stock", 1):
+				continue  # a return without Update Stock moves no stock
+			if d.warehouse in warehouses:
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
+			if d.get("rejected_warehouse") in warehouses:
+				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
+
+		left.stock_qty = max(flt(left.stock_qty, row.precision("stock_qty")), 0)
+
+		# the earlier rows of this return post their entries first
+		for d in earlier_rows:
+			if d.warehouse not in warehouses:
+				continue
+			if self.posts_stock_ledger_entry(d.item_code, d.stock_qty):
+				self.take_from_row_left_to_return(left, d, d.qty)
+			else:  # takes nothing, and counts like a return that took nothing
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
+
+		return left
+
+	def get_posted_return_qty(self, row, warehouse):
+		"""Qty the return row's entry moved in the warehouse, signed as its qty."""
+		sign = self.get_stock_qty_sign()
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_detail_no": row.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"actual_qty": ("<", 0) if sign > 0 else (">", 0),
+			},
+			"actual_qty",
+		)
+		return flt(actual_qty) * sign
+
+	def posts_stock_ledger_entry(self, item_code, stock_qty) -> bool:
+		"""Whether a row of a stock item posts its stock ledger entries."""
+		return True
+
+	def get_stock_qty_sign(self) -> int:
+		"""1 where a row's stock qty goes into the warehouse, as on a receipt, -1 where it goes out."""
+		return 1 if self.is_stock_receipt() else -1
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(

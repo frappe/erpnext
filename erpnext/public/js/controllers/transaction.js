@@ -1295,8 +1295,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
-		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
-			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
+		const plc_follows_currency = this.frm.doc.currency === this.frm.doc.price_list_currency;
+		if(plc_follows_currency && this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
 
@@ -1304,7 +1304,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if(this.frm.doc.__onload?.load_after_mapping) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
-				this.apply_price_list();
+				// keep the price list exchange rate just synced above, else the server refetches the market rate
+				this.apply_price_list(null, plc_follows_currency);
 			}
 
 		}
@@ -1424,7 +1425,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	uom(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-		item.pricing_rules = ''
 		if(item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
@@ -2758,6 +2758,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				}
 			})
+		} else if (
+			!doc.payment_terms_template &&
+			this.frm.updating_party_details &&
+			doc.payment_schedule?.length
+		) {
+			// the new party has no terms, so drop the previous party's schedule
+			this.frm.clear_table("payment_schedule");
+			this.frm.refresh_field("payment_schedule");
 		}
 	}
 
@@ -2903,6 +2911,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 };
 
+// bundle qty is in the stock UOM; the row qty is in the row's UOM when the row has a stock qty
+erpnext.get_serial_batch_row_qty = function (doc, row, stock_qty) {
+	const stock_qty_field = ["stock_qty", "transfer_qty"].find((field) =>
+		frappe.meta.has_field(row.doctype, field)
+	);
+	const conversion_factor = stock_qty_field ? flt(row.conversion_factor) || 1 : 1;
+	const stock_precision = precision(stock_qty_field || "qty", row);
+	const row_qty = Math.abs(flt(row.qty));
+
+	// keep a row qty that already matches, as dividing back by a fractional factor can drift
+	const qty =
+		flt(row_qty * conversion_factor, stock_precision) === flt(stock_qty, stock_precision)
+			? row_qty
+			: flt(stock_qty / conversion_factor, precision("qty", row));
+
+	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
+};
+
 erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close, show_dialog) {
 	let warehouse, receiving_stock, existing_stock;
 
@@ -2958,9 +2984,9 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 	new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 		if (r) {
 			let update_values = {
-				"serial_and_batch_bundle": r.name,
-				"qty": Math.abs(r.total_qty)
-			}
+				serial_and_batch_bundle: r.name,
+				qty: erpnext.get_serial_batch_row_qty(frm.doc, item_row, Math.abs(r.total_qty)),
+			};
 
 			if (r.warehouse) {
 				update_values[warehouse_field] = r.warehouse;
