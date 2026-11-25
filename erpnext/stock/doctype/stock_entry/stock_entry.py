@@ -4189,6 +4189,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.set_serial_batch_from_reserved_entry()
 		self.set_secondary_items()
+		self.set_secondary_items_from_job_card()
 		self.set_actual_qty()
 		self.validate_customer_provided_item()
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
