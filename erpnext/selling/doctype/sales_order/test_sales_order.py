@@ -3707,6 +3707,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	@change_settings("Selling Settings", {"validate_selling_price": 1, "editable_bundle_item_rates": 1})
 	def test_selling_price_validation_for_bundle_priced_from_components(self):
+		frappe.db.set_value("Price List", "Standard Selling", "currency", "INR")
 		bundle = make_item("_Test Bundle Priced From Components", {"is_stock_item": 0}).name
 		component = make_item("_Test Component Priced For Bundle", {"is_stock_item": 1}).name
 		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
