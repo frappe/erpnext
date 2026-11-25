@@ -2573,6 +2573,123 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertFalse(row_2_details.get("applied_on_items"))
 		self.assertFalse(row_2_details.get("apply_on"))
 
+	def test_mixed_conditions_preserves_apply_rule_on_other_for_siblings(self):
+		import copy
+		import json
+
+		from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+
+		item_a = make_item(
+			"PR Trigger Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		item_b = make_item(
+			"PR Trigger Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		item_c = make_item(
+			"PR Target Item C", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_price(item_a, "_Test Price List", 100)
+		make_item_price(item_b, "_Test Price List", 100)
+		make_item_price(item_c, "_Test Price List", 100)
+
+		# Mixed rule on Item Group for Items A and B
+		make_item_pricing_rule(
+			title="_Test PR Sibling Mixed Group",
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			apply_multiple_pricing_rules=1,
+			min_qty=3,
+			discount_percentage=5,
+			has_priority=1,
+			priority="1",
+		)
+		# Genuine apply_rule_on_other rule: buying Item B gives 20% discount on Item C
+		rule_other_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test PR Buy B Discount C",
+			"apply_on": "Item Code",
+			"apply_rule_on_other": "Item Code",
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"other_item_code": item_c,
+			"items": [{"item_code": item_b}],
+			"selling": 1,
+			"currency": "INR",
+			"min_qty": 1,
+			"discount_percentage": 20,
+			"company": "_Test Company",
+			"has_priority": 1,
+			"priority": "2",
+		}
+		frappe.get_doc(rule_other_record).insert()
+
+		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
+		si.append(
+			"items",
+			{
+				"item_code": item_b,
+				"item_name": item_b,
+				"stock_uom": "_Test UOM",
+				"uom": "_Test UOM",
+				"cost_center": si.items[0].cost_center,
+				"expense_account": si.items[0].expense_account,
+				"warehouse": si.items[0].warehouse,
+				"conversion_factor": 1,
+				"qty": 1,
+				"stock_qty": 1,
+				"price_list_rate": 100,
+			},
+		)
+		si.append(
+			"items",
+			{
+				"item_code": item_c,
+				"item_name": item_c,
+				"stock_uom": "_Test UOM",
+				"uom": "_Test UOM",
+				"cost_center": si.items[0].cost_center,
+				"expense_account": si.items[0].expense_account,
+				"warehouse": si.items[0].warehouse,
+				"conversion_factor": 1,
+				"qty": 1,
+				"stock_qty": 1,
+				"price_list_rate": 100,
+			},
+		)
+		si.items[0].name = "row-1"
+		si.items[1].name = "row-2"
+		si.items[2].name = "row-3"
+		si.items[0].stock_qty = 2
+		si.selling_price_list = "_Test Price List"
+
+		args = {
+			"items": [si.items[0].as_dict()],
+			"customer": si.customer,
+			"customer_group": si.customer_group,
+			"company": si.company,
+			"currency": si.currency,
+			"conversion_rate": si.conversion_rate,
+			"price_list": si.selling_price_list,
+			"plc_conversion_rate": si.plc_conversion_rate,
+			"price_list_currency": si.price_list_currency,
+			"transaction_date": si.posting_date,
+			"doctype": si.doctype,
+			"name": si.name,
+		}
+
+		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
+		# row-1 (item A) and repriced sibling row-2 (item B)
+		self.assertGreaterEqual(len(out), 2)
+
+		row_2_details = next(d for d in out if d.get("name") == "row-2")
+
+		# Verify that sibling B's apply_rule_on_other_items is preserved and targets C
+		self.assertTrue(row_2_details.get("apply_rule_on_other_items"))
+		target_items = json.loads(row_2_details.get("apply_rule_on_other_items"))
+		self.assertIn(item_c, target_items)
+		self.assertNotIn(item_b, target_items)
+
 	def test_recursive_product_rule_on_transaction_is_not_allowed(self):
 		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
 		rule = frappe.get_doc(

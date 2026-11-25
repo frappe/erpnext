@@ -596,8 +596,6 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 			if sibling_data.get("applied_on_items") or sibling_data.get("apply_on"):
 				sibling_data["applied_on_items"] = ""
 				sibling_data["apply_on"] = ""
-			if sibling_data.get("apply_rule_on_other_items"):
-				sibling_data["apply_rule_on_other_items"] = ""
 			out.append(sibling_data)
 			priced_row_names.add(row_name)
 
