@@ -467,10 +467,14 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.received_qty)
 		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
+<<<<<<< HEAD
 	def update_additional_cost(source, target, source_parent):
 		target.amount = flt(source.amount * additional_cost_share, target.precision("amount"))
 
 	additional_cost_share = get_additional_cost_share(frappe.get_doc("Subcontracting Order", source_name))
+=======
+	items = {item["name"]: item["qty"] for item in items} if items else {}
+>>>>>>> b9265ce (fix(subcontracting): recompute each receipt's share of the order's additional costs)
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
 		source_name,
@@ -497,7 +501,7 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 			},
 			"Landed Cost Taxes and Charges": {
 				"doctype": "Landed Cost Taxes and Charges",
-				"postprocess": update_additional_cost,
+				"field_map": {"name": "subcontracting_order_cost"},
 			},
 		},
 		target_doc,
@@ -507,6 +511,7 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 	return target_doc
 
 
+<<<<<<< HEAD
 def get_additional_cost_share(order: Document) -> float:
 	"""Share of the order's additional costs a receipt takes: what earlier receipts left of them."""
 	total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in order.items)
@@ -537,6 +542,8 @@ def get_additional_cost_taken_by_receipts(order: str) -> float:
 	)
 
 
+=======
+>>>>>>> b9265ce (fix(subcontracting): recompute each receipt's share of the order's additional costs)
 def set_subcontracting_order_status(sco: str | Document, status: str | None = None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)

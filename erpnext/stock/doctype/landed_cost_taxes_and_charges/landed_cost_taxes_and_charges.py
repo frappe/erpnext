@@ -27,6 +27,11 @@ class LandedCostTaxesandCharges(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		qty: DF.Float
+<<<<<<< HEAD
+=======
+		subcontracting_order_cost: DF.Data | None
+		work_order: DF.Link | None
+>>>>>>> b9265ce (fix(subcontracting): recompute each receipt's share of the order's additional costs)
 	# end: auto-generated types
 
 	pass

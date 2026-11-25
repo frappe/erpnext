@@ -527,6 +527,11 @@ class SubcontractingReceipt(SubcontractingController):
 		if self.is_return and self.return_against:
 			self.set_additional_costs_for_return()
 		else:
+<<<<<<< HEAD
+=======
+			self.set_work_order_costs()
+			self.set_order_additional_costs()
+>>>>>>> b9265ce (fix(subcontracting): recompute each receipt's share of the order's additional costs)
 			self.set_additional_costs_base_amount()
 			self.calculate_additional_costs()
 
@@ -535,6 +540,62 @@ class SubcontractingReceipt(SubcontractingController):
 			row.base_amount = flt(
 				flt(row.amount) * (flt(row.exchange_rate) or 1), row.precision("base_amount")
 			)
+
+	def set_order_additional_costs(self):
+		"""Give each cost row mapped from a Subcontracting Order its share of what the order's row has left."""
+		rows = [row for row in self.get("additional_costs") if row.subcontracting_order_cost]
+		if not rows:
+			return
+
+		costs_left = self.get_order_costs_left([row.subcontracting_order_cost for row in rows])
+		shares = self.get_order_additional_cost_shares()
+		for row in rows:
+			order, cost_left = costs_left[row.subcontracting_order_cost]
+			row.amount = flt(cost_left * shares.get(order, 0), row.precision("amount"))
+
+	def get_order_costs_left(self, order_costs: list[str]) -> dict[str, tuple[str, float]]:
+		"""Order and amount each order cost row has left after the submitted receipts."""
+		charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		taken = dict(
+			frappe.qb.from_(charges)
+			.select(charges.subcontracting_order_cost, Sum(charges.amount))
+			.where(
+				(charges.parenttype == "Subcontracting Receipt")
+				& (charges.docstatus == 1)
+				& charges.subcontracting_order_cost.isin(order_costs)
+			)
+			.groupby(charges.subcontracting_order_cost)
+			.run()
+		)
+		rows = frappe.get_all(
+			"Landed Cost Taxes and Charges",
+			filters={"name": ("in", order_costs), "parenttype": "Subcontracting Order"},
+			fields=["name", "parent", "amount"],
+		)
+		return {row.name: (row.parent, flt(row.amount) - flt(taken.get(row.name))) for row in rows}
+
+	def get_order_additional_cost_shares(self) -> dict[str, float]:
+		"""Share of each order's pending additional costs that this receipt's qty takes."""
+		received_qty = defaultdict(float)
+		for row in self.items:
+			if row.subcontracting_order_item:
+				received_qty[row.subcontracting_order_item] += self.get_qty_for_costing(row)
+
+		orders = list({row.subcontracting_order for row in self.items if row.subcontracting_order})
+		order_items = frappe.get_all(
+			"Subcontracting Order Item",
+			filters={"parent": ("in", orders)},
+			fields=["name", "parent", "qty", "received_qty", "additional_cost_per_qty"],
+		)
+		# orders whose costs net to zero are shared by qty
+		costed_orders = {row.parent for row in order_items if flt(row.additional_cost_per_qty)}
+		pending, received = defaultdict(float), defaultdict(float)
+		for row in order_items:
+			weight = flt(row.additional_cost_per_qty) if row.parent in costed_orders else 1
+			pending[row.parent] += max(flt(row.qty) - flt(row.received_qty), 0) * weight
+			received[row.parent] += received_qty[row.name] * weight
+
+		return {order: min(received[order] / pending[order], 1) if pending[order] else 0 for order in pending}
 
 	def set_additional_costs_for_return(self):
 		"""Take back the original receipt's additional costs allocated to the accepted qty returned."""
@@ -570,8 +631,17 @@ class SubcontractingReceipt(SubcontractingController):
 					"account_currency": row.account_currency,
 					"exchange_rate": row.exchange_rate,
 					"description": row.description,
+<<<<<<< HEAD
 					"amount": flt(row.amount * ratio, row.precision("amount")),
 					"base_amount": flt(row.base_amount * ratio, row.precision("base_amount")),
+=======
+					"has_corrective_cost": row.has_corrective_cost,
+					"work_order": row.work_order,
+					"item_row": row.item_row,
+					"subcontracting_order_cost": row.subcontracting_order_cost,
+					"amount": flt(row.amount * row_ratio, row.precision("amount")),
+					"base_amount": flt(row.base_amount * row_ratio, row.precision("base_amount")),
+>>>>>>> b9265ce (fix(subcontracting): recompute each receipt's share of the order's additional costs)
 				},
 			)
 		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
