@@ -1957,7 +1957,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		raw_materials = self.get_bom_raw_materials(self.fg_completed_qty, split_alternative_items=False)
 
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for item_code, bom_qty in get_bom_stock_qty_by_item(raw_materials).items():
 			matched_items = self.get_matched_items(item_code)
 			if not matched_items:
@@ -5981,12 +5981,26 @@ def get_used_alternative_items(
 
 def get_bom_stock_qty_by_item(raw_materials):
 	stock_qty_by_item = {}
+	stock_uom_by_item = {}
 	for key, details in raw_materials.items():
 		item_code = key[0] if isinstance(key, tuple) else key
 		stock_qty = flt(details.get("qty")) * (flt(details.get("conversion_factor")) or 1)
 		stock_qty_by_item[item_code] = stock_qty_by_item.get(item_code, 0.0) + stock_qty
+		stock_uom_by_item[item_code] = details.get("stock_uom")
 
-	return stock_qty_by_item
+	# a whole number stock UOM is consumed in whole units
+	return {
+		item_code: ceil_qty_if_uom_has_whole_number(stock_qty, stock_uom_by_item[item_code])
+		for item_code, stock_qty in stock_qty_by_item.items()
+	}
+
+
+def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
+	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
+		# rounding to 9 decimals first keeps float noise (0.07 * 100) from adding a unit
+		qty = frappe.utils.ceil(flt(qty, 9))
+
+	return qty
 
 
 def get_alternative_items_for_work_order(work_order, item_codes, exclude_stock_entry=None):
