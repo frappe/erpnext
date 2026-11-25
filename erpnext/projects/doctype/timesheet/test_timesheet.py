@@ -4,7 +4,7 @@ import datetime
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_to_date, now_datetime, nowdate
+from frappe.utils import add_to_date, getdate, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -114,6 +114,21 @@ class TestTimesheet(ERPNextTestSuite):
 		frappe.db.set_value("Task", task.name, "status", "Cancelled")
 		completed.cancel()
 		self.assertEqual(task_status(), "Cancelled")
+
+	def test_task_completed_by_a_time_log_is_completed_on_the_log_date(self):
+		emp = make_employee("test_employee_completed_on@salary.com", company="_Test Company")
+		task = create_task("_Test Timesheet Completed On Task")
+
+		timesheet = make_timesheet(emp, simulate=True, task=task.name, do_not_submit=True)
+		log = timesheet.time_logs[0]
+		log.from_time = add_to_date(now_datetime(), days=-10)
+		log.to_time = add_to_date(log.from_time, hours=2)
+		log.completed = 1
+		timesheet.submit()
+
+		task.reload()
+		self.assertEqual(task.status, "Completed")
+		self.assertEqual(getdate(task.completed_on), getdate(log.to_time))
 
 	def test_timesheet_base_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")

@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Coalesce, Concat, Date, Round
+from frappe.query_builder.functions import Coalesce, Concat, Date, Max, Round
 from frappe.utils import cint, cstr, flt, get_datetime, getdate, nowdate
 from frappe.utils.deprecations import deprecated
 
@@ -217,7 +217,11 @@ class Timesheet(Document):
 			if data.task and data.task not in tasks:
 				task = frappe.get_doc("Task", data.task)
 				task.update_time_and_costing()
-				task.status = get_task_status(task)
+				status = get_task_status(task)
+				if status == "Completed" and task.status != "Completed" and not task.completed_on:
+					# the task was completed when its completed time log ended, not when this timesheet is submitted
+					task.completed_on = get_task_completed_on(task.name)
+				task.status = status
 				task.save(ignore_permissions=True)
 				tasks.append(data.task)
 
@@ -417,6 +421,22 @@ def get_task_status(task: Document) -> str:
 	if not completed:
 		return "Open"
 	return "Completed" if any(completed) else "Working"
+
+
+def get_task_completed_on(task: str):
+	"""Date the task's completed time logs ended, never later than today."""
+	TimesheetDetail = frappe.qb.DocType("Timesheet Detail")
+	to_time = (
+		frappe.qb.from_(TimesheetDetail)
+		.select(Max(TimesheetDetail.to_time))
+		.where(
+			(TimesheetDetail.task == task)
+			& (TimesheetDetail.docstatus == 1)
+			& (TimesheetDetail.parenttype == "Timesheet")
+			& (TimesheetDetail.completed == 1)
+		)
+	).run()[0][0]
+	return min(getdate(to_time), getdate()) if to_time else getdate()
 
 
 @frappe.whitelist()
