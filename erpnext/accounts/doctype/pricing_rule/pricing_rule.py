@@ -581,12 +581,11 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 
 	mixed_rule_criteria = []
 	for rule_name, pr_doc in candidate_docs.items():
-		# Every candidate rule already came from an edited or sibling row, so keep sibling rules in scope.
-		if pr_doc.mixed_conditions and not pr_doc.disable:
-			apply_on_field = frappe.scrub(pr_doc.apply_on)
-			rule_items = set(get_pricing_rule_items(pr_doc) or [])
-			if rule_items:
-				mixed_rule_criteria.append((rule_name, apply_on_field, rule_items))
+		# Include disabled mixed rules so editing one row still clears stale sibling discounts.
+		if pr_doc.mixed_conditions:
+			mixed_rule_criteria.append(
+				(rule_name, frappe.scrub(pr_doc.apply_on), set(get_pricing_rule_items(pr_doc) or []))
+			)
 
 	if not mixed_rule_criteria:
 		return

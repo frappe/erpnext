@@ -2464,6 +2464,16 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertFalse(out[1].get("applied_on_items"))
 		self.assertFalse(out[1].get("apply_on"))
 
+		pr_mixed.reload()
+		pr_mixed.disable = 1
+		pr_mixed.save()
+		si.items[0].update({"qty": 2, "stock_qty": 2})
+		out = self._apply_pricing_rule_for_row(si)
+		self.assertEqual(len(out), 2)
+		self.assertEqual(out[0].discount_percentage, 10)
+		self.assertNotIn(pr_mixed.name, out[0].pricing_rules)
+		self.assertEqual((out[1].discount_percentage, out[1].pricing_rules), (0, ""))
+
 	def test_mixed_conditions_preserves_apply_rule_on_other_for_siblings(self):
 		item_a, item_b, item_c_same_group = self._make_priced_items(
 			"PR Trigger Item A", "PR Trigger Item B", "PR Target Item C Same"
