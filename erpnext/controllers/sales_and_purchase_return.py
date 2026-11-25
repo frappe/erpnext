@@ -688,6 +688,7 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 			rejected_qty_map = _return_map.get(row.rejected_warehouse)
 			rejected_qty_map.qty += abs(flt(row.rejected_qty))
 			rejected_qty_map.stock_qty += abs(flt(row.rejected_qty) * flt(row.conversion_factor))
+			rejected_qty_map.qty_in_stock_uom += abs(flt(row.rejected_qty)) * flt(row.conversion_factor)
 
 	return _return_map
 
@@ -884,7 +885,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			if doctype == "Subcontracting Receipt":
 				target_doc.received_qty = -1 * flt(source_doc.qty)
 			else:
-				target_doc.rejected_qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+				target_doc.rejected_qty = -1 * get_qty_left_to_return(
+					source_doc, rejected_wh_map.qty_in_stock_uom, "rejected_qty"
+				)
 
 			target_doc.qty = -1 * get_qty_left_to_return(source_doc, wh_map.qty_in_stock_uom)
 
@@ -897,7 +900,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.subcontracting_receipt_item = source_doc.name
 				if return_against_rejected_qty:
-					target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+					target_doc.qty = -1 * get_qty_left_to_return(
+						source_doc, rejected_wh_map.qty_in_stock_uom, "rejected_qty"
+					)
 					target_doc.rejected_qty = 0.0
 					target_doc.rejected_warehouse = ""
 					target_doc.warehouse = source_doc.rejected_warehouse
@@ -912,7 +917,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.delivery_note_packed_item = source_doc.delivery_note_packed_item
 
 			if doctype == "Purchase Receipt" and return_against_rejected_qty:
-				target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
+				target_doc.qty = -1 * get_qty_left_to_return(
+					source_doc, rejected_wh_map.qty_in_stock_uom, "rejected_qty"
+				)
 				target_doc.rejected_qty = 0.0
 				target_doc.rejected_warehouse = ""
 				target_doc.warehouse = source_doc.rejected_warehouse
