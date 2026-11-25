@@ -477,7 +477,7 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 	discounts dynamically without overwriting each other's specific pricing rules.
 	"""
 	doc_items = doc.get("items") if doc else None
-	if not doc_items:
+	if not doc_items or len(item_list) >= len(doc_items):
 		return
 
 	priced_row_names = {
