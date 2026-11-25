@@ -2314,6 +2314,77 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(subcontracting_receipt.supplied_items[0].consumed_qty, 10)
 		self.assertEqual(subcontracting_receipt.supplied_items[1].consumed_qty, 10)
 
+	def test_backdated_receipt_values_scrap_items_at_its_posting_date(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("BOM")
+		posting_date = add_days(today(), -2)
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+		bom = make_bom(
+			item=fg_item, raw_materials=[raw_material], rate=100, currency="INR", do_not_submit=True
+		)
+		bom.append("scrap_items", {"item_code": scrap_item, "stock_qty": 1, "rate": 10})
+		bom.save()
+		bom.submit()
+		make_stock_entry(
+			item_code=scrap_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=5,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse - _TC", qty=10, basic_rate=50)
+		make_stock_entry(
+			item_code=bom.items[0].item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -5),
+		)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 10,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		transfer = frappe.get_doc(
+			make_rm_stock_entry(
+				sco.name,
+				[
+					{
+						"item_code": fg_item,
+						"rm_item_code": row.rm_item_code,
+						"item_name": row.rm_item_code,
+						"qty": row.required_qty,
+						"rate": 100,
+						"stock_uom": row.stock_uom,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+					for row in sco.supplied_items
+				],
+			)
+		)
+		transfer.set_posting_time = 1
+		transfer.posting_date = add_days(today(), -3)
+		transfer.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.set_posting_time = 1
+		scr.posting_date = posting_date
+		scr.save()
+		scr.get_scrap_items(recalculate_rate=True)
+		scr.save()
+
+		self.assertEqual(scr.items[1].item_code, scrap_item)
+		self.assertEqual(scr.items[1].rate, 5)
+
 	def test_supplied_items_cost_after_reposting(self):
 		# Set Backflush Based On as "BOM"
 		set_backflush_based_on("BOM")
