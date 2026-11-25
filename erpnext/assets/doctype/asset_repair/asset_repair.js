@@ -195,6 +195,18 @@ frappe.ui.form.on("Asset Repair", {
 });
 
 frappe.ui.form.on("Asset Repair Consumed Item", {
+<<<<<<< HEAD
+=======
+	item_code: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, { serial_and_batch_bundle: "", serial_no: "" }).then(() => {
+			if (row.item_code && row.warehouse) {
+				frm.events.set_consumed_item_rate(frm, cdt, cdn);
+			}
+		});
+	},
+
+>>>>>>> e74c17b (fix: clear asset repair consumed item bundle on item or warehouse change)
 	warehouse: function (frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 
@@ -204,7 +216,9 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 			return;
 		}
 
-		frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		frappe.model.set_value(cdt, cdn, { serial_and_batch_bundle: "", serial_no: "" }).then(() => {
+			frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		});
 	},
 
 	consumed_quantity: function (frm, cdt, cdn) {
