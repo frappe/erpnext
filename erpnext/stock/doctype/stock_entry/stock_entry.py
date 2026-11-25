@@ -384,6 +384,23 @@ class StockEntry(StockController):
 
 		return references
 
+	def get_item_warehouses(self):
+		item_warehouses = super().get_item_warehouses()
+		order = self.get(self.subcontract_data.order_field)
+		if not order:
+			return item_warehouses
+
+		item_codes = {row.original_item or row.item_code for row in self.items}
+		supplied_items = frappe.get_all(
+			self.subcontract_data.order_supplied_items_field,
+			filters={"parent": order, "rm_item_code": ("in", item_codes)},
+			fields=["rm_item_code", "reserve_warehouse"],
+		)
+		item_warehouses.update(
+			(row.rm_item_code, row.reserve_warehouse) for row in supplied_items if row.reserve_warehouse
+		)
+		return item_warehouses
+
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
 			self.work_order
