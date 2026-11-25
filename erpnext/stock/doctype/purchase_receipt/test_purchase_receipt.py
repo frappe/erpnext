@@ -1712,6 +1712,41 @@ class TestPurchaseReceipt(FrappeTestCase):
 		dn.cancel()
 		stock.cancel()
 
+	def test_internal_transfer_receipt_cannot_be_posted_before_delivery(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item,
+			target="Stores - TCP1",
+			qty=7,
+			basic_rate=13.37,
+			posting_date=add_days(today(), -3),
+		)
+		dn = create_delivery_note(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=3,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			posting_date=add_days(today(), -1),
+			posting_time="10:30:00",
+		)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.update({"set_posting_time": 1, "posting_date": dn.posting_date, "posting_time": "10:29:59"})
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be before", pr.save)
+
+		# received at the same time as the delivery
+		pr.posting_time = "10:30:00"
+		pr.submit()
+		self.assertEqual(pr.items[0].valuation_rate, 13.37)
+
 	def test_lcv_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
