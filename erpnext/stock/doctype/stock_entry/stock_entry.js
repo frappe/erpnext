@@ -1413,6 +1413,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			args: {
 				work_order: me.frm.doc.work_order,
 				company: me.frm.doc.company,
+				purpose: me.frm.doc.purpose,
 			},
 			callback: function (r) {
 				if (!r.exc) {
