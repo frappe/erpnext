@@ -1052,6 +1052,7 @@ class calculate_taxes_and_totals:
 			)
 
 	def apply_discount_amount(self):
+		self.clear_distributed_discount()
 		if self.doc.discount_amount:
 			if not self.doc.apply_discount_on:
 				frappe.throw(_("Please select Apply Discount On"))
@@ -1126,6 +1127,10 @@ class calculate_taxes_and_totals:
 				self._calculate()
 		else:
 			self.doc.base_discount_amount = 0
+
+	def clear_distributed_discount(self):
+		for item in self._items:
+			item.distributed_discount_amount = 0
 
 	def get_total_for_discount_amount(self):
 		doc = self.doc
