@@ -225,6 +225,39 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertTrue(item_code in items)
 
+	def test_end_transit_entry_cannot_be_posted_before_transit_entry(self):
+		transit_warehouse = get_in_transit_warehouse("_Test Company")
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=7,
+			basic_rate=13.37,
+			posting_date=add_days(today(), -3),
+		)
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target=transit_warehouse,
+			purpose="Material Transfer",
+			add_to_transit=1,
+			qty=3,
+			posting_date=add_days(today(), -1),
+			posting_time="10:30:00",
+		)
+
+		end_transit_entry = make_stock_in_entry(transit_entry.name)
+		end_transit_entry.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		end_transit_entry.update(
+			{"set_posting_time": 1, "posting_date": transit_entry.posting_date, "posting_time": "10:29:59"}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be before", end_transit_entry.save)
+
+		# received at the same time as it was sent
+		end_transit_entry.posting_time = "10:30:00"
+		end_transit_entry.submit()
+		self.assertEqual(end_transit_entry.items[0].valuation_rate, 13.37)
+
 	def test_add_to_transit_entry(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
