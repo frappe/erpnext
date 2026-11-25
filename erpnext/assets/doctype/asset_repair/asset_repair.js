@@ -247,9 +247,11 @@ frappe.ui.form.on("Asset Repair Purchase Invoice", {
 frappe.ui.form.on("Asset Repair Consumed Item", {
 	item_code: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
-		if (row.item_code && row.warehouse) {
-			frm.events.set_consumed_item_rate(frm, cdt, cdn);
-		}
+		frappe.model.set_value(cdt, cdn, { serial_and_batch_bundle: "", serial_no: "" }).then(() => {
+			if (row.item_code && row.warehouse) {
+				frm.events.set_consumed_item_rate(frm, cdt, cdn);
+			}
+		});
 	},
 
 	warehouse: function (frm, cdt, cdn) {
@@ -261,7 +263,9 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 			return;
 		}
 
-		frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		frappe.model.set_value(cdt, cdn, { serial_and_batch_bundle: "", serial_no: "" }).then(() => {
+			frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		});
 	},
 
 	consumed_quantity: function (frm, cdt, cdn) {
