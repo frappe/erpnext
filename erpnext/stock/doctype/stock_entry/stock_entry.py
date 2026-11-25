@@ -4687,6 +4687,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				{
 					"item_code": row.item_code,
 					"uom": row.stock_uom,
+					"stock_uom": row.stock_uom,
 					"from_warehouse": "",
 					"qty": row.stock_qty,
 					"conversion_factor": 1,
