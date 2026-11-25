@@ -591,6 +591,13 @@ def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
 			)
 			set_transaction_type(sibling_args)
 			sibling_data = get_pricing_rule_for_item(sibling_args, doc=doc)
+			# Sibling rows are evaluated independently; ensure cleanup fields only affect this row
+			# and do not trigger group-wide cleanup in Desk which would clear other rows' discounts.
+			if sibling_data.get("applied_on_items") or sibling_data.get("apply_on"):
+				sibling_data["applied_on_items"] = ""
+				sibling_data["apply_on"] = ""
+			if sibling_data.get("apply_rule_on_other_items"):
+				sibling_data["apply_rule_on_other_items"] = ""
 			out.append(sibling_data)
 			priced_row_names.add(row_name)
 
@@ -984,13 +991,9 @@ def reset_pricing_rule_details(pricing_rules, item_details, item_code=None, rate
 				item_code if pricing_rule.get("same_item") else pricing_rule.get("free_item")
 			)
 
-		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
+		if pricing_rule.get("apply_rule_on_other"):
 			items = get_pricing_rule_items(pricing_rule, other_items=True)
-			item_details.apply_on = (
-				frappe.scrub(pricing_rule.apply_rule_on_other)
-				if pricing_rule.apply_rule_on_other
-				else frappe.scrub(pricing_rule.get("apply_on"))
-			)
+			item_details.apply_on = frappe.scrub(pricing_rule.apply_rule_on_other)
 			item_details.applied_on_items = ",".join(items)
 
 	item_details.pricing_rules = ""

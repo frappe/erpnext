@@ -2467,6 +2467,111 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(out[0].pricing_rules, "")
 		self.assertEqual(out[1].discount_percentage, 0)
 		self.assertEqual(out[1].pricing_rules, "")
+		self.assertFalse(out[1].get("applied_on_items"))
+		self.assertFalse(out[1].get("apply_on"))
+
+	def test_mixed_conditions_sibling_cleanup_does_not_clear_other_discounts(self):
+		import copy
+
+		from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+
+		item_a = make_item(
+			"PR Cleanup Item A", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		item_b = make_item(
+			"PR Cleanup Item B", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_price(item_a, "_Test Price List", 100)
+		make_item_price(item_b, "_Test Price List", 100)
+
+		# Mixed rule: min qty 3, 5% discount
+		pr_mixed = make_item_pricing_rule(
+			title="_Test PR Cleanup Mixed",
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			apply_multiple_pricing_rules=1,
+			min_qty=3,
+			discount_percentage=5,
+			has_priority=1,
+			priority="1",
+		)
+		# Item A specific rule: min qty 1, 10% discount
+		pr_item_a = make_item_pricing_rule(
+			title="_Test PR Cleanup A Only",
+			apply_on="Item Code",
+			item_code=item_a,
+			apply_multiple_pricing_rules=1,
+			min_qty=1,
+			discount_percentage=10,
+			has_priority=1,
+			priority="2",
+		)
+
+		si = create_sales_invoice(item_code=item_a, qty=2, do_not_save=True)
+		si.append(
+			"items",
+			{
+				"item_code": item_b,
+				"item_name": item_b,
+				"stock_uom": "_Test UOM",
+				"uom": "_Test UOM",
+				"cost_center": si.items[0].cost_center,
+				"expense_account": si.items[0].expense_account,
+				"warehouse": si.items[0].warehouse,
+				"conversion_factor": 1,
+				"qty": 1,
+				"stock_qty": 1,
+				"price_list_rate": 100,
+			},
+		)
+		si.items[0].name = "row-1"
+		si.items[1].name = "row-2"
+		si.items[0].stock_qty = 2
+		si.selling_price_list = "_Test Price List"
+
+		# Both rules active on Row 1 (15%), mixed rule active on Row 2 (5%)
+		si.items[0].pricing_rules = f"{pr_mixed.name},{pr_item_a.name}"
+		si.items[1].pricing_rules = pr_mixed.name
+
+		# Decrease Row 1 qty to 1: total qty becomes 2 < 3 -> mixed rule removed, but Row 1 keeps pr_item_a
+		si.items[0].qty = 1
+		si.items[0].stock_qty = 1
+
+		args = {
+			"items": [si.items[0].as_dict()],
+			"customer": si.customer,
+			"customer_group": si.customer_group,
+			"company": si.company,
+			"currency": si.currency,
+			"conversion_rate": si.conversion_rate,
+			"price_list": si.selling_price_list,
+			"plc_conversion_rate": si.plc_conversion_rate,
+			"price_list_currency": si.price_list_currency,
+			"transaction_date": si.posting_date,
+			"doctype": si.doctype,
+			"name": si.name,
+		}
+
+		out = apply_pricing_rule(copy.deepcopy(args), doc=si.as_dict())
+		self.assertEqual(len(out), 2)
+
+		row_1_details = out[0]
+		row_2_details = out[1]
+
+		# Row 1 keeps its item-specific discount
+		self.assertEqual(row_1_details.discount_percentage, 10)
+		self.assertIn(pr_item_a.name, row_1_details.pricing_rules)
+		self.assertNotIn(pr_mixed.name, row_1_details.pricing_rules)
+
+		# Sibling Row 2 loses the mixed rule
+		self.assertEqual(row_2_details.discount_percentage, 0)
+		self.assertEqual(row_2_details.pricing_rules, "")
+
+		# Sibling Row 2 must have row-only cleanup (no applied_on_items / apply_on)
+		# so Desk does not clear Row 1's discount
+		self.assertFalse(row_2_details.get("applied_on_items"))
+		self.assertFalse(row_2_details.get("apply_on"))
 
 	def test_recursive_product_rule_on_transaction_is_not_allowed(self):
 		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
