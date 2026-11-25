@@ -18,6 +18,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.tests.permission_test_utils import (
 	OTHER_COMPANY,
 	as_user,
+	assert_refused,
 	assert_refused_for_names,
 	assert_refused_without,
 	disable_mandatory_accounting_dimensions,
@@ -629,6 +630,50 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		outside = make_company_fenced_user("unrec-count@example.com", ["Accounts User"], "_Test Company 1")
 		with as_user(outside):
 			self.assertRaises(frappe.PermissionError, doc_has_references, si.doctype, si.name)
+
+	def test_unreconcile_document_fences_the_vouchers(self):
+		si = self.create_sales_invoice()
+		unpaid_si = self.create_sales_invoice()
+		pe = self.create_payment_entry()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 100},
+		)
+		pe.save().submit()
+
+		def unreconcile(company, voucher_no, reference_name):
+			doc = frappe.new_doc("Unreconcile Payment")
+			doc.company = company
+			doc.voucher_type = pe.doctype
+			doc.voucher_no = voucher_no
+			doc.append(
+				"allocations",
+				{
+					"reference_doctype": si.doctype,
+					"reference_name": reference_name,
+					"account": self.cash,
+					"party": "_Test Missing Party",
+				},
+			)
+			doc.insert()
+			doc.submit()
+			return doc
+
+		outside = make_company_fenced_user("unrec-doc@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused(self, unreconcile, "_Test Company 1", pe.name, si.name)
+			assert_refused(self, unreconcile, "_Test Company 1", "", si.name)
+		self.assertEqual(si.reload().outstanding_amount, 0)
+
+		inside = make_company_fenced_user("unrec-doc@example.com", ["Accounts User"], self.company)
+		with as_user(inside):
+			self.assertRaises(frappe.ValidationError, unreconcile, self.company, pe.name, unpaid_si.name)
+			doc = unreconcile(self.company, pe.name, si.name)
+
+		row = doc.allocations[0]
+		self.assertEqual((row.account, row.party_type, row.party), (self.debit_to, "Customer", self.customer))
+		self.assertEqual(si.reload().outstanding_amount, 100)
+		self.assertEqual(pe.reload().unallocated_amount, 200)
 
 
 class TestUnreconcilePaymentPermissions(AccountsTestMixin, FrappeTestCase):
