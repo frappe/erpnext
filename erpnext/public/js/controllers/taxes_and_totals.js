@@ -1204,14 +1204,13 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 			this.calculate_change_amount();
 
-			var paid_amount =
-				this.frm.doc.party_account_currency == this.frm.doc.currency
-					? this.frm.doc.paid_amount
-					: this.frm.doc.base_paid_amount;
+			let in_party_currency = this.frm.doc.party_account_currency == this.frm.doc.currency;
+			let paid_amount = in_party_currency ? this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
+			let change_amount = in_party_currency
+				? this.frm.doc.change_amount
+				: this.frm.doc.base_change_amount;
 			this.frm.doc.outstanding_amount = flt(
-				total_amount_to_pay -
-					flt(paid_amount) +
-					flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate),
+				total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				precision("outstanding_amount")
 			);
 		}
