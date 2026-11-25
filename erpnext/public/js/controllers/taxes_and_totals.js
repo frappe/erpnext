@@ -243,6 +243,24 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		return flt(item.qty) + flt(item.rejected_qty);
 	}
 
+	get_qty_for_amount(item) {
+		// Mirrors the server: a zero-qty return or debit note row adjusts the rate.
+		const doc = this.frm.doc;
+		if (
+			!(flt(item.qty) || flt(item.rejected_qty)) &&
+			doc.is_return &&
+			doc.doctype !== "Purchase Receipt"
+		) {
+			return -1;
+		}
+
+		if (!flt(item.qty) && doc.is_debit_note) {
+			return 1;
+		}
+
+		return this.get_billed_qty(item);
+	}
+
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
@@ -253,24 +271,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				item.net_rate = item.rate;
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
-				if (!(me.frm.doc.is_return || me.frm.doc.is_debit_note)) {
-					item.net_amount = item.amount = flt(
-						item.rate * me.get_billed_qty(item),
-						precision("amount", item)
-					);
-				} else {
-					// allow for '0' qty on Credit/Debit notes
-					let qty = flt(item.qty);
-					if (!qty) {
-						qty = me.frm.doc.is_debit_note ? 1 : -1;
-						if (me.frm.doc.doctype !== "Purchase Receipt" && me.frm.doc.is_return === 1) {
-							// In case of Purchase Receipt, qty can be 0 if all items are rejected
-							qty = flt(item.qty);
-						}
-					}
-
-					item.net_amount = item.amount = flt(item.rate * qty, precision("amount", item));
-				}
+				item.net_amount = item.amount = flt(
+					item.rate * me.get_qty_for_amount(item),
+					precision("amount", item)
+				);
 
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
