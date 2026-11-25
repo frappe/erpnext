@@ -28,7 +28,8 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Allocated Amount",
-   "options": "account_currency"
+   "options": "account_currency",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -48,17 +49,20 @@
   {
    "fieldname": "account",
    "fieldtype": "Data",
-   "label": "Account"
+   "label": "Account",
+   "read_only": 1
   },
   {
    "fieldname": "party_type",
    "fieldtype": "Data",
-   "label": "Party Type"
+   "label": "Party Type",
+   "read_only": 1
   },
   {
    "fieldname": "party",
    "fieldtype": "Data",
-   "label": "Party"
+   "label": "Party",
+   "read_only": 1
   },
   {
    "fieldname": "account_currency",
@@ -71,7 +75,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:57.224053",
+ "modified": "2026-11-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Unreconcile Payment Entries",
