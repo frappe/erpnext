@@ -2477,6 +2477,39 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertEqual((row.ordered_qty, row.received_qty), (10, 0))
 
+	def test_subcontracting_receipt_sets_the_accepted_sub_assembly_received_qty(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		plan, _po, sco = make_plan_with_subcontracted_sub_assembly()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 4
+		scr.items[0].rejected_qty = 1
+		scr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		scr.submit()
+
+		def get_received_qty():
+			return frappe.db.get_value(
+				"Production Plan Sub Assembly Item", plan.sub_assembly_items[0].name, "received_qty"
+			)
+
+		self.assertEqual(get_received_qty(), 4)
+
+		# the service Purchase Receipt leaves it as it is
+		purchase_receipt = make_purchase_receipt(scr.name)
+		purchase_receipt.submit()
+		self.assertEqual(get_received_qty(), 4)
+		purchase_receipt.cancel()
+		self.assertEqual(get_received_qty(), 4)
+
+		scr.reload()
+		scr.cancel()
+		self.assertEqual(get_received_qty(), 0)
+
 	def test_partial_material_request_keeps_the_plan_open_for_requests(self):
 		plan = create_production_plan(
 			item_code="Test Production Item 1", planned_qty=10, for_warehouse="_Test Warehouse - _TC"
@@ -6728,6 +6761,65 @@ def make_plan_with_sub_assembly():
 	for item in work_order.required_items:
 		item.source_warehouse = warehouse
 	return plan, work_order
+
+
+def make_plan_with_subcontracted_sub_assembly():
+	"""Submitted plan for 5 of a finished good whose sub-assembly is subcontracted, with the
+	Subcontracting Order's raw materials sent to the supplier."""
+	from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
+	from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+	rm_item = make_item("_Test PPV Subcontract RM", {"is_stock_item": 1}).name
+	sub_item = make_item("_Test PPV Subcontract SA", {"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+	fg_item = make_item("_Test PPV Subcontract FG", {"is_stock_item": 1}).name
+	service_item = make_item("_Test PPV Subcontract Service", {"is_stock_item": 0}).name
+	sub_bom = make_bom(item=sub_item, raw_materials=[rm_item], currency="INR")
+	make_bom(item=fg_item, raw_materials=[sub_item], currency="INR")
+	if not frappe.db.exists("Subcontracting BOM", {"finished_good": sub_item, "is_active": 1}):
+		frappe.get_doc(
+			{
+				"doctype": "Subcontracting BOM",
+				"finished_good": sub_item,
+				"finished_good_qty": 1,
+				"finished_good_bom": sub_bom.name,
+				"service_item": service_item,
+				"service_item_qty": 1,
+				"is_active": 1,
+			}
+		).insert()
+
+	make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=5, rate=100)
+
+	plan = create_production_plan(
+		item_code=fg_item,
+		planned_qty=5,
+		sub_assembly_warehouse="Stores - _TC",
+		skip_getting_mr_items=True,
+		do_not_submit=1,
+	)
+	plan.get_sub_assembly_items()
+	for row in plan.sub_assembly_items:
+		row.type_of_manufacturing = "Subcontract"
+		row.supplier = "_Test Supplier"
+	plan.submit()
+	plan.make_work_order()
+
+	purchase_order = frappe.db.get_value("Purchase Order Item", {"production_plan": plan.name}, "parent")
+	po = frappe.get_doc("Purchase Order", purchase_order)
+	po.supplier_warehouse = "Work In Progress - _TC"
+	po.submit()
+
+	sco = make_subcontracting_order(po.name)
+	sco.supplier_warehouse = "Work In Progress - _TC"
+	sco.items[0].warehouse = "Stores - _TC"
+	sco.submit()
+
+	rm_transfer = frappe.get_doc(make_rm_stock_entry(sco.name))
+	for item in rm_transfer.items:
+		item.s_warehouse = "Stores - _TC"
+	rm_transfer.submit()
+
+	return plan, po, sco
 
 
 def make_bom(**args):
