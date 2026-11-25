@@ -1689,7 +1689,8 @@ def get_sales_order_taxes(sales_orders):
 
 def create_dn_wo_so(pick_list, delivery_note=None, selected_locations=None):
 	if not delivery_note:
-		delivery_note = frappe.new_doc("Delivery Note")
+		# currency comes from the customer or company, not the global default
+		delivery_note = frappe.new_doc("Delivery Note", currency=None)
 
 	delivery_note.company = pick_list.company
 
