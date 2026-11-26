@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, nowdate
+from frappe.utils import cint, flt, get_email_address, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext import get_company_currency
@@ -588,7 +588,7 @@ class PaymentRequest(Document):
 				"description": self.subject,
 				"reference_doctype": "Payment Request",
 				"reference_docname": self.name,
-				"payer_email": self.email_to or get_email_to_store(),
+				"payer_email": self.email_to or get_email_address(),
 				"payer_name": data.customer_name,
 				"order_id": self.name,
 				"currency": self.currency,

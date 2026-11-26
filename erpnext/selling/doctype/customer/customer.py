@@ -21,6 +21,7 @@ from frappe.utils import (
 	cstr,
 	flt,
 	fmt_money,
+	get_email_addresses,
 	get_formatted_email,
 	get_link_to_form,
 	getdate,
@@ -39,7 +40,6 @@ from erpnext.controllers.website_list_for_contact import (
 	link_portal_users_to_contacts,
 )
 from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
-from erpnext.utilities import get_email_to_store
 from erpnext.utilities.transaction_base import TransactionBase
 
 from .mapper import (
@@ -715,9 +715,7 @@ def send_emails(customer: str, company: str):
 		fmt_money(get_credit_limit(customer, company), currency=currency),
 	)
 	frappe.sendmail(
-		recipients=[get_email_to_store(user) for user in get_credit_controller_users()],
-		subject=subject,
-		message=message,
+		recipients=get_email_addresses(get_credit_controller_users()), subject=subject, message=message
 	)
 
 

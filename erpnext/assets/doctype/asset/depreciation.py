@@ -11,6 +11,7 @@ from frappe.utils import (
 	add_months,
 	cint,
 	flt,
+	get_email_addresses,
 	get_last_day,
 	get_link_to_form,
 	getdate,
@@ -32,7 +33,6 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_temp_depr_schedule_doc,
 	reschedule_depreciation,
 )
-from erpnext.utilities import get_email_to_store
 
 
 def post_depreciation_entries(date=None):
@@ -340,9 +340,7 @@ def notify_depr_entry_posting_error(failed_asset_names, error_log_names):
 
 	message = get_message_for_depr_entry_posting_error(asset_links, error_log_links)
 
-	frappe.sendmail(
-		recipients=[get_email_to_store(user) for user in recipients], subject=subject, message=message
-	)
+	frappe.sendmail(recipients=get_email_addresses(recipients), subject=subject, message=message)
 
 
 def get_comma_separated_links(names, doctype):
