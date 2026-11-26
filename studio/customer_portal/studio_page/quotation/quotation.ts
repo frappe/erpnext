@@ -342,7 +342,7 @@ export default function setup(context) {
 				return { title, theme: "green", icon: "lucide-circle-check" }
 			}
 			case "Partially Ordered":
-				return { title: __("Part of this quotation is ordered."), theme: "blue", icon: "lucide-shopping-cart" }
+				return { title: __("Part of this quotation is ordered."), theme: "amber", icon: "lucide-shopping-cart" }
 			case "Closed":
 				return { title: __("This quotation is closed. It can no longer be answered."), theme: "gray", icon: "lucide-circle-x" }
 			default:

@@ -17,7 +17,7 @@ function statuses(): Record<string, { theme: string; label: string }> {
 		"Requested changes": { theme: "amber", label: __("Requested changes") },
 		Rejected: { theme: "red", label: __("Rejected") },
 		Revised: { theme: "gray", label: __("Revised") },
-		"Partially Ordered": { theme: "blue", label: __("Partially Ordered") },
+		"Partially Ordered": { theme: "amber", label: __("Partially Ordered") },
 		Ordered: { theme: "green", label: __("Ordered") },
 		Expired: { theme: "gray", label: __("Expired") },
 		// Sales Order
