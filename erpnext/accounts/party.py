@@ -280,7 +280,11 @@ def set_address_details(
 				billing_address=party_details.company_address,
 				billing_address_display=(
 					party_details.company_address_display
-					or render_address(party_details.company_address, check_permissions=False)
+					or render_address(
+						party_details.company_address,
+						check_permissions=not ignore_permissions
+						and not is_company_address(party_details.company_address, company),
+					)
 				),
 				**get_fetch_values(doctype, "billing_address", party_details.company_address),
 			)
@@ -1164,6 +1168,14 @@ def add_party_account(party_type, party, company, account):
 def render_address(address, check_permissions=True):
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval -- calls a local function
 	return frappe.call(_render_address, address, check_permissions=check_permissions)
+
+
+def is_company_address(address, company):
+	# the company's own addresses render without Address read, as in frappe's get_company_address
+	return bool(company) and frappe.db.exists(
+		"Dynamic Link",
+		{"parenttype": "Address", "parent": address, "link_doctype": "Company", "link_name": company},
+	)
 
 
 def validate_party_currency_before_merging(party_type, old_party, new_party):
