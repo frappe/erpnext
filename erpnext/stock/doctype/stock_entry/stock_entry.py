@@ -4679,7 +4679,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		item_dict = {}
-		rows = [row for row in self.get_secondary_items_from_job_card() if row.stock_qty > 0]
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		rows = [row for row in self.get_secondary_items_from_job_card() if flt(row.stock_qty, precision) > 0]
 		bom_rows = self.get_bom_secondary_item_details(rows)
 		for row in rows:
 			bom_row = bom_rows.get(row.bom_secondary_item, frappe._dict())
