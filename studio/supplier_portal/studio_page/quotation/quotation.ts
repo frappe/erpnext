@@ -80,8 +80,6 @@ export default function setup(context) {
 		if (doc.value.rfq) {
 			rows.push({ ...line(__("RFQ"), doc.value.rfq, INK8), route: "/rfqs/" + encodeURIComponent(doc.value.rfq) })
 		}
-		// the quote it replaced is cancelled, so it is named but not opened
-		if (doc.value.amended_from) rows.push(line(__("Revision of"), doc.value.amended_from))
 		const orders: string[] = doc.value.orders ?? []
 		orders.forEach((order, i) => {
 			const label = i > 0 ? "" : orders.length > 1 ? __("Purchase orders") : __("Purchase order")
@@ -111,9 +109,9 @@ export default function setup(context) {
 			ordered: orderedOfQuoted(row, doc.value.status, row.uom),
 			qty: formatQty(row.qty, row.uom),
 			rate: formatMoney(row.rate, currency.value),
-			// the list price and discount the rate comes from, under it
+			// the discount the rate comes from, under it
 			rateCaption: row.discount_percentage
-				? __("{0} less {1}%", [formatMoney(row.price_list_rate, currency.value), row.discount_percentage])
+				? __("{0}% off", [row.discount_percentage])
 				: "",
 			amount: formatMoney(row.amount, currency.value),
 		})),

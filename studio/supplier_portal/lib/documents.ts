@@ -161,7 +161,13 @@ export function quoteNote(q: any, orderedElsewhere: OrderedElsewhere): { title: 
 	}
 	switch (q.status) {
 		case "Submitted":
-			return { title: __("Quotation sent. If the buyer accepts it, you get a purchase order."), theme: "blue", icon: "lucide-send" }
+			return {
+				title: q.amended_from
+					? __("Revised quotation sent. If the buyer accepts it, you get a purchase order.")
+					: __("Quotation sent. If the buyer accepts it, you get a purchase order."),
+				theme: "blue",
+				icon: "lucide-send",
+			}
 		case "Partially Ordered":
 			return { title: __("The buyer ordered part of this quotation."), theme: "amber", icon: "lucide-shopping-cart" }
 		case "Ordered":

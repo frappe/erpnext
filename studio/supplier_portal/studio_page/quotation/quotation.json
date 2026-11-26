@@ -575,7 +575,8 @@
                           },
                           {
                            "baseStyles": {
-                            "color": "var(--ink-gray-5)"
+                            "color": "var(--ink-gray-5)",
+                            "textAlign": "right"
                            },
                            "blockName": "Caption",
                            "componentId": "TextBlock-f36b5ad3e0",

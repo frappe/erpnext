@@ -252,9 +252,9 @@ export default function setup(context) {
 				ordered: orderedOfQuoted(quoted, quotation.value.status, row.uom),
 				qty: formatQty(quoted.qty, row.uom),
 				rate: formatMoney(quoted.rate, currency.value),
-				// the list price and discount the rate comes from, under it
+				// the discount the rate comes from, under it
 				rateCaption: quoted.discount_percentage
-					? __("{0} less {1}%", [formatMoney(quoted.price_list_rate, currency.value), quoted.discount_percentage])
+					? __("{0}% off", [quoted.discount_percentage])
 					: "",
 				amount: formatMoney(quoted.amount, currency.value),
 			}
