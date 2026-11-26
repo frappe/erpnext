@@ -85,7 +85,15 @@ export function usePortalNotifications(context?: any) {
 	return {
 		...useSidebar(),
 		logout,
-		userMenuOptions,
+		userMenuOptions: computed(() =>
+			userMenuOptions.value.map((group: any) => ({
+				...group,
+				options: [
+					{ label: __("My account"), icon: "lucide-user", onClick: () => context?.router?.push("/account") },
+					...group.options,
+				],
+			})),
+		),
 		notifications,
 		notificationsOpen,
 		// both filters are client-side predicates, so `tab-change` needs no wiring
