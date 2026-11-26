@@ -1,0 +1,69 @@
+[
+ {"workstation_type": "Mixer", "machine_model": "Mixer", "description": "Blends raw materials into a batch."},
+ {"workstation_type": "Steam Kettle", "machine_model": "Steam Kettle", "description": "Heats and cooks a batch."},
+ {"workstation_type": "Reactor", "machine_model": "Reactor", "description": "Runs a reaction under heat in a closed vessel."},
+ {"workstation_type": "Fermenter", "machine_model": "Fermenter", "description": "Ferments a batch over time."},
+ {"workstation_type": "Mill", "machine_model": "Mill", "description": "Grinds solids into a powder."},
+ {"workstation_type": "Dryer", "machine_model": "Dryer", "description": "Removes moisture from a batch."},
+ {"workstation_type": "Cooler", "machine_model": "Cooler", "description": "Cools a batch after heating."},
+ {"workstation_type": "Filling Line", "machine_model": "Filling Line", "description": "Fills, caps and labels bottles."},
+ {"workstation_type": "Bagging Line", "machine_model": "Bagging Line", "description": "Fills and seals bags."},
+ {
+  "workstation_type": "Blow Room Line",
+  "machine_model": "Mixer",
+  "description": "Opens, cleans and blends fibre bales.",
+  "shapes": [
+   {"shape": "Box", "finish": "Steel", "x": -10, "width": 120, "depth": 64, "height": 44, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "x": -48, "z": 44, "width": 40, "depth": 44, "height": 36, "shakes": 1},
+   {"shape": "Open Tank", "finish": "Product", "x": 28, "z": 44, "radius": 26, "height": 50, "shows_level": 1, "shakes": 1}
+  ]
+ },
+ {
+  "workstation_type": "Carding Machine",
+  "description": "Combs fibre into a card sliver.",
+  "shapes": [
+   {"shape": "Box", "finish": "Steel", "width": 120, "depth": 70, "height": 50, "shakes": 1},
+   {"shape": "Tank", "finish": "Plate", "x": -18, "z": 50, "radius": 30, "height": 18, "shows_level": 0, "shakes": 1},
+   {"shape": "Agitator", "x": 34, "z": 56, "radius": 18, "shakes": 1},
+   {"shape": "Open Tank", "finish": "Product", "x": 72, "radius": 16, "height": 44, "shows_level": 1}
+  ]
+ },
+ {
+  "workstation_type": "Draw Frame",
+  "description": "Draws slivers together into an even sliver.",
+  "shapes": [
+   {"shape": "Box", "finish": "Steel", "width": 96, "depth": 50, "height": 60, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "z": 60, "width": 70, "depth": 30, "height": 14, "shakes": 1},
+   {"shape": "Flow Strip", "finish": "Product", "z": 74.5, "width": 66, "depth": 6},
+   {"shape": "Open Tank", "finish": "Product", "x": 64, "radius": 14, "height": 42, "shows_level": 1}
+  ]
+ },
+ {
+  "workstation_type": "Speed Frame",
+  "description": "Twists sliver into roving on bobbins.",
+  "shapes": [
+   {"shape": "Box", "finish": "Steel", "width": 150, "depth": 50, "height": 64, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "z": 64, "width": 150, "depth": 16, "height": 8},
+   {"shape": "Tank", "finish": "Cream", "x": -54, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": -18, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 18, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 54, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1}
+  ]
+ },
+ {
+  "workstation_type": "Ring Frame",
+  "description": "Spins roving into yarn on ring bobbins.",
+  "shapes": [
+   {"shape": "Box", "finish": "Steel", "width": 180, "depth": 40, "height": 56, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "x": -103, "width": 26, "depth": 46, "height": 76},
+   {"shape": "Box", "finish": "Dark", "z": 56, "width": 180, "depth": 12, "height": 6},
+   {"shape": "Tank", "finish": "Cream", "x": -75, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": -45, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": -15, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 15, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 45, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 75, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1}
+  ]
+ },
+ {"workstation_type": "Cone Winder", "machine_model": "Bagging Line", "description": "Winds yarn onto cones and packs them."}
+]

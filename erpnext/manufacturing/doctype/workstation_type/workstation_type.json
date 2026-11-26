@@ -12,10 +12,13 @@
  "engine": "InnoDB",
  "field_order": [
   "workstation_type",
+  "machine_model",
   "section_break_auzm",
   "workstation_costs",
   "section_break_8",
   "hour_rate",
+  "model_section",
+  "shapes",
   "description_tab",
   "description"
  ],
@@ -68,11 +71,35 @@
    "fieldtype": "Table",
    "label": "Operating Components Cost",
    "options": "Workstation Cost"
+  },
+  {
+   "description": "The machine the Plant Builder draws for workstations of this type. Filling Line and Bagging Line are packing machines.",
+   "fieldname": "machine_model",
+   "fieldtype": "Select",
+   "label": "Machine Model",
+   "options": "\nMixer\nSteam Kettle\nReactor\nFermenter\nMill\nDryer\nCooler\nFilling Line\nBagging Line",
+   "show_description_on_click": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "shapes",
+   "depends_on": "eval:![\"Filling Line\", \"Bagging Line\"].includes(doc.machine_model)",
+   "fieldname": "model_section",
+   "fieldtype": "Section Break",
+   "label": "3D Model"
+  },
+  {
+   "description": "Shapes that draw this machine in the Plant Builder, placed from the machine centre. Leave empty to draw the Machine Model preset.",
+   "fieldname": "shapes",
+   "fieldtype": "Table",
+   "label": "Shapes",
+   "options": "Workstation Type Shape",
+   "show_description_on_click": 1
   }
  ],
  "icon": "tag",
  "links": [],
- "modified": "2025-08-19 12:06:56.683558",
+ "modified": "2026-11-02 07:28:28.413387",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation Type",
