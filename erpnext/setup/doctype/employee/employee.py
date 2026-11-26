@@ -13,7 +13,6 @@ from frappe.query_builder import Criterion
 from frappe.utils import (
 	cint,
 	cstr,
-	get_email_address,
 	get_link_to_form,
 	get_user_by_email,
 	get_user_display_id,
@@ -617,7 +616,7 @@ def has_employee_user_permission(user):
 def get_employee_email(employee_doc):
 	user = employee_doc.get("user_id")
 	return (
-		(user and get_email_address(user))
+		(user and get_email_to_store(user))
 		or employee_doc.get("personal_email")
 		or employee_doc.get("company_email")
 	)
@@ -772,7 +771,7 @@ def get_all_employee_emails(company):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = (user and get_email_address(user)) or company_email or personal_email
+		email = (user and get_email_to_store(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails
@@ -787,7 +786,7 @@ def get_employee_emails(employee_list):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = (user and get_email_address(user)) or company_email or personal_email
+		email = (user and get_email_to_store(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails
