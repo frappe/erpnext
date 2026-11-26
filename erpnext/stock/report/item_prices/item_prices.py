@@ -211,6 +211,36 @@ def get_last_purchase_rate():
 	return item_last_purchase_rate_map
 
 
+<<<<<<< HEAD
+=======
+def get_purchase_rate_query(doctype, date_field):
+	parent = frappe.qb.DocType(doctype)
+	child = frappe.qb.DocType(f"{doctype} Item")
+	query = (
+		frappe.qb.from_(parent)
+		.from_(child)
+		.select(
+			child.item_code,
+			parent[date_field].as_("posting_date"),
+			(child.base_rate / child.conversion_factor).as_("base_rate"),
+			child.creation,
+		)
+		.where((parent.name == child.parent) & (parent.docstatus == 1))
+	)
+
+	if doctype == "Purchase Invoice":
+		query = query.where(parent.update_stock == 1)
+
+	if doctype != "Purchase Order":
+		query = query.where(parent.is_return == 0)
+
+	if condition := get_allowed_companies_condition(parent.company, doctype):
+		query = query.where(condition)
+
+	return query
+
+
+>>>>>>> 443af93 (fix(stock): item prices bom rate in company currency and last purchase rate without returns)
 def get_item_bom_rate():
 	"""Get BOM rate of an item from BOM"""
 
@@ -219,7 +249,7 @@ def get_item_bom_rate():
 	bom = frappe.qb.DocType("BOM")
 	bom_data = (
 		frappe.qb.from_(bom)
-		.select(bom.item, (bom.total_cost / bom.quantity).as_("bom_rate"))
+		.select(bom.item, (bom.base_total_cost / bom.quantity).as_("bom_rate"))
 		.where((bom.is_active == 1) & (bom.is_default == 1))
 	).run(as_dict=True)
 
