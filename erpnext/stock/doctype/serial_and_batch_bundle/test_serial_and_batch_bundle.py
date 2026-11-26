@@ -2634,7 +2634,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 	def test_legacy_serial_no_lookup_is_case_insensitive(self):
 		# MariaDB matches serial_no under a case insensitive collation, PostgreSQL does not.
 		# This asserts the lookup behaves the same on both; it can only fail on PostgreSQL.
-		from erpnext.stock.deprecated_serial_batch import DeprecatedSerialNoValuation
+		from erpnext.stock.serial_batch_bundle.legacy_valuation import DeprecatedSerialNoValuation
 
 		item = self.make_serial_item_for_valuation("_Test Legacy Serial Case", 1)
 		warehouse = "_Test Warehouse - _TC"
