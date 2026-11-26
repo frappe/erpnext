@@ -4,8 +4,12 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Count, Sum
+<<<<<<< HEAD
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, nowdate
+=======
+from frappe.utils import add_days, getdate, nowdate
+>>>>>>> 2ac71b5 (fix(accounts): book immutable ledger reversals on the cancellation date)
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -616,3 +620,25 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 				{"voucher_type": si.doctype, "voucher_no": si.name, "delinked": 1},
 			)
 		)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_immutable_ledger_reversal_ignores_request_posting_date(self):
+		si = self.create_sales_invoice(posting_date=add_days(nowdate(), -5))
+
+		frappe.form_dict.posting_date = add_days(nowdate(), -3)
+		self.addCleanup(frappe.form_dict.pop, "posting_date", None)
+		si.cancel()
+
+		remarks = f"On cancellation of {si.name}"
+		reversal_dates = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": si.name, "remarks": remarks},
+			pluck="posting_date",
+		) + frappe.get_all(
+			"Payment Ledger Entry",
+			filters={"voucher_no": si.name, "amount": ["<", 0]},
+			pluck="posting_date",
+		)
+
+		self.assertEqual(len(reversal_dates), 3)
+		self.assertEqual(set(reversal_dates), {getdate()})
