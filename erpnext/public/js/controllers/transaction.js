@@ -126,7 +126,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function (frm, cdt, cdn) {
-			frm.cscript.calculate_taxes_and_totals();
+			frm.cscript.refresh_item_tax_rates();
 		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "tax_amount", function (frm, cdt, cdn) {
@@ -2822,7 +2822,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							refresh_field("taxes");
 						} else {
 							me.frm.set_value("taxes", taxes);
-							me.calculate_taxes_and_totals();
+							me.refresh_item_tax_rates();
 						}
 					}
 				},
@@ -2884,6 +2884,41 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 			});
 		}
+	}
+
+	refresh_item_tax_rates() {
+		// item_tax_rate also holds each tax row's rate, so rebuild it as the server does on save
+		const items = this.frm.doc.items || [];
+		const templates = [...new Set(items.map((item) => item.item_tax_template || ""))];
+		const doc = {
+			company: this.frm.doc.company,
+			taxes: (this.frm.doc.taxes || []).map(({ account_head, rate, set_by_item_tax_template }) => ({
+				account_head,
+				rate,
+				set_by_item_tax_template,
+			})),
+		};
+		const request = (this.item_tax_rates_request = (this.item_tax_rates_request || 0) + 1);
+
+		return Promise.all(
+			templates.map((tax_template) =>
+				frappe.xcall("erpnext.stock.get_item_details.get_item_tax_map", {
+					doc,
+					tax_template,
+					as_json: true,
+				})
+			)
+		)
+			.then((item_tax_rates) => {
+				// a later tax change has its own request in flight
+				if (request !== this.item_tax_rates_request) return;
+
+				items.forEach((item) => {
+					const index = templates.indexOf(item.item_tax_template || "");
+					if (index !== -1) item.item_tax_rate = item_tax_rates[index];
+				});
+			})
+			.finally(() => this.calculate_taxes_and_totals());
 	}
 
 	item_tax_template(doc, cdt, cdn) {
