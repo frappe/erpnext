@@ -1537,7 +1537,7 @@ def make_purchase_order_for_default_supplier(
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
-		target.schedule_date = source.delivery_date
+		target.schedule_date = max(getdate(source.delivery_date or nowdate()), getdate(nowdate()))
 		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
 		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
 		target.project = source_parent.project
@@ -1682,7 +1682,7 @@ def make_purchase_order(
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
-		target.schedule_date = source.delivery_date
+		target.schedule_date = max(getdate(source.delivery_date or nowdate()), getdate(nowdate()))
 		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
 		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
 		target.project = source_parent.project
@@ -1788,7 +1788,9 @@ def set_delivery_date(items, sales_order):
 
 	for item in items:
 		if item.product_bundle:
-			item.schedule_date = delivery_by_item[item.product_bundle]
+			item.schedule_date = max(
+				getdate(delivery_by_item.get(item.product_bundle) or nowdate()), getdate(nowdate())
+			)
 
 
 def is_product_bundle(item_code):
