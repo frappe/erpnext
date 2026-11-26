@@ -4,7 +4,7 @@ from math import floor
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Min, NullIf, Sum
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, format_datetime, get_link_to_form
 
 import erpnext
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -51,6 +51,30 @@ class DisassembleStockEntry(BaseStockEntry):
 		for row in self.doc.items:
 			if not row.s_warehouse and not row.t_warehouse:
 				frappe.throw(_("Source or Target Warehouse is required for item {0}").format(row.item_code))
+
+	def validate_posting_datetime_with_source_entry(self):
+		"""The components take the rates of the source manufacture entry, so it cannot be posted before it."""
+		if not self.doc.source_stock_entry:
+			return
+
+		source = frappe.db.get_value(
+			"Stock Entry", self.doc.source_stock_entry, ["posting_date", "posting_time"], as_dict=True
+		)
+		source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
+		posting_datetime = get_combine_datetime(self.doc.posting_date, self.doc.posting_time)
+		if posting_datetime >= source_datetime:
+			return
+
+		frappe.throw(
+			_(
+				"Posting Date and Time {0} cannot be before {1}, when Stock Entry {2} manufactured this finished good."
+			).format(
+				frappe.bold(format_datetime(posting_datetime)),
+				frappe.bold(format_datetime(source_datetime)),
+				get_link_to_form("Stock Entry", self.doc.source_stock_entry),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
 
 	def validate_fg_completed_qty(self):
 		if not self.doc.source_stock_entry:
