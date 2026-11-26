@@ -7,6 +7,20 @@ from frappe import _
 from frappe.permissions import has_user_permission
 from frappe.utils.nestedset import NestedSet, get_root_of
 
+from erpnext.accounts.default_accounts import (
+	COST_OF_GOODS_SOLD,
+	DEFERRED_EXPENSE,
+	DEFERRED_REVENUE,
+	EXPENSES_ADDED_TO_STOCK,
+	EXPENSES_ADDED_TO_STOCK_CONTRA,
+	INCOME,
+	INVENTORY,
+	PAYMENT_DISCOUNT,
+	PROVISIONAL,
+	PURCHASE_EXPENSE,
+	PURCHASE_EXPENSE_CONTRA,
+)
+
 
 class ItemGroup(NestedSet):
 	# begin: auto-generated types
@@ -115,20 +129,22 @@ def get_company_resolved_defaults(company: str) -> dict:
 
 	return {
 		"default_warehouse": company_doc.get("default_warehouse"),
-		"default_inventory_account": company_doc.get("default_inventory_account"),
+		"default_inventory_account": company_doc.get_default_account(INVENTORY),
 		"buying_cost_center": company_doc.get("cost_center"),
 		"selling_cost_center": company_doc.get("cost_center"),
-		"expense_account": company_doc.get("default_expense_account"),
-		"income_account": company_doc.get("default_income_account"),
-		"default_provisional_account": company_doc.get("default_provisional_account"),
-		"purchase_expense_account": company_doc.get("purchase_expense_account"),
-		"default_cogs_account": company_doc.get("default_expense_account"),
-		"deferred_expense_account": company_doc.get("default_deferred_expense_account"),
-		"deferred_revenue_account": company_doc.get("default_deferred_revenue_account"),
-		"default_discount_account": company_doc.get("default_discount_account"),
-		"purchase_expense_contra_account": company_doc.get("purchase_expense_contra_account"),
-		"expenses_added_to_stock_account": company_doc.get("expenses_added_to_stock_account"),
-		"expenses_added_to_stock_contra_account": company_doc.get("expenses_added_to_stock_contra_account"),
+		"expense_account": company_doc.get_default_account(COST_OF_GOODS_SOLD),
+		"income_account": company_doc.get_default_account(INCOME),
+		"default_provisional_account": company_doc.get_default_account(PROVISIONAL),
+		"purchase_expense_account": company_doc.get_default_account(PURCHASE_EXPENSE),
+		"default_cogs_account": company_doc.get_default_account(COST_OF_GOODS_SOLD),
+		"deferred_expense_account": company_doc.get_default_account(DEFERRED_EXPENSE),
+		"deferred_revenue_account": company_doc.get_default_account(DEFERRED_REVENUE),
+		"default_discount_account": company_doc.get_default_account(PAYMENT_DISCOUNT),
+		"purchase_expense_contra_account": company_doc.get_default_account(PURCHASE_EXPENSE_CONTRA),
+		"expenses_added_to_stock_account": company_doc.get_default_account(EXPENSES_ADDED_TO_STOCK),
+		"expenses_added_to_stock_contra_account": company_doc.get_default_account(
+			EXPENSES_ADDED_TO_STOCK_CONTRA
+		),
 		"default_price_list": "",
 		"default_supplier": "",
 	}

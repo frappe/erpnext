@@ -12,6 +12,7 @@ from frappe.utils import cint, flt, format_date, get_link_to_form, getdate
 from frappe.utils.data import nowtime
 
 import erpnext
+from erpnext.accounts.default_accounts import PURCHASE_EXPENSE, PURCHASE_EXPENSE_CONTRA, get_default_account
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import _get_party_details
@@ -711,9 +712,13 @@ class BuyingController(SubcontractingController):
 		fields = ("purchase_expense_account", "purchase_expense_contra_account")
 		details = get_purchase_expense_account(item_code, self.company)
 
-		for field in fields:
+		company_purposes = {
+			"purchase_expense_account": PURCHASE_EXPENSE,
+			"purchase_expense_contra_account": PURCHASE_EXPENSE_CONTRA,
+		}
+		for field, purpose in company_purposes.items():
 			if not details.get(field):
-				details[field] = frappe.get_cached_value("Company", self.company, field)
+				details[field] = get_default_account(self.company, purpose)
 
 		for field in fields:
 			if not details.get(field):

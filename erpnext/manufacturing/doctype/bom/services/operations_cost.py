@@ -12,15 +12,13 @@ from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt
 
+from erpnext.accounts.default_accounts import OPERATING_COST, get_default_account
+
 
 def add_additional_cost(stock_entry, work_order, job_card=None):
 	# Add non stock items cost in the additional cost
 	stock_entry.additional_costs = []
-	expense_account = frappe.get_value(
-		"Company",
-		work_order.company,
-		"default_operating_cost_account",
-	)
+	expense_account = get_default_account(work_order.company, OPERATING_COST)
 	add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=job_card)
 	add_operations_cost(stock_entry, work_order, expense_account, job_card=job_card)
 

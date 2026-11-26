@@ -15,6 +15,7 @@ from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
 from frappe.utils.nestedset import get_root_of
 
+from erpnext.accounts.default_accounts import BANK, set_default_account
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
 
@@ -578,13 +579,7 @@ def create_bank_account(args):
 			doc = bank_account.insert()
 
 			if args.get("set_default"):
-				frappe.db.set_value(
-					"Company",
-					args.get("company_name"),
-					"default_bank_account",
-					bank_account.name,
-					update_modified=False,
-				)
+				set_default_account(args.get("company_name"), BANK, bank_account.name)
 
 			return doc
 

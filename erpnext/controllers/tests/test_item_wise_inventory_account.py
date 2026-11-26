@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -125,7 +126,7 @@ class TestItemWiseInventoryAccount(ERPNextTestSuite):
 			warehouse=self.default_warehouse,
 			company=self.company,
 			cost_center=frappe.db.get_value("Company", self.company, "cost_center"),
-			expense_account=frappe.db.get_value("Company", self.company, "default_expense_account"),
+			expense_account=get_default_account(self.company, COST_OF_GOODS_SOLD),
 			do_not_submit=True,
 		)
 
@@ -195,7 +196,7 @@ class TestItemWiseInventoryAccount(ERPNextTestSuite):
 			warehouse=self.default_warehouse,
 			company=self.company,
 			cost_center=frappe.db.get_value("Company", self.company, "cost_center"),
-			expense_account=frappe.db.get_value("Company", self.company, "default_expense_account"),
+			expense_account=get_default_account(self.company, COST_OF_GOODS_SOLD),
 		)
 
 		for row in items:
@@ -404,7 +405,7 @@ class TestItemWiseInventoryAccount(ERPNextTestSuite):
 			warehouse=self.default_warehouse,
 			company=self.company,
 			cost_center=frappe.db.get_value("Company", self.company, "cost_center"),
-			expense_account=frappe.db.get_value("Company", self.company, "default_expense_account"),
+			expense_account=get_default_account(self.company, COST_OF_GOODS_SOLD),
 			do_not_submit=True,
 		)
 

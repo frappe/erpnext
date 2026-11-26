@@ -394,16 +394,15 @@ const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, compa
 
 const CashPicker = ({ company, selectedAccount, setSelectedAccount }: { company: string, selectedAccount: string, setSelectedAccount: (account: string) => void }) => {
 
-    const { data } = useFrappeGetCall('frappe.client.get_value', {
-        doctype: 'Company',
-        filters: company,
-        fieldname: 'default_cash_account'
-    }, undefined, {
+    const { data } = useFrappeGetCall('erpnext.accounts.default_accounts.get_company_default_account', {
+        company,
+        purpose: 'CASH'
+    }, company ? undefined : null, {
         revalidateOnFocus: false,
         revalidateIfStale: false,
     })
 
-    const account = data?.message?.default_cash_account
+    const account = data?.message
 
     if (account) {
         return <button className={cn('text-left border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1 dark:hover:bg-surface-gray-3',
@@ -417,7 +416,7 @@ const CashPicker = ({ company, selectedAccount, setSelectedAccount }: { company:
             </div>
             <div className='flex flex-col gap-1'>
                 <span className='font-semibold text-sm'>Cash</span>
-                <span className='text-xs text-ink-gray-5'>{data?.message?.default_cash_account}</span>
+                <span className='text-xs text-ink-gray-5'>{account}</span>
             </div>
         </button>
     }

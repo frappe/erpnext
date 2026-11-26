@@ -12,6 +12,14 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.tests.utils import load_test_records_for
 from frappe.utils import now_datetime, today
 
+from erpnext.accounts.default_accounts import (
+	ACCUMULATED_DEPRECIATION,
+	ASSET_DISPOSAL,
+	DEPRECIATION_EXPENSE,
+	UNREALIZED_PROFIT_LOSS,
+	set_default_account,
+)
+
 ReportFilters = dict[str, Any]
 ReportName = NewType("ReportName", str)
 
@@ -317,9 +325,7 @@ class BootStrapTestData:
 			"company": company,
 		}
 		self.make_records(["account_name", "company"], [account])
-		frappe.db.set_value(
-			"Company", company, "unrealized_profit_loss_account", "Unrealized Profit and Loss - TCP1"
-		)
+		set_default_account(company, UNREALIZED_PROFIT_LOSS, "Unrealized Profit and Loss - TCP1")
 
 	def make_records(self, key, records):
 		doctype = records[0].get("doctype")
@@ -2178,16 +2184,11 @@ class BootStrapTestData:
 					)
 
 	def make_company_depreciation_settings(self):
-		frappe.db.set_value(
-			"Company",
-			"_Test Company",
-			{
-				"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
-				"depreciation_expense_account": "_Test Depreciations - _TC",
-				"disposal_account": "_Test Gain/Loss on Asset Disposal - _TC",
-				"depreciation_cost_center": "Main - _TC",
-			},
-		)
+		company = "_Test Company"
+		set_default_account(company, ACCUMULATED_DEPRECIATION, "_Test Accumulated Depreciations - _TC")
+		set_default_account(company, DEPRECIATION_EXPENSE, "_Test Depreciations - _TC")
+		set_default_account(company, ASSET_DISPOSAL, "_Test Gain/Loss on Asset Disposal - _TC")
+		frappe.db.set_value("Company", company, "depreciation_cost_center", "Main - _TC")
 
 	def make_customer(self):
 		records = [

@@ -20,6 +20,7 @@ from frappe.utils import (
 	today,
 )
 
+from erpnext.accounts.default_accounts import OPERATING_COST, set_default_account
 from erpnext.manufacturing.doctype.bom.services.operations_cost import add_additional_cost
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
@@ -3483,7 +3484,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				}
 			).insert()
 
-		frappe.db.set_value("Company", company, "default_operating_cost_account", operating_cost_account)
+		set_default_account(company, OPERATING_COST, operating_cost_account)
 
 		for item in ["TEST RM OP COST Item 1", "TEST FG OP COST Item"]:
 			if not frappe.db.exists("Item", item):

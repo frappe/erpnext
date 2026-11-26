@@ -9,6 +9,7 @@ from frappe import _, bold, throw
 from frappe.query_builder.functions import Min, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
+from erpnext.accounts.default_accounts import INCOME, get_default_account
 from erpnext.accounts.party import render_address
 from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
@@ -1414,7 +1415,7 @@ def set_default_income_account_for_item(obj):
 	Args:
 	    obj: Transaction document containing items table with income_account field
 	"""
-	company_default = frappe.get_cached_value("Company", obj.company, "default_income_account")
+	company_default = get_default_account(obj.company, INCOME)
 	for d in sorted(obj.get("items", default=[]), key=lambda row: row.item_code or ""):
 		income_account = getattr(d, "income_account", None)
 		if d.item_code and income_account and income_account != company_default:
