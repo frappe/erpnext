@@ -262,7 +262,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 	if (frm.doc.lead) {
 		party_type = "Lead";
 		party = frm.doc.lead;
-	} else if (frm.doc.customer) {
+	} else if (frm.doctype != "Purchase Order" && frm.doc.customer) {
 		party_type = "Customer";
 		party = frm.doc.customer;
 	} else if (frm.doc.supplier) {
