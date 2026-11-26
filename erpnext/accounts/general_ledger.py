@@ -672,21 +672,23 @@ def make_reverse_gl_entries(
 		).run(as_dict=1)
 
 	if gl_entries:
+		if immutable_ledger_enabled:
+			# reversals are booked on the day of cancellation
+			posting_date = posting_date or getdate()
+
 		create_payment_ledger_entry(
 			gl_entries,
 			cancel=1,
 			adv_adj=adv_adj,
 			update_outstanding=update_outstanding,
 			partial_cancel=partial_cancel,
+			posting_date=posting_date,
 		)
 		validate_accounting_period(gl_entries)
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 
-		if immutable_ledger_enabled:
-			validation_date = posting_date or frappe.form_dict.get("posting_date") or getdate()
-		else:
-			validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
+		validation_date = posting_date or gl_entries[0]["posting_date"]
 
 		check_freezing_date(validation_date, gl_entries[0]["company"], adv_adj)
 		validate_against_pcv(is_opening, validation_date, gl_entries[0]["company"])
@@ -757,8 +759,8 @@ def make_reverse_gl_entries(
 
 			if immutable_ledger_enabled:
 				new_gle["is_cancelled"] = 0
-				new_gle["posting_date"] = posting_date or frappe.form_dict.get("posting_date") or getdate()
-			elif posting_date:
+
+			if posting_date:
 				new_gle["posting_date"] = posting_date
 
 			if any([debit, credit, debit_in_account_currency, credit_in_account_currency]):
