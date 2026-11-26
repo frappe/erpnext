@@ -106,6 +106,21 @@ class TestAccountingDimension(unittest.TestCase):
 		self.assertEqual(gle.get("department"), "_Test Department - _TC")
 		self.assertEqual(gle1.get("department"), "_Test Department - _TC")
 
+	def test_dimension_filter_options_follow_dimensions(self):
+		def filter_options():
+			meta = frappe.get_meta("Accounting Dimension Filter")
+			return meta.get_field("accounting_dimension").options.split("\n")
+
+		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Driver"}).insert()
+		self.assertIn("Driver", filter_options())
+
+		dimension.disabled = 1
+		dimension.save()
+		self.assertIn("Driver", filter_options())
+
+		dimension.delete()
+		self.assertNotIn("Driver", filter_options())
+
 	def test_mandatory(self):
 		si = create_sales_invoice(do_not_save=1)
 		si.append(

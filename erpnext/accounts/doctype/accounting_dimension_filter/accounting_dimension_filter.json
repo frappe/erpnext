@@ -26,6 +26,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Accounting Dimension",
+   "options": "\nCost Center\nProject",
    "reqd": 1
   },
   {
@@ -101,7 +102,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-08 14:13:22.203011",
+ "modified": "2026-11-26 15:48:02.166295",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Filter",
