@@ -2,6 +2,7 @@ import frappe
 import requests
 from frappe import _
 from frappe.core.utils import html2text
+from frappe.rate_limiter import rate_limit
 from frappe.utils import sanitize_html
 from frappe.utils.global_search import search
 from jinja2 import utils
@@ -23,7 +24,8 @@ def get_context(context):
 
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- results are permission-filtered
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True, methods=["GET", "POST"])
+@rate_limit(limit=30, seconds=60)
 def get_help_results_sections(text: str):
 	out = []
 	settings = frappe.get_doc("Support Settings", "Support Settings")
