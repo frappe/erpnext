@@ -27,6 +27,12 @@ class TestTaxesAndTotals(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.net_total, 1400)
 		self.assertEqual(so.grand_total, 1400)
 
+		so.discount_amount = 0
+		so.save()
+
+		self.assertEqual([item.distributed_discount_amount for item in so.items], [0, 0])
+		self.assertEqual(so.net_total, 1500)
+
 	def test_distributed_discount_amount_with_taxes(self):
 		so = make_sales_order(do_not_save=1)
 		so.apply_discount_on = "Grand Total"
