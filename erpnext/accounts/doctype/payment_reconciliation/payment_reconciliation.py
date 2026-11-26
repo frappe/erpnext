@@ -134,12 +134,7 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
-<<<<<<< HEAD
-		self.validate_payment_limit()
-=======
 		self.validate_limits()
-		self.validate_access()
->>>>>>> 85048a0 (fix(accounts): validate invoice and payment limits in payment reconciliation)
 		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
 
