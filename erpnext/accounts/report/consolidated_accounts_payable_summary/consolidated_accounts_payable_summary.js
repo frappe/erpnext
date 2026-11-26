@@ -5,44 +5,13 @@ frappe.query_reports["Consolidated Accounts Payable Summary"] = {
 	filters: [
 		{
 			fieldname: "companies",
-			label: __("Companies"),
-			fieldtype: "MultiSelectList",
-			options: "Company",
 			get_data: function (txt) {
 				return erpnext.utils.get_link_options("Company", txt);
 			},
 			description: __("Totals are dropped when the companies use different currencies"),
 		},
 		{
-			fieldname: "report_date",
-			label: __("Report Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
-		},
-		{
-			fieldname: "ageing_based_on",
-			label: __("Ageing Based On"),
-			fieldtype: "Select",
-			options: "Posting Date\nDue Date\nSupplier Invoice Date",
-			default: "Due Date",
-		},
-		{
-			fieldname: "age_as_on",
-			label: __("Age as on"),
-			fieldtype: "Select",
-			options: "Report Date\nToday",
-			default: "Report Date",
-		},
-		{
-			fieldname: "range",
-			label: __("Ageing Range"),
-			fieldtype: "Data",
-			default: "30, 60, 90, 120",
-		},
-		{
 			fieldname: "party_type",
-			label: __("Party Type"),
-			fieldtype: "Autocomplete",
 			options: get_party_type_options(),
 			on_change: function () {
 				frappe.query_report.set_filter_value("party", "");
@@ -54,9 +23,6 @@ frappe.query_reports["Consolidated Accounts Payable Summary"] = {
 		},
 		{
 			fieldname: "party",
-			label: __("Party"),
-			fieldtype: "MultiSelectList",
-			options: "party_type",
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 
@@ -65,32 +31,6 @@ frappe.query_reports["Consolidated Accounts Payable Summary"] = {
 
 				return erpnext.utils.get_link_options(party_type, txt);
 			},
-		},
-		{
-			fieldname: "supplier_group",
-			label: __("Supplier Group"),
-			fieldtype: "Link",
-			options: "Supplier Group",
-		},
-		{
-			fieldname: "show_future_payments",
-			label: __("Show Future Payments"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_gl_balance",
-			label: __("Show GL Balance"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "based_on_payment_terms",
-			label: __("Based On Payment Terms"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "for_revaluation_journals",
-			label: __("Revaluation Journals"),
-			fieldtype: "Check",
 		},
 	],
 	collapsible_filters: true,
