@@ -69,7 +69,10 @@ from erpnext.exceptions import InvalidCurrency
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_packed_items_of_order_rows,
+	make_packing_list,
+)
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_bin_details,
@@ -2562,9 +2565,9 @@ class AccountsController(TransactionBase):
 		frappe.throw(_(message))
 
 	def get_company_default(self, fieldname, ignore_validation=False):
-		from erpnext.accounts.utils import get_company_default
+		from erpnext.accounts.utils import _get_company_default
 
-		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
+		return _get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
 		stock_items = []
@@ -2837,8 +2840,8 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 
-		base_grand_total = self.get("base_rounded_total") or self.base_grand_total
-		grand_total = self.get("rounded_total") or self.grand_total
+		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
+		grand_total = flt(self.get("rounded_total") or self.grand_total)
 		automatically_fetch_payment_terms = 0
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice", "Sales Order"):
@@ -3094,8 +3097,8 @@ class AccountsController(TransactionBase):
 				total += flt(d.payment_amount, d.precision("payment_amount"))
 				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
-			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
-			grand_total = self.get("rounded_total") or self.grand_total
+			base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
+			grand_total = flt(self.get("rounded_total") or self.grand_total)
 
 			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
@@ -4382,27 +4385,23 @@ def validate_child_on_delete(row, parent, ordered_item=None):
 			frappe.throw(_("Cannot delete an item which has been ordered"))
 
 
-def update_bin_on_delete(row, doctype):
-	"""Update bin for deleted item (row)."""
-	from erpnext.stock.stock_balance import (
-		get_indented_qty,
-		get_ordered_qty,
-		get_reserved_qty,
-		update_bin_qty,
-	)
+def update_bin_on_delete(rows, parent):
+	"""Update bin quantities after child item rows are deleted."""
+	row_names = [row.name for row in rows]
+	if parent.doctype == "Sales Order":
+		# covers a bundle row's components too
+		parent.update_reserved_qty(row_names)
+		return
 
-	qty_dict = {}
-
-	if doctype == "Sales Order":
-		qty_dict["reserved_qty"] = get_reserved_qty(row.item_code, row.warehouse)
-	else:
+	parent.update_ordered_qty(row_names)
+	# the request's warehouse, which the order row may have changed
+	request_items = {}
+	for row in rows:
 		if row.material_request_item:
-			qty_dict["indented_qty"] = get_indented_qty(row.item_code, row.warehouse)
+			request_items.setdefault(row.material_request, []).append(row.material_request_item)
 
-		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
-
-	if row.warehouse:
-		update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	for material_request, items in request_items.items():
+		frappe.get_doc("Material Request", material_request).update_requested_qty(items)
 
 
 def validate_blanket_order_changes(parent, data) -> None:
@@ -4461,6 +4460,42 @@ def validate_no_linked_order(rows, parent, linked_doctype) -> None:
 			)
 
 
+def validate_no_ordered_packed_item(rows, parent) -> None:
+	"""Raise if a Sales Order bundle row being deleted has a packed item on a draft or submitted Purchase Order."""
+	deleted_rows = {row.name for row in rows}
+	row_by_packed_item = {
+		packed.name: packed.parent_detail_docname
+		for packed in parent.get("packed_items")
+		if packed.parent_detail_docname in deleted_rows
+	}
+	if not row_by_packed_item:
+		return
+
+	purchase_orders = dict(
+		frappe.get_all(
+			"Purchase Order Item",
+			filters={
+				"sales_order": parent.name,
+				"sales_order_packed_item": ["in", list(row_by_packed_item)],
+				"docstatus": ["<", 2],
+			},
+			fields=["sales_order_packed_item", "parent"],
+			as_list=True,
+		)
+	)
+	ordered_rows = {row_by_packed_item[packed]: order for packed, order in purchase_orders.items()}
+	for row in rows:
+		if purchase_order := ordered_rows.get(row.name):
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which is already ordered on {2} {3}.").format(
+					row.idx,
+					row.item_code,
+					_("Purchase Order"),
+					get_link_to_form("Purchase Order", purchase_order),
+				)
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept_reservation=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
@@ -4482,6 +4517,7 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 
 	if parent.doctype == "Sales Order":
 		validate_no_linked_order(deleted_children, parent, "Purchase Order")
+		validate_no_ordered_packed_item(deleted_children, parent)
 	elif parent.doctype == "Purchase Order":
 		validate_no_linked_order(deleted_children, parent, "Sales Order")
 
@@ -4497,8 +4533,8 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 	# bin uses Material Request Items to recalculate & update
 	if parent.doctype not in ["Quotation", "Supplier Quotation"]:
 		parent.update_prevdoc_status()
-		for d in deleted_children:
-			update_bin_on_delete(d, parent.doctype)
+		if deleted_children:
+			update_bin_on_delete(deleted_children, parent)
 
 	return bool(deleted_children)
 
@@ -4542,6 +4578,16 @@ def update_child_qty_rate(
 			if doc.valid_till and getdate(doc.valid_till) < getdate():
 				frappe.throw(
 					_("Cannot update items of Quotation {0} because it has expired.").format(doc.name)
+				)
+
+	def validate_rows_belong_to_parent(doc, data):
+		item_row_names = {row.name for row in doc.items}
+		for d in data:
+			if d.get("docname") and d.get("docname") not in item_row_names:
+				frappe.throw(
+					_("Item row {0} does not belong to {1} {2}.").format(
+						frappe.bold(d.get("docname")), _(doc.doctype), frappe.bold(doc.name)
+					)
 				)
 
 	def validate_workflow_conditions(doc):
@@ -4722,7 +4768,12 @@ def update_child_qty_rate(
 	check_doc_permissions(parent, "write")
 	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
 	validate_parent_status(parent)
+	validate_rows_belong_to_parent(parent, data)
 	validate_blanket_order_changes(parent, data)
+
+	packed_items_before_update = {}
+	if parent_doctype == "Sales Order":
+		packed_items_before_update = get_packed_items_of_order_rows({row.name for row in parent.items})
 
 	if parent_doctype == "Quotation":
 		ordered_items = get_ordered_items(parent.name)
@@ -4903,7 +4954,7 @@ def update_child_qty_rate(
 	parent.set_total_in_words()
 	parent.validate_party_specific_items()
 	if parent_doctype == "Sales Order":
-		make_packing_list(parent)
+		make_packing_list(parent, packed_items_before_update)
 		parent.set_gross_profit()
 	elif parent_doctype == "Quotation":
 		make_packing_list(parent)

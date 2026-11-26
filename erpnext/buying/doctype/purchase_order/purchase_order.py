@@ -20,7 +20,7 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
-from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -184,7 +184,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_dt": "Material Request",
 				"target_parent_field": "per_ordered",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 				"percent_join_field": "material_request",
 			}
 		]
@@ -487,10 +487,17 @@ class PurchaseOrder(BuyingController):
 						flt(d.conversion_factor) or 1.0
 					)
 					d.discount_percentage = last_purchase_details["discount_percentage"]
+					d.discount_amount = (
+						last_purchase_details["discount_amount"]
+						* (flt(d.conversion_factor) or 1.0)
+						/ conversion_rate
+					)
 					d.base_rate = last_purchase_details["base_rate"] * (flt(d.conversion_factor) or 1.0)
 					d.price_list_rate = d.base_price_list_rate / conversion_rate
 					d.rate = d.base_rate / conversion_rate
 					d.last_purchase_rate = d.rate
+					d.margin_type = None
+					d.margin_rate_or_amount = 0.0
 				else:
 					item_last_purchase_rate = frappe.get_cached_value(
 						"Item", d.item_code, "last_purchase_rate"
@@ -500,6 +507,8 @@ class PurchaseOrder(BuyingController):
 							flt(d.conversion_factor) or 1.0
 						)
 						d.price_list_rate = d.rate = d.last_purchase_rate = d.base_rate / conversion_rate
+						d.margin_type = None
+						d.margin_rate_or_amount = 0.0
 
 	# Check for Closed status
 	def check_on_hold_or_closed_status(self):
@@ -558,8 +567,9 @@ class PurchaseOrder(BuyingController):
 		self.update_requested_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
-		if status == "Closed" or was_closed:
-			self.update_subcontracting_order_status()
+		# reopening leaves the Subcontracting Orders closed: a user may have closed them on purpose
+		if status == "Closed":
+			self.close_subcontracting_orders()
 		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -627,7 +637,11 @@ class PurchaseOrder(BuyingController):
 		pass
 
 	def update_status_updater(self):
-		self.status_updater.append(
+		self.status_updater.extend(self.get_sales_order_status_updater())
+
+	@staticmethod
+	def get_sales_order_status_updater():
+		return [
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Sales Order Item",
@@ -636,10 +650,10 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
-			}
-		)
-		self.status_updater.append(
+				**get_stock_qty_status_args(
+					frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales")
+				),
+			},
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Packed Item",
@@ -648,9 +662,9 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_packed_item",
 				"target_ref_field": "qty",
-				"source_field": "stock_qty",
-			}
-		)
+				**get_stock_qty_status_args(),
+			},
+		]
 
 	def update_delivered_qty_in_sales_order(self):
 		"""Update delivered qty in Sales Order for drop ship"""
@@ -725,26 +739,20 @@ class PurchaseOrder(BuyingController):
 		return result
 
 	def update_ordered_qty_in_so_for_removed_items(self, removed_items):
-		"""
-		Updates ordered_qty in linked SO when item rows are removed using Update Items
-		"""
-		if not self.is_against_so():
+		"""Recalculate the ordered qty of Sales Order rows linked to rows removed through Update Items."""
+		if not removed_items:
 			return
-		for item in removed_items:
-			prev_ordered_qty = flt(
-				frappe.get_cached_value("Sales Order Item", item.get("sales_order_item"), "ordered_qty")
-			)
 
-			frappe.db.set_value(
-				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
-			)
+		# the removed rows are still in self.items, so their Sales Order rows are recalculated too
+		for args in self.get_sales_order_status_updater():
+			self._update_children({**args, "cond": ""}, update_modified=True)
 
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
 			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
 				make_subcontracting_order(self.name, save=True, notify=True)
 
-	def update_subcontracting_order_status(self):
+	def close_subcontracting_orders(self):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			set_subcontracting_order_status as update_sco_status,
 		)
@@ -753,7 +761,7 @@ class PurchaseOrder(BuyingController):
 			for sco in frappe.get_all(
 				"Subcontracting Order", {"purchase_order": self.name, "docstatus": 1}, pluck="name"
 			):
-				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
+				update_sco_status(sco, "Closed")
 
 	def set_missing_values(self, for_validate=False):
 		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")

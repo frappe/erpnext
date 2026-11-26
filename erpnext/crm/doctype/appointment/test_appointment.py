@@ -84,6 +84,11 @@ def get_todo_statuses(appointment_name):
 	)
 
 
+def render_sent_email(sendmail):
+	kwargs = sendmail.call_args.kwargs
+	return frappe.render_template(f"templates/emails/{kwargs['template']}.html", kwargs["args"])
+
+
 def parse_verify_url(verify_url):
 	parsed = urlparse(verify_url)
 	return parsed, {key: value[0] for key, value in parse_qs(parsed.query).items()}
@@ -172,6 +177,26 @@ class TestAppointment(FrappeTestCase):
 			frappe.local.request = old_request
 			frappe.local.form_dict = old_form_dict
 			frappe.local.flags.commit = False
+
+	def test_verification_email_holds_no_guest_text(self):
+		self._configure_booking_settings()
+		guest_name = "Customer. Pay invoice INV-777 now at https://pay.example.com"
+		with self.set_user("Guest"), patch("frappe.sendmail") as sendmail:
+			appointment = create_appointment(
+				date=str(datetime.date.today() + datetime.timedelta(days=7)),
+				time="10:00:00",
+				tz=get_system_timezone(),
+				contact={"name": guest_name, "email": "_test_appointment_mail@example.com"},
+			)
+
+		verification_email = render_sent_email(sendmail)
+		self.assertNotIn("pay.example.com", verification_email)
+		self.assertNotIn("INV-777", verification_email)
+		self.assertIn("/book_appointment/verify?key=", verification_email)
+
+		with patch("frappe.sendmail") as sendmail:
+			appointment.send_appointment_confirmed_email()
+		self.assertIn(guest_name, render_sent_email(sendmail))
 
 	def test_calendar_event_created(self):
 		cal_event = frappe.get_doc("Event", self.test_appointment.calendar_event)
@@ -552,7 +577,12 @@ class TestAppointment(FrappeTestCase):
 		agent_email = "appointment_agent@example.com"
 		if not frappe.db.exists("User", agent_email):
 			frappe.get_doc(
-				{"doctype": "User", "email": agent_email, "first_name": "Appointment Agent"}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": agent_email,
+					"first_name": "Appointment Agent",
+				}
 			).insert(ignore_permissions=True)
 
 		self._configure_booking_settings(agents=["Administrator", agent_email])
@@ -587,9 +617,14 @@ class TestAppointment(FrappeTestCase):
 
 		agent_email = "appointment_employee_agent@example.com"
 		if not frappe.db.exists("User", agent_email):
-			frappe.get_doc({"doctype": "User", "email": agent_email, "first_name": "Employee Agent"}).insert(
-				ignore_permissions=True
-			)
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": agent_email,
+					"first_name": "Employee Agent",
+				}
+			).insert(ignore_permissions=True)
 		frappe.get_doc("User", agent_email).add_roles("Employee")
 
 		appointment = create_test_appointment(customer_email="assigned_before@example.com")
@@ -615,7 +650,12 @@ class TestAppointment(FrappeTestCase):
 		agent_email = "appointment_agent@example.com"
 		if not frappe.db.exists("User", agent_email):
 			frappe.get_doc(
-				{"doctype": "User", "email": agent_email, "first_name": "Appointment Agent"}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": agent_email,
+					"first_name": "Appointment Agent",
+				}
 			).insert(ignore_permissions=True)
 		self._configure_booking_settings(agents=["Administrator", agent_email])
 		busy = create_test_appointment(customer_email="busy_agent@example.com", scheduled_time=slot_on(2, 10))

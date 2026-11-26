@@ -1338,6 +1338,37 @@ class TestPOSInvoice(unittest.TestCase):
 
 		self.assertEqual(pos.docstatus, 1)
 
+	@change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_packed_row_gets_a_bundle_at_submit(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PPS-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		pos = create_pos_invoice(item=bundle, qty=2, rate=100, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
+		pos.insert()
+		pos.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", pos.packed_items[0].serial_and_batch_bundle, "total_qty"
+			),
+			-2,
+		)
+
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_stock_check_adds_up_rows_of_same_item(self):
 		item_code = make_stock_item_with_qty(20)
@@ -1467,6 +1498,20 @@ class TestPOSInvoice(unittest.TestCase):
 
 		make_merge_log_for(pos)
 		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 1)
+
+	def test_item_query_checks_pos_profile(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import item_query
+
+		def query(pos_profile):
+			return item_query("Item", "", "name", 0, 5, {"pos_profile": ["=", pos_profile]})
+
+		self.assertTrue(query(self.pos_profile.name))
+		assert_refused(self, query, {"warehouse": ["like", "%"]})
+		with as_user("Administrator"):
+			user = make_fenced_user("pos-items@example.com", ["Sales User"])
+		with as_user(user):
+			assert_refused(self, query, self.pos_profile.name)
+			assert_refused(self, query, "_Test Missing POS Profile")
 
 	def test_write_off_counts_as_paid(self):
 		pos = create_pos_invoice(rate=1000, do_not_save=1)

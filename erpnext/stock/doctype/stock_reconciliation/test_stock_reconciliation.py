@@ -2295,6 +2295,39 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			),
 		).name
 
+	def _save_zero_rate_reco_with_batch_bundle(self, allow_zero_valuation_rate):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self._make_batch_item("Test Stock Reco Zero Rate Batch Bundle", "TSRZRBB-.#####")
+		warehouse = "_Test Warehouse - _TC"
+
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=50)
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=5,
+			rate=0,
+			batch_no=get_batch_from_bundle(se.items[0].serial_and_batch_bundle),
+			reconcile_all_serial_batch=0,
+			do_not_save=1,
+		)
+		sr.items[0].allow_zero_valuation_rate = allow_zero_valuation_rate
+		sr.save()
+		return sr.items[0]
+
+	def test_zero_rate_kept_on_a_row_with_a_selected_batch_bundle(self):
+		row = self._save_zero_rate_reco_with_batch_bundle(allow_zero_valuation_rate=1)
+
+		self.assertEqual(row.valuation_rate, 0)
+		self.assertEqual(row.amount_difference, -250)
+
+	def test_form_filled_zero_rate_takes_the_bundle_rate(self):
+		"""The form fills a zero rate for batch items; without Allow Zero Valuation Rate it is not a write-down."""
+		row = self._save_zero_rate_reco_with_batch_bundle(allow_zero_valuation_rate=0)
+
+		self.assertEqual(row.valuation_rate, 50)
+		self.assertEqual(row.amount_difference, 0)
+
 	def test_zeroing_a_batch_does_not_make_an_adjustment_entry(self):
 		"""Emptying a batch that holds stock is an ordinary outward entry, not a value write-off."""
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -2662,6 +2695,51 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 		self.assertRaises(SerialNoExistsInFutureTransactionError, transfer.submit)
 
+	def test_backdated_serial_transfer_into_a_reconciled_warehouse_is_blocked(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			SerialNoExistsInFutureTransactionError,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"has_serial_no": 1, "serial_no_series": "TSRW-.#####"}).name
+		source, target = "_Test Warehouse 1 - _TC", "_Test Warehouse - _TC"
+		receipts = [
+			make_stock_entry(
+				item_code=item, target=warehouse, qty=qty, rate=100, posting_date=add_days(nowdate(), -5)
+			)
+			for warehouse, qty in ((source, 2), (target, 1))
+		]
+		create_stock_reconciliation(
+			item_code=item,
+			warehouse=target,
+			qty=1,
+			rate=207,
+			serial_no=get_serial_nos_from_bundle(receipts[1].items[0].serial_and_batch_bundle)[0],
+			use_serial_batch_fields=1,
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		transfers = [
+			make_stock_entry(
+				item_code=item,
+				source=source,
+				target=warehouse,
+				qty=1,
+				serial_no=serial_no,
+				use_serial_batch_fields=1,
+				posting_date=add_days(nowdate(), -3),
+				do_not_submit=True,
+			)
+			for serial_no, warehouse in zip(
+				get_serial_nos_from_bundle(receipts[0].items[0].serial_and_batch_bundle),
+				("_Test Warehouse 2 - _TC", target),
+				strict=True,
+			)
+		]
+		transfers[0].submit()
+		self.assertRaises(SerialNoExistsInFutureTransactionError, transfers[1].submit)
+
 	def test_backdated_entry_shifts_balance_across_batch_reconciliation(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -3014,6 +3092,56 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(queue_action.call_count, 2)
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation", sr.name, "docstatus"), 0)
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation Item", sr.items[0].name, "qty"), 20)
+
+	def test_quantity_difference_is_rounded_for_fractional_qty(self):
+		item_code = self.make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		create_stock_reconciliation(item_code=item_code, qty=10.1, rate=100)
+
+		sr = create_stock_reconciliation(item_code=item_code, qty=10.3, rate=100, do_not_submit=True)
+
+		self.assertEqual(flt(sr.items[0].quantity_difference), 0.2)
+
+	def test_rate_from_buying_price_in_another_uom_is_per_stock_uom(self):
+		"""A row without a rate for an item without stock takes the buying price per stock UOM."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"valuation_rate": 0,
+				"uoms": [{"uom": "Box", "conversion_factor": 1000}],
+			}
+		).name
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": "_Test Buying Price List Default Currency",
+				"currency": frappe.db.get_default("currency"),
+				"buying": 1,
+				"enabled": 1,
+			}
+		).insert(ignore_if_duplicate=True)
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": price_list.name,
+				"uom": "Box",
+				"price_list_rate": 1,
+			}
+		).insert()
+
+		sr = frappe.get_doc(
+			{
+				"doctype": "Stock Reconciliation",
+				"company": "_Test Company",
+				"purpose": "Stock Reconciliation",
+				"items": [{"item_code": item_code, "warehouse": "_Test Warehouse - _TC", "qty": 10}],
+			}
+		).insert()
+
+		self.assertEqual(sr.items[0].valuation_rate, 0.001)
 
 
 def create_batch_item_with_batch(item_name, batch_id):

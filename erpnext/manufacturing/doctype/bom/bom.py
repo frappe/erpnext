@@ -441,6 +441,8 @@ class BOM(WebsiteGenerator):
 		)
 		args.update(item)
 
+		# the form may send a stale price list exchange rate
+		self.set_plc_conversion_rate()
 		rate = self.get_rm_rate(args)
 		ret_item = {
 			"item_name": item and args["item_name"] or "",
@@ -524,7 +526,7 @@ class BOM(WebsiteGenerator):
 			return
 
 		self.flags.cost_updated = False
-		existing_bom_cost = self.total_cost
+		existing_costs = (self.total_cost, self.base_total_cost)
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
@@ -536,7 +538,7 @@ class BOM(WebsiteGenerator):
 			self.db_update()
 
 		# update parent BOMs
-		if self.total_cost != existing_bom_cost and update_parent:
+		if update_parent and (self.total_cost, self.base_total_cost) != existing_costs:
 			parent_boms = frappe.db.sql_list(
 				"""select distinct parent from `tabBOM Item`
 				where bom_no = %s and docstatus=1 and parenttype='BOM'""",
@@ -664,30 +666,43 @@ class BOM(WebsiteGenerator):
 	def set_conversion_rate(self):
 		if self.currency == self.company_currency():
 			self.conversion_rate = 1
-		elif self.conversion_rate == 1 or flt(self.conversion_rate) <= 0:
+		elif self.conversion_rate == 1 or flt(self.conversion_rate) <= 0 or self.has_stale_conversion_rate:
 			self.conversion_rate = get_exchange_rate(
 				self.currency, self.company_currency(), args="for_buying"
 			)
+
+	@property
+	def has_stale_conversion_rate(self):
+		"""Currency changed without a new conversion rate."""
+		previous = self.get_doc_before_save()
+		if not previous:
+			return False
+
+		precision = self.precision("conversion_rate")
+		rate_unchanged = flt(previous.conversion_rate, precision) == flt(self.conversion_rate, precision)
+		return previous.currency != self.currency and rate_unchanged
 
 	def set_plc_conversion_rate(self):
 		if self.rm_cost_as_per in ["Valuation Rate", "Last Purchase Rate"]:
 			self.plc_conversion_rate = 1
 			return
 
-		currency_changed = False
 		if self.buying_price_list:
-			currency = frappe.get_cached_value("Price List", self.buying_price_list, "currency")
-			currency_changed = currency != self.price_list_currency
-			self.price_list_currency = currency
+			self.price_list_currency = frappe.get_cached_value(
+				"Price List", self.buying_price_list, "currency"
+			)
 
 		if not self.price_list_currency:
 			return
 
 		if self.price_list_currency == self.company_currency():
 			self.plc_conversion_rate = 1
-		elif flt(self.plc_conversion_rate) in (0, 1) or (currency_changed and not self.is_new()):
-			self.plc_conversion_rate = get_exchange_rate(
-				self.price_list_currency, self.company_currency(), args="for_buying"
+		elif self.price_list_currency == self.currency:
+			self.plc_conversion_rate = self.conversion_rate
+		else:
+			self.plc_conversion_rate = (
+				get_exchange_rate(self.price_list_currency, self.company_currency(), args="for_buying")
+				or self.plc_conversion_rate
 			)
 
 	def validate_materials(self):
@@ -790,8 +805,9 @@ class BOM(WebsiteGenerator):
 		old_cost = self.total_cost
 
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
-		self.base_total_cost = (
-			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
+		self.base_total_cost = flt(
+			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost,
+			self.precision("base_total_cost"),
 		)
 
 		if self.total_cost != old_cost:
@@ -820,28 +836,49 @@ class BOM(WebsiteGenerator):
 				self.get("operating_cost_per_bom_quantity")
 			)
 			self.operating_cost = total_operating_cost
-			self.base_operating_cost = flt(total_operating_cost * self.conversion_rate, 2)
+			self.base_operating_cost = total_operating_cost * self.conversion_rate
+
+		self.base_operating_cost = flt(self.base_operating_cost, self.precision("base_operating_cost"))
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
+		self.update_stale_hour_rate(row)
+
 		if not row.hour_rate or update_hour_rate:
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
 
 			if hour_rate:
-				row.hour_rate = (
-					hour_rate / flt(self.conversion_rate) if self.conversion_rate and hour_rate else hour_rate
-				)
+				row.hour_rate = flt(hour_rate / (flt(self.conversion_rate) or 1), row.precision("hour_rate"))
 
-		if row.hour_rate:
-			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
+		row.base_hour_rate = flt(
+			flt(row.hour_rate) * flt(self.conversion_rate), row.precision("base_hour_rate")
+		)
 
-			if row.time_in_mins:
-				row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
-				row.base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
-				row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
-				row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
+		if row.time_in_mins:
+			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
+			base_operating_cost = flt(row.operating_cost) * flt(self.conversion_rate)
+			row.base_operating_cost = flt(base_operating_cost, row.precision("base_operating_cost"))
+			row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
+			row.base_cost_per_unit = base_operating_cost / (row.batch_size or 1.0)
 
 		if update_hour_rate and save:
 			row.db_update()
+
+	def update_stale_hour_rate(self, row):
+		"""Workstation or conversion rate changed but the hour rate did not, e.g. through the API."""
+		before = self.get_doc_before_save()
+		previous = before and before.get("operations", {"name": row.name})
+		if not previous or flt(previous[0].hour_rate) != flt(row.hour_rate):
+			return
+
+		old_rate, new_rate = flt(before.conversion_rate), flt(self.conversion_rate)
+		if any(
+			cstr(previous[0].get(field)) != cstr(row.get(field))
+			for field in ("workstation", "workstation_type")
+		):
+			row.hour_rate = 0
+		elif old_rate and new_rate and old_rate != new_rate:
+			# keeps the rate in company currency, also a manual one
+			row.hour_rate = flt(flt(row.hour_rate) * old_rate / new_rate, row.precision("hour_rate"))
 
 	def calculate_rm_cost(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
@@ -850,7 +887,7 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
-			old_rate = d.rate
+			old_rate, old_base_amount = d.rate, d.base_amount
 			if d.is_stock_item:
 				d.rate = self.get_rm_rate(
 					{
@@ -870,18 +907,18 @@ class BOM(WebsiteGenerator):
 			d.amount = flt(
 				flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty")), d.precision("amount")
 			)
-			d.base_amount = d.amount * flt(self.conversion_rate)
+			d.base_amount = flt(d.amount * flt(self.conversion_rate), d.precision("base_amount"))
 			d.qty_consumed_per_unit = flt(d.stock_qty, d.precision("stock_qty")) / flt(
 				self.quantity, self.precision("quantity")
 			)
 
 			total_rm_cost += d.amount
 			base_total_rm_cost += d.base_amount
-			if save and (old_rate != d.rate):
+			if save and (old_rate != d.rate or old_base_amount != d.base_amount):
 				d.db_update()
 
 		self.raw_material_cost = total_rm_cost
-		self.base_raw_material_cost = base_total_rm_cost
+		self.base_raw_material_cost = flt(base_total_rm_cost, self.precision("base_raw_material_cost"))
 
 	def calculate_sm_cost(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
@@ -908,37 +945,18 @@ class BOM(WebsiteGenerator):
 		self.base_scrap_material_cost = base_total_sm_cost
 
 	def calculate_exploded_cost(self):
-		"Set exploded row cost from it's parent BOM."
-		rm_rate_map = self.get_rm_rate_map()
+		"Set exploded row cost from the BOM rows and sub-assembly BOMs."
+		self.get_exploded_items()
 
 		for row in self.get("exploded_items"):
 			old_rate = flt(row.rate)
-			row.rate = rm_rate_map.get(row.item_code)
+			current = self.cur_exploded_items.get(row.item_code)
+			row.rate = current.rate if current else 0
 			row.amount = flt(row.stock_qty) * flt(row.rate)
 
 			if old_rate != row.rate:
 				# Only db_update if changed
 				row.db_update()
-
-	def get_rm_rate_map(self) -> dict[str, float]:
-		"Create Raw Material-Rate map for Exploded Items. Fetch rate from Items table or Subassembly BOM."
-		rm_rate_map = {}
-
-		for item in self.get("items"):
-			if item.bom_no:
-				# Get Item-Rate from Subassembly BOM
-				explosion_items = frappe.get_all(
-					"BOM Explosion Item",
-					filters={"parent": item.bom_no},
-					fields=["item_code", "rate"],
-					order_by=None,  # to avoid sort index creation at db level (granular change)
-				)
-				explosion_item_rate = {item.item_code: flt(item.rate) for item in explosion_items}
-				rm_rate_map.update(explosion_item_rate)
-			else:
-				rm_rate_map[item.item_code] = flt(item.base_rate) / flt(item.conversion_factor or 1.0)
-
-		return rm_rate_map
 
 	def update_exploded_items(self, save=True):
 		"""Update Flat BOM, following will be correct data"""
@@ -974,10 +992,15 @@ class BOM(WebsiteGenerator):
 		return erpnext.get_company_currency(self.company)
 
 	def add_to_cur_exploded_items(self, args):
-		if self.cur_exploded_items.get(args.item_code):
-			self.cur_exploded_items[args.item_code]["stock_qty"] += args.stock_qty
-		else:
+		existing = self.cur_exploded_items.get(args.item_code)
+		if not existing:
 			self.cur_exploded_items[args.item_code] = args
+			return
+
+		# the same item at another rate, e.g. from a sub-assembly: merge at the weighted rate
+		amount = flt(existing.stock_qty) * flt(existing.rate) + flt(args.stock_qty) * flt(args.rate)
+		existing.stock_qty += args.stock_qty
+		existing.rate = amount / existing.stock_qty
 
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		"""Add all items from Flat BOM of child BOM"""
@@ -1127,8 +1150,9 @@ class BOM(WebsiteGenerator):
 		return BOMTree(self.name)
 
 	def set_process_loss_qty(self):
-		if self.process_loss_percentage:
-			self.process_loss_qty = flt(self.quantity) * flt(self.process_loss_percentage) / 100
+		self.process_loss_qty = flt(
+			flt(self.quantity) * flt(self.process_loss_percentage) / 100, self.precision("process_loss_qty")
+		)
 
 	def validate_scrap_items(self):
 		must_be_whole_number = frappe.get_value("UOM", self.uom, "must_be_whole_number")

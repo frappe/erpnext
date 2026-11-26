@@ -24,6 +24,7 @@ class StockRepostingSettings(Document):
 			"", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
 		]
 		notify_reposting_error_to_role: DF.Link | None
+		repost_incorrect_valuation_entries: DF.Check
 		start_time: DF.Time | None
 	# end: auto-generated types
 

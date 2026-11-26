@@ -39,7 +39,7 @@ from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.ledger_health.ledger_health import update_ledger_health
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.utils import get_stock_value_on
+from erpnext.stock.utils import get_combine_datetime, get_stock_value_on
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
@@ -1118,7 +1118,12 @@ def repost_advance_payment_ledger(doc):
 
 
 @frappe.whitelist()
-def get_company_default(company, fieldname, ignore_validation=False):
+def get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
+	frappe.has_permission("Company", "read", doc=company, throw=True)
+	return _get_company_default(company, fieldname, ignore_validation)
+
+
+def _get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
 	value = frappe.get_cached_value("Company", company, fieldname)
 
 	if not ignore_validation and not value:
@@ -1527,6 +1532,9 @@ def repost_gle_for_stock_vouchers(
 		for voucher_type, voucher_no in stock_vouchers_chunk:
 			existing_gle = gle.get((voucher_type, voucher_no), [])
 			voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+			if voucher_obj.docstatus != 1:
+				continue
+
 			# Some transactions post credit as negative debit, this is handled while posting GLE
 			# but while comparing we need to make sure it's flipped so comparisons are accurate
 			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(warehouse_account))
@@ -1601,32 +1609,37 @@ def sort_stock_vouchers_by_posting_date(
 	return sorted_vouchers
 
 
-def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
-	values = []
-	condition = ""
+def get_future_stock_vouchers(
+	posting_date, posting_time, for_warehouses=None, for_items=None, company=None, to_datetime=None
+):
+	posting_datetime = get_combine_datetime(posting_date, posting_time)
+
+	SLE = DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(SLE)
+		.select(SLE.voucher_type, SLE.voucher_no)
+		.distinct()
+		.where(SLE.posting_datetime >= posting_datetime)
+		.where(SLE.is_cancelled == 0)
+		.orderby(SLE.posting_datetime)
+		.orderby(SLE.creation)
+		.for_update()
+	)
+
 	if for_items:
-		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
-		values += for_items
+		query = query.where(SLE.item_code.isin(for_items))
 
 	if for_warehouses:
-		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
-		values += for_warehouses
+		query = query.where(SLE.warehouse.isin(for_warehouses))
 
 	if company:
-		condition += " and company = %s"
-		values.append(company)
+		query = query.where(SLE.company == company)
 
-	future_stock_vouchers = frappe.db.sql(
-		f"""select distinct sle.voucher_type, sle.voucher_no
-		from `tabStock Ledger Entry` sle
-		where
-			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
-			and is_cancelled = 0
-			{condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""",
-		tuple([posting_date, posting_time, *values]),
-		as_dict=True,
-	)
+	if to_datetime:
+		query = query.where(SLE.posting_datetime <= to_datetime)
+
+	future_stock_vouchers = query.run(as_dict=True)
 
 	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 

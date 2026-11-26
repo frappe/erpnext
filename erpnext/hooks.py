@@ -46,7 +46,10 @@ doctype_list_js = {
 
 override_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
-override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
+override_whitelisted_methods = {
+	"frappe.www.contact.send_message": "erpnext.templates.utils.send_message",
+	"erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions": "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
+}
 
 welcome_email = "erpnext.setup.utils.welcome_email"
 
@@ -63,6 +66,9 @@ after_install = "erpnext.setup.install.after_install"
 
 after_app_install = "erpnext.setup.install.after_app_install"
 after_app_uninstall = "erpnext.setup.install.after_app_uninstall"
+
+# patches that must stop the migration when they fail, even with `bench migrate --skip-failing`
+never_skip_patches = ["erpnext.patches.v16_0.update_serial_batch_entries"]
 
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
@@ -486,6 +492,7 @@ scheduler_events = {
 	],
 	"weekly": [
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
+		"erpnext.stock.stock_ledger_audit.audit_stock_ledger_entries",
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",

@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -98,11 +100,11 @@ class SubcontractingOrder(SubcontractingController):
 		self.validate_uom_is_integer("stock_uom", "qty", "Subcontracting Order Item")
 		self.validate_item_stock_uom_is_integer("item_code", "qty", "Subcontracting Order Item")
 		self.validate_purchase_order_for_subcontracting()
-		self.validate_items()
 		self.validate_service_items()
 		self.validate_header_with_purchase_order()
 		self.validate_rows_with_purchase_order()
 		self.validate_supplied_items()
+		self.validate_additional_cost_accounts()
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
@@ -182,6 +184,15 @@ class SubcontractingOrder(SubcontractingController):
 			if service_item.purchase_order_item in purchase_order_items
 		]
 
+		service_purchase_order_items = {
+			service_item.purchase_order_item for service_item in self.service_items
+		}
+		for item in self.items:
+			if item.purchase_order_item not in service_purchase_order_items:
+				frappe.throw(
+					_("Row {0}: Finished Good {1} has no Service Item row.").format(item.idx, item.item_code)
+				)
+
 		for service_item in self.service_items:
 			if frappe.get_value("Item", service_item.item_code, "is_stock_item"):
 				frappe.throw(_("Service Item {0} must be a non-stock item.").format(service_item.item_code))
@@ -236,9 +247,13 @@ class SubcontractingOrder(SubcontractingController):
 					frappe.throw(_(msg))
 
 	def set_missing_values(self):
-		self.calculate_additional_costs()
 		self.calculate_service_costs()
 		self.calculate_supplied_items_qty_and_amount()
+		for item in self.items:
+			# additional costs split by Amount use the cost before them
+			item.amount = item.qty * (item.rm_cost_per_qty + item.service_cost_per_qty)
+
+		self.calculate_additional_costs()
 		self.calculate_items_qty_and_amount()
 
 	def calculate_service_costs(self):
@@ -248,7 +263,7 @@ class SubcontractingOrder(SubcontractingController):
 	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("items"):
 			bom = frappe.get_doc("BOM", item.bom)
-			rm_cost = sum(flt(rm_item.amount) for rm_item in bom.items)
+			rm_cost = sum(flt(rm_item.base_rate) * flt(rm_item.qty) for rm_item in bom.items)
 			item.rm_cost_per_qty = flt(rm_cost / flt(bom.quantity), item.precision("rm_cost_per_qty"))
 
 	def calculate_items_qty_and_amount(self):
@@ -359,16 +374,7 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
 				else:
-					total_required_qty = total_supplied_qty = 0
-					for item in self.supplied_items:
-						total_required_qty += item.required_qty
-						total_supplied_qty += flt(item.total_supplied_qty)
-					if total_supplied_qty:
-						status = "Partial Material Transferred"
-						if total_supplied_qty >= total_required_qty:
-							status = "Material Transferred"
-					else:
-						status = "Open"
+					status = self.get_transfer_status()
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
@@ -379,6 +385,23 @@ class SubcontractingOrder(SubcontractingController):
 		if update_bin:
 			self.update_ordered_qty_for_subcontracting()
 			self.update_reserved_qty_for_subcontracting()
+
+	def get_transfer_status(self):
+		"""Material Transferred only when each raw material is fully supplied, counted across rows."""
+		required_qty, supplied_qty = defaultdict(float), defaultdict(float)
+		for item in self.supplied_items:
+			required_qty[item.rm_item_code] += flt(item.required_qty)
+			supplied_qty[item.rm_item_code] += flt(item.total_supplied_qty)
+
+		if not any(supplied_qty.values()):
+			return "Open"
+
+		precision = frappe.get_precision("Subcontracting Order Supplied Item", "total_supplied_qty")
+		for rm_item_code, qty in required_qty.items():
+			if flt(supplied_qty[rm_item_code], precision) < flt(qty, precision):
+				return "Partial Material Transferred"
+
+		return "Material Transferred"
 
 	def update_subcontracted_quantity_in_po(self):
 		po_items = [d.purchase_order_item for d in self.service_items if d.purchase_order_item]
@@ -419,6 +442,18 @@ class SubcontractingOrder(SubcontractingController):
 
 			frappe.db.set_value("Purchase Order Item", po_item, "subcontracted_quantity", qty)
 
+	def get_raw_material_qty_at_supplier(self) -> dict:
+		"""Qty of each raw material sent for this order and not yet consumed or returned."""
+		self.initialized_fields()
+		self.subcontract_orders = [self.name]
+		self.get_available_materials()
+
+		qty_at_supplier = defaultdict(float)
+		for (rm_item_code, _finished_good, _order), details in self.available_materials.items():
+			qty_at_supplier[rm_item_code] += flt(details.qty)
+
+		return qty_at_supplier
+
 
 @frappe.whitelist()
 def make_subcontracting_receipt(source_name, target_doc=None):
@@ -432,6 +467,10 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.received_qty)
 		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
+	def update_additional_cost(source, target, source_parent):
+		target.amount = flt(source.amount * additional_cost_share, target.precision("amount"))
+
+	additional_cost_share = get_additional_cost_share(frappe.get_doc("Subcontracting Order", source_name))
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
 		source_name,
@@ -456,11 +495,46 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 				"postprocess": update_item,
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty),
 			},
+			"Landed Cost Taxes and Charges": {
+				"doctype": "Landed Cost Taxes and Charges",
+				"postprocess": update_additional_cost,
+			},
 		},
 		target_doc,
 	)
+	target_doc.set_additional_costs()
 
 	return target_doc
+
+
+def get_additional_cost_share(order: Document) -> float:
+	"""Share of the order's additional costs a receipt takes: what earlier receipts left of them."""
+	total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in order.items)
+	if not total_cost:
+		# costs that net to zero leave valuation unchanged, so keep their rows in full
+		return 1.0
+
+	pending_cost = sum(
+		max(flt(row.qty) - flt(row.received_qty), 0) * flt(row.additional_cost_per_qty) for row in order.items
+	)
+	if not pending_cost:
+		return 0.0
+
+	return max(1 - get_additional_cost_taken_by_receipts(order.name) / total_cost, 0)
+
+
+def get_additional_cost_taken_by_receipts(order: str) -> float:
+	receipt = frappe.qb.DocType("Subcontracting Receipt")
+	receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	return flt(
+		(
+			frappe.qb.from_(receipt_item)
+			.inner_join(receipt)
+			.on(receipt.name == receipt_item.parent)
+			.select(Sum(receipt_item.qty * receipt_item.additional_cost_per_qty))
+			.where((receipt.docstatus == 1) & (receipt_item.subcontracting_order == order))
+		).run()[0][0]
+	)
 
 
 def set_subcontracting_order_status(sco: str | Document, status: str | None = None):

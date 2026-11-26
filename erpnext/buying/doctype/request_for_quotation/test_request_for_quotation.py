@@ -19,6 +19,7 @@ from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotati
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.exceptions import PartyDisabled
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
@@ -63,6 +64,16 @@ class TestRequestforQuotation(FrappeTestCase):
 		with change_settings("Buying Settings", {"allow_zero_qty_in_request_for_quotation": 1}):
 			rfq.save()
 			self.assertEqual(rfq.items[0].qty, 0)
+
+	def test_item_change_on_material_request_row_is_blocked(self):
+		other_item = make_item("_Test RFQ Item Swap").name
+		mr = make_material_request(qty=5)
+		rfq = make_request_for_quotation(do_not_save=True)
+		rfq.items[0].material_request = mr.name
+		rfq.items[0].material_request_item = mr.items[0].name
+		# swapping the fetched item would leave a stale link to the MR row
+		rfq.items[0].item_code = other_item
+		self.assertRaises(frappe.ValidationError, rfq.insert)
 
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()
@@ -239,6 +250,28 @@ class TestRequestforQuotation(FrappeTestCase):
 			item["rate"] = 100
 		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(portal_doc))
 		self.assertEqual(supplier_quotation.items[0].amount, 500)
+
+	def test_supplier_portal_user_can_submit_a_quotation(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.templates.pages.rfq import get_portal_doc
+
+		user = create_user("rfq_portal_supplier@example.com", "Supplier").name
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+		frappe.new_doc(
+			"Portal User", user=user, parent=supplier, parentfield="portal_users", parenttype="Supplier"
+		).insert()
+
+		portal_doc = get_portal_doc(rfq)
+		portal_doc["supplier"] = supplier
+		for item in portal_doc["items"]:
+			item["rate"] = 100
+
+		with self.set_user(user):
+			supplier_quotation = create_supplier_quotation(portal_doc)
+
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", supplier_quotation, "supplier"), supplier)
 
 	def test_portal_row_left_untouched_is_quoted_at_zero(self):
 		from erpnext.templates.pages.rfq import get_portal_doc

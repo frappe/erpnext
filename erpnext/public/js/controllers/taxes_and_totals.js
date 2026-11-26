@@ -232,6 +232,24 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		return flt(item.qty) + flt(item.rejected_qty);
 	}
 
+	get_qty_for_amount(item) {
+		// Mirrors the server: a zero-qty return or debit note row adjusts the rate.
+		const doc = this.frm.doc;
+		if (
+			!(flt(item.qty) || flt(item.rejected_qty)) &&
+			doc.is_return &&
+			doc.doctype !== "Purchase Receipt"
+		) {
+			return -1;
+		}
+
+		if (!flt(item.qty) && doc.is_debit_note) {
+			return 1;
+		}
+
+		return this.get_billed_qty(item);
+	}
+
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
@@ -242,25 +260,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				item.net_rate = item.rate;
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
 
-				if (!(me.frm.doc.is_return || me.frm.doc.is_debit_note)) {
-					item.net_amount = item.amount = flt(
-						item.rate * me.get_billed_qty(item),
-						precision("amount", item)
-					);
-				}
-				else {
-					// allow for '0' qty on Credit/Debit notes
-					let qty = flt(item.qty);
-					if (!qty) {
-						qty = (me.frm.doc.is_debit_note ? 1 : -1);
-						if (me.frm.doc.doctype !== "Purchase Receipt" && me.frm.doc.is_return === 1) {
-							// In case of Purchase Receipt, qty can be 0 if all items are rejected
-							qty = flt(item.qty);
-						}
-					}
-
-					item.net_amount = item.amount = flt(item.rate * qty, precision("amount", item));
-				}
+				item.net_amount = item.amount = flt(
+					item.rate * me.get_qty_for_amount(item),
+					precision("amount", item)
+				);
 
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
@@ -301,9 +304,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0; });
 
-			if (!this.discount_amount_applied) {
+			if (!me.discount_amount_applied) {
 				erpnext.accounts.taxes.validate_taxes_and_charges(tax.doctype, tax.name);
-				erpnext.accounts.taxes.validate_inclusive_tax(tax, this.frm);
+				erpnext.accounts.taxes.validate_inclusive_tax(tax, me.frm);
 			}
 			frappe.model.round_floats_in(tax);
 		});
@@ -1134,41 +1137,49 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			if(["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)) {
+				// loyalty_amount is in company currency
+				let loyalty_amount =
+					this.frm.doc.party_account_currency == this.frm.doc.currency
+						? this.frm.doc.loyalty_amount / this.frm.doc.conversion_rate
+						: this.frm.doc.loyalty_amount;
 				let total_amount_for_payment = (this.frm.doc.redeem_loyalty_points && this.frm.doc.loyalty_amount)
-					? flt(total_amount_to_pay - this.frm.doc.loyalty_amount, precision("base_grand_total"))
+					? flt(total_amount_to_pay - loyalty_amount, precision("base_grand_total"))
 					: total_amount_to_pay;
 				this.set_default_payment(total_amount_for_payment, update_paid_amount);
 				this.calculate_paid_amount();
 			}
 			this.calculate_change_amount();
 
-			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
-				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
-				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
+			let in_party_currency = this.frm.doc.party_account_currency == this.frm.doc.currency;
+			let paid_amount = in_party_currency ? this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
+			let change_amount = in_party_currency ? this.frm.doc.change_amount : this.frm.doc.base_change_amount;
+			this.frm.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
+				precision("outstanding_amount"));
 		}
 	}
 
 	async set_total_amount_to_default_mop() {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
-		let total_amount_to_pay;
+		let total_amount_to_pay, amount_precision;
 
 		if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
+			amount_precision = precision("grand_total");
 			total_amount_to_pay = flt(
 				grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
-				precision("grand_total")
+				amount_precision
 			);
 		} else {
+			amount_precision = precision("base_grand_total");
 			total_amount_to_pay = flt(
 				(
 					flt(
 						base_grand_total,
-						precision("base_grand_total")
+						amount_precision
 					)
 					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount
 				),
-				precision("base_grand_total")
+				amount_precision
 			);
 		}
 
@@ -1183,7 +1194,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			payment_amount += payment.amount
 		});
 
-		if (payment_amount == total_amount_to_pay) {
+		if (flt(payment_amount, amount_precision) == total_amount_to_pay) {
 			return;
 		}
 
@@ -1283,14 +1294,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	calculate_change_amount(){
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
+		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+		var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
+
 		if(["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)
-			&& this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
+			&& this.frm.doc.paid_amount > grand_total && !this.frm.doc.is_return) {
 
 			var payment_types = $.map(this.frm.doc.payments, function(d) { return d.type; });
 			if (in_list(payment_types, 'Cash')) {
-				var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
-				var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
-
 				this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - grand_total,
 					precision("change_amount"));
 

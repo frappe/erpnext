@@ -97,6 +97,16 @@ frappe.ui.form.on("Job Card", {
 					__("Create")
 				);
 			}
+
+			if (frm.doc.docstatus === 0 && frm.doc.items.some((row) => flt(row.transferred_qty) > 0)) {
+				frm.add_custom_button(
+					__("Return Components"),
+					() => {
+						frm.trigger("make_stock_return_entry");
+					},
+					__("Create")
+				);
+			}
 		}
 
 		if (frm.doc.docstatus == 1 && !frm.doc.is_corrective_job_card) {
@@ -430,11 +440,6 @@ frappe.ui.form.on("Job Card", {
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
 
-		function setCurrentIncrement() {
-			currentIncrement += 1;
-			return currentIncrement;
-		}
-
 		function updateStopwatch(increment) {
 			var hours = Math.floor(increment / 3600);
 			var minutes = Math.floor((increment - hours * 3600) / 60);
@@ -453,8 +458,7 @@ frappe.ui.form.on("Job Card", {
 
 		function initialiseTimer() {
 			const interval = setInterval(function () {
-				var current = setCurrentIncrement();
-				updateStopwatch(current);
+				updateStopwatch(frm.events.get_current_time(frm));
 			}, 1000);
 		}
 
@@ -482,20 +486,30 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	get_current_time(frm) {
-		let current_time = 0;
+		// union of the intervals, so parallel operators count once; UTC gives wall-clock diffs, as on the server
+		const now = frappe.datetime.system_datetime();
+		const intervals = frm.doc.time_logs
+			.filter((d) => d.from_time)
+			.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
+			.sort((a, b) => a[0] - b[0]);
 
-		frm.doc.time_logs.forEach((d) => {
-			if (d.to_time) {
-				if (d.time_in_mins) {
-					current_time += flt(d.time_in_mins, 2) * 60;
-				} else {
-					current_time += get_seconds_diff(d.to_time, d.from_time);
-				}
-			} else {
-				current_time += get_seconds_diff(frappe.datetime.system_datetime(), d.from_time);
+		let current_time = 0;
+		let current_start = null;
+		let current_end = null;
+		intervals.forEach(([start, end]) => {
+			if (current_end && start <= current_end) {
+				current_end = moment.max(current_end, end);
+				return;
 			}
+			if (current_end) {
+				current_time += current_end.diff(current_start, "seconds", true);
+			}
+			[current_start, current_end] = [start, end];
 		});
 
+		if (current_end) {
+			current_time += current_end.diff(current_start, "seconds", true);
+		}
 		return current_time;
 	},
 
@@ -504,7 +518,6 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	for_quantity: function (frm) {
-		frm.doc.items = [];
 		frm.call({
 			method: "get_required_items",
 			doc: frm.doc,
@@ -527,6 +540,18 @@ frappe.ui.form.on("Job Card", {
 			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_entry",
 			frm: frm,
 			run_link_triggers: true,
+		});
+	},
+
+	make_stock_return_entry: function (frm) {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_return_entry",
+			args: { job_card: frm.doc.name },
+			callback: function (r) {
+				if (r.exc) return;
+				const doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			},
 		});
 	},
 
@@ -563,7 +588,3 @@ frappe.ui.form.on("Job Card Time Log", {
 		frm.set_value("started_time", "");
 	},
 });
-
-function get_seconds_diff(d1, d2) {
-	return moment(d1).diff(d2, "seconds");
-}

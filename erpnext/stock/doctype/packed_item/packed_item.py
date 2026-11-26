@@ -58,23 +58,28 @@ class PackedItem(Document):
 	pass
 
 
-def make_packing_list(doc):
-	"Make/Update packing list for Product Bundle Item."
+def make_packing_list(doc, order_packed_items=None):
+	"""Make/Update packing list for Product Bundle Item.
+
+	order_packed_items: a Sales Order's own packed rows by order row, to keep their qty on Update Items."""
 	if doc.get("_action") and doc._action == "update_after_submit":
 		return
 
 	parent_items_price, reset = {}, False
-	set_price_from_children = frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates")
+	# a return keeps its original's rates
+	set_price_from_children = not doc.get("return_against") and frappe.db.get_single_value(
+		"Selling Settings", "editable_bundle_item_rates"
+	)
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
-	order_packed_items = get_order_packed_items(doc)
+	if order_packed_items is None:
+		order_packed_items = get_order_packed_items(doc)
 
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
 		if is_product_bundle(item_row.item_code):
-			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
-			for bundle_item in get_product_bundle_items(item_row.item_code):
+			for bundle_item, so_packed_item in get_bundle_components(doc, item_row, order_packed_items):
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
@@ -83,9 +88,6 @@ def make_packing_list(doc):
 					reset=reset,
 				)
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				so_packed_item = pop_order_packed_item(
-					so_packed_items, item_row.item_code, bundle_item.item_code
-				)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
 				update_packed_item_price_data(pi_row, item_data, doc)
@@ -95,11 +97,44 @@ def make_packing_list(doc):
 
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
-				if set_price_from_children:  # create/update bundle item wise price dict
+				# a zero qty row has no component amount to price it from
+				if set_price_from_children and item_row.qty:
 					update_product_bundle_rate(parent_items_price, pi_row, item_row)
 
 	if parent_items_price:
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
+
+
+def get_bundle_components(doc, item_row, order_packed_items):
+	"""Components of ``item_row``'s bundle, each with the order's packed row it delivers."""
+	order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
+	so_packed_items = list(order_packed_items.get(order_row, []))
+	for bundle_item in get_product_bundle_items(item_row.item_code):
+		yield (
+			bundle_item,
+			pop_order_packed_item(so_packed_items, item_row.item_code, bundle_item.item_code),
+		)
+
+
+def get_kept_packed_items(doc):
+	"""Yield (packed row, bundle row, stock qty per bundle unit) for each packed row of the last
+	build that make_packing_list keeps for the bundle rows as they are now."""
+	packed_items_table = get_indexed_packed_items_table(doc)
+	order_packed_items = get_order_packed_items(doc)
+	# only a bundle row that has packed rows can keep one
+	parent_items = {row.parent_item for row in doc.get("packed_items")}
+	for item_row in doc.get("items"):
+		if item_row.item_code not in parent_items:
+			continue
+
+		for bundle_item, so_packed_item in get_bundle_components(doc, item_row, order_packed_items):
+			if stale_rows := get_stale_packed_rows(doc, item_row, bundle_item, packed_items_table):
+				packed_row = stale_rows.pop(0)
+				yield (
+					packed_row,
+					item_row,
+					get_component_stock_qty_per_unit(bundle_item, packed_row.uom, so_packed_item),
+				)
 
 
 def is_product_bundle(item_code: str) -> bool:
@@ -194,15 +229,9 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	"""
 	exists, pi_row = False, {}
 
-	# check if row already exists in packed items table
-	key = (
-		main_item_row.item_code,
-		packing_item.item_code,
-		None if doc.is_new() else main_item_row.name,
-	)
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
-	if stale_rows := packed_items_table.get(key):
+	if stale_rows := get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table):
 		pi_row, exists = stale_rows.pop(0), True
 
 	if not exists:
@@ -214,6 +243,21 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 		pi_row = doc.append("packed_items", pi_row)
 
 	return pi_row
+
+
+def set_incoming_rate_from_bundle(row, bundle):
+	"""Rate of the serial or batch nos picked on submit; validate looked it up before they were picked."""
+	row.db_set("incoming_rate", flt(bundle.avg_rate, row.precision("incoming_rate")))
+
+
+def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table):
+	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
+	key = (
+		main_item_row.item_code,
+		packing_item.item_code,
+		None if doc.is_new() else main_item_row.name,
+	)
+	return packed_items_table.get(key)
 
 
 def get_packed_item_details(item_code, company):
@@ -256,11 +300,22 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 
 def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=None):
 	"""Component stock qty per bundle stock unit; a Sales Order's packed row keeps the qty it was ordered with."""
-	if so_packed_item and so_packed_item.qty_per_unit:
-		return so_packed_item.qty_per_unit
-
 	# component qty is in the bundle row's UOM; convert to stock qty
-	return flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
+	qty_per_unit = flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
+	return get_ordered_qty_per_unit(qty_per_unit, so_packed_item)
+
+
+def get_ordered_qty_per_unit(qty_per_unit, so_packed_item=None):
+	"""``qty_per_unit``, or the order's own ratio if the conversion changed after the order was packed."""
+	# the order's ratio comes from its rounded packed qty, so use it only once the conversion has changed
+	if so_packed_item and so_packed_item.qty_per_unit:
+		ordered_qty = flt(
+			qty_per_unit * flt(so_packed_item.order_stock_qty), frappe.get_precision("Packed Item", "qty")
+		)
+		if ordered_qty != flt(so_packed_item.qty):
+			return so_packed_item.qty_per_unit
+
+	return qty_per_unit
 
 
 def get_order_packed_items(doc) -> dict:
@@ -363,7 +418,7 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	pl_rows = frappe.get_all(
 		"Pick List Item",
 		filters,
-		["item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
+		["name", "item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
 		order_by="qty desc",
 	)
 
@@ -387,22 +442,34 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 	pi_row.warehouse = pl_row.warehouse
 	pi_row.batch_no = pl_row.batch_no
-	pi_row.serial_no = get_packed_serial_nos(pi_row, pl_row)
+	pi_row.serial_no = get_packed_serial_nos(main_item_row, pi_row, pl_row)
 
 
-def get_packed_serial_nos(pi_row, pl_row):
+def get_packed_serial_nos(main_item_row, pi_row, pl_row):
 	"""Serial nos kept on the packed row, topped up from the pick list row, up to the packed qty."""
-	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
+	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	serial_nos = get_serial_nos(pi_row.serial_no)
 	qty = cint(pi_row.qty)
 	if len(serial_nos) < qty and pl_row.serial_no:
+		delivered = (
+			get_delivered_component_serial_nos(main_item_row, pl_row) if pl_row.delivered_qty else set()
+		)
 		kept = {number.lower() for number in serial_nos}
-		pending = get_serial_nos(get_pending_serial_nos(pl_row, get_serial_nos_in_stock([pl_row])))
+		pending = get_serial_nos(get_pending_serial_nos(pl_row, {pl_row.name: delivered}))
 		serial_nos += [number for number in pending if number.lower() not in kept]
 
 	return "\n".join(serial_nos[:qty])
+
+
+def get_delivered_component_serial_nos(main_item_row, pl_row):
+	"""Lower-cased serial nos that submitted deliveries of the pick list took from a component location."""
+	from erpnext.stock.doctype.pick_list.pick_list import get_delivered_bundle_component_qty
+
+	so_detail = main_item_row.get("so_detail")
+	delivered_serial_nos = get_delivered_bundle_component_qty(main_item_row.against_pick_list, {so_detail})[1]
+	return delivered_serial_nos[(so_detail, pl_row.item_code, pl_row.warehouse, pl_row.batch_no or "")]
 
 
 def update_packed_item_price_data(pi_row, item_data, doc):
@@ -473,7 +540,8 @@ def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 	if not rate:
 		parent_items_price[key] = 0.0
 
-	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.stock_qty)
+	# the row's rate is per its own UOM, so divide by its qty, not its stock qty
+	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.qty)
 
 
 def set_product_bundle_rate_amount(doc, parent_items_price):

@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
@@ -20,6 +21,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.utils import get_combine_datetime
 
 ROW_BASED_CHARGE_TYPES = ("On Previous Row Amount", "On Previous Row Total")
 
@@ -129,6 +131,31 @@ class SubcontractingReceipt(SubcontractingController):
 					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
 				),
 			)
+			if not self.is_return:
+				self.set_onload("has_rejected_qty_to_return", self.has_rejected_qty_to_return())
+
+	def has_rejected_qty_to_return(self) -> bool:
+		rejected_rows = {row.name: row for row in self.items if flt(row.rejected_qty)}
+		if not rejected_rows:
+			return False
+
+		item = frappe.qb.DocType("Subcontracting Receipt Item")
+		returned_qty = frappe._dict(
+			frappe.qb.from_(item)
+			.select(item.subcontracting_receipt_item, Sum(item.qty))
+			.where(
+				item.subcontracting_receipt_item.isin(list(rejected_rows))
+				& (item.return_qty_from_rejected_warehouse == 1)
+				& (item.docstatus == 1)
+			)
+			.groupby(item.subcontracting_receipt_item)
+			.run()
+		)
+		# return qty is negative
+		return any(
+			flt(row.rejected_qty + flt(returned_qty.get(name)), row.precision("rejected_qty")) > 0
+			for name, row in rejected_rows.items()
+		)
 
 	def before_validate(self):
 		super().before_validate()
@@ -150,6 +177,7 @@ class SubcontractingReceipt(SubcontractingController):
 		if not self.get("is_return"):
 			self.validate_inspection()
 			self.validate_purchase_orders_share_terms()
+			self.validate_additional_cost_accounts()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be future date"))
@@ -175,6 +203,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_return_supplier_warehouse()
 
 		if self.get("_action") == "submit":
+			self.validate_returned_raw_materials()
 			self.validate_scrap_items()
 			self.validate_accepted_warehouse()
 			self.validate_rejected_warehouse()
@@ -412,6 +441,18 @@ class SubcontractingReceipt(SubcontractingController):
 			self.set_additional_costs()
 			self.calculate_items_qty_and_amount()
 
+	def get_valuation_rate_at_posting(self, item_code, warehouse):
+		return get_valuation_rate(
+			item_code,
+			warehouse,
+			self.doctype,
+			self.name,
+			currency=erpnext.get_company_currency(self.company),
+			company=self.company,
+			posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
+			creation=self.first_sle_creation,
+		)
+
 	def add_scrap_items(self):
 		self.remove_scrap_items()
 
@@ -421,14 +462,7 @@ class SubcontractingReceipt(SubcontractingController):
 				for scrap_item in bom.scrap_items:
 					qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
 					rate = (
-						get_valuation_rate(
-							scrap_item.item_code,
-							self.set_warehouse,
-							self.doctype,
-							self.name,
-							currency=erpnext.get_company_currency(self.company),
-							company=self.company,
-						)
+						self.get_valuation_rate_at_posting(scrap_item.item_code, self.set_warehouse)
 						or scrap_item.rate
 					)
 					self.append(
@@ -600,14 +634,15 @@ class SubcontractingReceipt(SubcontractingController):
 					scrap_cost_map[item.reference_name] = item.amount
 
 		rejected_return_rows = self.get_rejected_return_rows()
-		returned_service_costs = self.get_returned_service_costs()
+		returned_costs = self.get_returned_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.is_scrap_item:
+				returned = returned_costs.get(item.name)
 				# rejected qty is received without service cost
-				if item.name in returned_service_costs:
+				if returned:
 					item.service_cost_per_qty = (
-						0.0 if item.name in rejected_return_rows else returned_service_costs[item.name]
+						0.0 if item.name in rejected_return_rows else returned.service_cost_per_qty
 					)
 
 				if item.qty:
@@ -616,7 +651,10 @@ class SubcontractingReceipt(SubcontractingController):
 						item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 						rm_cost_map.pop(item.name)
 
-					if item.name in scrap_cost_map:
+					# the stock ledger returns the finished good at its receipt rate
+					if returned and item.name not in rejected_return_rows:
+						item.scrap_cost_per_qty = returned.scrap_cost_per_qty
+					elif item.name in scrap_cost_map:
 						item.scrap_cost_per_qty = scrap_cost_map[item.name] / item.qty
 						scrap_cost_map.pop(item.name)
 					else:
@@ -638,26 +676,27 @@ class SubcontractingReceipt(SubcontractingController):
 			self.total_qty = total_qty
 			self.total = total_amount
 
-	def get_returned_service_costs(self) -> dict[str, float]:
-		"""Service cost per qty of the returned receipt row, for each return row."""
+	def get_returned_costs(self) -> dict[str, frappe._dict]:
+		"""Service and scrap cost per qty of the returned receipt row, for each return row."""
 		if not (self.is_return and self.return_against):
 			return {}
 
-		service_costs = dict(
-			frappe.get_all(
+		received_rows = {
+			row.name: row
+			for row in frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
-				fields=["name", "service_cost_per_qty"],
-				as_list=True,
+				fields=["name", "service_cost_per_qty", "scrap_cost_per_qty"],
 			)
-		)
+		}
 		return {
-			item.name: service_costs[item.subcontracting_receipt_item]
+			item.name: received_rows[item.subcontracting_receipt_item]
 			for item in self.items
-			if item.subcontracting_receipt_item in service_costs
+			if item.subcontracting_receipt_item in received_rows
 		}
 
 	def validate_scrap_items(self):
+		fg_rows = {item.name for item in self.items if not item.is_scrap_item}
 		for item in self.items:
 			if item.is_scrap_item:
 				if not item.qty:
@@ -679,6 +718,13 @@ class SubcontractingReceipt(SubcontractingController):
 						),
 					)
 
+				if item.reference_name not in fg_rows:
+					frappe.throw(
+						_(
+							"Row #{0}: The Finished Good row of Scrap Item {1} is not on this receipt. Remove the Scrap Item row."
+						).format(item.idx, frappe.bold(item.item_code)),
+					)
+
 	def validate_accepted_warehouse(self):
 		for item in self.get("items"):
 			if flt(item.qty) and not item.warehouse:
@@ -697,10 +743,12 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def validate_bom_required_qty(self):
-		if (
+		# a return takes back what the receipt consumed, not what the BOM needs
+		if self.is_return or (
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "Material Transferred for Subcontract"
-		) and not (frappe.db.get_single_value("Buying Settings", "validate_consumed_qty")):
+			and not frappe.db.get_single_value("Buying Settings", "validate_consumed_qty")
+		):
 			return
 
 		precision = frappe.get_precision("Subcontracting Receipt Item", "qty")

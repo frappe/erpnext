@@ -37,7 +37,13 @@ class TestTrialBalanceForParty(FrappeTestCase):
 		user = "test_tbp_company_permission@example.com"
 		if not frappe.db.exists("User", user):
 			frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": user,
+					"first_name": "TBP",
+					"roles": [{"role": "Accounts User"}],
+				}
 			).insert()
 		frappe.permissions.add_user_permission("Company", "_Test Company 1", user)
 
@@ -72,7 +78,13 @@ class TestTrialBalanceForParty(FrappeTestCase):
 		user = "test_tbp_account_permission@example.com"
 		if not frappe.db.exists("User", user):
 			frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": user,
+					"first_name": "TBP",
+					"roles": [{"role": "Accounts User"}],
+				}
 			).insert()
 		frappe.permissions.add_user_permission("Account", "Debtors - _TC", user, applicable_for="GL Entry")
 
@@ -95,7 +107,13 @@ class TestTrialBalanceForParty(FrappeTestCase):
 		user = "test_tbp_party_permission@example.com"
 		if not frappe.db.exists("User", user):
 			frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": user,
+					"first_name": "TBP",
+					"roles": [{"role": "Accounts User"}],
+				}
 			).insert()
 		frappe.permissions.add_user_permission("Customer", permitted, user)
 

@@ -291,6 +291,10 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def validate(self):
+		# Only POS consolidation may mark an invoice as consolidated.
+		if not self.flags.is_consolidated:
+			self.is_consolidated = 0
+
 		self.validate_auto_set_posting_time()
 		super().validate()
 
@@ -533,6 +537,8 @@ class SalesInvoice(SellingController):
 				self.make_bundle_using_old_serial_batch_fields(table_name)
 
 			self.validate_standalone_serial_nos_customer()
+			# reservations read the delivered serial and batch nos from the bundles
+			self.make_packed_item_bundles()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
 			self.validate_produced_serial_nos_against_reservation()
@@ -889,7 +895,9 @@ class SalesInvoice(SellingController):
 	@frappe.whitelist()
 	def set_account_for_mode_of_payment(self):
 		for payment in self.payments:
-			payment.account = get_bank_cash_account(payment.mode_of_payment, self.company).get("account")
+			payment.account = get_mode_of_payment_account(payment.mode_of_payment, self.company).get(
+				"account"
+			)
 
 	def validate_time_sheets_are_submitted(self):
 		# Note: This validation is skipped for return invoices
@@ -1097,7 +1105,6 @@ class SalesInvoice(SellingController):
 		if (
 			cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
@@ -1201,7 +1208,7 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		# Consolidation posts payments already accepted on submitted POS invoices.
-		if not self.get("is_consolidated"):
+		if not self.flags.is_consolidated:
 			for payment in self.get("payments") or []:
 				validate_enabled_mode_of_payment(payment.mode_of_payment)
 
@@ -2491,6 +2498,12 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment, company):
+	frappe.has_permission("Company", "select", company, throw=True)
+	frappe.has_permission("Mode of Payment", "select", mode_of_payment, throw=True)
+	return get_mode_of_payment_account(mode_of_payment, company)
+
+
+def get_mode_of_payment_account(mode_of_payment, company):
 	account = frappe.db.get_value(
 		"Mode of Payment Account", {"parent": mode_of_payment, "company": company}, "default_account"
 	)
@@ -2652,6 +2665,16 @@ def validate_inter_company_transaction(doc, doctype):
 	if not party:
 		partytype = "Supplier" if doctype in ["Sales Invoice", "Sales Order"] else "Customer"
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
+
+
+def validate_no_counterpart_sales_invoice(purchase_invoice):
+	"""Purchase Invoice rows link no Sales Invoice rows, so its header link marks it as already invoiced."""
+	if sales_invoice := purchase_invoice.inter_company_invoice_reference:
+		frappe.throw(
+			_(
+				"Cannot create Intercompany Sales Invoice. Purchase Invoice {0} already has Sales Invoice {1}."
+			).format(purchase_invoice.name, get_link_to_form("Sales Invoice", sales_invoice))
+		)
 
 
 @frappe.whitelist()
@@ -2867,6 +2890,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
+	if doctype == "Purchase Invoice":
+		validate_no_counterpart_sales_invoice(source_doc)
+
 	if not doclist.get("items"):
 		if target_doctype in ("Sales Invoice", "Purchase Invoice"):
 			message = _(
@@ -3130,6 +3156,9 @@ def get_loyalty_programs(customer: str):
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):
+	frappe.has_permission("Sales Invoice", doc=source_name, throw=True)
+	frappe.has_permission("Invoice Discounting", ptype="create", throw=True)
+
 	invoice = frappe.get_doc("Sales Invoice", source_name)
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company

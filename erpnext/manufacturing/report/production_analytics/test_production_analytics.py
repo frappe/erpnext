@@ -8,6 +8,8 @@ from frappe.permissions import add_user_permission
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import get_first_day, get_last_day, today
 
+test_dependencies = ["BOM"]
+
 
 class TestProductionAnalytics(FrappeTestCase):
 	def tearDown(self):

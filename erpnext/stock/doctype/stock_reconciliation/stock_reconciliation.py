@@ -11,7 +11,7 @@ from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 
 import erpnext
 from erpnext import _refuse
-from erpnext.accounts.utils import get_company_default
+from erpnext.accounts.utils import _get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -22,6 +22,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.serial_batch_bundle import set_entry_header_values
 from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
 
 
@@ -245,7 +247,9 @@ class StockReconciliation(StockController):
 						}
 					)
 
-				if not item.valuation_rate:
+				# the form fills a zero rate for batch items, so keep zero only when it is allowed
+				keep_zero_rate = item.valuation_rate == 0 and item.allow_zero_valuation_rate
+				if not item.valuation_rate and not keep_zero_rate:
 					item.valuation_rate = item.current_valuation_rate
 				continue
 
@@ -341,13 +345,13 @@ class StockReconciliation(StockController):
 					}
 				)
 
-				serial_and_batch_bundle.db_set(
-					{
-						"creation": creation,
-						"voucher_no": self.name,
-						"voucher_detail_no": voucher_detail_no,
-					}
-				)
+				values = {
+					"creation": creation,
+					"voucher_no": self.name,
+					"voucher_detail_no": voucher_detail_no,
+				}
+				serial_and_batch_bundle.db_set(values)
+				set_entry_header_values(serial_and_batch_bundle.name, values)
 
 	def get_bundle_for_specific_serial_batch(self, row) -> str:
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -698,13 +702,18 @@ class StockReconciliation(StockController):
 				)[1]
 				if not row.valuation_rate:
 					# try if there is a buying price list in default currency
-					buying_rate = frappe.db.get_value(
+					buying_price = frappe.db.get_value(
 						"Item Price",
 						{"item_code": row.item_code, "buying": 1, "currency": default_currency},
-						"price_list_rate",
+						["price_list_rate", "uom"],
+						as_dict=True,
 					)
-					if buying_rate:
-						row.valuation_rate = buying_rate
+					if buying_price and buying_price.price_list_rate:
+						# the price is per its own UOM, the valuation rate per stock UOM
+						conversion_factor = get_conversion_factor(row.item_code, buying_price.uom)
+						row.valuation_rate = (
+							buying_price.price_list_rate / conversion_factor["conversion_factor"]
+						)
 
 					else:
 						# get valuation rate from Item
@@ -1148,8 +1157,8 @@ class StockReconciliation(StockController):
 				flt(d.current_qty) * flt(d.current_valuation_rate), d.precision("current_amount")
 			)
 
-			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
-			d.amount_difference = flt(d.amount) - flt(d.current_amount)
+			d.quantity_difference = flt(flt(d.qty) - flt(d.current_qty), d.precision("qty"))
+			d.amount_difference = flt(flt(d.amount) - flt(d.current_amount), d.precision("amount_difference"))
 
 	def recalculate_difference_amount_from_ledger(self, voucher_detail_no: str | None = None):
 		"""Sync the displayed current qty/rate and difference amount with the (reposted) ledger.
@@ -1195,7 +1204,7 @@ class StockReconciliation(StockController):
 				"current_qty": current_qty,
 				"current_valuation_rate": current_valuation_rate,
 				"current_amount": current_amount,
-				"quantity_difference": flt(row.qty) - current_qty,
+				"quantity_difference": flt(flt(row.qty) - current_qty, row.precision("qty")),
 				"amount_difference": amount_difference,
 			},
 			update_modified=False,
@@ -1656,7 +1665,7 @@ def get_difference_account(purpose, company):
 	_require_reconciliation_permission("Company", company)
 
 	if purpose == "Stock Reconciliation":
-		account = get_company_default(company, "stock_adjustment_account")
+		account = _get_company_default(company, "stock_adjustment_account")
 	else:
 		account = frappe.db.get_value(
 			"Account", {"is_group": 0, "company": company, "account_type": "Temporary"}, "name"

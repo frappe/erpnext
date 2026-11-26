@@ -8,7 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, format_datetime, get_datetime, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -21,6 +21,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.controllers.sales_and_purchase_return import (
 	available_serial_batch_for_return,
 	filter_serial_batches,
+	get_return_reference_field,
 	make_serial_batch_bundle_for_return,
 	remove_picked_serial_batches,
 )
@@ -33,6 +34,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_type_of_transaction,
 )
+from erpnext.stock.serial_batch_bundle import set_bundle_header_values
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
@@ -52,6 +54,26 @@ class BatchExpiredError(frappe.ValidationError):
 	pass
 
 
+STOCK_ITEM_TABLES = ("items", "packed_items", "supplied_items", "stock_items")
+STOCK_WAREHOUSE_FIELDS = (
+	"warehouse",
+	"s_warehouse",
+	"t_warehouse",
+	"rejected_warehouse",
+	"target_warehouse",
+	"from_warehouse",
+)
+PARENT_WAREHOUSE_FIELDS = (
+	"set_warehouse",
+	"set_target_warehouse",
+	"set_from_warehouse",
+	"rejected_warehouse",
+	"supplier_warehouse",
+	"from_warehouse",
+	"to_warehouse",
+)
+
+
 class StockController(AccountsController):
 	def validate(self):
 		super().validate()
@@ -67,10 +89,11 @@ class StockController(AccountsController):
 		self.validate_serialized_batch()
 		self.clean_serial_nos()
 		self.validate_customer_provided_item()
+		# before the stock UOM rate, which divides by the factor
+		self.reset_conversion_factor()
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
-		self.reset_conversion_factor()
 
 	def validate_warehouse_of_sabb(self):
 		is_internal_transfer = self.is_internal_transfer()
@@ -181,6 +204,16 @@ class StockController(AccountsController):
 						frappe.bold(data.serial_and_batch_bundle), data.voucher_type, data.voucher_no
 					)
 				)
+
+	@property
+	def first_sle_creation(self):
+		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
+			"creation",
+			order_by="creation asc",
+		)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False, via_landed_cost_voucher=False):
 		if self.docstatus == 2:
@@ -451,6 +484,10 @@ class StockController(AccountsController):
 		bundle_details["ignore_serial_nos"] = list(picked_serial_nos[item_code])
 		bundle_details["already_picked_batches"] = picked_batches
 		sn_doc = self.create_serial_batch_bundle(bundle_details, row)
+		if row.doctype == "Packed Item":
+			from erpnext.stock.doctype.packed_item.packed_item import set_incoming_rate_from_bundle
+
+			set_incoming_rate_from_bundle(row, sn_doc)
 		entries = sn_doc.get("entries") or []
 		picked_serial_nos[item_code].extend(d.serial_no for d in entries if d.serial_no)
 		# a row's own batch no is already counted in picked_batches
@@ -1051,17 +1088,13 @@ class StockController(AccountsController):
 
 				if row.get("serial_and_batch_bundle"):
 					update_values["serial_and_batch_bundle"] = None
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
-					)
+					set_bundle_header_values(row.serial_and_batch_bundle, {"is_cancelled": 1})
 
 				if update_values:
 					row.db_set(update_values)
 
 				if table_name == "items" and row.get("rejected_serial_and_batch_bundle"):
-					frappe.db.set_value(
-						"Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, {"is_cancelled": 1}
-					)
+					set_bundle_header_values(row.rejected_serial_and_batch_bundle, {"is_cancelled": 1})
 
 					row.db_set("rejected_serial_and_batch_bundle", None)
 
@@ -1108,6 +1141,124 @@ class StockController(AccountsController):
 			include_bundle=include_bundle,
 			exclude_serial_nos=exclude_serial_nos,
 		)
+
+	def get_return_stock_qty(self, row, qty, warehouse) -> float:
+		"""Stock qty a return row moves, signed as its qty: no more than its original row moved in the
+		warehouse, less the row's other returns, and all that is left once it returns the rest of the
+		row's qty."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		if self.docstatus == 2:
+			return self.get_posted_return_qty(row, warehouse)
+
+		left = self.get_row_left_to_return(row, warehouse)
+		if left is None:
+			return get_stock_qty(row, qty)
+
+		return self.take_from_row_left_to_return(left, row, qty)
+
+	def take_from_row_left_to_return(self, left, row, qty) -> float:
+		"""Stock qty a return row takes from what is left of its original row, signed as its qty, taken off
+		what is left: no more than is left, and all of it once the row returns the rest of the qty."""
+		from erpnext.controllers.buying_controller import get_stock_qty
+
+		precision = row.precision("stock_qty")
+		left.unrounded_stock_qty += flt(qty) * flt(row.conversion_factor)
+		if flt(left.unrounded_stock_qty, precision) <= 0:
+			taken = -left.stock_qty
+		else:
+			taken = max(get_stock_qty(row, qty), -left.stock_qty)
+
+		left.stock_qty = flt(left.stock_qty + taken, precision)
+		return taken
+
+	def get_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
+		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
+		returns and the earlier rows of this return have not moved back, or None if it moved no stock
+		there. A delivery counts every warehouse its rows used, as a return can put its stock back in
+		another one."""
+		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row
+
+		reference_field = get_return_reference_field(self.doctype)
+		original_row = row.get(reference_field)
+		if not original_row:
+			return None
+
+		item = frappe.qb.DocType(row.doctype)
+		fields = [item.name, item.qty, item.conversion_factor, item.warehouse]
+		if frappe.get_meta(row.doctype).has_field("rejected_warehouse"):
+			fields += [item.rejected_qty, item.rejected_warehouse]
+
+		query = (
+			frappe.qb.from_(item)
+			.select(*fields)
+			.where(
+				(item.docstatus == 1)
+				& (
+					(item.name == original_row)
+					| ((item[reference_field] == original_row) & (item.parent != self.name))
+				)
+			)
+		)
+		if self.meta.has_field("update_stock"):
+			parent = frappe.qb.DocType(self.doctype)
+			query = query.inner_join(parent).on(parent.name == item.parent).select(parent.update_stock)
+
+		rows = query.run(as_dict=True)
+		earlier_rows = [d for d in self.items if d.get(reference_field) == original_row and d.idx < row.idx]
+		warehouses = (
+			[warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows + earlier_rows})
+		)
+		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouses)
+		if original_row not in posted_qty:
+			return None
+
+		left = frappe._dict(
+			unrounded_stock_qty=0.0, stock_qty=sum(posted_qty.values()) * self.get_stock_qty_sign()
+		)
+		for d in rows:
+			if not d.get("update_stock", 1):
+				continue  # a return without Update Stock moves no stock
+			if d.warehouse in warehouses:
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
+			if d.get("rejected_warehouse") in warehouses:
+				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
+
+		left.stock_qty = max(flt(left.stock_qty, row.precision("stock_qty")), 0)
+
+		# the earlier rows of this return post their entries first
+		for d in earlier_rows:
+			if d.warehouse not in warehouses:
+				continue
+			if self.posts_stock_ledger_entry(d.item_code, d.stock_qty):
+				self.take_from_row_left_to_return(left, d, d.qty)
+			else:  # takes nothing, and counts like a return that took nothing
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
+
+		return left
+
+	def get_posted_return_qty(self, row, warehouse):
+		"""Qty the return row's entry moved in the warehouse, signed as its qty."""
+		sign = self.get_stock_qty_sign()
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_detail_no": row.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"actual_qty": ("<", 0) if sign > 0 else (">", 0),
+			},
+			"actual_qty",
+		)
+		return flt(actual_qty) * sign
+
+	def posts_stock_ledger_entry(self, item_code, stock_qty) -> bool:
+		"""Whether a row of a stock item posts its stock ledger entries."""
+		return True
+
+	def get_stock_qty_sign(self) -> int:
+		"""1 where a row's stock qty goes into the warehouse, as on a receipt, -1 where it goes out."""
+		return 1 if self.is_stock_receipt() else -1
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
@@ -1428,6 +1579,7 @@ class StockController(AccountsController):
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
+				self.validate_internal_transfer_posting_datetime()
 
 				if self.get("is_internal_supplier") and self.docstatus == 1 and not self.get("is_return"):
 					self.validate_internal_transfer_qty()
@@ -1443,6 +1595,10 @@ class StockController(AccountsController):
 				row.from_warehouse = None
 
 	def validate_in_transit_warehouses(self):
+		# a draft saved with ignore_mandatory (e.g. mapped from a Pick List) gets its warehouses before submit
+		if self.docstatus == 0 and self.flags.ignore_mandatory:
+			return
+
 		if (self.doctype == "Sales Invoice" and self.get("update_stock")) or self.doctype == "Delivery Note":
 			for item in self.get("items"):
 				if not item.target_warehouse:
@@ -1466,6 +1622,40 @@ class StockController(AccountsController):
 	def validate_packed_items(self):
 		if self.doctype == "Sales Invoice" and self.get("packed_items"):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
+
+	def validate_internal_transfer_posting_datetime(self):
+		"""The receipt takes the cost of the delivery, so it cannot be posted before the delivery."""
+		from erpnext.stock.utils import get_combine_datetime
+
+		if self.get("is_return") or not self.is_stock_receipt():
+			return
+
+		source_doctype, reference_field = {
+			"Purchase Receipt": ("Delivery Note", "inter_company_reference"),
+			"Purchase Invoice": ("Sales Invoice", "inter_company_invoice_reference"),
+		}[self.doctype]
+		source_name = self.get(reference_field)
+		if not source_name:
+			return
+
+		source_datetime = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": source_doctype, "voucher_no": source_name, "is_cancelled": 0},
+			"posting_datetime",
+		)
+		posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		if not source_datetime or posting_datetime >= get_datetime(source_datetime):
+			return
+
+		frappe.throw(
+			_("Posting Date and Time {0} cannot be before {1}, when {2} {3} sent this material.").format(
+				bold(format_datetime(posting_datetime)),
+				bold(format_datetime(source_datetime)),
+				source_doctype,
+				get_link_to_form(source_doctype, source_name),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
 
 	def validate_internal_transfer_qty(self):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
@@ -1661,6 +1851,34 @@ class StockController(AccountsController):
 		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
+	def run_before_save_methods(self):
+		from erpnext.stock.utils import lock_bins
+
+		if self._action in ("submit", "cancel") and self.has_stock_update:
+			lock_bins(self.get_item_warehouses())
+
+		super().run_before_save_methods()
+
+	@property
+	def has_stock_update(self):
+		if self.doctype == "POS Invoice":
+			return False
+
+		return not self.meta.has_field("update_stock") or bool(self.update_stock)
+
+	def get_item_warehouses(self):
+		parent_warehouses = {self.get(fieldname) for fieldname in PARENT_WAREHOUSE_FIELDS}
+		item_warehouses = set()
+		for table_name in STOCK_ITEM_TABLES:
+			for row in self.get(table_name) or []:
+				item_code = row.get("rm_item_code") or row.get("item_code")
+				warehouses = parent_warehouses | {row.get(fieldname) for fieldname in STOCK_WAREHOUSE_FIELDS}
+				item_warehouses.update(
+					(item_code, warehouse) for warehouse in warehouses if item_code and warehouse
+				)
+
+		return item_warehouses
+
 	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		args = frappe._dict(
 			{
@@ -1670,6 +1888,7 @@ class StockController(AccountsController):
 				"voucher_no": self.name,
 				"company": self.company,
 				"via_landed_cost_voucher": via_landed_cost_voucher,
+				"skip_unchanged_entries": 1,
 			}
 		)
 
@@ -1690,6 +1909,7 @@ class StockController(AccountsController):
 					voucher_type=self.doctype,
 					voucher_no=self.name,
 					via_landed_cost_voucher=via_landed_cost_voucher,
+					skip_unchanged_entries=True,
 				)
 			else:
 				create_repost_item_valuation_entry(args)
@@ -2068,15 +2288,21 @@ def future_sle_exists(args, sl_entries=None, for_update=False):
 
 	or_conditions = get_conditions_to_validate_future_sle(sl_entries)
 
-	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
+	posting_datetime = get_combine_datetime(args["posting_date"], args["posting_time"])
+	args["posting_datetime"] = posting_datetime
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
+	# same-time entries sort by creation, so only those created after this voucher's come later
+	is_later = sle.posting_datetime > posting_datetime
+	if creation := get_voucher_sle_creation(args):
+		is_later |= (sle.posting_datetime == posting_datetime) & (sle.creation > creation)
+
 	query = (
 		frappe.qb.from_(sle)
 		.select(sle.item_code, sle.warehouse, Count(sle.name).as_("total_row"))
 		.where(
 			Criterion.any(or_conditions)
-			& (sle.posting_datetime >= args["posting_datetime"])
+			& is_later
 			& (sle.voucher_no != args["voucher_no"])
 			& (sle.is_cancelled == 0)
 		)
@@ -2128,6 +2354,16 @@ def get_cached_data(args, key):
 		return frappe.local.future_sle[key]
 
 
+def get_voucher_sle_creation(args):
+	"""Creation of the voucher's first SLE, cancelled ones included."""
+	return frappe.db.get_value(
+		"Stock Ledger Entry",
+		{"voucher_type": args.voucher_type, "voucher_no": args.voucher_no},
+		"creation",
+		order_by="creation asc",
+	)
+
+
 def get_sle_entries_against_voucher(args):
 	return frappe.get_all(
 		"Stock Ledger Entry",
@@ -2170,12 +2406,17 @@ def create_repost_item_valuation_entry(args):
 	repost_entry.flags.ignore_links = True
 	repost_entry.flags.ignore_permissions = True
 	repost_entry.via_landed_cost_voucher = args.via_landed_cost_voucher
+	repost_entry.skip_unchanged_entries = args.skip_unchanged_entries
 	repost_entry.save()
 	repost_entry.submit()
 
 
 def create_item_wise_repost_entries(
-	voucher_type, voucher_no, allow_zero_rate=False, via_landed_cost_voucher=False
+	voucher_type,
+	voucher_no,
+	allow_zero_rate=False,
+	via_landed_cost_voucher=False,
+	skip_unchanged_entries=False,
 ):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
@@ -2201,6 +2442,7 @@ def create_item_wise_repost_entries(
 		repost_entry.flags.ignore_links = True
 		repost_entry.flags.ignore_permissions = True
 		repost_entry.via_landed_cost_voucher = via_landed_cost_voucher
+		repost_entry.skip_unchanged_entries = skip_unchanged_entries
 		repost_entry.submit()
 		repost_entries.append(repost_entry)
 
@@ -2253,6 +2495,7 @@ def make_bundle_for_material_transfer(**kwargs):
 
 		row.warehouse = kwargs.warehouse
 
+	bundle_doc.set_child_details()
 	bundle_doc.set_incoming_rate()
 	bundle_doc.calculate_qty_and_amount()
 	bundle_doc.flags.ignore_permissions = True

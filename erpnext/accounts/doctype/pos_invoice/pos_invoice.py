@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import set_bundle_header_values
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 from erpnext.stock.utils import get_bin_qty_map
 
@@ -254,6 +255,9 @@ class POSInvoice(SalesInvoice):
 		self.make_bundle_for_sales_purchase_return()
 		for table_name in ["items", "packed_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.make_packed_item_bundles()
+		for table_name in ["items", "packed_items"]:
 			self.submit_serial_batch_bundle(table_name)
 
 		if self.coupon_code:
@@ -340,10 +344,8 @@ class POSInvoice(SalesInvoice):
 		for row in self.items:
 			if row.serial_and_batch_bundle:
 				if not self.consolidated_invoice:
-					frappe.db.set_value(
-						"Serial and Batch Bundle",
-						row.serial_and_batch_bundle,
-						{"is_cancelled": 1, "voucher_no": ""},
+					set_bundle_header_values(
+						row.serial_and_batch_bundle, {"is_cancelled": 1, "voucher_no": ""}
 					)
 
 				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
@@ -874,11 +876,20 @@ def get_stock_availability(item_code, warehouse):
 	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
 	frappe.has_permission("POS Profile", ptype, throw=True)
 
-	# the caller picks the warehouse when allow_warehouse_change is set; costs nobody who has no
-	# Warehouse User Permission
+	# and keep a company-restricted caller inside their own companies, which costs nobody who has
+	# no Company User Permission
 	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 
-	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+	user_permissions = get_user_permissions(frappe.session.user)
+	allowed_companies = get_allowed_docs_for_doctype(user_permissions.get("Company", []), "POS Profile")
+	if allowed_companies:
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+	# the caller picks the warehouse when allow_warehouse_change is set, and the company check above
+	# does not narrow within a company; costs nobody who has no Warehouse User Permission
+	if warehouse_permissions := user_permissions.get("Warehouse"):
 		allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "POS Invoice")
 		if allowed_warehouses and warehouse not in allowed_warehouses:
 			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
@@ -1097,17 +1108,27 @@ def add_return_modes(doc, pos_profile):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
-	if pos_profile := filters.get("pos_profile")[1]:
-		pos_profile = frappe.get_cached_doc("POS Profile", pos_profile)
+	if pos_profile := get_permitted_pos_profile(filters.pop("pos_profile", None)):
 		if item_groups := get_item_group(pos_profile):
 			filters["item_group"] = ["in", tuple(item_groups)]
 
-		del filters["pos_profile"]
-
-	else:
-		filters.pop("pos_profile", None)
-
 	return _item_query(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+
+def get_permitted_pos_profile(condition):
+	if not condition or not condition[1]:
+		return
+
+	pos_profile = condition[1]
+	# doctype check first, so an unentitled caller can't tell missing names from existing ones
+	if not (
+		isinstance(pos_profile, str)
+		and frappe.has_permission("POS Profile", "select")
+		and frappe.has_permission("POS Profile", "select", doc=pos_profile)
+	):
+		_refuse()
+
+	return frappe.get_cached_doc("POS Profile", pos_profile)
 
 
 def get_item_group(pos_profile):
