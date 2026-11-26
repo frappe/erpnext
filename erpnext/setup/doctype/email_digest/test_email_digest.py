@@ -600,6 +600,19 @@ class TestEmailDigest(ERPNextTestSuite):
 		# within the High tier, a NULL date must sort before a real date (MariaDB NULLs-first)
 		self.assertLess(order.index(high_nulldate), order.index(high_dated))
 
+	def test_digest_is_sent_to_user_email(self):
+		from unittest.mock import patch
+
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Projects User"], generated_id=True) as user:
+			digest = create_email_digest(recipients=[user.name])
+			messages = []
+			with patch("frappe.sendmail", side_effect=lambda **kwargs: messages.append(kwargs["recipients"])):
+				digest.send()
+
+		self.assertEqual(messages, [user.email])
+
 
 def make_digest_test_user(email, system_user=False):
 	user = frappe.get_doc(

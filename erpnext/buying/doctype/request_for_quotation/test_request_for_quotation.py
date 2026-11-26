@@ -577,6 +577,40 @@ class TestRequestforQuotation(ERPNextTestSuite):
 
 		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
 
+	def test_supplier_contact_reuses_user_found_by_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Supplier"], generated_id=True) as user:
+			rfq = make_request_for_quotation(
+				supplier_data=[
+					{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier", "email_id": user.email}
+				],
+				do_not_submit=True,
+			)
+			update_password_link, contact = rfq.update_supplier_contact(rfq.suppliers[0], rfq.get_link())
+
+			self.assertFalse(update_password_link)
+			self.assertEqual(
+				frappe.db.get_value("Contact", contact, ["email_id", "user"]), (user.email, user.name)
+			)
+
+	def test_supplier_email_is_sent_from_the_session_users_email(self):
+		from unittest.mock import patch
+
+		from frappe.core.doctype.user.test_user import test_user
+
+		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import RequestforQuotation
+
+		rfq = make_request_for_quotation(do_not_submit=True)
+		with (
+			patch.object(RequestforQuotation, "send_email") as send_email,
+			test_user(roles=["Purchase Manager"], generated_id=True) as user,
+			self.set_user(user.name),
+		):
+			rfq.supplier_rfq_mail(rfq.suppliers[0], "", rfq.get_link())
+
+			self.assertEqual(send_email.call_args.args[1], user.email)
+
 
 def make_request_for_quotation(**args):
 	"""

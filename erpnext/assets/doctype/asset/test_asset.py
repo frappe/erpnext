@@ -2,6 +2,7 @@
 # See license.txt
 
 from itertools import product
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import (
@@ -26,6 +27,7 @@ from erpnext.assets.doctype.asset.asset import (
 	update_maintenance_status,
 )
 from erpnext.assets.doctype.asset.depreciation import (
+	notify_depr_entry_posting_error,
 	post_depreciation_entries,
 	restore_asset,
 	scrap_asset,
@@ -2572,6 +2574,22 @@ class TestDepreciationBasics(AssetSetup):
 		# Verify original asset was updated
 		target_asset.reload()
 		self.assertEqual(target_asset.asset_quantity, 1)  # Remaining quantity
+
+	def test_depreciation_failure_email_is_sent_to_user_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with (
+			self.change_settings(
+				"Accounts Settings", {"role_to_notify_on_depreciation_failure": "Accounts Manager"}
+			),
+			test_user(roles=["Accounts Manager"], generated_id=True) as user,
+			patch("frappe.sendmail") as sendmail,
+		):
+			notify_depr_entry_posting_error([], [])
+
+		recipients = sendmail.call_args.kwargs["recipients"]
+		self.assertIn(user.email, recipients)
+		self.assertNotIn(user.name, recipients)
 
 
 def get_gl_entries(doctype, docname):

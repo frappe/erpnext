@@ -16,9 +16,11 @@ from frappe.utils import (
 	fmt_money,
 	format_time,
 	formatdate,
+	get_email_address,
 	get_link_to_report,
 	get_url_to_form,
 	get_url_to_list,
+	get_user_display_id,
 	now_datetime,
 	today,
 )
@@ -88,7 +90,9 @@ class EmailDigest(Document):
 		for row in self.recipients:
 			if row.recipient not in valid_users:
 				frappe.throw(
-					_("Row {0}: Recipient {1} must be an enabled System User.").format(row.idx, row.recipient)
+					_("Row {0}: Recipient {1} must be an enabled System User.").format(
+						row.idx, get_user_display_id(row.recipient)
+					)
 				)
 
 	def get_eligible_recipients(self):
@@ -119,7 +123,9 @@ class EmailDigest(Document):
 				frappe.db.rollback(save_point="email_digest_recipient")
 				if not continue_on_error:
 					raise
-				frappe.log_error(title=f"Email Digest {self.name} failed for {row.recipient}")
+				frappe.log_error(
+					title=f"Email Digest {self.name} failed for {get_user_display_id(row.recipient)}"
+				)
 
 	def send_to_recipient(self, recipient):
 		original_session = frappe._dict(frappe.session)
@@ -137,7 +143,7 @@ class EmailDigest(Document):
 			frappe.local.form_dict = original_form
 		if message:
 			frappe.sendmail(
-				recipients=recipient,
+				recipients=get_email_address(recipient),
 				subject=_("{0} Digest").format(_(self.frequency)),
 				message=message,
 				reference_doctype=self.doctype,
