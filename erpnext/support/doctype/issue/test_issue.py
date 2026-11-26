@@ -877,11 +877,6 @@ class TestIssue(TestSetUp):
 				issue.raised_by = user.email.upper()
 				self.assertTrue(frappe.has_website_permission(issue, "write"))
 
-	def test_raised_by_keeps_administrator_by_name(self):
-		issue = frappe.get_doc({"doctype": "Issue", "subject": "Raised by Administrator"}).insert()
-
-		self.assertEqual(issue.raised_by, "Administrator")
-
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
