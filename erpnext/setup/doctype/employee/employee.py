@@ -13,7 +13,6 @@ from frappe.query_builder import Criterion
 from frappe.utils import (
 	cint,
 	cstr,
-	get_email_address,
 	get_link_to_form,
 	get_user_by_email,
 	get_user_display_id,
@@ -24,6 +23,7 @@ from frappe.utils import (
 from frappe.utils.nestedset import NestedSet
 
 import erpnext
+from erpnext.utilities import get_email_to_store
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -379,7 +379,7 @@ class Employee(NestedSet):
 		preferred_email_field = frappe.scrub(self.prefered_contact_email)
 		self.prefered_email = self.get(preferred_email_field) if preferred_email_field else None
 		if preferred_email_field == "user_id" and self.prefered_email:
-			self.prefered_email = get_email_address(self.prefered_email)
+			self.prefered_email = get_email_to_store(self.prefered_email)
 
 	def validate_status(self):
 		if self.status != "Active" and self.has_value_changed("status"):
@@ -616,7 +616,7 @@ def has_employee_user_permission(user):
 def get_employee_email(employee_doc):
 	user = employee_doc.get("user_id")
 	return (
-		(user and get_email_address(user))
+		(user and get_email_to_store(user))
 		or employee_doc.get("personal_email")
 		or employee_doc.get("company_email")
 	)
@@ -771,7 +771,7 @@ def get_all_employee_emails(company):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = (user and get_email_address(user)) or company_email or personal_email
+		email = (user and get_email_to_store(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails
@@ -786,7 +786,7 @@ def get_employee_emails(employee_list):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = (user and get_email_address(user)) or company_email or personal_email
+		email = (user and get_email_to_store(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails
@@ -889,7 +889,7 @@ def _get_contact_details(employee: str) -> dict:
 		contact_data.get("prefered_email")
 		or contact_data.get("company_email")
 		or contact_data.get("personal_email")
-		or (contact_data.user_id and get_email_address(contact_data.user_id))
+		or (contact_data.user_id and get_email_to_store(contact_data.user_id))
 	)
 
 	return {
