@@ -61,14 +61,10 @@ async function logout(): Promise<void> {
 	}
 }
 
-/**
- * The account menu behind the sidebar's account block, which shows the supplier. "My account"
- * joins it in useNotifications.
- */
+/** The sidebar account menu; useNotifications adds "My account". */
 const userMenuOptions = computed(() => [
 	{
-		// `group`, not `label` — a group keyed on `label` is read as a plain action row
-		// and its `options` are dropped (frappe-ui MenuGroupOption)
+		// `group`, not `label`: frappe-ui drops the options of a `label` group
 		group: "account",
 		hideLabel: true,
 		options: [{ label: __("Log out"), icon: "lucide-log-out", onClick: logout }],

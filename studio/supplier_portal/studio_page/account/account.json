@@ -210,7 +210,6 @@
                  "componentId": "FormControl-45b581fb49",
                  "componentName": "FormControl",
                  "componentProps": {
-                  "description": "{{ __('Your login. Ask the buyer to change it.') }}",
                   "disabled": true,
                   "label": "{{ __('Email') }}",
                   "modelValue": {

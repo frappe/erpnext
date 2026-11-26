@@ -15,15 +15,13 @@ export default function setup(context) {
 	const loaded = computed(() => Boolean(account.value))
 	const loadFailed = computed(() => Boolean(context.account?.error) && !loaded.value)
 
-	// ---------------------------------------------------------------- profile
-	// the controls bind to these by name, so each needs its own ref
 	const firstName = ref("")
 	const lastName = ref("")
 	const phone = ref("")
 	const mobile = ref("")
 	const email = computed(() => account.value?.email ?? "")
 
-	/** What was last saved: the form starts from it, and Save is offered only when something differs. */
+	/** Last saved values; Save is enabled only when the form differs. */
 	const saved = ref({ first_name: "", last_name: "", phone: "", mobile_no: "" })
 	function fill(values: any) {
 		saved.value = {
@@ -37,7 +35,7 @@ export default function setup(context) {
 		phone.value = saved.value.phone
 		mobile.value = saved.value.mobile_no
 	}
-	// the first answer fills the form; a later reload must not overwrite what is being typed
+	// fill once, so a reload does not overwrite what is being typed
 	let filled = false
 	watch(
 		account,
@@ -73,7 +71,6 @@ export default function setup(context) {
 		}
 	}
 
-	// ---------------------------------------------------------------- password
 	const currentPassword = ref("")
 	const newPassword = ref("")
 	const confirmPassword = ref("")
@@ -81,7 +78,6 @@ export default function setup(context) {
 	const changingPassword = ref(false)
 	const passwordError = ref("")
 
-	/** Said under the fields as soon as it applies, rather than after a round trip. */
 	const passwordHint = computed(() => {
 		if (confirmPassword.value && newPassword.value !== confirmPassword.value) return __("The new passwords do not match.")
 		return ""
@@ -103,14 +99,12 @@ export default function setup(context) {
 			currentPassword.value = newPassword.value = confirmPassword.value = ""
 			toast.success(__("Your password is changed."))
 		} catch (error: any) {
-			// the site's password policy explains itself; a wrong current password says so
 			passwordError.value = readableError(error)
 		} finally {
 			changingPassword.value = false
 		}
 	}
 
-	// ---------------------------------------------------------------- sidebar
 	const { companyName, companyLogo } = usePortalIdentity(() => "")
 	const { user } = useSession()
 

@@ -1,18 +1,16 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-"""The signed-in portal user's own account: their name and phone numbers, and their password.
-Every endpoint acts on the session user only, and reads or writes only the fields below."""
+"""The signed-in portal user's own name, phone numbers and password."""
 
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, validate_phone_number
 
-# what the account page shows and may change; never roles, email, user type or anything else on User
+# the only User fields a portal user may change
 EDITABLE_FIELDS = ("first_name", "last_name", "phone", "mobile_no")
 
-# a User's name fields are Data fields
 NAME_LENGTH = 140
 
 
@@ -48,7 +46,6 @@ def update_account(
 
 	doc = frappe.get_doc("User", user)
 	doc.update(values)
-	# a user may change their own name and phone in Desk too; this saves only the fields above
 	doc.save(ignore_permissions=True)
 	return get_account()
 
@@ -56,9 +53,7 @@ def update_account(
 @frappe.whitelist(methods=["POST"])
 @rate_limit(limit=10, seconds=60 * 60, user_based=True, ip_based=False)
 def change_password(old_password: str, new_password: str, logout_other_sessions: int = 0) -> None:
-	"""Change the signed-in user's password. Frappe's own update checks the current password as a
-	login does (failed attempts count), enforces the site's password policy, refuses the current
-	password, and can sign the user out everywhere else."""
+	"""Change the signed-in user's password; Frappe checks the current one and the password policy."""
 	from frappe.core.doctype.user.user import update_password
 
 	_signed_in_user()

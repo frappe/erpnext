@@ -86,7 +86,6 @@ export function usePortalNotifications(context?: any) {
 	return {
 		...useSidebar(),
 		logout,
-		// the account page is a portal page, so it is reached through this page's router
 		userMenuOptions: computed(() =>
 			userMenuOptions.value.map((group: any) => ({
 				...group,
