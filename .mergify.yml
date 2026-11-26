@@ -26,23 +26,9 @@ commands_restrictions:
 pull_request_rules:
   - name: Auto-close PRs on stable branch
     conditions:
-      - and:
-          - and:
-              - author!=surajshetty3416
-              - author!=gavindsouza
-              - author!=rohitwaghchaure
-              - author!=nabinhait
-              - author!=ankush
-              - author!=deepeshgarg007
-              - author!=frappe-pr-bot
-              - author!=frappe-release-bot[bot]
-              - author!=mergify[bot]
-          - or:
-              - base=version-13
-              - base=version-12
-              - base=version-14
-              - base=version-15
-              - base=version-16
+      - author!=frappe-release-bot[bot]
+      - author!=mergify[bot]
+      - base~=^version-\d+$
     actions:
       close:
       comment:
