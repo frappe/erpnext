@@ -9,15 +9,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-<<<<<<< HEAD
 from frappe.query_builder.functions import CurDate, Sum
-from frappe.utils import cint, flt, get_link_to_form, today
-from frappe.utils.data import DateTimeLikeObject, add_days
-
-import erpnext
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
-=======
-from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime, today
+from frappe.utils import cint, flt, get_link_to_form, nowtime, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 import erpnext
@@ -25,8 +18,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_batch_qty_for_stock,
 )
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
->>>>>>> c24efc0 (chore(stock): import batch bundle helpers at module level)
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
@@ -432,7 +423,6 @@ def make_batch_bundle(
 	)
 
 
-<<<<<<< HEAD
 def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -474,7 +464,8 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 		query = query.where(batch.name == batches[0].batch_no)
 
 	return query.run(as_dict=True)
-=======
+
+
 def make_split_serial_bundle(item_code, warehouse, company, from_bundle_id, batch_no):
 	from erpnext.stock.serial_batch_bundle import get_serial_nos
 
@@ -494,7 +485,6 @@ def make_split_serial_bundle(item_code, warehouse, company, from_bundle_id, batc
 		}
 	)
 	return bundle.save().name
->>>>>>> 4e83929 (fix(stock): keep serial nos when splitting a serial and batch item)
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):
