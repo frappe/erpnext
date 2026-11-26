@@ -73,16 +73,21 @@ class TestAccountingDimensionFilter(ERPNextTestSuite):
 
 	def test_message_names_dimension_whose_field_is_missing(self):
 		# a filter outlives its deleted dimension: no field on GL Entry, the fieldname is all that is left
-		frappe.get_doc(
+		doc = frappe.get_doc(
 			{
 				"doctype": "Accounting Dimension Filter",
-				"accounting_dimension": "Test Removed Dimension",
+				"accounting_dimension": "Branch",
 				"allow_or_restrict": "Restrict",
 				"apply_restriction_on_values": 0,
 				"company": "_Test Company",
 				"accounts": [{"applicable_on_account": "Sales - _TC", "is_mandatory": 1}],
 			}
 		).insert()
+		frappe.db.set_value(
+			"Accounting Dimension Filter",
+			doc.name,
+			{"accounting_dimension": "Test Removed Dimension", "fieldname": "test_removed_dimension"},
+		)
 
 		si = create_sales_invoice(do_not_save=1)
 		si.department = "Accounts - _TC"
