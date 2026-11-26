@@ -10,8 +10,7 @@ frappe.ui.form.on("Sales Invoice", {
 					callback: function (r) {
 						frm.reload_doc();
 						if (r.message) {
-							open_url_post(frappe.request.url, {
-								cmd: "frappe.core.doctype.file.file.download_file",
+							open_url_post("/api/method/frappe.core.doctype.file.file.download_file", {
 								file_url: r.message,
 							});
 						}
