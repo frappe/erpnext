@@ -258,7 +258,6 @@ def reported_advances(customer, company, report_date):
 			"report_date": report_date,
 			"party_type": "Customer",
 			"party": [customer],
-			"customer": customer,
 			"ageing_based_on": "Due Date",
 			"age_as_on": "Report Date",
 			"range": "30, 60, 90",
