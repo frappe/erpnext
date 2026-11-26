@@ -18,6 +18,7 @@ from pypika import Order
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
+from erpnext.stock.doctype.item.item import get_allowed_uoms
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 
@@ -1139,23 +1140,14 @@ def check_linked_filter_permissions(doctype: str, filters: dict) -> None:
 def get_item_uom_query(doctype, txt, searchfield, start, page_len, filters):
 	if frappe.db.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
 		item_code = filters.get("item_code")
-		if not item_code or not frappe.get_list("Item", filters=[["name", "=", item_code]], pluck="name"):
+		items = item_code and frappe.get_list(
+			"Item", filters=[["name", "=", item_code]], fields=["name", "stock_uom", "variant_of"]
+		)
+		if not items:
 			return []
 
-		query_filters = {"parent": item_code, "parenttype": "Item"}
-
-		if txt:
-			query_filters["uom"] = ["like", f"%{txt}%"]
-
-		return frappe.get_all(
-			"UOM Conversion Detail",
-			filters=query_filters,
-			fields=["uom", "conversion_factor"],
-			limit_start=start,
-			limit_page_length=page_len,
-			order_by="idx",
-			as_list=1,
-		)
+		uoms = get_allowed_uoms(items)[items[0].name].items()
+		return [[uom, factor] for uom, factor in uoms if txt.lower() in uom.lower()][start : start + page_len]
 
 	return frappe.get_list(
 		"UOM",

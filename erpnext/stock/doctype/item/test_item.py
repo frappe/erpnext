@@ -1169,6 +1169,32 @@ class TestItem(FrappeTestCase):
 			uoms=[{"uom": disabled_uom.name, "conversion_factor": 2}],
 		)
 
+	def test_default_uoms_need_conversion_when_uoms_are_restricted(self):
+		with change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
+			self.assertRaises(frappe.ValidationError, make_item, properties={"sales_uom": "Box"})
+			self.assertRaises(frappe.ValidationError, make_item, properties={"purchase_uom": "Box"})
+			make_item(
+				properties={"sales_uom": "Box", "purchase_uom": "Box"},
+				uoms=[{"uom": "Box", "conversion_factor": 12}],
+			)
+
+		with change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 0}):
+			make_item(properties={"sales_uom": "Box", "purchase_uom": "Box"})
+
+	def test_variant_default_uom_can_use_template_conversion(self):
+		template = make_item(
+			properties={"has_variants": 1, "attributes": [{"attribute": "Test Size"}]},
+			uoms=[{"uom": "Box", "conversion_factor": 12}],
+		)
+		variant = create_variant(template.name, {"Test Size": "Small"})
+		variant.uoms = []
+		variant.sales_uom = "Box"
+
+		with change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
+			variant.insert()
+
+		self.assertNotIn("Box", [row.uom for row in variant.uoms])
+
 	def test_uom_conv_intermediate(self):
 		factor = get_uom_conv_factor("Pound", "Gram")
 		self.assertAlmostEqual(factor, 453.592, 3)
