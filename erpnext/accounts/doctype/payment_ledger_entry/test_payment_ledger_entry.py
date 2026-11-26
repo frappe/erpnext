@@ -546,3 +546,17 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 				{"voucher_type": si.doctype, "voucher_no": si.name, "delinked": 1},
 			)
 		)
+
+	def test_cancel_delinks_entry_without_party(self):
+		je = self.create_journal_entry(self.expense_account, self.creditors, 500)
+		je.party_not_required = 1
+		je.save().submit()
+		je.cancel()
+
+		entries = frappe.get_all(
+			"Payment Ledger Entry",
+			filters={"voucher_type": je.doctype, "voucher_no": je.name},
+			fields=["amount", "delinked"],
+		)
+		self.assertEqual(len(entries), 2)
+		self.assertTrue(all(x.delinked for x in entries))
