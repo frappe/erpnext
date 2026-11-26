@@ -8,6 +8,7 @@ import regex
 from frappe import qb
 from frappe.exceptions import ValidationError
 
+from erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule import run_rule_evaluation
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -294,3 +295,18 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 				)
 				with self.assertRaises(ValidationError):
 					doc.insert()
+
+	# --- run_rule_evaluation ---
+
+	def test_run_rule_evaluation_is_deduplicated(self):
+		with patch("frappe.enqueue") as enqueue_mock:
+			run_rule_evaluation()
+			run_rule_evaluation(force_evaluate=True)
+
+		job_ids = []
+		for call in enqueue_mock.call_args_list:
+			self.assertTrue(call.kwargs["deduplicate"])
+			job_ids.append(call.kwargs["job_id"])
+
+		# A forced run must not be dropped because a normal run is queued.
+		self.assertEqual(len(set(job_ids)), 2)
