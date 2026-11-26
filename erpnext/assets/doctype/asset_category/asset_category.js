@@ -3,9 +3,6 @@
 
 frappe.ui.form.on("Asset Category", {
 	onload: function (frm) {
-		frm.add_fetch("company_name", "accumulated_depreciation_account", "accumulated_depreciation_account");
-		frm.add_fetch("company_name", "depreciation_expense_account", "depreciation_expense_account");
-
 		frm.set_query("fixed_asset_account", "accounts", function (doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
@@ -50,6 +47,29 @@ frappe.ui.form.on("Asset Category", {
 					company: d.company_name,
 				},
 			};
+		});
+	},
+});
+
+frappe.ui.form.on("Asset Category Account", {
+	company_name: async function (frm, cdt, cdn) {
+		const company = locals[cdt][cdn].company_name;
+		if (!company) return;
+
+		// fetch from the server, because the boot data can be older than the Company
+		const get_account = (purpose) =>
+			frappe.xcall("erpnext.accounts.default_accounts.get_company_default_account", {
+				company,
+				purpose,
+			});
+		const [accumulated_depreciation_account, depreciation_expense_account] = await Promise.all([
+			get_account("ACCUMULATED_DEPRECIATION"),
+			get_account("DEPRECIATION_EXPENSE"),
+		]);
+
+		frappe.model.set_value(cdt, cdn, {
+			accumulated_depreciation_account: accumulated_depreciation_account || "",
+			depreciation_expense_account: depreciation_expense_account || "",
 		});
 	},
 });

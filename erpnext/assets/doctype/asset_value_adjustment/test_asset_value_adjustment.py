@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
+from erpnext.accounts.default_accounts import CAPITAL_WORK_IN_PROGRESS, set_default_account
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
 from erpnext.assets.doctype.asset.test_asset import set_mandatory_dimension_default_for_other_company
@@ -17,9 +18,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestAssetValueAdjustment(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.set_value(
-			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
-		)
+		set_default_account("_Test Company", CAPITAL_WORK_IN_PROGRESS, "CWIP Account - _TC")
 
 	def test_current_asset_value(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")

@@ -21,6 +21,12 @@ from frappe.utils import (
 from frappe.utils.user import get_users_with_role
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ACCUMULATED_DEPRECIATION,
+	ASSET_DISPOSAL,
+	DEPRECIATION_EXPENSE,
+	get_default_account,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
@@ -807,14 +813,10 @@ def get_depreciation_accounts(asset_category, company):
 		frappe.throw(_("Please set Fixed Asset Account in Asset Category {0}").format(asset_category))
 
 	if not non_depreciable_category:
-		accounts = frappe.get_cached_value(
-			"Company", company, ["accumulated_depreciation_account", "depreciation_expense_account"]
-		)
-
 		if not accumulated_depreciation_account:
-			accumulated_depreciation_account = accounts[0]
+			accumulated_depreciation_account = get_default_account(company, ACCUMULATED_DEPRECIATION)
 		if not depreciation_expense_account:
-			depreciation_expense_account = accounts[1]
+			depreciation_expense_account = get_default_account(company, DEPRECIATION_EXPENSE)
 
 		if not accumulated_depreciation_account or not depreciation_expense_account:
 			frappe.throw(
@@ -854,9 +856,8 @@ def get_disposal_account_and_cost_center(company: str):
 
 
 def _get_disposal_account_and_cost_center(company: str):
-	disposal_account, depreciation_cost_center = frappe.get_cached_value(
-		"Company", company, ["disposal_account", "depreciation_cost_center"]
-	)
+	disposal_account = get_default_account(company, ASSET_DISPOSAL)
+	depreciation_cost_center = frappe.get_cached_value("Company", company, "depreciation_cost_center")
 
 	if not disposal_account:
 		frappe.throw(_("Please set 'Gain/Loss Account on Asset Disposal' in Company {0}").format(company))

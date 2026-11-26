@@ -7,6 +7,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, get_link_to_form
 
+from erpnext.accounts.default_accounts import (
+	ACCUMULATED_DEPRECIATION,
+	CAPITAL_WORK_IN_PROGRESS,
+	DEPRECIATION_EXPENSE,
+	get_default_account,
+)
+
 ACCOUNT_FIELDS = (
 	"fixed_asset_account",
 	"accumulated_depreciation_account",
@@ -154,8 +161,8 @@ class AssetCategory(Document):
 		if self.enable_cwip_accounting:
 			missing_cwip_accounts_for_company = []
 			for d in self.accounts:
-				if not d.capital_work_in_progress_account and not frappe.get_cached_value(
-					"Company", d.company_name, "capital_work_in_progress_account"
+				if not d.capital_work_in_progress_account and not get_default_account(
+					d.company_name, CAPITAL_WORK_IN_PROGRESS
 				):
 					missing_cwip_accounts_for_company.append(get_link_to_form("Company", d.company_name))
 
@@ -179,12 +186,10 @@ class AssetCategory(Document):
 		companies_with_accounts = set()
 
 		def validate_company_accounts(company, acc_row=None):
-			default_accounts = frappe.get_cached_value(
-				"Company",
-				company,
-				["accumulated_depreciation_account", "depreciation_expense_account"],
-				as_dict=True,
-			)
+			default_accounts = {
+				"accumulated_depreciation_account": get_default_account(company, ACCUMULATED_DEPRECIATION),
+				"depreciation_expense_account": get_default_account(company, DEPRECIATION_EXPENSE),
+			}
 			for fieldname, label in depreciation_account_map.items():
 				row_value = acc_row.get(fieldname) if acc_row else None
 				if not row_value and not default_accounts.get(fieldname):

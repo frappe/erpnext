@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, now
 
+from erpnext.accounts.default_accounts import CAPITAL_WORK_IN_PROGRESS, set_default_account
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -12,9 +13,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestAssetMovement(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.set_value(
-			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
-		)
+		set_default_account("_Test Company", CAPITAL_WORK_IN_PROGRESS, "CWIP Account - _TC")
 
 	def test_movement(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")

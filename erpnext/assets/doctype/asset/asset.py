@@ -21,6 +21,12 @@ from frappe.utils import (
 )
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ACCUMULATED_DEPRECIATION,
+	CAPITAL_WORK_IN_PROGRESS,
+	DEPRECIATION_EXPENSE,
+	get_default_account,
+)
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.assets.doctype.asset.depreciation import (
 	get_comma_separated_links,
@@ -1317,6 +1323,14 @@ def get_item_details(
 	return books
 
 
+# Company default account to use when the asset category has no account
+COMPANY_DEFAULT_ACCOUNT_PURPOSES = {
+	"accumulated_depreciation_account": ACCUMULATED_DEPRECIATION,
+	"depreciation_expense_account": DEPRECIATION_EXPENSE,
+	"capital_work_in_progress_account": CAPITAL_WORK_IN_PROGRESS,
+}
+
+
 def get_asset_account(account_name, asset=None, asset_category=None, company=None):
 	account = None
 	if asset:
@@ -1327,8 +1341,8 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 	if not asset and not account:
 		account = get_asset_category_account(account_name, asset_category=asset_category, company=company)
 
-	if not account:
-		account = frappe.get_cached_value("Company", company, account_name)
+	if not account and account_name in COMPANY_DEFAULT_ACCOUNT_PURPOSES:
+		account = get_default_account(company, COMPANY_DEFAULT_ACCOUNT_PURPOSES[account_name])
 
 	if not account:
 		if not asset_category:
