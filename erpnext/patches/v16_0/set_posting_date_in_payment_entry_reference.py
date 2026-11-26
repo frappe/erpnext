@@ -1,8 +1,9 @@
 import frappe
+from pypika.terms import Bracket
 
 
 def execute():
-	reference = frappe.qb.DocType("Payment Entry Reference").as_("reference")
+	reference = frappe.qb.DocType("Payment Entry Reference")
 	reference_doctypes = (
 		frappe.qb.from_(reference)
 		.select(reference.reference_doctype)
@@ -17,11 +18,12 @@ def execute():
 			continue
 
 		source = frappe.qb.DocType(doctype)
+		source_date = (
+			frappe.qb.from_(source).select(source[date_field]).where(source.name == reference.reference_name)
+		)
 		(
 			frappe.qb.update(reference)
-			.join(source)
-			.on(source.name == reference.reference_name)
-			.set(reference.posting_date, source[date_field])
+			.set(reference.posting_date, Bracket(source_date))
 			.where((reference.reference_doctype == doctype) & reference.posting_date.isnull())
 		).run()
 

@@ -478,6 +478,17 @@ frappe.ui.form.on("Payment Entry", {
 		return frm.amount_from_references === frm.doc.name;
 	},
 
+	is_outstanding_in_payment_direction: function (frm) {
+		const order_doctypes = frm.events.get_order_doctypes(frm);
+		const net_outstanding = (frm.doc.references || [])
+			.filter((row) => !order_doctypes.includes(row.reference_doctype))
+			.reduce((total, row) => total + flt(row.outstanding_amount), 0);
+		const settles_invoices =
+			(frm.doc.payment_type == "Receive" && frm.doc.party_type == "Customer") ||
+			(frm.doc.payment_type == "Pay" && ["Supplier", "Employee"].includes(frm.doc.party_type));
+		return settles_invoices ? net_outstanding > 0 : net_outstanding < 0;
+	},
+
 	set_default_bank_cash_account: async function (frm) {
 		const bank_field = { Receive: "paid_to", Pay: "paid_from" }[frm.doc.payment_type];
 		const is_chosen = () => frm.doc[bank_field] || frm.doc.mode_of_payment || frm.doc.bank_account;
@@ -1387,10 +1398,8 @@ frappe.ui.form.on("Payment Entry", {
 						key(row.reference_doctype, row.reference_name, row.payment_term)
 					)
 				);
-				const amount_from_references =
-					!flt(frm.events.get_party_amount(frm)) || frm.events.is_amount_from_references(frm);
 				const order_doctypes = frm.events.get_order_doctypes(frm);
-				let added = 0;
+				const new_rows = [];
 
 				if (r.message) {
 					$.each(r.message, function (i, d) {
@@ -1402,7 +1411,7 @@ frappe.ui.form.on("Payment Entry", {
 						}
 
 						var c = frm.add_child("references");
-						added++;
+						new_rows.push(c);
 						c.reference_doctype = d.voucher_type;
 						c.reference_name = d.voucher_no;
 						c.posting_date = d.posting_date;
@@ -1413,11 +1422,6 @@ frappe.ui.form.on("Payment Entry", {
 						c.payment_term = d.payment_term;
 						c.payment_term_outstanding = d.payment_term_outstanding;
 						c.allocated_amount = d.allocated_amount;
-						if (amount_from_references) {
-							c.allocated_amount = order_doctypes.includes(d.voucher_type)
-								? 0
-								: d.outstanding_amount;
-						}
 						c.account = d.account;
 
 						var party_account_currency =
@@ -1436,7 +1440,7 @@ frappe.ui.form.on("Payment Entry", {
 					});
 				}
 
-				if (r.message?.length && !added) {
+				if (r.message?.length && !new_rows.length) {
 					frappe.show_alert({
 						message: get_outstanding_invoices
 							? __("No new invoices to add.")
@@ -1463,7 +1467,15 @@ frappe.ui.form.on("Payment Entry", {
 					);
 				}
 
+				const amount_from_references =
+					(!flt(frm.events.get_party_amount(frm)) || frm.events.is_amount_from_references(frm)) &&
+					frm.events.is_outstanding_in_payment_direction(frm);
 				if (amount_from_references) {
+					new_rows.forEach((row) => {
+						row.allocated_amount = order_doctypes.includes(row.reference_doctype)
+							? 0
+							: row.outstanding_amount;
+					});
 					frm.amount_from_references = frm.doc.name;
 					frm.refresh_field("references");
 					return frm.events.set_total_allocated_amount(frm);
