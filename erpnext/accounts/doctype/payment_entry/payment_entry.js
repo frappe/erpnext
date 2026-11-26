@@ -478,11 +478,15 @@ frappe.ui.form.on("Payment Entry", {
 		return frm.amount_from_references === frm.doc.name;
 	},
 
-	is_outstanding_in_payment_direction: function (frm) {
+	get_invoice_outstanding: function (frm) {
 		const order_doctypes = frm.events.get_order_doctypes(frm);
-		const net_outstanding = (frm.doc.references || [])
+		return (frm.doc.references || [])
 			.filter((row) => !order_doctypes.includes(row.reference_doctype))
 			.reduce((total, row) => total + flt(row.outstanding_amount), 0);
+	},
+
+	is_outstanding_in_payment_direction: function (frm) {
+		const net_outstanding = frm.events.get_invoice_outstanding(frm);
 		const settles_invoices =
 			(frm.doc.payment_type == "Receive" && frm.doc.party_type == "Customer") ||
 			(frm.doc.payment_type == "Pay" && ["Supplier", "Employee"].includes(frm.doc.party_type));
@@ -1398,7 +1402,6 @@ frappe.ui.form.on("Payment Entry", {
 						key(row.reference_doctype, row.reference_name, row.payment_term)
 					)
 				);
-				const order_doctypes = frm.events.get_order_doctypes(frm);
 				const new_rows = [];
 
 				if (r.message) {
@@ -1467,18 +1470,16 @@ frappe.ui.form.on("Payment Entry", {
 					);
 				}
 
-				const amount_from_references =
+				if (
 					(!flt(frm.events.get_party_amount(frm)) || frm.events.is_amount_from_references(frm)) &&
-					frm.events.is_outstanding_in_payment_direction(frm);
-				if (amount_from_references) {
-					new_rows.forEach((row) => {
-						row.allocated_amount = order_doctypes.includes(row.reference_doctype)
-							? 0
-							: row.outstanding_amount;
-					});
+					frm.events.is_outstanding_in_payment_direction(frm)
+				) {
 					frm.amount_from_references = frm.doc.name;
-					frm.refresh_field("references");
-					return frm.events.set_total_allocated_amount(frm);
+					return frm.events.allocate_party_amount_against_ref_docs(
+						frm,
+						Math.abs(frm.events.get_invoice_outstanding(frm)),
+						false
+					);
 				}
 				frm.events.allocate_party_amount_against_ref_docs(
 					frm,
