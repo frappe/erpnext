@@ -454,6 +454,8 @@ frappe.ui.form.on("Work Order", {
 				fieldname: "operations",
 				fieldtype: "Table",
 				label: __("Operations"),
+				cannot_add_rows: 1,
+				cannot_delete_rows: 1,
 				fields: [
 					{
 						fieldtype: "Link",
