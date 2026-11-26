@@ -1,0 +1,42 @@
+name: Check PRs on other branches
+
+# Check PR only runs for PRs to branches that have it. This checks PRs to every other branch.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # The CLI reads the template from the workspace, not from the GitHub API.
+      - uses: actions/checkout@v7
+
+      - uses: mitchellh/vouch/action/setup-vouch@d66fa29a64600490892131ad87597c30c91fcac4 # v1.5.0
+
+      - name: Check open PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          declare -A has_check
+          # Like Check PR, only new PRs are checked, not the ones opened before.
+          since=$(date -u -d "2 hours ago" +%Y-%m-%dT%H:%M:%SZ)
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 1000 --search "created:>=$since" \
+            --json number,baseRefName \
+            --jq '.[] | "\(.number) \(.baseRefName)"' |
+          while read -r pr base; do
+            if [ -z "${has_check[$base]+set}" ]; then
+              has_check[$base]=$(gh api -X GET "repos/$GITHUB_REPOSITORY/contents/.github/workflows/vouch-check-pr.yml" \
+                -f ref="$base" --silent 2>/dev/null && echo 1 || echo 0)
+            fi
+            [ "${has_check[$base]}" = 1 ] && continue
+
+            vouch gh-check-pr "$pr" --repo "$GITHUB_REPOSITORY" \
+              --template-file .github/vouch-pr-unvouched.md --auto-close=true --dry-run=false
+          done
