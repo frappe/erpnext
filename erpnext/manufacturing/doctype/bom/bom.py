@@ -159,6 +159,7 @@ class BOM(WebsiteGenerator):
 		description: DF.TextEditor | None
 		exploded_items: DF.Table[BOMExplosionItem]
 		fg_based_operating_cost: DF.Check
+		formula_tolerance: DF.Percent
 		has_variants: DF.Check
 		image: DF.AttachImage | None
 		inspection_required: DF.Check

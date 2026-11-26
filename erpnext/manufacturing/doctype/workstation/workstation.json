@@ -17,6 +17,7 @@
   "disabled",
   "column_break_3",
   "production_capacity",
+  "batch_capacity",
   "warehouse",
   "workstation_status_tab",
   "status",
@@ -202,6 +203,14 @@
    "fieldtype": "Table",
    "label": "Operating Components Cost",
    "options": "Workstation Cost"
+  },
+  {
+   "description": "Largest batch the machine holds, in the weight unit of the finished good it makes.",
+   "fieldname": "batch_capacity",
+   "fieldtype": "Float",
+   "label": "Batch Capacity",
+   "non_negative": 1,
+   "show_description_on_click": 1
   }
  ],
  "hide_toolbar": 1,
@@ -209,7 +218,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2025-08-19 12:07:05.374386",
+ "modified": "2026-11-04 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
