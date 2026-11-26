@@ -2456,6 +2456,68 @@ class TestPickList(ERPNextTestSuite):
 			stock_entry.items[0].set(field, value)
 			self.assertRaises(frappe.ValidationError, stock_entry.insert)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"transfer_extra_materials_percentage": 50})
+	def test_stock_entry_against_work_order_pick_list_honours_transfer_allowance(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			create_pick_list as create_pick_list_from_work_order,
+		)
+
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
+		make_stock_entry(item=raw_material, to_warehouse="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=50,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="_Test Warehouse 1 - _TC",
+		)
+		pick_list = create_pick_list_from_work_order(work_order.name, None, 10)
+		pick_list.submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.items[0].qty = 15
+		stock_entry.insert()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.items[0].qty = 16
+		self.assertRaisesRegex(frappe.ValidationError, "more than the 15.0 allowed", stock_entry.insert)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"transfer_extra_materials_percentage": 50})
+	def test_over_transferred_row_keeps_pick_list_open_for_pending_rows(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			create_pick_list as create_pick_list_from_work_order,
+		)
+
+		over_transferred = make_item(properties={"is_stock_item": 1}).name
+		pending = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[over_transferred, pending], rm_qty=1)
+		for item in (over_transferred, pending):
+			make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=20,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="_Test Warehouse 1 - _TC",
+		)
+		pick_list = create_pick_list_from_work_order(work_order.name, None, 10)
+		pick_list.submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		for row in stock_entry.items:
+			row.qty = 15 if row.item_code == over_transferred else 5
+		stock_entry.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.status, "Partially Transferred")
+
 	def test_delivery_note_and_sales_invoice_both_count_as_delivered(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)

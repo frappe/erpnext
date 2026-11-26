@@ -575,7 +575,7 @@ class PickList(TransactionBase):
 		if total_transferred <= 0:
 			return None
 
-		if total_transferred >= total_picked:
+		if all(flt(row.transferred_qty) >= flt(row.picked_qty) for row in self.locations):
 			return "Completed"
 
 		return "Partially Transferred"
