@@ -14,7 +14,6 @@ from frappe.utils import (
 	add_days,
 	cint,
 	get_datetime,
-	get_email_addresses,
 	get_link_to_form,
 	get_weekday,
 	getdate,
@@ -46,7 +45,7 @@ from erpnext.stock.stock_ledger import (
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
-from erpnext.utilities import clear_logs_with_references
+from erpnext.utilities import clear_logs_with_references, get_email_to_store
 
 RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
@@ -1068,7 +1067,9 @@ def notify_error_to_stock_managers(doc, traceback):
 			"Please check the error message and take necessary actions to fix the error and then restart the reposting again."
 		)
 	)
-	frappe.sendmail(recipients=get_email_addresses(recipients), subject=subject, message=message)
+	frappe.sendmail(
+		recipients=[get_email_to_store(user) for user in recipients], subject=subject, message=message
+	)
 
 
 def get_recipients():

@@ -1544,8 +1544,7 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr = frappe.get_doc("Payment Request", {"reference_name": so.name})
 		self.assertEqual(pr.docstatus, 1)
 		self.assertEqual(pr.grand_total, so.grand_total)
-		# the portal's recipient_id is ignored, and an Administrator owner isn't mailed
-		self.assertIsNone(pr.email_to)
+		self.assertEqual(pr.email_to, so.owner)
 		self.assertEqual(pr.party, so.customer)
 		self.assertTrue(pr.make_sales_invoice)
 		self.assertEqual(
