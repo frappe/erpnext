@@ -19,6 +19,7 @@
   "pos_closing_entry",
   "column_break_7",
   "user",
+  "currency",
   "opening_balance_details_section",
   "balance_details",
   "section_break_9",
@@ -82,6 +83,14 @@
    "reqd": 1
   },
   {
+   "fetch_from": "pos_profile.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
    "fieldname": "section_break_9",
    "fieldtype": "Section Break",
    "read_only": 1
@@ -133,7 +142,7 @@
  "icon": "folder-open",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:16.034296",
+ "modified": "2026-10-23 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Opening Entry",
