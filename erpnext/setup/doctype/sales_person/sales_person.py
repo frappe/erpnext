@@ -4,6 +4,7 @@
 
 from collections import defaultdict
 from itertools import chain
+from urllib.parse import urlencode
 
 import frappe
 from frappe import _
@@ -103,10 +104,9 @@ class SalesPerson(NestedSet):
 			.limit(1)
 		).run()
 		if linked_to_customer:
+			customers_url = f"{get_url_to_list('Customer')}?{urlencode({'sales_person': self.name})}"
 			return _("The Sales Person is linked with {0}").format(
-				frappe.bold(
-					f"""<a href="{get_url_to_list("Customer")}?sales_person={self.name}">{"Customers"}</a>"""
-				)
+				frappe.bold(f"""<a href="{customers_url}">{"Customers"}</a>""")
 			)
 
 		for doctype in ("Sales Order", "Delivery Note"):
