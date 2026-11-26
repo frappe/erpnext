@@ -677,6 +677,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// real currency change can be told apart from a mere exchange rate refresh
 		// (e.g. triggered by a date change).
 		this._doc_currency = this.frm.doc.currency;
+		this._schedule_base_date = this.get_schedule_base_date();
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
@@ -1427,7 +1428,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
 			this.update_rates_for_new_date();
-			this.recalculate_terms();
+			this.recalculate_terms(this.pop_schedule_date_shift());
 		}
 	}
 
@@ -1435,6 +1436,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		if (this.frm.doc.posting_date) {
 			this.frm.posting_date = this.frm.doc.posting_date;
+			const days_moved = this.pop_schedule_date_shift();
 
 			if (
 				(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer) ||
@@ -1455,7 +1457,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							me.frm.doc.due_date = r.message;
 							refresh_field("due_date");
 							me.update_rates_for_new_date();
-							me.recalculate_terms();
+							me.recalculate_terms(days_moved);
 						}
 					},
 				});
@@ -1542,7 +1544,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.posting_date();
 	}
 
-	recalculate_terms() {
+	get_schedule_base_date() {
+		const doc = this.frm.doc;
+		return doc.bill_date || doc.posting_date || doc.transaction_date;
+	}
+
+	// days the schedule base date moved since the manual rows were last aligned to it
+	pop_schedule_date_shift() {
+		const base_date = this.get_schedule_base_date();
+		const days_moved = frappe.datetime.get_day_diff(base_date, this._schedule_base_date || base_date);
+		this._schedule_base_date = base_date;
+		return days_moved;
+	}
+
+	recalculate_terms(days_moved) {
 		const doc = this.frm.doc;
 		if (doc.payment_terms_template) {
 			this.payment_terms_template();
@@ -1551,13 +1566,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			doc.payment_schedule.forEach(function (term) {
 				if (term.payment_term) {
 					me.payment_term(doc, term.doctype, term.name);
-				} else {
-					frappe.model.set_value(
-						term.doctype,
-						term.name,
-						"due_date",
-						doc.posting_date || doc.transaction_date
-					);
+				} else if (term.due_date && days_moved) {
+					// hand-entered due dates move with the document date, keeping their gaps
+					const due_date = moment(term.due_date).add(days_moved, "days").format("YYYY-MM-DD");
+					frappe.model.set_value(term.doctype, term.name, "due_date", due_date);
 				}
 			});
 		}
