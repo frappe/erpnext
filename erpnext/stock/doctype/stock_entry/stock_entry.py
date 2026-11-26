@@ -4783,6 +4783,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 				+ flt(self.get_pending_process_loss_qty())
 			)
 
+		# overproduction past the Job Card's completed qty has no recorded output left
+		if flt(pending_qty, self.precision("fg_completed_qty")) <= 0:
+			return []
+
 		used_secondary_items = self.get_used_secondary_items()
 		for row in other:
 			key = get_secondary_item_key(row)
