@@ -913,9 +913,8 @@ frappe.ui.form.on("Production Plan", {
 			fields,
 			(row) => {
 				let get_template_url =
-					"erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials";
-				open_url_post(frappe.request.url, {
-					cmd: get_template_url,
+					"/api/method/erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials";
+				open_url_post(get_template_url, {
 					doc: frm.doc,
 					warehouses: row.warehouses,
 				});
