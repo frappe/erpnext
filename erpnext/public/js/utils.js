@@ -843,15 +843,16 @@ erpnext.utils.update_child_items = function (opts) {
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
 	const has_reserved_stock = opts.has_reserved_stock ? true : false;
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
-	const get_item_details = (item_code, row) =>
+	const get_item_details = (item_code, row, doc = frm.doc) =>
 		frm.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			args: {
-				doc: frm.doc,
+				doc: doc,
 				ctx: {
 					item_code: item_code,
 					set_warehouse: frm.doc.set_warehouse,
 					customer: frm.doc.customer || frm.doc.party_name,
+					coupon_code: frm.doc.coupon_code,
 					quotation_to: frm.doc.quotation_to,
 					supplier: frm.doc.supplier,
 					currency: frm.doc.currency,
@@ -877,6 +878,26 @@ erpnext.utils.update_child_items = function (opts) {
 				},
 			},
 		});
+
+	// latest uom price request per dialog row, so a slower earlier response is ignored
+	const uom_requests = {};
+
+	// same order as apply_pricing_rule_on_item: margin on the price list rate, then discount
+	const get_rate_from_item_details = (details) => {
+		const price_list_rate = flt(details.price_list_rate);
+		const margin = flt(details.margin_rate_or_amount);
+		const rate_with_margin =
+			details.margin_type == "Percentage"
+				? price_list_rate * (1 + margin / 100)
+				: price_list_rate + (details.margin_type == "Amount" ? margin : 0);
+
+		let discount_amount = flt(details.discount_amount);
+		if (flt(details.discount_percentage)) {
+			discount_amount = (rate_with_margin * flt(details.discount_percentage)) / 100;
+		}
+
+		return flt(rate_with_margin - discount_amount, get_precision("rate"));
+	};
 
 	this.data = frm.doc[opts.child_docname]
 		.filter((d) => !d.closed)
@@ -990,30 +1011,38 @@ erpnext.utils.update_child_items = function (opts) {
 				filters: { item_code: row.item_code },
 			}),
 			onchange: function () {
-				frappe.call({
-					method: "erpnext.stock.get_item_details.get_conversion_factor",
-					args: { item_code: this.doc.item_code, uom: this.value },
-					callback: (r) => {
-						if (!r.exc) {
-							if (this.doc.conversion_factor == r.message.conversion_factor) return;
+				const row = dialog.fields_dict.trans_items.df.data.find((d) => d.name == this.doc.name);
+				const uom = this.value;
+				if (!row || !row.item_code || !uom) return;
 
-							const docname = this.doc.docname;
-							dialog.fields_dict.trans_items.df.data.some((doc) => {
-								if (doc.docname == docname) {
-									doc.conversion_factor = r.message.conversion_factor;
-									dialog.fields_dict.trans_items.grid.refresh();
-									return true;
-								}
-							});
-						}
-					},
+				// re-fetch the conversion factor and the price for the new UOM, the same
+				// way the item row does before submission, so the rate never keeps the
+				// previous UOM's price
+				const rate_before = row.rate;
+				const item_code = row.item_code;
+				const request = (uom_requests[row.name] = (uom_requests[row.name] || 0) + 1);
+				// the row's saved stock qty is for the old uom; without it qty-based pricing rules
+				// use the stock qty of the new uom
+				const doc = {
+					...frm.doc,
+					items: frm.doc.items.map((d) => (d.name == row.docname ? { ...d, stock_qty: 0 } : d)),
+				};
+				get_item_details(item_code, { ...row, uom }, doc).then((r) => {
+					// a later uom or item change owns the row now
+					const superseded =
+						uom_requests[row.name] != request || row.item_code != item_code || row.uom != uom;
+					if (!r.message || superseded) return;
+
+					const details = r.message;
+					row.conversion_factor = details.conversion_factor || row.conversion_factor;
+					// informational only, the server looks the price up again
+					row.price_list_rate = flt(details.price_list_rate);
+					// keep a rate the user typed while the price was being fetched
+					if (row.price_list_rate && row.rate == rate_before) {
+						row.rate = get_rate_from_item_details(details);
+					}
+					dialog.fields_dict.trans_items.grid.refresh();
 				});
-
-				if (!this.doc.docname) {
-					get_item_details(this.doc.item_code, this.doc).then((r) => {
-						this.doc.price_list_rate = r.message.price_list_rate;
-					});
-				}
 			},
 		},
 		{
