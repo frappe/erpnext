@@ -3228,6 +3228,41 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		expected_rates = {row["item_code"]: row["rate"] for row in rm_items}
 		self.assertEqual({row.rm_item_code: row.rate for row in scr.supplied_items}, expected_rates)
 
+	def test_value_short_of_the_receipt_amount_is_a_stock_adjustment_loss(self):
+		# 300000 finished goods at 13.333... reach the ledger at 3,999,999.90, 0.10 short of the amount
+		set_backflush_based_on("BOM")
+		company = "_Test Company with perpetual inventory"
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], quantity=3, company=company, currency="INR")
+		make_stock_entry(
+			item_code=rm_item, qty=100000, target="Work In Progress - TCP1", basic_rate=10, company=company
+		)
+		sco = get_subcontracting_order(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=[
+				{
+					"warehouse": "Stores - TCP1",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 300000,
+					"rate": 10,
+					"fg_item": fg_item,
+					"fg_item_qty": 300000,
+				}
+			],
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		balances = defaultdict(float)
+		for gle in get_gl_entries(scr.doctype, scr.name):
+			balances[gle.account] += gle.debit - gle.credit
+
+		stock_adjustment_account = frappe.get_cached_value("Company", company, "stock_adjustment_account")
+		self.assertEqual(flt(balances[stock_adjustment_account], 2), 0.1)
+
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
 		set_backflush_based_on("BOM")
 

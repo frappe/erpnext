@@ -1335,26 +1335,25 @@ class SubcontractingReceipt(SubcontractingController):
 							"stock_adjustment_account", ignore_validation=True
 						)
 
-						# Loss Account (Credit)
+						# the receipt amount the ledger did not take into stock is a loss
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=loss_account,
 							cost_center=item.cost_center,
-							debit=0.0,
-							credit=divisional_loss,
+							debit=divisional_loss,
+							credit=0.0,
 							remarks=remarks,
 							against_account=item.expense_account,
 							account_currency=get_account_currency(loss_account),
 							project=item.project,
 							item=item,
 						)
-						# Expense Account (Debit)
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=item.expense_account,
 							cost_center=item.cost_center,
-							debit=divisional_loss,
-							credit=0.0,
+							debit=0.0,
+							credit=divisional_loss,
 							remarks=remarks,
 							against_account=loss_account,
 							account_currency=get_account_currency(item.expense_account),
