@@ -198,7 +198,7 @@ export default function setup(context) {
 		if (left) {
 			return {
 				title: several ? __("{0} still to deliver on the orders.", [left]) : __("{0} still to deliver on the order.", [left]),
-				theme: "amber",
+				theme: "blue",
 				icon: "lucide-truck",
 			}
 		}
