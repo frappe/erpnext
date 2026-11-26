@@ -15,17 +15,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	apply_pricing_rule_on_item(item) {
-<<<<<<< HEAD
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
-		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
-=======
-		let effective_item_rate = flt(item.price_list_rate);
 		if (
 			["Sales Order", "Quotation", "Purchase Order"].includes(item.parenttype) &&
 			item.blanket_order_rate
 		) {
->>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
 			effective_item_rate = flt(item.blanket_order_rate) * (flt(item.conversion_factor) || 1);
 		}
 		if (item.margin_type == "Percentage") {

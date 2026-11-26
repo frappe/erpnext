@@ -657,8 +657,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							child_docname: item.name,
 							is_old_subcontracting_flow: me.frm.doc.is_old_subcontracting_flow,
 							use_serial_batch_fields: item.use_serial_batch_fields,
-							against_blanket_order: item.against_blanket_order,
-							blanket_order: item.blanket_order,
 							serial_and_batch_bundle: item.serial_and_batch_bundle,
 						}
 					},
@@ -1940,7 +1938,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var append_item = function(d) {
 			if (d.item_code) {
 				item_list.push({
-<<<<<<< HEAD
 					"doctype": d.doctype,
 					"name": d.name,
 					"child_docname": d.name,
@@ -1962,29 +1959,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"conversion_factor": d.conversion_factor || 1.0,
 					"discount_percentage" : d.discount_percentage,
 					"discount_amount" : d.discount_amount,
-=======
-					doctype: d.doctype,
-					name: d.name,
-					child_docname: d.name,
-					item_code: d.item_code,
-					item_group: d.item_group,
-					brand: d.brand,
-					qty: d.qty,
-					stock_qty: d.stock_qty,
-					uom: d.uom,
-					stock_uom: d.stock_uom,
-					parenttype: d.parenttype,
-					parent: d.parent,
-					pricing_rules: d.pricing_rules,
-					is_free_item: d.is_free_item,
-					warehouse: d.warehouse,
-					serial_no: d.serial_no,
-					batch_no: d.batch_no,
-					price_list_rate: d.price_list_rate,
-					conversion_factor: d.conversion_factor || 1.0,
-					discount_percentage: d.discount_percentage,
-					discount_amount: d.discount_amount,
->>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
@@ -2016,19 +1990,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {
-<<<<<<< HEAD
-						frappe.model.set_value(child.doctype, child.name, "rate", value);
-=======
 						const doc = frappe.get_doc(child.doctype, child.name);
-						if (doc) doc.price_list_rate = value; // silent update so rate trigger uses correct value
-<<<<<<< HEAD
-						if (!doc?.blanket_order_rate) {
+						if (
+							!doc?.blanket_order_rate ||
+							!["Sales Order", "Quotation", "Purchase Order"].includes(doc.parenttype) ||
+							child.has_pricing_rule_for_rate
+						) {
 							frappe.model.set_value(child.doctype, child.name, "rate", value);
 						}
->>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
-=======
-						frappe.model.set_value(child.doctype, child.name, "rate", value);
->>>>>>> 55d503b (refactor: keep the blanket order rate fix to the order rate base)
 					}
 
 					if (key === "pricing_rules") {
