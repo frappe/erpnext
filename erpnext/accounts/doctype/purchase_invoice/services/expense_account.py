@@ -8,6 +8,11 @@ from frappe import _, throw
 from frappe.utils import get_link_to_form
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ASSET_RECEIVED_BUT_NOT_BILLED,
+	STOCK_RECEIVED_BUT_NOT_BILLED,
+	get_default_account,
+)
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import validate_account_head
@@ -22,7 +27,9 @@ class ExpenseAccountService:
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(doc.company)
 
 		if auto_accounting_for_stock:
-			stock_not_billed_account = doc.get_company_default("stock_received_but_not_billed")
+			stock_not_billed_account = get_default_account(
+				doc.company, STOCK_RECEIVED_BUT_NOT_BILLED, required=True
+			)
 			stock_items = doc.get_stock_items()
 
 		doc.asset_received_but_not_billed = None
@@ -119,8 +126,8 @@ class ExpenseAccountService:
 
 				if item.pr_detail:
 					if not doc.asset_received_but_not_billed:
-						doc.asset_received_but_not_billed = doc.get_company_default(
-							"asset_received_but_not_billed"
+						doc.asset_received_but_not_billed = get_default_account(
+							doc.company, ASSET_RECEIVED_BUT_NOT_BILLED, required=True
 						)
 
 					# check if 'Asset Received But Not Billed' account is credited in Purchase receipt or not

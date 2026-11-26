@@ -7,6 +7,15 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	ADVANCE_PAID,
+	EXCHANGE_GAIN_LOSS,
+	PROVISIONAL,
+	ROUND_OFF,
+	ROUND_OFF_FOR_OPENING,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.mapper import get_mapped_purchase_invoice
@@ -232,7 +241,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 					self.assertNotEqual(mr.status, "Received")
 
 	def test_gl_entries_without_perpetual_inventory(self):
-		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
+		set_default_account("_Test Company", ROUND_OFF, "Round Off - _TC")
 		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
 		self.assertTrue(not cint(erpnext.is_perpetual_inventory_enabled(pi.company)))
 		pi.insert()
@@ -730,7 +739,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.insert()
 		pi.submit()
 
-		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
+		exchange_gain_loss_account = get_default_account(pi.company, EXCHANGE_GAIN_LOSS)
 		self.assertFalse(
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
@@ -832,7 +841,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.insert()
 		pi.submit()
 
-		exchange_gain_loss_account = frappe.db.get_value("Company", pi.company, "exchange_gain_loss_account")
+		exchange_gain_loss_account = get_default_account(pi.company, EXCHANGE_GAIN_LOSS)
 		self.assertFalse(
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
@@ -1885,10 +1894,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
 
-		original_account = frappe.db.get_value("Company", "_Test Company", "exchange_gain_loss_account")
-		frappe.db.set_value(
-			"Company", "_Test Company", "exchange_gain_loss_account", "Exchange Gain/Loss - _TC"
-		)
+		original_account = get_default_account("_Test Company", EXCHANGE_GAIN_LOSS)
+		set_default_account("_Test Company", EXCHANGE_GAIN_LOSS, "Exchange Gain/Loss - _TC")
 
 		pay = frappe.get_doc(
 			{
@@ -2080,7 +2087,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		frappe.db.set_single_value(
 			"Accounts Settings", "unlink_payment_on_cancellation_of_invoice", unlink_enabled
 		)
-		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
+		set_default_account("_Test Company", EXCHANGE_GAIN_LOSS, original_account)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_purchase_invoice_advance_taxes(self):
@@ -4164,7 +4171,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				"company": company_name,
 			},
 		):
-			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc)
+			set_default_account(company_name, ROUND_OFF_FOR_OPENING, acc)
 		else:
 			acc = frappe.new_doc("Account")
 			acc.company = company_name
@@ -4172,7 +4179,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			acc.account_name = "Round Off for Opening"
 			acc.account_type = "Round Off for Opening"
 			acc.save()
-			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc.name)
+			set_default_account(company_name, ROUND_OFF_FOR_OPENING, acc.name)
 
 	def test_rounding_adjustment_in_foreign_currency(self):
 		"""The payable is posted at the base rounded total and the round off row, on a company
@@ -4212,7 +4219,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(pi.base_rounding_adjustment, -0.22)
 		self.assertEqual(pi.base_rounded_total, 964.47)
 
-		round_off_account = frappe.get_cached_value("Company", pi.company, "round_off_account")
+		round_off_account = get_default_account(pi.company, ROUND_OFF)
 		gl_entries = frappe.get_all(
 			"GL Entry",
 			filters={"voucher_type": "Purchase Invoice", "voucher_no": pi.name},
@@ -4760,14 +4767,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 
 def set_advance_flag(company, flag, default_account):
-	frappe.db.set_value(
-		"Company",
-		company,
-		{
-			"book_advance_payments_in_separate_party_account": flag,
-			"default_advance_paid_account": default_account,
-		},
-	)
+	frappe.db.set_value("Company", company, "book_advance_payments_in_separate_party_account", flag)
+	set_default_account(company, ADVANCE_PAID, default_account)
 
 
 def check_gl_entries(
@@ -5099,5 +5100,5 @@ def toggle_provisional_accounting_setting(**args):
 	args = frappe._dict(args)
 	company = frappe.get_doc("Company", args.company or "_Test Company")
 	company.enable_provisional_accounting_for_non_stock_items = args.enable or 0
-	company.default_provisional_account = args.provisional_account
+	company.set_default_account(PROVISIONAL, args.provisional_account)
 	company.save()

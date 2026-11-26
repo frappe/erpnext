@@ -12,6 +12,7 @@ from frappe.utils import cint, flt, formatdate, get_link_to_form
 from frappe.utils.data import comma_and
 
 import erpnext
+from erpnext.accounts.default_accounts import WRITE_OFF, get_default_account
 from erpnext.accounts.deferred_revenue import (
 	validate_deferred_revenue_return_cancellation,
 	validate_service_stop_date,
@@ -1069,7 +1070,7 @@ class SalesInvoice(SellingController):
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
-			self.write_off_account = frappe.get_cached_value("Company", self.company, "write_off_account")
+			self.write_off_account = get_default_account(self.company, WRITE_OFF)
 
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)

@@ -7,6 +7,7 @@ import frappe
 from frappe.utils import flt
 
 import erpnext
+from erpnext.accounts.default_accounts import INVENTORY, STOCK_ADJUSTMENT, set_default_account
 from erpnext.accounts.doctype.coupon_code.test_coupon_code import test_create_test_data
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -164,8 +165,8 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 				with self.set_user("Administrator"):
 					company = frappe.get_doc("Company", "_Test Company")
 					company.enable_perpetual_inventory = 1
-					company.default_inventory_account = "Stock In Hand - _TC"
-					company.stock_adjustment_account = "Stock Adjustment - _TC"
+					company.set_default_account(INVENTORY, "Stock In Hand - _TC")
+					company.set_default_account(STOCK_ADJUSTMENT, "Stock Adjustment - _TC")
 					company.save()
 					item = make_item("_Test POS Returned Stock", {"is_stock_item": 1})
 					stock_entry = make_stock_entry(
@@ -785,7 +786,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 			)
 
 	def test_consolidating_standalone_return_without_stock_history(self):
-		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", "Stock In Hand - _TC")
+		set_default_account("_Test Company", INVENTORY, "Stock In Hand - _TC")
 		item_code = make_item("_Test Standalone POS Return Item", {"is_stock_item": 1}).name
 		pos_return = create_pos_invoice(item_code=item_code, qty=-1, rate=100, is_return=1, do_not_save=1)
 		pos_return.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": -100})

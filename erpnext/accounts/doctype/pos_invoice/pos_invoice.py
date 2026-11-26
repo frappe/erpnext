@@ -13,6 +13,7 @@ from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form, getdate
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext import _refuse
+from erpnext.accounts.default_accounts import CASH, get_default_account
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
@@ -791,9 +792,7 @@ class POSInvoice(SalesInvoice):
 				TaxService(self).set_taxes()
 
 		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value(
-				"Company", self.company, "default_cash_account"
-			)
+			self.account_for_change_amount = get_default_account(self.company, CASH)
 
 		return profile
 
