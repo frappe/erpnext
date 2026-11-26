@@ -3147,7 +3147,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		for gle in get_gl_entries(scr.doctype, scr.name):
 			balances[gle.account] += gle.debit - gle.credit
 
-		stock_adjustment_account = frappe.get_cached_value("Company", company, "stock_adjustment_account")
+		stock_adjustment_account = get_default_account(company, STOCK_ADJUSTMENT)
 		self.assertEqual(flt(balances[stock_adjustment_account], 2), 0.1)
 
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
