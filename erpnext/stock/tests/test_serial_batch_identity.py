@@ -18,13 +18,7 @@ from erpnext.stock.doctype.pick_list.pick_list import (
 	get_items_with_location_and_quantity,
 	get_pick_list_holders,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_available_serial_nos,
-	get_batch_nos_from_sre,
-	get_reserved_serial_nos_for_pos,
-	get_serial_batch_numbers,
-	get_serial_batch_scan,
-)
+from erpnext.stock.doctype.serial_and_batch_bundle.api import get_serial_batch_numbers, get_serial_batch_scan
 from erpnext.stock.doctype.serial_no.serial_no import auto_fetch_serial_number, get_pos_reserved_serial_nos
 from erpnext.stock.doctype.stock_entry.services.disassemble import (
 	DisassembleStockEntry,
@@ -39,6 +33,9 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
 from erpnext.stock.get_item_details import get_filtered_serial_nos, update_stock
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_nos_from_sre
+from erpnext.stock.serial_batch_bundle.availability.reservations import get_reserved_serial_nos_for_pos
+from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 from erpnext.stock.utils import get_stock_balance

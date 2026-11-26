@@ -442,7 +442,7 @@ def get_expired_batch_items():
 
 
 def _enrich_expired_batches_with_stock(expired_batches):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+	from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 
 	expired_batches_stock = get_auto_batch_nos(
 		frappe._dict({"batch_no": list(expired_batches.keys()), "for_stock_levels": True})

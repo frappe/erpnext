@@ -21,12 +21,10 @@ from erpnext.controllers.sales_and_purchase_return import (
 	make_serial_batch_bundle_for_return,
 	remove_picked_serial_batches,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	combine_datetime,
-	get_batch_qty_for_stock,
-	get_type_of_transaction,
-)
+from erpnext.stock.doctype.serial_and_batch_bundle.api import get_type_of_transaction
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
 from erpnext.stock.serial_batch_bundle import add_picked_batches
+from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 

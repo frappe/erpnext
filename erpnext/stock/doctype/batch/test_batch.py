@@ -131,12 +131,10 @@ class TestBatch(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
-		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
 		)
+		from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 
 		invoice_type = frappe.db.get_single_value("POS Settings", "invoice_type")
 		session_user = frappe.session.user

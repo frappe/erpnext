@@ -16,7 +16,7 @@ frappe.ui.form.on("Quality Inspection", {
 
 		return frappe
 			.xcall(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_scan",
+				"erpnext.stock.doctype.serial_and_batch_bundle.api.get_serial_batch_scan",
 				{
 					item_code,
 					number,

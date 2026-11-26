@@ -13,10 +13,8 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 import erpnext
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	combine_datetime,
-	get_batch_qty_for_stock,
-)
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
+from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -527,10 +525,8 @@ def get_pos_reserved_batch_qty(filters: dict | str):
 
 
 def get_available_batches(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		combine_datetime,
-		get_auto_batch_nos,
-	)
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
+	from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 
 	if kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
