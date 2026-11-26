@@ -107,6 +107,141 @@ class TestShippingRule(ERPNextTestSuite):
 			calculate_taxes_and_totals(so)
 			self.assertEqual(so.taxes[0].base_tax_amount, 50)
 
+	def test_switching_shipping_rule_replaces_previous_charge(self):
+		rule_a, rule_b = create_switch_shipping_rules()
+
+		so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+		so.set("taxes", [])
+		so.shipping_rule = rule_a.name
+		so.apply_shipping_rule()
+		append_tax_on_row(so, "1")
+
+		so.shipping_rule = rule_b.name
+		so.apply_shipping_rule(previous_shipping_rule=rule_a.name)
+
+		self.assertEqual(len(so.taxes), 2)
+		self.assertEqual(so.taxes[0].account_head, rule_b.account)
+		self.assertEqual(so.taxes[0].description, rule_b.label)
+		self.assertEqual(so.taxes[0].tax_amount, 250)
+		self.assertEqual(so.taxes[1].tax_amount, 25)
+		self.assertEqual(so.grand_total, 1275)
+
+	def test_switching_shipping_rule_on_save_replaces_previous_charge(self):
+		rule_a, rule_b = create_switch_shipping_rules()
+
+		so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+		so.set("taxes", [])
+		so.shipping_rule = rule_a.name
+		so.insert()
+
+		so.shipping_rule = rule_b.name
+		so.save()
+
+		self.assertEqual(len(so.taxes), 1)
+		self.assertEqual(so.taxes[0].account_head, rule_b.account)
+		self.assertEqual(so.grand_total, 1250)
+
+	def test_switching_shipping_rule_replaces_template_charge(self):
+		rule_a, rule_b = create_switch_shipping_rules()
+
+		so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+		so.set("taxes", [])
+		append_actual_charge(so, rule_a.account, "Shipping Charges", 30)
+		so.shipping_rule = rule_a.name
+		so.apply_shipping_rule()
+
+		so.shipping_rule = rule_b.name
+		so.apply_shipping_rule(previous_shipping_rule=rule_a.name)
+
+		self.assertEqual(len(so.taxes), 1)
+		self.assertEqual(so.taxes[0].account_head, rule_b.account)
+		self.assertEqual(so.grand_total, 1250)
+
+	def test_applying_shipping_rule_keeps_charge_on_other_rule_account(self):
+		rule_a, rule_b = create_switch_shipping_rules()
+
+		so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+		so.set("taxes", [])
+		append_actual_charge(so, rule_b.account, "Customs Duty", 30)
+		so.shipping_rule = rule_a.name
+		so.apply_shipping_rule()
+
+		self.assertEqual(len(so.taxes), 2)
+		self.assertEqual(so.taxes[0].account_head, rule_b.account)
+		self.assertEqual(so.taxes[0].tax_amount, 30)
+		self.assertEqual(so.grand_total, 1130)
+
+	def test_switching_shipping_rule_keeps_charge_before_dependent_tax(self):
+		rule_a, rule_b = create_switch_shipping_rules()
+
+		so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+		so.set("taxes", [])
+		append_actual_charge(so, rule_a.account, rule_a.label, 100)
+		append_tax_on_row(so, "1")
+		append_actual_charge(so, rule_b.account, rule_b.label, 250)
+
+		so.shipping_rule = rule_b.name
+		so.apply_shipping_rule(previous_shipping_rule=rule_a.name)
+		so.insert()
+
+		self.assertEqual(len(so.taxes), 2)
+		self.assertEqual(so.taxes[0].account_head, rule_b.account)
+		self.assertEqual(so.taxes[1].row_id, "1")
+		self.assertEqual(so.grand_total, 1275)
+
+
+def create_switch_shipping_rules():
+	return (
+		create_fixed_shipping_rule("_Test Shipping Rule - Switch A", 100),
+		create_fixed_shipping_rule(
+			"_Test Shipping Rule - Switch B", 250, account="_Test Account Customs Duty - _TC"
+		),
+	)
+
+
+def append_actual_charge(doc, account, description, amount):
+	doc.append(
+		"taxes",
+		{
+			"charge_type": "Actual",
+			"account_head": account,
+			"cost_center": "_Test Cost Center - _TC",
+			"description": description,
+			"tax_amount": amount,
+		},
+	)
+
+
+def append_tax_on_row(doc, row_id):
+	doc.append(
+		"taxes",
+		{
+			"charge_type": "On Previous Row Amount",
+			"row_id": row_id,
+			"account_head": "_Test Account Excise Duty - _TC",
+			"description": "Excise Duty",
+			"rate": 10,
+		},
+	)
+
+
+def create_fixed_shipping_rule(label, amount, account="_Test Account Shipping Charges - _TC"):
+	if frappe.db.exists("Shipping Rule", label):
+		return frappe.get_doc("Shipping Rule", label)
+
+	return frappe.get_doc(
+		{
+			"doctype": "Shipping Rule",
+			"label": label,
+			"shipping_rule_type": "Selling",
+			"company": "_Test Company",
+			"calculate_based_on": "Fixed",
+			"shipping_amount": amount,
+			"account": account,
+			"cost_center": "_Test Cost Center - _TC",
+		}
+	).insert(ignore_permissions=True)
+
 
 def create_shipping_rule(shipping_rule_type, shipping_rule_name):
 	if frappe.db.exists("Shipping Rule", shipping_rule_name):

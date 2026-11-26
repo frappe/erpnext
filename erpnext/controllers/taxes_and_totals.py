@@ -543,7 +543,8 @@ class calculate_taxes_and_totals:
 
 		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
-			shipping_rule.apply(self.doc)
+			doc_before_save = self.doc.get_doc_before_save()
+			shipping_rule.apply(self.doc, doc_before_save.get("shipping_rule") if doc_before_save else None)
 
 			self.calculate_discounted_totals()
 

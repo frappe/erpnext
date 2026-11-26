@@ -7,7 +7,7 @@
 import frappe
 from frappe import _, msgprint, throw
 from frappe.model.document import Document
-from frappe.utils import flt, fmt_money
+from frappe.utils import cstr, flt, fmt_money
 
 import erpnext
 
@@ -99,7 +99,7 @@ class ShippingRule(Document):
 				ManyBlankToValuesError,
 			)
 
-	def apply(self, doc):
+	def apply(self, doc, previous_shipping_rule=None):
 		"""Apply shipping rule on given doc. Called from accounts controller"""
 
 		shipping_amount = 0.0
@@ -128,7 +128,7 @@ class ShippingRule(Document):
 		if doc.currency != doc.company_currency:
 			shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
 
-		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
+		self.add_shipping_rule_to_tax_table(doc, shipping_amount, previous_shipping_rule)
 
 	def get_net_total(self, doc):
 		"""Net total before a Grand Total discount, which depends on the shipping charge itself."""
@@ -172,7 +172,7 @@ class ShippingRule(Document):
 					)
 				)
 
-	def add_shipping_rule_to_tax_table(self, doc, shipping_amount):
+	def add_shipping_rule_to_tax_table(self, doc, shipping_amount, previous_shipping_rule=None):
 		shipping_charge = {
 			"charge_type": "Actual",
 			"account_head": self.account,
@@ -202,7 +202,24 @@ class ShippingRule(Document):
 			)
 
 		existing_shipping_charge = doc.get("taxes", filters=shipping_charge_filters)
-		if existing_shipping_charge:
+		previous_rule_charges = []
+		if previous_shipping_rule and previous_shipping_rule != self.name:
+			previous_rule_charges = [
+				d
+				for d in get_shipping_rule_charges(doc, previous_shipping_rule, shipping_charge_filters)
+				if d not in existing_shipping_charge
+			]
+
+		if previous_rule_charges:
+			# keep the earliest row, so rows referring to the others by row_id still follow it
+			charges = sorted(existing_shipping_charge[-1:] + previous_rule_charges, key=lambda d: d.idx)
+			shipping_row = charges.pop(0)
+			if shipping_row not in existing_shipping_charge:
+				shipping_charge.pop("doctype")
+				shipping_row.update({**shipping_charge, "description": self.label})
+			shipping_row.tax_amount = shipping_amount
+			remove_charges(doc, charges, shipping_row)
+		elif existing_shipping_charge:
 			# take the last record found
 			existing_shipping_charge[-1].tax_amount = shipping_amount
 		else:
@@ -252,3 +269,26 @@ class ShippingRule(Document):
 				)
 
 			msgprint("\n".join(messages), raise_exception=OverlappingConditionError)
+
+
+def get_shipping_rule_charges(doc, shipping_rule, shipping_charge_filters):
+	rule = frappe.db.get_value("Shipping Rule", shipping_rule, ["account", "cost_center"], as_dict=True)
+	if not rule:
+		return []
+
+	filters = {**shipping_charge_filters, "account_head": rule.account, "cost_center": rule.cost_center}
+	if not rule.cost_center:
+		filters["cost_center"] = ("in", (None, "", erpnext.get_default_cost_center(doc.company)))
+
+	return doc.get("taxes", filters=filters)
+
+
+def remove_charges(doc, charges, shipping_row):
+	"""Remove charges and repoint the rows that refer to any charge by row_id."""
+	charge_at_row = {cstr(d.idx): d for d in doc.get("taxes")}
+	for charge in charges:
+		doc.remove(charge)
+
+	for tax in doc.get("taxes"):
+		if referred_charge := charge_at_row.get(cstr(tax.row_id)):
+			tax.row_id = cstr((shipping_row if referred_charge in charges else referred_charge).idx)
