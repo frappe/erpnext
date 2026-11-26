@@ -24,6 +24,7 @@ from frappe.utils import (
 from frappe.utils.nestedset import NestedSet
 
 import erpnext
+from erpnext.utilities import get_email_to_store
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -379,7 +380,7 @@ class Employee(NestedSet):
 		preferred_email_field = frappe.scrub(self.prefered_contact_email)
 		self.prefered_email = self.get(preferred_email_field) if preferred_email_field else None
 		if preferred_email_field == "user_id" and self.prefered_email:
-			self.prefered_email = get_email_address(self.prefered_email)
+			self.prefered_email = get_email_to_store(self.prefered_email)
 
 	def validate_status(self):
 		if self.status != "Active" and self.has_value_changed("status"):
@@ -889,7 +890,7 @@ def _get_contact_details(employee: str) -> dict:
 		contact_data.get("prefered_email")
 		or contact_data.get("company_email")
 		or contact_data.get("personal_email")
-		or (contact_data.user_id and get_email_address(contact_data.user_id))
+		or (contact_data.user_id and get_email_to_store(contact_data.user_id))
 	)
 
 	return {
