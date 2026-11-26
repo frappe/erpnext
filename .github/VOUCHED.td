@@ -12,7 +12,6 @@
 #   - Optional details after a space following the handle.
 Afsalsyed
 akhtarmohsin
-Copilot
 dependabot[bot]
 ervishnucs
 gajjug004
