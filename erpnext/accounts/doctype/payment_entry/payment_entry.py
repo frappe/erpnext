@@ -41,7 +41,6 @@ from erpnext.accounts.party import (
 	complete_contact_details,
 	get_default_contact,
 	get_party_account,
-	get_party_account_currency,
 	validate_party_company,
 )
 from erpnext.accounts.utils import (
@@ -2772,9 +2771,11 @@ def get_party_balance(company: str, party_type: str, party: str, date: str) -> d
 	if party_type not in ("Customer", "Supplier") or not frappe.has_permission(party_type, "read", party):
 		return None
 
+	validate_party_company(party_type, party, company)
+	party_account = get_party_account(party_type, party, company)
 	return {
 		"balance": get_balance_on(date=date, party_type=party_type, party=party, company=company),
-		"currency": get_party_account_currency(party_type, party, company),
+		"currency": get_account_currency(party_account),
 	}
 
 

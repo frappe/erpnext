@@ -1211,6 +1211,9 @@ frappe.ui.form.on("Payment Entry", {
 		if (!frm.doc.paid_from_account_currency || !frm.doc.paid_to_account_currency) return;
 
 		const amount = flt(total, precision("paid_amount"));
+		const party_amount_field = frm.doc.payment_type == "Receive" ? "paid_amount" : "received_amount";
+		if (flt(frm.doc[party_amount_field], precision(party_amount_field)) == amount) return;
+
 		if (frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
 			return frm.set_value("paid_amount", amount);
 		}
