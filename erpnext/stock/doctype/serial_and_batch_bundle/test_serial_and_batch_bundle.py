@@ -16,7 +16,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.api import (
 from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import resolve_csv_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	SerialNoDuplicateError,
-	combine_datetime,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.services.batch_stock import BundleBatchStock
 from erpnext.stock.doctype.serial_and_batch_bundle.services.validation import BundleValidation
@@ -29,6 +28,7 @@ from erpnext.stock.serial_batch_bundle.availability.batches import (
 from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_serial_nos_based_on_posting_date
 from erpnext.stock.serial_batch_bundle.bundle_entries import parse_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.utils import get_combine_datetime
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
@@ -53,7 +53,7 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 			voucher_type="Purchase Receipt",
 			type_of_transaction="Inward",
-			posting_datetime=combine_datetime(today(), nowtime()),
+			posting_datetime=get_combine_datetime(today(), nowtime()),
 		)
 
 	def test_manual_serials_resolve_by_item_and_save(self):
@@ -195,7 +195,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			frappe._dict(
 				item_code=item_code,
 				warehouse=warehouse,
-				posting_datetime=combine_datetime(posting_date, "11:00:00"),
+				posting_datetime=get_combine_datetime(posting_date, "11:00:00"),
 			),
 			[serial_ids[1]],
 		)
@@ -374,7 +374,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertEqual(flt(stock_value_difference, 2), -500)
 
-	@patch("erpnext.stock.serial_batch_bundle.SERIAL_NO_QUERY_BATCH_SIZE", 1)
+	@patch("erpnext.stock.serial_batch_bundle.valuation.SERIAL_NO_QUERY_BATCH_SIZE", 1)
 	def test_outward_serial_valued_at_latest_inward_rate_in_warehouse(self):
 		item_code = make_item(
 			"_Test Serial Latest Inward Rate Item",
@@ -2130,7 +2130,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			BatchNegativeStockError,
-			SerialandBatchBundle,
 		)
 
 		item_code = "Test Hist Neg Batch Item"
@@ -2159,7 +2158,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			posting_date=add_days(today(), -365),
 			posting_time="10:00:00",
 		)
-		with patch.object(SerialandBatchBundle, "validate_negative_batch"):
+		with patch.object(BundleBatchStock, "validate_negative_batch"):
 			make_stock_entry(
 				item_code=item_code,
 				qty=5,
@@ -2843,7 +2842,8 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			)
 
 	def test_get_auto_data_limits_serial_query_to_requested_quantity(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle import serial_and_batch_bundle
+		from erpnext.stock.doctype.serial_and_batch_bundle import api
+		from erpnext.stock.serial_batch_bundle.availability import serial_nos as available_serial_nos
 
 		item = make_item(
 			"_Test Auto Data Limited Serial Item",
@@ -2870,14 +2870,12 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			with (
 				as_user(fenced),
 				patch.object(
-					serial_and_batch_bundle,
+					available_serial_nos,
 					"get_serial_nos_based_on_filters",
-					wraps=serial_and_batch_bundle.get_serial_nos_based_on_filters,
+					wraps=available_serial_nos.get_serial_nos_based_on_filters,
 				) as serial_query,
 			):
-				rows = serial_and_batch_bundle.get_auto_data(
-					item_code=item, has_serial_no=1, qty=2, warehouse=warehouse
-				)
+				rows = api.get_auto_data(item_code=item, has_serial_no=1, qty=2, warehouse=warehouse)
 
 			self.assertEqual(serial_query.call_args.args[3].qty, 2)
 			self.assertEqual([row.warehouse for row in rows], ["_Test Warehouse 1 - _TC"] * 2)
@@ -3188,7 +3186,7 @@ def make_serial_batch_bundle(kwargs):
 
 	posting_datetime = None
 	if kwargs.get("posting_date"):
-		posting_datetime = combine_datetime(kwargs.posting_date, kwargs.posting_time or nowtime())
+		posting_datetime = get_combine_datetime(kwargs.posting_date, kwargs.posting_time or nowtime())
 
 	company = kwargs.get("company")
 	if not company and kwargs.get("warehouse"):
@@ -3247,7 +3245,7 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 					if bundle:
 						bundles[bundle] = serials
 
-				module = "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle"
+				module = "erpnext.stock.serial_batch_bundle.availability.serial_nos"
 				with (
 					patch(f"{module}.get_stock_ledgers_for_serial_nos", return_value=entries),
 					patch(f"{module}.get_bundle_wise_serial_nos", return_value=bundles),

@@ -261,7 +261,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			returned_against="Original-Row",
 			entries=[{"serial_no": serial.name}],
 		)
-		with patch.object(bundle, "get_orignal_document_data", return_value=[original]):
+		with patch.object(BundleReturn, "get_orignal_document_data", return_value=[original]):
 			BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 			bundle.item_code = self.other_item.name
 			bundle.entries[0].serial_no = other_serial.name
@@ -286,9 +286,9 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			entries=[{"serial_no": serial.name}],
 		)
 		with (
-			patch.object(bundle, "get_orignal_document_data", return_value=[original]),
+			patch.object(BundleReturn, "get_orignal_document_data", return_value=[original]),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_nos_from_bundle",
+				"erpnext.stock.doctype.serial_and_batch_bundle.services.returns.get_serial_nos_from_bundle",
 				return_value=[serial.name],
 			),
 		):
@@ -405,7 +405,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			entries=[{"serial_no": kept.name}, {"serial_no": removed.name}],
 		)
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_stock_reco_details",
+			"erpnext.stock.doctype.serial_and_batch_bundle.services.future_transactions.get_stock_reco_details",
 			return_value=row,
 		):
 			for numbers, expected in (
@@ -1064,7 +1064,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					return_value=[transfer, consumption],
 				),
 				patch(
-					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_voucher_wise_serial_batch_from_bundle",
+					"erpnext.stock.serial_batch_bundle.bundle_entries.get_voucher_wise_serial_batch_from_bundle",
 					return_value=bundle_data,
 				),
 			):
@@ -1096,7 +1096,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				return_value=rows,
 			),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_voucher_wise_serial_batch_from_bundle",
+				"erpnext.stock.serial_batch_bundle.bundle_entries.get_voucher_wise_serial_batch_from_bundle",
 				return_value=bundle_data,
 			),
 		):
@@ -1305,7 +1305,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		other_warehouse.db_set("warehouse", "_Test Warehouse 1 - _TC")
 		reserved = [serial.name for serial in [*serials, other_item, other_warehouse]]
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.reservations.get_reserved_serial_nos_for_pos",
 			return_value=reserved,
 		):
 			numbers = get_pos_reserved_serial_nos(
@@ -1491,7 +1491,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			return get_pos_reserved_serial_nos({"item_code": self.item.name, "warehouse": warehouse})
 
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.reservations.get_reserved_serial_nos_for_pos",
 			return_value=[serial.name],
 		):
 			with self.set_user(accounts_user):
@@ -1546,7 +1546,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		for serial in (reserved, selected, available, other):
 			serial.db_set("warehouse", warehouse)
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.reservations.get_reserved_serial_nos_for_pos",
 			return_value=[reserved.name],
 		):
 			self.assertEqual(
@@ -1599,7 +1599,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with (
 			patch("frappe.get_all", return_value=[row]),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle._get_serial_batch_ledgers",
+				"erpnext.stock.serial_batch_bundle.availability.reservations._get_serial_batch_ledgers",
 				return_value=[frappe._dict(serial_no=serial.name, name="POS-Bundle")],
 			),
 			patch(
@@ -1661,7 +1661,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			return [row.serial_no for row in get_available_serial_nos(kwargs)]
 
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.serial_nos.get_reserved_serial_nos_for_pos",
 			return_value=[reserved.name],
 		):
 			self.assertEqual(available([requested.name]), [requested.name])

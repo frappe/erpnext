@@ -46,7 +46,7 @@ class TestSerialBatchMessages(ERPNextTestSuite):
 
 	def test_existing_stock_message_shows_physical_serial(self):
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_available_serial_nos",
+			"erpnext.stock.doctype.serial_and_batch_bundle.services.validation.get_available_serial_nos",
 			return_value=[frappe._dict(serial_no=self.serial.name, warehouse=self.bundle.warehouse)],
 		):
 			with self.assertRaises(SerialNoDuplicateError) as error:
@@ -74,7 +74,7 @@ class TestSerialBatchMessages(ERPNextTestSuite):
 		self.bundle.returned_against = "Original Receipt Row"
 		self.bundle.set("entries", [{"batch_no": self.batch.name, "qty": -1}])
 		with patch.object(
-			self.bundle,
+			BundleReturn,
 			"get_orignal_document_data",
 			return_value=[frappe._dict(batch_no=original_batch.name, stock_qty=1)],
 		):
