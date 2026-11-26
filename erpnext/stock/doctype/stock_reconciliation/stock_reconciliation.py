@@ -84,12 +84,11 @@ class StockReconciliation(StockController):
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		if self.purpose == ADJUSTMENT_ENTRY:
 			self.validate_adjustment_entry()
 			return
-
-		sbb = SerialBatchBundleService(self)
 
 		self.validate_standard_cost_items()
 		self.validate_items_exist()
@@ -102,7 +101,7 @@ class StockReconciliation(StockController):
 		self.validate_posting_time()
 		self.set_current_serial_and_batch_bundle()
 		self.set_new_serial_and_batch_bundle()
-		sbb.validate_duplicate_serial_and_batch_bundle("items")
+		SerialBatchValidationService(self).validate_duplicate_serial_and_batch_bundle("items")
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.change_row_indexes()
@@ -110,7 +109,7 @@ class StockReconciliation(StockController):
 		self.validate_opening_stock()
 		self.validate_customer_provided_item()
 		self.set_zero_value_for_customer_provided_items()
-		sbb.clean_serial_nos()
+		SerialBatchBundleService(self).clean_serial_nos()
 		self.set_total_qty_and_amount()
 		validate_putaway_capacity(self)
 		self.validate_inventory_dimension()

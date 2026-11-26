@@ -1160,7 +1160,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 	def test_serial_and_batch_bundle_company(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		item = make_item(
 			"Test Serial and Batch Bundle Company Item",
@@ -1209,7 +1209,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					frappe.ValidationError,
 					"Company _Test Company 1 does not match with the company _Test Company",
 				):
-					SerialBatchBundleService(pr).validate_warehouse_of_sabb()
+					SerialBatchValidationService(pr).validate_warehouse_of_sabb()
 
 	def test_auto_cancel_serial_and_batch(self):
 		item_code = make_item(

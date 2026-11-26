@@ -453,7 +453,7 @@ class TestBatch(ERPNextTestSuite):
 
 	def test_expired_packed_item_batch_cannot_be_delivered(self):
 		from erpnext.exceptions import BatchExpiredError
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		receipt = self.test_purchase_receipt(10)
 		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
@@ -474,7 +474,7 @@ class TestBatch(ERPNextTestSuite):
 		row.serial_and_batch_bundle = None
 
 		self.assertRaises(
-			BatchExpiredError, SerialBatchBundleService(delivery_note).validate_outward_bundle_batches
+			BatchExpiredError, SerialBatchValidationService(delivery_note).validate_outward_bundle_batches
 		)
 
 	def test_batch_stock_endpoints_need_batch_access(self):
