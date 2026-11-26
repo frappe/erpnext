@@ -43,7 +43,7 @@ def validate_desk_user():
 
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- developer mode only
-@frappe.whitelist(methods=["POST"], allow_guest=True)
+@frappe.whitelist(methods=["POST"], allow_guest=True, rate_limit=None)
 def get_context_for_dev():
 	if not frappe.conf.developer_mode:
 		frappe.throw(_("This method is only meant for developer mode"))
