@@ -278,7 +278,7 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 				"options": "Project",
 				"width": 80,
 			},
-			{"label": _("Owner"), "fieldname": "owner", "fieldtype": "Data", "width": 100},
+			{"label": _("Owner"), "fieldname": "owner", "fieldtype": "Link", "options": "User", "width": 100},
 			{
 				"label": _("Sales Order"),
 				"fieldname": "sales_order",

@@ -7,7 +7,7 @@ from frappe import _
 from frappe.permissions import get_user_permissions
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, DateDiff, Max, Sum
-from frappe.utils import cint, nowdate
+from frappe.utils import cint, get_user_display_id, nowdate
 from pypika import Order
 from pypika.analytics import RowNumber
 
@@ -136,7 +136,7 @@ def check_doctype_access(doctype):
 	# roles fit Sales Order, but the report also offers Sales Invoice: block a mode the role cannot read
 	if not (frappe.has_permission(doctype, "select") or frappe.has_permission(doctype, "read")):
 		frappe.throw(
-			_("User {0} has no read or select permission on {1}").format(frappe.session.user, _(doctype)),
+			_("User {0} has no read or select permission on {1}").format(get_user_display_id(), _(doctype)),
 			frappe.PermissionError,
 		)
 

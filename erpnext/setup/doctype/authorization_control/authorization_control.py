@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, session
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import comma_or, cstr, flt, has_common
+from frappe.utils import comma_or, cstr, flt, get_user_display_id, has_common
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -60,7 +60,11 @@ class AuthorizationControl(TransactionBase):
 				appr_users, [session["user"]]
 			):
 				frappe.msgprint(_("Not authorized since {0} exceeds limits").format(_(based_on)))
-				frappe.throw(_("Can be approved by {0}").format(comma_or(appr_roles + appr_users)))
+				frappe.throw(
+					_("Can be approved by {0}").format(
+						comma_or(appr_roles + [get_user_display_id(user) for user in appr_users])
+					)
+				)
 
 	def validate_auth_rule(self, doctype_name, total, based_on, cond, company, master_name=""):
 		chk = 1

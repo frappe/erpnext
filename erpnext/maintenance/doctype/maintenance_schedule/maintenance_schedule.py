@@ -6,7 +6,16 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Max
-from frappe.utils import add_days, cint, cstr, date_diff, escape_html, formatdate, getdate
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	date_diff,
+	escape_html,
+	formatdate,
+	get_user_display_id,
+	getdate,
+)
 
 from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
@@ -126,7 +135,7 @@ class MaintenanceSchedule(TransactionBase):
 				frappe.msgprint(
 					_(
 						"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}"
-					).format(self.owner, "<br>" + "<br>".join(no_email_sp))
+					).format(get_user_display_id(self.owner), "<br>" + "<br>".join(no_email_sp))
 				)
 
 			scheduled_date = frappe.db.get_all(

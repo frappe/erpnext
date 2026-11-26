@@ -10,7 +10,7 @@ from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
 from frappe.query_builder.functions import Concat_ws, Max, Min, Sum
-from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
+from frappe.utils import add_days, cint, flt, formatdate, get_datetime, get_user_display_id, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
@@ -447,7 +447,7 @@ class StockLedgerEntry(Document):
 					).format(frappe.bold(self.item_code), frappe.bold(self.warehouse))
 
 					msg += "<br><br>" + _("Please contact any of the following users for this transaction.")
-					msg += "<br>" + "<br>".join(authorized_users)
+					msg += "<br>" + "<br>".join(get_user_display_id(user) for user in authorized_users)
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
 	def on_cancel(self):

@@ -9,7 +9,7 @@ from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder import functions as fn
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt
+from frappe.utils import flt, get_user_display_id
 
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
@@ -127,7 +127,9 @@ class POSClosingEntry(StatusUpdater):
 				invalid_row.setdefault("msg", []).append(_("POS Invoice is not submitted"))
 			if pos_invoice.owner != self.user:
 				invalid_row.setdefault("msg", []).append(
-					_("POS Invoice isn't created by user {0}").format(frappe.bold(self.owner))
+					_("POS Invoice isn't created by user {0}").format(
+						frappe.bold(get_user_display_id(self.owner))
+					)
 				)
 
 			if invalid_row.get("msg"):
@@ -192,7 +194,9 @@ class POSClosingEntry(StatusUpdater):
 				invalid_row.setdefault("msg", []).append(_("Sales Invoice is not submitted"))
 			if sales_invoice.owner != self.user:
 				invalid_row.setdefault("msg", []).append(
-					_("Sales Invoice isn't created by user {0}").format(frappe.bold(self.owner))
+					_("Sales Invoice isn't created by user {0}").format(
+						frappe.bold(get_user_display_id(self.owner))
+					)
 				)
 
 			if invalid_row.get("msg"):

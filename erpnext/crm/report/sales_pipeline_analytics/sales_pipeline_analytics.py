@@ -59,7 +59,14 @@ class SalesPipelineAnalytics:
 	def set_pipeline_based_on_column(self):
 		if self.filters.get("pipeline_by") == "Owner":
 			self.columns.insert(
-				0, {"fieldname": "opportunity_owner", "label": _("Opportunity Owner"), "width": 200}
+				0,
+				{
+					"fieldname": "opportunity_owner",
+					"label": _("Opportunity Owner"),
+					"fieldtype": "Link",
+					"options": "User",
+					"width": 200,
+				},
 			)
 
 		elif self.filters.get("pipeline_by") == "Sales Stage":

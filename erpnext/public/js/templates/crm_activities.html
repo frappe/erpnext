@@ -54,7 +54,7 @@
 						{% if(tasks[i].allocated_to) { %}
 							<div class="text-muted  ml-1">
 								{{ __("Allocated To:") }}
-								{%= frappe.utils.escape_html(tasks[i].allocated_to) %}
+								{%= frappe.utils.escape_html(frappe.user.full_name(tasks[i].allocated_to)) %}
 							</div>
 						{% } %}
 						</div>

@@ -26,7 +26,7 @@ def execute(filters=None):
 def get_pos_columns():
 	return [
 		_("Date") + ":Date:80",
-		_("Owner") + ":Data:200",
+		_("Owner") + ":Link/User:200",
 		_("Payment Mode") + ":Data:240",
 		_("Sales and Returns") + ":Currency/currency:120",
 		_("Taxes") + ":Currency/currency:120",
@@ -42,7 +42,7 @@ def get_columns(filters):
 	else:
 		return [
 			_("Date") + ":Date:80",
-			_("Owner") + ":Data:200",
+			_("Owner") + ":Link/User:200",
 			_("Payment Mode") + ":Data:240",
 			_("Sales and Returns") + ":Currency/currency:120",
 			_("Taxes") + ":Currency/currency:120",
