@@ -9,6 +9,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import Bracket, LiteralValue
 
 import erpnext
+from erpnext.accounts.default_accounts import STOCK_RECEIVED_BUT_NOT_BILLED, get_default_account
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
 	apply_order_by_conditions,
 	get_grouped_data,
@@ -359,7 +360,10 @@ def get_items(filters, additional_table_columns):
 
 
 def get_aii_accounts():
-	return dict(frappe.get_all("Company", fields=["name", "stock_received_but_not_billed"], as_list=True))
+	return {
+		company: get_default_account(company, STOCK_RECEIVED_BUT_NOT_BILLED)
+		for company in frappe.get_all("Company", pluck="name")
+	}
 
 
 def get_purchase_receipts_against_purchase_order(item_list):

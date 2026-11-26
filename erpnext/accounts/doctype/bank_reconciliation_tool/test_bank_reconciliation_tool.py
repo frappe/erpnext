@@ -8,6 +8,7 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, getdate, today
 
+from erpnext.accounts.default_accounts import EXCHANGE_GAIN_LOSS, get_default_account, set_default_account
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
 	clear_clearing_date,
@@ -431,10 +432,8 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		self.create_usd_payable_account()
 		self.create_usd_receivable_account()
 		self.set_party_account("Supplier", self.supplier, self.creditors_usd)
-		if not frappe.db.get_value("Company", self.company, "exchange_gain_loss_account"):
-			frappe.db.set_value(
-				"Company", self.company, "exchange_gain_loss_account", "Exchange Gain/Loss - _TC"
-			)
+		if not get_default_account(self.company, EXCHANGE_GAIN_LOSS):
+			set_default_account(self.company, EXCHANGE_GAIN_LOSS, "Exchange Gain/Loss - _TC")
 
 	def set_party_account(self, party_type, party, account):
 		doc = frappe.get_doc(party_type, party)

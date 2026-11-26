@@ -7,15 +7,14 @@ import frappe
 from frappe import _, qb
 from frappe.utils import flt, get_link_to_form
 
+from erpnext.accounts.default_accounts import EXCHANGE_GAIN, EXCHANGE_LOSS, get_default_account
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.utils import create_gain_loss_journal, get_currency_precision
 
 
 def get_exchange_gain_loss_account(company: str, is_gain: bool) -> str | None:
-	fieldname = "exchange_gain_account" if is_gain else "exchange_loss_account"
-	return frappe.get_cached_value("Company", company, fieldname) or frappe.get_cached_value(
-		"Company", company, "exchange_gain_loss_account"
-	)
+	purpose = EXCHANGE_GAIN if is_gain else EXCHANGE_LOSS
+	return get_default_account(company, purpose)
 
 
 def gain_loss_journal_already_booked(

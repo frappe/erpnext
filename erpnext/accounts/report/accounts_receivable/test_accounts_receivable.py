@@ -4,6 +4,12 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.default_accounts import (
+	EXCHANGE_GAIN_LOSS,
+	PAYMENT_DISCOUNT,
+	UNREALIZED_EXCHANGE_GAIN_LOSS,
+	set_default_account,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	BLANK_ACCOUNTING_DIMENSION,
 )
@@ -542,7 +548,9 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		# Using Exchange Gain/Loss account for unrealized as well.
 		company_doc = frappe.get_doc("Company", self.company)
-		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
+		company_doc.set_default_account(
+			UNREALIZED_EXCHANGE_GAIN_LOSS, company_doc.get_default_account(EXCHANGE_GAIN_LOSS)
+		)
 		company_doc.save()
 
 		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
@@ -1629,7 +1637,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 				"discount": 10,
 			}
 		).insert()
-		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(self.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 		si = self.create_backdated_invoice_with_terms(
 			dict(
 				payment_term=term.name,

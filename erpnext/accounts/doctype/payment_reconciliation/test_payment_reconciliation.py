@@ -6,6 +6,15 @@ import frappe
 from frappe.utils import add_days, add_years, cint, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
 
+from erpnext.accounts.default_accounts import (
+	ADVANCE_PAID,
+	ADVANCE_RECEIVED,
+	EXCHANGE_GAIN,
+	EXCHANGE_LOSS,
+	PAYMENT_DISCOUNT,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -238,8 +247,8 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			parent_account="Indirect Expenses - _TC",
 			company=self.company,
 		)
-		frappe.db.set_value("Company", self.company, "exchange_gain_account", gain_account)
-		frappe.db.set_value("Company", self.company, "exchange_loss_account", loss_account)
+		set_default_account(self.company, EXCHANGE_GAIN, gain_account)
+		set_default_account(self.company, EXCHANGE_LOSS, loss_account)
 		return gain_account, loss_account
 
 	def create_foreign_currency_sales_invoice(self, conversion_rate):
@@ -920,7 +929,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 					],
 				}
 			).insert()
-		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+		set_default_account(self.company, PAYMENT_DISCOUNT, "Write Off - _TC")
 
 		si = self.create_sales_invoice(rate=200, do_not_submit=True)
 		si.payment_terms_template = "_Test Template With Discount On Second Term"
@@ -2323,14 +2332,8 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		"""
 		Reconcile an Advance payment against reverse payment, for a supplier.
 		"""
-		frappe.db.set_value(
-			"Company",
-			self.company,
-			{
-				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_paid_account": self.advance_payable_account,
-			},
-		)
+		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", 1)
+		set_default_account(self.company, ADVANCE_PAID, self.advance_payable_account)
 
 		self.supplier = "_Test Supplier"
 		amount = 4000
@@ -2454,10 +2457,10 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			self.company,
 			{
 				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_paid_account": self.advance_payable_account,
 				"reconciliation_takes_effect_on": "Advance Payment Date",
 			},
 		)
+		set_default_account(self.company, ADVANCE_PAID, self.advance_payable_account)
 
 		self.supplier = "_Test Supplier"
 		amount = 1500
@@ -2503,20 +2506,20 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			self.company,
 			[
 				"reconciliation_takes_effect_on",
-				"default_advance_paid_account",
 				"book_advance_payments_in_separate_party_account",
 			],
 			as_dict=True,
 		)
+		old_advance_paid_account = get_default_account(self.company, ADVANCE_PAID)
 		frappe.db.set_value(
 			"Company",
 			self.company,
 			{
 				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_paid_account": self.advance_payable_account,
 				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
 			},
 		)
+		set_default_account(self.company, ADVANCE_PAID, self.advance_payable_account)
 
 		self.supplier = "_Test Supplier"
 
@@ -2557,6 +2560,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		po.cancel()
 
 		frappe.db.set_value("Company", self.company, old_settings)
+		set_default_account(self.company, ADVANCE_PAID, old_advance_paid_account)
 
 	def test_advance_payment_reconciliation_against_journal_for_customer(self):
 		frappe.db.set_value(
@@ -2564,10 +2568,10 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			self.company,
 			{
 				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_received_account": self.advance_receivable_account,
 				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
 			},
 		)
+		set_default_account(self.company, ADVANCE_RECEIVED, self.advance_receivable_account)
 		amount = 200.0
 		je = self.create_journal_entry(self.debit_to, self.bank, amount)
 		je.accounts[0].cost_center = self.main_cc
@@ -2673,10 +2677,10 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			self.company,
 			{
 				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_paid_account": self.advance_payable_account,
 				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
 			},
 		)
+		set_default_account(self.company, ADVANCE_PAID, self.advance_payable_account)
 		amount = 200.0
 		je = self.create_journal_entry(self.creditors, self.bank, -amount)
 		je.accounts[0].cost_center = self.main_cc
@@ -2901,10 +2905,10 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			self.company,
 			{
 				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_received_account": self.advance_receivable_account,
 				"reconciliation_takes_effect_on": "Reconciliation Date",
 			},
 		)
+		set_default_account(self.company, ADVANCE_RECEIVED, self.advance_receivable_account)
 		inv_date = convert_to_date(add_days(nowdate(), -1))
 		adv_date = convert_to_date(add_days(nowdate(), -2))
 
@@ -3000,11 +3004,11 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			self.company,
 			[
 				"book_advance_payments_in_separate_party_account",
-				"default_advance_paid_account",
 				"reconciliation_takes_effect_on",
 			],
 			as_dict=True,
 		)
+		default_advance_paid_account = get_default_account(self.company, ADVANCE_PAID)
 		first_fy_start_date = frappe.db.get_value(
 			"Fiscal Year", {"disabled": 0}, [{"MIN": "year_start_date"}]
 		)
@@ -3020,10 +3024,10 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			self.company,
 			{
 				"book_advance_payments_in_separate_party_account": 1,
-				"default_advance_paid_account": self.advance_payable_account,
 				"reconciliation_takes_effect_on": "Oldest Of Invoice Or Advance",
 			},
 		)
+		set_default_account(self.company, ADVANCE_PAID, self.advance_payable_account)
 
 		self.supplier = "_Test Supplier"
 
@@ -3122,6 +3126,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(getdate(pe.references[1].reconcile_effect_on), getdate(pi2.posting_date))
 
 		frappe.db.set_value("Company", self.company, default_settings)
+		set_default_account(self.company, ADVANCE_PAID, default_advance_paid_account)
 
 	def test_foreign_currency_reverse_payment_entry_against_payment_entry_for_customer(self):
 		transaction_date = nowdate()

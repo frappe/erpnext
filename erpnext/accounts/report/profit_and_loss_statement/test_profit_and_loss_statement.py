@@ -7,6 +7,7 @@ import frappe
 from frappe.desk.query_report import export_query
 from frappe.utils import add_days, getdate, today
 
+from erpnext.accounts.default_accounts import INCOME, get_default_account
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	BLANK_ACCOUNTING_DIMENSION,
 )
@@ -119,7 +120,7 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		columns, data, *_ = execute(filters)
 		self.assertLessEqual({self.cost_center, second_cc}, {c.get("dimension_value") for c in columns})
 
-		income_account = frappe.db.get_value("Company", self.company, "default_income_account")
+		income_account = get_default_account(self.company, INCOME)
 		income_row = next((r for r in data if r.get("account") == income_account), None)
 		self.assertIsNotNone(income_row)
 
@@ -165,7 +166,7 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		blank_period_key = next(
 			period.key for period in period_list if period.from_date <= posting_date <= period.to_date
 		)
-		income_account = frappe.db.get_value("Company", self.company, "default_income_account")
+		income_account = get_default_account(self.company, INCOME)
 		income_row = next(row for row in execute(filters)[1] if row.get("account") == income_account)
 
 		self.assertEqual(income_row[blank_period_key], 125)
@@ -216,7 +217,7 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		)
 		export_query()
 		contents = frappe.response["filecontent"].decode()
-		sales_account = frappe.db.get_value("Company", self.company, "default_income_account")
+		sales_account = get_default_account(self.company, INCOME)
 
 		self.assertIn(sales_account, contents)
 

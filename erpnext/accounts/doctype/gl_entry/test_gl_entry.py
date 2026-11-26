@@ -5,6 +5,7 @@ import frappe
 from frappe.model.naming import parse_naming_series
 from frappe.utils import flt
 
+from erpnext.accounts.default_accounts import ROUND_OFF, set_default_account
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
 	set_amount_in_reporting_currency,
 )
@@ -64,7 +65,7 @@ class TestGLEntry(ERPNextTestSuite):
 		self.assertTrue(all(row.party_type == "User" and row.party == "Administrator" for row in entries))
 
 	def test_round_off_entry(self):
-		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
+		set_default_account("_Test Company", ROUND_OFF, "_Test Write Off - _TC")
 		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
 
 		jv = make_journal_entry(
@@ -95,7 +96,7 @@ class TestGLEntry(ERPNextTestSuite):
 		self.assertTrue(round_off_entry)
 
 	def test_existing_round_off_entry_is_kept_for_one_cent_imbalance(self):
-		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
+		set_default_account("_Test Company", ROUND_OFF, "_Test Write Off - _TC")
 		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
 
 		def make_entry(account, debit=0, credit=0):

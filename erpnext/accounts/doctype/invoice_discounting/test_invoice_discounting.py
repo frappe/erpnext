@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, flt, nowdate
 
+from erpnext.accounts.default_accounts import BANK, set_default_account
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.mapper import get_payment_entry_against_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -41,7 +42,7 @@ class TestInvoiceDiscounting(ERPNextTestSuite):
 			parent_account="Expenses - _TC",
 			company="_Test Company",
 		)
-		frappe.db.set_value("Company", "_Test Company", "default_bank_account", self.bank_account)
+		set_default_account("_Test Company", BANK, self.bank_account)
 
 	def test_total_amount(self):
 		inv1 = create_sales_invoice(rate=200)

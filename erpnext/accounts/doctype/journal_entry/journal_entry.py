@@ -12,6 +12,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
 
 import erpnext
+from erpnext.accounts.default_accounts import ADVANCE_PAID, ADVANCE_RECEIVED, BANK, CASH, get_default_account
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -198,10 +199,8 @@ class JournalEntry(AccountsController):
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])
 		advance_accounts = set()
-		advance_accounts.add(
-			frappe.get_cached_value("Company", self.company, "default_advance_received_account")
-		)
-		advance_accounts.add(frappe.get_cached_value("Company", self.company, "default_advance_paid_account"))
+		advance_accounts.add(get_default_account(self.company, ADVANCE_RECEIVED))
+		advance_accounts.add(get_default_account(self.company, ADVANCE_PAID))
 		if advance_accounts_used := journal_accounts & advance_accounts:
 			frappe.msgprint(
 				_(
@@ -1067,7 +1066,7 @@ def get_default_bank_cash_account(
 		account (of that type), otherwise return empty dict.
 		"""
 		if account_type == "Bank":
-			account = frappe.get_cached_value("Company", company, "default_bank_account")
+			account = get_default_account(company, BANK)
 			if not account:
 				account_list = frappe.get_all(
 					"Account", filters={"company": company, "account_type": "Bank", "is_group": 0}
@@ -1076,7 +1075,7 @@ def get_default_bank_cash_account(
 					account = account_list[0].name
 
 		elif account_type == "Cash":
-			account = frappe.get_cached_value("Company", company, "default_cash_account")
+			account = get_default_account(company, CASH)
 			if not account:
 				account_list = frappe.get_all(
 					"Account", filters={"company": company, "account_type": "Cash", "is_group": 0}

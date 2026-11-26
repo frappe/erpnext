@@ -11,6 +11,12 @@ from frappe.utils import cint, flt, get_link_to_form, getdate, now
 from frappe.utils.caching import request_cache
 
 import erpnext
+from erpnext.accounts.default_accounts import (
+	COST_OF_GOODS_SOLD,
+	ROUND_OFF,
+	ROUND_OFF_FOR_OPENING,
+	get_default_account,
+)
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_checks_for_pl_and_bs_accounts,
@@ -154,9 +160,8 @@ def process_gl_map(gl_map, merge_entries=True, precision=None, from_repost=False
 
 
 def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_repost=False):
-	round_off_account, default_currency = frappe.get_cached_value(
-		"Company", gl_map[0].company, ["round_off_account", "default_currency"]
-	)
+	default_currency = frappe.get_cached_value("Company", gl_map[0].company, "default_currency")
+	round_off_account = get_default_account(gl_map[0].company, ROUND_OFF)
 	if not precision:
 		precision = get_field_precision(
 			frappe.get_meta("GL Entry").get_field("debit"),
@@ -611,13 +616,13 @@ def update_accounting_dimensions(round_off_gle):
 
 
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use_company_default=False):
-	round_off_account, round_off_cost_center, round_off_for_opening = frappe.get_cached_value(
-		"Company", company, ["round_off_account", "round_off_cost_center", "round_off_for_opening"]
-	) or [None, None, None]
+	round_off_cost_center = frappe.get_cached_value("Company", company, "round_off_cost_center")
+	round_off_for_opening = get_default_account(company, ROUND_OFF_FOR_OPENING)
+	round_off_account = get_default_account(company, ROUND_OFF)
 
 	# Use expense account as fallback
 	if not round_off_account:
-		round_off_account = frappe.get_cached_value("Company", company, "default_expense_account")
+		round_off_account = get_default_account(company, COST_OF_GOODS_SOLD)
 
 	meta = frappe.get_meta(voucher_type)
 

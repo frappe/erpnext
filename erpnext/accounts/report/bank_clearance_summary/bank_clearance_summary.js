@@ -23,7 +23,7 @@ frappe.query_reports["Bank Clearance Summary"] = {
 			options: "Account",
 			reqd: 1,
 			default: frappe.defaults.get_user_default("Company")
-				? locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"]
+				? erpnext.utils.get_default_account(frappe.defaults.get_user_default("Company"), "BANK")
 				: "",
 			get_query: function () {
 				return {

@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.default_accounts import INVENTORY, get_default_account, set_default_account
 from erpnext.accounts.report.trial_balance.trial_balance import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -302,11 +303,9 @@ class TestTrialBalanceReport(ERPNextTestSuite):
 
 		user = make_restricted_user("test_trial_balance_account@example.com", "Account", permitted_account)
 		# a perpetual inventory company links an account the user is not permitted
-		inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
-		self.addCleanup(
-			frappe.db.set_value, "Company", "_Test Company", "default_inventory_account", inventory_account
-		)
-		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", "Stock In Hand - _TC")
+		inventory_account = get_default_account("_Test Company", INVENTORY)
+		self.addCleanup(set_default_account, "_Test Company", INVENTORY, inventory_account)
+		set_default_account("_Test Company", INVENTORY, "Stock In Hand - _TC")
 		frappe.set_user(user)
 		try:
 			total_row = execute(frappe._dict(filters))[1][-1]

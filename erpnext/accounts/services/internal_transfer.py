@@ -7,6 +7,8 @@ import frappe
 from frappe import _, bold
 from frappe.utils import cint, flt
 
+from erpnext.accounts.default_accounts import UNREALIZED_PROFIT_LOSS, get_default_account
+
 COUNTERPART_REFERENCE = {
 	"Sales Invoice": ("inter_company_invoice_reference", "Purchase Invoice"),
 	"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
@@ -48,9 +50,7 @@ class InternalTransferService:
 		if not self.is_internal_transfer() or self.doc.unrealized_profit_loss_account:
 			return
 
-		unrealized_profit_loss_account = frappe.get_cached_value(
-			"Company", self.doc.company, "unrealized_profit_loss_account"
-		)
+		unrealized_profit_loss_account = get_default_account(self.doc.company, UNREALIZED_PROFIT_LOSS)
 
 		if not unrealized_profit_loss_account:
 			frappe.throw(

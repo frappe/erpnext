@@ -17,7 +17,7 @@ frappe.dashboards.chart_sources["Account Balance Timeline"] = {
 			fieldtype: "Link",
 			options: "Account",
 			reqd: 1,
-			default: locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"],
+			default: erpnext.utils.get_default_account(frappe.defaults.get_user_default("Company"), "BANK"),
 			get_query: () => {
 				return {
 					filters: {

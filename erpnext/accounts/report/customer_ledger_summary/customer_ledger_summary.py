@@ -10,6 +10,7 @@ from frappe.utils import getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import Bracket, LiteralValue
 
+from erpnext.accounts.default_accounts import ROUND_OFF, get_default_account
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	BLANK_ACCOUNTING_DIMENSION,
 	get_accounting_dimensions,
@@ -437,7 +438,7 @@ class PartyLedgerSummaryReport:
 
 		invoice_dr_or_cr = "debit" if self.filters.party_type == "Customer" else "credit"
 		reverse_dr_or_cr = "credit" if self.filters.party_type == "Customer" else "debit"
-		round_off_account = frappe.get_cached_value("Company", self.filters.company, "round_off_account")
+		round_off_account = get_default_account(self.filters.company, ROUND_OFF)
 
 		current_period_vouchers = set()
 		adjustment_voucher_entries = {}

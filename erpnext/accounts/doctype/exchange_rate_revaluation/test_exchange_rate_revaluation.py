@@ -7,6 +7,7 @@ from frappe.query_builder import functions
 from frappe.query_builder.utils import DocType
 from frappe.utils import add_days, flt, today
 
+from erpnext.accounts.default_accounts import EXCHANGE_GAIN_LOSS, UNREALIZED_EXCHANGE_GAIN_LOSS
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.tests.utils import ERPNextTestSuite
@@ -24,7 +25,9 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 	def set_system_and_company_settings(self):
 		# Using Exchange Gain/Loss account for unrealized as well.
 		company_doc = frappe.get_doc("Company", self.company)
-		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
+		company_doc.set_default_account(
+			UNREALIZED_EXCHANGE_GAIN_LOSS, company_doc.get_default_account(EXCHANGE_GAIN_LOSS)
+		)
 		company_doc.save()
 
 	@ERPNextTestSuite.change_settings(

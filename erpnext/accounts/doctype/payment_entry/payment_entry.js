@@ -1613,8 +1613,8 @@ frappe.ui.form.on("Payment Entry", {
 			const is_single_currency =
 				frm.doc.paid_from_account_currency === frm.doc.paid_to_account_currency;
 			const account =
-				(is_single_currency && company_defaults?.bank_charges_account) ||
-				company_defaults?.[account_fieldname] ||
+				(is_single_currency && erpnext.utils.get_default_account(frm.doc.company, "BANK_CHARGES")) ||
+				erpnext.utils.get_default_account(frm.doc.company, "EXCHANGE_GAIN_LOSS") ||
 				(await prompt_for_missing_account(frm, account_fieldname));
 
 			row = frm.add_child("deductions");

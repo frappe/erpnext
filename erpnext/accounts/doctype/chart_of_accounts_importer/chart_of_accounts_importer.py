@@ -18,6 +18,7 @@ from frappe.utils.xlsxutils import (
 	read_xlsx_file_from_attached_file,
 )
 
+from erpnext.accounts.default_accounts import CASH, PAYABLE, PROVISIONAL, RECEIVABLE
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 	build_tree_from_json,
 	create_charts,
@@ -520,37 +521,36 @@ def set_default_accounts(company):
 	from erpnext.setup.doctype.company.company import install_country_fixtures
 
 	company = frappe.get_doc("Company", company)
-	company.update(
+	receivable_account = frappe.db.get_value(
+		"Account",
 		{
-			"default_receivable_account": frappe.db.get_value(
-				"Account",
-				{
-					"company": company.name,
-					"account_type": "Receivable",
-					"is_group": 0,
-					"account_currency": company.default_currency,
-				},
-			),
-			"default_payable_account": frappe.db.get_value(
-				"Account",
-				{
-					"company": company.name,
-					"account_type": "Payable",
-					"is_group": 0,
-					"account_currency": company.default_currency,
-				},
-			),
-			"default_provisional_account": frappe.db.get_value(
-				"Account",
-				{"company": company.name, "account_type": "Service Received But Not Billed", "is_group": 0},
-			),
-		}
+			"company": company.name,
+			"account_type": "Receivable",
+			"is_group": 0,
+			"account_currency": company.default_currency,
+		},
 	)
+	payable_account = frappe.db.get_value(
+		"Account",
+		{
+			"company": company.name,
+			"account_type": "Payable",
+			"is_group": 0,
+			"account_currency": company.default_currency,
+		},
+	)
+	provisional_account = frappe.db.get_value(
+		"Account",
+		{"company": company.name, "account_type": "Service Received But Not Billed", "is_group": 0},
+	)
+	company.set_default_account(RECEIVABLE, receivable_account)
+	company.set_default_account(PAYABLE, payable_account)
+	company.set_default_account(PROVISIONAL, provisional_account)
 
 	company.save()
 	company.update_default_account = True
 	company.set_default_accounts()
-	if company.default_cash_account:
+	if company.get_default_account(CASH):
 		company.set_mode_of_payment_account()
 	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()
