@@ -19,7 +19,6 @@ from erpnext.accounts.utils import _get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -34,6 +33,7 @@ from erpnext.stock.utils import (
 	_get_stock_balance,
 	check_company,
 	check_warehouse_company,
+	get_combine_datetime,
 	get_valuation_method,
 )
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
@@ -274,7 +274,7 @@ class StockReconciliation(StockController):
 					{
 						"item_code": row.item_code,
 						"warehouse": row.warehouse,
-						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+						"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
 						"voucher_detail_no": row.name,
@@ -450,7 +450,7 @@ class StockReconciliation(StockController):
 						"company": self.company,
 						"item_code": item.item_code,
 						"warehouse": item.warehouse,
-						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+						"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 						"voucher_type": self.doctype,
 						"type_of_transaction": "Outward",
 					}
@@ -468,7 +468,7 @@ class StockReconciliation(StockController):
 						{
 							"item_code": item.item_code,
 							"warehouse": item.warehouse,
-							"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+							"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 							"ignore_warehouse": 1,
 							"ignore_reserved_stock": True,
 						}
@@ -618,7 +618,7 @@ class StockReconciliation(StockController):
 				{
 					"item_code": row.item_code,
 					"warehouse": row.warehouse,
-					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+					"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 					"serial_nos": serial_nos,
 					"check_serial_nos": True,
 					"voucher_no": self.name,
@@ -1348,7 +1348,7 @@ class StockReconciliation(StockController):
 				& sle.warehouse.isin({d.warehouse for d in self.items})
 				& (sle.is_cancelled == 0)
 				& (sle.voucher_no != self.name)
-				& (sle.posting_datetime <= combine_datetime(self.posting_date, self.posting_time))
+				& (sle.posting_datetime <= get_combine_datetime(self.posting_date, self.posting_time))
 			)
 			.run(as_dict=True)
 		)
@@ -1796,7 +1796,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None, posting
 		{"warehouse": warehouse, "from_date": posting_date, "to_date": posting_date, "company": company}
 	)
 	if posting_time:
-		filters.to_datetime = combine_datetime(posting_date, posting_time)
+		filters.to_datetime = get_combine_datetime(posting_date, posting_time)
 
 	if item_code:
 		filters.item_code = item_code
@@ -1944,7 +1944,7 @@ def _get_stock_balance_for(
 					{
 						"item_code": item_code,
 						"warehouse": warehouse,
-						"posting_datetime": combine_datetime(posting_date, posting_time),
+						"posting_datetime": get_combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 						"has_batch_no": 1,
 						"ignore_reserved_stock": True,

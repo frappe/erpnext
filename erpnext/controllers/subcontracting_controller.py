@@ -20,7 +20,6 @@ from erpnext.controllers.sales_and_purchase_return import (
 	is_rejected_subcontracting_return,
 )
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos, get_batch_qty_for_stock
@@ -29,6 +28,7 @@ from erpnext.stock.serial_batch_bundle.bundle_entries import get_voucher_wise_se
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import (
 	_get_incoming_rate,
+	get_combine_datetime,
 	get_valuation_method,
 	is_serial_no_wise_valuation_disabled,
 	validate_warehouse_company,
@@ -1097,7 +1097,7 @@ class SubcontractingController(StockController):
 					"qty": qty,
 					"serial_nos": serial_nos,
 					"batches": batches,
-					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+					"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": "Subcontracting Receipt",
 					"do_not_submit": True,
 					"type_of_transaction": "Outward" if qty > 0 else "Inward",

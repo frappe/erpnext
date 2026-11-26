@@ -22,9 +22,9 @@ from erpnext.controllers.sales_and_purchase_return import (
 	remove_picked_serial_batches,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.api import get_type_of_transaction
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
 from erpnext.stock.serial_batch_bundle import add_picked_batches
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.utils import get_combine_datetime
 
 
 class SerialBatchBundleService:
@@ -94,7 +94,7 @@ class SerialBatchBundleService:
 			):
 				bundle_details = {
 					"item_code": row.get("rm_item_code") or row.item_code,
-					"posting_datetime": combine_datetime(self.doc.posting_date, self.doc.posting_time),
+					"posting_datetime": get_combine_datetime(self.doc.posting_date, self.doc.posting_time),
 					"voucher_type": self.doc.doctype,
 					"voucher_no": self.doc.name,
 					"voucher_detail_no": row.name,
