@@ -1787,7 +1787,6 @@ frappe.ui.form.on("Payment Entry", {
 		frm.refresh_field("deductions");
 		frm.events.set_unallocated_amount(frm);
 
-		frm.fields_dict.deductions_or_loss_section.collapse(false);
 		frappe.show_alert({
 			message: __("Wrote off {0} to {1}", [
 				format_currency(
