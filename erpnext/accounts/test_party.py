@@ -4,8 +4,14 @@ import frappe
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.accounts.party import get_default_price_list, get_party_account, set_price_list
+from erpnext.accounts.party import (
+	get_default_price_list,
+	get_party_account,
+	get_party_details,
+	set_price_list,
+)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+from erpnext.tests.permission_test_utils import make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -178,6 +184,29 @@ class PartyTestCase(ERPNextTestSuite):
 
 		self.assertIsNone(party_details.selling_price_list)
 
+	def test_billing_address_outside_the_company_needs_address_read(self):
+		other_address = self.create_billing_address()
+		own_address = self.create_billing_address(
+			links=[{"link_doctype": "Company", "link_name": "_Test Company"}]
+		)
+		# no supplier address, so only the billing address is rendered
+		supplier = self.create_supplier().name
+		stock_user = make_fenced_user("party-details-stock-user@example.com", ["Stock User"])
+		purchase_user = make_fenced_user("party-details-purchase-user@example.com", ["Purchase User"])
+
+		with self.set_user(stock_user):
+			self.assertRaises(
+				frappe.PermissionError, get_purchase_receipt_party_details, supplier, other_address
+			)
+			# the company's own address renders as before
+			details = get_purchase_receipt_party_details(supplier, own_address)
+			self.assertIn("1 Billing Street", details.billing_address_display)
+
+		with self.set_user(purchase_user):
+			details = get_purchase_receipt_party_details(supplier, other_address)
+		self.assertEqual(details.billing_address, other_address)
+		self.assertIn("1 Billing Street", details.billing_address_display)
+
 	def create_user_with_price_list_permissions(self, price_lists, applicable_for=None):
 		user = frappe.get_doc(
 			{
@@ -242,3 +271,30 @@ class PartyTestCase(ERPNextTestSuite):
 		customer.save()
 
 		return customer
+
+	def create_billing_address(self, links=None):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": frappe.generate_hash(length=10),
+					"address_type": "Billing",
+					"address_line1": "1 Billing Street",
+					"city": "Pune",
+					"country": "India",
+					"links": links or [],
+				}
+			)
+			.insert()
+			.name
+		)
+
+
+def get_purchase_receipt_party_details(supplier, company_address):
+	return get_party_details(
+		party=supplier,
+		party_type="Supplier",
+		company="_Test Company",
+		doctype="Purchase Receipt",
+		company_address=company_address,
+	)
