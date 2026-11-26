@@ -728,7 +728,7 @@ class TestBatch(FrappeTestCase):
 		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
 		return item_code, se.items[0].serial_and_batch_bundle
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_existing_serial_no": 0})
+	@change_settings("Stock Settings", {"allow_existing_serial_no": 0})
 	def test_split_batch_moves_the_serial_nos_of_a_serial_and_batch_item(self):
 		from erpnext.stock.doctype.batch.batch import split_batch
 
@@ -757,10 +757,10 @@ class TestBatch(FrappeTestCase):
 			4,
 		)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_existing_serial_no": 0})
+	@change_settings("Stock Settings", {"allow_existing_serial_no": 0})
 	def test_split_batch_of_returned_serial_nos(self):
 		from erpnext.stock.doctype.batch.batch import split_batch
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		warehouse = "_Test Warehouse - _TC"
