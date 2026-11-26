@@ -322,7 +322,17 @@ class TestCustomerPortal(ERPNextTestSuite):
 		reply = get_quotation(quotation.name)
 
 		self.assertEqual(
-			set(reply), {*QUOTATION_FIELDS, "items", "taxes", "signed", "signed_on", "revised_to", "orders"}
+			set(reply),
+			{
+				*QUOTATION_FIELDS,
+				"items",
+				"taxes",
+				"signed",
+				"signed_on",
+				"revised_to",
+				"previous_version",
+				"orders",
+			},
 		)
 		totals_fields = {"rounded_total", "rounding_adjustment", "discount_amount", "apply_discount_on"}
 		self.assertTrue(totals_fields <= set(reply))

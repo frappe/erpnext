@@ -102,19 +102,14 @@ export default function setup(context) {
 			line(__("Date"), formatDate(doc.value.transaction_date)),
 			validityLine.value,
 		]
-		// Amendments are the one place a customer sees two documents as one thread.
-		if (doc.value.amended_from) rows.push(line(__("Amended from"), doc.value.amended_from))
-		const revised = doc.value.revised_to
-		if (revised) {
-			rows.push({
-				key: "revised:" + revised,
-				label: __("Revised to"),
-				value: revised,
-				color: INK8,
-				weight: "420",
-				route: "/quotations/" + encodeURIComponent(revised),
-			})
-		}
+		// Versions are the one place a customer sees two documents as one thread.
+		const version = (label: string, name: string) => ({
+			...line(label, name),
+			route: "/quotations/" + encodeURIComponent(name),
+		})
+		if (doc.value.previous_version) rows.push(version(__("Previous version"), doc.value.previous_version))
+		else if (doc.value.amended_from) rows.push(line(__("Amended from"), doc.value.amended_from))
+		if (doc.value.revised_to) rows.push(version(__("Latest version"), doc.value.revised_to))
 		const orders: string[] = doc.value.orders ?? []
 		orders.forEach((name, i) => {
 			rows.push({
@@ -330,8 +325,8 @@ export default function setup(context) {
 				return { title: __("You asked for changes. You can still accept or reject this quotation."), theme: "amber", icon: "lucide-message-square-diff" }
 			case "Rejected":
 				return { title: responseNote.value, theme: "red", icon: "lucide-circle-x" }
-			case "Revised":
-				return { title: __("Revised to {0}. This version can no longer be answered.", [q.revised_to]), theme: "gray", icon: "lucide-history" }
+			case "Replaced":
+				return { title: __("Replaced by {0}. This version can no longer be answered.", [q.revised_to]), theme: "gray", icon: "lucide-history" }
 			case "Expired":
 				return { title: expiredNote(formatDate(q.valid_till)), theme: "gray", icon: "lucide-clock" }
 			case "Ordered": {
@@ -353,7 +348,10 @@ export default function setup(context) {
 	 *  never ordered does not read as if they had ignored it. */
 	function expiredNote(on: string): string {
 		if (answer.value === "Accepted") {
-			return __("You accepted this, but it expired on {0} before it was ordered. Get in touch to go ahead.", [on])
+			const signed = doc.value.signed_on
+			return signed
+				? __("You accepted this on {0}, but it expired on {1} before your order was confirmed. Get in touch to go ahead.", [formatDate(signed), on])
+				: __("You accepted this, but it expired on {0} before your order was confirmed. Get in touch to go ahead.", [on])
 		}
 		if (answer.value === "Rejected") return __("You rejected this quotation. It expired on {0}.", [on])
 		if (answer.value === "Changes Requested") {

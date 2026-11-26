@@ -16,7 +16,7 @@ function statuses(): Record<string, { theme: string; label: string }> {
 		Accepted: { theme: "green", label: __("Accepted") },
 		"Requested changes": { theme: "amber", label: __("Requested changes") },
 		Rejected: { theme: "red", label: __("Rejected") },
-		Revised: { theme: "gray", label: __("Revised") },
+		Replaced: { theme: "gray", label: __("Replaced") },
 		"Partially Ordered": { theme: "amber", label: __("Partially Ordered") },
 		Ordered: { theme: "green", label: __("Ordered") },
 		Expired: { theme: "gray", label: __("Expired") },
@@ -69,7 +69,7 @@ export function quotationStatus(q: any): string {
 	if (!q.status) return ""
 	if (q.status === "Ordered" || q.status === "Partially Ordered") return q.status
 	// desk can tick Is Active on an older version again, and then it is still open
-	if (q.revised_to && !q.is_active) return "Revised"
+	if (q.revised_to && !q.is_active) return "Replaced"
 	// lapsed, though the daily job has not marked it Expired yet: it can no longer be answered
 	if (q.status === "Expired" || quotationHasLapsed(q)) return "Expired"
 	if (q.status === "Lost") return "Closed"

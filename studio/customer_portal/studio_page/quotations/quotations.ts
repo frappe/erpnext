@@ -30,8 +30,9 @@ export default function setup(context) {
 	/** `revised_to` comes from the server: the newer revision may be on a page not loaded yet. */
 	function amendmentNote(q: any): string {
 		const notes: string[] = []
-		if (q.amended_from) notes.push(__("Amended from {0}", [q.amended_from]))
-		if (q.revised_to) notes.push(__("Revised to {0}", [q.revised_to]))
+		if (q.previous_version) notes.push(__("Previous version {0}", [q.previous_version]))
+		else if (q.amended_from) notes.push(__("Amended from {0}", [q.amended_from]))
+		if (q.revised_to) notes.push(__("Replaced by {0}", [q.revised_to]))
 		return notes.join(" · ")
 	}
 

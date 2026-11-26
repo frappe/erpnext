@@ -411,7 +411,7 @@ def get_quotation(name: str) -> dict:
 		"signed": bool(doc.customer_signature),
 		"signed_on": _signed_on(doc.name) if doc.customer_signature else None,
 	}
-	_add_revised_to([reply])
+	_add_versions([reply])
 	reply["orders"] = [order.name for order in _made_against(name, "Sales Order", "prevdoc_docname", [])]
 	return reply
 
@@ -567,7 +567,7 @@ def _list_rows(kind: str, config: dict, names: list[str]) -> list[dict]:
 	}
 	rows = _add_item_names(config["doctype"], [found[name] for name in names if name in found])
 	if kind == "quotations":
-		_add_revised_to(rows)
+		_add_versions(rows)
 	_add_last_dates(kind, rows)
 	return rows
 
@@ -610,27 +610,36 @@ def _add_last_dates(kind: str, rows: list[dict]) -> None:
 		row[field] = dates.get(row.name)
 
 
-def _add_revised_to(quotations: list[dict]) -> None:
-	"""Each quotation's latest revision, when that is a newer one the customer can see.
+def _add_versions(quotations: list[dict]) -> None:
+	"""Each quotation's other versions the customer can see: `revised_to` the latest, when that is a
+	newer one, and `previous_version` the one just before it (the first quotation for R1, R1 for R2).
 
-	Every revision points at the first version through `revision_of`, and ERPNext flags the
-	latest version of the group with `is_latest_revision`."""
+	Every revision points at the first version through `revision_of`, ERPNext flags the latest version
+	of the group with `is_latest_revision`, and the versions in between follow their creation order."""
 	first = {q["name"]: q.get("revision_of") or q["name"] for q in quotations}
 	# as on the list itself, a Replied quotation is not shown
-	scoped = _portal_filters("Quotation", {"is_latest_revision": 1, "status": ["!=", "Replied"]})
-	latest = {}
+	scoped = _portal_filters("Quotation", {"status": ["!=", "Replied"]})
+	versions, latest = {}, {}
 	if first and scoped:
 		groups = list(set(first.values()))
 		for row in frappe.get_all(
 			"Quotation",
 			filters=scoped,
 			or_filters={"name": ["in", groups], "revision_of": ["in", groups]},
-			fields=["name", "revision_of"],
+			fields=["name", "revision_of", "is_latest_revision"],
+			order_by="creation asc",
 		):
-			latest[row.revision_of or row.name] = row.name
+			group = row.revision_of or row.name
+			versions.setdefault(group, []).append(row.name)
+			if row.is_latest_revision:
+				latest[group] = row.name
 	for quotation in quotations:
-		newest = latest.get(first[quotation["name"]])
-		quotation["revised_to"] = newest if newest != quotation["name"] else None
+		name, group = quotation["name"], first[quotation["name"]]
+		newest = latest.get(group)
+		quotation["revised_to"] = newest if newest != name else None
+		names = versions.get(group, [])
+		at = names.index(name) if name in names else 0
+		quotation["previous_version"] = names[at - 1] if at > 0 else None
 
 
 def _search_condition(doctype: str, fields: tuple, term: str):
@@ -695,7 +704,7 @@ def _documents(kind: str) -> list[dict]:
 	)
 	documents = _add_item_names(config["doctype"], documents)
 	if kind == "quotations":
-		_add_revised_to(documents)
+		_add_versions(documents)
 	_add_last_dates(kind, documents)
 	return documents
 
