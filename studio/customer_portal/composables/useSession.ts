@@ -46,15 +46,12 @@ async function logout(): Promise<void> {
 	}
 }
 
-/**
- * The account menu behind the sidebar's user block. The address is the group
- * heading rather than a row, which is also where it stops being truncated.
- */
+/** The sidebar account menu; useNotifications adds "My account". */
 const userMenuOptions = computed(() => [
 	{
-		// `group`, not `label` — a group keyed on `label` is read as a plain action row
-		// and its `options` are dropped (frappe-ui MenuGroupOption)
-		group: user.value.email,
+		// `group`, not `label`: frappe-ui drops the options of a `label` group
+		group: "account",
+		hideLabel: true,
 		options: [{ label: __("Log out"), icon: "lucide-log-out", onClick: logout }],
 	},
 ])

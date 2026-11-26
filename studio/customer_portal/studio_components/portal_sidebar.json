@@ -131,13 +131,8 @@
      },
      {
       "baseStyles": {
-       "alignItems": "center",
-       "display": "flex",
-       "flexDirection": "row",
-       "flexShrink": 0,
-       "height": "48px",
        "marginTop": "auto",
-       "padding": "0px 4px"
+       "padding": "8px"
       },
       "blockName": "container",
       "children": [
@@ -155,69 +150,31 @@
           "parentBlockId": "Dropdown-5wffe96oy",
           "slotContent": [
            {
-            "baseStyles": {
-             "alignItems": "center",
-             "borderRadius": "6px",
-             "cursor": "pointer",
-             "display": "flex",
-             "flexDirection": "row",
-             "height": "40px",
-             "minWidth": "0px",
-             "padding": "0px 6px",
-             "width": "100%"
+            "blockName": "Account",
+            "componentId": "SidebarItem-acct7q2m",
+            "componentName": "SidebarItem",
+            "componentProps": {
+             "label": "{{ user.fullName }}"
             },
-            "attributes": {
-             "aria-label": "{{ __('Account') }}",
-             "role": "button",
-             "tabindex": "0"
-            },
-            "blockName": "div",
-            "children": [
-             {
-              "blockName": "Avatar",
-              "componentId": "Avatar-jdhf6rknx",
-              "componentName": "Avatar",
-              "componentProps": {
-               "label": "{{ user.initials }}",
-               "shape": "circle",
-               "size": "lg"
-              }
-             },
-             {
-              "baseStyles": {
-               "display": "flex",
-               "flex": "1",
-               "flexDirection": "column",
-               "marginLeft": "8px",
-               "minWidth": "0px"
-              },
-              "blockName": "div",
-              "children": [
+            "componentSlots": {
+             "prefix": {
+              "parentBlockId": "SidebarItem-acct7q2m",
+              "slotContent": [
                {
-                "baseStyles": {
-                 "color": "var(--ink-gray-8)",
-                 "overflow": "hidden",
-                 "textOverflow": "ellipsis",
-                 "whiteSpace": "nowrap"
-                },
-                "blockName": "TextBlock",
-                "componentId": "TextBlock-dovp7o9b6",
-                "componentName": "TextBlock",
+                "blockName": "Avatar",
+                "componentId": "Avatar-jdhf6rknx",
+                "componentName": "Avatar",
                 "componentProps": {
-                 "fontSize": "text-base-medium",
-                 "tag": "span",
-                 "text": "{{ user.fullName }}"
+                 "label": "{{ user.initials }}",
+                 "shape": "circle",
+                 "size": "xs"
                 }
                }
               ],
-              "componentId": "div-aa5ycoh34",
-              "componentName": "div",
-              "originalElement": "div"
+              "slotId": "SidebarItem-acct7q2m:prefix",
+              "slotName": "prefix"
              }
-            ],
-            "componentId": "div-ibyoj9s2a",
-            "componentName": "div",
-            "originalElement": "div"
+            }
            }
           ],
           "slotId": "Dropdown-5wffe96oy:default",
@@ -365,7 +322,7 @@
  "idx": 0,
  "is_disabled": 0,
  "is_standard": 1,
- "modified": "2026-11-16 12:00:00.000000",
+ "modified": "2026-11-26 13:00:00.000000",
  "modified_by": "Administrator",
  "name": "portal_sidebar",
  "owner": "Administrator"
