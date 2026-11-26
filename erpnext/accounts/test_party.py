@@ -1,7 +1,7 @@
 import frappe
 
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.accounts.party import get_default_price_list, set_price_list
+from erpnext.accounts.party import get_address_tax_category, get_default_price_list, set_price_list
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -135,6 +135,39 @@ class PartyTestCase(ERPNextTestSuite):
 			set_price_list(party_details, customer, "Customer", given_price_list, doctype="Sales Order")
 
 		self.assertIsNone(party_details.selling_price_list)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"determine_address_tax_category_from": "Billing Address"}
+	)
+	def test_address_without_tax_category_should_fall_back_to_the_party(self):
+		customer = self.create_customer(tax_category="_Test Tax Category 1")
+		address_with_category = self.create_address(tax_category="_Test Tax Category 2")
+		address_without_category = self.create_address()
+		pos_profile = make_pos_profile()
+		pos_profile.db_set("tax_category", "_Test Tax Category 3")
+
+		def tax_category(address, customer_name, pos_profile=None):
+			return get_address_tax_category(
+				billing_address=address, party_type="Customer", party=customer_name, pos_profile=pos_profile
+			)
+
+		self.assertEqual(tax_category(address_with_category, customer.name), "_Test Tax Category 2")
+		self.assertEqual(tax_category(address_without_category, customer.name), "_Test Tax Category 1")
+		self.assertEqual(
+			tax_category(address_without_category, self.create_customer().name, pos_profile.name),
+			"_Test Tax Category 3",
+		)
+
+	def create_address(self, tax_category=None):
+		address = frappe.new_doc("Address")
+		address.address_title = frappe.generate_hash(length=10)
+		address.address_line1 = "Line 1"
+		address.city = "Mumbai"
+		address.country = "India"
+		address.tax_category = tax_category
+		address.insert(ignore_permissions=True)
+
+		return address.name
 
 	def create_user_with_price_list_permissions(self, price_lists, applicable_for=None):
 		user = frappe.get_doc(

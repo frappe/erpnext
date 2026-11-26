@@ -210,12 +210,16 @@ erpnext.utils.set_taxes_from_address = function (
 		);
 	}
 
+	const [party_type, party] = address_party(frm, billing_address_field);
+
 	frappe.call({
 		method: "erpnext.accounts.party.get_address_tax_category",
 		args: {
-			tax_category: frm.doc.tax_category,
 			billing_address: frm.doc[billing_address_field],
 			shipping_address: frm.doc[shipping_address_field],
+			party_type,
+			party,
+			pos_profile: frm.doc.is_pos ? frm.doc.pos_profile : "",
 		},
 		callback: function (r) {
 			if (!r.exc) {
@@ -398,6 +402,16 @@ function party_field(frm, party_type) {
 		return "lead";
 	}
 	return ["customer", "supplier", "lead"].find((field) => frappe.meta.get_docfield(frm.doc.doctype, field));
+}
+
+function address_party(frm, billing_address_field) {
+	if (billing_address_field === "supplier_address") {
+		return ["Supplier", frm.doc.supplier];
+	}
+	if (frm.doc.quotation_to) {
+		return [frm.doc.quotation_to, frm.doc.party_name];
+	}
+	return ["Customer", frm.doc.customer];
 }
 
 function party_label(frm, party_type) {

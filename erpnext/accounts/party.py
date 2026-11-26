@@ -802,7 +802,17 @@ def validate_due_date_with_template(posting_date, due_date, bill_date, template_
 
 
 @frappe.whitelist()
-def get_address_tax_category(tax_category=None, billing_address=None, shipping_address=None):
+def get_address_tax_category(
+	tax_category=None,
+	billing_address=None,
+	shipping_address=None,
+	party_type=None,
+	party=None,
+	pos_profile=None,
+):
+	if party and not tax_category:
+		tax_category = get_party_tax_category(party_type, party, pos_profile)
+
 	addr_tax_category_from = frappe.get_single_value(
 		"Accounts Settings", "determine_address_tax_category_from"
 	)
@@ -814,6 +824,18 @@ def get_address_tax_category(tax_category=None, billing_address=None, shipping_a
 			tax_category = frappe.db.get_value("Address", billing_address, "tax_category") or tax_category
 
 	return cstr(tax_category)
+
+
+def get_party_tax_category(party_type, party, pos_profile=None):
+	tax_category = None
+	if party_type in ("Customer", "Supplier"):
+		frappe.has_permission(party_type, "select", party, throw=True)
+		tax_category = frappe.db.get_value(party_type, party, "tax_category")
+
+	if not tax_category and pos_profile:
+		tax_category = frappe.db.get_value("POS Profile", pos_profile, "tax_category")
+
+	return tax_category
 
 
 @frappe.whitelist()
