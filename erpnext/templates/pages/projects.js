@@ -41,10 +41,9 @@ frappe.ready(function () {
 	var reload_items = function (item_status, item, $btn) {
 		$.ajax({
 			method: "GET",
-			url: "/",
+			url: "/api/method/erpnext.templates.pages.projects.get_" + item + "_html",
 			dataType: "json",
 			data: {
-				cmd: "erpnext.templates.pages.projects.get_" + item + "_html",
 				project: frappe.utils.get_url_arg("project"),
 				item_status: item_status,
 			},
@@ -76,10 +75,9 @@ frappe.ready(function () {
 		}
 		$.ajax({
 			method: "GET",
-			url: "/",
+			url: "/api/method/erpnext.templates.pages.projects.get_" + item + "_html",
 			dataType: "json",
 			data: {
-				cmd: "erpnext.templates.pages.projects.get_" + item + "_html",
 				project: frappe.utils.get_url_arg("project"),
 				start: start,
 				item_status: item_status,
