@@ -386,7 +386,7 @@ class TestAccount(ERPNextTestSuite):
 		self.assertNotIn("Raw Materials - Demo", accounts)
 		self.assertIn("Raw Materials", accounts)
 
-		# pick it as default_payable_account
+		# pick it as the default payable account
 		self.assertNotEqual(accounts["Customer Deposits"].get("account_type"), "Payable")
 
 		payable_ledgers = [

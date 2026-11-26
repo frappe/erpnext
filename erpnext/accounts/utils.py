@@ -37,11 +37,13 @@ from pypika.functions import Coalesce
 from pypika.terms import ExistsCriterion
 
 import erpnext
+from erpnext.accounts.default_accounts import get_default_account, get_purpose_by_fieldname
 
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.ledger_health.ledger_health import update_ledger_health
+from erpnext.deprecation_dumpster import deprecation_warning
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_combine_datetime, get_stock_value_on
 
@@ -1269,6 +1271,14 @@ def get_company_default(company: str, fieldname: str, ignore_validation: bool = 
 
 
 def _get_company_default(company: str, fieldname: str, ignore_validation: bool = False):
+	if purpose := get_purpose_by_fieldname(fieldname):
+		deprecation_warning(
+			"2026-11-23",
+			"v18",
+			f"The Company field {fieldname} was removed. Use erpnext.accounts.default_accounts.get_default_account(company, {purpose!r}) instead.",
+		)
+		return get_default_account(company, purpose, required=not ignore_validation)
+
 	value = frappe.get_cached_value("Company", company, fieldname)
 
 	if not ignore_validation and not value:

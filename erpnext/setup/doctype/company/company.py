@@ -26,10 +26,19 @@ from frappe.utils import (
 from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
 from erpnext.accounts.default_accounts import (
+	ASSET_DISPOSAL,
+	BANK_CHARGES,
 	CASH,
+	EXCHANGE_GAIN,
+	EXCHANGE_GAIN_LOSS,
+	EXCHANGE_LOSS,
+	INCOME,
 	INVENTORY,
+	PAYABLE,
 	PROVISIONAL,
+	RECEIVABLE,
 	STOCK_DELIVERED_BUT_NOT_BILLED,
+	WRITE_OFF,
 	get_purpose,
 	get_purposes,
 )
@@ -51,16 +60,16 @@ class Company(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.setup.doctype.company_default_account.company_default_account import (
+			CompanyDefaultAccount,
+		)
+
 		abbr: DF.Data
 		accounts_frozen_till_date: DF.Date | None
-		accumulated_depreciation_account: DF.Link | None
 		allow_account_creation_against_child_company: DF.Check
-		asset_received_but_not_billed: DF.Link | None
 		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
-		bank_charges_account: DF.Link | None
 		book_advance_payments_in_separate_party_account: DF.Check
-		capital_work_in_progress_account: DF.Link | None
 		chart_of_accounts: DF.Literal[None]
 		company_description: DF.TextEditor | None
 		company_logo: DF.AttachImage | None
@@ -72,30 +81,15 @@ class Company(NestedSet):
 		date_of_commencement: DF.Date | None
 		date_of_establishment: DF.Date | None
 		date_of_incorporation: DF.Date | None
-		default_advance_paid_account: DF.Link | None
-		default_advance_received_account: DF.Link | None
-		default_bank_account: DF.Link | None
+		default_accounts: DF.Table[CompanyDefaultAccount]
 		default_buying_terms: DF.Link | None
-		default_cash_account: DF.Link | None
 		default_currency: DF.Link
-		default_deferred_expense_account: DF.Link | None
-		default_deferred_revenue_account: DF.Link | None
-		default_discount_account: DF.Link | None
-		default_expense_account: DF.Link | None
 		default_fg_warehouse: DF.Link | None
 		default_finance_book: DF.Link | None
 		default_holiday_list: DF.Link | None
 		default_in_transit_warehouse: DF.Link | None
-		default_income_account: DF.Link | None
-		default_inventory_account: DF.Link | None
 		default_letter_head: DF.Link | None
 		default_letter_head_report: DF.Link | None
-		default_manufacturing_variance_account: DF.Link | None
-		default_operating_cost_account: DF.Link | None
-		default_payable_account: DF.Link | None
-		default_provisional_account: DF.Link | None
-		default_purchase_price_variance_account: DF.Link | None
-		default_receivable_account: DF.Link | None
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
 		default_selling_terms: DF.Link | None
@@ -103,9 +97,7 @@ class Company(NestedSet):
 		default_warehouse_for_sales_return: DF.Link | None
 		default_wip_warehouse: DF.Link | None
 		depreciation_cost_center: DF.Link | None
-		depreciation_expense_account: DF.Link | None
 		disable_sdbnb_in_sr: DF.Check
-		disposal_account: DF.Link | None
 		domain: DF.Data | None
 		email: DF.Data | None
 		enable_item_wise_inventory_account: DF.Check
@@ -113,12 +105,7 @@ class Company(NestedSet):
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		enable_stock_delivered_but_not_billed: DF.Check
 		exception_budget_approver_role: DF.Link | None
-		exchange_gain_account: DF.Link | None
-		exchange_gain_loss_account: DF.Link | None
-		exchange_loss_account: DF.Link | None
 		existing_company: DF.Link | None
-		expenses_added_to_stock_account: DF.Link | None
-		expenses_added_to_stock_contra_account: DF.Link | None
 		fax: DF.Data | None
 		is_group: DF.Check
 		lft: DF.Int
@@ -127,8 +114,6 @@ class Company(NestedSet):
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
-		purchase_expense_account: DF.Link | None
-		purchase_expense_contra_account: DF.Link | None
 		reconcile_on_advance_payment_date: DF.Check
 		reconciliation_takes_effect_on: DF.Literal[
 			"Advance Payment Date", "Oldest Of Invoice Or Advance", "Reconciliation Date"
@@ -137,25 +122,16 @@ class Company(NestedSet):
 		reporting_currency: DF.Link | None
 		rgt: DF.Int
 		role_allowed_for_frozen_entries: DF.Link | None
-		round_off_account: DF.Link | None
 		round_off_cost_center: DF.Link | None
-		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
 		sample_retention_warehouse: DF.Link | None
 		series_for_depreciation_entry: DF.Data | None
-		service_expense_account: DF.Link | None
-		stock_adjustment_account: DF.Link | None
-		stock_delivered_but_not_billed: DF.Link | None
-		stock_received_but_not_billed: DF.Link | None
 		submit_err_jv: DF.Check
 		tax_id: DF.Data | None
 		total_monthly_sales: DF.Currency
 		transactions_annual_history: DF.Code | None
-		unrealized_exchange_gain_loss_account: DF.Link | None
-		unrealized_profit_loss_account: DF.Link | None
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 		website: DF.Data | None
-		write_off_account: DF.Link | None
 	# end: auto-generated types
 
 	nsm_parent_field = "parent_company"
@@ -388,18 +364,41 @@ class Company(NestedSet):
 		setup_taxes_and_charges(self.name, self.country)
 
 	def validate_default_accounts(self):
-		for purpose in get_purposes().values():
-			fieldname = purpose.fieldname
-			account = self.get(fieldname)
-			if not account:
+		purposes = get_purposes()
+		doc_before_save = self.get_doc_before_save()
+		old_accounts = {}
+		if doc_before_save:
+			old_accounts = {row.purpose: row.account for row in doc_before_save.default_accounts}
+
+		seen_purposes = set()
+		for row in self.default_accounts:
+			account_changed = old_accounts.get(row.purpose) != row.account
+			purpose = purposes.get(row.purpose)
+			# keep the unchanged rows of an uninstalled app
+			if not purpose and row.purpose in old_accounts and not account_changed:
 				continue
 
-			label = _(purpose.label)
-			if self.is_value_new_or_changed(fieldname):
-				self.validate_default_account(account, label, purpose.filters)
+			if not purpose:
+				frappe.throw(
+					_("Row #{0}: {1} is not a valid default account purpose").format(
+						row.idx, bold(row.purpose)
+					)
+				)
 
-			if self.is_value_new_or_changed(fieldname) or self.currency_changed:
-				if get_account_currency(account) not in {
+			label = _(purpose.label)
+			if row.purpose in seen_purposes:
+				frappe.throw(_("Row #{0}: {1} is set more than once").format(row.idx, bold(label)))
+			seen_purposes.add(row.purpose)
+
+			# the mandatory check runs after validate
+			if not row.account:
+				continue
+
+			if account_changed:
+				self.validate_default_account(row.account, label, purpose.filters)
+
+			if account_changed or self.currency_changed:
+				if get_account_currency(row.account) not in {
 					self.default_currency,
 					self.previous_default_currency,
 				}:
@@ -408,6 +407,12 @@ class Company(NestedSet):
 							"{0} currency must be same as company's default currency. Please select another account."
 						).format(bold(label))
 					)
+
+		# show the rows in the order of the registry
+		purpose_order = {key: index for index, key in enumerate(purposes)}
+		self.default_accounts.sort(key=lambda row: purpose_order.get(row.purpose, len(purpose_order)))
+		for idx, row in enumerate(self.default_accounts, start=1):
+			row.idx = idx
 
 		for fieldname in ("cost_center", "round_off_cost_center", "depreciation_cost_center"):
 			cost_center = self.get(fieldname)
@@ -425,7 +430,8 @@ class Company(NestedSet):
 	def get_default_account(self, purpose: str, required: bool = False) -> str | None:
 		"""Return the account of this purpose, else the account of its fallback purpose."""
 		default_purpose = get_purpose(purpose)
-		account = self.get(default_purpose.fieldname)
+		row = self.get_default_account_row(purpose)
+		account = row.account if row else None
 		if not account and default_purpose.fallback:
 			account = self.get_default_account(default_purpose.fallback)
 
@@ -435,8 +441,21 @@ class Company(NestedSet):
 		return account
 
 	def set_default_account(self, purpose: str, account: str | None) -> None:
-		"""Set the account of this purpose. The caller saves the Company."""
-		self.set(get_purpose(purpose).fieldname, account)
+		"""Set the account of this purpose. An empty account removes the row. The caller saves the Company."""
+		get_purpose(purpose)
+		row = self.get_default_account_row(purpose)
+		if row and account:
+			row.account = account
+		elif row:
+			self.remove(row)
+		elif account:
+			self.append("default_accounts", {"purpose": purpose, "account": account})
+
+	def get_default_account_row(self, purpose: str):
+		"""Return the row of this purpose in `default_accounts`, without fallback."""
+		for row in self.default_accounts:
+			if row.purpose == purpose:
+				return row
 
 	def is_value_new_or_changed(self, fieldname):
 		"""Validate a default only when it is set, so existing defaults do not block unrelated saves."""
@@ -580,15 +599,14 @@ class Company(NestedSet):
 		frappe.local.flags.ignore_root_company_validation = True
 		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
-		self.db_set(
-			"default_receivable_account",
+		self.add_default_account_row(
+			RECEIVABLE,
 			frappe.db.get_value(
 				"Account", {"company": self.name, "account_type": "Receivable", "is_group": 0}
 			),
 		)
-
-		self.db_set(
-			"default_payable_account",
+		self.add_default_account_row(
+			PAYABLE,
 			frappe.db.get_value("Account", {"company": self.name, "account_type": "Payable", "is_group": 0}),
 		)
 
@@ -784,21 +802,27 @@ class Company(NestedSet):
 				check_pending_reposting(self.accounts_frozen_till_date, self.name)
 
 	def set_default_accounts(self):
+		"""Find the default accounts of a new Company by account type and account name.
+
+		This runs in `on_update`, so it writes each new row directly to the database.
+		"""
 		if not self.update_default_account:
 			return
 
 		for purpose in get_purposes().values():
-			# a purpose of another app can have no Company field
-			if not purpose.account_type or not purpose.fieldname:
+			if not purpose.account_type:
 				continue
 
 			if purpose.depends_on and not self.get(purpose.depends_on):
 				continue
 
-			self._set_default_account(purpose.fieldname, purpose.account_type)
+			account = frappe.db.get_value(
+				"Account", {"account_type": purpose.account_type, "is_group": 0, "company": self.name}
+			)
+			self.add_default_account_row(purpose.key, account)
 
-		if not self.default_income_account:
-			income_account = frappe.db.get_all(
+		if not self.get_default_account_row(INCOME):
+			income_accounts = frappe.db.get_all(
 				"Account",
 				filters={"company": self.name, "is_group": 0},
 				or_filters={
@@ -807,70 +831,28 @@ class Company(NestedSet):
 				},
 				pluck="name",
 			)
+			self.add_default_account_row(INCOME, income_accounts[0] if income_accounts else None)
 
-			if income_account:
-				income_account = income_account[0]
-			else:
-				income_account = None
-
-			self.db_set("default_income_account", income_account)
-
-		if not self.default_payable_account:
-			self.db_set("default_payable_account", self.default_payable_account)
-
-		if not self.write_off_account:
-			write_off_acct = frappe.db.get_value(
-				"Account", {"account_name": _("Write Off"), "company": self.name, "is_group": 0}
+		for purpose, account_name in (
+			(WRITE_OFF, _("Write Off")),
+			(BANK_CHARGES, _("Bank Charges")),
+			(EXCHANGE_GAIN_LOSS, _("Exchange Gain/Loss")),
+			(EXCHANGE_GAIN, _("Exchange Gain")),
+			(EXCHANGE_LOSS, _("Exchange Loss")),
+			(ASSET_DISPOSAL, _("Gain/Loss on Asset Disposal")),
+		):
+			account = frappe.db.get_value(
+				"Account", {"account_name": account_name, "company": self.name, "is_group": 0}
 			)
+			self.add_default_account_row(purpose, account)
 
-			self.db_set("write_off_account", write_off_acct)
-
-		if not self.bank_charges_account:
-			bank_charges_acct = frappe.db.get_value(
-				"Account", {"account_name": _("Bank Charges"), "company": self.name, "is_group": 0}
-			)
-
-			self.db_set("bank_charges_account", bank_charges_acct)
-
-		if not self.exchange_gain_loss_account:
-			exchange_gain_loss_acct = frappe.db.get_value(
-				"Account", {"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0}
-			)
-
-			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
-
-		if not self.exchange_gain_account:
-			exchange_gain_acct = frappe.db.get_value(
-				"Account", {"account_name": _("Exchange Gain"), "company": self.name, "is_group": 0}
-			)
-
-			self.db_set("exchange_gain_account", exchange_gain_acct)
-
-		if not self.exchange_loss_account:
-			exchange_loss_acct = frappe.db.get_value(
-				"Account", {"account_name": _("Exchange Loss"), "company": self.name, "is_group": 0}
-			)
-
-			self.db_set("exchange_loss_account", exchange_loss_acct)
-
-		if not self.disposal_account:
-			disposal_acct = frappe.db.get_value(
-				"Account",
-				{"account_name": _("Gain/Loss on Asset Disposal"), "company": self.name, "is_group": 0},
-			)
-
-			self.db_set("disposal_account", disposal_acct)
-
-	def _set_default_account(self, fieldname, account_type):
-		if self.get(fieldname):
+	def add_default_account_row(self, purpose: str, account: str | None) -> None:
+		"""Add a row for this purpose in memory and in the database, unless the purpose has a row."""
+		if not account or self.get_default_account_row(purpose):
 			return
 
-		account = frappe.db.get_value(
-			"Account", {"account_type": account_type, "is_group": 0, "company": self.name}
-		)
-
-		if account:
-			self.db_set(fieldname, account)
+		row = self.append("default_accounts", {"purpose": purpose, "account": account})
+		row.db_insert()
 
 	def set_mode_of_payment_account(self):
 		cash = frappe.db.get_value("Mode of Payment", {"type": "Cash"}, "name")

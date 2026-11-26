@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "creation": "2026-11-23 21:06:38.343478",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purpose",
+  "account"
+ ],
+ "fields": [
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Autocomplete",
+   "in_list_view": 1,
+   "label": "Purpose",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "istable": 1,
+ "link_display_mode": "Search",
+ "links": [],
+ "modified": "2026-11-23 21:20:27.211395",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Company Default Account",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -201,6 +201,14 @@ frappe.ui.form.on("Company", {
 		erpnext.company.set_chart_of_accounts_options(frm);
 	},
 
+	validate: function (frm) {
+		// rows added by "Add Missing Purposes" that got no account
+		(frm.doc.default_accounts || [])
+			.filter((row) => !row.account)
+			.forEach((row) => frappe.model.clear_doc(row.doctype, row.name));
+		frm.refresh_field("default_accounts");
+	},
+
 	make_default_tax_template: function (frm) {
 		frm.call({
 			method: "create_default_tax_template",
@@ -289,9 +297,7 @@ erpnext.company.setup_queries = function (frm) {
 	});
 
 	erpnext.company.get_purpose_options().then((purposes) => {
-		purposes.forEach((purpose) => {
-			erpnext.company.set_custom_query(frm, [purpose.fieldname, purpose.filters]);
-		});
+		erpnext.company.setup_default_accounts(frm, purposes);
 	});
 };
 
@@ -302,6 +308,40 @@ erpnext.company.get_purpose_options = function () {
 		);
 	}
 	return erpnext.company.purpose_options;
+};
+
+erpnext.company.setup_default_accounts = function (frm, purposes) {
+	// the purpose stores the key, for example "RECEIVABLE", and shows the label
+	const purpose_options = purposes.map((purpose) => ({
+		value: purpose.value,
+		label: purpose.label,
+		description: purpose.description,
+	}));
+	const labels = Object.fromEntries(purposes.map((purpose) => [purpose.value, purpose.label]));
+	frappe.meta.get_docfield("Company Default Account", "purpose").formatter = (value) =>
+		labels[value] || value;
+
+	const grid = frm.fields_dict.default_accounts.grid;
+	grid.update_docfield_property("purpose", "options", purpose_options);
+	frm.refresh_field("default_accounts");
+
+	frm.set_query("account", "default_accounts", function (doc, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		const purpose = purposes.find((purpose) => purpose.value === row.purpose);
+		return {
+			filters: { company: doc.name, is_group: 0, ...(purpose ? purpose.filters : {}) },
+		};
+	});
+
+	if (!frm.is_new() && frm.has_perm("write")) {
+		grid.add_custom_button(__("Add Missing Purposes"), () => {
+			const existing = new Set((frm.doc.default_accounts || []).map((row) => row.purpose));
+			purposes
+				.filter((purpose) => !existing.has(purpose.value))
+				.forEach((purpose) => frm.add_child("default_accounts", { purpose: purpose.value }));
+			frm.refresh_field("default_accounts");
+		});
+	}
 };
 
 erpnext.company.set_custom_query = function (frm, v) {

@@ -107,6 +107,7 @@ class TestChartofAccountsImporter(ERPNextTestSuite):
 			unset_existing_data(company.name)
 
 		self.assertFalse(frappe.db.exists("Account", {"company": company.name}))
+		self.assertFalse(frappe.db.exists("Company Default Account", {"parent": company.name}))
 		for template in templates:
 			self.assertFalse(frappe.db.exists(template.doctype, template.name))
 			self.assertFalse(frappe.db.exists(template.taxes[0].doctype, template.taxes[0].name))
