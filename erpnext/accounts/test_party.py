@@ -5,6 +5,7 @@ import frappe
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.party import (
+	get_address_tax_category,
 	get_default_price_list,
 	get_party_account,
 	get_party_details,
@@ -206,6 +207,29 @@ class PartyTestCase(ERPNextTestSuite):
 			details = get_purchase_receipt_party_details(supplier, other_address)
 		self.assertEqual(details.billing_address, other_address)
 		self.assertIn("1 Billing Street", details.billing_address_display)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"determine_address_tax_category_from": "Billing Address"}
+	)
+	def test_address_without_tax_category_should_fall_back_to_the_party(self):
+		customer = self.create_customer(tax_category="_Test Tax Category 1")
+		address_with_category = self.create_billing_address()
+		frappe.db.set_value("Address", address_with_category, "tax_category", "_Test Tax Category 2")
+		address_without_category = self.create_billing_address()
+		pos_profile = make_pos_profile()
+		pos_profile.db_set("tax_category", "_Test Tax Category 3")
+
+		def tax_category(address, customer_name, pos_profile=None):
+			return get_address_tax_category(
+				billing_address=address, party_type="Customer", party=customer_name, pos_profile=pos_profile
+			)
+
+		self.assertEqual(tax_category(address_with_category, customer.name), "_Test Tax Category 2")
+		self.assertEqual(tax_category(address_without_category, customer.name), "_Test Tax Category 1")
+		self.assertEqual(
+			tax_category(address_without_category, self.create_customer().name, pos_profile.name),
+			"_Test Tax Category 3",
+		)
 
 	def create_user_with_price_list_permissions(self, price_lists, applicable_for=None):
 		user = frappe.get_doc(
