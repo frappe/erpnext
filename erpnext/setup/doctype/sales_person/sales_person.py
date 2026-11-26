@@ -4,6 +4,7 @@
 
 from collections import defaultdict
 from itertools import chain
+from urllib.parse import urlencode
 
 import frappe
 from frappe import _
@@ -96,6 +97,7 @@ class SalesPerson(NestedSet):
 			frappe.qb.from_(sales_team)
 			.select(sales_team.sales_person)
 			.where((sales_team.sales_person == self.name) & (sales_team.parenttype == "Customer"))
+<<<<<<< HEAD
 			.groupby(sales_team.sales_person)
 		).run(as_dict=True)
 
@@ -106,6 +108,14 @@ class SalesPerson(NestedSet):
 						f"""<a href="{get_url_to_list("Customer")}?sales_person={self.name}">{"Customers"}</a>"""
 					)
 				)
+=======
+			.limit(1)
+		).run()
+		if linked_to_customer:
+			customers_url = f"{get_url_to_list('Customer')}?{urlencode({'sales_person': self.name})}"
+			return _("The Sales Person is linked with {0}").format(
+				frappe.bold(f"""<a href="{customers_url}">{"Customers"}</a>""")
+>>>>>>> 90ab490 (fix(setup): encode the Sales Person name in the linked Customers URL)
 			)
 
 		for doctype in ("Sales Order", "Delivery Note"):
