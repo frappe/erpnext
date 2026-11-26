@@ -796,8 +796,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (fetch_valuation_rate) {
 			this.get_incoming_rate(
 				item,
-				this.frm.doc.posting_date,
-				this.frm.doc.posting_time,
+				// v15 orders have no posting time, so value them as of now
+				this.frm.doc.posting_date || frappe.datetime.nowdate(),
+				this.frm.doc.posting_time || frappe.datetime.now_time(),
 				this.frm.doc.doctype,
 				this.frm.doc.company
 			);
