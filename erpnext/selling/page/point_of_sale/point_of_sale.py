@@ -451,7 +451,7 @@ def check_opening_entry(user: str):
 	open_vouchers = frappe.db.get_all(
 		"POS Opening Entry",
 		filters={"user": user, "pos_closing_entry": ["in", ["", None]], "docstatus": 1},
-		fields=["name", "company", "pos_profile", "period_start_date"],
+		fields=["name", "company", "pos_profile", "period_start_date", "currency"],
 		order_by="period_start_date desc",
 	)
 

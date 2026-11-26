@@ -417,7 +417,7 @@ def make_closing_entry_from_opening(opening_entry):
 	closing_entry.pos_profile = opening_entry.pos_profile
 	closing_entry.user = opening_entry.user
 	closing_entry.company = opening_entry.company
-	closing_entry.currency = frappe.get_cached_value("POS Profile", opening_entry.pos_profile, "currency")
+	closing_entry.currency = opening_entry.currency
 	closing_entry.grand_total = 0
 	closing_entry.net_total = 0
 	closing_entry.total_quantity = 0

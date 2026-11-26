@@ -138,6 +138,7 @@ erpnext.PointOfSale.Controller = class {
 		this.company = data.company;
 		this.pos_profile = data.pos_profile;
 		this.pos_opening_time = data.period_start_date;
+		this.pos_opening_currency = data.currency;
 		this.item_stock_map = {};
 		this.settings = {};
 
@@ -324,7 +325,7 @@ erpnext.PointOfSale.Controller = class {
 		voucher.pos_profile = this.frm.doc.pos_profile;
 		voucher.user = frappe.session.user;
 		voucher.company = this.frm.doc.company;
-		voucher.currency = this.frm.doc.currency;
+		voucher.currency = this.pos_opening_currency;
 		voucher.pos_opening_entry = this.pos_opening;
 		voucher.period_end_date = frappe.datetime.now_datetime();
 		voucher.posting_date = frappe.datetime.now_date();
