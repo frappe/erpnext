@@ -20,7 +20,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import find_party_account, get_party_account
 from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes, get_currency_precision
-from erpnext.utilities import get_email_to_store, payment_app_import_guard
+from erpnext.utilities import payment_app_import_guard
 
 ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"Sales Order",
@@ -1000,7 +1000,9 @@ def make_payment_request(**args):
 				"party_account_currency": party_account_currency,
 				"grand_total": grand_total,
 				"mode_of_payment": args.mode_of_payment,
-				"email_to": args.recipient_id or get_email_to_store(ref_doc.owner),
+				"email_to": args.recipient_id
+				or (ref_doc.owner not in frappe.STANDARD_USERS and get_email_address(ref_doc.owner))
+				or None,
 				"subject": _("Payment Request for {0}").format(args.dn),
 				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 				"reference_doctype": ref_doc.doctype,
