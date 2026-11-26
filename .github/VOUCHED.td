@@ -17,6 +17,7 @@ ervishnucs
 gajjug004
 kaulith
 kavin-114
+loicdokos
 mergify[bot]
 raghavisruia
 rtdany10
