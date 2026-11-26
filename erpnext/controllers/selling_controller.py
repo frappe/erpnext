@@ -15,7 +15,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, i
 from erpnext.controllers.stock_controller import StockController, add_picked_batches
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
-from erpnext.stock.doctype.item.item import set_item_default
+from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
@@ -61,6 +61,7 @@ class SellingController(StockController):
 		super().validate()
 		self.ensure_customer_is_not_blocked()
 		self.validate_items()
+		validate_item_uoms(self.get("items"))
 		if not (self.get("is_debit_note") or self.get("is_return")):
 			self.validate_max_discount()
 		self.validate_selling_price()
