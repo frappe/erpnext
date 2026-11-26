@@ -208,6 +208,23 @@ class TestProspect(ERPNextTestSuite):
 			prospect = frappe.response["message"]
 			self.assertEqual(frappe.db.get_value("Prospect", prospect, "prospect_owner"), user.name)
 
+	def test_crm_deal_owned_by_administrator_keeps_owner(self):
+		from unittest.mock import patch
+
+		from erpnext.crm.frappe_crm_api import create_prospect_against_crm_deal
+
+		self.addCleanup(setattr, frappe.local, "form_dict", frappe._dict())
+		with patch("erpnext.crm.frappe_crm_api.validate_frappe_crm_sync"):
+			frappe.local.form_dict = frappe._dict(
+				organization=f"CRM Org {random_string(6)}",
+				deal_owner=frappe.utils.get_email_address("Administrator"),
+				erpnext_company="_Test Company",
+			)
+			create_prospect_against_crm_deal()
+
+		prospect = frappe.response["message"]
+		self.assertEqual(frappe.db.get_value("Prospect", prospect, "prospect_owner"), "Administrator")
+
 
 def lead_row_status(lead: str) -> str:
 	return frappe.db.get_value("Prospect Lead", {"lead": lead}, "status")
