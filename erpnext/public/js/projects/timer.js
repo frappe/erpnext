@@ -121,6 +121,7 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
 		grid_row.doc.task = args.task;
 		grid_row.doc.expected_hours = args.expected_hours;
 		grid_row.doc.to_time = frappe.datetime.get_datetime_as_string(frappe.datetime.system_datetime());
+		grid_row.doc.billing_hours = 0;
 		grid_row.refresh();
 		frm.dirty();
 		frm.save();
