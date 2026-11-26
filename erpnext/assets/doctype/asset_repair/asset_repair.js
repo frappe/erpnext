@@ -129,6 +129,7 @@ frappe.ui.form.on("Asset Repair", {
 
 	completion_date: (frm) => {
 		frm.events.set_downtime(frm);
+		frm.events.refresh_consumed_item_rates(frm);
 	},
 
 	set_downtime: (frm) => {
@@ -162,11 +163,23 @@ frappe.ui.form.on("Asset Repair", {
 		}
 	},
 
+	refresh_consumed_item_rates: function (frm) {
+		(frm.doc.stock_items || []).forEach((row) => {
+			if (row.item_code && row.warehouse) {
+				frm.events.set_consumed_item_rate(frm, row.doctype, row.name);
+			}
+		});
+	},
+
+	get_stock_posting_datetime: function (frm) {
+		// submit issues the stock at completion_date, so pick and price it at that moment
+		let posting_datetime = frm.doc.completion_date || frappe.datetime.now_datetime();
+		return posting_datetime.split(" ");
+	},
+
 	set_consumed_item_rate: function (frm, cdt, cdn) {
 		let item = locals[cdt][cdn];
-		// submit issues the stock at completion_date, so price the outgoing qty at that moment
-		let posting_datetime = frm.doc.completion_date || frappe.datetime.now_datetime();
-		let [posting_date, posting_time] = posting_datetime.split(" ");
+		let [posting_date, posting_time] = frm.events.get_stock_posting_datetime(frm);
 
 		frappe.call({
 			method: "erpnext.stock.utils.get_incoming_rate",
@@ -178,6 +191,7 @@ frappe.ui.form.on("Asset Repair", {
 					posting_time: posting_time,
 					qty: -1 * flt(item.consumed_quantity),
 					serial_no: item.serial_no,
+					serial_and_batch_bundle: item.serial_and_batch_bundle,
 					company: frm.doc.company,
 				},
 			},
@@ -236,6 +250,15 @@ frappe.ui.form.on("Asset Repair Purchase Invoice", {
 });
 
 frappe.ui.form.on("Asset Repair Consumed Item", {
+	item_code: function (frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, { serial_and_batch_bundle: "", serial_no: "" }).then(() => {
+			if (row.item_code && row.warehouse) {
+				frm.events.set_consumed_item_rate(frm, cdt, cdn);
+			}
+		});
+	},
+
 	warehouse: function (frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 
@@ -245,7 +268,9 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 			return;
 		}
 
-		frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		frappe.model.set_value(cdt, cdn, { serial_and_batch_bundle: "", serial_no: "" }).then(() => {
+			frm.events.set_consumed_item_rate(frm, cdt, cdn);
+		});
 	},
 
 	consumed_quantity: function (frm, cdt, cdn) {
@@ -278,8 +303,7 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 				if (item.has_serial_no && item.has_batch_no) {
 					item.title = __("Select Serial and Batch");
 				}
-				frm.doc.posting_date = frappe.datetime.get_today();
-				frm.doc.posting_time = frappe.datetime.now_time();
+				[frm.doc.posting_date, frm.doc.posting_time] = frm.events.get_stock_posting_datetime(frm);
 
 				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
 					if (r) {

@@ -27,8 +27,8 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_op_cost_from_sub_assemblies,
 	validate_bom_no,
 )
-from erpnext.manufacturing.doctype.bom.services.costing import get_exploded_good_qty
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
+from erpnext.manufacturing.doctype.work_order.services.required_items import get_allowed_transfer_qty
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import stock_ledger
@@ -56,6 +56,7 @@ from .services.manufacturing import (
 	MaterialConsumptionForManufactureStockEntry,
 	OperationsNotCompleteError,
 	RepackStockEntry,
+	get_bom_items,
 	get_secondary_items_from_sub_assemblies,
 )
 from .services.material_receipt_issue import (
@@ -371,9 +372,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls:
 			self.purpose_cls(self).validate()
 
+		# rows of every purpose count towards the Material Request
+		MaterialRequestStockEntry(self).validate_material_request()
 		self.validate_warehouses_company()
 		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
+		MaterialTransferStockEntry(self).validate_posting_datetime_with_outgoing_entry()
+		if self.purpose == "Disassemble":
+			DisassembleStockEntry(self).validate_posting_datetime_with_source_entry()
 		self.validate_item()
 		validate_item_uoms(self.get("items"))
 		self.validate_customer_provided_item()
@@ -1059,13 +1065,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return 0.0
 
 		qty_per_finished_good = get_sub_assembly_secondary_qty(self.bom_no).get(row.bom_secondary_item, 0)
-		bom = frappe.get_cached_value(
-			"BOM", bom_no, ["quantity", "process_loss_qty", "is_phantom_bom"], as_dict=True
-		)
-		sub_assemblies_made = (
-			qty_per_finished_good * flt(self.fg_completed_qty) * flt(bom.quantity) / flt(qty_per_bom)
-		)
-		boms_made = sub_assemblies_made / get_exploded_good_qty(bom)
+		boms_made = qty_per_finished_good * flt(self.fg_completed_qty) / flt(qty_per_bom)
 		consumed_rates = self.get_consumed_rates()
 		components = frappe.get_all(
 			"BOM Explosion Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
@@ -1073,10 +1073,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 		component_cost = sum(
 			flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components
 		)
-		return component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made)
+		sub_assemblies_made = boms_made * flt(frappe.get_cached_value("BOM", bom_no, "quantity"))
+		# its own-cost rows can be worth more than its posted components: it then takes nothing
+		return max(component_cost - self.get_secondary_items_cost_within(bom_no, sub_assemblies_made), 0)
 
 	def get_consumed_rates(self) -> dict:
-		"""Average consumed rate of each component, keyed by the BOM item it was consumed for."""
+		"""Consumed value of each component per unit consumed, or per unit the entry's BOM needs when
+		that is more, keyed by the BOM item it was consumed for. A sub-assembly's share of what the BOM
+		needs then takes no more than the value posted, which rounding can make less than the need."""
 		rows = self.get("items")
 		if self.is_rm_cost_from_consumption_entries():
 			rows = frappe.get_all(
@@ -1092,7 +1096,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 				qty[item_code] += flt(d.transfer_qty)
 				value[item_code] += flt(d.basic_amount)
 
-		return {item_code: value[item_code] / qty[item_code] for item_code in qty if qty[item_code]}
+		required = {
+			d.item_code: d.qty
+			for d in get_bom_items(self.bom_no, use_multi_level_bom=1, qty=self.fg_completed_qty)
+		}
+		return {
+			item_code: value[item_code] / max(qty[item_code], flt(required.get(item_code)))
+			for item_code in qty
+			if qty[item_code]
+		}
 
 	def get_secondary_items_cost_within(self, bom_no, qty) -> float:
 		"""Value of the BOM's Valuation Rate and Manual secondary rows, and of what its sub-assemblies
@@ -2291,10 +2303,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			transfer_qty[d.pick_list_item] += flt(d.transfer_qty)
 			transferred_qty = flt(flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item], precision)
-			if transferred_qty > flt(picked_row.picked_qty):
+			allowed_qty = flt(
+				get_allowed_transfer_qty(picked_row.picked_qty) if self.work_order else picked_row.picked_qty,
+				precision,
+			)
+			if transferred_qty > allowed_qty:
 				frappe.throw(
-					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
-						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
+					_("Row #{0}: Item {1} is transferred more than the {2} allowed in {3}.").format(
+						d.idx, frappe.bold(d.item_code), allowed_qty, self.pick_list
 					)
 				)
 

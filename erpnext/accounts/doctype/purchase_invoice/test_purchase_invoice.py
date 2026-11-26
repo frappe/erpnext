@@ -3235,6 +3235,48 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		for invoice in (pi, returned):
 			self.assert_warehouse_accounts_match_stock(invoice)
 
+	def test_internal_transfer_invoice_cannot_be_posted_before_sales_invoice(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item,
+			target="Stores - TCP1",
+			qty=7,
+			basic_rate=13.37,
+			posting_date=add_days(today(), -3),
+		)
+		si = create_sales_invoice(
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			item_code=item,
+			qty=3,
+			warehouse="Stores - TCP1",
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			posting_date=add_days(today(), -1),
+			do_not_save=1,
+		)
+		si.posting_time = "10:30:00"
+		si.items[0].target_warehouse = "Work In Progress - TCP1"
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update({"update_stock": 1, "set_posting_time": 1, "posting_date": add_days(today(), -2)})
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be before", pi.save)
+
+		# received after the sale
+		pi.update({"posting_date": si.posting_date, "posting_time": "10:30:01"})
+		pi.submit()
+		self.assertEqual(pi.items[0].valuation_rate, 13.37)
+
 	def test_landed_cost_on_an_internal_transfer_invoice(self):
 		"""Landed cost on a stock updating internal transfer invoice goes into the accepted warehouse."""
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
@@ -3264,6 +3306,36 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				flt(booked_value[get_inventory_account(invoice.company, stock_entry.warehouse)], 2),
 				flt(stock_entry.stock_value_difference, 2),
 			)
+
+	def test_internal_transfer_invoice_keeps_the_cost_of_each_batch(self):
+		"""Batches that leave in one internal sales invoice row keep their own cost in the receiving warehouse."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			get_package_rates,
+			get_stock_value_by_warehouse,
+			make_internal_delivery_of_lots,
+			receive_lots,
+		)
+
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 1}).name
+		batches = [get_batch_from_bundle(bundle) for bundle in receive_lots(item, (101, 133))]
+		si = make_internal_delivery_of_lots(
+			item, {"batches": {batches[0]: 1, batches[1]: 2}}, doctype="Sales Invoice"
+		)
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+
+		self.assertEqual(
+			get_stock_value_by_warehouse(pi.name),
+			{"Work In Progress - TCP1": -367.0, "Finished Goods - TCP1": 367.0},
+		)
+		self.assertEqual(
+			get_package_rates(pi.name, "Finished Goods - TCP1"), {batches[0]: 101.0, batches[1]: 133.0}
+		)
 
 	def test_internal_transfer_invoice_resizes_package_without_package_permission(self):
 		"""A user who may not write packages can still change the rejected qty of a draft transfer

@@ -637,7 +637,7 @@ class PickList(TransactionBase):
 		if total_transferred <= 0:
 			return None
 
-		if total_transferred >= total_picked:
+		if all(flt(row.transferred_qty) >= flt(row.picked_qty) for row in self.locations):
 			return "Completed"
 
 		return "Partially Transferred"
@@ -1359,14 +1359,9 @@ def get_delivered_sales_order_item_query(pi_item):
 
 
 def get_holding_qty_case(pi_item):
-	return (
-		Case()
-		.when(
-			(pi_item.picked_qty > 0) & (pi_item.docstatus == 1),
-			pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty,
-		)
-		.else_(pi_item.stock_qty)
-	)
+	pending_qty = pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty
+	is_picked = (pi_item.picked_qty > 0) & (pi_item.docstatus == 1)
+	return Case().when(is_picked & (pending_qty > 0), pending_qty).when(is_picked, 0).else_(pi_item.stock_qty)
 
 
 def get_pick_list_holders(item_codes, warehouses=None, exclude_pick_list=None):

@@ -4066,6 +4066,96 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		jv.submit()
 		self.assertEqual(self.get_gl_balance([jv.name], "TDS - _TC"), 0)
 
+	def test_journal_entry_withholds_on_chargeable_expense_account(self):
+		self.make_single_and_cumulative_category()
+		self.setup_party_with_category("Supplier", "Test TDS Supplier6", "Single And Cumulative TDS")
+
+		jv = self.make_supplier_journal("Credit Note", "Marketing Expenses - _TC", 50000)
+		jv.submit()
+
+		self.assertEqual(jv.tax_withholding_entries[0].taxable_amount, 50000)
+		self.assertEqual(jv.tax_withholding_entries[0].withholding_amount, 5000)
+		self.assertEqual(self.get_gl_balance([jv.name], "TDS - _TC"), -5000)
+
+	def test_journal_entry_excludes_tax_account_from_tds_base(self):
+		self.make_single_and_cumulative_category()
+		self.setup_party_with_category("Supplier", "Test TDS Supplier6", "Single And Cumulative TDS")
+
+		jv = make_journal_entry_with_tax_withholding(
+			party_type="Supplier",
+			party="Test TDS Supplier6",
+			voucher_type="Credit Note",
+			amount=50000,
+			save=False,
+		)
+		jv.accounts[1].credit_in_account_currency = 59000
+		jv.append(
+			"accounts",
+			{
+				"account": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"debit_in_account_currency": 9000,
+				"exchange_rate": 1,
+			},
+		)
+		jv.apply_tds = 1
+		jv.tax_withholding_category = "Single And Cumulative TDS"
+		jv.save()
+
+		self.assertEqual(jv.tax_withholding_entries[0].taxable_amount, 50000)
+		self.assertEqual(jv.tax_withholding_entries[0].withholding_amount, 5000)
+
+	def test_gross_total_tds_excludes_valuation_charges(self):
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		create_tax_withholding_category(
+			category_name="Gross Total TDS Category",
+			rate=10,
+			from_date=fiscal_year[1],
+			to_date=fiscal_year[2],
+			account="TDS - _TC",
+			tax_deduction_basis="Gross Total",
+		)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "Gross Total TDS Category")
+
+		pi = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"supplier": "Test TDS Supplier5",
+				"company": "_Test Company",
+				"apply_tds": 1,
+				"update_stock": 1,
+				"currency": "INR",
+				"credit_to": "Creditors - _TC",
+				"items": [
+					{
+						"item_code": "TCS Item",
+						"qty": 1,
+						"rate": 40000,
+						"warehouse": "_Test Warehouse - _TC",
+						"cost_center": "Main - _TC",
+					}
+				],
+				"taxes": [
+					{
+						"category": "Valuation",
+						"add_deduct_tax": "Add",
+						"charge_type": "Actual",
+						"account_head": "_Test Account Shipping Charges - _TC",
+						"cost_center": "Main - _TC",
+						"tax_amount": 1000,
+						"description": "Freight",
+					}
+				],
+			}
+		)
+		pi.save()
+		pi.submit()
+
+		self.assertEqual(pi.tax_withholding_entries[0].taxable_amount, 40000)
+		self.assertEqual(pi.tax_withholding_entries[0].withholding_amount, 4000)
+		self.assertEqual(pi.grand_total, 36000)
+		pi.cancel()
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object

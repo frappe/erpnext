@@ -12,9 +12,8 @@ window.get_product_list = function() {
 
 	$.ajax({
 		method: "GET",
-		url: "/",
+		url: "/api/method/erpnext.templates.pages.product_search.get_product_list",
 		data: {
-			cmd: "erpnext.templates.pages.product_search.get_product_list",
 			start: window.start,
 			search: window.search,
 			product_group: window.product_group

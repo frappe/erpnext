@@ -1,7 +1,16 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on("Manufacturing Settings", {});
+frappe.ui.form.on("Manufacturing Settings", {
+	after_save(frm) {
+		if (
+			cint(frappe.boot.sysdefaults.enable_operations_and_job_cards) !==
+			cint(frm.doc.enable_operations_and_job_cards)
+		) {
+			window.location.reload();
+		}
+	},
+});
 
 frappe.tour["Manufacturing Settings"] = [
 	{

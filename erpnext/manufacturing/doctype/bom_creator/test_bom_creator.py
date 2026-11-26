@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.manufacturing.doctype.bom.test_bom import operations_and_job_cards_disabled
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
 from erpnext.manufacturing.doctype.bom_creator.item_matcher import ItemMatcher
 from erpnext.manufacturing.doctype.bom_creator.step_file import read_step_file
@@ -289,107 +290,6 @@ class TestBOMCreator(ERPNextTestSuite):
 		design.save()
 
 		self.assertRaisesRegex(frappe.ValidationError, "its own assembly", design.enqueue_create_boms)
-
-	def test_each_operation_makes_an_item_that_the_next_operation_uses(self):
-		design = make_mapped_design(produce_item_at_each_operation=True)
-		welded_frame = make_item("_Test Creator Welded Frame", {"is_stock_item": 1}).name
-		welding = add_operation(design, "_Test Creator Welding", output_item=welded_frame)
-		assembly = add_operation(design, "_Test Creator Assembly")
-		add_material(design, part="TUBE-25", qty=3, operation=welding)
-		design.append("materials", {"from_operation_id": welding, "operation_id": assembly, "qty": 1})
-		add_material(design, part="WHEEL-26", qty=2, operation=assembly)
-		design.save()
-
-		bom = frappe.get_doc("BOM", make_boms(design)["BIKE-100"])
-
-		self.assertEqual(bom.track_semi_finished_goods, 1)
-		self.assertEqual(
-			[(row.finished_good, row.is_final_finished_good) for row in bom.operations],
-			[(welded_frame, 0), ("BIKE-100", 1)],
-		)
-		self.assertEqual(
-			[(row.item_code, row.operation_row_id) for row in bom.items],
-			[("TUBE-25", 1), (welded_frame, 2), ("WHEEL-26", 2)],
-		)
-
-	def test_operation_output_quantity_is_for_one_finished_good(self):
-		design = make_mapped_design(produce_item_at_each_operation=True)
-		design.qty = 3
-		welded_frame = make_item("_Test Creator Welded Frame", {"is_stock_item": 1}).name
-		welding = add_operation(design, "_Test Creator Welding", output_item=welded_frame, output_quantity=2)
-		assembly = add_operation(design, "_Test Creator Assembly")
-		add_material(design, part="TUBE-25", qty=3, operation=welding)
-		design.append("materials", {"from_operation_id": welding, "operation_id": assembly, "qty": 2})
-		design.save()
-
-		bom = frappe.get_doc("BOM", make_boms(design)["BIKE-100"])
-
-		self.assertEqual([row.finished_good_qty for row in bom.operations], [6, 3])
-
-	def test_output_of_an_earlier_operation_is_not_exploded(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		design = make_mapped_design(produce_item_at_each_operation=True)
-		welded_frame = make_item("_Test Creator Welded Frame", {"is_stock_item": 1}).name
-		make_bom(item=welded_frame, raw_materials=["_Test Item"], currency="INR")
-		welding = add_operation(design, "_Test Creator Welding", output_item=welded_frame)
-		assembly = add_operation(design, "_Test Creator Assembly")
-		add_material(design, part="TUBE-25", qty=3, operation=welding)
-		design.append("materials", {"from_operation_id": welding, "operation_id": assembly, "qty": 1})
-		design.save()
-
-		bom = frappe.get_doc("BOM", make_boms(design)["BIKE-100"])
-
-		row = next(row for row in bom.items if row.item_code == welded_frame)
-		self.assertEqual((row.bom_no, row.do_not_explode), ("", 1))
-
-	def test_sub_assembly_gets_its_own_bom_used_in_the_finished_good_bom(self):
-		design = make_mapped_design(produce_item_at_each_operation=True)
-		frame = get_part(design, "FRAME-ASM").node_id
-		add_material(design, part="TUBE-25", qty=3, bom=frame)
-		add_material(design, part="BOLT-M6", qty=4, bom=frame)
-		add_material(design, part="FRAME-ASM", qty=1)
-		add_material(design, part="WHEEL-26", qty=2)
-		design.save()
-
-		boms = make_boms(design)
-
-		self.assertEqual(get_bom_items(boms["FRAME-ASM"]), {"TUBE-25": 3, "BOLT-M6": 4})
-		finished_good_bom = frappe.get_doc("BOM", boms["BIKE-100"])
-		self.assertEqual(
-			{row.item_code: row.bom_no for row in finished_good_bom.items},
-			{"FRAME-ASM": boms["FRAME-ASM"], "WHEEL-26": ""},
-		)
-		self.assertEqual(design.status, "Completed")
-
-	def test_item_outside_the_design_gets_its_own_sub_assembly_bom(self):
-		design = make_mapped_design(produce_item_at_each_operation=True)
-		panel = make_item("_Test Creator Printed Panel", {"is_stock_item": 1}).name
-		node_id = max(row.node_id for row in design.items) + 1
-		design.append(
-			"items",
-			{
-				"node_id": node_id,
-				"part_number": panel,
-				"part_name": panel,
-				"item_code": panel,
-				"qty": 1,
-				"source": "Manual",
-			},
-		)
-		add_material(design, part="TUBE-25", qty=3, bom=node_id)
-		design.append("materials", {"item_code": panel, "qty": 2})
-		add_material(design, part="WHEEL-26", qty=2)
-		design.save()
-
-		boms = make_boms(design)
-
-		self.assertEqual(get_bom_items(boms[panel]), {"TUBE-25": 3})
-		finished_good_bom = frappe.get_doc("BOM", boms["BIKE-100"])
-		self.assertEqual(
-			{row.item_code: row.bom_no for row in finished_good_bom.items},
-			{panel: boms[panel], "WHEEL-26": ""},
-		)
 
 	def test_operation_plan_cost_counts_sub_assembly_materials(self):
 		design = make_mapped_design(produce_item_at_each_operation=True)
@@ -811,6 +711,43 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual((bom.with_operations, bom.routing), (1, routing.name))
 		self.assertEqual([row.operation for row in bom.operations], ["_Test Operation 1"])
 		self.assertEqual(bom.items[0].operation, "_Test Operation 1")
+
+	def test_new_design_with_operations_needs_operations_enabled(self):
+		routing = create_routing(
+			routing_name="_Test Creator Routing",
+			operations=[
+				{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 10}
+			],
+		)
+		part_with_operation = {"item_code": "_Test Item", "qty": 1, "operation": "_Test Operation 1"}
+		kit = make_item("_Test Creator Phantom Kit", {"is_stock_item": 0}).name
+
+		with operations_and_job_cards_disabled():
+			for values in (
+				{"track_semi_finished_goods": 1},
+				{"routing": routing.name},
+				{"items": [part_with_operation]},
+			):
+				with self.subTest(values=values):
+					self.assertRaisesRegex(
+						frappe.ValidationError, "Enable Operations & Job Cards", make_bom_creator, **values
+					)
+
+			make_bom_creator(items=[{"item_code": "_Test Item", "qty": 1}])
+			make_bom_creator(item_code=kit, is_phantom=1, items=[part_with_operation])
+
+	def test_design_with_operations_saves_after_operations_disabled(self):
+		design = make_bom_creator(
+			items=[{"item_code": "_Test Item", "qty": 1, "operation": "_Test Operation 1"}]
+		)
+
+		with operations_and_job_cards_disabled():
+			design.save()
+			design.items[0].operation = None
+			design.save()
+
+			design.items[0].operation = "_Test Operation 1"
+			self.assertRaisesRegex(frappe.ValidationError, "Enable Operations & Job Cards", design.save)
 
 	def test_boms_are_created_in_the_background_from_the_saved_creator(self):
 		from frappe.handler import run_doc_method

@@ -224,12 +224,36 @@ class SerialandBatchBundle(Document):
 			return
 
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
+		if not serial_nos:
+			return
 
-		data = frappe.get_all(
-			"Serial and Batch Entry",
-			filters={"serial_no": ("in", serial_nos), "docstatus": 1, "qty": ("<", 0)},
-			fields=["serial_no", "parent"],
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		query = (
+			frappe.qb.from_(entry)
+			.join(bundle)
+			.on(bundle.name == entry.parent)
+			.select(entry.serial_no, entry.parent, bundle.voucher_type, bundle.voucher_no)
+			.where((entry.serial_no.isin(serial_nos)) & (entry.docstatus == 1) & (entry.qty < 0))
 		)
+		if self.docstatus == 0:
+			# a serial no still in stock may be moving (e.g. a batch split), so check it on submit
+			serial_no = frappe.qb.DocType("Serial No")
+			query = (
+				query.join(serial_no)
+				.on(serial_no.name == entry.serial_no)
+				.where(Coalesce(serial_no.warehouse, "") == "")
+			)
+
+		data = query.run(as_dict=True)
+
+		# a serial no issued by this same voucher is moved within it, not received again
+		moved = {
+			row.serial_no
+			for row in data
+			if row.voucher_type == self.voucher_type and row.voucher_no == self.voucher_no
+		}
+		data = [row for row in data if row.serial_no not in moved]
 
 		note = "<br><br> <b>Note</b>:<br>"
 		for row in data:
@@ -1396,40 +1420,70 @@ class SerialandBatchBundle(Document):
 			)
 
 	def get_transfer_rates(self) -> dict:
-		"""Rate of each serial/batch where the same Stock Entry row took it out, plus the row's additional cost."""
+		"""Rate of each serial/batch where the same transfer row took it out, plus the row's added cost."""
 		from erpnext.stock.utils import is_serial_no_wise_valuation_disabled
 
-		if (
-			self.voucher_type != "Stock Entry"
-			or not self.voucher_detail_no
-			or is_serial_no_wise_valuation_disabled(self.item_code)
-		):
+		if not self.voucher_detail_no or is_serial_no_wise_valuation_disabled(self.item_code):
 			return {}
 
-		outward_bundle = frappe.db.get_value(
+		outward_bundles = frappe.get_all(
 			"Serial and Batch Bundle",
-			{
+			filters={
 				"voucher_type": self.voucher_type,
 				"voucher_detail_no": self.voucher_detail_no,
+				"item_code": self.item_code,
 				"type_of_transaction": "Outward",
 				"is_cancelled": 0,
 			},
+			pluck="name",
 		)
-		if not outward_bundle:
+		if not outward_bundles:
 			return {}
 
-		additional_cost, transfer_qty = frappe.db.get_value(
-			"Stock Entry Detail", self.voucher_detail_no, ["additional_cost", "transfer_qty"]
-		)
-		additional_cost_per_unit = flt(additional_cost) / flt(transfer_qty)
+		added_cost_per_unit = self.get_transfer_added_cost_per_unit()
+		if added_cost_per_unit is None:
+			return {}
+
 		return {
-			(d.serial_no, d.batch_no): flt(d.incoming_rate) + additional_cost_per_unit
+			(d.serial_no, d.batch_no): flt(d.incoming_rate) + added_cost_per_unit
 			for d in frappe.get_all(
 				"Serial and Batch Entry",
-				filters={"parent": outward_bundle},
+				filters={"parent": ("in", outward_bundles)},
 				fields=["serial_no", "batch_no", "incoming_rate"],
 			)
 		}
+
+	def get_transfer_added_cost_per_unit(self) -> float | None:
+		"""Cost a transfer row adds to each stock unit it moves, None when the row is no transfer."""
+		if self.voucher_type == "Stock Entry":
+			additional_cost, transfer_qty = frappe.db.get_value(
+				"Stock Entry Detail", self.voucher_detail_no, ["additional_cost", "transfer_qty"]
+			)
+			return flt(additional_cost) / flt(transfer_qty)
+
+		if self.voucher_type in ("Delivery Note", "Sales Invoice"):
+			target_warehouse = frappe.db.get_value(
+				self.child_table, self.voucher_detail_no, "target_warehouse"
+			)
+			return 0.0 if target_warehouse else None
+
+		if self.voucher_type not in ("Purchase Receipt", "Purchase Invoice"):
+			return None
+
+		row = frappe.db.get_value(
+			self.child_table,
+			self.voucher_detail_no,
+			["from_warehouse", "landed_cost_voucher_amount", "stock_qty"],
+			as_dict=True,
+		)
+		if not (row and row.from_warehouse):
+			return None
+
+		# the landed cost belongs to the accepted stock only
+		if self.is_rejected or not flt(row.stock_qty):
+			return 0.0
+
+		return flt(row.landed_cost_voucher_amount) / flt(row.stock_qty)
 
 	def get_subcontracting_return_rates(self) -> dict:
 		"""Rate the returned Subcontracting Receipt consumed each serial/batch of a supplied item at."""

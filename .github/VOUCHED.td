@@ -11,29 +11,16 @@
 #   - Denounce with minus prefix: -username or -platform:username.
 #   - Optional details after a space following the handle.
 Afsalsyed
-AhmedAbokhatwa
 akhtarmohsin
-Copilot
 dependabot[bot]
 ervishnucs
 gajjug004
-Hemil-Sangani
-Jatin3128
 kaulith
 kavin-114
-krishna-254
 loicdokos
-maasanto
 mergify[bot]
-nareshkannasln
-nikkothari22
-nishkagosalia
+PatrickDEissler
 raghavisruia
 rtdany10
-SandraFrappe
-sarathibalamurugan
-Shllokkk
-Soham-ambibuzz
-sumitjain236
+Sudhanshu-Badole
 trustedcomputer
-yasmine8

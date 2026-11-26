@@ -126,7 +126,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function (frm, cdt, cdn) {
-			frm.cscript.calculate_taxes_and_totals();
+			frm.cscript.refresh_item_tax_rates();
 		});
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "tax_amount", function (frm, cdt, cdn) {
@@ -677,6 +677,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// real currency change can be told apart from a mere exchange rate refresh
 		// (e.g. triggered by a date change).
 		this._doc_currency = this.frm.doc.currency;
+		this._schedule_base_date = this.get_schedule_base_date();
+		this._doc_conversion_rate = flt(this.frm.doc.conversion_rate);
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
@@ -1426,8 +1428,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	transaction_date() {
 		if (this.frm.doc.transaction_date) {
 			this.frm.transaction_date = this.frm.doc.transaction_date;
-			frappe.ui.form.trigger(this.frm.doc.doctype, "currency");
-			this.recalculate_terms();
+			this.update_rates_for_new_date();
+			this.recalculate_terms(this.pop_schedule_date_shift());
 		}
 	}
 
@@ -1435,6 +1437,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		if (this.frm.doc.posting_date) {
 			this.frm.posting_date = this.frm.doc.posting_date;
+			const days_moved = this.pop_schedule_date_shift();
 
 			if (
 				(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer) ||
@@ -1454,14 +1457,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						if (r.message) {
 							me.frm.doc.due_date = r.message;
 							refresh_field("due_date");
-							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
-							me.recalculate_terms();
+							me.update_rates_for_new_date();
+							me.recalculate_terms(days_moved);
 						}
 					},
 				});
 			} else {
-				frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
+				me.update_rates_for_new_date();
 			}
+		}
+	}
+
+	async update_rates_for_new_date() {
+		const previous_rate = flt(this.frm.doc.conversion_rate);
+		await this.frm.script_manager.trigger("currency");
+
+		// A changed rate re-prices via the conversion_rate trigger; an unchanged one fires nothing
+		if (flt(this.frm.doc.conversion_rate) === previous_rate) {
+			this.apply_pricing_rule();
 		}
 	}
 
@@ -1532,7 +1545,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.posting_date();
 	}
 
-	recalculate_terms() {
+	get_schedule_base_date() {
+		const doc = this.frm.doc;
+		return doc.bill_date || doc.posting_date || doc.transaction_date;
+	}
+
+	// days the schedule base date moved since the manual rows were last aligned to it
+	pop_schedule_date_shift() {
+		const base_date = this.get_schedule_base_date();
+		const days_moved = frappe.datetime.get_day_diff(base_date, this._schedule_base_date || base_date);
+		this._schedule_base_date = base_date;
+		return days_moved;
+	}
+
+	recalculate_terms(days_moved) {
 		const doc = this.frm.doc;
 		if (doc.payment_terms_template) {
 			this.payment_terms_template();
@@ -1541,13 +1567,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			doc.payment_schedule.forEach(function (term) {
 				if (term.payment_term) {
 					me.payment_term(doc, term.doctype, term.name);
-				} else {
-					frappe.model.set_value(
-						term.doctype,
-						term.name,
-						"due_date",
-						doc.posting_date || doc.transaction_date
-					);
+				} else if (term.due_date && days_moved) {
+					// hand-entered due dates move with the document date, keeping their gaps
+					const due_date = moment(term.due_date).add(days_moved, "days").format("YYYY-MM-DD");
+					frappe.model.set_value(term.doctype, term.name, "due_date", due_date);
 				}
 			});
 		}
@@ -1573,7 +1596,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// Currency the stored margins/actual charges are denominated in, captured
 		// before this trigger updates the tracker for the next one.
 		let previous_currency = this._doc_currency;
+		let previous_rate = this._doc_conversion_rate;
 		this._doc_currency = this.frm.doc.currency;
+		let currency_changed = previous_currency !== this.frm.doc.currency;
 		// A mapped document keeps its source's rate, unless its currency is changed
 		if (
 			this.frm.doc.currency &&
@@ -1581,22 +1606,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			(!this.frm.doc.__onload?.load_after_mapping ||
 				inter_company_reference ||
 				this.frm.doc.use_transaction_date_exchange_rate ||
-				previous_currency !== this.frm.doc.currency)
+				currency_changed)
 		) {
 			this.get_exchange_rate(
 				transaction_date,
 				this.frm.doc.currency,
 				company_currency,
 				function (exchange_rate) {
+					// A mere rate refresh (e.g. by a date change) keeps the entered amounts
+					if (currency_changed) {
+						me.convert_amounts_to_new_currency(previous_rate, exchange_rate);
+					}
 					if (exchange_rate != me.frm.doc.conversion_rate) {
-						// Margins and actual charges are amounts in the transaction
-						// currency; convert them only when the currency itself changed,
-						// not when just the exchange rate was refreshed (e.g. by a date
-						// change), otherwise the entered margin keeps shrinking.
-						if (previous_currency !== me.frm.doc.currency) {
-							me.set_margin_amount_based_on_currency(exchange_rate);
-							me.set_actual_charges_based_on_currency(exchange_rate);
-						}
 						me.frm.set_value("conversion_rate", exchange_rate);
 					}
 				}
@@ -1605,6 +1626,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			// company currency and doc currency is same
 			// this will prevent unnecessary conversion rate triggers
 			if (this.frm.doc.currency === this.get_company_currency()) {
+				if (currency_changed) {
+					this.convert_amounts_to_new_currency(previous_rate, 1.0);
+				}
 				this.frm.set_value("conversion_rate", 1.0);
 			} else {
 				this.conversion_rate();
@@ -1617,10 +1641,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
-		if (
-			this.frm.doc.currency === this.frm.doc.price_list_currency &&
-			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate
-		) {
+		// a change that arrives before the currency handler belongs to the old currency's tracker
+		if (this.frm.doc.currency === this._doc_currency) {
+			this._doc_conversion_rate = flt(this.frm.doc.conversion_rate);
+		}
+		const plc_follows_currency = this.frm.doc.currency === this.frm.doc.price_list_currency;
+		if (plc_follows_currency && this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
 
@@ -1628,7 +1654,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if (this.frm.doc.__onload?.load_after_mapping) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list) {
-				this.apply_price_list();
+				// keep the price list exchange rate just synced above, else the server refetches the market rate
+				this.apply_price_list(null, plc_follows_currency);
 			}
 		}
 		// Make read only if Accounts Settings doesn't allow stale rates
@@ -1664,45 +1691,45 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	set_margin_amount_based_on_currency(exchange_rate) {
-		if (
-			(in_list([
-				"Quotation",
-				"Sales Order",
-				"Delivery Note",
-				"Sales Invoice",
-				"Purchase Invoice",
-				"Purchase Order",
-				"Purchase Receipt",
-			]),
-			this.frm.doc.doctype)
-		) {
-			var me = this;
-			$.each(this.frm.doc.items || [], function (i, d) {
-				if (d.margin_type == "Amount") {
-					frappe.model.set_value(
-						d.doctype,
-						d.name,
-						"margin_rate_or_amount",
-						flt(d.margin_rate_or_amount) / flt(exchange_rate)
-					);
-				}
-			});
+	convert_amounts_to_new_currency(from_rate, to_rate) {
+		this._doc_conversion_rate = flt(to_rate);
+		if (!flt(from_rate) || !flt(to_rate) || flt(from_rate) === flt(to_rate)) return;
+
+		const factor = flt(from_rate) / flt(to_rate);
+		this.convert_item_amounts(factor);
+		this.convert_actual_charges(factor);
+
+		// a percentage discount is recalculated from the converted totals
+		if (!this.frm.doc.additional_discount_percentage && this.frm.doc.discount_amount) {
+			const discount = flt(this.frm.doc.discount_amount * factor, precision("discount_amount"));
+			this.frm.set_value("discount_amount", discount);
 		}
 	}
 
-	set_actual_charges_based_on_currency(exchange_rate) {
-		var me = this;
-		$.each(this.frm.doc.taxes || [], function (i, d) {
-			if (d.charge_type == "Actual") {
-				frappe.model.set_value(
-					d.doctype,
-					d.name,
-					"tax_amount",
-					flt(d.base_tax_amount) / flt(exchange_rate)
+	convert_item_amounts(factor) {
+		for (const item of this.frm.doc.items || []) {
+			if (item.margin_type == "Amount" && item.margin_rate_or_amount) {
+				const margin = flt(
+					item.margin_rate_or_amount * factor,
+					precision("margin_rate_or_amount", item)
 				);
+				frappe.model.set_value(item.doctype, item.name, "margin_rate_or_amount", margin);
 			}
-		});
+			// a percentage discount is recalculated from the converted price list rate
+			if (!item.discount_percentage && item.discount_amount) {
+				const discount = flt(item.discount_amount * factor, precision("discount_amount", item));
+				frappe.model.set_value(item.doctype, item.name, "discount_amount", discount);
+			}
+		}
+	}
+
+	convert_actual_charges(factor) {
+		for (const tax of this.frm.doc.taxes || []) {
+			if (tax.charge_type == "Actual") {
+				const tax_amount = flt(tax.tax_amount * factor, precision("tax_amount", tax));
+				frappe.model.set_value(tax.doctype, tax.name, "tax_amount", tax_amount);
+			}
+		}
 	}
 
 	get_exchange_rate(transaction_date, from_currency, to_currency, callback) {
@@ -1781,7 +1808,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	uom(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-		item.pricing_rules = "";
 		if (item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
@@ -2802,7 +2828,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							refresh_field("taxes");
 						} else {
 							me.frm.set_value("taxes", taxes);
-							me.calculate_taxes_and_totals();
+							me.refresh_item_tax_rates();
 						}
 					}
 				},
@@ -2864,6 +2890,41 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 			});
 		}
+	}
+
+	refresh_item_tax_rates() {
+		// item_tax_rate also holds each tax row's rate, so rebuild it as the server does on save
+		const items = this.frm.doc.items || [];
+		const templates = [...new Set(items.map((item) => item.item_tax_template || ""))];
+		const doc = {
+			company: this.frm.doc.company,
+			taxes: (this.frm.doc.taxes || []).map(({ account_head, rate, set_by_item_tax_template }) => ({
+				account_head,
+				rate,
+				set_by_item_tax_template,
+			})),
+		};
+		const request = (this.item_tax_rates_request = (this.item_tax_rates_request || 0) + 1);
+
+		return Promise.all(
+			templates.map((tax_template) =>
+				frappe.xcall("erpnext.stock.get_item_details.get_item_tax_map", {
+					doc,
+					tax_template,
+					as_json: true,
+				})
+			)
+		)
+			.then((item_tax_rates) => {
+				// a later tax change has its own request in flight
+				if (request !== this.item_tax_rates_request) return;
+
+				items.forEach((item) => {
+					const index = templates.indexOf(item.item_tax_template || "");
+					if (index !== -1) item.item_tax_rate = item_tax_rates[index];
+				});
+			})
+			.finally(() => this.calculate_taxes_and_totals());
 	}
 
 	item_tax_template(doc, cdt, cdn) {
@@ -3320,6 +3381,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				},
 			});
+		} else if (
+			!doc.payment_terms_template &&
+			this.frm.updating_party_details &&
+			doc.payment_schedule?.length
+		) {
+			// the new party has no terms, so drop the previous party's schedule
+			this.frm.clear_table("payment_schedule");
+			this.frm.refresh_field("payment_schedule");
 		}
 	}
 

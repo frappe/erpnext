@@ -289,7 +289,11 @@ def set_address_details(
 				billing_address=party_details.company_address,
 				billing_address_display=(
 					party_details.company_address_display
-					or render_address(party_details.company_address, check_permissions=False)
+					or render_address(
+						party_details.company_address,
+						check_permissions=not ignore_permissions
+						and not is_company_address(party_details.company_address, company),
+					)
 				),
 				**get_fetch_values(doctype, "billing_address", party_details.company_address),
 			)
@@ -826,8 +830,16 @@ def validate_due_date_with_template(posting_date, due_date, bill_date, template_
 
 @frappe.whitelist()
 def get_address_tax_category(
-	tax_category: str | None = None, billing_address: str | None = None, shipping_address: str | None = None
+	tax_category: str | None = None,
+	billing_address: str | None = None,
+	shipping_address: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	pos_profile: str | None = None,
 ):
+	if party and not tax_category:
+		tax_category = get_party_tax_category(party_type, party, pos_profile)
+
 	addr_tax_category_from = frappe.get_single_value(
 		"Accounts Settings", "determine_address_tax_category_from"
 	)
@@ -839,6 +851,18 @@ def get_address_tax_category(
 			tax_category = frappe.db.get_value("Address", billing_address, "tax_category") or tax_category
 
 	return cstr(tax_category)
+
+
+def get_party_tax_category(party_type: str | None, party: str, pos_profile: str | None = None):
+	tax_category = None
+	if party_type in ("Customer", "Supplier"):
+		frappe.has_permission(party_type, "select", party, throw=True)
+		tax_category = frappe.db.get_value(party_type, party, "tax_category")
+
+	if not tax_category and pos_profile:
+		tax_category = frappe.db.get_value("POS Profile", pos_profile, "tax_category")
+
+	return tax_category
 
 
 @frappe.whitelist()
@@ -1204,6 +1228,14 @@ def add_party_account(party_type, party, company, account):
 def render_address(address, check_permissions=True):
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval -- calls a local function
 	return frappe.call(_render_address, address, check_permissions=check_permissions)
+
+
+def is_company_address(address, company):
+	# the company's own addresses render without Address read, as in frappe's get_company_address
+	return bool(company) and frappe.db.exists(
+		"Dynamic Link",
+		{"parenttype": "Address", "parent": address, "link_doctype": "Company", "link_name": company},
+	)
 
 
 def validate_party_currency_before_merging(party_type, old_party, new_party):

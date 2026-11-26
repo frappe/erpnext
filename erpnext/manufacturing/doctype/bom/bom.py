@@ -159,6 +159,7 @@ class BOM(WebsiteGenerator):
 		description: DF.TextEditor | None
 		exploded_items: DF.Table[BOMExplosionItem]
 		fg_based_operating_cost: DF.Check
+		formula_tolerance: DF.Percent
 		has_variants: DF.Check
 		image: DF.AttachImage | None
 		inspection_required: DF.Check
@@ -318,6 +319,7 @@ class BOM(WebsiteGenerator):
 		self._validate_uoms_and_goods()
 
 	def _validate_setup(self):
+		self.validate_operations_enabled_in_manufacturing_settings()
 		self.clear_operations()
 		self.clear_inspection()
 		self.validate_main_item()
@@ -776,6 +778,25 @@ class BOM(WebsiteGenerator):
 			frappe.db.set_value("BOM", next_default, "is_default", 1)
 
 		frappe.db.set_value("Item", self.item, "default_bom", next_default)
+
+	def validate_operations_enabled_in_manufacturing_settings(self):
+		if not self.with_operations or frappe.get_single_value(
+			"Manufacturing Settings", "enable_operations_and_job_cards"
+		):
+			return
+
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and doc_before_save.with_operations:
+			return
+
+		frappe.throw(
+			_("Cannot enable {0} as {1} is disabled in {2}").format(
+				bold(self.meta.get_translated_label("with_operations")),
+				bold(_("Enable Operations & Job Cards")),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			),
+			title=_("Operations Not Enabled"),
+		)
 
 	def clear_operations(self):
 		if not self.with_operations:
@@ -1667,7 +1688,7 @@ def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
 	is_stock_item = cint(not opts.include_non_stock_items)
 	stock_item_condition = t.item_doc.is_stock_item.isin([1, is_stock_item])
 	if opts.fetch_secondary_items:
-		return _add_secondary_item_columns(query, t, stock_item_condition)
+		return _add_secondary_item_columns(query, t, opts.qty, stock_item_condition)
 
 	# BOM Item rate is per row UOM, while BOM Explosion Item rate is per stock UOM. Select the
 	# matching quantity so a normal BOM row's conversion factor is not applied twice.
@@ -1713,14 +1734,14 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 	return query, [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
 
 
-def _add_secondary_item_columns(query, t, stock_item_condition):
+def _add_secondary_item_columns(query, t, qty, stock_item_condition):
 	# grouped by (item_code, secondary_item_type), which the BOM keeps unique, so every Max()
 	# below returns the single grouped row's own value while keeping the GROUP BY valid on
 	# postgres.
 	query = query.select(
 		Max(t.item_doc.description).as_("description"),
 		Max(t.bom_item.cost_allocation_per).as_("cost_allocation_per"),
-		Max(t.bom_item.process_loss_per).as_("process_loss_per"),
+		(Sum(t.bom_item.process_loss_qty / IfNull(t.bom_doc.quantity, 1)) * qty).as_("process_loss_qty"),
 		t.bom_item.secondary_item_type,
 		Max(t.bom_item.name).as_("name"),
 	).where(stock_item_condition)

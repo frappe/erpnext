@@ -4,7 +4,7 @@ from math import floor
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Min, NullIf, Sum
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, format_datetime, get_link_to_form
 
 import erpnext
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -13,9 +13,9 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
 from .manufacturing import (
-	ceil_qty_if_uom_has_whole_number,
 	get_bom_items,
 	get_production_item_details,
+	get_secondary_item_qty,
 	get_secondary_items,
 )
 from .stock_entry_base import BaseStockEntry
@@ -51,6 +51,30 @@ class DisassembleStockEntry(BaseStockEntry):
 		for row in self.doc.items:
 			if not row.s_warehouse and not row.t_warehouse:
 				frappe.throw(_("Source or Target Warehouse is required for item {0}").format(row.item_code))
+
+	def validate_posting_datetime_with_source_entry(self):
+		"""The components take the rates of the source manufacture entry, so it cannot be posted before it."""
+		if not self.doc.source_stock_entry:
+			return
+
+		source = frappe.db.get_value(
+			"Stock Entry", self.doc.source_stock_entry, ["posting_date", "posting_time"], as_dict=True
+		)
+		source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
+		posting_datetime = get_combine_datetime(self.doc.posting_date, self.doc.posting_time)
+		if posting_datetime >= source_datetime:
+			return
+
+		frappe.throw(
+			_(
+				"Posting Date and Time {0} cannot be before {1}, when Stock Entry {2} manufactured this finished good."
+			).format(
+				frappe.bold(format_datetime(posting_datetime)),
+				frappe.bold(format_datetime(source_datetime)),
+				get_link_to_form("Stock Entry", self.doc.source_stock_entry),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
 
 	def validate_fg_completed_qty(self):
 		if not self.doc.source_stock_entry:
@@ -390,12 +414,9 @@ class DisassembleStockEntry(BaseStockEntry):
 			item_args["uom"] = item_args.get("uom") or item_args.get("stock_uom")
 			item_args["bom_secondary_item"] = row.get("name")
 
-			row.qty = row.qty * self.doc.fg_completed_qty
-			if row.get("process_loss_per"):
-				row.qty -= flt(row.qty * row.get("process_loss_per") / 100)
-			item_args["qty"] = ceil_qty_if_uom_has_whole_number(row.qty, item_args["uom"])
-
-			self.doc.append("items", item_args)
+			item_args["qty"] = get_secondary_item_qty(row, self.doc.fg_completed_qty)
+			if item_args["qty"]:
+				self.doc.append("items", item_args)
 
 	def add_finished_goods(self):
 		item_details = get_production_item_details(self.doc.work_order, self.doc.bom_no)

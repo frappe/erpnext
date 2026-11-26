@@ -12,6 +12,9 @@ frappe.ui.form.on("BOM Creator", {
 			filters: { item: locals[cdt][cdn].item_code, docstatus: 1 },
 		}));
 		frm.set_query("default_warehouse", (doc) => ({ filters: { company: doc.company, is_group: 0 } }));
+		frm.set_query("raw_material_warehouse", (doc) => ({
+			filters: { company: doc.company, is_group: 0 },
+		}));
 		frm.get_field("design_file").df.options = {
 			restrictions: { allowed_file_types: [".step", ".stp", ".csv"] },
 		};
@@ -32,6 +35,7 @@ frappe.ui.form.on("BOM Creator", {
 			frm.meta.fields.filter((df) => df.allow_on_submit && !df.read_only).map((df) => df.fieldname),
 			frm.doc.docstatus !== 1 || ["Submitted", "Failed"].includes(frm.doc.status)
 		);
+		frm.events.toggle_track_semi_finished_goods(frm);
 		frm.previous_item_name = frm.doc.item_name;
 		if (frm.doc.status === "Failed") {
 			frm.dashboard.set_headline(
@@ -41,6 +45,31 @@ frappe.ui.form.on("BOM Creator", {
 		}
 	},
 
+	toggle_track_semi_finished_goods(frm) {
+		if (cint(frappe.boot.sysdefaults.enable_operations_and_job_cards)) {
+			return;
+		}
+
+		if (!frm.doc.track_semi_finished_goods) {
+			frm.toggle_enable("track_semi_finished_goods", false);
+		}
+
+		frm.set_df_property("track_semi_finished_goods", "show_description_on_click", 0);
+		frm.set_df_property(
+			"track_semi_finished_goods",
+			"description",
+			__("To use operations, enable {0} in {1}.", [
+				`<b>${__("Enable Operations & Job Cards")}</b>`,
+				frappe.utils.get_form_link(
+					"Manufacturing Settings",
+					"Manufacturing Settings",
+					true,
+					__("Manufacturing Settings")
+				),
+			])
+		);
+	},
+
 	company(frm) {
 		if (frm.doc.company) {
 			frm.set_value("currency", erpnext.get_currency(frm.doc.company));
@@ -48,10 +77,18 @@ frappe.ui.form.on("BOM Creator", {
 	},
 
 	track_semi_finished_goods(frm) {
+		frm.design_view?.refresh();
+	},
+
+	raw_material_warehouse(frm) {
 		frm.design_view?.render();
 	},
 
 	qty(frm) {
+		frm.design_view?.render();
+	},
+
+	formula_tolerance(frm) {
 		frm.design_view?.render();
 	},
 

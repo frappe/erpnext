@@ -7,7 +7,7 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.file.utils import find_file_by_url
 from frappe.model.document import Document
-from frappe.utils import cint, flt, sbool
+from frappe.utils import cint, flt, get_link_to_form, sbool
 from frappe.utils.background_jobs import is_job_enqueued
 
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
@@ -57,8 +57,9 @@ class BOMCreator(Document):
 		design_file: DF.Attach | None
 		design_name: DF.Data | None
 		error_log: DF.Text | None
+		formula_tolerance: DF.Percent
 		is_phantom: DF.Check
-		item_code: DF.Link | None
+		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
 		items: DF.Table[BOMCreatorItem]
@@ -72,6 +73,7 @@ class BOMCreator(Document):
 		project: DF.Link | None
 		qty: DF.Float
 		raw_material_cost: DF.Currency
+		raw_material_warehouse: DF.Link | None
 		remarks: DF.TextEditor | None
 		revision: DF.Int
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
@@ -94,6 +96,7 @@ class BOMCreator(Document):
 		self.validate_part_models()
 		self.validate_existing_boms()
 		self.validate_finished_good()
+		self.validate_operations_enabled_in_manufacturing_settings()
 		OperationPlan(self).validate()
 		self.set_revision_changes()
 		MaterialCost(self).set_costs()
@@ -112,6 +115,7 @@ class BOMCreator(Document):
 		self.set_part_structure()
 		self.validate_part_models()
 		self.validate_existing_boms()
+		self.validate_operations_enabled_in_manufacturing_settings()
 		OperationPlan(self).validate()
 		self.set_revision_changes()
 		MaterialCost(self).set_costs()
@@ -158,7 +162,7 @@ class BOMCreator(Document):
 
 	def validate_finished_good(self):
 		if self.is_phantom and self.track_semi_finished_goods:
-			frappe.throw(_("A phantom BOM cannot use 'Produce Item per Operation'."))
+			frappe.throw(_("A phantom BOM cannot use 'Process Manufacturing'."))
 
 		if not self.item_code:
 			return
@@ -183,6 +187,37 @@ class BOMCreator(Document):
 					).format(row.idx, bold(row.item_code), bold(row.operation)),
 					title=_("Routing Required"),
 				)
+
+	def validate_operations_enabled_in_manufacturing_settings(self):
+		label = self.get_operations_field_label()
+		if not label or frappe.get_single_value("Manufacturing Settings", "enable_operations_and_job_cards"):
+			return
+
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and doc_before_save.get_operations_field_label():
+			return
+
+		frappe.throw(
+			_("Cannot use {0} as {1} is disabled in {2}").format(
+				bold(label),
+				bold(_("Enable Operations & Job Cards")),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			),
+			title=_("Operations Not Enabled"),
+		)
+
+	def get_operations_field_label(self) -> str | None:
+		if self.is_phantom:
+			return None
+
+		if self.track_semi_finished_goods:
+			return self.meta.get_translated_label("track_semi_finished_goods")
+
+		if self.routing:
+			return self.meta.get_translated_label("routing")
+
+		if any(row.operation for row in self.items):
+			return frappe.get_meta("BOM Creator Item").get_translated_label("operation")
 
 	def import_design_file(self):
 		design = read_design_file(self.design_file)

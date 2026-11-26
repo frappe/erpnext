@@ -177,6 +177,11 @@ class JobCard(Document):
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
+		self.clear_breakdown()
+
+	def on_trash(self):
+		if self.docstatus == 0:
+			self.clear_breakdown()
 
 	def has_stock_entry(self):
 		return frappe.db.exists("Stock Entry", {"job_card": self.name, "docstatus": ["!=", 2]})
@@ -495,17 +500,16 @@ class JobCard(Document):
 	def append_secondary_item(self, item_code, values):
 		secondary_item = {
 			"item_code": item_code,
-			"stock_qty": values.qty,
+			# net of the BOM's rounded loss qty, as manufacture and disassembly from the BOM count it
+			"stock_qty": flt(
+				values.qty - flt(values.process_loss_qty),
+				frappe.get_precision("Job Card Secondary Item", "stock_qty"),
+			),
 			"item_name": values.item_name,
 			"stock_uom": values.stock_uom,
 			"secondary_item_type": values.secondary_item_type,
 			"bom_secondary_item": values.name,
 		}
-
-		secondary_item["stock_qty"] -= flt(
-			secondary_item["stock_qty"] * (flt(values.process_loss_per) / 100),
-			self.precision("for_quantity"),
-		)
 
 		self.append("secondary_items", secondary_item)
 
@@ -2204,6 +2208,12 @@ class JobCard(Document):
 			row.db_update()
 
 	def update_workstation_status(self):
+		status = self.get_workstation_status()
+		workstation = frappe.get_doc("Workstation", self.workstation)
+		if workstation.status not in (status, "Problem"):
+			workstation.db_set("status", status, notify=True)
+
+	def get_workstation_status(self, include_self=True):
 		job_cards = frappe.get_all(
 			"Job Card",
 			fields=["name", "status"],
@@ -2211,7 +2221,7 @@ class JobCard(Document):
 		)
 		# Validation runs before the current card's status is written to the database.
 		statuses = {row.status for row in job_cards if row.name != self.name}
-		if self.docstatus == 0:
+		if include_self and self.docstatus == 0:
 			statuses.add(self.status)
 
 		status = "Off"
@@ -2219,10 +2229,15 @@ class JobCard(Document):
 			status = "Production"
 		elif "On Hold" in statuses:
 			status = "Idle"
+		return status
+
+	def clear_breakdown(self):
+		if not self.is_paused or not self.track_semi_finished_goods:
+			return
 
 		workstation = frappe.get_doc("Workstation", self.workstation)
-		if workstation.status != status:
-			workstation.db_set("status", status, notify=True)
+		if workstation.status == "Problem":
+			workstation.db_set("status", self.get_workstation_status(include_self=False), notify=True)
 
 	@frappe.whitelist()
 	def start_timer(self, **kwargs):
