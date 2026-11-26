@@ -3,11 +3,7 @@ from collections import defaultdict
 import frappe
 import frappe.query_builder
 from frappe.query_builder.functions import Max, Sum
-from frappe.utils import (
-	flt,
-	getdate,
-	today,
-)
+from frappe.utils import flt, getdate, today
 
 from erpnext.stock.serial_batch_bundle.availability.reservations import (
 	get_batches_to_be_considered,

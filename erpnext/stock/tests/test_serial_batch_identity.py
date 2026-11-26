@@ -19,6 +19,10 @@ from erpnext.stock.doctype.pick_list.pick_list import (
 	get_pick_list_holders,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.api import get_serial_batch_numbers, get_serial_batch_scan
+from erpnext.stock.doctype.serial_and_batch_bundle.services.future_transactions import (
+	BundleFutureTransactions,
+)
+from erpnext.stock.doctype.serial_and_batch_bundle.services.returns import BundleReturn
 from erpnext.stock.doctype.serial_no.serial_no import auto_fetch_serial_number, get_pos_reserved_serial_nos
 from erpnext.stock.doctype.stock_entry.services.disassemble import (
 	DisassembleStockEntry,
@@ -257,11 +261,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			entries=[{"serial_no": serial.name}],
 		)
 		with patch.object(bundle, "get_orignal_document_data", return_value=[original]):
-			bundle.validate_serial_and_batch_no_for_returned()
+			BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 			bundle.item_code = self.other_item.name
 			bundle.entries[0].serial_no = other_serial.name
 			with self.assertRaisesRegex(frappe.ValidationError, "Returned-001.*not part") as error:
-				bundle.validate_serial_and_batch_no_for_returned()
+				BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 		self.assertNotIn(other_serial.name, str(error.exception))
 		self.assertEqual(original.serial_no, "returned-001")
 		self.assertEqual(bundle.entries[0].serial_no, other_serial.name)
@@ -287,10 +291,10 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				return_value=[serial.name],
 			),
 		):
-			bundle.validate_serial_and_batch_no_for_returned()
+			BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 			bundle.entries[0].serial_no = invalid_serial.name
 			with self.assertRaisesRegex(frappe.ValidationError, "Other-002.*not part") as error:
-				bundle.validate_serial_and_batch_no_for_returned()
+				BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 		self.assertNotIn(invalid_serial.name, str(error.exception))
 		self.assertNotIn(serial.serial_no, str(error.exception))
 		self.assertEqual(bundle.entries[0].serial_no, invalid_serial.name)
@@ -409,7 +413,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			):
 				with self.subTest(numbers=numbers):
 					row.serial_no = numbers
-					serials, batches = bundle.get_serial_nos_for_validate()
+					serials, batches = BundleFutureTransactions(bundle).get_serial_nos_for_validate()
 					self.assertEqual(set(serials), expected)
 					self.assertEqual(batches, [])
 					self.assertEqual(row.serial_no, numbers)

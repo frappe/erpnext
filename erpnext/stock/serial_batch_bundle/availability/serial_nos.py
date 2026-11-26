@@ -3,10 +3,7 @@ from collections import Counter, defaultdict
 import frappe
 import frappe.query_builder
 from frappe.query_builder.functions import Coalesce, Concat_ws
-from frappe.utils import (
-	cint,
-	today,
-)
+from frappe.utils import cint, today
 
 from erpnext.stock.serial_batch_bundle.availability.reservations import (
 	get_other_doc_reserved_serials,

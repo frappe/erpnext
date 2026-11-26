@@ -4,9 +4,7 @@ import frappe
 import frappe.query_builder
 from frappe import _, _dict, bold
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import (
-	cint,
-)
+from frappe.utils import cint
 
 from erpnext.stock.serial_batch_bundle.bundle_entries import _get_serial_batch_ledgers, parse_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity

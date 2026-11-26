@@ -1,12 +1,7 @@
 import frappe
 from frappe import _, bold
 from frappe.model.naming import NamingSeries, parse_naming_series
-from frappe.utils import (
-	cint,
-	flt,
-	getdate,
-	now,
-)
+from frappe.utils import cint, flt, getdate, now
 
 from erpnext.stock.serial_batch_bundle.bundle_entries import get_serial_nos_batch
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity

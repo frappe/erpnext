@@ -2,12 +2,7 @@ from collections import defaultdict
 
 import frappe
 from frappe.query_builder.functions import Sum
-from frappe.utils import (
-	add_days,
-	create_batch,
-	flt,
-	getdate,
-)
+from frappe.utils import add_days, create_batch, flt, getdate
 from pypika import Order
 from pypika.terms import ExistsCriterion
 

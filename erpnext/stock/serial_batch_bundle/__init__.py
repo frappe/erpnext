@@ -20,12 +20,8 @@ from erpnext.stock.serial_batch_bundle.bundle_entries import (
 	get_serial_or_batch_items,
 	get_serial_or_batch_nos,
 )
-from erpnext.stock.serial_batch_bundle.creation import (
-	SerialBatchCreation,
-)
-from erpnext.stock.serial_batch_bundle.ledger_posting import (
-	SerialBatchBundle,
-)
+from erpnext.stock.serial_batch_bundle.creation import SerialBatchCreation
+from erpnext.stock.serial_batch_bundle.ledger_posting import SerialBatchBundle
 from erpnext.stock.serial_batch_bundle.serial_no_status import (
 	CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES,
 	INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES,

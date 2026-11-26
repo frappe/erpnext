@@ -1,18 +1,10 @@
 from typing import Any, Literal
 
 import frappe
-import frappe.query_builder
 from frappe import _
 from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.document import Document
-from frappe.utils import (
-	cint,
-	cstr,
-	flt,
-	nowtime,
-	parse_json,
-	today,
-)
+from frappe.utils import cint, cstr, flt, nowtime, parse_json, today
 
 from erpnext import _is_within_user_permissions, _refuse, require_permission
 from erpnext.stock.doctype.purchase_receipt_item.purchase_receipt_item import PurchaseReceiptItem

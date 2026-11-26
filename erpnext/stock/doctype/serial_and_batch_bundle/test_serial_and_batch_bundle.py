@@ -18,6 +18,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	SerialNoDuplicateError,
 	combine_datetime,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.services.batch_stock import BundleBatchStock
+from erpnext.stock.doctype.serial_and_batch_bundle.services.validation import BundleValidation
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.serial_batch_bundle.availability.batches import (
 	get_available_batches_qty,
@@ -2287,11 +2289,14 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		bundle = frappe.get_doc("Serial and Batch Bundle", outward.items[0].serial_and_batch_bundle)
 		posting_datetime = frappe.utils.get_datetime(bundle.posting_datetime)
 
-		self.assertEqual(bundle.get_batchwise_qty_before(posting_datetime), {batch_no: 70})
+		self.assertEqual(BundleBatchStock(bundle).get_batchwise_qty_before(posting_datetime), {batch_no: 70})
 		self.assertEqual(
-			sorted(flt(row.qty) for row in bundle.get_available_qty_from_sabb(posting_datetime)), [-10, 20]
+			sorted(
+				flt(row.qty) for row in BundleBatchStock(bundle).get_available_qty_from_sabb(posting_datetime)
+			),
+			[-10, 20],
 		)
-		self.assertEqual(bundle.get_batchwise_available_qty(), {batch_no: 80})
+		self.assertEqual(BundleBatchStock(bundle).get_batchwise_available_qty(), {batch_no: 80})
 
 	def make_serial_item_for_valuation(self, item_code, use_serial_no_wise_valuation):
 		return make_item(
@@ -3344,22 +3349,26 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		doc.append("entries", {"serial_no": "SN1"})
 		doc.append("entries", {"serial_no": "SN1"})
-		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_serial_and_batch_no)
+		self.assertRaises(
+			frappe.ValidationError, BundleValidation(doc).validate_duplicate_serial_and_batch_no
+		)
 
 	def test_duplicate_batch_no_in_entries_is_rejected(self):
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		doc.append("entries", {"batch_no": "B1"})
 		doc.append("entries", {"batch_no": "B1"})
-		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_serial_and_batch_no)
+		self.assertRaises(
+			frappe.ValidationError, BundleValidation(doc).validate_duplicate_serial_and_batch_no
+		)
 
 	def test_voucher_no_is_mandatory(self):
 		doc = frappe.new_doc("Serial and Batch Bundle")
-		self.assertRaises(frappe.ValidationError, doc.validate_serial_and_batch_data)
+		self.assertRaises(frappe.ValidationError, BundleValidation(doc).validate_serial_and_batch_data)
 
 	def test_validate_docstatus_rejects_unsubmitted_entries(self):
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		doc.append("entries", {"qty": 1})  # a fresh row has docstatus 0
-		self.assertRaises(frappe.ValidationError, doc.validate_docstatus)
+		self.assertRaises(frappe.ValidationError, BundleValidation(doc).validate_docstatus)
 
 	def test_calculate_total_qty_normalizes_and_signs(self):
 		inward = frappe.new_doc("Serial and Batch Bundle")

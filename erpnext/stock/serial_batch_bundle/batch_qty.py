@@ -1,9 +1,6 @@
 import frappe
 from frappe import _, bold
-from frappe.utils import (
-	flt,
-	get_link_to_form,
-)
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 

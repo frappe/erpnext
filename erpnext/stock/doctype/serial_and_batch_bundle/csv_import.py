@@ -1,9 +1,7 @@
 import frappe
 import frappe.query_builder
 from frappe import _
-from frappe.utils import (
-	parse_json,
-)
+from frappe.utils import parse_json
 from frappe.utils.csvutils import build_csv_response
 
 
