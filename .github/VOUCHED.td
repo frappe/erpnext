@@ -19,6 +19,8 @@ kaulith
 kavin-114
 loicdokos
 mergify[bot]
+PatrickDEissler
 raghavisruia
 rtdany10
+Sudhanshu-Badole
 trustedcomputer
