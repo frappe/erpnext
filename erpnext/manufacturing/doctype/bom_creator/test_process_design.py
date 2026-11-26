@@ -113,6 +113,24 @@ class TestProcessDesign(ERPNextTestSuite):
 		self.assertIn("The packing stage runs on its own, after all other stages", problems)
 		self.assertIn("Stage 1 starts the process, so give it at least one raw material", problems)
 
+	def test_weight_per_unit_converts_an_item_to_the_formula_weight(self):
+		design = make_ketchup_design()
+		make_item(
+			"_Test Ketchup Sachet",
+			{"is_stock_item": 1, "stock_uom": "Nos", "weight_per_unit": 8, "weight_uom": "Gram"},
+		)
+		make_item("_Test Ketchup Label", {"is_stock_item": 1, "stock_uom": "Nos"})
+		for item_code in ("_Test Ketchup Sachet", "_Test Ketchup Label"):
+			design.append("materials", {"operation_id": 1, "item_code": item_code, "qty": 1})
+
+		formula = ProcessFormula(design)
+		self.assertEqual(round(formula.weight_factors["_Test Ketchup Sachet"], 3), 125)
+		self.assertEqual(formula.weight_factors["_Test Ketchup Label"], 0)
+		self.assertIn(
+			"Set the Weight Per Unit of _Test Ketchup Label, or add Kg to its units of measure",
+			formula.get_problems(),
+		)
+
 	def test_plant_builder_checks_an_unsaved_design(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import check_design
 

@@ -261,7 +261,9 @@ class ProcessFormula:
 		if not self.item.weight_uom:
 			return []
 		return [
-			_("Add {0} to the units of measure of {1}").format(self.item.weight_uom, item_code)
+			_("Set the Weight Per Unit of {1}, or add {0} to its units of measure").format(
+				self.item.weight_uom, item_code
+			)
 			for item_code in item_codes
 			if item_code and not self.weight_factors.get(item_code)
 		]
@@ -337,8 +339,10 @@ def get_weight_factors(item_codes, weight_uom):
 	if not item_codes or not weight_uom:
 		return {}
 
-	stock_uoms = dict(
-		frappe.get_all("Item", filters={"name": ("in", item_codes)}, fields=["name", "stock_uom"], as_list=1)
+	items = frappe.get_all(
+		"Item",
+		filters={"name": ("in", item_codes)},
+		fields=["name", "stock_uom", "weight_per_unit", "weight_uom"],
 	)
 	item_factors = dict(
 		frappe.get_all(
@@ -350,9 +354,20 @@ def get_weight_factors(item_codes, weight_uom):
 	)
 
 	factors = {}
-	for item_code, stock_uom in stock_uoms.items():
-		if stock_uom == weight_uom:
-			factors[item_code] = 1.0
+	for item in items:
+		if item.stock_uom == weight_uom:
+			factors[item.name] = 1.0
 		else:
-			factors[item_code] = item_factors.get(item_code) or get_uom_conv_factor(weight_uom, stock_uom)
+			factors[item.name] = (
+				item_factors.get(item.name)
+				or get_uom_conv_factor(weight_uom, item.stock_uom)
+				or get_factor_from_unit_weight(item, weight_uom)
+			)
 	return factors
+
+
+def get_factor_from_unit_weight(item, weight_uom):
+	if not item.weight_uom:
+		return 0
+	unit_weight = flt(item.weight_per_unit) * flt(get_uom_conv_factor(item.weight_uom, weight_uom))
+	return 1 / unit_weight if unit_weight > 0 else 0
