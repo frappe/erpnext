@@ -27,6 +27,7 @@ pull_request_rules:
   - name: Auto-close PRs on stable branch
     conditions:
       - author!=frappe-release-bot[bot]
+      - author!=mergify[bot]
       - or:
           - base=version-12
           - base=version-13
