@@ -140,6 +140,7 @@ frappe.ui.form.on("Timesheet", {
 	currency: function (frm) {
 		set_exchange_rate(frm);
 		frm.trigger("set_dynamic_field_label");
+		frm.trigger("update_activity_rates");
 	},
 
 	exchange_rate: function (frm) {
@@ -250,30 +251,31 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	employee: function (frm) {
-		if (frm.doc.employee && frm.doc.time_logs) {
-			const selected_employee = frm.doc.employee;
-			frm.doc.time_logs.forEach((row) => {
-				if (row.activity_type) {
-					frappe.call({
-						method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-						args: {
-							employee: frm.doc.employee,
-							activity_type: row.activity_type,
-							currency: frm.doc.currency,
-						},
-						callback: function (r) {
-							if (r.message) {
-								if (selected_employee !== frm.doc.employee) return;
-								row.billing_rate = r.message["billing_rate"];
-								row.costing_rate = r.message["costing_rate"];
-								frm.refresh_fields("time_logs");
-								calculate_billing_costing_amount(frm, row.doctype, row.name);
-							}
-						},
-					});
-				}
+		if (frm.doc.employee) frm.trigger("update_activity_rates");
+	},
+
+	// re-fetch the activity rates of the rows for the current employee and currency
+	update_activity_rates: function (frm) {
+		const { employee, currency } = frm.doc;
+		(frm.doc.time_logs || []).forEach((row) => {
+			if (!row.activity_type) return;
+			frappe.call({
+				method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+				args: {
+					employee: employee,
+					activity_type: row.activity_type,
+					currency: currency,
+				},
+				callback: function (r) {
+					if (!r.message || employee !== frm.doc.employee || currency !== frm.doc.currency) return;
+					row.billing_rate = r.message["billing_rate"];
+					row.costing_rate = r.message["costing_rate"];
+					frm.refresh_fields("time_logs");
+					calculate_billing_costing_amount(frm, row.doctype, row.name);
+					calculate_time_and_amount(frm);
+				},
 			});
-		}
+		});
 	},
 });
 
