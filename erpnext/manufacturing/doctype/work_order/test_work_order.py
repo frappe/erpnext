@@ -4819,6 +4819,55 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertEqual(item.against_stock_entry, se_manufacture1.name)
 			self.assertTrue(item.ste_detail)
 
+	def test_disassembly_cannot_be_posted_before_source_manufacture(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		raw_item = make_item("Test Raw Disassembly Posting Time", {"is_stock_item": 1}).name
+		fg_item = make_item("Test FG Disassembly Posting Time", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[raw_item], rm_qty=2)
+		wo = make_wo_order_test_record(production_item=fg_item, qty=5, bom_no=bom.name, status="Not Started")
+
+		setup_date, manufacture_date = add_days(today(), -2), add_days(today(), -1)
+		make_stock_entry_test_record(
+			item_code=raw_item,
+			purpose="Material Receipt",
+			target=wo.wip_warehouse,
+			qty=50,
+			basic_rate=13.37,
+			posting_date=setup_date,
+			posting_time="08:00:00",
+		)
+		make_stock_entry_test_record(
+			item_code=fg_item,
+			purpose="Material Receipt",
+			target=wo.fg_warehouse,
+			qty=3,
+			basic_rate=50,
+			posting_date=setup_date,
+			posting_time="08:00:00",
+		)
+
+		def make_entry(purpose, qty, posting_time, date=manufacture_date):
+			entry = frappe.get_doc(make_stock_entry(wo.name, purpose, qty))
+			entry.update({"set_posting_time": 1, "posting_date": date, "posting_time": posting_time})
+			return entry
+
+		se_transfer = make_entry("Material Transfer for Manufacture", wo.qty, "09:00:00", setup_date)
+		for item in se_transfer.items:
+			item.s_warehouse = wo.wip_warehouse
+		se_transfer.submit()
+		se_manufacture = make_entry("Manufacture", wo.qty, "10:30:00")
+		se_manufacture.submit()
+
+		disassembly = make_entry("Disassemble", 3, "10:29:59")
+		self.assertEqual(disassembly.source_stock_entry, se_manufacture.name)
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be before", disassembly.save)
+
+		disassembly.posting_time = "10:30:00"
+		disassembly.submit()
+
 	def test_disassembly_auto_sets_source_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 			make_stock_entry as make_stock_entry_test_record,
