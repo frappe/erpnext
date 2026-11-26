@@ -140,6 +140,7 @@ frappe.ui.form.on("Timesheet", {
 	currency: function (frm) {
 		set_exchange_rate(frm);
 		frm.trigger("set_dynamic_field_label");
+		set_activity_costs(frm);
 	},
 
 	exchange_rate: function (frm) {
