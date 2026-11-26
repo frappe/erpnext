@@ -35,14 +35,11 @@ pull_request_rules:
         message: |
           @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
           https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
-  # Stacked PRs target other branches, so the people who can queue are allowed.
+  # Only people with write access can open a PR from a branch in this repository, e.g. stacked PRs.
   - name: Auto-close PRs on other branches
     conditions:
       - -base~=^(develop|version-15-hotfix|version-16-hotfix|version-\d+)$
-      - author!=mergify[bot]
-      - -author=@erpnext-maintainers
-      - author!=barredterra
-      - author!=vorasmit
+      - from-fork
     actions:
       close:
       comment:
