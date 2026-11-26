@@ -107,22 +107,6 @@
    "child": 0,
    "collapsible": 1,
    "hidden": 0,
-   "indent": 0,
-   "is_default_module": 0,
-   "keep_closed": 0,
-   "label": "Plant Builder",
-   "link_to": "plant-builder",
-   "link_type": "Page",
-   "open_in_new_tab": 0,
-   "show_arrow": 0,
-   "type": "Link",
-   "icon": "layout-grid"
-  },
-  {
-   "added": 0,
-   "child": 0,
-   "collapsible": 1,
-   "hidden": 0,
    "icon": "clipboard-list",
    "indent": 0,
    "is_default_module": 0,
@@ -466,7 +450,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-11-26 10:00:00.000000",
+ "modified": "2026-11-16 11:12:59.624263",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

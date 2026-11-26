@@ -1,10 +1,9 @@
 <script setup>
-import { computed } from "vue";
-import FloorList from "./views/FloorList.vue";
-import FloorView from "./views/FloorView.vue";
+import { computed, watchEffect } from "vue";
 import PlantRun from "./views/PlantRun.vue";
 import MachineDesigner from "./views/MachineDesigner.vue";
 import ProcessDesign from "./views/ProcessDesign.vue";
+import { openList } from "./lib/api";
 
 const props = defineProps({
 	route: { type: Array, default: () => [] },
@@ -17,11 +16,16 @@ const emit = defineEmits(["title", "actions", "change", "update"]);
 const part = (index) => (props.route[index] ? decodeURIComponent(props.route[index]) : null);
 const machine = computed(() => (props.route[2] === "design" ? part(1) : null));
 const workOrder = computed(() => (props.route[0] === "run" && props.route.length === 2 ? part(1) : null));
-const floor = computed(() => (props.route.length === 1 ? part(0) : null));
 const chrome = {
 	onTitle: (title) => emit("title", title),
 	onActions: (actions) => emit("actions", actions),
 };
+
+watchEffect(() => {
+	if (props.design || machine.value || workOrder.value) return;
+	window.frappe.route_flags.replace_route = true;
+	openList("Work Order");
+});
 
 function selectNumber(event) {
 	if (event.target.matches('input[type="number"]')) event.target.select();
@@ -42,7 +46,5 @@ function selectNumber(event) {
 		/>
 		<MachineDesigner v-else-if="machine" :key="machine" :name="machine" v-bind="chrome" />
 		<PlantRun v-else-if="workOrder" :key="workOrder" :work-order="workOrder" v-bind="chrome" />
-		<FloorView v-else-if="floor" :key="floor" :name="floor" v-bind="chrome" />
-		<FloorList v-else v-bind="chrome" />
 	</div>
 </template>
