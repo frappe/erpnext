@@ -35,17 +35,6 @@ pull_request_rules:
         message: |
           @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
           https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
-  # Only people with write access can open a PR from a branch in this repository, e.g. stacked PRs.
-  - name: Auto-close PRs on other branches
-    conditions:
-      - -base~=^(develop|version-15-hotfix|version-16-hotfix|version-\d+)$
-      - from-fork
-    actions:
-      close:
-      comment:
-        message: |
-          @{{author}}, thanks for the contribution, but we only accept pull requests on develop and the hotfix branches.
-          https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
   - name: backport to develop
     conditions:
       - label="backport develop"
