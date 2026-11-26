@@ -851,27 +851,22 @@ class PickList(TransactionBase):
 			item.idx = idx
 
 	def update_bundle_picked_qty(self):
-		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its components."""
-		so_rows = self._get_product_bundles()
-		product_bundle_qty_map = self._get_product_bundle_qty_map(so_rows)
-		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
-			bundle_items = product_bundle_qty_map.get(so_row)
-			if not bundle_items:
-				continue
-
+		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its stock components."""
+		product_bundles = self._get_product_bundles()
+		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
+		for so_row, packed_items in get_packed_items_of_order_rows(product_bundles).items():
 			picked_qty = defaultdict(float)
 			for row in packed_items:
-				if bundle_items.get(row.item_code):
-					picked_qty[row.item_code] += flt(row.picked_qty)
+				picked_qty[row.item_code] += flt(row.picked_qty)
 
-			bundles = min(
+			bundle_qty = min(
 				(
-					get_whole_bundle_count(qty, bundle_items[item_code])
-					for item_code, qty in picked_qty.items()
+					get_whole_bundle_count(picked_qty[item_code], qty_per_bundle)
+					for item_code, qty_per_bundle in product_bundle_qty_map[so_row].items()
 				),
 				default=0,
 			)
-			frappe.db.set_value("Sales Order Item", so_row, "picked_qty", bundles)
+			frappe.db.set_value("Sales Order Item", so_row, "picked_qty", bundle_qty)
 
 	def get_own_vouchers(self):
 		"""Vouchers whose stock reservations this pick list may pick."""
@@ -1000,10 +995,20 @@ class PickList(TransactionBase):
 		return [name for name in so_item_names if name in existing]
 
 	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, list[float]]]:
-		"""Component stock qty per bundle of each packed row, by Sales Order row and item, as a delivery packs it."""
+		"""Stock component qty per bundle of each packed row, by Sales Order row and item, as a delivery packs it."""
+		bundles = get_packed_items_of_order_rows(so_rows)
+		if not bundles:
+			return {}
+
+		item_codes = {row.item_code for packed_items in bundles.values() for row in packed_items}
+		stock_items = set(
+			frappe.get_all(
+				"Item", filters={"name": ("in", list(item_codes)), "is_stock_item": 1}, pluck="name"
+			)
+		)
 		components = {}
 		qty_map = defaultdict(lambda: defaultdict(list))
-		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
+		for so_row, packed_items in bundles.items():
 			parent_item = packed_items[0].parent_item
 			if parent_item not in components:
 				components[parent_item] = [
@@ -1012,7 +1017,8 @@ class PickList(TransactionBase):
 				]
 
 			for component, qty_per_unit in components[parent_item]:
-				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
+				packed_item = pop_order_packed_item(packed_items, parent_item, component.item_code)
+				if packed_item and component.item_code in stock_items:
 					qty_map[so_row][component.item_code].append(
 						get_ordered_qty_per_unit(qty_per_unit, packed_item)
 					)
@@ -1020,16 +1026,16 @@ class PickList(TransactionBase):
 		return qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
-		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
+		"""Whole bundles this Pick List's own rows picked (or left undelivered) of every stock component."""
 		picked_qty = defaultdict(float)
 		for item in self.locations:
-			if item.sales_order_item == bundle_row and bundle_items.get(item.item_code):
+			if item.sales_order_item == bundle_row:
 				picked_qty[item.item_code] += flt(item.picked_qty) - (
 					flt(item.delivered_qty) if pending_only else 0
 				)
 
 		return min(
-			(get_whole_bundle_count(qty, bundle_items[item_code]) for item_code, qty in picked_qty.items()),
+			(get_whole_bundle_count(picked_qty[item_code], qty) for item_code, qty in bundle_items.items()),
 			default=0,
 		)
 
