@@ -481,7 +481,8 @@ frappe.ui.form.on("Payment Entry", {
 	set_default_bank_cash_account: async function (frm) {
 		const bank_field = { Receive: "paid_to", Pay: "paid_from" }[frm.doc.payment_type];
 		const is_chosen = () => frm.doc[bank_field] || frm.doc.mode_of_payment || frm.doc.bank_account;
-		if (!bank_field || is_chosen()) return;
+		if (!bank_field || frm.doc[bank_field] || frm.doc.mode_of_payment) return;
+		if (frm.doc.bank_account) return frm.trigger("bank_account");
 
 		const { company, payment_type } = frm.doc;
 		for (const account_type of ["Bank", "Cash"]) {
@@ -679,7 +680,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 	},
 
-	payment_type: function (frm) {
+	payment_type: async function (frm) {
 		set_default_party_type(frm);
 		frm.events.set_account_descriptions(frm);
 		frm.events.set_display_labels(frm);
@@ -706,8 +707,9 @@ frappe.ui.form.on("Payment Entry", {
 				}
 			);
 		} else {
+			await frm.set_value({ paid_from: null, paid_to: null });
 			if (frm.doc.party) {
-				frm.events.party(frm);
+				frm.trigger("party");
 			}
 
 			if (frm.doc.mode_of_payment) {
