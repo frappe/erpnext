@@ -1335,6 +1335,74 @@ class TestSalesOrder(ERPNextTestSuite):
 			sales_order.name,
 		)
 
+	def test_unconfigured_uom_rejected_when_uoms_are_restricted(self):
+		item = make_item(
+			uoms=[{"uom": "Box", "conversion_factor": 12}, {"uom": "Kg", "conversion_factor": 1}]
+		)
+		# Simulate a legacy conversion factor that Item validation no longer permits.
+		item.uoms[1].db_set("conversion_factor", 0)
+
+		with self.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
+			for uom in ("Pair", "Kg"):
+				self.assertRaises(
+					frappe.ValidationError, make_sales_order, item_code=item.name, uom=uom, do_not_submit=True
+				)
+			make_sales_order(item_code=item.name, uom="Box", do_not_submit=True)
+
+	def test_update_items_rejects_unconfigured_uom(self):
+		item = make_item()
+		so = make_sales_order(item_code=item.name, qty=2)
+		trans_items = json.dumps(
+			[
+				{
+					"docname": so.items[0].name,
+					"item_code": item.name,
+					"qty": 2,
+					"rate": 100,
+					"uom": "Box",
+					"stock_uom": "Box",
+				}
+			]
+		)
+
+		with self.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
+			self.assertRaises(
+				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_items, so.name
+			)
+
+	def test_update_items_allows_existing_unconfigured_uom(self):
+		legacy_item = make_item(uoms=[{"uom": "Box", "conversion_factor": 2}])
+		item = make_item()
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": legacy_item.name,
+					"qty": 2,
+					"rate": 100,
+					"uom": "Box",
+					"warehouse": "_Test Warehouse - _TC",
+				},
+				{"item_code": item.name, "qty": 2, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+			]
+		)
+		legacy_item.reload()
+		legacy_item.uoms = [row for row in legacy_item.uoms if row.uom != "Box"]
+		legacy_item.save()
+		trans_items = json.dumps(
+			[
+				{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": 100, "uom": row.uom}
+				for row, qty in zip(so.items, (2, 5), strict=True)
+			]
+		)
+
+		with self.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1}):
+			update_child_qty_rate("Sales Order", trans_items, so.name)
+
+		so.reload()
+		self.assertEqual(so.items[0].uom, "Box")
+		self.assertEqual(so.items[0].conversion_factor, 2)
+		self.assertEqual(so.items[1].qty, 5)
+
 	def test_update_child_preserves_conversion_factor_precision(self):
 		from erpnext.controllers.accounts_controller import update_child_item_uom_and_weight
 
