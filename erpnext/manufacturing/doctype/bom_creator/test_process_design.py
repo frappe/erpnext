@@ -163,6 +163,8 @@ class TestProcessDesign(ERPNextTestSuite):
 
 		self.assertIn("choose the item this step makes", errors)
 		self.assertIn("set the operation time", errors)
+		self.assertNotIn("<strong>", errors)
+		self.assertIn("_Test Ketchup Design step 1", errors)
 
 	def test_plant_builder_design_check_needs_workstation_read(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import check_design

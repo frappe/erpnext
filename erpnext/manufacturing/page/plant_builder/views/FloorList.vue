@@ -1,13 +1,19 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { Button } from "frappe-ui";
+import LoadFailed from "../components/LoadFailed.vue";
 import { __, call, setRoute } from "../lib/api";
+import { useLoad } from "../lib/load";
 import { machineOf } from "../lib/machines";
 import { MACHINE_STATUS } from "../lib/floor";
 
 const emit = defineEmits(["title", "actions"]);
 const floors = ref([]);
 const loading = ref(true);
+const { failed, load } = useLoad(async () => {
+	floors.value = await call("get_floors");
+	loading.value = false;
+});
 
 onMounted(async () => {
 	emit("title", __("Plant Builder"));
@@ -17,8 +23,7 @@ onMounted(async () => {
 			onClick: () => window.frappe.new_doc("BOM Creator", { track_semi_finished_goods: 1 }),
 		},
 	]);
-	floors.value = await call("get_floors");
-	loading.value = false;
+	await load();
 });
 
 const open = (floor) => setRoute(floor.name);
@@ -34,7 +39,8 @@ function meta(floor) {
 </script>
 
 <template>
-	<div class="min-h-0 flex-1 overflow-auto">
+	<LoadFailed v-if="failed" @retry="load" />
+	<div v-else class="min-h-0 flex-1 overflow-auto">
 		<div class="mx-auto max-w-5xl px-5 pb-10 pt-6">
 			<div class="flex items-start gap-4">
 				<p class="max-w-[680px] flex-1 text-p-base text-ink-gray-7">

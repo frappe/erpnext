@@ -73,7 +73,9 @@ export function useRun(workOrder) {
 		(state.value?.stages || []).map((stage) => ({ ...stage, phase: phaseOf(stage) }))
 	);
 	const isActive = (stage) => stage.can_start || !["waiting", "done"].includes(stage.phase);
-	const hasActiveStage = computed(() => stages.value.some(isActive));
+	const canPause = computed(() =>
+		stages.value.some((stage) => stage.job_card?.docstatus === 0 && stage.job_card.running_since)
+	);
 
 	function progressOf(stage) {
 		if (stage.phase === "charging") return 100;
@@ -228,6 +230,8 @@ export function useRun(workOrder) {
 				local.replan[stage.idx] = false;
 			}
 			local.preview[stage.idx] = preview;
+		} catch {
+			if (local.pending[stage.idx] === request) delete local.preview[stage.idx];
 		} finally {
 			if (local.pending[stage.idx] === request) delete local.pending[stage.idx];
 		}
@@ -300,7 +304,7 @@ export function useRun(workOrder) {
 		activity,
 		activityOf,
 		isActive,
-		hasActiveStage,
+		canPause,
 		stageSeconds,
 		progressOf,
 		previewOf,

@@ -16,12 +16,22 @@ let timer = null;
 watch(qty, (value) => {
 	clearTimeout(timer);
 	if (num(value) > 0 && num(value) !== num(order.value.qty))
-		timer = setTimeout(() => run.setQty(num(value)), 600);
+		timer = setTimeout(() => saveQty(num(value)), 600);
 });
+
+async function saveQty(value) {
+	try {
+		await run.setQty(value);
+		return true;
+	} catch {
+		qty.value = order.value.qty;
+		return false;
+	}
+}
 
 async function start() {
 	clearTimeout(timer);
-	if (num(qty.value) !== num(order.value.qty)) await run.setQty(num(qty.value));
+	if (num(qty.value) !== num(order.value.qty) && !(await saveQty(num(qty.value)))) return;
 	await run.start();
 }
 

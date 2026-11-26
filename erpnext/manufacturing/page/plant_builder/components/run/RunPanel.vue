@@ -19,8 +19,9 @@ const running = computed(() =>
 watch(
 	running,
 	(value) => {
+		if (!value) return;
 		const index = run.stages.value.findIndex(run.isActive);
-		const step = value && steps.value[index]?.$el;
+		const step = steps.value[index]?.$el;
 		const viewport = step?.closest("[data-reka-scroll-area-viewport]");
 		if (!viewport) return;
 		const top = step.getBoundingClientRect().top - viewport.getBoundingClientRect().top;

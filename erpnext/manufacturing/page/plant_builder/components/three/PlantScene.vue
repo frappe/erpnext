@@ -16,6 +16,7 @@ const props = defineProps({
 	live: { type: Object, default: () => ({}) },
 	chip: { type: Object, default: null },
 	paused: Boolean,
+	busy: Boolean,
 });
 const emit = defineEmits(["resume"]);
 
@@ -241,6 +242,7 @@ const grid = {
 					size="sm"
 					icon-left="lucide-play"
 					:label="__('Resume')"
+					:disabled="busy"
 					@click="emit('resume')"
 				/>
 			</div>

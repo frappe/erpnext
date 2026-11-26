@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from frappe.permissions import has_permission
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, strip_html
 
 from erpnext.manufacturing.doctype.bom_creator.operation_plan import OperationPlan
 from erpnext.manufacturing.doctype.work_order.mapper import make_work_order
@@ -150,7 +150,7 @@ def check_design(doc: str | dict) -> dict:
 	formula.apply()
 	batch = flt(design.qty) or 1
 	return {
-		"errors": plan.get_problems(),
+		"errors": [strip_html(problem) for problem in plan.get_problems()],
 		"item": formula.item,
 		"machines": add_machine_shapes(formula.machines),
 		"weight_factors": formula.weight_factors,

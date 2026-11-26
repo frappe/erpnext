@@ -4,11 +4,13 @@ import { Badge, Button, FormControl, ScrollArea, Tooltip } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import SectionHead from "../components/setup/SectionHead.vue";
 import DeskControl from "../components/DeskControl.vue";
+import LoadFailed from "../components/LoadFailed.vue";
 import { __, call, openForm, openList, setRoute } from "../lib/api";
 import { READ_ONLY } from "../lib/plant";
 import { MACHINE_STATUS, floorView, newFloorDoc, toSceneFloor } from "../lib/floor";
 import { machineOf } from "../lib/machines";
 import { fmt } from "../lib/format";
+import { useLoad } from "../lib/load";
 
 const props = defineProps({ name: String });
 const emit = defineEmits(["title", "actions"]);
@@ -36,7 +38,7 @@ function apply(result) {
 	emit("title", result.doc.floor_name || __("New Plant Floor"));
 }
 
-onMounted(async () => {
+const { failed, load } = useLoad(async () => {
 	apply(
 		isNew
 			? {
@@ -48,6 +50,11 @@ onMounted(async () => {
 			: await call("get_floor", { name: props.name })
 	);
 	if (isNew) saved.value = "";
+});
+
+onMounted(async () => {
+	emit("title", props.name);
+	await load();
 	emit(
 		"actions",
 		isNew
@@ -64,7 +71,7 @@ onMounted(async () => {
 onBeforeUnmount(() => clearInterval(poll));
 
 async function refresh() {
-	if (dirty.value || saving.value) return;
+	if (failed.value || dirty.value || saving.value) return;
 	apply(await call("get_floor", { name: props.name }));
 }
 
@@ -106,7 +113,8 @@ const live = computed(() => ({
 </script>
 
 <template>
-	<div v-if="doc" class="flex min-h-0 flex-1 flex-col">
+	<LoadFailed v-if="failed" @retry="load" />
+	<div v-else-if="doc" class="flex min-h-0 flex-1 flex-col">
 		<div class="flex h-12 shrink-0 items-center justify-end gap-2 border-b border-outline-gray-2 px-5">
 			<Button
 				v-if="!readOnly"

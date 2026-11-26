@@ -3,17 +3,19 @@ import { computed, onMounted, provide, ref, watch } from "vue";
 import { Button, FormControl, ScrollArea, Tooltip } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import SetupStatus from "../components/setup/SetupStatus.vue";
+import LoadFailed from "../components/LoadFailed.vue";
 import StagesSection from "../components/setup/StagesSection.vue";
 import { __, call } from "../lib/api";
 import { READ_ONLY, toScenePlant } from "../lib/plant";
 import { designRows, fromDesign, rowsKey, toDesign } from "../lib/design";
 import { previewView } from "../lib/scene";
 import { num } from "../lib/format";
+import { useLoad } from "../lib/load";
 
 const props = defineProps({ design: Object, readOnly: Boolean });
 const emit = defineEmits(["change", "update"]);
 
-const HEADER_FIELDS = ["item_code", "qty", "raw_material_warehouse"];
+const HEADER_FIELDS = ["design_name", "item_code", "qty", "raw_material_warehouse"];
 
 const catalog = ref(null);
 const doc = ref(null);
@@ -36,11 +38,13 @@ function load() {
 	emittedKey = rowsKey(toDesign(doc.value));
 }
 
-onMounted(async () => {
+const { failed, load: loadCatalog } = useLoad(async () => {
 	catalog.value = (await call("get_machine_catalog")).workstation_types;
 	load();
 	check();
 });
+
+onMounted(loadCatalog);
 
 watch(
 	() => [rowsKey(designRows(props.design)), header(props.design)],
@@ -115,7 +119,8 @@ function restoreBatchSize(event) {
 </script>
 
 <template>
-	<div v-if="doc" class="flex min-h-0 flex-1">
+	<LoadFailed v-if="failed" @retry="loadCatalog" />
+	<div v-else-if="doc" class="flex min-h-0 flex-1">
 		<aside class="flex w-[32rem] shrink-0 flex-col border-r border-outline-gray-2">
 			<ScrollArea class="min-h-0 flex-1" viewport-class="px-5 pt-5 pb-16">
 				<fieldset :disabled="readOnly" class="m-0 min-w-0 space-y-8 border-0 p-0">

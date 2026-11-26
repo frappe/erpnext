@@ -3,10 +3,12 @@ import { computed, onBeforeUnmount, onMounted, provide } from "vue";
 import { Badge, Button, Tooltip } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import RunPanel from "../components/run/RunPanel.vue";
+import LoadFailed from "../components/LoadFailed.vue";
 import { __, openForm } from "../lib/api";
 import { levels } from "../lib/clock";
 import { machineOf } from "../lib/machines";
 import { useRun } from "../lib/run";
+import { useLoad } from "../lib/load";
 import { fmt, fmtTimer, num } from "../lib/format";
 
 const props = defineProps({ workOrder: String });
@@ -15,9 +17,11 @@ const emit = defineEmits(["title", "actions"]);
 const run = useRun(props.workOrder);
 provide("run", run);
 
+const { failed, load } = useLoad(run.refresh);
+
 let poll = null;
 onMounted(async () => {
-	await run.refresh();
+	await load();
 	emit("title", props.workOrder);
 	emit("actions", [
 		{ label: __("Open Work Order"), onClick: () => openForm("Work Order", props.workOrder) },
@@ -91,7 +95,8 @@ const live = computed(() => {
 </script>
 
 <template>
-	<div v-if="run.state.value" class="flex min-h-0 flex-1 flex-col">
+	<LoadFailed v-if="failed" @retry="load" />
+	<div v-else-if="run.state.value" class="flex min-h-0 flex-1 flex-col">
 		<div class="flex h-12 shrink-0 items-center gap-2 border-b border-outline-gray-2 px-5">
 			<Badge
 				:label="__(run.status.value)"
@@ -123,13 +128,14 @@ const live = computed(() => {
 						v-if="isRunning"
 						icon-left="lucide-pause"
 						:label="__('Pause')"
-						:disabled="!run.hasActiveStage.value || run.busy.value"
+						:disabled="!run.canPause.value || run.busy.value"
 						@click="run.pause"
 					/>
 					<Button
 						v-else-if="run.status.value === 'On Hold'"
 						icon-left="lucide-play"
 						:label="__('Resume')"
+						:disabled="run.busy.value"
 						@click="run.resume"
 					/>
 					<div class="mx-1 h-5 w-px bg-surface-gray-4" />
@@ -150,6 +156,7 @@ const live = computed(() => {
 					:live="live"
 					:chip="run.activity.value"
 					:paused="run.paused.value"
+					:busy="run.busy.value"
 					@resume="run.resume"
 				/>
 			</div>

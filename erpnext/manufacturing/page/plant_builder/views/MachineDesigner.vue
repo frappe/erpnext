@@ -3,8 +3,10 @@ import { computed, onMounted, ref } from "vue";
 import { Button, Dropdown, ScrollArea, Switch } from "frappe-ui";
 import MachinePreview from "../components/designer/MachinePreview.vue";
 import ShapeCard from "../components/designer/ShapeCard.vue";
+import LoadFailed from "../components/LoadFailed.vue";
 import { __, call, openForm } from "../lib/api";
 import { PRESETS, SHAPES, isPackingModel, machineOf, newShape } from "../lib/machines";
+import { useLoad } from "../lib/load";
 
 const props = defineProps({ name: String });
 const emit = defineEmits(["title", "actions"]);
@@ -39,12 +41,16 @@ function apply(result) {
 	selected.value = shapes.value.length ? 0 : null;
 }
 
+const { failed, load } = useLoad(async () =>
+	apply(await call("get_machine_design", { workstation_type: props.name }))
+);
+
 onMounted(async () => {
 	emit("title", props.name);
 	emit("actions", [
 		{ label: __("Open Workstation Type"), onClick: () => openForm("Workstation Type", props.name) },
 	]);
-	apply(await call("get_machine_design", { workstation_type: props.name }));
+	await load();
 });
 
 function insert(at, row) {
@@ -81,7 +87,8 @@ async function save() {
 </script>
 
 <template>
-	<div v-if="design" class="flex min-h-0 flex-1 flex-col">
+	<LoadFailed v-if="failed" @retry="load" />
+	<div v-else-if="design" class="flex min-h-0 flex-1 flex-col">
 		<div class="flex h-12 shrink-0 items-center gap-2 border-b border-outline-gray-2 px-5">
 			<p class="min-w-0 flex-1 truncate text-p-sm text-ink-gray-6">{{ note }}</p>
 			<template v-if="editable">
