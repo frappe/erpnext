@@ -2935,7 +2935,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	setup_accounting_dimension_triggers() {
 		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
 			callback: function (r) {
 				if (r.message && r.message[0]) {
 					let dimensions = r.message[0].map((d) => d.fieldname);
