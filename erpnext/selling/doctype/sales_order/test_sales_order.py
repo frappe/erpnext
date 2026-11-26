@@ -1313,7 +1313,14 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		legacy_item.save()
 		trans_items = json.dumps(
 			[
-				{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": 100, "uom": row.uom}
+				{
+					"docname": row.name,
+					"item_code": row.item_code,
+					"qty": qty,
+					"rate": 100,
+					"uom": row.uom,
+					"conversion_factor": row.conversion_factor,
+				}
 				for row, qty in zip(so.items, (2, 5), strict=True)
 			]
 		)
