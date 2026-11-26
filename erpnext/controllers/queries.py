@@ -8,6 +8,7 @@ from collections import OrderedDict, defaultdict
 import frappe
 from frappe import _, qb
 from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.model.db_query import requires_owner_constraint
 from frappe.permissions import has_permission
 from frappe.query_builder import Criterion, CustomFunction
 from frappe.query_builder.functions import Concat, Locate, Sum
@@ -15,6 +16,7 @@ from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
+from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
@@ -365,6 +367,9 @@ def get_project_name(
 def get_delivery_notes_to_be_billed(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool = False
 ):
+	permission_type = "select" if frappe.only_has_select_perm("Delivery Note") else "read"
+	frappe.has_permission("Delivery Note", permission_type, throw=True)
+
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 
 	fields = get_fields(doctype, ["name", "customer", "posting_date"])
@@ -396,12 +401,24 @@ def get_delivery_notes_to_be_billed(
 				)
 			)
 		)
+		.where(get_permitted_delivery_note_criterion(DeliveryNote))
 		.orderby(DeliveryNote[searchfield], order=Order.asc)
 		.limit(page_len)
 		.offset(start)
 	)
 
 	return query.run(as_dict=as_dict)
+
+
+def get_permitted_delivery_note_criterion(delivery_note):
+	role_permissions = frappe.permissions.get_role_permissions("Delivery Note")
+	if not (role_permissions.get("read") or role_permissions.get("select")):
+		return delivery_note.name.isin(frappe.share.get_shared("Delivery Note") or [""])
+
+	if requires_owner_constraint(role_permissions):
+		return delivery_note.owner == frappe.session.user
+
+	return Criterion.all(build_qb_match_conditions("Delivery Note"))
 
 
 @frappe.whitelist()
