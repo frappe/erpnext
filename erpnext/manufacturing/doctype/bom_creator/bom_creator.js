@@ -12,6 +12,9 @@ frappe.ui.form.on("BOM Creator", {
 			filters: { item: locals[cdt][cdn].item_code, docstatus: 1 },
 		}));
 		frm.set_query("default_warehouse", (doc) => ({ filters: { company: doc.company, is_group: 0 } }));
+		frm.set_query("raw_material_warehouse", (doc) => ({
+			filters: { company: doc.company, is_group: 0 },
+		}));
 		frm.get_field("design_file").df.options = {
 			restrictions: { allowed_file_types: [".step", ".stp", ".csv"] },
 		};
@@ -48,10 +51,18 @@ frappe.ui.form.on("BOM Creator", {
 	},
 
 	track_semi_finished_goods(frm) {
+		frm.design_view?.refresh();
+	},
+
+	raw_material_warehouse(frm) {
 		frm.design_view?.render();
 	},
 
 	qty(frm) {
+		frm.design_view?.render();
+	},
+
+	formula_tolerance(frm) {
 		frm.design_view?.render();
 	},
 
