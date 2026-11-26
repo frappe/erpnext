@@ -13,7 +13,10 @@ from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
 	add_account_subtype,
 	add_account_type,
 	add_bank_accounts,
+	add_institution,
+	get_link_token_for_update,
 	get_plaid_configuration,
+	get_transactions,
 	new_bank_transaction,
 	sync_transactions,
 )
@@ -189,6 +192,24 @@ class TestPlaidSettings(unittest.TestCase):
 		self.assertNotEqual(bank_account, party_account.name)
 		self.assertEqual(frappe.db.get_value("Bank Account", bank_account, "company"), "_Test Company")
 		self.assertFalse(frappe.db.get_value("Bank Account", party_account.name, "integration_id"))
+
+	def test_access_token_is_kept_out_of_the_bank_record(self):
+		token = "access-sandbox-plaid-token-test"
+		response = {"institution": {"institution_id": "ins_7", "name": "Plaid Token Test Bank"}}
+		with patch(f"{PLAID_SETTINGS}.PlaidConnector") as connector:
+			connector.return_value.get_access_token.return_value = token
+			add_institution("public-token", json.dumps(response))
+
+		bank = frappe.get_doc("Bank", "Plaid Token Test Bank")
+		self.assertNotEqual(frappe.db.get_value("Bank", bank.name, "plaid_access_token"), token)
+		self.assertNotIn(token, frappe.as_json(bank.as_dict()))
+		self.assertEqual(bank.get_password("plaid_access_token"), token)
+
+		with patch(f"{PLAID_SETTINGS}.PlaidConnector") as connector:
+			get_link_token_for_update(bank.name)
+			get_transactions(bank.name)
+
+		self.assertEqual([call.args for call in connector.call_args_list], [(token,), (token,)])
 
 
 PLAID_SETTINGS = "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings"
