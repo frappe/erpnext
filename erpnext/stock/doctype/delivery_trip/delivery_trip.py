@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_datetime, get_email_address, get_link_to_form, getdate
 
 
 class DeliveryTrip(Document):
@@ -609,7 +609,7 @@ def get_driver_email(driver: str):
 	frappe.has_permission("Driver", "select", doc=driver, throw=True)
 
 	driver_data = frappe.db.get_value("Driver", driver, ["user", "employee"], as_dict=True)
-	email = driver_data.user
+	email = driver_data.user and get_email_address(driver_data.user)
 	if (
 		not email
 		and driver_data.employee

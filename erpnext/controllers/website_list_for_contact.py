@@ -9,7 +9,7 @@ from frappe import _
 from frappe.modules.utils import get_module_app
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Lower, Max
-from frappe.utils import cint, flt, has_common
+from frappe.utils import cint, flt, get_email_addresses, has_common
 from frappe.utils.user import is_website_user
 
 # fields read by templates/includes/transaction_row.html
@@ -368,18 +368,20 @@ def add_role_for_portal_user(portal_user, role):
 
 	if "System Manager" not in frappe.get_roles():
 		frappe.msgprint(
-			_("Please add {1} role to user {0}.").format(portal_user.user, role),
+			_("Please add {1} role to user {0}.").format(user_doc.email, role),
 			alert=True,
 		)
 		return
 
 	user_doc.add_roles(role)
-	frappe.msgprint(_("Added {1} role to user {0}.").format(frappe.bold(user_doc.name), role), alert=True)
+	frappe.msgprint(
+		_("Added {1} role to user {0}.").format(frappe.bold(user_doc.email), role),
+		alert=True,
+	)
 
 
 def link_portal_users_to_contacts(doc):
 	"""When portal users are added to Supplier/Customer, link them to the Contact profile."""
-	# a User's name is its (lowercased) email, so portal_users are already the emails
 	portal_users = {p.user for p in doc.get("portal_users") or [] if p.user}
 	if not portal_users:
 		return
@@ -390,6 +392,7 @@ def link_portal_users_to_contacts(doc):
 		if portal_users == previous_users:
 			return
 
+	emails = list(get_email_addresses(portal_users))
 	portal_users = list(portal_users)
 
 	contact = frappe.qb.DocType("Contact")
@@ -405,9 +408,9 @@ def link_portal_users_to_contacts(doc):
 
 	conditions = [
 		contact.user.isin(portal_users),
-		Lower(contact.email_id).isin(portal_users),
-		Lower(contact_email.email_id).isin(portal_users),
 	]
+	if emails:
+		conditions += [Lower(contact.email_id).isin(emails), Lower(contact_email.email_id).isin(emails)]
 
 	query = query.where(Criterion.any(conditions))
 	contacts = query.run(pluck=True)

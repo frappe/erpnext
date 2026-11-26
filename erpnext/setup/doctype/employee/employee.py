@@ -10,7 +10,17 @@ from frappe.permissions import (
 	remove_user_permission,
 )
 from frappe.query_builder import Criterion
-from frappe.utils import cint, cstr, get_link_to_form, getdate, today, validate_email_address
+from frappe.utils import (
+	cint,
+	cstr,
+	get_email_address,
+	get_link_to_form,
+	get_user_by_email,
+	get_user_display_id,
+	getdate,
+	today,
+	validate_email_address,
+)
 from frappe.utils.nestedset import NestedSet
 
 import erpnext
@@ -185,7 +195,9 @@ class Employee(NestedSet):
 		user = user or self.user_id
 		if set(frappe.get_roles(user)) & (get_admin_roles() - editor_roles):
 			frappe.throw(
-				_("You are not permitted to link or update User {0}").format(frappe.bold(user)),
+				_("You are not permitted to link or update User {0}").format(
+					frappe.bold(get_user_display_id(user))
+				),
 				frappe.PermissionError,
 			)
 
@@ -366,6 +378,8 @@ class Employee(NestedSet):
 	def set_preferred_email(self):
 		preferred_email_field = frappe.scrub(self.prefered_contact_email)
 		self.prefered_email = self.get(preferred_email_field) if preferred_email_field else None
+		if preferred_email_field == "user_id" and self.prefered_email:
+			self.prefered_email = get_email_address(self.prefered_email)
 
 	def validate_status(self):
 		if self.status != "Active" and self.has_value_changed("status"):
@@ -408,7 +422,7 @@ class Employee(NestedSet):
 		if enable and not self.can_reenable_user(user):
 			frappe.msgprint(
 				_("User {0} is disabled. Only a user who can edit Users can enable it.").format(
-					frappe.bold(self.user_id)
+					frappe.bold(user.email)
 				)
 			)
 			return
@@ -449,7 +463,9 @@ class Employee(NestedSet):
 		).run()
 		if employee:
 			throw(
-				_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0][0]),
+				_("User {0} is already assigned to Employee {1}").format(
+					get_user_display_id(self.user_id), employee[0][0]
+				),
 				frappe.DuplicateEntryError,
 			)
 
@@ -522,12 +538,16 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 
 	user_roles = [d.role for d in doc.get("roles")]
 	if "Employee" in user_roles:
-		frappe.msgprint(_("User {0}: Removed Employee role as there is no mapped employee.").format(doc.name))
+		frappe.msgprint(
+			_("User {0}: Removed Employee role as there is no mapped employee.").format(doc.email)
+		)
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee"})[0])
 
 	if "Employee Self Service" in user_roles:
 		frappe.msgprint(
-			_("User {0}: Removed Employee Self Service role as there is no mapped employee.").format(doc.name)
+			_("User {0}: Removed Employee Self Service role as there is no mapped employee.").format(
+				doc.email
+			)
 		)
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
 
@@ -594,8 +614,11 @@ def has_employee_user_permission(user):
 
 
 def get_employee_email(employee_doc):
+	user = employee_doc.get("user_id")
 	return (
-		employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
+		(user and get_email_address(user))
+		or employee_doc.get("personal_email")
+		or employee_doc.get("company_email")
 	)
 
 
@@ -694,7 +717,7 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 		frappe.throw(_("Email is required to create a user"))
 
 	email = validate_email_address(email, True)
-	if frappe.db.exists("User", email):
+	if get_user_by_email(email):
 		frappe.throw(
 			_("User {0} already exists. Link the existing user to the Employee instead.").format(
 				frappe.bold(email)
@@ -748,7 +771,7 @@ def get_all_employee_emails(company):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = user or company_email or personal_email
+		email = (user and get_email_address(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails
@@ -763,7 +786,7 @@ def get_employee_emails(employee_list):
 		user, company_email, personal_email = frappe.db.get_value(
 			"Employee", employee, ["user_id", "company_email", "personal_email"]
 		)
-		email = user or company_email or personal_email
+		email = (user and get_email_address(user)) or company_email or personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails
@@ -866,7 +889,7 @@ def _get_contact_details(employee: str) -> dict:
 		contact_data.get("prefered_email")
 		or contact_data.get("company_email")
 		or contact_data.get("personal_email")
-		or contact_data.get("user_id")
+		or (contact_data.user_id and get_email_address(contact_data.user_id))
 	)
 
 	return {

@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
-from frappe.utils import comma_and, get_link_to_form, validate_email_address
+from frappe.utils import comma_and, get_email_address, get_link_to_form, validate_email_address
 from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.accounts.party import set_taxes
@@ -200,7 +200,7 @@ class Lead(SellingController, CRMNote):
 			if not self.flags.ignore_email_validation:
 				validate_email_address(self.email_id, throw=True)
 
-			if self.email_id == self.lead_owner:
+			if self.lead_owner and self.email_id == get_email_address(self.lead_owner):
 				frappe.throw(_("Lead Owner cannot be same as the Lead Email Address"))
 
 	def link_to_contact(self):

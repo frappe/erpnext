@@ -130,3 +130,25 @@ class TestTemplateUtils(ERPNextTestSuite):
 		colleague = frappe.db.get_value("Opportunity", {"title": "Colleague renewal"}, "opportunity_from")
 		self.assertEqual(own, ("Customer", "_Test Customer"))
 		self.assertEqual(colleague, "Lead")
+
+	def test_contact_us_signed_in_sender_with_generated_id_is_filed_against_own_customer(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		frappe.db.set_single_value("CRM Settings", "enable_opportunity_creation_from_contact_us", 1)
+		self.addCleanup(frappe.db.set_default, "company", frappe.db.get_default("company"))
+		frappe.db.set_default("company", "_Test Company")
+
+		with test_user(roles=["Customer"], generated_id=True) as user:
+			contact = frappe.get_doc("Contact", {"user": user.name})
+			contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+			contact.save(ignore_permissions=True)
+
+			with self.set_user(user.name):
+				send_message(user.email, "Renewal request", "Generated ID renewal")
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Opportunity", {"title": "Generated ID renewal"}, ["opportunity_from", "party_name"]
+			),
+			("Customer", "_Test Customer"),
+		)

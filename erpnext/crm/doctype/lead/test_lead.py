@@ -447,6 +447,20 @@ class TestLead(ERPNextTestSuite):
 		lead = frappe.new_doc("Lead")
 		self.assertRaises(frappe.ValidationError, lead.set_lead_name)
 
+	def test_lead_owner_cannot_be_the_lead_email_of_a_user_with_a_generated_id(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Sales User"], generated_id=True) as user:
+			lead = frappe.get_doc(
+				{
+					"doctype": "Lead",
+					"first_name": "_Test Owner Lead",
+					"email_id": user.email,
+					"lead_owner": user.name,
+				}
+			)
+			self.assertRaisesRegex(frappe.ValidationError, "Lead Owner cannot be same", lead.insert)
+
 
 def create_event(subject, starts_on, reference_type, reference_name):
 	event = frappe.new_doc("Event")
