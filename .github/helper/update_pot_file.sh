@@ -5,7 +5,7 @@ cd ~ || exit
 echo "Setting Up Bench..."
 
 pip install frappe-bench
-bench -v init frappe-bench --skip-assets --skip-redis-config-generation --python "$(which python)"
+bench -v init frappe-bench --frappe-branch "${BASE_BRANCH}" --skip-assets --skip-redis-config-generation --python "$(which python)"
 cd ./frappe-bench || exit
 
 echo "Get ERPNext..."
