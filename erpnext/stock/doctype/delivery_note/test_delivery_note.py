@@ -2379,115 +2379,9 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.docstatus, 1)
 
-<<<<<<< HEAD
-	@change_settings(
-=======
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
-		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
-	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
-	def test_packed_row_skips_batch_qty_of_a_packed_row_bundle_set_on_the_draft(self):
-		component = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TRBD-.#####",
-			}
-		).name
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-		se = make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=2, basic_rate=100)
-		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		first_batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
-
-		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
-		dn.packed_items[0].serial_and_batch_bundle = make_serial_batch_bundle(
-			{
-				"item_code": component,
-				"warehouse": "_Test Warehouse - _TC",
-				"qty": -2,
-				"batches": frappe._dict({first_batch: 2}),
-				"voucher_type": "Delivery Note",
-				"type_of_transaction": "Outward",
-				"do_not_submit": True,
-			}
-		).name
-		dn.append(
-			"items",
-			{
-				"item_code": bundle,
-				"qty": 1,
-				"rate": 100,
-				"warehouse": "_Test Warehouse - _TC",
-				"cost_center": dn.items[0].cost_center,
-				"expense_account": dn.items[0].expense_account,
-			},
-		)
-		dn.submit()
-
-		self.assertNotEqual(get_batch_from_bundle(dn.packed_items[1].serial_and_batch_bundle), first_batch)
-
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
-		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
-	)
-	def test_packed_row_bundle_follows_bundle_qty_changed_on_a_saved_draft(self):
-		component = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TRBQ-.#####",
-			}
-		).name
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-
-		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
-		dn.save()
-		dn.items[0].qty = 2
-		dn.save()
-		dn.submit()
-
-		self.assertEqual(
-			frappe.db.get_value(
-				"Serial and Batch Bundle", dn.packed_items[0].serial_and_batch_bundle, "total_qty"
-			),
-			-2,
-		)
-
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
-		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
-	)
-	def test_packed_row_bundle_made_at_submit_rejects_an_expired_batch(self):
-		from erpnext.exceptions import BatchExpiredError
-
-		component = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_serial_no": 1,
-				"serial_no_series": "TPSE-.#####",
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TPBE-.#####",
-			}
-		).name
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-		se = make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=2, basic_rate=100)
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
-		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
-
-		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
-		self.assertRaises(BatchExpiredError, dn.submit)
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_packed_row_on_batch_fields_rejects_an_expired_batch(self):
-		from erpnext.exceptions import BatchExpiredError
+		from erpnext.controllers.stock_controller import BatchExpiredError
 
 		component = make_item(
 			properties={
@@ -2507,8 +2401,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.packed_items[0].batch_no = batch_no
 		self.assertRaises(BatchExpiredError, dn.save)
 
-	@ERPNextTestSuite.change_settings(
->>>>>>> 8aa097d (test(stock): expired or disabled batch on a packed row)
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
