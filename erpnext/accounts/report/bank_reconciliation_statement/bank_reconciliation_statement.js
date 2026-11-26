@@ -4,22 +4,10 @@
 frappe.query_reports["Bank Reconciliation Statement"] = {
 	filters: [
 		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			reqd: 1,
-			default: frappe.defaults.get_user_default("Company"),
-		},
-		{
 			fieldname: "account",
-			label: __("Bank Account"),
-			fieldtype: "Link",
-			options: "Account",
 			default: frappe.defaults.get_user_default("Company")
 				? locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"]
 				: "",
-			reqd: 1,
 			get_query: function () {
 				var company = frappe.query_report.get_filter_value("company");
 				return {
@@ -32,18 +20,6 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 					],
 				};
 			},
-		},
-		{
-			fieldname: "report_date",
-			label: __("Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
-			reqd: 1,
-		},
-		{
-			fieldname: "include_pos_transactions",
-			label: __("Include POS Transactions"),
-			fieldtype: "Check",
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter, filter) {
