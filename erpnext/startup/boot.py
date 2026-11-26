@@ -7,6 +7,7 @@ from frappe.defaults import get_user_default
 from frappe.utils import cint
 
 import erpnext.accounts.utils
+from erpnext.accounts.default_accounts import get_purposes
 from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
 
 BOOT_COMPANY_FIELDS = (
@@ -111,6 +112,13 @@ def get_readable_company_defaults():
 		return {}
 
 	companies = frappe.get_list("Company", fields=list(READABLE_COMPANY_FIELDS), limit_page_length=0)
+	purposes = get_purposes()
+	for company in companies:
+		company_doc = frappe.get_cached_doc("Company", company.name)
+		company.default_accounts = {
+			purpose: account for purpose in purposes if (account := company_doc.get_default_account(purpose))
+		}
+
 	return {company.name: company for company in companies}
 
 
