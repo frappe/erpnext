@@ -107,8 +107,15 @@ def address_query(
 			return []
 		filter_list.append(["Address", "name", "in", linked_addresses])
 	if company_address is not None:
-		# Users may select company addresses without being able to read or edit the protected flag.
-		filter_list.append(["Address", "is_your_company_address", "=", cint(company_address)])
+		# Users may select company addresses without read access to the protected flag, which
+		# get_list refuses to filter on, so match by name instead.
+		company_addresses = frappe.get_all("Address", filters={"is_your_company_address": 1}, pluck="name")
+		if cint(company_address):
+			if not company_addresses:
+				return []
+			filter_list.append(["Address", "name", "in", company_addresses])
+		elif company_addresses:
+			filter_list.append(["Address", "name", "not in", company_addresses])
 
 	return frappe.get_list(
 		"Address",
