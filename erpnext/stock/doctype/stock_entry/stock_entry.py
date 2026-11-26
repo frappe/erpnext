@@ -261,6 +261,8 @@ class StockEntry(StockController):
 		self.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		self.validate_posting_datetime_with_outgoing_entry()
+		if self.purpose == "Disassemble":
+			self.validate_posting_datetime_with_source_entry()
 		self.validate_purpose()
 		self.validate_item()
 		self.validate_customer_provided_item()
@@ -1745,6 +1747,30 @@ class StockEntry(StockController):
 				bold(format_datetime(posting_datetime)),
 				bold(format_datetime(outgoing_datetime)),
 				get_link_to_form("Stock Entry", self.outgoing_stock_entry),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
+
+	def validate_posting_datetime_with_source_entry(self):
+		"""The components take the rates of the source manufacture entry, so it cannot be posted before it."""
+		if not self.source_stock_entry:
+			return
+
+		source = frappe.db.get_value(
+			"Stock Entry", self.source_stock_entry, ["posting_date", "posting_time"], as_dict=True
+		)
+		source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
+		posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		if posting_datetime >= source_datetime:
+			return
+
+		frappe.throw(
+			_(
+				"Posting Date and Time {0} cannot be before {1}, when Stock Entry {2} manufactured this finished good."
+			).format(
+				bold(format_datetime(posting_datetime)),
+				bold(format_datetime(source_datetime)),
+				get_link_to_form("Stock Entry", self.source_stock_entry),
 			),
 			title=_("Invalid Posting Date and Time"),
 		)
