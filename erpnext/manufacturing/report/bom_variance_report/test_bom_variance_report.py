@@ -189,8 +189,8 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 		close_work_order(work_order.name, "Closed")
 		make_stock_return_entry(work_order.name).submit()
 
-		row = self.run_report(bom_no=bom.name, work_order=work_order.name)[1]
-		self.assertEqual((row.raw_material_code, row.required_qty, row.consumed_qty), (material, 6, 6))
+		row = self.material_rows(work_order)[material]
+		self.assertEqual((row.required_qty, row.consumed_qty), (6, 6))
 
 	def test_material_rows_of_hidden_work_orders_are_left_out(self):
 		permitted = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2)
