@@ -25,7 +25,9 @@ class TestAccountingDimension(unittest.TestCase):
 		create_dimension()
 
 	def test_client_dimension_defaults_only_for_companies_the_user_can_see(self):
-		add_dimension_default("Department", "_Test Company 1", "_Test Department - _TC")
+		default_row = add_dimension_default("Department", "_Test Company 1", "_Test Department - _TC")
+		# unittest.TestCase does not roll back, and later tests save this dimension as a company-fenced user
+		self.addCleanup(frappe.db.delete, "Accounting Dimension Detail", {"name": default_row})
 		limited_user = make_fenced_user(
 			"_test_dimension_limited@example.com", ["Accounts User"], [("Company", "_Test Company")]
 		)
@@ -192,7 +194,7 @@ def disable_dimension():
 
 def add_dimension_default(dimension, company, default_dimension):
 	dimension_doc = frappe.get_doc("Accounting Dimension", dimension)
-	frappe.get_doc(
+	default_row = frappe.get_doc(
 		{
 			"doctype": "Accounting Dimension Detail",
 			"parent": dimension_doc.name,
@@ -203,4 +205,6 @@ def add_dimension_default(dimension, company, default_dimension):
 			"reference_document": dimension_doc.document_type,
 			"default_dimension": default_dimension,
 		}
-	).db_insert()
+	)
+	default_row.db_insert()
+	return default_row.name
