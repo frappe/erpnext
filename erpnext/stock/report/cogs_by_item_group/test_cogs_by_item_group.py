@@ -145,6 +145,10 @@ class TestCogsByItemGroup(ERPNextTestSuite):
 
 		self.assertEqual([row.cogs_debit for row in data if item_group in row.item_group], [300])
 
+	def test_report_without_company(self):
+		# the report does not enforce the company filter, so it must run without one
+		self.run_report(company=None)
+
 
 def make_item_group(name: str) -> str:
 	if not frappe.db.exists("Item Group", name):

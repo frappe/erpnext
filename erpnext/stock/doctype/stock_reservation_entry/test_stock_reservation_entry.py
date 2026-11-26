@@ -6,6 +6,7 @@ from random import randint
 import frappe
 from frappe.utils import add_days, flt, today
 
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.selling.doctype.sales_order.mapper import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
@@ -1844,7 +1845,7 @@ def create_material_receipt(
 	se.purpose = "Material Receipt"
 	se.company = "_Test Company"
 	cost_center = frappe.get_value("Company", se.company, "cost_center")
-	expense_account = frappe.get_value("Company", se.company, "stock_adjustment_account")
+	expense_account = get_default_account(se.company, STOCK_ADJUSTMENT)
 
 	for item in items.values():
 		se.append(

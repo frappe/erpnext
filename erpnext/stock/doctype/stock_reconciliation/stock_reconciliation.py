@@ -15,7 +15,7 @@ from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
 from erpnext import _refuse
-from erpnext.accounts.utils import _get_company_default
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -94,9 +94,7 @@ class StockReconciliation(StockController):
 		self.validate_standard_cost_items()
 		self.validate_items_exist()
 		if not self.expense_account:
-			self.expense_account = frappe.get_cached_value(
-				"Company", self.company, "stock_adjustment_account"
-			)
+			self.expense_account = get_default_account(self.company, STOCK_ADJUSTMENT)
 		if not self.cost_center:
 			self.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 		self.validate_posting_time()
@@ -125,9 +123,7 @@ class StockReconciliation(StockController):
 		AdjustmentEntry(self).validate_made_from_report()
 
 		if not self.expense_account:
-			self.expense_account = frappe.get_cached_value(
-				"Company", self.company, "stock_adjustment_account"
-			)
+			self.expense_account = get_default_account(self.company, STOCK_ADJUSTMENT)
 		if not self.cost_center:
 			self.cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 
@@ -2016,7 +2012,7 @@ def get_difference_account(purpose: str, company: str):
 	_require_reconciliation_permission("Company", company)
 
 	if purpose in ("Stock Reconciliation", ADJUSTMENT_ENTRY):
-		account = _get_company_default(company, "stock_adjustment_account")
+		account = get_default_account(company, STOCK_ADJUSTMENT, required=True)
 	else:
 		account = frappe.db.get_value(
 			"Account", {"is_group": 0, "company": company, "account_type": "Temporary"}, "name"

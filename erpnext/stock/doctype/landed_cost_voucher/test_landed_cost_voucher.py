@@ -8,6 +8,12 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
+from erpnext.accounts.default_accounts import (
+	CAPITAL_WORK_IN_PROGRESS,
+	INVENTORY,
+	STOCK_RECEIVED_BUT_NOT_BILLED,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.utils import update_gl_entries_after
@@ -585,10 +591,10 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 		epi = is_perpetual_inventory_enabled(company_a)
 		company_doc = frappe.get_doc("Company", company_a)
-		old_inventory_account = company_doc.default_inventory_account
+		old_inventory_account = company_doc.get_default_account(INVENTORY)
 		company_doc.enable_perpetual_inventory = 1
-		company_doc.stock_received_but_not_billed = srbnb
-		company_doc.default_inventory_account = "Stock In Hand - _TC"
+		company_doc.set_default_account(STOCK_RECEIVED_BUT_NOT_BILLED, srbnb)
+		company_doc.set_default_account(INVENTORY, "Stock In Hand - _TC")
 		company_doc.save()
 
 		pr = make_purchase_receipt(
@@ -616,11 +622,8 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		distribute_landed_cost_on_items(lcv)
 		lcv.submit()
 
-		frappe.db.set_value(
-			"Company",
-			company_a,
-			{"enable_perpetual_inventory": epi, "default_inventory_account": old_inventory_account},
-		)
+		frappe.db.set_value("Company", company_a, "enable_perpetual_inventory", epi)
+		set_default_account(company_a, INVENTORY, old_inventory_account)
 		frappe.local.enable_perpetual_inventory = {}
 
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):
@@ -1087,9 +1090,7 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 	def test_asset_lcv(self):
 		"Check if LCV for an Asset updates the Assets Net Purchase Amount correctly."
-		frappe.db.set_value(
-			"Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC"
-		)
+		set_default_account("_Test Company", CAPITAL_WORK_IN_PROGRESS, "CWIP Account - _TC")
 
 		if not frappe.db.exists("Item", "Macbook Pro"):
 			create_fixed_asset_item()

@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff
 
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.accounts.report.general_ledger.general_ledger import get_gl_entries
 from erpnext.accounts.report.utils import validate_mandatory_date_range
 
@@ -40,7 +41,9 @@ def execute(filters: Filters) -> tuple[Columns, Data]:
 
 
 def update_filters_with_account(filters: Filters) -> None:
-	account = frappe.get_value("Company", filters.get("company"), "default_expense_account")
+	# the report does not enforce the company filter
+	company = filters.get("company")
+	account = get_default_account(company, COST_OF_GOODS_SOLD) if company else None
 	filters.update(dict(account=account))
 
 

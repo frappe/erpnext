@@ -10,6 +10,7 @@ import frappe
 from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.ledger_preview import (
 	get_accounting_ledger_preview,
@@ -2914,7 +2915,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			500,
 		)
 
-		stock_adjustment_account = frappe.get_cached_value("Company", company, "stock_adjustment_account")
+		stock_adjustment_account = get_default_account(company, STOCK_ADJUSTMENT)
 		gl_entries = get_gl_entries(scr_return.doctype, scr_return.name, skip_cancelled=True)
 		self.assertFalse(
 			flt(
@@ -3146,7 +3147,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		for gle in get_gl_entries(scr.doctype, scr.name):
 			balances[gle.account] += gle.debit - gle.credit
 
-		stock_adjustment_account = frappe.get_cached_value("Company", company, "stock_adjustment_account")
+		stock_adjustment_account = get_default_account(company, STOCK_ADJUSTMENT)
 		self.assertEqual(flt(balances[stock_adjustment_account], 2), 0.1)
 
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
@@ -4867,7 +4868,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			"GL Entry",
 			filters={
 				"voucher_no": scr_return.name,
-				"account": frappe.get_cached_value("Company", scr.company, "stock_adjustment_account"),
+				"account": get_default_account(scr.company, STOCK_ADJUSTMENT),
 				"is_cancelled": 0,
 			},
 		)
@@ -5878,7 +5879,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr_return.submit()
 
 		self.assertEqual(flt(scr_return.items[0].amount, 2), flt(-1 * scr.items[0].amount, 2))
-		stock_adjustment_account = frappe.get_cached_value("Company", scr.company, "stock_adjustment_account")
+		stock_adjustment_account = get_default_account(scr.company, STOCK_ADJUSTMENT)
 		self.assertFalse(
 			[
 				gle

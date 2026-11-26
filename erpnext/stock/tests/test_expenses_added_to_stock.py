@@ -3,6 +3,13 @@
 
 import frappe
 
+from erpnext.accounts.default_accounts import (
+	EXPENSES_ADDED_TO_STOCK,
+	EXPENSES_ADDED_TO_STOCK_CONTRA,
+	PURCHASE_EXPENSE,
+	PURCHASE_EXPENSE_CONTRA,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -34,16 +41,10 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 			parent_account="Expenses - TCP1",
 			company=COMPANY,
 		)
-		frappe.db.set_value(
-			"Company",
-			COMPANY,
-			{
-				"expenses_added_to_stock_account": self.eats_account,
-				"expenses_added_to_stock_contra_account": self.eats_contra_account,
-				"purchase_expense_account": self.purchase_expense_account,
-				"purchase_expense_contra_account": self.purchase_expense_contra_account,
-			},
-		)
+		set_default_account(COMPANY, EXPENSES_ADDED_TO_STOCK, self.eats_account)
+		set_default_account(COMPANY, EXPENSES_ADDED_TO_STOCK_CONTRA, self.eats_contra_account)
+		set_default_account(COMPANY, PURCHASE_EXPENSE, self.purchase_expense_account)
+		set_default_account(COMPANY, PURCHASE_EXPENSE_CONTRA, self.purchase_expense_contra_account)
 		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
 		self.item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 
@@ -141,7 +142,7 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 		self.assertEqual(credits[self.eats_contra_account], 0)
 
 	def test_missing_contra_account_raises_when_feature_enabled(self):
-		frappe.db.set_value("Company", COMPANY, "expenses_added_to_stock_contra_account", None)
+		set_default_account(COMPANY, EXPENSES_ADDED_TO_STOCK_CONTRA, None)
 
 		self.assertRaises(
 			frappe.ValidationError,

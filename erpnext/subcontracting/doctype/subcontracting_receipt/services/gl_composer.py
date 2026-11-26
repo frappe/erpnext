@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.services.base_stock_gl_composer import BaseStockGLComposer
@@ -115,9 +116,7 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 					)
 
 					if divisional_loss := flt(item.amount - stock_value_diff, item.precision("amount")):
-						loss_account = doc.get_company_default(
-							"stock_adjustment_account", ignore_validation=True
-						)
+						loss_account = get_default_account(doc.company, STOCK_ADJUSTMENT)
 
 						# the receipt amount the ledger did not take into stock is a loss
 						self.add_gl_entry(

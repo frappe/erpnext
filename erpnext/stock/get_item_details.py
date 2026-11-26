@@ -19,6 +19,16 @@ from frappe.utils import add_days, add_months, cint, cstr, flt, get_link_to_form
 
 import erpnext
 from erpnext import get_company_currency
+from erpnext.accounts.default_accounts import (
+	COST_OF_GOODS_SOLD,
+	DEFERRED_EXPENSE,
+	DEFERRED_REVENUE,
+	INCOME,
+	SERVICE_EXPENSE,
+	STOCK_DELIVERED_BUT_NOT_BILLED,
+	STOCK_RECEIVED_BUT_NOT_BILLED,
+	get_default_account,
+)
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	get_pricing_rule_for_item,
 	set_transaction_type,
@@ -692,7 +702,6 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 		"Company",
 		ctx.company,
 		[
-			"stock_delivered_but_not_billed",
 			"disable_sdbnb_in_sr",
 			"enable_stock_delivered_but_not_billed",
 		],
@@ -703,13 +712,14 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 		ctx.doctype == "Delivery Note"
 		and ctx.is_stock_item
 		and company_values
-		and company_values.stock_delivered_but_not_billed
 		and company_values.enable_stock_delivered_but_not_billed
 		and not ctx.get("is_fixed_asset")
 		and not ctx.get("is_subcontracted")
 	):
 		if not (ctx.get("is_return") and company_values.disable_sdbnb_in_sr):
-			expense_account = company_values.stock_delivered_but_not_billed
+			expense_account = (
+				get_default_account(ctx.company, STOCK_DELIVERED_BUT_NOT_BILLED) or expense_account
+			)
 
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not ctx.uom:
@@ -781,7 +791,7 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 	)
 
 	if not item.is_stock_item and not out.expense_account:
-		out.expense_account = frappe.get_cached_value("Company", ctx.company, "service_expense_account")
+		out.expense_account = get_default_account(ctx.company, SERVICE_EXPENSE)
 
 	default_supplier = get_default_supplier(ctx, item_defaults, item_group_defaults, brand_defaults)
 	if default_supplier:
@@ -814,7 +824,7 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 			ctx.name, ctx.conversion_rate, item.name, out.conversion_factor
 		)
 
-	expense_account_field = "default_expense_account"
+	expense_account_purpose = COST_OF_GOODS_SOLD
 	if (
 		item.is_stock_item
 		and erpnext.is_perpetual_inventory_enabled(ctx.company)
@@ -823,17 +833,17 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 			or (ctx.doctype == "Purchase Invoice" and ctx.get("update_stock"))
 		)
 	):
-		expense_account_field = "stock_received_but_not_billed"
+		expense_account_purpose = STOCK_RECEIVED_BUT_NOT_BILLED
 
 	# if default specified in item is for another company, fetch from company
-	for d in [
-		["Account", "income_account", "default_income_account"],
-		["Account", "expense_account", expense_account_field],
-		["Cost Center", "cost_center", "cost_center"],
-		["Warehouse", "warehouse", ""],
-	]:
-		if not out[d[1]]:
-			out[d[1]] = frappe.get_cached_value("Company", ctx.company, d[2]) if d[2] else None
+	if not out.income_account:
+		out.income_account = get_default_account(ctx.company, INCOME)
+	if not out.expense_account:
+		out.expense_account = get_default_account(ctx.company, expense_account_purpose)
+	if not out.cost_center:
+		out.cost_center = frappe.get_cached_value("Company", ctx.company, "cost_center")
+	if not out.warehouse:
+		out.warehouse = None
 
 	for fieldname in ("item_name", "item_group", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
@@ -1231,7 +1241,7 @@ def get_default_expense_account(ctx: frappe._dict, item, item_group, brand):
 		)
 
 		if not expense_account:
-			expense_account = frappe.get_cached_value("Company", ctx.company, "default_expense_account")
+			expense_account = get_default_account(ctx.company, COST_OF_GOODS_SOLD)
 
 		if expense_account:
 			return expense_account
@@ -1264,12 +1274,14 @@ def get_default_discount_account(ctx: frappe._dict, item, item_group, brand):
 
 def get_default_deferred_account(ctx: frappe._dict, item, fieldname=None):
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
+		purpose = DEFERRED_REVENUE if fieldname == "deferred_revenue_account" else DEFERRED_EXPENSE
 		return (
 			get_item_defaults(ctx.item_code, ctx.company).get(fieldname)
 			or get_item_group_defaults(ctx.item_code, ctx.company).get(fieldname)
 			or get_brand_defaults(ctx.item_code, ctx.company).get(fieldname)
 			or ctx.get(fieldname)
-			or frappe.get_cached_value("Company", ctx.company, "default_" + fieldname)
+			# calculate_service_end_date gets a child row from the form, without a company
+			or (ctx.company and get_default_account(ctx.company, purpose))
 		)
 	else:
 		return None

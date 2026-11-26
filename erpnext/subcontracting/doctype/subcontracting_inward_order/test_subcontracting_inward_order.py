@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.default_accounts import COST_OF_GOODS_SOLD, get_default_account
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_stock_entry_from_wo
 from erpnext.selling.doctype.sales_order.mapper import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -2261,7 +2262,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery.save()
 		self.assertEqual(
 			delivery.items[0].expense_account,
-			frappe.get_cached_value("Company", delivery.company, "default_expense_account"),
+			get_default_account(delivery.company, COST_OF_GOODS_SOLD),
 		)
 
 		delivery.items[0].expense_account = "Freight and Forwarding Charges - _TC"
@@ -2302,9 +2303,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		second.cancel()
 		third = deliver(2, marketing)
-		self.assertEqual(
-			return_account(), frappe.get_cached_value("Company", scio.company, "default_expense_account")
-		)
+		self.assertEqual(return_account(), get_default_account(scio.company, COST_OF_GOODS_SOLD))
 
 		third.cancel()
 		self.assertEqual(return_account(), freight)

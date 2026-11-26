@@ -10,6 +10,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime
 
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -3339,7 +3340,7 @@ def create_stock_reconciliation(**args):
 	sr.company = args.company or "_Test Company"
 	sr.expense_account = args.expense_account or (
 		(
-			frappe.get_cached_value("Company", sr.company, "stock_adjustment_account")
+			get_default_account(sr.company, STOCK_ADJUSTMENT)
 			or frappe.get_cached_value(
 				"Account", {"account_type": "Stock Adjustment", "company": sr.company}, "name"
 			)

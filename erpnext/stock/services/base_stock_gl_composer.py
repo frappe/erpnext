@@ -5,6 +5,12 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.default_accounts import (
+	COST_OF_GOODS_SOLD,
+	EXPENSES_ADDED_TO_STOCK,
+	EXPENSES_ADDED_TO_STOCK_CONTRA,
+	get_default_account,
+)
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 
@@ -108,7 +114,7 @@ class BaseStockGLComposer(BaseGLComposer):
 					_inv_dict = doc.get_inventory_account_dict(item_row, inventory_account_map)
 					warehouse_asset_account = _inv_dict.get("account") if _inv_dict else None
 
-				expense_account = frappe.get_cached_value("Company", doc.company, "default_expense_account")
+				expense_account = get_default_account(doc.company, COST_OF_GOODS_SOLD)
 				if not expense_account:
 					frappe.throw(
 						_(
@@ -306,8 +312,12 @@ def get_expenses_added_to_stock_accounts(item_code, company):
 		details = get_brand_defaults(item_code, company)
 
 	details = frappe._dict({field: details.get(field) for field in fields})
-	for field in fields:
+	company_purposes = {
+		"expenses_added_to_stock_account": EXPENSES_ADDED_TO_STOCK,
+		"expenses_added_to_stock_contra_account": EXPENSES_ADDED_TO_STOCK_CONTRA,
+	}
+	for field, purpose in company_purposes.items():
 		if not details.get(field):
-			details[field] = frappe.get_cached_value("Company", company, field)
+			details[field] = get_default_account(company, purpose)
 
 	return details

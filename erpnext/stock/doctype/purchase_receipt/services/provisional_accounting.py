@@ -8,6 +8,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt
 
+from erpnext.accounts.default_accounts import PROVISIONAL, get_default_account
 from erpnext.accounts.utils import get_account_currency
 
 
@@ -24,7 +25,7 @@ class ProvisionalAccountingService:
 		if not provisional_accounting_for_non_stock_items:
 			return
 
-		default_provisional_account = doc.get_company_default("default_provisional_account")
+		default_provisional_account = get_default_account(doc.company, PROVISIONAL, required=True)
 		for item in doc.get("items"):
 			if not item.get("provisional_expense_account"):
 				item.provisional_expense_account = default_provisional_account
@@ -259,7 +260,7 @@ def get_provisional_receipt_rows(company, po_details) -> dict:
 		.orderby(pr.creation)
 	).run(as_dict=True)
 
-	default_account = frappe.get_cached_value("Company", company, "default_provisional_account")
+	default_account = get_default_account(company, PROVISIONAL)
 	for row in rows:
 		row.provisional_expense_account = row.provisional_expense_account or default_account
 

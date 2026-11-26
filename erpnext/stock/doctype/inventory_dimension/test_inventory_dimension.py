@@ -8,6 +8,7 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.utils import nowdate, nowtime
 
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	CanNotBeChildDoc,
@@ -1173,9 +1174,9 @@ def prepare_data_for_internal_transfer():
 		"Cost Center", {"company": company}, "name"
 	)
 
-	expene_account = frappe.db.get_value(
-		"Company", company, "stock_adjustment_account"
-	) or frappe.db.get_value("Account", {"company": company, "account_type": "Expense Account"}, "name")
+	expene_account = get_default_account(company, STOCK_ADJUSTMENT) or frappe.db.get_value(
+		"Account", {"company": company, "account_type": "Expense Account"}, "name"
+	)
 
 	return frappe._dict(
 		{

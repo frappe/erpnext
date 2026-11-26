@@ -39,6 +39,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import create_batch, flt, format_datetime, get_datetime, get_link_to_form, getdate
 from pypika.terms import ExistsCriterion
 
+from erpnext.accounts.default_accounts import STOCK_ADJUSTMENT, get_default_account
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.expected_valuation import ADJUSTMENT_ENTRY, QueuePool, iterate_expected_stock_at
 from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
@@ -342,7 +343,7 @@ def make_adjustment_entry(
 
 
 def get_stock_adjustment_account(company: str) -> str | None:
-	return frappe.get_cached_value("Company", company, "stock_adjustment_account") or frappe.db.get_value(
+	return get_default_account(company, STOCK_ADJUSTMENT) or frappe.db.get_value(
 		"Account", {"account_type": "Stock Adjustment", "company": company, "is_group": 0}, "name"
 	)
 

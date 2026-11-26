@@ -18,6 +18,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import add_days, add_to_date, flt, getdate, nowdate
 
+from erpnext.accounts.default_accounts import INVENTORY, get_default_account
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -640,8 +641,8 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 				fields=["account", "debit", "credit"],
 			)
 		}
-		inventory_account = frappe.db.get_value("Warehouse", warehouse, "account") or frappe.get_cached_value(
-			"Company", company, "default_inventory_account"
+		inventory_account = frappe.db.get_value("Warehouse", warehouse, "account") or get_default_account(
+			company, INVENTORY
 		)
 		self.assertEqual(gl_entries, {inventory_account: 50, adjustment.expense_account: -50})
 

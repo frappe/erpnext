@@ -6,6 +6,12 @@ from unittest.mock import patch
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import add_days, cint, cstr, flt, get_time, getdate, nowtime, today
 
+from erpnext.accounts.default_accounts import (
+	COST_OF_GOODS_SOLD,
+	STOCK_ADJUSTMENT,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.exceptions import QualityInspectionRequiredError
@@ -974,7 +980,7 @@ class TestStockEntry(ERPNextTestSuite):
 		transfer.append(
 			"additional_costs",
 			{
-				"expense_account": frappe.get_value("Company", transfer.company, "default_expense_account"),
+				"expense_account": get_default_account(transfer.company, COST_OF_GOODS_SOLD),
 				"description": "Freight",
 				"amount": additional_cost,
 			},
@@ -1314,7 +1320,7 @@ class TestStockEntry(ERPNextTestSuite):
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
 
-		default_expense_account = frappe.get_value("Company", company, "default_expense_account")
+		default_expense_account = get_default_account(company, COST_OF_GOODS_SOLD)
 
 		items = get_multiple_items()
 		repack.items = []
@@ -3660,7 +3666,7 @@ class TestStockEntry(ERPNextTestSuite):
 				frappe._dict(item_code="_Test FG Item", qty=4, t_warehouse="_Test Warehouse 1 - _TC"),
 			],
 		)
-		frappe.db.set_value("Company", "_Test Company", "stock_adjustment_account", "Stock Adjustment - _TC")
+		set_default_account("_Test Company", STOCK_ADJUSTMENT, "Stock Adjustment - _TC")
 		# SE must have atleast one FG
 		self.assertRaises(FinishedGoodError, se.save)
 

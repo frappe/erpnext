@@ -4,6 +4,16 @@
 import frappe
 from frappe.utils import add_days, flt, nowtime, today
 
+from erpnext.accounts.default_accounts import (
+	COST_OF_GOODS_SOLD,
+	INVENTORY,
+	MANUFACTURING_VARIANCE,
+	PURCHASE_PRICE_VARIANCE,
+	STOCK_ADJUSTMENT,
+	STOCK_RECEIVED_BUT_NOT_BILLED,
+	get_default_account,
+	set_default_account,
+)
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -43,14 +53,14 @@ def create_item_standard_cost(item_code, rate, company=TEST_COMPANY, effective_d
 def ensure_ppv_account(company):
 	"""Ensure `company` has a Default Purchase Price Variance Account so receipts/invoices of
 	Standard Cost items can book the receipt-rate-vs-standard difference."""
-	account = frappe.get_cached_value("Company", company, "default_purchase_price_variance_account")
+	account = get_default_account(company, PURCHASE_PRICE_VARIANCE)
 	if account:
 		return account
 
 	from erpnext.accounts.doctype.account.test_account import create_account
 
 	# Place it under the same group as the company's default expense account.
-	expense_account = frappe.get_cached_value("Company", company, "default_expense_account")
+	expense_account = get_default_account(company, COST_OF_GOODS_SOLD)
 	parent_account = frappe.db.get_value("Account", expense_account, "parent_account")
 	account = create_account(
 		account_name="Purchase Price Variance",
@@ -59,21 +69,21 @@ def ensure_ppv_account(company):
 		company=company,
 		account_currency=frappe.get_cached_value("Company", company, "default_currency"),
 	)
-	frappe.db.set_value("Company", company, "default_purchase_price_variance_account", account)
+	set_default_account(company, PURCHASE_PRICE_VARIANCE, account)
 	return account
 
 
 def ensure_mfg_variance_account(company):
 	"""Ensure `company` has a Default Manufacturing Variance Account so Manufacture/Repack entries of
 	Standard Cost finished goods can book the consumed-cost-vs-standard difference."""
-	account = frappe.get_cached_value("Company", company, "default_manufacturing_variance_account")
+	account = get_default_account(company, MANUFACTURING_VARIANCE)
 	if account:
 		return account
 
 	from erpnext.accounts.doctype.account.test_account import create_account
 
 	# Place it under the same group as the company's default expense account.
-	expense_account = frappe.get_cached_value("Company", company, "default_expense_account")
+	expense_account = get_default_account(company, COST_OF_GOODS_SOLD)
 	parent_account = frappe.db.get_value("Account", expense_account, "parent_account")
 	account = create_account(
 		account_name="Manufacturing Variance",
@@ -82,7 +92,7 @@ def ensure_mfg_variance_account(company):
 		company=company,
 		account_currency=frappe.get_cached_value("Company", company, "default_currency"),
 	)
-	frappe.db.set_value("Company", company, "default_manufacturing_variance_account", account)
+	set_default_account(company, MANUFACTURING_VARIANCE, account)
 	return account
 
 
@@ -347,7 +357,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		)
 		self.assertEqual(flt(sle), 100)
 
-		stock_adjustment = frappe.get_cached_value("Company", PI_COMPANY, "stock_adjustment_account")
+		stock_adjustment = get_default_account(PI_COMPANY, STOCK_ADJUSTMENT)
 		booked = flt(
 			frappe.db.sql(
 				"select sum(debit - credit) from `tabGL Entry` where voucher_no=%s and account=%s and is_cancelled=0",
@@ -361,7 +371,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		sle_difference = frappe.db.get_value(
 			"Stock Ledger Entry", {"voucher_no": reco.name, "is_cancelled": 0}, "stock_value_difference"
 		)
-		stock_adjustment = frappe.get_cached_value("Company", PI_COMPANY, "stock_adjustment_account")
+		stock_adjustment = get_default_account(PI_COMPANY, STOCK_ADJUSTMENT)
 		booked = sum(
 			flt(gle.credit) - flt(gle.debit)
 			for gle in frappe.get_all(
@@ -827,7 +837,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		# The 50 variance is reclassified to the Manufacturing Variance account...
 		self.assertEqual(gl_net(mfg_variance), 50)
 		# ...leaving the generic Stock Adjustment account untouched.
-		stock_adj = frappe.get_cached_value("Company", PI_COMPANY, "stock_adjustment_account")
+		stock_adj = get_default_account(PI_COMPANY, STOCK_ADJUSTMENT)
 		self.assertEqual(gl_net(stock_adj), 0)
 
 	def test_manufacturing_variance_includes_additional_costs(self):
@@ -885,7 +895,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		# stock) should be booked.
 		ensure_mfg_variance_account(PI_COMPANY)
 		additional_cost_account = "Expenses Included In Valuation - TCP1"
-		stock_adjustment = frappe.get_cached_value("Company", PI_COMPANY, "stock_adjustment_account")
+		stock_adjustment = get_default_account(PI_COMPANY, STOCK_ADJUSTMENT)
 		rm = create_standard_cost_item()
 		fg = create_standard_cost_item()
 		create_item_standard_cost(rm.name, rate=50, company=PI_COMPANY)
@@ -915,8 +925,8 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 	def test_manufacturing_variance_account_required(self):
 		# Without a Manufacturing Variance account, submitting a Standard Cost Manufacture/Repack must fail.
-		previous = frappe.get_cached_value("Company", PI_COMPANY, "default_manufacturing_variance_account")
-		frappe.db.set_value("Company", PI_COMPANY, "default_manufacturing_variance_account", None)
+		previous = get_default_account(PI_COMPANY, MANUFACTURING_VARIANCE)
+		set_default_account(PI_COMPANY, MANUFACTURING_VARIANCE, None)
 		frappe.clear_cache(doctype="Company")
 		try:
 			rm = create_standard_cost_item()
@@ -936,7 +946,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 			se.insert()
 			self.assertRaises(frappe.ValidationError, se.submit)
 		finally:
-			frappe.db.set_value("Company", PI_COMPANY, "default_manufacturing_variance_account", previous)
+			set_default_account(PI_COMPANY, MANUFACTURING_VARIANCE, previous)
 			frappe.clear_cache(doctype="Company")
 
 	def test_valuation_method_change_blocked_with_stock(self):
@@ -1220,7 +1230,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		ppv_account = ensure_ppv_account(PI_COMPANY)
-		cogs_account = frappe.get_cached_value("Company", PI_COMPANY, "default_expense_account")
+		cogs_account = get_default_account(PI_COMPANY, COST_OF_GOODS_SOLD)
 
 		item = create_standard_cost_item()
 		create_item_standard_cost(item.name, rate=130, company=PI_COMPANY)
@@ -1243,7 +1253,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 	def test_zero_price_purchases_book_standard_cost(self):
 		ppv_account = "Stock Adjustment - TCP1"
-		stock_account = frappe.get_cached_value("Company", PI_COMPANY, "default_inventory_account")
+		stock_account = get_default_account(PI_COMPANY, INVENTORY)
 		item = create_standard_cost_item(
 			item_defaults=[
 				{
@@ -1315,8 +1325,8 @@ class TestItemStandardCost(ERPNextTestSuite):
 		# Receiving a Standard Cost item with a variance but no PPV account configured must error.
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
-		previous = frappe.get_cached_value("Company", PI_COMPANY, "default_purchase_price_variance_account")
-		frappe.db.set_value("Company", PI_COMPANY, "default_purchase_price_variance_account", None)
+		previous = get_default_account(PI_COMPANY, PURCHASE_PRICE_VARIANCE)
+		set_default_account(PI_COMPANY, PURCHASE_PRICE_VARIANCE, None)
 		frappe.clear_cache(doctype="Company")
 		try:
 			item = create_standard_cost_item()
@@ -1331,7 +1341,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 				rate=200,
 			)
 		finally:
-			frappe.db.set_value("Company", PI_COMPANY, "default_purchase_price_variance_account", previous)
+			set_default_account(PI_COMPANY, PURCHASE_PRICE_VARIANCE, previous)
 			frappe.clear_cache(doctype="Company")
 
 	def test_pi_without_update_stock_does_not_rebook_variance(self):
@@ -1342,7 +1352,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		ppv_account = ensure_ppv_account(PI_COMPANY)
-		srbnb_account = frappe.get_cached_value("Company", PI_COMPANY, "stock_received_but_not_billed")
+		srbnb_account = get_default_account(PI_COMPANY, STOCK_RECEIVED_BUT_NOT_BILLED)
 
 		item = create_standard_cost_item()
 		create_item_standard_cost(item.name, rate=130, company=PI_COMPANY)

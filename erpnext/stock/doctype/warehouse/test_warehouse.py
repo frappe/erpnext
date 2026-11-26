@@ -4,6 +4,7 @@
 import frappe
 
 import erpnext
+from erpnext.accounts.default_accounts import INVENTORY, set_default_account
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -97,7 +98,7 @@ class TestWarehouse(ERPNextTestSuite):
 	def test_warehouses_based_on_account_follow_effective_account(self):
 		company = "_Test Company"
 		default_account = get_warehouse_account("_Test Default Inventory", company)
-		frappe.db.set_value("Company", company, "default_inventory_account", default_account)
+		set_default_account(company, INVENTORY, default_account)
 		inheriting = create_warehouse("_Test Default Account WH", {"account": None}, company=company)
 		explicit = create_warehouse(
 			"_Test Explicit Default WH", {"account": default_account}, company=company
@@ -224,7 +225,7 @@ class TestWarehouse(ERPNextTestSuite):
 		from erpnext.stock import get_warehouse_account
 
 		company = INVENTORY_FALLBACK_COMPANY
-		frappe.db.set_value("Company", company, "default_inventory_account", None)
+		set_default_account(company, INVENTORY, None)
 		if frappe.db.exists("Account", "Extra Inventory Account - _TCIF"):
 			frappe.delete_doc("Account", "Extra Inventory Account - _TCIF")
 
@@ -382,7 +383,7 @@ class TestWarehouse(ERPNextTestSuite):
 
 def create_ambiguous_inventory_account_warehouse():
 	company = INVENTORY_FALLBACK_COMPANY
-	frappe.db.set_value("Company", company, "default_inventory_account", None)
+	set_default_account(company, INVENTORY, None)
 
 	single_account = frappe.db.get_value(
 		"Account", {"account_type": "Stock", "is_group": 0, "company": company}, "name"
