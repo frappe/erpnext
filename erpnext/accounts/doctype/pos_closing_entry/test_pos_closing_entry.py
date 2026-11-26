@@ -209,6 +209,20 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		row_meta = frappe.get_meta("POS Closing Entry Detail")
 		self.assertEqual(get_field_currency(row_meta.get_field("closing_amount"), row), "CDF")
 
+	def test_closing_keeps_opening_currency_after_profile_change(self):
+		self.pos_profile.db_set("currency", "CDF")
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=True)
+		self.pos_profile.db_set("currency", "USD")
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		self.assertEqual(closing_entry.currency, "CDF")
+		closing_entry.append(
+			"payment_reconciliation", {"mode_of_payment": "Cash", "opening_amount": 0, "closing_amount": 0}
+		)
+		closing_entry.insert()
+		closing_entry.save()
+		self.assertEqual(closing_entry.reload().currency, "CDF")
+
 	def test_currency_patch_uses_open_session_invoices(self):
 		from erpnext.patches.v16_0.set_currency_in_pos_opening_and_closing_entries import execute
 
