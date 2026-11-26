@@ -42,6 +42,7 @@ from erpnext.stock.serial_batch_bundle.availability.reservations import get_rese
 from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 from erpnext.stock.utils import get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1744,7 +1745,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			)
 		doc = self.make_receipt("SHARED-001")
 		doc.items[0].batch_no = batch.name
-		service = SerialBatchBundleService(doc)
+		service = SerialBatchValidationService(doc)
 		service.validate_serialized_batch()
 		doc.items[0].batch_no = wrong_batch.name
 		with self.assertRaisesRegex(frappe.ValidationError, "Shared-001 does not belong to Batch"):
