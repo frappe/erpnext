@@ -346,6 +346,22 @@ class TestTimesheet(ERPNextTestSuite):
 		second_invoice = self._invoice_with_timesheet_row(timesheet.name, None, with_amounts=False)
 		self.assertRaises(frappe.ValidationError, second_invoice.save)
 
+	def test_other_customers_timesheets_are_not_fetched_or_billed(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheets = {}
+		for customer in ("_Test Customer", "_Test Customer 1"):
+			timesheet = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+			timesheet.customer = customer
+			timesheets[customer] = timesheet.submit()
+
+		fetched = {d.time_sheet for d in get_projectwise_timesheet_data(customer="_Test Customer")}
+		self.assertIn(timesheets["_Test Customer"].name, fetched)
+		self.assertNotIn(timesheets["_Test Customer 1"].name, fetched)
+
+		other = timesheets["_Test Customer 1"]
+		sales_invoice = self._invoice_with_timesheet_row(other.name, other.time_logs[0].name)
+		self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
 	def test_invoice_from_timesheet_carries_the_project_of_its_logs(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})

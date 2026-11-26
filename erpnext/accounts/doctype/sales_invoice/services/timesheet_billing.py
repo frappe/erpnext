@@ -38,10 +38,16 @@ class TimesheetBillingService:
 					)
 
 			if data.time_sheet:
-				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
+				status, customer = frappe.db.get_value("Timesheet", data.time_sheet, ["status", "customer"])
 				if status not in ["Submitted", "Payslip", "Partially Billed", "Billed"]:
 					frappe.throw(
 						_("Timesheet {0} cannot be invoiced in its current state").format(data.time_sheet)
+					)
+				if customer and customer != self.doc.customer:
+					frappe.throw(
+						_("Row {0}: Timesheet {1} belongs to Customer {2}").format(
+							data.idx, frappe.bold(data.time_sheet), frappe.bold(customer)
+						)
 					)
 
 	def update_time_sheet(self, sales_invoice: str | None) -> None:
@@ -135,7 +141,7 @@ class TimesheetBillingService:
 		doc = self.doc
 		doc.set("timesheets", [])
 		if doc.project:
-			for data in get_projectwise_timesheet_data(doc.project):
+			for data in get_projectwise_timesheet_data(doc.project, customer=doc.customer):
 				doc.append("timesheets", self.get_timesheet_row(data))
 			self.calculate_billing_amount_for_timesheet()
 

@@ -1086,6 +1086,7 @@ frappe.ui.form.on("Sales Invoice", {
 		if (!Object.prototype.hasOwnProperty.call(kwargs, "project") && frm.doc.project) {
 			kwargs.project = frm.doc.project;
 		}
+		kwargs.customer = frm.doc.customer;
 
 		const timesheets = await frm.events.get_timesheet_data(frm, kwargs);
 
