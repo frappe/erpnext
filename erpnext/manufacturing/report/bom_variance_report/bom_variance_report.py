@@ -116,10 +116,12 @@ def get_materials_by_work_order(work_orders):
 	materials = {}
 	for row in frappe.get_all(
 		"Work Order Item",
-		fields=["parent", "item_code as raw_material_code", "required_qty", "consumed_qty"],
+		fields=["parent", "item_code as raw_material_code", "required_qty", "consumed_qty", "returned_qty"],
 		filters={"parent": ["in", work_orders], "parenttype": "Work Order"},
 		order_by="idx",
 	):
+		# consumed_qty also holds what was returned from WIP
+		row.consumed_qty = flt(row.consumed_qty) - flt(row.pop("returned_qty"))
 		materials.setdefault(row.pop("parent"), []).append(row)
 
 	return materials
