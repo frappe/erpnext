@@ -2945,6 +2945,7 @@ def get_reference_details(
 
 	res = frappe._dict(
 		{
+			"posting_date": ref_doc.get("posting_date") or ref_doc.get("transaction_date"),
 			"due_date": ref_doc.get("due_date"),
 			"total_amount": flt(total_amount),
 			"outstanding_amount": flt(outstanding_amount),
