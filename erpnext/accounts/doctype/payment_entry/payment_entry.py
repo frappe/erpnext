@@ -1124,7 +1124,12 @@ class PaymentEntry(AccountsController):
 				self.get_allocated_amount_in_transaction_currency(ref.allocated_amount, *key),
 			)
 
-			discount_accounts = {company.default_discount_account, company.round_off_account}
+			discount_accounts = {
+				company.default_discount_account,
+				company.payment_discount_received_account,
+				company.payment_discount_allowed_account,
+				company.round_off_account,
+			}
 			discount_accounts.update(row.account_head for row in doc.taxes)
 			for deduction in self.deductions:
 				if deduction.account not in discount_accounts or deduction.name not in remaining_deductions:
@@ -3478,17 +3483,35 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 		# If tax loss booking is enabled, pending loss will be rounding loss.
 		# Otherwise it will be the total discount loss.
 		book_tax_loss = frappe.get_single_value("Accounts Settings", "book_tax_discount_loss")
-		account_type = "round_off_account" if book_tax_loss else "default_discount_account"
+		if book_tax_loss:
+			account = frappe.get_cached_value("Company", pe.company, "round_off_account")
+		else:
+			account = get_payment_discount_account(pe.company, pe.payment_type)
 
 		pe.append(
 			"deductions",
 			{
-				"account": frappe.get_cached_value("Company", pe.company, account_type),
+				"account": account,
 				"cost_center": pe.cost_center
 				or frappe.get_cached_value("Company", pe.company, "cost_center"),
 				"amount": discount_amount * positive_negative,
 			},
 		)
+
+
+def get_payment_discount_account(company: str, payment_type: str) -> str | None:
+	"""Return the account for early payment discounts.
+
+	Payment type "Pay" uses the discount received account, "Receive" uses the discount allowed
+	account. If that account is not set, use the default payment discount account.
+	"""
+	fieldname = (
+		"payment_discount_received_account" if payment_type == "Pay" else "payment_discount_allowed_account"
+	)
+	specific_account, default_account = frappe.get_cached_value(
+		"Company", company, [fieldname, "default_discount_account"]
+	)
+	return specific_account or default_account
 
 
 def split_early_payment_discount_loss(pe, doc, valid_discounts) -> float:
@@ -3525,7 +3548,7 @@ def get_early_payment_discount_loss(
 	base_loss_on_income = doc.get("base_total") * (total_discount_percent / 100)
 	rows = [
 		{
-			"account": frappe.get_cached_value("Company", company, "default_discount_account"),
+			"account": get_payment_discount_account(company, payment_type),
 			"cost_center": cost_center,
 			"amount": flt(base_loss_on_income, doc.precision("total")) * positive_negative,
 		}

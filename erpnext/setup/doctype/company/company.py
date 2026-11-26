@@ -117,6 +117,8 @@ class Company(NestedSet):
 		monthly_sales_target: DF.Currency
 		old_parent: DF.Data | None
 		parent_company: DF.Link | None
+		payment_discount_allowed_account: DF.Link | None
+		payment_discount_received_account: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
 		purchase_expense_account: DF.Link | None
@@ -426,6 +428,8 @@ class Company(NestedSet):
 			"default_purchase_price_variance_account": {},
 			"default_manufacturing_variance_account": {},
 			"default_discount_account": {},
+			"payment_discount_received_account": {"root_type": ("Income", "Expense")},
+			"payment_discount_allowed_account": {"root_type": ("Income", "Expense")},
 			"default_deferred_revenue_account": {},
 			"default_deferred_expense_account": {},
 		}

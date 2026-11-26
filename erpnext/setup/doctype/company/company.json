@@ -62,6 +62,8 @@
   "default_expense_account",
   "default_income_account",
   "default_discount_account",
+  "payment_discount_received_account",
+  "payment_discount_allowed_account",
   "payment_terms",
   "cost_center",
   "default_finance_book",
@@ -1152,6 +1154,26 @@
   {
    "fieldname": "column_break_gthb",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "description": "Used for early payment discounts received on payments to suppliers. If empty, the Default Payment Discount Account is used.",
+   "fieldname": "payment_discount_received_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Payment Discount Received Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "description": "Used for early payment discounts allowed on payments from customers. If empty, the Default Payment Discount Account is used.",
+   "fieldname": "payment_discount_allowed_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Payment Discount Allowed Account",
+   "no_copy": 1,
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
@@ -1159,8 +1181,9 @@
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
+ "link_display_mode": "Search",
  "links": [],
- "modified": "2026-09-06 12:00:00.000000",
+ "modified": "2026-11-23 17:07:25.840737",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
