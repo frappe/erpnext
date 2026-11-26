@@ -7,28 +7,13 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext import get_company_currency
-<<<<<<< HEAD
-<<<<<<< HEAD
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import validate_pricing_parties
 from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
 from erpnext.controllers.accounts_controller import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_item_prices_for_stock_uom
-=======
-=======
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import validate_pricing_parties
-from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
-from erpnext.accounts.services.taxes import validate_conversion_rate
->>>>>>> 55d503b (refactor: keep the blanket order rate fix to the order rate base)
-from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.get_item_details import get_price_list_rate_for
 
-<<<<<<< HEAD
-_ORDER_DOCTYPES = {"Sales Order", "Quotation", "Purchase Order"}
->>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
-=======
 BLANKET_RATE_DOCTYPES = ("Sales Order", "Quotation", "Purchase Order")
->>>>>>> 55d503b (refactor: keep the blanket order rate fix to the order rate base)
 
 _ORDER_TYPE_CONFIG = {
 	"Selling": {

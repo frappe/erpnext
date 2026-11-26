@@ -337,7 +337,6 @@ class TransactionBase(StatusUpdater):
 					)
 
 	def fetch_item_details(self, item: dict) -> dict:
-<<<<<<< HEAD
 		ctx = frappe._dict(
 			{
 				"item_code": item.get("item_code"),
@@ -390,61 +389,6 @@ class TransactionBase(StatusUpdater):
 				"against_blanket_order": item.get("against_blanket_order"),
 				"blanket_order": item.get("blanket_order"),
 			}
-=======
-		return _get_item_details(
-			frappe._dict(
-				{
-					"item_code": item.get("item_code"),
-					"barcode": item.get("barcode"),
-					"serial_no": item.get("serial_no"),
-					"batch_no": item.get("batch_no"),
-					"set_warehouse": self.get("set_warehouse"),
-					"warehouse": item.get("warehouse"),
-					"customer": self.get("customer") or self.get("party_name"),
-					"quotation_to": self.get("quotation_to"),
-					"supplier": self.get("supplier"),
-					"currency": self.get("currency"),
-					"is_internal_supplier": self.get("is_internal_supplier"),
-					"is_internal_customer": self.get("is_internal_customer"),
-					"update_stock": self.update_stock
-					if self.doctype in ["Purchase Invoice", "Sales Invoice"]
-					else False,
-					"conversion_rate": self.get("conversion_rate"),
-					"price_list": self.get("selling_price_list") or self.get("buying_price_list"),
-					"price_list_currency": self.get("price_list_currency"),
-					"plc_conversion_rate": self.get("plc_conversion_rate"),
-					"company": self.get("company"),
-					"order_type": self.get("order_type"),
-					"is_pos": cint(self.get("is_pos")),
-					"is_return": cint(self.get("is_return")),
-					"is_subcontracted": self.get("is_subcontracted"),
-					"ignore_pricing_rule": self.get("ignore_pricing_rule"),
-					"doctype": self.get("doctype"),
-					"name": self.get("name"),
-					"project": item.get("project") or self.get("project"),
-					"qty": item.get("qty") or 1,
-					"net_rate": item.get("rate"),
-					"base_net_rate": item.get("base_net_rate"),
-					"stock_qty": item.get("stock_qty"),
-					"conversion_factor": item.get("conversion_factor"),
-					"weight_per_unit": item.get("weight_per_unit"),
-					"uom": item.get("uom"),
-					"weight_uom": item.get("weight_uom"),
-					"manufacturer": item.get("manufacturer"),
-					"stock_uom": item.get("stock_uom"),
-					"pos_profile": self.get("pos_profile") if cint(self.get("is_pos")) else "",
-					"cost_center": item.get("cost_center"),
-					"tax_category": self.get("tax_category"),
-					"item_tax_template": item.get("item_tax_template"),
-					"child_doctype": item.get("doctype"),
-					"child_docname": item.get("name"),
-					"use_serial_batch_fields": item.get("use_serial_batch_fields"),
-					"against_blanket_order": item.get("against_blanket_order"),
-					"blanket_order": item.get("blanket_order"),
-				}
-			),
-			self,
->>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
 		)
 		# the doc may be client-built, so check the parties and price list it names
 		validate_pricing_context(ctx)
