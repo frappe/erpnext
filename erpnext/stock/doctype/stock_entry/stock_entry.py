@@ -4295,6 +4295,14 @@ class StockEntry(StockController):
 				fields=["name", "item_code", "warehouse", "picked_qty", "transferred_qty"],
 			)
 		}
+		precision = frappe.get_precision("Pick List Item", "transferred_qty")
+		wo_allowance = 0.0
+		if self.work_order:
+			wo_allowance = flt(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "overproduction_percentage_for_work_order"
+				)
+			)
 		transfer_qty = defaultdict(float)
 		for d in self.items:
 			picked_row = picked_rows.get(d.pick_list_item)
@@ -4326,11 +4334,17 @@ class StockEntry(StockController):
 
 			precision = self.precision("transfer_qty", d)
 			transfer_qty[d.pick_list_item] += flt(d.transfer_qty)
-			total_transferred = flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item]
-			if flt(total_transferred, precision) > flt(picked_row.picked_qty, precision):
+			transferred_qty = flt(flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item], precision)
+			allowed_qty = flt(
+				flt(picked_row.picked_qty) + (flt(picked_row.picked_qty) * (wo_allowance / 100))
+				if self.work_order
+				else picked_row.picked_qty,
+				precision,
+			)
+			if transferred_qty > allowed_qty:
 				frappe.throw(
-					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
-						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
+					_("Row #{0}: Item {1} is transferred more than the {2} allowed in {3}.").format(
+						d.idx, frappe.bold(d.item_code), allowed_qty, self.pick_list
 					)
 				)
 
