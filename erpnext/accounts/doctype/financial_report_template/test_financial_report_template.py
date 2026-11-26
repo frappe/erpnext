@@ -424,6 +424,25 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 		self.assertNotIn("<img", message)
 
 
+class TestRowColor(FinancialReportTemplateTestCase):
+	@staticmethod
+	def _validate(color):
+		template = frappe._dict(rows=[frappe._dict(color=color, idx=1)])
+		return TemplateStructureValidator()._validate_colors(template)
+
+	def test_css_colors_are_accepted(self):
+		for color in ("", None, "#1F2937", "#fff", "red", " Navy "):
+			self.assertTrue(self._validate(color).is_valid, color)
+
+	def test_values_that_leave_the_color_are_rejected(self):
+		for color in ('red" onmouseover="alert(1)', "red; background: url(x)", "url(x)", "#12345"):
+			self.assertFalse(self._validate(color).is_valid, color)
+
+	def test_colors_the_excel_export_cannot_use_are_rejected(self):
+		for color in ("rgb(31, 41, 55)", "hsl(120 50% 50% / 0.5)", "RebeccaPurple"):
+			self.assertFalse(self._validate(color).is_valid, color)
+
+
 class TestReferenceCodeExtraction(FinancialReportTemplateTestCase):
 	"""Dependency ordering relies on knowing which codes a formula reads."""
 
