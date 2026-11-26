@@ -316,8 +316,8 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 		):
 			send_emails(process_soa.name)
 
-			# scheduled runs are Administrator; frappe picks the default outgoing account for None
-			self.assertIsNone(enqueue.call_args.kwargs["sender"])
+			# scheduled runs are Administrator; frappe picks the default outgoing account for it
+			self.assertEqual(enqueue.call_args.kwargs["sender"], "Administrator")
 
 
 def create_process_soa(**args):
