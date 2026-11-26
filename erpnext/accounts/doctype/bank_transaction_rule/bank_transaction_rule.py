@@ -255,7 +255,18 @@ def scheduler_run_rule_evaluation():
 @frappe.whitelist(methods=["POST"])
 def run_rule_evaluation(force_evaluate: bool = False):
 	frappe.has_permission("Bank Transaction", ptype="write", throw=True)
-	frappe.enqueue(method=_run_rule_evaluation, force_evaluate=force_evaluate)
+
+	# Each run covers all transactions, so one queued or running job per mode is enough.
+	job_id = "bank_transaction_rule_evaluation"
+	if force_evaluate:
+		job_id += "_forced"
+
+	frappe.enqueue(
+		method=_run_rule_evaluation,
+		force_evaluate=force_evaluate,
+		job_id=job_id,
+		deduplicate=True,
+	)
 
 
 def _run_rule_evaluation(force_evaluate=False):
