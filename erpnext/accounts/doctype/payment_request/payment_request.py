@@ -1000,9 +1000,13 @@ def make_payment_request(**args):
 				"party_account_currency": party_account_currency,
 				"grand_total": grand_total,
 				"mode_of_payment": args.mode_of_payment,
+				# like frappe's comment_email: Administrator and Guest stay by name
 				"email_to": args.recipient_id
-				or (ref_doc.owner not in frappe.STANDARD_USERS and get_email_address(ref_doc.owner))
-				or None,
+				or (
+					ref_doc.owner
+					if ref_doc.owner in frappe.STANDARD_USERS
+					else get_email_address(ref_doc.owner)
+				),
 				"subject": _("Payment Request for {0}").format(args.dn),
 				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 				"reference_doctype": ref_doc.doctype,
