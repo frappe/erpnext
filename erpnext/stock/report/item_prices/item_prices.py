@@ -196,6 +196,9 @@ def get_purchase_rate_query(doctype, date_field):
 	if doctype == "Purchase Invoice":
 		query = query.where(parent.update_stock == 1)
 
+	if doctype != "Purchase Order":
+		query = query.where(parent.is_return == 0)
+
 	if condition := get_allowed_companies_condition(parent.company, doctype):
 		query = query.where(condition)
 
@@ -210,7 +213,7 @@ def get_item_bom_rate():
 	bom = frappe.qb.DocType("BOM")
 	query = (
 		frappe.qb.from_(bom)
-		.select(bom.item, (bom.total_cost / bom.quantity).as_("bom_rate"))
+		.select(bom.item, (bom.base_total_cost / bom.quantity).as_("bom_rate"))
 		.where((bom.is_active == 1) & (bom.is_default == 1))
 	)
 
