@@ -456,6 +456,9 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
 		from erpnext.stock.doctype.item.test_item import make_item
 
+		# the quantities are fractions of a qty step
+		for uom in ("Nos", "_Test UOM 1"):
+			frappe.db.set_value("UOM", uom, "must_be_whole_number", 0)
 		item_code = make_item(
 			properties={"stock_uom": "Nos", "uoms": [{"uom": "_Test UOM 1", "conversion_factor": 10}]}
 		).name
