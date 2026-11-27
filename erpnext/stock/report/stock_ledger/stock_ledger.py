@@ -9,7 +9,7 @@ from frappe import _
 from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cint, flt, get_datetime
+from frappe.utils import cint, escape_html, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber
 
@@ -153,6 +153,9 @@ def execute(filters=None):
 
 
 def formatter(value, column, data, default_formatter):
+	if column.get("serial_batch"):
+		return escape_html(value)
+
 	value = default_formatter(value, column, data)
 	if column.fieldname == "out_qty" and data.out_qty < 0:
 		value = f"<span style='color:red'>{value}</span>"
