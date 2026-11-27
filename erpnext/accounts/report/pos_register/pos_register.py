@@ -135,6 +135,7 @@ def add_subtotal_row(data, group_invoices, group_by_field, group_by_value):
 			group_by_field: group_by_value,
 			"grand_total": grand_total,
 			"paid_amount": paid_amount,
+			"company": group_invoices[0].company,
 			"bold": 1,
 		}
 	)
