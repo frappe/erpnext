@@ -1464,13 +1464,15 @@ def make_bundle_for_material_transfer(**kwargs):
 			bundle_doc.append("entries", entry.as_dict(no_default_fields=True))
 
 	if kwargs.exclude_serial_nos:
-		keep = [row for row in bundle_doc.entries if row.serial_no not in set(kwargs.exclude_serial_nos)]
-		bundle_doc.entries = keep
-		for idx, row in enumerate(keep, start=1):
-			row.idx = idx
+		bundle_doc.entries = [
+			row for row in bundle_doc.entries if row.serial_no not in set(kwargs.exclude_serial_nos)
+		]
 
 	if kwargs.exclude_batch_qty:
 		remove_batch_qty(bundle_doc, kwargs.exclude_batch_qty)
+
+	for idx, row in enumerate(bundle_doc.entries, start=1):
+		row.idx = idx
 
 	qty = 0
 	if (
@@ -1524,13 +1526,11 @@ def remove_batch_qty(bundle_doc, batch_qty):
 		qty = abs(flt(row.qty))
 		used = min(qty, batch_qty[row.batch_no])
 		batch_qty[row.batch_no] -= used
-		if flt(qty - used, precision) > 0:
-			row.qty = qty - used
+		row.qty = flt(qty - used, precision)
+		if row.qty > 0:
 			keep.append(row)
 
 	bundle_doc.entries = keep
-	for idx, row in enumerate(keep, start=1):
-		row.idx = idx
 
 
 def get_ledger_entry_times(voucher_detail_no, docstatus):
