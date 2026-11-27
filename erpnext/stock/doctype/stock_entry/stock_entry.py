@@ -1549,14 +1549,51 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not ids:
 			return
 
+		received = self.get_serial_batch_received_from_transit()
 		for d in self.get("items"):
 			serial_and_batch_bundle = ids.get(d.ste_detail)
 			if not serial_and_batch_bundle:
 				continue
 
 			d.serial_and_batch_bundle = self.make_package_for_transfer(
-				serial_and_batch_bundle, d.s_warehouse, "Outward", do_not_submit=True
+				serial_and_batch_bundle,
+				d.s_warehouse,
+				"Outward",
+				do_not_submit=True,
+				exclude_serial_nos=received[d.ste_detail].serial_nos,
+				exclude_batch_qty=received[d.ste_detail].batch_qty,
 			)
+			# the bundle holds what is left in transit, the serial nos copied from the outward row may not
+			d.serial_no = None
+
+	def get_serial_batch_received_from_transit(self):
+		"""Serial nos and batch qty that earlier end transit entries took out, per outward row."""
+		entry = frappe.qb.DocType("Stock Entry")
+		row = frappe.qb.DocType("Stock Entry Detail")
+		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+
+		data = (
+			frappe.qb.from_(entry)
+			.inner_join(row)
+			.on(row.parent == entry.name)
+			.inner_join(bundle_entry)
+			.on(bundle_entry.parent == row.serial_and_batch_bundle)
+			.select(row.ste_detail, bundle_entry.serial_no, bundle_entry.batch_no, bundle_entry.qty)
+			.where(
+				(entry.outgoing_stock_entry == self.outgoing_stock_entry)
+				& (entry.docstatus == 1)
+				& (row.ste_detail.isnotnull())
+			)
+		).run(as_dict=True)
+
+		received = defaultdict(lambda: frappe._dict(serial_nos=[], batch_qty=defaultdict(float)))
+		for d in data:
+			if d.serial_no:
+				received[d.ste_detail].serial_nos.append(d.serial_no)
+			elif d.batch_no:
+				received[d.ste_detail].batch_qty[d.batch_no] += abs(flt(d.qty))
+
+		return received
 
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):

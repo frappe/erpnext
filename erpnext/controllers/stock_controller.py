@@ -306,6 +306,7 @@ class StockController(AccountsController):
 		include_bundle=None,
 		exclude_serial_nos=None,
 		total_qty=0,
+		exclude_batch_qty=None,
 	):
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
@@ -318,6 +319,7 @@ class StockController(AccountsController):
 			include_bundle,
 			exclude_serial_nos,
 			total_qty,
+			exclude_batch_qty,
 		)
 
 	def get_return_stock_qty(self, row, qty, warehouse) -> float:
@@ -1467,6 +1469,9 @@ def make_bundle_for_material_transfer(**kwargs):
 		for idx, row in enumerate(keep, start=1):
 			row.idx = idx
 
+	if kwargs.exclude_batch_qty:
+		remove_batch_qty(bundle_doc, kwargs.exclude_batch_qty)
+
 	qty = 0
 	if (
 		len(bundle_doc.entries) == 1
@@ -1507,6 +1512,25 @@ def make_bundle_for_material_transfer(**kwargs):
 			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
+
+
+def remove_batch_qty(bundle_doc, batch_qty):
+	"""Take the given qty of each batch off the bundle entries, dropping the entries used up."""
+	batch_qty = defaultdict(float, batch_qty)
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+
+	keep = []
+	for row in bundle_doc.entries:
+		qty = abs(flt(row.qty))
+		used = min(qty, batch_qty[row.batch_no])
+		batch_qty[row.batch_no] -= used
+		if flt(qty - used, precision) > 0:
+			row.qty = qty - used
+			keep.append(row)
+
+	bundle_doc.entries = keep
+	for idx, row in enumerate(keep, start=1):
+		row.idx = idx
 
 
 def get_ledger_entry_times(voucher_detail_no, docstatus):
