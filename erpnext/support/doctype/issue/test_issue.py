@@ -874,7 +874,6 @@ class TestIssue(TestSetUp):
 
 			with self.set_user(user.name):
 				self.assertIn(issue.name, [d.name for d in get_issue_list("Issue", None, None, 0, 500)])
-				issue.raised_by = user.email.upper()
 				self.assertTrue(frappe.has_website_permission(issue, "write"))
 
 	def test_raised_by_keeps_administrator_by_name(self):

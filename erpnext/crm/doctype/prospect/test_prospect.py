@@ -217,7 +217,7 @@ class TestProspect(ERPNextTestSuite):
 		with patch("erpnext.crm.frappe_crm_api.validate_frappe_crm_sync"):
 			frappe.local.form_dict = frappe._dict(
 				organization=f"CRM Org {random_string(6)}",
-				deal_owner=frappe.utils.get_email_address("Administrator"),
+				deal_owner="Administrator",
 				erpnext_company="_Test Company",
 			)
 			create_prospect_against_crm_deal()

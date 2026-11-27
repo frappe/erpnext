@@ -71,9 +71,12 @@ def get_site_info(site_info):
 	return {"company": company, "domain": domain, "activation": get_level(site_info)}
 
 
-def get_email_to_store(user: str | None = None) -> str | None:
-	"""Return the value to save for a user in an email field: their email, but Administrator and Guest
-	by name, like frappe's `comment_email`."""
+def get_user_email(user: str | None = None) -> str | None:
+	"""Return the value to save for a user in an email field.
+
+	- Other users: their email.
+	- Administrator and Guest: their name, as saved before.
+	"""
 	user = user or frappe.session.user
 	return user if user in frappe.STANDARD_USERS else frappe.utils.get_email_address(user)
 
