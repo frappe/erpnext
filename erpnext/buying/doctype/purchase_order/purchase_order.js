@@ -419,10 +419,11 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 								? __("Internal Sales Order")
 								: __("Inter Company Sales Order");
 
-						this.add_inter_company_order_button(
+						this.add_inter_company_button(
 							button_label,
 							"Sales Order",
-							"purchase_order_item"
+							"purchase_order_item",
+							() => this.make_inter_company_order(this.frm)
 						);
 					}
 				}
