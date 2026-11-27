@@ -530,10 +530,14 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 		value_before = stock.value
 		count_in_adjustment_row(stock, row, details)
 
-		# the ledger counts in every row as an entry of its own
-		stock.carried_value = flt(
-			stock.carried_value + stock.value - value_before, details.currency_precision
-		)
+		# the ledger counts in every row as an entry of its own, and values a Standard Cost item's
+		# whole balance at the standard rate
+		if details.valuation_method == "Standard Cost":
+			stock.carried_value = flt(stock.value, details.currency_precision)
+		else:
+			stock.carried_value = flt(
+				stock.carried_value + stock.value - value_before, details.currency_precision
+			)
 
 	carry_moving_average_rate_from_rounded_value(stock)
 
