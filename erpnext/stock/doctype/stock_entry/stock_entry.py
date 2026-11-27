@@ -4428,9 +4428,7 @@ class StockEntry(StockController):
 	def get_batches_sent(self):
 		"""Batches this entry sent to the supplier."""
 		bundles = [row.serial_and_batch_bundle for row in self.items if row.serial_and_batch_bundle]
-		return {row.batch_no for row in self.items if row.batch_no} | set(
-			get_batches_from_bundle(bundles)
-		)
+		return {row.batch_no for row in self.items if row.batch_no} | set(get_batches_from_bundle(bundles))
 
 	def get_net_qty_sent(self, order, item_codes):
 		"""Net qty of each item the order's transfers and their returns still supply."""
