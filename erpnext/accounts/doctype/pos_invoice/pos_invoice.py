@@ -851,7 +851,6 @@ class POSInvoice(SalesInvoice):
 					pay_req.submit()
 				else:
 					pay_req.check_permission("email")
-					frappe.has_permission(self.doctype, "read", self.name, throw=True)
 					pay_req.request_phone_payment()
 
 				return pay_req
