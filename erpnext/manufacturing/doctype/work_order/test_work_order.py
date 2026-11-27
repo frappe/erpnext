@@ -6050,6 +6050,13 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertEqual({row.item_row for row in scr.additional_costs}, {scr.items[0].name})
 		self.assertEqual(flt(first.items[0].additional_cost_per_qty), 15)
 
+	def test_work_order_cost_shares_add_up_to_the_cost(self):
+		from erpnext.manufacturing.doctype.bom.services.operations_cost import _split_per_unit_cost
+
+		shares = _split_per_unit_cost(50 / 3, [1, 1, 1])
+		self.assertEqual(shares, [16.67, 16.66, 16.67])
+		self.assertEqual(flt(sum(shares), 2), 50)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
