@@ -530,8 +530,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.remove_returned_secondary_rows_without_qty()
 
 		if recalculate_rate:
-			self.set_additional_costs()
-			self.calculate_items_qty_and_amount()
+			self.set_additional_costs_and_amounts()
 
 	def get_returned_receipt_rows(self) -> dict:
 		"""Rows of the receipt this return is against, by name."""
@@ -816,8 +815,11 @@ class SubcontractingReceipt(SubcontractingController):
 	@frappe.whitelist()
 	def set_missing_values(self):
 		self.set_available_qty_for_consumption()
+		self.set_additional_costs_and_amounts()
+
+	def set_additional_costs_and_amounts(self):
 		if self.distribute_additional_costs_based_on == "Amount" and self.get("additional_costs"):
-			# split on the amounts at the current qty
+			# split on the amounts at the current qty and secondary rows
 			self.calculate_items_qty_and_amount()
 		self.set_additional_costs()
 		self.calculate_items_qty_and_amount()
