@@ -3,9 +3,10 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import flt, today
+from frappe.utils import flt, getdate, today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+from erpnext.accounts.report.financial_statements import get_period_list
 
 COMPANY = "_Test Company 6"
 COMPANY_SHORT_NAME = "_TC6"
@@ -83,6 +84,19 @@ class TestBalanceSheet(FrappeTestCase):
 			posting_date="2026-07-01",
 		)
 		self.assertEqual(get_profit_loss_rows(filters), (unclosed + 1000, provisional - 1000))
+
+	def test_yearly_date_range_starting_mid_month_has_one_period(self):
+		period_list = get_period_list(
+			None, None, "2025-07-17", "2026-07-16", "Date Range", "Yearly", ignore_fiscal_year=True
+		)
+		self.assertEqual(len(period_list), 1)
+		self.assertEqual(period_list[0].to_date, getdate("2026-07-16"))
+
+	def test_periods_ending_in_same_month_have_unique_keys(self):
+		period_list = get_period_list(
+			None, None, "2025-07-17", "2026-07-31", "Date Range", "Yearly", ignore_fiscal_year=True
+		)
+		self.assertEqual([period.key for period in period_list], ["jul_2026", "jul_2026_31"])
 
 
 def get_profit_loss_rows(filters):
