@@ -102,10 +102,11 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 			sheet_on_mobile: true,
 			no_submit_on_enter: true,
 			primary_action_label: this.can_submit ? __("Submit Payment") : __("Save Draft"),
-			primary_action: (values) => this.save(values),
+			primary_action: (values) => this.confirm_save(values),
 			secondary_action_label: __("Edit Full Form"),
 			secondary_action: () => this.edit_full_form(),
 		});
+		frappe.ui.button.dress(this.dialog.get_primary_btn(), { variant: "subtle" });
 		this.dialog.show();
 		this.render_invoices();
 		this.refresh_summary();
@@ -113,11 +114,27 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 	}
 
 	get_title() {
-		const party = frappe.utils.escape_html(this.payment_entry.party_name || this.payment_entry.party);
+		const party = this.get_party();
 		if (this.is_refund) {
 			return this.is_receive ? __("Refund from {0}", [party]) : __("Refund to {0}", [party]);
 		}
 		return this.is_receive ? __("Payment from {0}", [party]) : __("Payment to {0}", [party]);
+	}
+
+	get_submit_question(amount) {
+		const args = [format_currency(amount, this.party_currency), this.get_party()];
+		if (this.is_refund) {
+			return this.is_receive
+				? __("Submit a refund of {0} from {1}?", args)
+				: __("Submit a refund of {0} to {1}?", args);
+		}
+		return this.is_receive
+			? __("Submit a payment of {0} from {1}?", args)
+			: __("Submit a payment of {0} to {1}?", args);
+	}
+
+	get_party() {
+		return frappe.utils.escape_html(this.payment_entry.party_name || this.payment_entry.party);
 	}
 
 	set_defaults() {
@@ -523,6 +540,11 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 
 	get_precision() {
 		return precision("paid_amount", this.payment_entry);
+	}
+
+	confirm_save(values) {
+		if (!this.can_submit) return this.save(values);
+		frappe.confirm(this.get_submit_question(values.party_amount), () => this.save(values));
 	}
 
 	async save(values) {

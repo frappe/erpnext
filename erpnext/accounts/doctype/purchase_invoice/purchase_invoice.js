@@ -13,6 +13,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
+		this.frm.make_methods = { "Payment Entry": () => this.make_payment_entry() };
+		this.frm.can_make_methods = { "Payment Entry": () => this.can_record_payment() };
 
 		// formatter for purchase invoice item
 		if (this.frm.doc.update_stock) {
@@ -40,6 +42,16 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				},
 			};
 		});
+	}
+
+	can_record_payment() {
+		const doc = this.frm.doc;
+		return (
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			!doc.on_hold &&
+			frappe.model.can_create("Payment Entry")
+		);
 	}
 
 	onload() {
@@ -146,16 +158,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			);
 		}
 
-		if (
-			doc.docstatus == 1 &&
-			doc.outstanding_amount != 0 &&
-			!doc.on_hold &&
-			frappe.model.can_create("Payment Entry")
-		) {
+		if (this.can_record_payment()) {
 			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
-			this.frm.add_custom_button(label, () => this.make_payment_entry());
-			this.frm.change_custom_button_type(label, null, "primary");
-			this.frm.custom_make_buttons["Payment Entry"] = label;
+			this.frm.page.set_primary_action(label, () => this.make_payment_entry());
 		}
 
 		if (doc.docstatus === 0) {
@@ -533,7 +538,6 @@ frappe.ui.form.on("Purchase Invoice", {
 
 		frm.custom_make_buttons = {
 			"Purchase Invoice": "Return / Debit Note",
-			"Payment Entry": "Record Payment",
 		};
 
 		if (frm.doc.update_stock) {

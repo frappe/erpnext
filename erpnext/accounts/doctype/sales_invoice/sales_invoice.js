@@ -18,7 +18,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.frm.make_methods = {
 			Dunning: this.make_dunning.bind(this),
 			"Invoice Discounting": this.make_invoice_discounting.bind(this),
+			"Payment Entry": () => this.make_payment_entry(),
 		};
+		this.frm.can_make_methods = { "Payment Entry": () => this.can_record_payment() };
+	}
+	can_record_payment() {
+		const doc = this.frm.doc;
+		return doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry");
 	}
 	company() {
 		super.company();
@@ -94,8 +100,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		const can_record_payment =
-			doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry");
+		const can_record_payment = this.can_record_payment();
 
 		if (doc.docstatus == 1 && !doc.is_return) {
 			var is_delivered_by_supplier = false;
@@ -175,9 +180,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 		if (can_record_payment) {
 			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
-			this.frm.add_custom_button(label, () => this.make_payment_entry());
-			this.frm.change_custom_button_type(label, null, "primary");
-			this.frm.custom_make_buttons["Payment Entry"] = label;
+			this.frm.page.set_primary_action(label, () => this.make_payment_entry());
 		}
 
 		this.toggle_get_items();
@@ -892,7 +895,6 @@ frappe.ui.form.on("Sales Invoice", {
 			"Delivery Note": "Delivery",
 			"Sales Invoice": "Return / Credit Note",
 			"Payment Request": "Payment Request",
-			"Payment Entry": "Record Payment",
 		};
 
 		frm.set_query("time_sheet", "timesheets", function (doc, cdt, cdn) {
