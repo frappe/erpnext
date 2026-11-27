@@ -2372,9 +2372,9 @@ class update_entries_after:
 				is_return_purchase_entry=self.is_return_purchase_entry(sle),
 			)
 
-		_qty, stock_value = stock_queue.get_total_stock_and_value()
+		queue_qty, queue_value = stock_queue.get_total_stock_and_value()
 
-		stock_value_difference = stock_value - prev_stock_value
+		stock_value_difference = queue_value - prev_stock_value
 
 		self.wh_data.stock_queue = stock_queue.state
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + stock_value_difference)
@@ -2384,8 +2384,9 @@ class update_entries_after:
 				[0, sle.incoming_rate or sle.outgoing_rate or self.wh_data.valuation_rate]
 			)
 
-		if flt(self.wh_data.qty_after_transaction, self.flt_precision):
-			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
+		# running stock value is rounded to currency precision, the queue keeps the exact value
+		if flt(queue_qty, self.flt_precision):
+			self.wh_data.valuation_rate = queue_value / queue_qty
 
 	def is_return_purchase_entry(self, sle):
 		if self.skip_serial_batch_valuation:
