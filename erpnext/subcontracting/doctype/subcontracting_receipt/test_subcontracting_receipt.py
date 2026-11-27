@@ -476,6 +476,25 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertEqual(second.total_additional_costs, 600)
 
+	def test_receipt_after_older_ones_booked_the_order_cost_in_full_takes_nothing(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		# stands in for a receipt submitted before cost rows were linked, which booked 1,200
+		frappe.db.set_value(
+			"Landed Cost Taxes and Charges", {"parent": first.name}, "subcontracting_order_cost", None
+		)
+		frappe.db.set_value(
+			"Subcontracting Receipt Item", first.items[0].name, "additional_cost_per_qty", 300
+		)
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+
+		self.assertEqual(second.total_additional_costs, 0)
+
 	def test_receipt_cannot_repeat_an_order_additional_cost_row(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
