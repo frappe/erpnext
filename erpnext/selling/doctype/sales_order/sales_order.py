@@ -679,9 +679,10 @@ class SalesOrder(SellingController):
 		return flt(item.delivered_qty) < flt(item.qty) or super().is_item_closable(item)
 
 	def validate_item_close(self, items):
-		"""Reserved stock has to be released deliberately before a row is closed."""
+		"""Reserved stock, a bundle's on its packed items, has to be released deliberately before a row is closed."""
 		for item in items:
-			if has_reserved_stock(self.doctype, self.name, item.name):
+			packed_rows = [row.name for row in self.packed_items if row.parent_detail_docname == item.name]
+			if any(has_reserved_stock(self.doctype, self.name, name) for name in [item.name, *packed_rows]):
 				frappe.throw(
 					_("Row #{0}: {1} has reserved stock. Unreserve it before closing the row.").format(
 						item.idx, frappe.bold(item.item_code)
