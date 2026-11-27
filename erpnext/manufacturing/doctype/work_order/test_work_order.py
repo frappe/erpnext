@@ -4937,6 +4937,31 @@ class TestWorkOrder(ERPNextTestSuite):
 		scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
 		self.assertEqual(scrap_row.basic_rate, 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_capped_manual_scrap_rate_goes_back_up_with_consumed_cost(self):
+		"""A Manual scrap rate capped on a short draft goes back to its BOM rate once the consumed cost covers it."""
+		scrap_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		work_order, _rm_item = make_whole_number_partial_work_order(
+			rm_qty=1, scrap_item=scrap_item, scrap_valuation_type="Manual", kg_rm_qty=4
+		)
+		submit_manufacture_of_one(work_order)
+
+		# consumes 1 Kg at 1 and no Nos, against scrap at 10
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		manufacture.save()
+		scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
+		self.assertEqual(scrap_row.basic_rate, 1)
+
+		# only Kg at 99 is left to consume
+		kg_item = next(row.item_code for row in manufacture.items if row.s_warehouse)
+		test_stock_entry.make_stock_entry(item_code=kg_item, target="Stores - _TC", qty=3, basic_rate=99)
+		test_stock_entry.make_stock_entry(item_code=kg_item, source="Stores - _TC", qty=3)
+		manufacture.save()
+		scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
+		self.assertEqual(scrap_row.basic_rate, 10)
+
 	def test_capped_secondary_rows_add_up_to_consumed_cost(self):
 		"""Capping rounds the running total, so a small consumed cost leaves no row negative."""
 		entry = frappe.new_doc("Stock Entry")
