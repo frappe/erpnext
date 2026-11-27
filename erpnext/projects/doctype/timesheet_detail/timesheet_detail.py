@@ -83,9 +83,10 @@ class TimesheetDetail(Document):
 
 		self.update_billing_hours()
 		needs_rate = not flt(self.costing_rate) or (self.is_billable and not flt(self.billing_rate))
+		# a draft without an exchange rate cannot convert the activity cost either
 		rate = (
 			_get_activity_cost(employee, self.activity_type, currency, transaction_date)
-			if self.activity_type and needs_rate
+			if self.activity_type and needs_rate and flt(exchange_rate)
 			else {}
 		)
 		self.billing_rate = flt(self.billing_rate) or flt(rate.get("billing_rate"))
