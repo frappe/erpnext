@@ -162,6 +162,9 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertTrue(frappe.db.has_index("tabSerial and Batch Entry", "serial_no_posting_datetime_index"))
 		self.assertFalse(frappe.db.get_column_index("tabSerial and Batch Entry", "serial_no", unique=False))
+		self.assertFalse(
+			frappe.db.has_index("tabSerial and Batch Entry", "warehouse_serial_no_posting_datetime_index")
+		)
 
 	def test_serial_availability_at_posting_cutoff(self):
 		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
