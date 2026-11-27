@@ -140,12 +140,13 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	currency: function (frm) {
+		keep_rates_in_company_currency(frm);
 		set_exchange_rate(frm);
 		frm.trigger("set_dynamic_field_label");
-		set_activity_costs(frm);
 	},
 
 	exchange_rate: function (frm) {
+		convert_kept_rates(frm);
 		$.each(frm.doc.time_logs, function (i, d) {
 			calculate_billing_costing_amount(frm, d.doctype, d.name);
 		});
@@ -251,9 +252,9 @@ frappe.ui.form.on("Timesheet", {
 		}
 	},
 
-	validate: function (frm) {
-		// a save waits for the activity rates that are still being fetched
-		return frm.activity_rates_refresh;
+	after_save: function (frm) {
+		// the server converted the rates that were still waiting for an exchange rate
+		frm.kept_rates = null;
 	},
 });
 
@@ -307,11 +308,15 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	billing_rate: function (frm, cdt, cdn) {
+		// a rate set after the currency change is already in the new currency
+		if (frm.kept_rates?.[cdn]) delete frm.kept_rates[cdn].billing_rate;
 		calculate_billing_costing_amount(frm, cdt, cdn);
 		calculate_time_and_amount(frm);
 	},
 
 	costing_rate: function (frm, cdt, cdn) {
+		// a rate set after the currency change is already in the new currency
+		if (frm.kept_rates?.[cdn]) delete frm.kept_rates[cdn].costing_rate;
 		calculate_billing_costing_amount(frm, cdt, cdn);
 		calculate_time_and_amount(frm);
 	},
@@ -437,7 +442,7 @@ var set_start_date = function (frm) {
 
 var set_activity_costs = function (frm) {
 	let activity_types = new Set((frm.doc.time_logs || []).map((row) => row.activity_type).filter(Boolean));
-	let calls = [...activity_types].map((activity_type) =>
+	activity_types.forEach((activity_type) => {
 		fetch_activity_cost(frm, activity_type, (cost) => {
 			frm.doc.time_logs
 				.filter((row) => row.activity_type === activity_type)
@@ -448,9 +453,8 @@ var set_activity_costs = function (frm) {
 				});
 			calculate_time_and_amount(frm);
 			frm.refresh_fields("time_logs");
-		})
-	);
-	frm.activity_rates_refresh = Promise.allSettled(calls);
+		});
+	});
 };
 
 // drops the response if the employee, currency or start date changed meanwhile
@@ -458,7 +462,7 @@ var fetch_activity_cost = function (frm, activity_type, callback) {
 	const employee = frm.doc.employee;
 	const currency = frm.doc.currency;
 	const transaction_date = get_start_date(frm);
-	return frappe.call({
+	frappe.call({
 		method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 		args: {
 			employee: employee,
@@ -476,6 +480,35 @@ var fetch_activity_cost = function (frm, activity_type, callback) {
 			}
 		},
 	});
+};
+
+// on a currency change, remember what each rate is worth in company currency
+var keep_rates_in_company_currency = function (frm) {
+	let exchange_rate = flt(frm.doc.exchange_rate);
+	// without a rate the earlier currency change is still waiting for its own
+	if (!exchange_rate) return;
+
+	frm.kept_rates = {};
+	(frm.doc.time_logs || []).forEach((row) => {
+		frm.kept_rates[row.name] = {
+			billing_rate: flt(row.billing_rate) * exchange_rate,
+			costing_rate: flt(row.costing_rate) * exchange_rate,
+		};
+	});
+};
+
+// once the new exchange rate is known, the rates keep their worth in company currency
+var convert_kept_rates = function (frm) {
+	let exchange_rate = flt(frm.doc.exchange_rate);
+	if (!frm.kept_rates || !exchange_rate) return;
+
+	(frm.doc.time_logs || []).forEach((row) => {
+		Object.entries(frm.kept_rates[row.name] || {}).forEach(([fieldname, base_rate]) => {
+			row[fieldname] = base_rate / exchange_rate;
+		});
+	});
+	frm.kept_rates = null;
+	frm.refresh_fields("time_logs");
 };
 
 var set_exchange_rate = function (frm) {
