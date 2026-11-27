@@ -234,6 +234,20 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.base_total_billable_amount, 120)
 		self.assertEqual(timesheet.base_total_costing_amount, 40)
 
+	def test_currency_change_keeps_the_same_number_entered_in_the_new_currency(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+
+		# 50 a hour is typed again as USD on the form, which sends the new base rate with it
+		timesheet.currency = "USD"
+		timesheet.exchange_rate = 2
+		timesheet.time_logs[0].base_billing_rate = 100
+		timesheet.save()
+
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 50)
+		self.assertEqual(timesheet.time_logs[0].costing_rate, 10)
+		self.assertEqual(timesheet.base_total_billable_amount, 200)
+
 	def test_foreign_currency_timesheet_gets_the_exchange_rate_on_its_start_date(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = frappe.get_doc(
