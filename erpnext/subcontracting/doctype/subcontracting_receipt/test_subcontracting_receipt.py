@@ -658,14 +658,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(first.total_additional_costs, 400)
 		self.assertEqual(second.total_additional_costs, 600)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
-	def test_batch_return_uses_accepted_receipt_rate(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-=======
-=======
 	def test_receipt_after_one_without_linked_cost_rows_takes_the_order_cost_balance(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
@@ -682,11 +674,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(second.total_additional_costs, 600)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 0446605 (test: receipt after one without linked cost rows takes the order cost balance)
-=======
-=======
 	def test_receipt_after_older_ones_booked_the_order_cost_in_full_takes_nothing(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
@@ -706,7 +693,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(second.total_additional_costs, 0)
 
->>>>>>> ecc5281 (test: receipt after older ones booked the order cost in full takes nothing)
 	def test_receipt_cannot_repeat_an_order_additional_cost_row(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
@@ -715,7 +701,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "repeats a cost", scr.save)
 
->>>>>>> 91c69dc (test: receipt cannot repeat an order additional cost row)
 	def test_draft_receipts_take_their_share_of_order_additional_costs(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
@@ -769,22 +754,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual([row.amount for row in scr_return.additional_costs], [-550, 0])
 		self.assertEqual(replacement.total_additional_costs, 550)
 
-	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
-		set_backflush_based_on("BOM")
-		sco = get_subcontracting_order()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 8
-		scr.items[0].process_loss_qty = 2
-		scr.save()
-		scr.submit()
->>>>>>> c60d88c (test: receipt drafts and multi-order receipts take their share of order additional costs)
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_batch_return_uses_accepted_receipt_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}

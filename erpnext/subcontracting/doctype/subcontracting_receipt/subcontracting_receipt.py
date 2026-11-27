@@ -6,18 +6,9 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
-<<<<<<< HEAD
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
-=======
-from frappe.query_builder.functions import IfNull, Sum
-=======
-from frappe.query_builder.functions import Sum
->>>>>>> 01466aa (fix(subcontracting): count a receipt's costs for an order as unlinked unless linked to that order)
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
->>>>>>> 1f87a7f (fix(subcontracting): count additional costs booked by receipts without linked cost rows)
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
