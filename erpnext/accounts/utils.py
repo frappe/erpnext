@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Optional
 import frappe
 import frappe.defaults
 from frappe import _, qb, throw
+from frappe.database.schema import DEFAULT_DECIMAL_PRECISION
 from frappe.desk.reportview import build_match_conditions
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import determine_consecutive_week_number
@@ -779,18 +780,9 @@ def update_reference_in_payment_entry(
 			)
 		existing_row = existing_rows[0]
 
-		precision = d.get("precision")
-		if precision is None:
-			ref_df = frappe.get_meta("Payment Entry Reference").get_field("allocated_amount")
-			party_currency = payment_entry.get("party_account_currency")
-			if not party_currency:
-				party_account = payment_entry.get(
-					"paid_from" if payment_entry.payment_type == "Receive" else "paid_to"
-				)
-				party_currency = get_account_currency(party_account)
-			precision = get_field_precision(ref_df, doc=existing_row, currency=party_currency)
-
-		if flt(d.allocated_amount, precision) > flt(existing_row.allocated_amount, precision):
+		# Keep the stored precision so each split deducts the same amount it adds.
+		remaining_amount = flt(existing_row.allocated_amount - d.allocated_amount, DEFAULT_DECIMAL_PRECISION)
+		if remaining_amount < 0:
 			frappe.throw(
 				_(
 					"Cannot allocate {0} against {1} {2}. Only {3} is unallocated in row #{4} of {5} {6}."
@@ -805,7 +797,7 @@ def update_reference_in_payment_entry(
 				)
 			)
 
-		existing_row.allocated_amount = flt(existing_row.allocated_amount - d.allocated_amount, precision)
+		existing_row.allocated_amount = remaining_amount
 
 		new_row = payment_entry.append("references")
 		new_row.docstatus = 1

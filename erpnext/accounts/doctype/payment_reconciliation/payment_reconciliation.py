@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, msgprint, qb
+from frappe.database.schema import DEFAULT_DECIMAL_PRECISION
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
@@ -505,20 +506,14 @@ class PaymentReconciliation(Document):
 		for pay in args.get("payments"):
 			pay.update({"unreconciled_amount": pay.get("amount")})
 			for inv in args.get("invoices"):
-				if pay.get("amount") >= inv.get("outstanding_amount"):
-					res = self.get_allocated_entry(pay, inv, inv["outstanding_amount"])
-					pay["amount"] = flt(
-						flt(pay.get("amount")) - flt(inv.get("outstanding_amount")),
-						allocated_amount_precision,
-					)
-					inv["outstanding_amount"] = 0
-				else:
-					res = self.get_allocated_entry(pay, inv, pay["amount"])
-					inv["outstanding_amount"] = flt(
-						flt(inv.get("outstanding_amount")) - flt(pay.get("amount")),
-						allocated_amount_precision,
-					)
-					pay["amount"] = 0
+				payment_amount = flt(pay.get("amount"))
+				invoice_outstanding = flt(inv.get("outstanding_amount"))
+				allocated_amount = min(payment_amount, invoice_outstanding)
+				res = self.get_allocated_entry(pay, inv, allocated_amount)
+				pay["amount"] = flt(payment_amount - allocated_amount, DEFAULT_DECIMAL_PRECISION)
+				inv["outstanding_amount"] = flt(
+					invoice_outstanding - allocated_amount, DEFAULT_DECIMAL_PRECISION
+				)
 
 				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
 				if pay.get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
@@ -537,12 +532,9 @@ class PaymentReconciliation(Document):
 					elif exc_gain_loss_posting_date == "Reconciliation Date":
 						res.update({"gain_loss_posting_date": nowdate()})
 
-				if pay.get("amount") == 0:
-					entries.append(res)
+				entries.append(res)
+				if not flt(pay["amount"], allocated_amount_precision):
 					break
-				elif inv.get("outstanding_amount") == 0:
-					entries.append(res)
-					continue
 
 			else:
 				break
