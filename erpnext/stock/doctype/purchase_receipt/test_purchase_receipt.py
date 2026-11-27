@@ -4693,7 +4693,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			},
 			uoms=[{"uom": "Box", "conversion_factor": 0.5}],
 		)
-		pr, warehouses, *_ = self.make_transfer_receipt(item_doc, 3, 3, uom="Box", conversion_factor=0.5)
+		pr, warehouses, *_ = self.make_transfer_receipt(
+			"Rejected Only Return", item_doc, 3, 3, uom="Box", conversion_factor=0.5
+		)
 		pr.submit()
 
 		pr_return = make_return_doc("Purchase Receipt", pr.name)
