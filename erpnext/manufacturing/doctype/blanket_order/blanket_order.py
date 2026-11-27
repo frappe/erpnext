@@ -27,6 +27,15 @@ ORDER_TYPE_BY_DOCTYPE = {
 }
 
 
+def get_effective_base_rate(item, price_list_rate) -> float:
+	"""Blanket order rate in the row's UOM if the row has one, else the price list rate."""
+	if item.parenttype in ORDER_TYPE_BY_DOCTYPE and item.blanket_order_rate:
+		return flt(
+			item.blanket_order_rate * (flt(item.conversion_factor) or 1), item.precision("price_list_rate")
+		)
+	return flt(price_list_rate)
+
+
 class BlanketOrder(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
