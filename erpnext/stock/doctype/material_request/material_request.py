@@ -106,7 +106,8 @@ class MaterialRequest(BuyingController):
 				"target_parent_dt": "Sales Order",
 				"join_field": "packed_item",
 				"target_ref_field": "qty",
-				"source_field": "qty",
+				# packed item qty is in the component's stock uom
+				"source_field": "stock_qty",
 			},
 		]
 
