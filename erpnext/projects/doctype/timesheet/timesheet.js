@@ -323,23 +323,13 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	activity_type: function (frm, cdt, cdn) {
-		if (!frappe.get_doc(cdt, cdn).activity_type) return;
+		let activity_type = frappe.get_doc(cdt, cdn).activity_type;
+		if (!activity_type) return;
 
-		frappe.call({
-			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-			args: {
-				employee: frm.doc.employee,
-				activity_type: frm.selected_doc.activity_type,
-				currency: frm.doc.currency,
-				transaction_date: get_start_date(frm),
-			},
-			callback: function (r) {
-				if (r.message) {
-					frappe.model.set_value(cdt, cdn, "billing_rate", r.message["billing_rate"]);
-					frappe.model.set_value(cdt, cdn, "costing_rate", r.message["costing_rate"]);
-					calculate_billing_costing_amount(frm, cdt, cdn);
-				}
-			},
+		fetch_activity_cost(frm, activity_type, (cost) => {
+			frappe.model.set_value(cdt, cdn, "billing_rate", cost.billing_rate);
+			frappe.model.set_value(cdt, cdn, "costing_rate", cost.costing_rate);
+			calculate_billing_costing_amount(frm, cdt, cdn);
 		});
 	},
 });
@@ -445,28 +435,34 @@ var set_start_date = function (frm) {
 };
 
 var set_activity_costs = function (frm) {
-	const employee = frm.doc.employee;
-	const transaction_date = get_start_date(frm);
 	(frm.doc.time_logs || []).forEach((row) => {
 		if (!row.activity_type) return;
-		frappe.call({
-			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-			args: {
-				employee: employee,
-				activity_type: row.activity_type,
-				currency: frm.doc.currency,
-				transaction_date: transaction_date,
-			},
-			callback: function (r) {
-				if (!r.message || employee !== frm.doc.employee || transaction_date !== get_start_date(frm)) {
-					return;
-				}
-				row.billing_rate = r.message["billing_rate"];
-				row.costing_rate = r.message["costing_rate"];
-				frm.refresh_fields("time_logs");
-				calculate_billing_costing_amount(frm, row.doctype, row.name);
-			},
+		fetch_activity_cost(frm, row.activity_type, (cost) => {
+			row.billing_rate = cost.billing_rate;
+			row.costing_rate = cost.costing_rate;
+			frm.refresh_fields("time_logs");
+			calculate_billing_costing_amount(frm, row.doctype, row.name);
 		});
+	});
+};
+
+// drops the response if the employee or start date changed meanwhile
+var fetch_activity_cost = function (frm, activity_type, callback) {
+	const employee = frm.doc.employee;
+	const transaction_date = get_start_date(frm);
+	frappe.call({
+		method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+		args: {
+			employee: employee,
+			activity_type: activity_type,
+			currency: frm.doc.currency,
+			transaction_date: transaction_date,
+		},
+		callback: function (r) {
+			if (r.message && employee === frm.doc.employee && transaction_date === get_start_date(frm)) {
+				callback(r.message);
+			}
+		},
 	});
 };
 
