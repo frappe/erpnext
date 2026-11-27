@@ -3151,6 +3151,45 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		# si_c is only partially settled: 72.57 - 50.83 = 21.74
 		self.assertAlmostEqual(si_c.outstanding_amount, 21.74, places=2)
 
+	def test_payment_reconciliation_limits_validation(self):
+		pr = self.create_payment_reconciliation()
+
+		# Negative invoice limit must raise ValidationError
+		pr.invoice_limit = -1
+		pr.payment_limit = 10
+		with self.assertRaisesRegex(frappe.ValidationError, "Invoice Limit must be a non-negative integer"):
+			pr.get_unreconciled_entries()
+
+		# Invalid invoice limit string must raise ValidationError
+		pr.invoice_limit = "not-an-int"
+		with self.assertRaisesRegex(frappe.ValidationError, "Invoice Limit must be a non-negative integer"):
+			pr.get_unreconciled_entries()
+
+		# Negative payment limit must raise ValidationError
+		pr.invoice_limit = 10
+		pr.payment_limit = -1
+		with self.assertRaisesRegex(frappe.ValidationError, "Payment Limit must be a non-negative integer"):
+			pr.get_unreconciled_entries()
+
+		# Invalid payment limit string must raise ValidationError
+		pr.payment_limit = "not-an-int"
+		with self.assertRaisesRegex(frappe.ValidationError, "Payment Limit must be a non-negative integer"):
+			pr.get_unreconciled_entries()
+
+		# Zero limit should be accepted without error (fetches all entries)
+		pr.invoice_limit = 0
+		pr.payment_limit = 0
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.invoice_limit, 0)
+		self.assertEqual(pr.payment_limit, 0)
+
+		# Valid string integers should be normalized to int
+		pr.invoice_limit = "15"
+		pr.payment_limit = "25"
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.invoice_limit, 15)
+		self.assertEqual(pr.payment_limit, 25)
+
 
 def create_fiscal_year(company, year_start_date, year_end_date):
 	fy_docname = frappe.db.exists(
