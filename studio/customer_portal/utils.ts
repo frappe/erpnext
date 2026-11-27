@@ -186,11 +186,13 @@ export function formatQty(value: number | null | undefined, uom?: string): strin
 }
 
 /** An item's description, stripped of markup. Falls back to the item code, and
- *  stays empty when the description only repeats the item name. */
+ *  stays empty when it would only repeat the item name. */
 export function descriptionOf(row: any): string {
 	const text = String(row.description ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-	if (text && text !== (row.item_name || "").trim()) return text
-	return row.item_code || ""
+	const name = (row.item_name || "").trim()
+	if (text && text !== name) return text
+	// the code adds nothing when it is the name again
+	return row.item_code && row.item_code !== name ? row.item_code : ""
 }
 
 /** Rich text (such as terms) as plain text that keeps its paragraphs; it is never rendered as HTML. */

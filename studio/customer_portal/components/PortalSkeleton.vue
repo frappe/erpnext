@@ -50,7 +50,7 @@
 					>
 						<Line text="text-sm" width="0.5rem" end />
 						<div class="flex min-w-0 items-start gap-2.5">
-							<Skeleton :class="[BLOCK, 'size-8 shrink-0 rounded']" />
+							<Skeleton :class="[BLOCK, 'size-10 shrink-0 rounded']" />
 							<div class="flex min-w-0 flex-1 flex-col gap-0.5">
 								<Line text="text-base-medium" :width="width(i, 30)" />
 								<Line text="text-p-sm" :width="width(i + 2, 45)" />
@@ -310,5 +310,11 @@ Line.props = ["text", "width", "end"];
 	.portal-reveal {
 		animation: none;
 	}
+}
+/* An item row is top-aligned so the figures sit on the item's first line. With a photo and only the
+   name, the photo is taller than the text, so the name and the figures centre on it instead. */
+[data-slot="list-row"][data-one-line] > [data-slot="list-cell"] {
+	align-self: center !important;
+	align-items: center !important;
 }
 </style>
