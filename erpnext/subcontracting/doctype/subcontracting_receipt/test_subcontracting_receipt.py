@@ -39,6 +39,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	get_mapped_subcontracting_receipt,
 	make_subcontracting_receipt,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
@@ -443,23 +444,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertEqual(first.total_additional_costs + second.total_additional_costs, 1000)
 
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
-	def test_batch_return_uses_accepted_receipt_rate(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
-<<<<<<< HEAD
-=======
-		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 4}])
-		first.save()
-		first.submit()
-		second = make_subcontracting_receipt(sco.name)
-		second.save()
-		second.submit()
-
-		self.assertEqual(first.total_additional_costs, 400)
-		self.assertEqual(second.total_additional_costs, 600)
-
 	def test_receipt_after_one_without_linked_cost_rows_takes_the_order_cost_balance(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
@@ -556,66 +540,11 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual([row.amount for row in scr_return.additional_costs], [-550, 0])
 		self.assertEqual(replacement.total_additional_costs, 550)
 
-	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
-		set_backflush_based_on("BOM")
-		sco = get_subcontracting_order()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 8
-		scr.items[0].process_loss_qty = 2
-		scr.save()
-		scr.submit()
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_batch_return_uses_accepted_receipt_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-8)
-
-		self.assertEqual(scr_return.items[0].process_loss_qty, 0)
-		self.assertEqual(scr_return.items[0].received_qty, -8)
-
-	def test_full_return_of_receipt_with_process_loss_marks_it_returned(self):
-		set_backflush_based_on("BOM")
-		sco = get_subcontracting_order()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 8
-		scr.items[0].process_loss_qty = 2
-		scr.save()
-		scr.submit()
-
-		make_return_subcontracting_receipt(scr_name=scr.name)
-
-		scr.load_from_db()
-		self.assertEqual(scr.per_returned, 100)
-		self.assertEqual(scr.status, "Return Issued")
-
-	def test_full_return_of_receipt_with_process_loss_returns_its_secondary_items(self):
-		fg_item = "Subcontracted Item SA1"
-		make_bom_with_secondary_item(fg_item)
-		scr = make_receipt_with_secondary_items(fg_item, 10, process_loss_qty=2)
-
-		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-		scr_return.save()
-		scr_return.get_secondary_items()
-		scr_return.save()
-		scr_return.submit()
-
-		scr.load_from_db()
-		self.assertEqual(scr.items[1].returned_qty, 5)
-		self.assertEqual(scr.status, "Return Issued")
-
-	def test_batch_return_value_matches_receipt(self):
->>>>>>> c60d88c (test: receipt drafts and multi-order receipts take their share of order additional costs)
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
 		).name

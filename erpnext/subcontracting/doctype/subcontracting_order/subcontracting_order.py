@@ -467,14 +467,6 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.received_qty)
 		target.amount = (flt(source.qty) - flt(source.received_qty)) * flt(source.rate)
 
-<<<<<<< HEAD
-	def update_additional_cost(source, target, source_parent):
-		target.amount = flt(source.amount * additional_cost_share, target.precision("amount"))
-
-	additional_cost_share = get_additional_cost_share(frappe.get_doc("Subcontracting Order", source_name))
-=======
-	items = {item["name"]: item["qty"] for item in items} if items else {}
->>>>>>> b9265ce (fix(subcontracting): recompute each receipt's share of the order's additional costs)
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
 		source_name,
@@ -511,39 +503,6 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 	return target_doc
 
 
-<<<<<<< HEAD
-def get_additional_cost_share(order: Document) -> float:
-	"""Share of the order's additional costs a receipt takes: what earlier receipts left of them."""
-	total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in order.items)
-	if not total_cost:
-		# costs that net to zero leave valuation unchanged, so keep their rows in full
-		return 1.0
-
-	pending_cost = sum(
-		max(flt(row.qty) - flt(row.received_qty), 0) * flt(row.additional_cost_per_qty) for row in order.items
-	)
-	if not pending_cost:
-		return 0.0
-
-	return max(1 - get_additional_cost_taken_by_receipts(order.name) / total_cost, 0)
-
-
-def get_additional_cost_taken_by_receipts(order: str) -> float:
-	receipt = frappe.qb.DocType("Subcontracting Receipt")
-	receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
-	return flt(
-		(
-			frappe.qb.from_(receipt_item)
-			.inner_join(receipt)
-			.on(receipt.name == receipt_item.parent)
-			.select(Sum(receipt_item.qty * receipt_item.additional_cost_per_qty))
-			.where((receipt.docstatus == 1) & (receipt_item.subcontracting_order == order))
-		).run()[0][0]
-	)
-
-
-=======
->>>>>>> b9265ce (fix(subcontracting): recompute each receipt's share of the order's additional costs)
 def set_subcontracting_order_status(sco: str | Document, status: str | None = None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
