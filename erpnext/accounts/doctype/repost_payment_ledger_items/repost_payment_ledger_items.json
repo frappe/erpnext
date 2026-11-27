@@ -2,6 +2,7 @@
  "actions": [],
  "creation": "2022-10-20 10:44:18.796489",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "voucher_type",
@@ -11,25 +12,43 @@
   {
    "fieldname": "voucher_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "reqd": 1
   },
   {
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
    "label": "Voucher No",
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "reqd": 1
   }
  ],
  "istable": 1,
+ "link_display_mode": "Search",
  "links": [],
+<<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2022-10-28 14:47:11.838109",
+=======
+ "modified": "2026-11-25 20:54:19.871514",
+>>>>>>> 13bae6c (fix(accounts): fix repost payment ledger form and child grid)
+=======
+ "modified": "2026-11-27 12:00:00.000000",
+>>>>>>> dcedc80 (fix(accounts): make repost payment ledger voucher fields mandatory)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Payment Ledger Items",
  "owner": "Administrator",
  "permissions": [],
+<<<<<<< HEAD
  "sort_field": "modified",
+=======
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+>>>>>>> 13bae6c (fix(accounts): fix repost payment ledger form and child grid)
  "sort_order": "DESC",
  "states": []
 }
