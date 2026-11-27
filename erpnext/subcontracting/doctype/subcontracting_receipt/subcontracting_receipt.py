@@ -178,6 +178,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.validate_inspection()
 			self.validate_purchase_orders_share_terms()
 			self.validate_additional_cost_accounts()
+			self.validate_order_costs_are_not_repeated()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be future date"))
@@ -527,6 +528,7 @@ class SubcontractingReceipt(SubcontractingController):
 		if self.is_return and self.return_against:
 			self.set_additional_costs_for_return()
 		else:
+			self.set_order_additional_costs()
 			self.set_additional_costs_base_amount()
 			self.calculate_additional_costs()
 
@@ -535,6 +537,127 @@ class SubcontractingReceipt(SubcontractingController):
 			row.base_amount = flt(
 				flt(row.amount) * (flt(row.exchange_rate) or 1), row.precision("base_amount")
 			)
+
+	def validate_order_costs_are_not_repeated(self):
+		"""Each order cost row is recomputed in full, so it can be mapped only once."""
+		seen = set()
+		for row in self.get("additional_costs"):
+			if not row.subcontracting_order_cost:
+				continue
+			if row.subcontracting_order_cost in seen:
+				frappe.throw(
+					_(
+						"Row #{0}: This Additional Costs row repeats a cost of the Subcontracting Order. Remove it."
+					).format(row.idx),
+					title=_("Duplicate Additional Cost"),
+				)
+			seen.add(row.subcontracting_order_cost)
+
+	def set_order_additional_costs(self):
+		"""Give each cost row mapped from a Subcontracting Order its share of what the order's row has left."""
+		rows = [row for row in self.get("additional_costs") if row.subcontracting_order_cost]
+		if not rows:
+			return
+
+		costs_left = self.get_order_costs_left([row.subcontracting_order_cost for row in rows])
+		shares = self.get_order_additional_cost_shares()
+		for row in rows:
+			order, cost_left = costs_left[row.subcontracting_order_cost]
+			row.amount = flt(cost_left * shares.get(order, 0), row.precision("amount"))
+
+	def get_order_costs_left(self, order_costs: list[str]) -> dict[str, tuple[str, float]]:
+		"""Order and amount each order cost row has left after the submitted receipts."""
+		charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		taken = dict(
+			frappe.qb.from_(charges)
+			.select(charges.subcontracting_order_cost, Sum(charges.amount))
+			.where(
+				(charges.parenttype == "Subcontracting Receipt")
+				& (charges.docstatus == 1)
+				& charges.subcontracting_order_cost.isin(order_costs)
+			)
+			.groupby(charges.subcontracting_order_cost)
+			.run()
+		)
+		order = frappe.qb.DocType("Subcontracting Order")
+		rows = (
+			frappe.qb.from_(charges)
+			.inner_join(order)
+			.on(order.name == charges.parent)
+			.select(charges.name, charges.parent, charges.amount, order.total_additional_costs)
+			.where((charges.parenttype == "Subcontracting Order") & charges.name.isin(order_costs))
+			.run(as_dict=True)
+		)
+		unlinked_taken = self.get_order_costs_taken_by_unlinked_receipts(list({row.parent for row in rows}))
+		costs_left = {}
+		for row in rows:
+			# unlinked receipts take from each order row by its share of the order's cost
+			row_share = (
+				flt(row.amount) / flt(row.total_additional_costs) if flt(row.total_additional_costs) else 0
+			)
+			row_taken = flt(taken.get(row.name)) + flt(unlinked_taken.get(row.parent)) * row_share
+			cost_left = flt(row.amount) - row_taken
+			# a row booked in full or more before the upgrade has nothing left, never a reversal
+			costs_left[row.name] = (row.parent, cost_left if cost_left * flt(row.amount) > 0 else 0)
+		return costs_left
+
+	def get_order_costs_taken_by_unlinked_receipts(self, orders: list[str]) -> dict[str, float]:
+		"""Additional costs each order's submitted receipts booked without cost rows linked to the order."""
+		receipt = frappe.qb.DocType("Subcontracting Receipt")
+		receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
+		charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		order_charges = frappe.qb.DocType("Landed Cost Taxes and Charges").as_("order_charges")
+		# receipts with a cost row linked to this item row's order
+		linked_receipts = (
+			frappe.qb.from_(charges)
+			.inner_join(order_charges)
+			.on(order_charges.name == charges.subcontracting_order_cost)
+			.select(charges.parent)
+			.where(
+				(charges.parenttype == "Subcontracting Receipt")
+				& (order_charges.parent == receipt_item.subcontracting_order)
+			)
+		)
+		booked = (
+			frappe.qb.from_(receipt_item)
+			.inner_join(receipt)
+			.on(receipt.name == receipt_item.parent)
+			.select(
+				receipt_item.subcontracting_order,
+				Sum(receipt_item.qty * receipt_item.additional_cost_per_qty),
+			)
+			.where(
+				(receipt.docstatus == 1)
+				& receipt_item.subcontracting_order.isin(orders)
+				& receipt.name.notin(linked_receipts)
+			)
+			.groupby(receipt_item.subcontracting_order)
+			.run()
+		)
+		return {order: flt(cost) for order, cost in booked}
+
+	def get_order_additional_cost_shares(self) -> dict[str, float]:
+		"""Share of each order's pending additional costs that this receipt's qty takes."""
+		received_qty = defaultdict(float)
+		for row in self.items:
+			if row.subcontracting_order_item:
+				received_qty[row.subcontracting_order_item] += flt(row.qty)
+
+		orders = list({row.subcontracting_order for row in self.items if row.subcontracting_order})
+		order_items = frappe.get_all(
+			"Subcontracting Order Item",
+			filters={"parent": ("in", orders)},
+			fields=["name", "parent", "qty", "received_qty", "additional_cost_per_qty"],
+		)
+		# orders whose costs net to zero are shared by qty
+		costed_orders = {row.parent for row in order_items if flt(row.additional_cost_per_qty)}
+		pending, received = defaultdict(float), defaultdict(float)
+		for row in order_items:
+			weight = flt(row.additional_cost_per_qty) if row.parent in costed_orders else 1
+			pending[row.parent] += max(flt(row.qty) - flt(row.received_qty), 0) * weight
+			received[row.parent] += received_qty[row.name] * weight
+
+		return {order: min(received[order] / pending[order], 1) if pending[order] else 0 for order in pending}
 
 	def set_additional_costs_for_return(self):
 		"""Take back the original receipt's additional costs allocated to the accepted qty returned."""
@@ -545,6 +668,7 @@ class SubcontractingReceipt(SubcontractingController):
 		total_basis = sum(flt(row.get(basis)) for row in original_rows.values())
 		total_cost = sum(flt(row.qty) * flt(row.additional_cost_per_qty) for row in original_rows.values())
 		returned_basis = returned_cost = 0.0
+		returned_orders = set()
 		for row in self.items:
 			original_row = original_rows.get(row.subcontracting_receipt_item)
 			if not original_row:
@@ -555,14 +679,20 @@ class SubcontractingReceipt(SubcontractingController):
 				row.additional_cost_per_qty = flt(original_row.additional_cost_per_qty)
 				returned_cost += flt(row.qty) * row.additional_cost_per_qty
 				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
+				returned_orders.add(original_row.subcontracting_order)
 
-		if total_cost:
-			ratio = returned_cost / total_cost
+		kept_rows = self.get_order_costs_kept_by_return(original, returned_orders)
+		shared_cost = flt(
+			total_cost - sum(flt(row.amount) for row in kept_rows), self.precision("total_additional_costs")
+		)
+		if shared_cost:
+			ratio = returned_cost / shared_cost
 		else:
 			ratio = returned_basis / total_basis if total_basis else 0.0
 
 		self.set("additional_costs", [])
 		for row in original.additional_costs:
+			row_ratio = 0.0 if row in kept_rows else ratio
 			self.append(
 				"additional_costs",
 				{
@@ -570,11 +700,35 @@ class SubcontractingReceipt(SubcontractingController):
 					"account_currency": row.account_currency,
 					"exchange_rate": row.exchange_rate,
 					"description": row.description,
-					"amount": flt(row.amount * ratio, row.precision("amount")),
-					"base_amount": flt(row.base_amount * ratio, row.precision("base_amount")),
+					"subcontracting_order_cost": row.subcontracting_order_cost,
+					"amount": flt(row.amount * row_ratio, row.precision("amount")),
+					"base_amount": flt(row.base_amount * row_ratio, row.precision("base_amount")),
 				},
 			)
 		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
+
+	def get_order_costs_kept_by_return(self, original: Document, returned_orders: set[str]) -> list:
+		"""Original cost rows of orders none of whose goods are returned; no later receipt books them again."""
+		linked_rows = [row for row in original.additional_costs if row.subcontracting_order_cost]
+		if not linked_rows:
+			return []
+
+		order_of_cost = dict(
+			frappe.get_all(
+				"Landed Cost Taxes and Charges",
+				filters={"name": ("in", [row.subcontracting_order_cost for row in linked_rows])},
+				fields=["name", "parent"],
+				as_list=True,
+			)
+		)
+		kept_rows = [
+			row
+			for row in linked_rows
+			if order_of_cost.get(row.subcontracting_order_cost) not in returned_orders
+		]
+		# keep them only if other rows are left to take back the returned cost
+		shared_cost = sum(flt(row.amount) for row in original.additional_costs if row not in kept_rows)
+		return kept_rows if flt(shared_cost, self.precision("total_additional_costs")) else []
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}

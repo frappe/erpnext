@@ -27,6 +27,7 @@ class LandedCostTaxesandCharges(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		qty: DF.Float
+		subcontracting_order_cost: DF.Data | None
 	# end: auto-generated types
 
 	pass
