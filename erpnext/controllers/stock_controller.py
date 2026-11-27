@@ -1464,9 +1464,8 @@ def make_bundle_for_material_transfer(**kwargs):
 			bundle_doc.append("entries", entry.as_dict(no_default_fields=True))
 
 	if kwargs.exclude_serial_nos:
-		bundle_doc.entries = [
-			row for row in bundle_doc.entries if row.serial_no not in set(kwargs.exclude_serial_nos)
-		]
+		exclude_serial_nos = set(kwargs.exclude_serial_nos)
+		bundle_doc.entries = [row for row in bundle_doc.entries if row.serial_no not in exclude_serial_nos]
 
 	if kwargs.exclude_batch_qty:
 		remove_batch_qty(bundle_doc, kwargs.exclude_batch_qty)
