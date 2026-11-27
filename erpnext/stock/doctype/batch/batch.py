@@ -13,11 +13,9 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 import erpnext
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	combine_datetime,
-	get_batch_qty_for_stock,
-)
+from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.utils import get_combine_datetime
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
@@ -435,7 +433,7 @@ def make_batch_bundle(
 			{
 				"item_code": item_code,
 				"warehouse": warehouse,
-				"posting_datetime": combine_datetime(today(), nowtime()),
+				"posting_datetime": get_combine_datetime(today(), nowtime()),
 				"voucher_type": "Stock Entry",
 				"qty": qty,
 				"type_of_transaction": type_of_transaction,
@@ -460,7 +458,7 @@ def make_split_serial_bundle(item_code, warehouse, company, from_bundle_id, batc
 			"company": company,
 			"voucher_type": "Stock Entry",
 			"type_of_transaction": "Inward",
-			"posting_datetime": combine_datetime(today(), nowtime()),
+			"posting_datetime": get_combine_datetime(today(), nowtime()),
 			"entries": [
 				{"serial_no": serial_no, "batch_no": batch_no, "qty": 1}
 				for serial_no in get_serial_nos(from_bundle_id)
@@ -527,13 +525,13 @@ def get_pos_reserved_batch_qty(filters: dict | str):
 
 
 def get_available_batches(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		combine_datetime,
-		get_auto_batch_nos,
-	)
+	from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
+	from erpnext.stock.utils import get_combine_datetime
 
 	if kwargs.get("posting_date"):
-		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
+		kwargs["posting_datetime"] = get_combine_datetime(
+			kwargs.get("posting_date"), kwargs.get("posting_time")
+		)
 
 	batchwise_qty = OrderedDict()
 

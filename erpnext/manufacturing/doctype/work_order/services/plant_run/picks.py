@@ -2,11 +2,9 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, now_datetime
 
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_auto_batch_nos,
-	get_available_serial_nos,
-)
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
+from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 from erpnext.stock.utils import get_combine_datetime
 
 

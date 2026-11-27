@@ -203,7 +203,7 @@ class StockLedgerService:
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.serial_batch_bundle import update_batch_qty
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 		from erpnext.stock.stock_ledger import make_sl_entries
 
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
@@ -214,7 +214,7 @@ class StockLedgerService:
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
-		SerialBatchBundleService(self.doc).validate_reserved_batches()
+		SerialBatchValidationService(self.doc).validate_reserved_batches()
 
 	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		from erpnext.controllers.stock_controller import (

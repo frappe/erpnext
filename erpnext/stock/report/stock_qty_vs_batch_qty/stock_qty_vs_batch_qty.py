@@ -7,8 +7,8 @@ import frappe
 from frappe import _
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
 
 
 def execute(filters=None):

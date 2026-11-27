@@ -178,7 +178,7 @@ $.extend(erpnext.utils, {
 				);
 				if (!names.length) return;
 				const numbers = await frappe.xcall(
-					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
+					"erpnext.stock.doctype.serial_and_batch_bundle.api.get_serial_batch_numbers",
 					{ item_code, doctype, names }
 				);
 				for (const [name, number] of Object.entries(numbers)) {

@@ -275,7 +275,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				this.bundle
 			)}`;
 		} else {
-			url = `/api/method/erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.download_blank_csv_template?content=${encodeURIComponent(
+			url = `/api/method/erpnext.stock.doctype.serial_and_batch_bundle.csv_import.download_blank_csv_template?content=${encodeURIComponent(
 				JSON.stringify(this.get_csv_columns())
 			)}`;
 		}
@@ -296,7 +296,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 	async import_csv_file(file_url) {
 		let [serials, batches] = await this.call(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.read_serial_batch_csv",
+			"erpnext.stock.doctype.serial_and_batch_bundle.csv_import.read_serial_batch_csv",
 			{ file_path: file_url }
 		);
 
@@ -635,19 +635,16 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	}
 
 	async auto_fetch_entries(qty, based_on, warehouse) {
-		let data = await this.call(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_auto_data",
-			{
-				item_code: this.item_code,
-				warehouse: warehouse,
-				has_serial_no: this.item.has_serial_no,
-				has_batch_no: this.item.has_batch_no,
-				qty: qty,
-				based_on: based_on,
-				posting_date: this.frm.doc.posting_date,
-				posting_time: this.frm.doc.posting_time,
-			}
-		);
+		let data = await this.call("erpnext.stock.doctype.serial_and_batch_bundle.api.get_auto_data", {
+			item_code: this.item_code,
+			warehouse: warehouse,
+			has_serial_no: this.item.has_serial_no,
+			has_batch_no: this.item.has_batch_no,
+			qty: qty,
+			based_on: based_on,
+			posting_date: this.frm.doc.posting_date,
+			posting_time: this.frm.doc.posting_time,
+		});
 
 		if (!data || !data.length) {
 			frappe.msgprint(

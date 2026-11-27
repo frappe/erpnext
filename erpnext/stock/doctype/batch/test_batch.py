@@ -131,12 +131,10 @@ class TestBatch(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
-		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
 		)
+		from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 
 		invoice_type = frappe.db.get_single_value("POS Settings", "invoice_type")
 		session_user = frappe.session.user
@@ -455,7 +453,7 @@ class TestBatch(ERPNextTestSuite):
 
 	def test_expired_packed_item_batch_cannot_be_delivered(self):
 		from erpnext.exceptions import BatchExpiredError
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		receipt = self.test_purchase_receipt(10)
 		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
@@ -476,7 +474,7 @@ class TestBatch(ERPNextTestSuite):
 		row.serial_and_batch_bundle = None
 
 		self.assertRaises(
-			BatchExpiredError, SerialBatchBundleService(delivery_note).validate_outward_bundle_batches
+			BatchExpiredError, SerialBatchValidationService(delivery_note).validate_outward_bundle_batches
 		)
 
 	def test_batch_stock_endpoints_need_batch_access(self):

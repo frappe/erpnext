@@ -364,8 +364,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
-		sbb = SerialBatchBundleService(self)
+		validation = SerialBatchValidationService(self)
 
 		self.validate_reference_companies()
 		self.validate_row_reference_parents()
@@ -375,7 +376,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# rows of every purpose count towards the Material Request
 		MaterialRequestStockEntry(self).validate_material_request()
 		self.validate_warehouses_company()
-		sbb.validate_duplicate_serial_and_batch_bundle("items")
+		validation.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		MaterialTransferStockEntry(self).validate_posting_datetime_with_outgoing_entry()
 		if self.purpose == "Disassemble":
@@ -390,7 +391,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
-		sbb.validate_warehouse_of_sabb()
+		validation.validate_warehouse_of_sabb()
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.validate_company_in_accounting_dimension()
@@ -431,12 +432,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_difference_account()
 		self.validate_job_card_item()
 		self.set_purpose_for_stock_entry()
-		sbb.clean_serial_nos()
+		SerialBatchBundleService(self).clean_serial_nos()
 		self.remove_fg_completed_qty()
 		if self.docstatus == 1:
 			StockEntrySABB(self).make_serial_and_batch_bundle_for_outward()
 
-		sbb.validate_serialized_batch()
+		validation.validate_serialized_batch()
 		self.calculate_rate_and_amount()
 		validate_putaway_capacity(self)
 		self.validate_closed_subcontracting_order()
