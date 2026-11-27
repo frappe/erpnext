@@ -3247,6 +3247,7 @@ class TestSalesOrder(ERPNextTestSuite):
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
+			get_payment_entry,
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
@@ -3255,6 +3256,11 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
+		pe = get_payment_entry("Sales Order", so.name, party_amount=400)
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.submit()
+
 		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
@@ -3262,6 +3268,7 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
+		self.assertFalse(any(term.paid_amount for term in si.payment_schedule))
 
 	def test_zero_amount_sales_order_billing_status(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
