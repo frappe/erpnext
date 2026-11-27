@@ -51,7 +51,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_batch_qty_for_stock,
 	get_type_of_transaction,
 )
-from erpnext.stock.stock_ledger import get_items_to_be_repost
+from erpnext.stock.stock_ledger import get_items_to_be_repost, get_next_stock_reco
 
 # Purposes whose inward (t_warehouse) row is inspected.
 QI_INCOMING_PURPOSES = (
@@ -2426,12 +2426,14 @@ class StockController(AccountsController):
 		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self):
 			item_based_reposting = frappe.get_single_value("Stock Reposting Settings", "item_based_reposting")
 			if item_based_reposting:
-				create_item_wise_repost_entries(
+				repost_entries = create_item_wise_repost_entries(
 					voucher_type=self.doctype,
 					voucher_no=self.name,
 					via_landed_cost_voucher=via_landed_cost_voucher,
 					skip_unchanged_entries=True,
 				)
+				if force and not repost_entries and self.docstatus == 1:
+					create_accounting_repost_entry(self.doctype, self.name)
 			else:
 				create_repost_item_valuation_entry(args)
 
@@ -3317,7 +3319,10 @@ def create_item_wise_repost_entries(
 ):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
+	from erpnext.stock.utils import get_valuation_method
+
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
+	company, docstatus = frappe.db.get_value(voucher_type, voucher_no, ["company", "docstatus"])
 
 	distinct_item_warehouses = set()
 	repost_entries = []
@@ -3327,6 +3332,15 @@ def create_item_wise_repost_entries(
 		if item_wh in distinct_item_warehouses:
 			continue
 		distinct_item_warehouses.add(item_wh)
+
+		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
+		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
+		# A later Stock Reconciliation keeps its counted balance, so its stock value difference and
+		# GL depend on the shifted balance before it; only the repost recomputes those.
+		if get_valuation_method(sle.item_code, company) == "Standard Cost" and not get_next_stock_reco(
+			frappe._dict(sle, voucher_no=voucher_no, is_cancelled=docstatus == 2)
+		):
+			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
 		repost_entry.based_on = "Item and Warehouse"
@@ -3344,6 +3358,23 @@ def create_item_wise_repost_entries(
 		repost_entries.append(repost_entry)
 
 	return repost_entries
+
+
+def create_accounting_repost_entry(voucher_type, voucher_no):
+	repost_entry = frappe.new_doc("Repost Item Valuation")
+	repost_entry.based_on = "Transaction"
+	repost_entry.voucher_type = voucher_type
+	repost_entry.voucher_no = voucher_no
+	repost_entry.update(
+		frappe.db.get_value(
+			voucher_type, voucher_no, ["company", "posting_date", "posting_time"], as_dict=True
+		)
+	)
+	repost_entry.repost_only_accounting_ledgers = 1
+	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
+	repost_entry.submit()
+	return repost_entry
 
 
 def make_bundle_for_material_transfer(**kwargs):

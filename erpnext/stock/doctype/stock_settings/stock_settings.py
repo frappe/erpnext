@@ -71,7 +71,7 @@ class StockSettings(Document):
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
 		validate_material_transfer_warehouses: DF.Check
-		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
+		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO", "Standard Cost"]
 	# end: auto-generated types
 
 	def validate(self):
