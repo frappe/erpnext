@@ -549,11 +549,14 @@ def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
 		out.update(_get_bin_details(ctx.item_code, ctx.from_warehouse if is_permitted else None))
 
 	elif out.get("warehouse"):
-		bin_details = _get_bin_details(
-			ctx.item_code, out.warehouse, ctx.company, include_child_warehouses=True
-		)
+		company = ctx.company if needs_company_total_stock(ctx) else None
+		bin_details = _get_bin_details(ctx.item_code, out.warehouse, company, include_child_warehouses=True)
 
 		out.update(bin_details)
+
+
+def needs_company_total_stock(ctx: frappe._dict):
+	return not ctx.child_doctype or frappe.get_meta(ctx.child_doctype).has_field("company_total_stock")
 
 
 def get_item_code(barcode=None, serial_no=None):
