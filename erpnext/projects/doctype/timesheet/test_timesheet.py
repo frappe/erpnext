@@ -105,6 +105,34 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(timesheet.exchange_rate, 1)
 		self.assertEqual(timesheet.base_total_costing_amount, timesheet.total_costing_amount)
 
+	def test_foreign_currency_timesheet_gets_the_exchange_rate_on_its_start_date(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"employee": emp,
+				"currency": "USD",
+				"time_logs": [
+					{
+						"activity_type": "_Test Activity Type",
+						"from_time": "2026-09-25 10:00:00",
+						"hours": 2,
+						"costing_rate": 6,
+					}
+				],
+			}
+		)
+
+		def get_exchange_rate(from_currency, to_currency, transaction_date=None, *args):
+			return 80 if str(transaction_date) == "2026-09-25" else 62.9
+
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", get_exchange_rate):
+			timesheet.insert()
+
+		self.assertEqual(timesheet.exchange_rate, 80)
+		self.assertEqual(timesheet.base_total_costing_amount, 960)
+
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
