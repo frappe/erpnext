@@ -195,6 +195,45 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.exchange_rate, 1)
 		self.assertEqual(timesheet.base_total_costing_amount, timesheet.total_costing_amount)
 
+	def test_currency_change_keeps_the_worth_of_the_rates(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+		self.assertEqual(timesheet.base_total_billable_amount, 100)
+
+		# 50 and 20 INR a hour become 25 and 10 USD at 2 INR a USD
+		timesheet.currency = "USD"
+		timesheet.exchange_rate = 2
+		timesheet.save()
+
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 25)
+		self.assertEqual(timesheet.time_logs[0].costing_rate, 10)
+		self.assertEqual(timesheet.total_billable_amount, 50)
+		self.assertEqual(timesheet.base_total_billable_amount, 100)
+		self.assertEqual(timesheet.base_total_costing_amount, 40)
+
+		# and the same INR rates again on the way back
+		timesheet.currency = "INR"
+		timesheet.save()
+
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 50)
+		self.assertEqual(timesheet.time_logs[0].costing_rate, 20)
+		self.assertEqual(timesheet.base_total_billable_amount, 100)
+
+	def test_currency_change_keeps_a_rate_set_in_the_new_currency(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+
+		timesheet.currency = "USD"
+		timesheet.exchange_rate = 2
+		timesheet.time_logs[0].billing_rate = 30
+		timesheet.save()
+
+		# only the costing rate was left as it was
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 30)
+		self.assertEqual(timesheet.time_logs[0].costing_rate, 10)
+		self.assertEqual(timesheet.base_total_billable_amount, 120)
+		self.assertEqual(timesheet.base_total_costing_amount, 40)
+
 	def test_foreign_currency_timesheet_gets_the_exchange_rate_on_its_start_date(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = frappe.get_doc(
