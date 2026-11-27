@@ -89,12 +89,15 @@ class Timesheet(Document):
 
 	def set_exchange_rate(self):
 		"""A company currency Timesheet always has rate 1. A foreign one without a rate gets
-		the rate on its start date. A rate that is set, 1 included, is kept."""
+		the rate on its start date. A set rate is kept, but 1 only while a rate exists:
+		drafts used to get 1 when none was found."""
 		company_currency = self.get_company_currency()
 		if not self.currency or self.currency == company_currency:
 			self.exchange_rate = 1
-		elif not flt(self.exchange_rate):
-			self.exchange_rate = get_exchange_rate(self.currency, company_currency, self.start_date)
+		elif flt(self.exchange_rate) in (0, 1):
+			rate = get_exchange_rate(self.currency, company_currency, self.start_date)
+			if not rate or not flt(self.exchange_rate):
+				self.exchange_rate = rate
 
 	def validate_exchange_rate(self):
 		if not flt(self.exchange_rate):
