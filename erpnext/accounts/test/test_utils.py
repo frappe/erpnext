@@ -171,8 +171,8 @@ class TestUtils(ERPNextTestSuite):
 		payment_reconciliation.get_unreconciled_entries()
 		payment_reconciliation.allocate_entries(
 			{
-				"payments": [d.__dict__ for d in payment_reconciliation.payments],
-				"invoices": [d.__dict__ for d in payment_reconciliation.invoices],
+				"payments": [d.as_dict() for d in payment_reconciliation.payments],
+				"invoices": [d.as_dict() for d in payment_reconciliation.invoices],
 			}
 		)
 		for d in payment_reconciliation.invoices:
@@ -185,6 +185,121 @@ class TestUtils(ERPNextTestSuite):
 		payment_entry.load_from_db()
 		self.assertEqual(len(payment_entry.references), 1)
 		self.assertEqual(payment_entry.difference_amount, 0)
+
+	def test_update_reference_in_payment_entry_exceeding_allocated_amount(self):
+		from erpnext.accounts.utils import update_reference_in_payment_entry
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Receive"
+		pe.party_type = "Customer"
+		pe.party = "_Test Customer"
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Sales Order",
+				"reference_name": "SO-0001",
+				"allocated_amount": 100,
+				"name": "ref-1",
+			},
+		)
+		entry = frappe._dict(
+			{
+				"voucher_detail_no": "ref-1",
+				"against_voucher_type": "Sales Invoice",
+				"against_voucher": "ACC-SINV-0001",
+				"allocated_amount": 150,
+			}
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			update_reference_in_payment_entry,
+			entry,
+			pe,
+			do_not_save=True,
+		)
+
+	def test_update_reference_in_payment_entry_three_decimal_split(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		from erpnext.accounts.utils import update_reference_in_payment_entry
+
+		ps = make_property_setter("Payment Entry Reference", "allocated_amount", "precision", 3, "Currency")
+		frappe.clear_cache(doctype="Payment Entry Reference")
+		try:
+			pe = frappe.new_doc("Payment Entry")
+			pe.payment_type = "Receive"
+			pe.party_type = "Customer"
+			pe.party = "_Test Customer"
+			pe.party_account_currency = "BHD"
+			pe.paid_from_account_currency = "BHD"
+			pe.paid_to_account_currency = "BHD"
+			pe.paid_amount = 100.0
+			pe.received_amount = 100.0
+			pe.target_exchange_rate = 1.0
+			pe.source_exchange_rate = 1.0
+			pe.append(
+				"references",
+				{
+					"reference_doctype": "Sales Order",
+					"reference_name": "SO-0001",
+					"allocated_amount": 100.0,
+					"name": "ref-split-1",
+				},
+			)
+
+			entry_1 = frappe._dict(
+				{
+					"voucher_detail_no": "ref-split-1",
+					"against_voucher_type": "Sales Invoice",
+					"against_voucher": "ACC-SINV-0001",
+					"allocated_amount": 99.999,
+				}
+			)
+			update_reference_in_payment_entry(
+				entry_1, pe, do_not_save=True, skip_ref_details_update_for_pe=True
+			)
+
+			existing_row = pe.get("references", {"name": "ref-split-1"})[0]
+			self.assertEqual(existing_row.allocated_amount, 0.001)
+
+			entry_2 = frappe._dict(
+				{
+					"voucher_detail_no": "ref-split-1",
+					"against_voucher_type": "Sales Invoice",
+					"against_voucher": "ACC-SINV-0002",
+					"allocated_amount": 0.001,
+				}
+			)
+			update_reference_in_payment_entry(
+				entry_2, pe, do_not_save=True, skip_ref_details_update_for_pe=True
+			)
+			self.assertEqual(len(pe.references), 2)
+			self.assertEqual(
+				[(r.reference_name, r.allocated_amount) for r in pe.references],
+				[("ACC-SINV-0001", 99.999), ("ACC-SINV-0002", 0.001)],
+			)
+		finally:
+			ps.delete()
+			frappe.clear_cache(doctype="Payment Entry Reference")
+
+	def test_update_reference_in_payment_entry_missing_row_raises_refresh_hint(self):
+		from erpnext.accounts.utils import update_reference_in_payment_entry
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Receive"
+		pe.party_type = "Customer"
+		pe.party = "_Test Customer"
+		entry = frappe._dict(
+			{
+				"voucher_detail_no": "non-existent-row",
+				"against_voucher_type": "Sales Invoice",
+				"against_voucher": "ACC-SINV-0001",
+				"allocated_amount": 50,
+			}
+		)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			update_reference_in_payment_entry(entry, pe, do_not_save=True)
+		self.assertIn("refresh the reconciliation", str(cm.exception))
 
 	def test_naming_series_variable_parsing(self):
 		"""
