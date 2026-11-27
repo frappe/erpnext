@@ -2436,6 +2436,28 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.docstatus, 1)
 
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_packed_row_on_batch_fields_rejects_an_expired_batch(self):
+		from erpnext.controllers.stock_controller import BatchExpiredError
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TPFE-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		se = make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
+
+		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
+		dn.packed_items[0].batch_no = batch_no
+		self.assertRaises(BatchExpiredError, dn.save)
+
 	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
