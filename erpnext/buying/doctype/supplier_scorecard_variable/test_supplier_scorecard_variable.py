@@ -23,6 +23,7 @@ from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_varia
 	get_total_days_late,
 	get_total_workdays,
 )
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -62,6 +63,70 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 			receipt.items[0].received_qty = received
 			receipt.items[0].stock_qty = received
 			receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
+	def test_on_time_receipt_with_rejected_qty_counts_as_on_time(self):
+		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=10, rate=100)
+		receipt = make_purchase_receipt(po.name)
+		receipt.items[0].qty = 8
+		receipt.items[0].rejected_qty = 2
+		receipt.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
+	def test_on_time_receipt_is_compared_in_stock_qty(self):
+		# 2 boxes of 2999.5 received against 2 boxes of 3000 ordered is 1 unit short
+		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=2, rate=100, submit=False)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 3000
+		po.submit()
+		receipt = make_purchase_receipt(po.name)
+		receipt.items[0].conversion_factor = 2999.5
+		receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 0)
+
+	def test_receipts_short_only_by_conversion_rounding_count_as_on_time(self):
+		# factors as set from edited stock qtys (332 and 333.42); the PO shows them fully received
+		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		item_code = make_item(properties={"stock_uom": "Kg"}).name
+		po = create_scorecard_po(
+			supplier, add_days(nowdate(), 5), qty=1467, rate=100, submit=False, item_code=item_code
+		)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 0.45359237
+		po.submit()
+		for qty, conversion_factor in ((733, 0.452933151), (734, 0.454250681)):
+			receipt = make_purchase_receipt(po.name)
+			receipt.items[0].qty = qty
+			receipt.items[0].conversion_factor = conversion_factor
+			receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
+	def test_short_receipt_rounding_to_ordered_stock_qty_is_late(self):
+		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=1000, rate=100, submit=False)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 0.001
+		po.submit()
+		receipt = make_purchase_receipt(po.name)
+		receipt.items[0].qty = 996
+		receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1})
+	def test_on_time_receipt_against_unit_price_line_counts_as_on_time(self):
+		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=0, rate=100)
+		receipt = make_purchase_receipt(po.name)
+		receipt.items[0].qty = 5
+		receipt.submit()
 
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
@@ -141,9 +206,16 @@ def create_scorecard_supplier(supplier_name):
 	return supplier_name
 
 
-def create_scorecard_po(supplier, schedule_date, transaction_date=None, qty=10, rate=100, submit=True):
+def create_scorecard_po(
+	supplier, schedule_date, transaction_date=None, qty=10, rate=100, submit=True, item_code=None
+):
 	po = create_purchase_order(
-		supplier=supplier, transaction_date=transaction_date, qty=qty, rate=rate, do_not_save=True
+		supplier=supplier,
+		item_code=item_code,
+		transaction_date=transaction_date,
+		qty=qty,
+		rate=rate,
+		do_not_save=True,
 	)
 	po.schedule_date = schedule_date
 	po.items[0].schedule_date = schedule_date
