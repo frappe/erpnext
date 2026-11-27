@@ -1543,6 +1543,27 @@ class TestPickList(FrappeTestCase):
 
 		pick_list.reload()
 		self.assertEqual(pick_list.status, "Partially Transferred")
+		holds = {
+			row.item_code: row.picked_qty
+			for row in frappe.new_doc("Pick List")._get_pick_list_items(
+				[_dict(item_code=over_transferred), _dict(item_code=pending)]
+			)
+		}
+		self.assertEqual(holds, {over_transferred: 0, pending: 5})
+
+		other_work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=20,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="_Test Warehouse 1 - _TC",
+		)
+		next_pick_list = create_pick_list_from_work_order(other_work_order.name, None, 20)
+		self.assertEqual(
+			{row.item_code: row.stock_qty for row in next_pick_list.locations},
+			{over_transferred: 5, pending: 10},
+		)
+		next_pick_list.submit()
 
 	def test_picklist_reserved_qty_validation(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
