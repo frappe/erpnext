@@ -190,6 +190,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.validate_inspection()
 			self.validate_purchase_orders_share_terms()
 			self.validate_additional_cost_accounts()
+			self.validate_order_costs_are_not_repeated()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be future date"))
@@ -907,6 +908,21 @@ class SubcontractingReceipt(SubcontractingController):
 			if work_order := work_orders.get(row.job_card):
 				qty[work_order][row.name] = flt(row.qty) + flt(row.process_loss_qty)
 		return qty
+
+	def validate_order_costs_are_not_repeated(self):
+		"""Each order cost row is recomputed in full, so it can be mapped only once."""
+		seen = set()
+		for row in self.get("additional_costs"):
+			if not row.subcontracting_order_cost:
+				continue
+			if row.subcontracting_order_cost in seen:
+				frappe.throw(
+					_(
+						"Row #{0}: This Additional Costs row repeats a cost of the Subcontracting Order. Remove it."
+					).format(row.idx),
+					title=_("Duplicate Additional Cost"),
+				)
+			seen.add(row.subcontracting_order_cost)
 
 	def set_order_additional_costs(self):
 		"""Give each cost row mapped from a Subcontracting Order its share of what the order's row has left."""
