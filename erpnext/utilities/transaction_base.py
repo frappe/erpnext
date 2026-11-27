@@ -572,13 +572,14 @@ class TransactionBase(StatusUpdater):
 			item_obj.stock_uom_rate = flt(item_obj.rate) / flt(item_obj.conversion_factor)
 
 	def set_item_rate_and_discounts(self, item_obj: object, item_details: dict) -> None:
-		effective_item_rate = item_details.price_list_rate
-		item_rate = item_details.rate
+		# Deferred import avoids circular import with accounts_controller -> blanket_order_pricing on v16
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order_pricing import (
+			get_effective_base_rate,
+		)
 
 		# Field order precedance
 		# blanket_order_rate -> margin_type -> discount_percentage -> discount_amount
-		if item_obj.parenttype in ["Sales Order", "Quotation"] and item_obj.blanket_order_rate:
-			effective_item_rate = flt(item_obj.blanket_order_rate) * (flt(item_obj.conversion_factor) or 1)
+		effective_item_rate = get_effective_base_rate(item_obj, item_details.price_list_rate)
 
 		if item_obj.margin_type == "Percentage":
 			item_obj.rate_with_margin = flt(effective_item_rate) + flt(effective_item_rate) * (
