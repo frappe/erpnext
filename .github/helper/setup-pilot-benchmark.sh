@@ -36,11 +36,10 @@ fi
 if [ "${DB:-}" = postgres ]; then
     curl -fsSL https://raw.githubusercontent.com/frappe/pilot/develop/install.sh | sh -s -- --ci
 else
+    # Patch only needs the CLI. Redis and Frappe run directly during migrations.
     mkdir -p "$HOME/pilot"
-curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
-    | tar -xz -C "$HOME/pilot"
-uv venv "$HOME/pilot/.admin-venv"
-uv pip install --python "$HOME/pilot/.admin-venv/bin/python" -r "$HOME/pilot/pyproject.toml" --extra admin
+    curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
+        | tar -xz -C "$HOME/pilot"
 fi
 
 pilot new frappe-bench --frappe-branch "$frappebranch" --database "$DB" --admin-password 'PilotAdmin123!'
