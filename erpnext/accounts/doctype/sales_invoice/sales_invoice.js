@@ -18,7 +18,19 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.frm.make_methods = {
 			Dunning: this.make_dunning.bind(this),
 			"Invoice Discounting": this.make_invoice_discounting.bind(this),
+			"Payment Entry": () => this.make_payment_entry(),
 		};
+		this.frm.can_make_methods = { "Payment Entry": () => this.can_record_payment() };
+	}
+	can_record_payment() {
+		const doc = this.frm.doc;
+		return doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry");
+	}
+	add_record_payment_button() {
+		if (!this.can_record_payment()) return;
+		const label = this.frm.doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
+		this.frm.add_custom_button(label, () => this.make_payment_entry());
+		this.frm.change_custom_button_type(label, null, "primary");
 	}
 	company() {
 		super.company();
@@ -94,10 +106,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
-			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
-			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
-		}
+		const can_record_payment = this.can_record_payment();
 
 		if (doc.docstatus == 1 && !doc.is_return) {
 			var is_delivered_by_supplier = false;
@@ -115,7 +124,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					this.make_sales_return.bind(this),
 					__("Create")
 				);
-				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+				if (!can_record_payment) {
+					this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+				}
 			}
 
 			if (cint(doc.update_stock) != 1 && frappe.model.can_create("Delivery Note")) {
@@ -172,6 +183,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				);
 			}
 		}
+
 		this.toggle_get_items();
 
 		this.set_default_print_format();
@@ -186,7 +198,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			);
 		}
 
-		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
+		Promise.resolve(erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm)).then(() =>
+			this.add_record_payment_button()
+		);
 
 		if (this.frm.doc.is_created_using_pos && !this.frm.doc.is_return) {
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
@@ -853,7 +867,6 @@ frappe.ui.form.on("Sales Invoice", {
 			"Delivery Note": "Delivery",
 			"Sales Invoice": "Return / Credit Note",
 			"Payment Request": "Payment Request",
-			"Payment Entry": "Payment",
 		};
 
 		frm.set_query("time_sheet", "timesheets", function (doc, cdt, cdn) {

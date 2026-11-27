@@ -6,6 +6,7 @@ frappe.listview_settings["Purchase Invoice"] = {
 	add_fields: [
 		"supplier",
 		"supplier_name",
+		"credit_to",
 		"base_grand_total",
 		"outstanding_amount",
 		"due_date",
@@ -53,7 +54,7 @@ frappe.listview_settings["Purchase Invoice"] = {
 
 		if (frappe.model.can_create("Payment Entry")) {
 			listview.page.add_action_item(__("Payment"), () => {
-				erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment Entry");
+				erpnext.accounts.RecordPaymentDialog.record_from_list(listview);
 			});
 		}
 	},
