@@ -168,7 +168,7 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 	set_queries(frm) {
 		frm.set_query("item_code", () => {
 			return {
-				query: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.item_query",
+				query: "erpnext.stock.doctype.serial_and_batch_bundle.api.item_query",
 			};
 		});
 

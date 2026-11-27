@@ -15,14 +15,11 @@ frappe.ui.form.on("Quality Inspection", {
 		if (!frm.is_new() || !item_code || !number) return;
 
 		return frappe
-			.xcall(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_scan",
-				{
-					item_code,
-					number,
-					doctype: "Serial No",
-				}
-			)
+			.xcall("erpnext.stock.doctype.serial_and_batch_bundle.api.get_serial_batch_scan", {
+				item_code,
+				number,
+				doctype: "Serial No",
+			})
 			.then((record) => {
 				frm.doc.item_serial_no = record?.name || number;
 			})

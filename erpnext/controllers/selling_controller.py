@@ -502,6 +502,7 @@ class SellingController(StockController):
 	def make_packed_item_bundles(self):
 		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		service = SerialBatchBundleService(self)
 		packed_rows = [p for p in service.get_current_packed_rows() if not p.serial_and_batch_bundle]
@@ -517,8 +518,9 @@ class SellingController(StockController):
 			)
 
 		# validate ran before these bundles existed
-		if service.is_batch_check_needed():
-			service.validate_outward_bundle_batches(rows=packed_rows)
+		validation = SerialBatchValidationService(self)
+		if validation.is_batch_check_needed():
+			validation.validate_outward_bundle_batches(rows=packed_rows)
 
 	def get_item_list(self):
 		il = []
