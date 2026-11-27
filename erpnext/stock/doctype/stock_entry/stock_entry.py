@@ -756,11 +756,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 			),
 		)
 		costed_out_items = [d for d in finished_items_last if self.is_costed_out(d)]
+		# Manual rates are kept unless earlier entries consumed part of this entry's share
+		manufacture = ManufactureStockEntry(self) if has_running_total_share else None
+		is_short = bool(manufacture and manufacture.is_short_of_raw_material_share())
+		if is_short:
+			# a rate capped on an earlier save goes back up when the consumed cost rises
+			manufacture.set_manual_secondary_rates_from_bom(costed_out_items)
+
 		for d in costed_out_items:
 			self._set_incoming_item_rate(d, *rate_args)
 
-		# Manual rates are kept unless earlier entries consumed part of this entry's share
-		if has_running_total_share and ManufactureStockEntry(self).is_short_of_raw_material_share():
+		if is_short:
 			self.cap_costed_out_items(costed_out_items, outgoing_items_cost)
 
 		for d in finished_items_last:

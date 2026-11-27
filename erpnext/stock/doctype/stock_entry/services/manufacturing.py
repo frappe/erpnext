@@ -1229,12 +1229,18 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.valuation_type = bom_row.get("valuation_type")
 			if row.valuation_type == "Manual":
 				row.set_basic_rate_manually = 1
-				row.basic_rate = (
-					flt(bom_row.base_cost) / flt(bom_row.stock_qty) if flt(bom_row.get("stock_qty")) else 0
-				)
+				row.basic_rate = get_manual_secondary_rate(bom_row)
 			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
+
+	def set_manual_secondary_rates_from_bom(self, rows):
+		"""Set Manual secondary rows to the rate of the BOM row they were mapped from."""
+		manual_rows = [d for d in rows if d.valuation_type == "Manual" and d.bom_secondary_item]
+		bom_rows = self.get_bom_secondary_item_details(manual_rows)
+		for d in manual_rows:
+			if bom_row := bom_rows.get(d.bom_secondary_item):
+				d.basic_rate = get_manual_secondary_rate(bom_row)
 
 	def get_bom_secondary_item_details(self, secondary_items) -> dict:
 		names = [row.bom_secondary_item for row in secondary_items if row.bom_secondary_item]
@@ -1593,6 +1599,11 @@ def _run_bom_items_query(bom_no, table_name, qty):
 		.orderby(doctype.idx)
 	)
 	return _add_bom_table_specific_fields(query, doctype, table_name).run(as_dict=1)
+
+
+def get_manual_secondary_rate(bom_row) -> float:
+	"""Rate per stock unit of a Manual BOM secondary row, in the company currency."""
+	return flt(bom_row.base_cost) / flt(bom_row.stock_qty) if flt(bom_row.stock_qty) else 0.0
 
 
 def _add_bom_table_specific_fields(query, doctype, table_name):
