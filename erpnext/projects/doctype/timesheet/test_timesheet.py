@@ -223,6 +223,15 @@ class TestTimesheet(ERPNextTestSuite):
 			self.assertEqual(timesheet.base_total_costing_amount, 0)
 			self.assertRaises(frappe.ValidationError, timesheet.submit)
 
+	def test_draft_needing_an_activity_cost_saves_without_an_exchange_rate(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		update_activity_type("_Test Activity Type")
+		timesheet = make_usd_timesheet(emp)
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", return_value=0):
+			timesheet.insert()
+			self.assertEqual(timesheet.time_logs[0].costing_rate, 0)
+			self.assertRaises(frappe.ValidationError, timesheet.submit)
+
 	def test_amounts_follow_the_rates_without_an_activity_type(self):
 		from_time = now_datetime()
 		timesheet = frappe.get_doc(
