@@ -674,6 +674,29 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		self.assertRaisesRegex(frappe.ValidationError, "returns took back", transfer.cancel)
 
+	def test_transfer_of_a_consumed_batch_cannot_be_cancelled_while_another_batch_is_sent(self):
+		"""Batch X is sent for FG A and batch Y for FG B, a receipt of FG A consumes X, and the supplier holds X of another order."""
+		set_backflush_based_on("Material Transferred for Subcontract")
+		rm_item = make_item(
+			"Subcontracted Batch RM Item For Cancel",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SCOCB-.####",
+			},
+		).name
+		sco = get_order_for_finished_goods("Cancel Batch", rm_item, (5, 5))
+		batch_x = send_serial_batch(sco, sco.supplied_items[0], batch_no=True)
+		transfer = frappe.get_last_doc("Stock Entry", {"subcontracting_order": sco.name})
+		send_serial_batch(sco, sco.supplied_items[1], batch_no=True)
+		make_receipt_for_finished_good(sco, sco.items[0].item_code).submit()
+		make_stock_entry(
+			item_code=rm_item, target=sco.supplier_warehouse, qty=5, basic_rate=100, batch_no=batch_x
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "of Batch", transfer.cancel)
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
