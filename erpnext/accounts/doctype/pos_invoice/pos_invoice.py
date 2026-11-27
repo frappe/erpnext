@@ -838,7 +838,7 @@ class POSInvoice(SalesInvoice):
 			update_multi_mode_option(self, pos_profile)
 			self.paid_amount = 0
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def create_payment_request(self):
 		for pay in self.payments:
 			if pay.type == "Phone":
@@ -853,6 +853,7 @@ class POSInvoice(SalesInvoice):
 					pay_req = self.get_new_payment_request(pay)
 					pay_req.submit()
 				else:
+					pay_req.check_permission("email")
 					pay_req.request_phone_payment()
 
 				return pay_req
