@@ -71,14 +71,20 @@ class TimesheetDetail(Document):
 		if flt(self.billing_hours) == 0.0:
 			self.billing_hours = self.hours
 
-	def update_cost(self, employee: str, currency: str | None = None, exchange_rate: float = 1.0):
+	def update_cost(
+		self,
+		employee: str,
+		currency: str | None = None,
+		exchange_rate: float = 1.0,
+		transaction_date: str | None = None,
+	):
 		"""Fill missing rates from the activity cost, then amounts from the rates."""
 		from erpnext.projects.doctype.timesheet.timesheet import _get_activity_cost
 
 		self.update_billing_hours()
 		needs_rate = not flt(self.costing_rate) or (self.is_billable and not flt(self.billing_rate))
 		rate = (
-			_get_activity_cost(employee, self.activity_type, currency)
+			_get_activity_cost(employee, self.activity_type, currency, transaction_date)
 			if self.activity_type and needs_rate
 			else {}
 		)
