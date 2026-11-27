@@ -744,25 +744,27 @@ class StockEntry(StockController, SubcontractingInwardController):
 			has_consumption_basis,
 			secondary_items_cost_basis,
 		)
-		costed_out_items = [d for d in self.get("items") if is_costed_out_of_finished_item(d)]
+		# Own-cost rows first, then sub-assembly percentage rows, inner BOMs first: their value is
+		# deducted from the basis the outer BOMs' rows and the finished good split.
+		finished_items_last = sorted(
+			self.get("items"),
+			key=lambda row: (
+				cint(row.is_finished_item),
+				cint(not self.is_costed_out(row)),
+				cint(not is_costed_out_of_finished_item(row)),
+				self.count_secondary_items_under(row),
+			),
+		)
+		costed_out_items = [d for d in finished_items_last if self.is_costed_out(d)]
 		for d in costed_out_items:
 			self._set_incoming_item_rate(d, *rate_args)
 
 		if has_running_total_share:
 			self.cap_costed_out_items(costed_out_items, outgoing_items_cost)
 
-		# Sub-assembly percentage rows next, inner BOMs first: their value is deducted from the
-		# basis the outer BOMs' rows and the finished good split.
-		finished_items_last = sorted(
-			(d for d in self.get("items") if not is_costed_out_of_finished_item(d)),
-			key=lambda row: (
-				cint(row.is_finished_item),
-				cint(not self.is_costed_out(row)),
-				self.count_secondary_items_under(row),
-			),
-		)
 		for d in finished_items_last:
-			self._set_incoming_item_rate(d, *rate_args)
+			if not self.is_costed_out(d):
+				self._set_incoming_item_rate(d, *rate_args)
 
 		if zero_valuation_items:
 			self._notify_zero_valuation_rate(zero_valuation_items)
