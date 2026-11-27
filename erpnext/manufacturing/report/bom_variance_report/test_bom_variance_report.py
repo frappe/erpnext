@@ -5,12 +5,8 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
 
-<<<<<<< HEAD
-=======
-from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry, make_stock_return_entry
->>>>>>> 3a83423 (test(manufacturing): bom variance with raw material returned from wip)
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry, make_stock_return_entry
 from erpnext.manufacturing.report.bom_variance_report.bom_variance_report import execute, get_work_orders
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite

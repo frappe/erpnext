@@ -6,15 +6,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-<<<<<<< HEAD
-=======
-from erpnext.manufacturing.doctype.work_order.services.required_items import (
+from erpnext.manufacturing.doctype.work_order.work_order import (
 	distribute_over_rows,
 	get_consumed_qty_by_work_order,
 )
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
->>>>>>> 2bb2f35 (fix(manufacturing): read bom variance consumed qty from stock entries)
 
 def execute(filters=None):
 	columns, data = [], []
