@@ -56,6 +56,9 @@ cd "$HOME/pilot/benches/frappe-bench"
 
 pilot get-app https://github.com/frappe/payments --branch develop --skip-assets
 
+git config --global --add safe.directory "$GITHUB_WORKSPACE"
+git config --global --add safe.directory "$GITHUB_WORKSPACE/.git"
+
 erpnext_branch=${GITHUB_REF_NAME:-$(git -C "$GITHUB_WORKSPACE" branch --show-current)}
 erpnext_commit=${GITHUB_SHA:-$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)}
 pilot get-app "$GITHUB_WORKSPACE" --branch "$erpnext_branch" --commit "$erpnext_commit" --skip-assets
