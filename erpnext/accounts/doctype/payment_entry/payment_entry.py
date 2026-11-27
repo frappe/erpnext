@@ -3679,7 +3679,7 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 		account_type = "round_off_account" if book_tax_loss else "default_discount_account"
 		account = frappe.get_cached_value("Company", pe.company, account_type)
 
-		if not account:
+		if book_tax_loss and not account:
 			label = frappe.get_meta("Company").get_translated_label(account_type)
 			frappe.throw(
 				_("Please set {0} in Company {1}").format(
