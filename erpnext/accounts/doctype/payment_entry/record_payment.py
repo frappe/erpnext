@@ -64,14 +64,25 @@ class RecordPayment:
 		self.outstanding = sum(abs(flt(row.outstanding_amount)) for row in self.payment_entry.references)
 		self.is_refund = any(flt(row.outstanding_amount) < 0 for row in self.payment_entry.references)
 		self.is_invoice = dt in ("Sales Invoice", "Purchase Invoice")
+		self.has_discount = bool(self.payment_entry.deductions)
 
 		self.set_details()
 		self.set_bank_account()
+		if self.has_discount:
+			return
 		self.set_amounts()
 		self.set_deductions()
 		self.allocate()
 
 	def save(self):
+		if self.has_discount:
+			frappe.throw(
+				_(
+					"An early payment discount applies on this reference date. Use Edit Full Form to record it."
+				),
+				title=_("Early Payment Discount"),
+			)
+
 		payment_entry = self.payment_entry
 		if payment_entry.has_permission("submit") and not get_workflow_name(payment_entry.doctype):
 			payment_entry.submit()

@@ -6,6 +6,7 @@ frappe.listview_settings["Sales Invoice"] = {
 	add_fields: [
 		"customer",
 		"customer_name",
+		"debit_to",
 		"base_grand_total",
 		"outstanding_amount",
 		"due_date",

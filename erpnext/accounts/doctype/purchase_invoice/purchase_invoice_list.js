@@ -6,6 +6,7 @@ frappe.listview_settings["Purchase Invoice"] = {
 	add_fields: [
 		"supplier",
 		"supplier_name",
+		"credit_to",
 		"base_grand_total",
 		"outstanding_amount",
 		"due_date",

@@ -69,7 +69,8 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 	}
 
 	static is_one_party(doctype, invoices) {
-		const party_field = doctype === "Sales Invoice" ? "customer" : "supplier";
+		const [party_field, account_field] =
+			doctype === "Sales Invoice" ? ["customer", "debit_to"] : ["supplier", "credit_to"];
 		const [first] = invoices;
 		return invoices.every(
 			(invoice) =>
@@ -78,7 +79,8 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 				!cint(invoice.on_hold) &&
 				flt(invoice.outstanding_amount) > 0 &&
 				invoice.company === first.company &&
-				invoice[party_field] === first[party_field]
+				invoice[party_field] === first[party_field] &&
+				invoice[account_field] === first[account_field]
 		);
 	}
 
