@@ -50,6 +50,11 @@ def execute(filters=None):
 	return columns, grouped_data
 
 
+def formatter(value, column, data, default_formatter):
+	"""Lets the server build the PDF; the print grid already bolds subtotal rows."""
+	return default_formatter(value, column, data)
+
+
 def get_pos_entries(filters, group_by_field):
 	"""POS sales from POS Invoices and from Sales Invoices made directly at the POS."""
 	entries = get_invoice_entries("POS Invoice", filters, group_by_field)
@@ -130,6 +135,7 @@ def add_subtotal_row(data, group_invoices, group_by_field, group_by_value):
 			group_by_field: group_by_value,
 			"grand_total": grand_total,
 			"paid_amount": paid_amount,
+			"company": group_invoices[0].company,
 			"bold": 1,
 		}
 	)

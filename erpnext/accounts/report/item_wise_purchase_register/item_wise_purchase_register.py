@@ -117,6 +117,11 @@ def _execute(filters=None, additional_table_columns=None):
 	return columns, [row for _item, row in rows], None, None, None, 0
 
 
+def formatter(value, column, data, default_formatter):
+	"""Lets the server build the PDF; the print grid already bolds subtotal rows."""
+	return default_formatter(value, column, data)
+
+
 def get_columns(additional_table_columns, filters):
 	columns = []
 
