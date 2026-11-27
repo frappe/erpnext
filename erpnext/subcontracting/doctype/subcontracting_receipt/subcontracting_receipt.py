@@ -993,22 +993,37 @@ class SubcontractingReceipt(SubcontractingController):
 				& (order_charges.parent == receipt_item.subcontracting_order)
 			)
 		)
+		unlinked = (
+			(receipt.docstatus == 1)
+			& receipt_item.subcontracting_order.isin(orders)
+			& receipt.name.notin(linked_receipts)
+		)
 		costing_qty = receipt_item.qty + receipt_item.rejected_qty + receipt_item.process_loss_qty
-		return dict(
+		booked = (
 			frappe.qb.from_(receipt_item)
 			.inner_join(receipt)
 			.on(receipt.name == receipt_item.parent)
 			.select(
 				receipt_item.subcontracting_order, Sum(costing_qty * receipt_item.additional_cost_per_qty)
 			)
-			.where(
-				(receipt.docstatus == 1)
-				& receipt_item.subcontracting_order.isin(orders)
-				& receipt.name.notin(linked_receipts)
-			)
+			.where(unlinked)
 			.groupby(receipt_item.subcontracting_order)
 			.run()
 		)
+		# costs a receipt gives to one item row, such as Work Order costs, are not the order's
+		targeted_charges = frappe.qb.DocType("Landed Cost Taxes and Charges").as_("targeted_charges")
+		targeted = dict(
+			frappe.qb.from_(targeted_charges)
+			.inner_join(receipt_item)
+			.on(receipt_item.name == targeted_charges.item_row)
+			.inner_join(receipt)
+			.on(receipt.name == targeted_charges.parent)
+			.select(receipt_item.subcontracting_order, Sum(targeted_charges.base_amount))
+			.where(unlinked & (targeted_charges.parenttype == "Subcontracting Receipt"))
+			.groupby(receipt_item.subcontracting_order)
+			.run()
+		)
+		return {order: flt(cost) - flt(targeted.get(order)) for order, cost in booked}
 
 	def get_order_additional_cost_shares(self) -> dict[str, float]:
 		"""Share of each order's pending additional costs that this receipt's qty takes."""
