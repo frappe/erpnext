@@ -1195,7 +1195,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.trigger("set_default_internal_warehouse");
 	}
 
-	add_inter_company_order_button(label, target_doctype, reference_fieldname) {
+	add_inter_company_button(label, target_doctype, reference_fieldname, make_counterpart) {
 		if (!frappe.model.can_create(target_doctype)) return;
 
 		frappe.call({
@@ -1207,26 +1207,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 			callback: (r) => {
 				const received_items = r.message;
-				// An order made from its counterpart links it without item references.
-				const is_made_from_counterpart =
-					this.frm.doc.inter_company_order_reference && $.isEmptyObject(received_items);
+				// A document made from its counterpart links it without item references.
+				const counterpart =
+					this.frm.doc.inter_company_order_reference ||
+					this.frm.doc.inter_company_invoice_reference;
+				const is_made_from_counterpart = counterpart && $.isEmptyObject(received_items);
 				const has_pending_qty = this.frm.doc.items.some(
-					(item) =>
-						!item.closed &&
-						flt(
-							(item.stock_qty - flt(received_items[item.name])) / item.conversion_factor,
-							precision("qty", item)
-						) > 0
+					(item) => !item.closed && this.get_inter_company_pending_qty(item, received_items) > 0
 				);
 				if (is_made_from_counterpart || !has_pending_qty) return;
 
-				this.frm.add_custom_button(
-					label,
-					() => this.make_inter_company_order(this.frm),
-					__("Create")
-				);
+				this.frm.add_custom_button(label, make_counterpart, __("Create"));
 			},
 		});
+	}
+
+	get_inter_company_pending_qty(item, received_items) {
+		// Mirrors get_pending_qty in make_inter_company_transaction.
+		const received_stock_qty = flt(received_items[item.name]);
+		if (!received_stock_qty) return flt(item.qty);
+
+		const pending_stock_qty = flt(item.stock_qty - received_stock_qty, precision("stock_qty", item));
+		return flt(pending_stock_qty / item.conversion_factor, precision("qty", item));
 	}
 
 	set_default_internal_warehouse() {
