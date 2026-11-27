@@ -831,17 +831,24 @@ class SubcontractingReceipt(SubcontractingController):
 	def set_work_order_costs(self):
 		"""Book the costs of a Work Order on the finished goods of its subcontracted final operation."""
 		# the rows are rebuilt on every save, so keep the account a user picked
-		accounts = {
-			(row.work_order, row.item_row, cint(row.has_corrective_cost)): row.expense_account
-			for row in self.get("additional_costs")
-			if row.work_order and row.expense_account
-		}
+		accounts = {}
+		for row in self.get("additional_costs"):
+			if row.work_order and row.expense_account:
+				corrective = cint(row.has_corrective_cost)
+				accounts[(row.work_order, row.item_row, corrective)] = row.expense_account
+				# item rows are renamed on first insert, so their old names do not match
+				accounts.setdefault((row.work_order, corrective), row.expense_account)
+
 		self.set("additional_costs", [row for row in self.get("additional_costs") if not row.work_order])
 		for work_order_name, qty_by_item_row in self.get_final_operation_qty().items():
 			work_order = frappe.get_doc("Work Order", work_order_name)
 			for row in get_subcontracted_work_order_costs(work_order, qty_by_item_row):
-				key = (row["work_order"], row["item_row"], cint(row.get("has_corrective_cost")))
-				row["expense_account"] = accounts.get(key) or row["expense_account"]
+				corrective = cint(row.get("has_corrective_cost"))
+				row["expense_account"] = (
+					accounts.get((row["work_order"], row["item_row"], corrective))
+					or accounts.get((row["work_order"], corrective))
+					or row["expense_account"]
+				)
 				self.append("additional_costs", row)
 
 	def get_final_operation_qty(self) -> dict[str, dict[str, float]]:
