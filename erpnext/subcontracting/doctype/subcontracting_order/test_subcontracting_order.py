@@ -1065,6 +1065,146 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			],
 		)
 
+	def test_transfer_can_be_cancelled_while_another_row_supplies_what_was_consumed(self):
+		"""5 each are sent for FG A and FG B, and a receipt of FG C, sent nothing, consumes 5."""
+		set_backflush_based_on("BOM")
+		sco, _rm_item = make_order_of_three_sharing_a_raw_material("Cancel For Other FG")
+		transfers = [make_supplied_item_transfer(sco, row) for row in sco.supplied_items[:2]]
+		for transfer in transfers:
+			transfer.submit()
+		make_receipt_for_finished_good(sco, sco.items[2].item_code).submit()
+
+		transfers[0].cancel()
+		self.assertEqual(get_consumed_qty(sco), [0, 5, 0])
+
+	def test_transfer_cannot_be_cancelled_when_the_order_would_supply_less_than_was_consumed(self):
+		"""5 each are sent for FG A and FG B, receipts of all three consume 15, then 5 are sent for FG C."""
+		set_backflush_based_on("BOM")
+		sco, rm_item = make_order_of_three_sharing_a_raw_material("Cancel Short")
+		transfers = [make_supplied_item_transfer(sco, row) for row in sco.supplied_items[:2]]
+		for transfer in transfers:
+			transfer.submit()
+		# stock of other orders at the same supplier
+		make_stock_entry(item_code=rm_item, target=sco.supplier_warehouse, qty=5, basic_rate=100)
+		make_subcontracting_receipt(sco.name).submit()
+		make_supplied_item_transfer(sco, sco.supplied_items[2]).submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfers[0].cancel)
+
+	def test_transfer_cannot_be_cancelled_when_a_return_leaves_the_order_short(self):
+		"""5 each are sent for FG A and FG B, 4 are returned from FG A's row, and a receipt of FG A consumes 5."""
+		set_backflush_based_on("BOM")
+		sco, rm_item = make_order_of_three_sharing_a_raw_material("Cancel After Return")
+		transfers = [make_supplied_item_transfer(sco, row) for row in sco.supplied_items[:2]]
+		for transfer in transfers:
+			transfer.submit()
+
+		frappe.flags.args = {"rm_details": [sco.supplied_items[0].name]}
+		returned = get_materials_from_supplier(sco.name)
+		frappe.flags.args = None
+		returned.items = [item for item in returned.items if item.sco_rm_detail == sco.supplied_items[0].name]
+		returned.items[0].qty = 4
+		returned.submit()
+		# stock of other orders at the same supplier
+		make_stock_entry(item_code=rm_item, target=sco.supplier_warehouse, qty=5, basic_rate=100)
+		make_receipt_for_finished_good(sco, sco.items[0].item_code).submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfers[0].cancel)
+
+	def test_transfer_of_a_material_not_on_the_order_can_be_cancelled_while_another_supplies_it(self):
+		"""An item not in FG A's BOM is sent twice for it, and a receipt of 1 FG A consumes less than one transfer."""
+		set_backflush_based_on("Material Transferred for Subcontract")
+		sco, _rm_item = make_order_of_three_sharing_a_raw_material("Cancel Extra")
+		extra_item = make_item("Subcontracted Extra RM Item For Cancel", {"is_stock_item": 1}).name
+		warehouse = sco.supplied_items[0].reserve_warehouse
+		make_stock_entry(item_code=extra_item, target=warehouse, qty=10, basic_rate=100)
+		rm_item = {
+			"item_code": sco.items[0].item_code,
+			"rm_item_code": extra_item,
+			"qty": 5,
+			"warehouse": warehouse,
+			"stock_uom": "Nos",
+		}
+		transfers = [frappe.get_doc(make_rm_stock_entry(sco.name, [rm_item])) for _ in range(2)]
+		for transfer in transfers:
+			transfer.submit()
+
+		receipt = make_receipt_for_finished_good(sco, sco.items[0].item_code)
+		receipt.items[0].qty = 1
+		receipt.save()
+		receipt.submit()
+
+		transfers[0].cancel()
+		self.assertEqual(transfers[0].docstatus, 2)
+
+	def test_transfer_of_a_consumed_alternative_cannot_be_cancelled(self):
+		"""FG A is sent an alternative, FG B the raw material, and a receipt of FG A consumes the alternative."""
+		set_backflush_based_on("BOM")
+		sco, rm_item = make_order_of_three_sharing_a_raw_material("Cancel Alternative")
+		for item in sco.items:
+			frappe.db.set_value("BOM", item.bom, "allow_alternative_item", 1)
+		alternative = make_item("Subcontracted Alternative RM Item For Cancel", {"is_stock_item": 1}).name
+		set_alternative_item(rm_item, alternative)
+		make_stock_entry(
+			item_code=alternative, target=sco.supplied_items[0].reserve_warehouse, qty=5, basic_rate=100
+		)
+		transfer = make_supplied_item_transfer(sco, sco.supplied_items[0])
+		transfer.items[0].update(
+			{"item_code": alternative, "original_item": rm_item, "allow_alternative_item": 1}
+		)
+		transfer.submit()
+		make_supplied_item_transfer(sco, sco.supplied_items[1]).submit()
+		make_receipt_for_finished_good(sco, sco.items[0].item_code).submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfer.cancel)
+
+	def test_transfer_cannot_be_cancelled_after_its_material_was_returned(self):
+		"""5 are sent for FG A and all 5 returned, with stock of other orders at the supplier."""
+		set_backflush_based_on("BOM")
+		sco, rm_item = make_order_of_three_sharing_a_raw_material("Cancel Returned")
+		transfer = make_supplied_item_transfer(sco, sco.supplied_items[0])
+		transfer.submit()
+		get_materials_from_supplier_for(sco).submit()
+		make_stock_entry(item_code=rm_item, target=sco.supplier_warehouse, qty=5, basic_rate=100)
+
+		self.assertRaisesRegex(frappe.ValidationError, "returns took back", transfer.cancel)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_transfer_whose_reservation_was_consumed_cannot_be_cancelled(self):
+		"""With Reserve Stock, 5 each are sent for FG A and FG B, and a receipt of FG C consumes A's reservation."""
+		set_backflush_based_on("BOM")
+		sco, _rm_item = make_order_of_three_sharing_a_raw_material("Cancel Reserved", reserve_stock=1)
+		transfers = [make_supplied_item_transfer(sco, row) for row in sco.supplied_items[:2]]
+		for transfer in transfers:
+			transfer.submit()
+		make_receipt_for_finished_good(sco, sco.items[2].item_code).submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "reserved at the supplier", transfers[0].cancel)
+		transfers[1].cancel()
+
+	def test_transfer_of_a_consumed_batch_cannot_be_cancelled_while_another_batch_is_sent(self):
+		"""Batch X is sent for FG A and batch Y for FG B, a receipt of FG A consumes X, and the supplier holds X of another order."""
+		set_backflush_based_on("Material Transferred for Subcontract")
+		rm_item = make_item(
+			"Subcontracted Batch RM Item For Cancel",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SCOCB-.####",
+			},
+		).name
+		sco = get_order_for_finished_goods("Cancel Batch", rm_item, (5, 5))
+		batch_x = send_serial_batch(sco, sco.supplied_items[0], batch_no=True)
+		transfer = frappe.get_last_doc("Stock Entry", {"subcontracting_order": sco.name})
+		send_serial_batch(sco, sco.supplied_items[1], batch_no=True)
+		make_receipt_for_finished_good(sco, sco.items[0].item_code).submit()
+		make_stock_entry(
+			item_code=rm_item, target=sco.supplier_warehouse, qty=5, basic_rate=100, batch_no=batch_x
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "of Batch", transfer.cancel)
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
@@ -3039,7 +3179,7 @@ def set_alternative_item(item_code, alternative_item_code):
 	).insert()
 
 
-def get_order_for_finished_goods(suffix, rm_item, fg_qtys):
+def get_order_for_finished_goods(suffix, rm_item, fg_qtys, **args):
 	"""A Subcontracting Order with a finished good of each qty, each made of 1 rm_item."""
 	service_items = []
 	for idx, qty in enumerate(fg_qtys):
@@ -3058,7 +3198,19 @@ def get_order_for_finished_goods(suffix, rm_item, fg_qtys):
 			}
 		)
 
-	return get_subcontracting_order(service_items=service_items)
+	return get_subcontracting_order(service_items=service_items, **args)
+
+
+def make_order_of_three_sharing_a_raw_material(suffix, reserve_stock=0):
+	"""Order for 5 each of FG A, B and C, each made of 1 of a new raw material, with 15 of it in stock."""
+	rm_item = make_item(f"Subcontracted RM Item {suffix}", {"is_stock_item": 1}).name
+	sco = get_order_for_finished_goods(suffix, rm_item, (5, 5, 5), do_not_submit=1)
+	sco.reserve_stock = reserve_stock
+	make_stock_entry(
+		item_code=rm_item, target=sco.supplied_items[0].reserve_warehouse, qty=15, basic_rate=100
+	)
+	sco.submit()
+	return sco, rm_item
 
 
 def send_serial_batch(sco, row, batch_no=False):
