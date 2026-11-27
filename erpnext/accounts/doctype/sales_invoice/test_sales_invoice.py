@@ -6816,11 +6816,16 @@ class TestSalesInvoice(ERPNextTestSuite):
 		frappe.db.set_value("Company", "_Test Company 1", "cost_center", cost_center)
 
 	def test_debit_note_with_update_stock_validation(self):
-		"""Test that saving a Debit Note with Update Stock enabled raises ValidationError."""
+		"""A Debit Note cannot update stock, and skips the selling price check."""
 		si = create_sales_invoice(do_not_save=True)
 		si.is_debit_note = 1
 		si.update_stock = 1
 		self.assertRaises(frappe.ValidationError, si.save)
+
+		si.update_stock = 0
+		frappe.db.set_value("Item", si.items[0].item_code, "last_purchase_rate", si.items[0].rate * 5)
+		with self.change_settings("Selling Settings", {"validate_selling_price": 1}):
+			si.save()
 
 
 def make_item_for_si(item_code, properties=None):
