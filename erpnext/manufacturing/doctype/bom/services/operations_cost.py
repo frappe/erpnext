@@ -12,6 +12,8 @@ from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt
 
+import erpnext
+
 
 def add_additional_cost(stock_entry, work_order, job_card=None):
 	# Add non stock items cost in the additional cost
@@ -327,15 +329,20 @@ def _corrective_cost_enabled():
 
 
 def _utilised_corrective_cost(work_order):
+	"""Corrective operation cost booked by Manufacture entries and Subcontracting Receipts, net of returns."""
 	charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+	on_entries = charges.parent.isin(_manufacture_stock_entries(work_order))
+	on_receipts = (
+		(charges.work_order == work_order.name)
+		& (charges.parenttype == "Subcontracting Receipt")
+		& (charges.docstatus == 1)
+	)
 	query = (
 		frappe.qb.from_(charges)
-		.select(Sum(charges.amount).as_("amount"))
-		.where(
-			charges.parent.isin(_manufacture_stock_entries(work_order)) & (charges.has_corrective_cost == 1)
-		)
+		.select(Sum(charges.amount))
+		.where((charges.has_corrective_cost == 1) & (on_entries | on_receipts))
 	)
-	return query.run(as_dict=True)[0].amount or 0
+	return flt(query.run()[0][0])
 
 
 def _manufacture_stock_entries(work_order):
@@ -349,6 +356,98 @@ def _manufacture_stock_entries(work_order):
 			& (stock_entry.purpose == "Manufacture")
 		)
 	)
+
+
+def get_subcontracted_work_order_costs(work_order, qty_by_item_row):
+	"""Additional cost rows of a Work Order for the finished goods of its subcontracted final operation."""
+	row = {
+		"expense_account": frappe.get_cached_value(
+			"Company", work_order.company, "default_operating_cost_account"
+		),
+		"work_order": work_order.name,
+	}
+	additional_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
+	corrective_per_unit = _subcontracted_corrective_cost_per_unit(work_order, sum(qty_by_item_row.values()))
+	qtys = list(qty_by_item_row.values())
+	precision = frappe.get_precision(
+		"Landed Cost Taxes and Charges", "amount", currency=erpnext.get_company_currency(work_order.company)
+	)
+	amounts = zip(
+		qty_by_item_row,
+		_split_per_unit_cost(additional_per_unit, qtys, precision),
+		_split_per_unit_cost(corrective_per_unit, qtys, precision),
+		strict=True,
+	)
+
+	costs = []
+	for item_row, additional_amount, corrective_amount in amounts:
+		if additional_per_unit:
+			costs.append(
+				{
+					**row,
+					"item_row": item_row,
+					"description": "Additional Operating Cost",
+					"amount": additional_amount,
+				}
+			)
+		if corrective_per_unit:
+			costs.append(
+				{
+					**row,
+					"item_row": item_row,
+					"description": "Corrective Operation Cost",
+					"has_corrective_cost": 1,
+					"amount": corrective_amount,
+				}
+			)
+	return costs
+
+
+def _split_per_unit_cost(per_unit_cost, qtys, precision):
+	"""Cost of each qty, rounded on the running total so the shares add up to the cost of all qtys."""
+	amounts, allocated, cumulative_qty = [], 0.0, 0.0
+	for qty in qtys:
+		cumulative_qty += qty
+		cumulative_amount = flt(per_unit_cost * cumulative_qty, precision)
+		amounts.append(flt(cumulative_amount - allocated, precision))
+		allocated = cumulative_amount
+	return amounts
+
+
+def _subcontracted_corrective_cost_per_unit(work_order, receipt_qty):
+	"""Corrective operation cost left, over the qty left to produce, but at least over this receipt's qty."""
+	if not (work_order.corrective_operation_cost and _corrective_cost_enabled()):
+		return 0
+
+	# a subcontracted job card records no completed qty, so the Work Order qty is the limit
+	remaining_qty = max(flt(work_order.qty) - _subcontracted_qty_received(work_order), receipt_qty)
+	remaining_cost = flt(work_order.corrective_operation_cost) - _utilised_corrective_cost(work_order)
+	return remaining_cost / remaining_qty
+
+
+def _subcontracted_qty_received(work_order):
+	"""Finished good qty received for the subcontracted final operation, process loss included."""
+	job_card = frappe.qb.DocType("Job Card")
+	item = frappe.qb.DocType("Subcontracting Receipt Item")
+	returned = item.as_("returned")
+	query = (
+		frappe.qb.from_(item)
+		.inner_join(job_card)
+		.on(job_card.name == item.job_card)
+		.left_join(returned)
+		.on(returned.name == item.subcontracting_receipt_item)
+		.select(Sum(item.qty + item.process_loss_qty))
+		.where(
+			(item.docstatus == 1)
+			# a return from the rejected warehouse takes back no Work Order costs
+			& (returned.rejected_warehouse.isnull() | (item.warehouse != returned.rejected_warehouse))
+			& (job_card.work_order == work_order.name)
+			& (job_card.is_subcontracted == 1)
+			& (job_card.is_corrective_job_card == 0)
+			& (job_card.finished_good == work_order.production_item)
+		)
+	)
+	return flt(query.run()[0][0])
 
 
 def get_op_cost_from_sub_assemblies(bom_no, op_cost=0, skip_boms_with_operations=False):
