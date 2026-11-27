@@ -1372,7 +1372,7 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertRaises(frappe.InvalidStatusError, create_pick_list, mr.name)
 
 	def test_pick_list_maps_the_qty_left_after_a_transfer_and_an_open_pick(self):
-		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry as make_se_from_pick_list
+		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry as make_se_from_pick_list
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
 
 		item_code = create_item("_Test MR Open Pick Item", is_stock_item=1).name
