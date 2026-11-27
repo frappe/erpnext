@@ -1691,7 +1691,6 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 					)
 					self.assertEqual(get_stock_value_on(warehouses=warehouse, item_code=item), 0)
 
-<<<<<<< HEAD
 	def test_valuation_rate_without_a_voucher_reads_the_ledger(self):
 		from erpnext.stock.stock_ledger import get_valuation_rate
 
@@ -1702,9 +1701,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual(get_valuation_rate(item_code, warehouse, None, None), 100)
 		self.assertEqual(get_valuation_rate(item_code, warehouse, "Stock Entry", None), 100)
 
-	@change_settings("System Settings", {"float_precision": 4})
-=======
-	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 6, "currency_precision": 2})
+	@change_settings("System Settings", {"float_precision": 6, "currency_precision": 2})
 	def test_queue_rate_for_small_leftover(self):
 		"""A small leftover keeps its queue rate, not the rounding remainder of the stock value."""
 		warehouse = "_Test Warehouse - _TC"
@@ -1722,8 +1719,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 				receipt = make_stock_entry(item_code=item, target=warehouse, qty=40)
 				self.assertEqual(receipt.items[0].basic_rate, 2)
 
-	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 4})
->>>>>>> b49d65e (test: small FIFO/LIFO leftover keeps its queue rate)
+	@change_settings("System Settings", {"float_precision": 4})
 	def test_negative_qty_with_precision(self):
 		"Test if system precision is respected while validating negative qty."
 		from erpnext.stock.doctype.item.test_item import create_item
