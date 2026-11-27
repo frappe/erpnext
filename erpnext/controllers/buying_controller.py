@@ -1467,11 +1467,16 @@ class BuyingController(SubcontractingController):
 		)
 
 	def get_returned_source_package(self, row, source_qty):
+		"""Package that puts the returned accepted and rejected stock back in transit."""
+		package, include_bundle = row.serial_and_batch_bundle, row.rejected_serial_and_batch_bundle
+		if not package:  # a return of only the rejected qty
+			package, include_bundle = include_bundle, None
+
 		return self.make_package_for_transfer(
-			row.serial_and_batch_bundle,
+			package,
 			row.from_warehouse,
 			type_of_transaction="Inward",
-			include_bundle=row.rejected_serial_and_batch_bundle,
+			include_bundle=include_bundle,
 			total_qty=source_qty,
 		)
 
