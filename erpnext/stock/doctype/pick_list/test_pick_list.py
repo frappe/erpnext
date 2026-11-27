@@ -2235,9 +2235,11 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(create_pick_list(sales_order.name).locations, [])
 
 	def test_repeated_bundle_component_is_not_picked_again_after_a_partial_delivery(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item=component, to_warehouse=warehouse, qty=20, basic_rate=100)
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=40, basic_rate=100)
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
 		for qty in (1, 2):
@@ -2267,6 +2269,14 @@ class TestPickList(ERPNextTestSuite):
 			[(sales_order.packed_items[0].name, 2)],
 		)
 		pick_list.submit()
+
+		# a bundle delivered without a pick list leaves each row its own share to pick
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.items[0].qty = 1
+		delivery_note.submit()
+
+		self.assertEqual([row.qty for row in create_pick_list(sales_order.name).locations], [2, 4])
 
 	def test_orders_with_different_discounts_get_their_own_delivery_note(self):
 		item = make_item(properties={"is_stock_item": 1}).name
