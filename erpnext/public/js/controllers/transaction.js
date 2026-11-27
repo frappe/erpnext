@@ -2078,7 +2078,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {
-						frappe.model.set_value(child.doctype, child.name, "rate", value);
+						const doc = frappe.get_doc(child.doctype, child.name);
+						if (
+							!doc?.blanket_order_rate ||
+							!["Sales Order", "Quotation", "Purchase Order"].includes(doc.parenttype) ||
+							child.has_pricing_rule_for_rate
+						) {
+							frappe.model.set_value(child.doctype, child.name, "rate", value);
+						}
 					}
 
 					if (key === "pricing_rules") {
