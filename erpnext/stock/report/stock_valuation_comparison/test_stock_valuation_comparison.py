@@ -265,6 +265,17 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		rows = self.run_report(item, tolerance=0)
 		self.assertEqual(rows, [], msg=frappe.as_json(rows))
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 6, "currency_precision": 2})
+	def test_small_fifo_lifo_balance_expects_the_queue_rate(self):
+		for valuation_method in ("FIFO", "LIFO"):
+			with self.subTest(valuation_method=valuation_method):
+				item = make_item(properties={"valuation_method": valuation_method, "stock_uom": "Kg"}).name
+
+				make_stock_entry(item_code=item, target=WAREHOUSE, qty=0.003, rate=2)
+				make_stock_entry(item_code=item, target=WAREHOUSE, qty=0.005, rate=2)
+
+				self.assertNoDifferences(item)
+
 	def test_zero_tolerance_shows_every_difference(self):
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 
