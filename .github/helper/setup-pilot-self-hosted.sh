@@ -36,8 +36,6 @@ fi
 mkdir -p "$HOME/pilot"
 curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
     | tar -xz -C "$HOME/pilot"
-uv venv "$HOME/pilot/.admin-venv"
-uv pip install --python "$HOME/pilot/.admin-venv/bin/python" -r "$HOME/pilot/pyproject.toml" --extra admin
 
 pilot new frappe-bench --frappe-branch "$frappebranch" --admin-password 'PilotAdmin123!'
 pilot -b frappe-bench set-bench-config python "$(command -v python)"
@@ -63,13 +61,15 @@ erpnext_branch=${GITHUB_REF_NAME:-$(git -C "$GITHUB_WORKSPACE" branch --show-cur
 erpnext_commit=${GITHUB_SHA:-$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)}
 pilot get-app "$GITHUB_WORKSPACE" --branch "$erpnext_branch" --commit "$erpnext_commit" --skip-assets
 
-pilot -b frappe-bench setup requirements
 uv pip install --python env/bin/python -e "apps/frappe[test]"
 
-pilot_log=${RUNNER_TEMP:-/tmp}/pilot.log
-pilot -b frappe-bench start > "$pilot_log" 2>&1 &
-curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 \
-    http://127.0.0.1:7000/api/v1/health
+# The bootstrap tests need Redis and the staged database.
+redis-server config/redis_cache.conf --daemonize yes
+redis-server config/redis_queue.conf --daemonize yes
+read -r cache_port queue_port < <(python -c 'import tomllib; r = tomllib.load(open("bench.toml", "rb"))["redis"]; print(r["cache_port"], r["queue_port"])')
+for port in "$cache_port" "$queue_port"; do
+    redis-cli -p "$port" ping | grep -qx PONG
+done
 
 if [ ! -f sites/assets/assets.json ]; then
     mkdir -p sites/assets
