@@ -3,6 +3,7 @@
 
 
 from collections import deque
+from contextlib import contextmanager
 from functools import partial
 
 import frappe
@@ -969,6 +970,41 @@ class TestBOM(ERPNextTestSuite):
 		bom.save()
 		self.assertEqual(bom.transfer_material_against, "Work Order")
 		bom.delete()
+
+	@timeout
+	def test_new_bom_with_operations_needs_operations_enabled(self):
+		bom_with_operations = get_bom_with_operations()
+		new_bom = frappe.copy_doc(bom_with_operations)
+		new_bom.docstatus = 0
+		bom_without_operations = frappe.copy_doc(bom_with_operations)
+		bom_without_operations.docstatus = 0
+		bom_without_operations.with_operations = 0
+
+		with operations_and_job_cards_disabled():
+			with self.assertRaisesRegex(frappe.ValidationError, "Enable Operations & Job Cards"):
+				new_bom.insert()
+
+			bom_without_operations.insert()
+
+		self.assertFalse(bom_without_operations.operations)
+
+	@timeout
+	def test_existing_bom_with_operations_saves_after_operations_disabled(self):
+		draft = frappe.copy_doc(get_bom_with_operations())
+		draft.docstatus = 0
+		draft.insert()
+
+		with operations_and_job_cards_disabled():
+			draft.save()
+			self.assertTrue(draft.operations)
+
+			draft.with_operations = 0
+			draft.save()
+			self.assertFalse(draft.operations)
+
+			draft.with_operations = 1
+			with self.assertRaisesRegex(frappe.ValidationError, "Enable Operations & Job Cards"):
+				draft.save()
 
 	@timeout
 	def test_bom_name_length(self):
@@ -2453,6 +2489,21 @@ def make_batch_operation_bom(operation, workstation, **row_values):
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
+
+
+def get_bom_with_operations():
+	return frappe.get_doc(
+		"BOM", frappe.db.get_value("BOM", {"item": "_Test FG Item 2", "with_operations": 1, "is_active": 1})
+	)
+
+
+@contextmanager
+def operations_and_job_cards_disabled():
+	frappe.db.set_single_value("Manufacturing Settings", "enable_operations_and_job_cards", 0)
+	try:
+		yield
+	finally:
+		frappe.db.set_single_value("Manufacturing Settings", "enable_operations_and_job_cards", 1)
 
 
 def make_user_with_roles(email, *roles):

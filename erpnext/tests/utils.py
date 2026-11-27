@@ -177,6 +177,7 @@ class BootStrapTestData:
 		self.make_asset_maintenance_team()
 		self.make_asset_category()
 		self.update_stock_settings()
+		self.update_manufacturing_settings()
 		self.make_item()
 		self.make_product_bundle()
 		self.make_location()
@@ -252,6 +253,9 @@ class BootStrapTestData:
 		stock_settings.update_price_list_based_on = "Rate"
 		stock_settings.enable_serial_and_batch_no_for_item = 1
 		stock_settings.save()
+
+	def update_manufacturing_settings(self):
+		frappe.db.set_single_value("Manufacturing Settings", "enable_operations_and_job_cards", 1)
 
 	def make_records(self, key, records):
 		doctype = records[0].get("doctype")

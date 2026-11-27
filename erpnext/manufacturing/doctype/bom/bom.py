@@ -290,6 +290,7 @@ class BOM(WebsiteGenerator):
 		if not self.company:
 			frappe.throw(_("Please select a Company first."), title=_("Mandatory"))
 
+		self.validate_operations_enabled_in_manufacturing_settings()
 		self.clear_operations()
 		self.clear_inspection()
 		self.validate_main_item()
@@ -826,6 +827,25 @@ class BOM(WebsiteGenerator):
 			frappe.db.set_value("BOM", next_default, "is_default", 1)
 
 		frappe.db.set_value("Item", self.item, "default_bom", next_default)
+
+	def validate_operations_enabled_in_manufacturing_settings(self):
+		if not self.with_operations or frappe.get_single_value(
+			"Manufacturing Settings", "enable_operations_and_job_cards"
+		):
+			return
+
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and doc_before_save.with_operations:
+			return
+
+		frappe.throw(
+			_("Cannot enable {0} as {1} is disabled in {2}").format(
+				bold(self.meta.get_translated_label("with_operations")),
+				bold(_("Enable Operations & Job Cards")),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			),
+			title=_("Operations Not Enabled"),
+		)
 
 	def clear_operations(self):
 		if not self.with_operations:
