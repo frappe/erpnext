@@ -1253,6 +1253,32 @@ class TestPOSInvoice(unittest.TestCase):
 
 		frappe.set_user("test@example.com")
 
+	def test_resending_phone_payment_request_needs_email_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.accounts.doctype.payment_request.payment_request import PaymentRequest
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
+
+		invoice = frappe.new_doc("POS Invoice")
+		invoice.contact_mobile = "9999900000"
+		invoice.append("payments", {"type": "Phone", "amount": 100})
+		sales_user = make_fenced_user("pos-resend-sales@example.com", ["Sales User"])
+		accounts_user = make_fenced_user("pos-resend-accounts@example.com", ["Accounts User"])
+
+		with (
+			patch.object(
+				POSInvoice, "get_existing_payment_request", return_value=frappe.new_doc("Payment Request")
+			),
+			patch.object(PaymentRequest, "request_phone_payment") as request_phone_payment,
+		):
+			with as_user(sales_user):
+				self.assertRaises(frappe.PermissionError, invoice.create_payment_request)
+			request_phone_payment.assert_not_called()
+
+			with as_user(accounts_user):
+				invoice.create_payment_request()
+			request_phone_payment.assert_called_once()
+
 	def test_serial_and_batch_item_with_only_batch_in_fields(self):
 		from frappe.tests.utils import change_settings
 
