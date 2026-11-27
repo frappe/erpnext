@@ -20,6 +20,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 )
 
+import erpnext
 from erpnext import _refuse, require_permission
 from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
@@ -83,10 +84,25 @@ class Timesheet(Document):
 		self.calculate_hours()
 		self.validate_time_logs()
 		self.check_task_and_project_access(self.time_logs)
+		self.set_dates()
+		self.set_exchange_rate()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
-		self.set_dates()
+
+	def set_exchange_rate(self):
+		"""A company currency Timesheet always has rate 1. A foreign one without a rate gets
+		the current rate. A rate that is set, 1 included, is kept."""
+		company_currency = self.get_company_currency()
+		if not self.currency or self.currency == company_currency:
+			self.exchange_rate = 1
+		elif not flt(self.exchange_rate):
+			self.exchange_rate = get_exchange_rate(self.currency, company_currency) or 1
+
+	def get_company_currency(self):
+		if self.company:
+			return erpnext.get_company_currency(self.company)
+		return erpnext.get_default_currency() or frappe.defaults.get_global_default("currency")
 
 	def calculate_hours(self):
 		for row in self.time_logs:
