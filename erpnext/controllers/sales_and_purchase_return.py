@@ -718,27 +718,11 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 
 	def sum_in_stock_uom(column):
 		table = f"`tab{child_doctype}`"
-		return {
-			"SUM": [{"MUL": [{"ABS": f"{table}.{column}"}, f"{table}.conversion_factor"]}],
-			"as": f"{column}_in_stock_uom",
-		}
+		return f"sum(abs({table}.{column}) * {table}.conversion_factor) as {column}_in_stock_uom"
 
 	fields = [
-<<<<<<< HEAD
 		f"sum(abs(`tab{child_doctype}`.qty)) as qty",
-=======
-		{"SUM": [{"ABS": f"`tab{child_doctype}`.qty"}], "as": "qty"},
-<<<<<<< HEAD
-		{
-			"SUM": [
-				{"MUL": [{"ABS": f"`tab{child_doctype}`.qty"}, f"`tab{child_doctype}`.conversion_factor"]}
-			],
-			"as": "qty_in_stock_uom",
-		},
->>>>>>> 8e78192 (fix(stock): compare return rates and quantities per stock UOM)
-=======
 		sum_in_stock_uom("qty"),
->>>>>>> 5d68c89 (fix: map a debit note's rejected and received qty after a return in another UOM)
 	]
 
 	if doctype != "Subcontracting Receipt":
@@ -748,12 +732,8 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		fields += [
-<<<<<<< HEAD
 			f"sum(abs(`tab{child_doctype}`.rejected_qty)) as rejected_qty",
-=======
-			{"SUM": [{"ABS": f"`tab{child_doctype}`.rejected_qty"}], "as": "rejected_qty"},
 			sum_in_stock_uom("rejected_qty"),
->>>>>>> 5d68c89 (fix: map a debit note's rejected and received qty after a return in another UOM)
 		]
 
 		if doctype == "Purchase Receipt":

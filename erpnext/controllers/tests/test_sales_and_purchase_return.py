@@ -497,7 +497,7 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, return_dn.insert)
 
 	def test_purchase_return_maps_after_accepted_and_rejected_warehouse_returns(self):
-		from erpnext.stock.doctype.purchase_receipt.mapper import (
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return,
 			make_purchase_return_against_rejected_warehouse,
 		)
@@ -516,7 +516,7 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 
 	def test_purchase_return_maps_rejected_qty_after_return_in_another_uom(self):
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.purchase_receipt.mapper import (
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return,
 			make_purchase_return_against_rejected_warehouse,
 		)
