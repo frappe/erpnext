@@ -7,7 +7,7 @@ from itertools import product
 import frappe
 from frappe import qb
 from frappe.desk.notifications import get_open_count
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate
 from freezegun import freeze_time
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -2603,6 +2603,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 			"total_amount": 5000.0,
 			"outstanding_amount": 5000.0,
 			"exchange_rate": 1.0,
+			"posting_date": getdate(so.transaction_date),
 			"due_date": None,
 			"bill_no": None,
 		}

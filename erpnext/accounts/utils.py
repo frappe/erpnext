@@ -2510,62 +2510,47 @@ class QueryPaymentLedger:
 			filter_on_against_voucher_no.append(ple.against_voucher_no.like(f"%{self.voucher_no}%"))
 
 		# build outstanding amount filter
-		filter_on_outstanding_amount = []
-		if self.min_outstanding:
-			if self.min_outstanding > 0:
-				filter_on_outstanding_amount.append(
-					Table("outstanding").amount_in_account_currency >= self.min_outstanding
-				)
-			else:
-				filter_on_outstanding_amount.append(
-					Table("outstanding").amount_in_account_currency <= self.min_outstanding
-				)
-		if self.max_outstanding:
-			if self.max_outstanding > 0:
-				filter_on_outstanding_amount.append(
-					Table("outstanding").amount_in_account_currency <= self.max_outstanding
-				)
-			else:
-				filter_on_outstanding_amount.append(
-					Table("outstanding").amount_in_account_currency >= self.max_outstanding
-				)
+		filter_on_outstanding_amount = self.get_outstanding_amount_filters(
+			Table("outstanding").amount_in_account_currency
+		)
 
 		if self.limit and self.get_invoices:
+			own_row = (ple.voucher_no == ple.against_voucher_no) & (
+				ple.voucher_type == ple.against_voucher_type
+			)
+			own_row_matches_filters = Criterion.all(
+				[own_row, *self.dimensions_filter, *self.voucher_posting_date]
+			)
+			outstanding_amount = Sum(ple.amount_in_account_currency)
 			outstanding_vouchers = (
 				qb.from_(ple)
 				.select(
 					ple.against_voucher_no.as_("voucher_no"),
-					Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
-					Max(
-						Case().when(
-							(
-								(ple.voucher_no == ple.against_voucher_no)
-								& (ple.voucher_type == ple.against_voucher_type)
-							),
-							(ple.posting_date),
-						)
-					).as_("invoice_date"),
+					outstanding_amount.as_("amount_in_account_currency"),
+					Max(Case().when(own_row, ple.posting_date)).as_("invoice_date"),
 				)
 				.where(ple.delinked == 0)
 				.where(Criterion.all(filter_on_against_voucher_no))
 				.where(Criterion.all(self.common_filter))
-				.where(Criterion.all(self.dimensions_filter))
-				.where(Criterion.all(self.voucher_posting_date))
 				.groupby(
 					ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party
 				)
 				# order by the select aliases (postgres can't ORDER BY a non-existent ple column)
 				.orderby(qb.Field("invoice_date"), qb.Field("voucher_no"))
 				# postgres HAVING can't reference a select alias; use the aggregate expression
-				.having(Sum(ple.amount_in_account_currency) > 0)
+				.having(outstanding_amount > 0)
+				.having(Criterion.all(self.get_outstanding_amount_filters(outstanding_amount)))
+				.having(Max(Case().when(own_row_matches_filters, 1).else_(0)) == 1)
 				.limit(self.limit)
 				.run()
 			)
-			if outstanding_vouchers:
-				filter_on_voucher_no.append(ple.voucher_no.isin([x[0] for x in outstanding_vouchers]))
-				filter_on_against_voucher_no.append(
-					ple.against_voucher_no.isin([x[0] for x in outstanding_vouchers])
-				)
+			if not outstanding_vouchers:
+				return
+
+			filter_on_voucher_no.append(ple.voucher_no.isin([x[0] for x in outstanding_vouchers]))
+			filter_on_against_voucher_no.append(
+				ple.against_voucher_no.isin([x[0] for x in outstanding_vouchers])
+			)
 
 		# build query for voucher amount
 		# account is grouped, not aggregated: it is a join key against the outstanding CTE below, and
@@ -2743,6 +2728,18 @@ class QueryPaymentLedger:
 		self.query_for_outstanding()
 
 		return self.voucher_outstandings
+
+	def get_outstanding_amount_filters(self, amount):
+		filters = []
+		if self.min_outstanding:
+			filters.append(
+				amount >= self.min_outstanding if self.min_outstanding > 0 else amount <= self.min_outstanding
+			)
+		if self.max_outstanding:
+			filters.append(
+				amount <= self.max_outstanding if self.max_outstanding > 0 else amount >= self.max_outstanding
+			)
+		return filters
 
 
 def create_gain_loss_journal(
