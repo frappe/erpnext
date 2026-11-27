@@ -2007,7 +2007,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
-		target.schedule_date = source.delivery_date
+		target.schedule_date = max(getdate(source.delivery_date or nowdate()), getdate(nowdate()))
 		target.qty = qty_to_order[source.name]
 		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
@@ -2129,7 +2129,9 @@ def set_delivery_date(items, sales_order):
 
 	for item in items:
 		if item.product_bundle:
-			item.schedule_date = delivery_by_item[item.product_bundle]
+			item.schedule_date = max(
+				getdate(delivery_by_item.get(item.product_bundle) or nowdate()), getdate(nowdate())
+			)
 
 
 def is_product_bundle(item_code):
