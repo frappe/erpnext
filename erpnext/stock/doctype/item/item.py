@@ -1601,7 +1601,7 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 		query = query.select(parent_doc.transaction_date)
 		query = query.orderby(parent_doc.transaction_date, parent_doc.name, order=Order.desc)
 
-	return query.run(as_dict=1)
+	return query.limit(1).run(as_dict=1)
 
 
 def rebuild_bin_reservations(item_code, warehouse):
