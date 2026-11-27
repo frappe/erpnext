@@ -1044,16 +1044,37 @@ def raise_work_orders(material_request: str):
 	return work_orders
 
 
+def get_open_pick_qty(material_request: str) -> dict[str, float]:
+	"""Stock qty picked on submitted pick lists but not yet transferred, per request row."""
+	pick_list = frappe.qb.DocType("Pick List")
+	pick_list_item = frappe.qb.DocType("Pick List Item")
+	rows = (
+		frappe.qb.from_(pick_list_item)
+		.join(pick_list)
+		.on(pick_list.name == pick_list_item.parent)
+		.select(
+			pick_list_item.material_request_item,
+			Sum(pick_list_item.picked_qty - pick_list_item.transferred_qty),
+		)
+		.where((pick_list.docstatus == 1) & (pick_list_item.material_request == material_request))
+		.groupby(pick_list_item.material_request_item)
+	).run()
+
+	return {row_name: flt(qty) for row_name, qty in rows}
+
+
+def get_pending_pick_qty(row, open_pick_qty: dict[str, float]):
+	# ordered_qty already holds what open picks transferred, so add only the untransferred part
+	return flt(row.stock_qty) - flt(row.ordered_qty) - flt(open_pick_qty.get(row.name))
+
+
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
 	validate_request_not_stopped(source_name)
+	open_pick_qty = get_open_pick_qty(source_name)
 
 	def update_item(obj, target, source_parent):
-		qty = (
-			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
-			if flt(obj.stock_qty) > flt(obj.ordered_qty)
-			else 0
-		)
+		qty = max(flt(get_pending_pick_qty(obj, open_pick_qty) / target.conversion_factor), 0)
 		target.qty = qty
 		target.stock_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
@@ -1072,8 +1093,7 @@ def create_pick_list(source_name, target_doc=None):
 				"field_map": {"name": "material_request_item", "stock_qty": "stock_qty"},
 				"postprocess": update_item,
 				"condition": lambda doc: (
-					flt(doc.ordered_qty, doc.precision("ordered_qty"))
-					< flt(doc.stock_qty, doc.precision("ordered_qty"))
+					flt(get_pending_pick_qty(doc, open_pick_qty), doc.precision("stock_qty")) > 0
 				),
 			},
 		},
