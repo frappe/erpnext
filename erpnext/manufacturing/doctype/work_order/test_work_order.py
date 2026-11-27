@@ -4920,6 +4920,23 @@ class TestWorkOrder(ERPNextTestSuite):
 				rates = get_partial_manufacture_scrap_rates(valuation_type, kg_rm_qty=4)
 				self.assertEqual(rates, [(91, 10), (0, 1), (0, 1), (0, 1)])
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_repost_keeps_capped_scrap_rate(self):
+		"""A repost after later entries submit still caps the scrap of a short entry."""
+		scrap_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+		work_order, _rm_item = make_whole_number_partial_work_order(
+			rm_qty=1, scrap_item=scrap_item, kg_rm_qty=4
+		)
+		manufactures = [submit_manufacture_of_one(work_order) for _ in range(4)]
+
+		manufacture = frappe.get_doc("Stock Entry", manufactures[1].name)
+		manufacture.flags.via_repost = True
+		manufacture.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
+		scrap_row = next(row for row in manufacture.items if row.item_code == scrap_item)
+		self.assertEqual(scrap_row.basic_rate, 1)
+
 	def test_capped_secondary_rows_add_up_to_consumed_cost(self):
 		"""Capping rounds the running total, so a small consumed cost leaves no row negative."""
 		entry = frappe.new_doc("Stock Entry")
