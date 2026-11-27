@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.manufacturing.doctype.bom.test_bom import operations_and_job_cards_disabled
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
 from erpnext.manufacturing.doctype.bom_creator.item_matcher import ItemMatcher
 from erpnext.manufacturing.doctype.bom_creator.step_file import read_step_file
@@ -811,6 +812,43 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual((bom.with_operations, bom.routing), (1, routing.name))
 		self.assertEqual([row.operation for row in bom.operations], ["_Test Operation 1"])
 		self.assertEqual(bom.items[0].operation, "_Test Operation 1")
+
+	def test_new_design_with_operations_needs_operations_enabled(self):
+		routing = create_routing(
+			routing_name="_Test Creator Routing",
+			operations=[
+				{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 10}
+			],
+		)
+		part_with_operation = {"item_code": "_Test Item", "qty": 1, "operation": "_Test Operation 1"}
+		kit = make_item("_Test Creator Phantom Kit", {"is_stock_item": 0}).name
+
+		with operations_and_job_cards_disabled():
+			for values in (
+				{"track_semi_finished_goods": 1},
+				{"routing": routing.name},
+				{"items": [part_with_operation]},
+			):
+				with self.subTest(values=values):
+					self.assertRaisesRegex(
+						frappe.ValidationError, "Enable Operations & Job Cards", make_bom_creator, **values
+					)
+
+			make_bom_creator(items=[{"item_code": "_Test Item", "qty": 1}])
+			make_bom_creator(item_code=kit, is_phantom=1, items=[part_with_operation])
+
+	def test_design_with_operations_saves_after_operations_disabled(self):
+		design = make_bom_creator(
+			items=[{"item_code": "_Test Item", "qty": 1, "operation": "_Test Operation 1"}]
+		)
+
+		with operations_and_job_cards_disabled():
+			design.save()
+			design.items[0].operation = None
+			design.save()
+
+			design.items[0].operation = "_Test Operation 1"
+			self.assertRaisesRegex(frappe.ValidationError, "Enable Operations & Job Cards", design.save)
 
 	def test_boms_are_created_in_the_background_from_the_saved_creator(self):
 		from frappe.handler import run_doc_method

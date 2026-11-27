@@ -270,6 +270,27 @@ frappe.ui.form.on("BOM", {
 		frm.set_df_property("with_operations", "hidden", frm.doc.fg_based_operating_cost ? 1 : 0);
 	},
 
+	toggle_with_operations(frm) {
+		if (cint(frappe.boot.sysdefaults.enable_operations_and_job_cards)) {
+			return;
+		}
+
+		frm.toggle_enable("with_operations", frm.doc.with_operations);
+		frm.set_df_property(
+			"with_operations",
+			"description",
+			__("To use operations, enable {0} in {1}.", [
+				`<b>${__("Enable Operations & Job Cards")}</b>`,
+				frappe.utils.get_form_link(
+					"Manufacturing Settings",
+					"Manufacturing Settings",
+					true,
+					__("Manufacturing Settings")
+				),
+			])
+		);
+	},
+
 	onload_post_render: function (frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
@@ -302,6 +323,7 @@ frappe.ui.form.on("BOM", {
 	refresh(frm) {
 		frm.toggle_enable("item", frm.doc.__islocal);
 
+		frm.trigger("toggle_with_operations");
 		frm.trigger("toggle_fields_for_semi_finished_goods");
 
 		frm.set_indicator_formatter("item_code", function (doc) {
