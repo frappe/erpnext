@@ -811,20 +811,20 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 		incoming_rates = frappe._dict()
 		for serial_nos_batch in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
-			for serial_no, incoming_rate in self.get_inward_serial_no_rates(
+			for serial_no, warehouse, incoming_rate in self.get_inward_serial_no_rates(
 				serial_nos_batch, bundle_child, posted_before_condition
 			):
-				incoming_rates.setdefault(serial_no, incoming_rate)
+				if warehouse == self.sle.warehouse:
+					incoming_rates.setdefault(serial_no, incoming_rate)
 
 		return incoming_rates
 
 	def get_inward_serial_no_rates(self, serial_nos, bundle_child, posted_before_condition):
 		query = (
 			frappe.qb.from_(bundle_child)
-			.select(bundle_child.serial_no, bundle_child.incoming_rate)
+			.select(bundle_child.serial_no, bundle_child.warehouse, bundle_child.incoming_rate)
 			.where(
-				(bundle_child.warehouse == self.sle.warehouse)
-				& (bundle_child.serial_no.isin(serial_nos))
+				(bundle_child.serial_no.isin(serial_nos))
 				& (bundle_child.item_code == self.sle.item_code)
 				& (bundle_child.is_cancelled == 0)
 				& (bundle_child.docstatus == 1)
