@@ -4216,6 +4216,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.set_serial_batch_from_reserved_entry()
 		self.set_secondary_items()
+		self.set_secondary_items_from_job_card()
 		self.set_actual_qty()
 		self.validate_customer_provided_item()
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
@@ -4705,7 +4706,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		item_dict = {}
-		rows = [row for row in self.get_secondary_items_from_job_card() if row.stock_qty > 0]
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		rows = [row for row in self.get_secondary_items_from_job_card() if flt(row.stock_qty, precision) > 0]
 		bom_rows = self.get_bom_secondary_item_details(rows)
 		for row in rows:
 			bom_row = bom_rows.get(row.bom_secondary_item, frappe._dict())
@@ -4713,6 +4715,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				{
 					"item_code": row.item_code,
 					"uom": row.stock_uom,
+					"stock_uom": row.stock_uom,
 					"from_warehouse": "",
 					"qty": row.stock_qty,
 					"conversion_factor": 1,
@@ -4807,6 +4810,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 				- flt(self.pro_doc.produced_qty)
 				+ flt(self.get_pending_process_loss_qty())
 			)
+
+		# overproduction past the Job Card's completed qty has no recorded output left
+		if flt(pending_qty, self.precision("fg_completed_qty")) <= 0:
+			return []
 
 		used_secondary_items = self.get_used_secondary_items()
 		for row in other:
