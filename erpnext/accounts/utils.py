@@ -558,7 +558,7 @@ def reconcile_against_document(
 					dimensions_dict=dimensions_dict,
 				)
 				if referenced_row.get("outstanding_amount") and entry.get("outstanding_amount") is None:
-					referenced_row.outstanding_amount -= flt(entry.allocated_amount)
+					referenced_row.outstanding_amount -= flt(referenced_row.allocated_amount)
 
 				reposting_rows.append(referenced_row)
 
@@ -780,9 +780,11 @@ def update_reference_in_payment_entry(
 			)
 		existing_row = existing_rows[0]
 
-		# Keep the stored precision so each split deducts the same amount it adds.
-		remaining_amount = flt(existing_row.allocated_amount - d.allocated_amount, DEFAULT_DECIMAL_PRECISION)
-		if remaining_amount < 0:
+		precision = d.get("precision")
+		if precision is None:
+			precision = DEFAULT_DECIMAL_PRECISION
+		excess_amount = d.allocated_amount - existing_row.allocated_amount
+		if flt(excess_amount, precision) > 0:
 			frappe.throw(
 				_(
 					"Cannot allocate {0} against {1} {2}. Only {3} is unallocated in row #{4} of {5} {6}."
@@ -797,7 +799,9 @@ def update_reference_in_payment_entry(
 				)
 			)
 
-		existing_row.allocated_amount = remaining_amount
+		# A difference below the allocation precision must not create a negative advance balance.
+		reference_details["allocated_amount"] = min(d.allocated_amount, existing_row.allocated_amount)
+		existing_row.allocated_amount = max(0, flt(-excess_amount, DEFAULT_DECIMAL_PRECISION))
 
 		new_row = payment_entry.append("references")
 		new_row.docstatus = 1
