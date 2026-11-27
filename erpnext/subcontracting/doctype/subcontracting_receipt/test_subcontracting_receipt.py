@@ -658,6 +658,102 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(first.total_additional_costs, 400)
 		self.assertEqual(second.total_additional_costs, 600)
 
+	def test_receipt_after_one_without_linked_cost_rows_takes_the_order_cost_balance(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		# stands in for a receipt submitted before cost rows were linked to the order
+		frappe.db.set_value(
+			"Landed Cost Taxes and Charges", {"parent": first.name}, "subcontracting_order_cost", None
+		)
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+
+		self.assertEqual(second.total_additional_costs, 600)
+
+	def test_receipt_after_older_ones_booked_the_order_cost_in_full_takes_nothing(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		# stands in for a receipt submitted before cost rows were linked, which booked 1,200
+		frappe.db.set_value(
+			"Landed Cost Taxes and Charges", {"parent": first.name}, "subcontracting_order_cost", None
+		)
+		frappe.db.set_value(
+			"Subcontracting Receipt Item", first.items[0].name, "additional_cost_per_qty", 300
+		)
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+
+		self.assertEqual(second.total_additional_costs, 0)
+
+	def test_receipt_cannot_repeat_an_order_additional_cost_row(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.append("additional_costs", scr.additional_costs[0].as_dict(no_default_fields=True))
+
+		self.assertRaisesRegex(frappe.ValidationError, "repeats a cost", scr.save)
+
+	def test_draft_receipts_take_their_share_of_order_additional_costs(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.append(
+			"additional_costs",
+			{"expense_account": "Cost of Goods Sold - _TC", "description": "Handling", "amount": 500},
+		)
+		first.save()
+		second = make_subcontracting_receipt(sco.name)
+		second.items[0].qty = 6
+		second.save()
+		first.submit()
+		second.submit()
+
+		self.assertEqual([row.amount for row in first.additional_costs], [400, 500])
+		self.assertEqual([row.amount for row in second.additional_costs], [600])
+
+	def test_receipt_of_two_orders_takes_each_order_share_of_additional_costs(self):
+		first_order = make_order_with_additional_cost_and_transfer(1000)
+		second_order = make_order_with_additional_cost_and_transfer(100)
+
+		scr = make_subcontracting_receipt(first_order.name)
+		scr = get_mapped_subcontracting_receipt(second_order.name, target_doc=scr)
+		scr.items[0].qty = 5
+		scr.save()
+		scr.submit()
+		next_scr = make_subcontracting_receipt(first_order.name)
+
+		self.assertEqual([row.amount for row in scr.additional_costs], [500, 100])
+		self.assertEqual([row.amount for row in next_scr.additional_costs], [500])
+
+	def test_return_of_one_order_of_a_receipt_keeps_the_other_order_costs(self):
+		first_order = make_order_with_additional_cost_and_transfer(1000)
+		second_order = make_order_with_additional_cost_and_transfer(100)
+		scr = make_subcontracting_receipt(first_order.name)
+		scr = get_mapped_subcontracting_receipt(second_order.name, target_doc=scr)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.set(
+			"items", [row for row in scr_return.items if row.subcontracting_order == first_order.name]
+		)
+		scr_return.save()
+		scr_return.submit()
+		replacement = make_subcontracting_receipt(first_order.name)
+		replacement.save()
+
+		self.assertEqual([row.amount for row in scr_return.additional_costs], [-550, 0])
+		self.assertEqual(replacement.total_additional_costs, 550)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_batch_return_uses_accepted_receipt_rate(self):
