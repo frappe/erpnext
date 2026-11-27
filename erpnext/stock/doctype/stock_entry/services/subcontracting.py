@@ -4,9 +4,11 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, NullIf, Sum
 from frappe.utils import flt
 
+from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.utils import get_bin
 
 from .stock_entry_base import BaseStockEntry
@@ -205,31 +207,93 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 
 	def on_cancel(self):
 		self.update_subcontract_order_supplied_items()
-		self.validate_consumed_qty_is_still_supplied()
+		self.update_consumed_qty_in_order()
 
-	def validate_consumed_qty_is_still_supplied(self):
-		"""Receipts of the order must not have consumed the material this cancelled entry supplied."""
-		rm_detail_field = self.doc.subcontract_data.rm_detail_field
-		order_rows = frappe.get_all(
-			self.doc.subcontract_data.order_supplied_items_field,
-			filters={"name": ["in", [row.get(rm_detail_field) for row in self.doc.items]]},
-			fields=["idx", "rm_item_code", "total_supplied_qty", "consumed_qty"],
-		)
+	def update_consumed_qty_in_order(self):
+		"""Count the order's consumption again on the transfers left, and block a cancel that leaves some unsupplied."""
+		order = self.doc.get(self.doc.subcontract_data.order_field)
+		if not order:
+			return
+
+		self.validate_reservation_is_not_consumed(order)
+		# one cancel of the order's transfers at a time
+		order_doc = frappe.get_doc(self.doc.subcontract_data.order_doctype, order, for_update=True)
+		order_doc.set_consumed_qty_in_subcontract_order()
+		self.validate_consumed_batches_are_supplied(order_doc)
+
+		item_codes = list({row.item_code for row in self.doc.items})
+		net_qty_sent = self.get_net_qty_sent(order, item_codes)
+		consumed_qty = get_consumed_qty_by_item(order, item_codes)
 		precision = frappe.get_precision(self.doc.subcontract_data.order_supplied_items_field, "consumed_qty")
-		for row in order_rows:
-			if flt(row.consumed_qty, precision) > flt(row.total_supplied_qty, precision):
+		for item_code in item_codes:
+			qty = flt(consumed_qty.get(item_code, 0) - net_qty_sent.get(item_code, 0), precision)
+			if qty > 0:
 				frappe.throw(
 					_(
-						"Cannot cancel: receipts of {0} {1} already consumed {2} of Item {3} (row {4}), more than the {5} it would still have supplied."
-					).format(
-						self.doc.subcontract_data.order_doctype,
-						self.doc.get(self.doc.subcontract_data.order_field),
-						row.consumed_qty,
-						row.rm_item_code,
-						row.idx,
-						row.total_supplied_qty,
-					)
+						"Cannot cancel: {0} {1} would then supply {2} less of Item {3} than its receipts already consumed and its returns took back."
+					).format(self.doc.subcontract_data.order_doctype, order, qty, item_code)
 				)
+
+	def validate_consumed_batches_are_supplied(self, order_doc):
+		"""The order's other transfers must still supply what its receipts consumed of the batches this entry sent."""
+		batches = self.get_batches_sent()
+		precision = frappe.get_precision(self.doc.subcontract_data.order_supplied_items_field, "consumed_qty")
+		for (item_code, batch_no), qty in order_doc.get("unsupplied_batch_qty", default={}).items():
+			qty = flt(qty, precision)
+			if batch_no in batches and qty > 0:
+				frappe.throw(
+					_(
+						"Cannot cancel: {0} {1} would then supply {2} less of Batch {3} of Item {4} than its receipts already consumed."
+					).format(order_doc.doctype, order_doc.name, qty, batch_no, item_code)
+				)
+
+	def get_batches_sent(self):
+		"""Batches this entry sent to the supplier."""
+		bundles = [row.serial_and_batch_bundle for row in self.doc.items if row.serial_and_batch_bundle]
+		return {row.batch_no for row in self.doc.items if row.batch_no} | set(
+			get_batches_from_bundle(bundles)
+		)
+
+	def validate_reservation_is_not_consumed(self, order):
+		"""Receipts keep the supplier warehouse reservation of this entry they consumed; the cancel cannot move it to another."""
+		if frappe.db.exists(
+			"Stock Reservation Entry",
+			{
+				"from_voucher_type": "Stock Entry",
+				"from_voucher_no": self.doc.name,
+				"docstatus": 1,
+				"consumed_qty": (">", 0),
+			},
+		):
+			frappe.throw(
+				_(
+					"Cannot cancel: receipts of {0} {1} already consumed the stock this entry reserved at the supplier. Cancel those receipts first."
+				).format(self.doc.subcontract_data.order_doctype, order)
+			)
+
+	def get_net_qty_sent(self, order, item_codes):
+		"""Net qty of each item the order's transfers and their returns still supply."""
+		se = frappe.qb.DocType("Stock Entry")
+		se_detail = frappe.qb.DocType("Stock Entry Detail")
+		qty = Case().when(se.is_return == 1, -se_detail.transfer_qty).else_(se_detail.transfer_qty)
+		rows = (
+			frappe.qb.from_(se)
+			.inner_join(se_detail)
+			.on(se.name == se_detail.parent)
+			.select(se_detail.item_code, Sum(qty))
+			.where(
+				(se.docstatus == 1)
+				& (se[self.doc.subcontract_data.order_field] == order)
+				& se_detail.item_code.isin(item_codes)
+				& (
+					(se.purpose == "Send to Subcontractor")
+					| ((se.purpose == "Material Transfer") & (se.is_return == 1))
+				)
+			)
+			.groupby(se_detail.item_code)
+		).run()
+
+		return dict(rows)
 
 	def update_subcontract_order_supplied_items(self):
 		if not self.doc.get(self.doc.subcontract_data.order_field):
@@ -320,3 +384,23 @@ def get_items_from_subcontract_order(source_name: str, target_doc: str | dict | 
 	target_doc = make_rm_stock_entry(subcontract_order=source_name, target_doc=target_doc)
 
 	return target_doc
+
+
+def get_consumed_qty_by_item(order, item_codes):
+	"""Qty of each item the order's subcontracting receipts consumed, net of their returns."""
+	supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+	receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	rows = (
+		frappe.qb.from_(supplied_item)
+		.inner_join(receipt_item)
+		.on(receipt_item.name == supplied_item.reference_name)
+		.select(supplied_item.rm_item_code, Sum(supplied_item.consumed_qty))
+		.where(
+			(supplied_item.docstatus == 1)
+			& (receipt_item.subcontracting_order == order)
+			& supplied_item.rm_item_code.isin(item_codes)
+		)
+		.groupby(supplied_item.rm_item_code)
+	).run()
+
+	return dict(rows)
