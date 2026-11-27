@@ -83,6 +83,16 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			frappe.db.get_column_index("tabSerial and Batch Bundle", "voucher_type", unique=False)
 		)
 
+	def test_serial_no_is_indexed_with_posting_datetime(self):
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("MariaDB index names")
+
+		self.assertTrue(frappe.db.has_index("tabSerial and Batch Entry", "serial_no_posting_datetime_index"))
+		self.assertFalse(frappe.db.get_column_index("tabSerial and Batch Entry", "serial_no", unique=False))
+		self.assertFalse(
+			frappe.db.has_index("tabSerial and Batch Entry", "warehouse_serial_no_posting_datetime_index")
+		)
+
 	def test_serial_availability_at_posting_cutoff(self):
 		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
 

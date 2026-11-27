@@ -571,3 +571,4 @@ erpnext.patches.v16_0.set_reserved_components_return_cutoff
 erpnext.patches.v16_0.encrypt_bank_plaid_access_token
 erpnext.patches.v16_0.enable_operations_and_job_cards
 erpnext.patches.v16_0.set_accounting_dimension_filter_options
+erpnext.patches.v16_0.drop_warehouse_serial_no_index_from_serial_and_batch_entry
