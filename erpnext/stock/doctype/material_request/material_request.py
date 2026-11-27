@@ -657,8 +657,28 @@ def validate_request_not_stopped(source_name):
 		frappe.throw(_("Material Request {0} is stopped").format(source_name), frappe.InvalidStatusError)
 
 
-def get_pending_pick_qty(row):
-	return flt(row.stock_qty) - max(flt(row.ordered_qty), flt(row.picked_qty))
+def get_open_pick_qty(material_request: str) -> dict[str, float]:
+	"""Stock qty picked on submitted pick lists but not yet transferred, per request row."""
+	pick_list = frappe.qb.DocType("Pick List")
+	pick_list_item = frappe.qb.DocType("Pick List Item")
+	rows = (
+		frappe.qb.from_(pick_list_item)
+		.join(pick_list)
+		.on(pick_list.name == pick_list_item.parent)
+		.select(
+			pick_list_item.material_request_item,
+			Sum(pick_list_item.picked_qty - pick_list_item.transferred_qty),
+		)
+		.where((pick_list.docstatus == 1) & (pick_list_item.material_request == material_request))
+		.groupby(pick_list_item.material_request_item)
+	).run()
+
+	return {row_name: flt(qty) for row_name, qty in rows}
+
+
+def get_pending_pick_qty(row, open_pick_qty: dict[str, float]):
+	# ordered_qty already holds what open picks transferred, so add only the untransferred part
+	return flt(row.stock_qty) - flt(row.ordered_qty) - flt(open_pick_qty.get(row.name))
 
 
 def get_draft_work_order_qty(material_request):
@@ -1372,9 +1392,10 @@ def raise_work_orders(material_request: str, company: str):
 @frappe.whitelist()
 def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
 	validate_request_not_stopped(source_name)
+	open_pick_qty = get_open_pick_qty(source_name)
 
 	def update_item(obj, target, source_parent):
-		qty = flt(get_pending_pick_qty(obj) / target.conversion_factor, obj.precision("qty"))
+		qty = flt(get_pending_pick_qty(obj, open_pick_qty) / target.conversion_factor, obj.precision("qty"))
 		target.qty = qty
 		target.stock_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
@@ -1396,7 +1417,9 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 					"from_warehouse": "warehouse",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: flt(get_pending_pick_qty(doc), doc.precision("stock_qty")) > 0,
+				"condition": lambda doc: (
+					flt(get_pending_pick_qty(doc, open_pick_qty), doc.precision("stock_qty")) > 0
+				),
 			},
 		},
 		target_doc,
