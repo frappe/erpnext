@@ -1544,6 +1544,49 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(sorted(incoming_rates.values()), [100, 300])
 		self.assertEqual(incoming_rates, {row.name: row.rate for row in scr_return.supplied_items})
 
+	def test_standard_cost_raw_material_return_uses_current_standard_rate(self):
+		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
+			create_item_standard_cost,
+			create_standard_cost_item,
+		)
+
+		rm_item = create_standard_cost_item().name
+		create_item_standard_cost(rm_item, rate=50, effective_date=add_days(today(), -1))
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 6
+		scr.save()
+		scr.submit()
+		create_item_standard_cost(rm_item, rate=80)
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": rm_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(scr_return.supplied_items[0].rate, 80)
+		self.assertEqual(stock_value_difference, 2 * 80)
+
 	def test_subcontracting_receipt_over_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
@@ -4504,6 +4547,76 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr_return.items[0].warehouse = scr.items[0].warehouse
 		scr_return.save()
 		self.assertEqual(scr_return.items[0].service_cost_per_qty, scr.items[0].service_cost_per_qty)
+
+	def test_rejected_return_of_standard_cost_raw_materials_matches_the_ledger(self):
+		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
+			create_item_standard_cost,
+			create_standard_cost_item,
+			ensure_ppv_account,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		ensure_ppv_account(company)
+		raw_material = create_standard_cost_item().name
+		create_item_standard_cost(
+			raw_material, rate=50, company=company, effective_date=add_days(today(), -1)
+		)
+		finished_good = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=finished_good, raw_materials=[raw_material], company=company, currency="INR")
+
+		sco = get_subcontracting_order(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=[
+				{
+					"warehouse": "Stores - TCP1",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": finished_good,
+					"fg_item_qty": 10,
+				}
+			],
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.save()
+		scr.submit()
+
+		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		scr_return.save()
+		scr_return.reload()
+		scr_return.submit()
+
+		stock_value = sum(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": scr_return.name, "warehouse": scr_return.supplier_warehouse},
+				pluck="stock_value_difference",
+			)
+		)
+		supplier_warehouse_account = get_inventory_account(company, scr_return.supplier_warehouse)
+		gl_value = sum(
+			gle.debit - gle.credit
+			for gle in get_gl_entries("Subcontracting Receipt", scr_return.name)
+			if gle.account == supplier_warehouse_account
+		)
+		self.assertTrue(stock_value)
+		self.assertEqual(gl_value, stock_value)
 
 	def test_purchase_receipt_maps_all_receipt_rows(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (

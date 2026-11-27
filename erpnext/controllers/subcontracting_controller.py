@@ -31,6 +31,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import (
 	_get_incoming_rate,
+	get_valuation_method,
 	is_serial_no_wise_valuation_disabled,
 	validate_warehouse_company,
 )
@@ -141,15 +142,17 @@ class SubcontractingController(StockController):
 
 		rates = []
 		for row in rows:
+			# the stock ledger values Standard Cost items at the standard rate
+			is_standard_cost = get_valuation_method(row.rm_item_code, self.company) == "Standard Cost"
 			return_rate = None
-			if self.is_return:
+			if self.is_return and not is_standard_cost:
 				key = (original_rows.get(row.reference_name), row.rm_item_code)
 				return_rate = self.get_serial_batch_return_rate(
 					row, consumed_serial_batches.get(key, {}), bundle_entries
 				)
 				if return_rate is None:
 					return_rate = return_rates.get(key)
-			if row.reference_name in rejected_return_rows:
+			if row.reference_name in rejected_return_rows and not is_standard_cost:
 				rates.append(0.0)
 			elif return_rate is not None:
 				rates.append(return_rate)
