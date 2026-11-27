@@ -663,6 +663,17 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		self.assertRaisesRegex(frappe.ValidationError, "already consumed", transfer.cancel)
 
+	def test_transfer_cannot_be_cancelled_after_its_material_was_returned(self):
+		"""5 are sent for FG A and all 5 returned, with stock of other orders at the supplier."""
+		set_backflush_based_on("BOM")
+		sco, rm_item = make_order_of_three_sharing_a_raw_material("Cancel Returned")
+		transfer = make_supplied_item_transfer(sco, sco.supplied_items[0])
+		transfer.submit()
+		get_materials_from_supplier_for(sco).submit()
+		make_stock_entry(item_code=rm_item, target=sco.supplier_warehouse, qty=5, basic_rate=100)
+
+		self.assertRaisesRegex(frappe.ValidationError, "returns took back", transfer.cancel)
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
