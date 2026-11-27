@@ -9,14 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-<<<<<<< HEAD
-from frappe.utils import cint, flt, get_link_to_form, today
-from frappe.utils.data import DateTimeLikeObject, add_days
-
-import erpnext
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
-=======
-from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime, today
+from frappe.utils import cint, flt, get_link_to_form, nowtime, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 import erpnext
@@ -24,8 +17,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_batch_qty_for_stock,
 )
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
->>>>>>> c24efc0 (chore(stock): import batch bundle helpers at module level)
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
