@@ -63,6 +63,7 @@ from erpnext.stock.get_item_details import (
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_empty_batches_based_work_order,
+	get_serial_batch_list_from_item,
 	get_serial_or_batch_items,
 )
 from erpnext.stock.stock_ledger import (
@@ -2784,9 +2785,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue
 
 			bundle_doc = None
-			if row.serial_and_batch_bundle and abs(row.transfer_qty) != abs(
-				frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
-			):
+			if is_bundle_resized(row):
 				bundle_doc = SerialBatchCreation(
 					{
 						"item_code": row.item_code,
@@ -2838,29 +2837,104 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def set_serial_batch_fields_for_subcontracting_inward(self):
 		serial_nos, batch_nos = frappe._dict(), frappe._dict()
-		for row in self.items:
-			if self.purpose in [
-				"Return Raw Material to Customer",
-				"Subcontracting Delivery",
-				"Subcontracting Return",
-			]:
-				if not row.serial_and_batch_bundle:
-					serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
-						row.scio_detail, only_pending=self.purpose != "Subcontracting Return"
-					)
+		if self.purpose not in [
+			"Return Raw Material to Customer",
+			"Subcontracting Delivery",
+			"Subcontracting Return",
+		]:
+			return serial_nos, batch_nos
 
-					if len(batch_nos_list) > 1:
-						row.use_serial_batch_fields = 0
+		reserved = self.get_reserved_entries_by_scio_detail()
+		self.take_bundled_entries(reserved)
+		# a resized bundle is picked again, so its row takes from reserved like a row without one
+		rows = [
+			(row, get_entered_serial_nos_and_batch(row))
+			for row in self.items
+			if not row.serial_and_batch_bundle or is_bundle_resized(row)
+		]
+		# rows with serial nos entered take first, then rows with a batch, so other rows do not take those
+		for row, entered in sorted(rows, key=lambda pair: (not pair[1][0], not pair[1][1])):
+			serial_nos_list, batch_nos_list = take_reserved_entries(
+				reserved[row.scio_detail], row.transfer_qty, *entered
+			)
+			short_qty = flt(
+				row.transfer_qty - (sum(batch_nos_list.values()) or len(serial_nos_list)),
+				frappe.get_precision("Serial and Batch Entry", "qty"),
+			)
+			if any(entered) and short_qty > 0 and is_entered_taken(entered, serial_nos_list, batch_nos_list):
+				# an earlier draft save filled these for a smaller qty, so top them up from the reserved entries
+				more_serial_nos, more_batches = take_reserved_entries(reserved[row.scio_detail], short_qty)
+				serial_nos_list += more_serial_nos
+				for batch_no, qty in more_batches.items():
+					batch_nos_list[batch_no] = batch_nos_list.get(batch_no, 0) + qty
+				row.serial_no = row.batch_no = None
 
-					if row.use_serial_batch_fields:
-						if serial_nos_list and not row.serial_no:
-							row.serial_no = "\n".join(serial_nos_list)
-						if batch_nos_list and not row.batch_no:
-							row.batch_no = next(iter(batch_nos_list.keys()))
+			if len(batch_nos_list) > 1:
+				row.use_serial_batch_fields = 0
 
-					serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
+			if row.use_serial_batch_fields:
+				if serial_nos_list and not row.serial_no:
+					row.serial_no = "\n".join(serial_nos_list)
+				if batch_nos_list and not row.batch_no:
+					row.batch_no = next(iter(batch_nos_list.keys()))
+
+			serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
 
 		return serial_nos, batch_nos
+
+	def get_reserved_entries_by_scio_detail(self):
+		"""Reserved serial and batch entries of the inward order rows, with the qty each can still give."""
+		reserved = defaultdict(list)
+		scio_details = list({row.scio_detail for row in self.items if row.scio_detail})
+		if not scio_details:
+			return reserved
+
+		table = frappe.qb.DocType("Stock Reservation Entry")
+		child_table = frappe.qb.DocType("Serial and Batch Entry")
+		only_pending = self.purpose != "Subcontracting Return"
+		available = child_table.qty - child_table.delivered_qty if only_pending else child_table.delivered_qty
+		query = (
+			frappe.qb.from_(table)
+			.join(child_table)
+			.on(table.name == child_table.parent)
+			.select(
+				table.voucher_detail_no,
+				child_table.serial_no,
+				child_table.batch_no,
+				available.as_("available"),
+			)
+			.where((table.docstatus == 1) & table.voucher_detail_no.isin(scio_details) & (available > 0))
+			.orderby(table.creation)
+			.orderby(child_table.idx)
+		)
+
+		for entry in query.run(as_dict=True):
+			reserved[entry.voucher_detail_no].append(entry)
+
+		return reserved
+
+	def take_bundled_entries(self, reserved):
+		"""Take from reserved what rows with a bundle of the row qty already hold."""
+		rows = {
+			row.serial_and_batch_bundle: row
+			for row in self.items
+			if row.serial_and_batch_bundle and not is_bundle_resized(row)
+		}
+		if not rows:
+			return
+
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ["in", list(rows)]},
+			fields=["parent", "serial_no", "batch_no", "qty"],
+			order_by="idx",
+		):
+			take_reserved_entries(
+				reserved[rows[entry.parent].scio_detail],
+				abs(entry.qty),
+				[entry.serial_no] if entry.serial_no else None,
+				entry.batch_no,
+			)
 
 	def validate_subcontract_order(self):
 		"""Throw exception if more raw material is transferred against Subcontract Order than in
@@ -5867,6 +5941,53 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
+
+
+def is_bundle_resized(row):
+	"""The row has a bundle whose total qty is not the row qty."""
+	return bool(row.serial_and_batch_bundle) and abs(row.transfer_qty) != abs(
+		frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
+	)
+
+
+def get_entered_serial_nos_and_batch(row):
+	"""Serial nos and batch entered on a row that uses the serial and batch fields."""
+	if not row.use_serial_batch_fields:
+		return None, None
+
+	serial_nos, batches = get_serial_batch_list_from_item(row)
+	return serial_nos or None, batches[0] if batches else None
+
+
+def is_entered_taken(entered, serial_nos_list, batch_nos_list):
+	"""Every entered serial no, or the entered batch, was taken from the reserved entries."""
+	serial_nos, batch_no = entered
+	if serial_nos:
+		return set(serial_nos) <= set(serial_nos_list)
+	return batch_no in batch_nos_list
+
+
+def take_reserved_entries(entries, qty, serial_nos=None, batch_no=None):
+	"""Take serial nos and batch qty up to qty from reserved entries, only of serial_nos / batch_no if given."""
+	taken_serial_nos, taken_batches = [], frappe._dict()
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	for entry in entries:
+		if flt(qty, precision) <= 0:
+			break
+		if flt(entry.available, precision) <= 0 or entry.serial_no in taken_serial_nos:
+			continue
+		if (serial_nos and entry.serial_no not in serial_nos) or (batch_no and entry.batch_no != batch_no):
+			continue
+
+		entry_qty = min(entry.available, qty)
+		entry.available -= entry_qty
+		qty -= entry_qty
+		if entry.serial_no:
+			taken_serial_nos.append(entry.serial_no)
+		if entry.batch_no:
+			taken_batches[entry.batch_no] = taken_batches.get(entry.batch_no, 0) + entry_qty
+
+	return taken_serial_nos, taken_batches
 
 
 def split_by_weights(amount: float, weights: list[float], precision: int) -> list[float]:

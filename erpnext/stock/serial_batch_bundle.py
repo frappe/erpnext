@@ -1374,7 +1374,7 @@ class SerialBatchCreation:
 		if serial_nos:
 			self.serial_nos = serial_nos
 		if batch_nos:
-			self.batch_nos = batch_nos
+			self.batches = batch_nos
 
 		self.set_auto_serial_batch_entries_for_outward()
 		self.set_serial_batch_entries(doc)
