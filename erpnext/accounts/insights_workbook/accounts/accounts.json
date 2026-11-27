@@ -307,7 +307,7 @@
       "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
-       "expression": "sum_if((outstanding >= 0.005) & (due_date >= today()) & (due_date < date_add(today(), 30, 'day')), outstanding)",
+       "expression": "sum_if((outstanding >= 0.005) & (due_date > today()) & (due_date <= date_add(today(), 30, 'day')), outstanding)",
        "type": "expression"
       },
       "format": "currency",
@@ -566,7 +566,15 @@
         "column_name": "overdue",
         "type": "column"
        },
-       "operator": ">",
+       "operator": "!=",
+       "value": 0
+      },
+      {
+       "column": {
+        "column_name": "customer_overdue",
+        "type": "column"
+       },
+       "operator": "!=",
        "value": 0
       }
      ],
@@ -608,11 +616,11 @@
       "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
-       "expression": "sum_if(days_overdue.between(1, 30), outstanding)",
+       "expression": "sum_if(days_overdue.between(0, 30), outstanding)",
        "type": "expression"
       },
       "format": "currency",
-      "measure_name": "1-30 Days"
+      "measure_name": "0-30 Days"
      },
      {
       "currency_column": "Company:company:default_currency",
@@ -932,7 +940,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-24 19:40:00.000000",
+ "modified": "2026-11-27 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "accounts",
@@ -1812,7 +1820,7 @@
       },
       {
        "expression": {
-        "expression": "(due_date >= today()) & (due_date < date_add(week_start(today()), 56, 'day'))",
+        "expression": "(due_date > today()) & (due_date < date_add(week_start(today()), 56, 'day'))",
         "type": "expression"
        }
       }
@@ -1935,7 +1943,7 @@
     {
      "data_type": "Decimal",
      "expression": {
-      "expression": "if_else((outstanding >= 0.005) & (due_date < today()), outstanding, 0)",
+      "expression": "if_else((abs(outstanding) >= 0.005) & (due_date <= today()), outstanding, 0)",
       "type": "expression"
      },
      "new_name": "overdue",
@@ -2207,10 +2215,19 @@
     {
      "data_type": "Decimal",
      "expression": {
-      "expression": "if_else((outstanding >= 0.005) & (due_date < today()), outstanding, 0)",
+      "expression": "if_else((abs(outstanding) >= 0.005) & (due_date <= today()), outstanding, 0)",
       "type": "expression"
      },
      "new_name": "overdue",
+     "type": "mutate"
+    },
+    {
+     "data_type": "Decimal",
+     "expression": {
+      "expression": "if_else(abs(overdue.sum().over(ibis.window(group_by=[customer, company]))) >= 0.005, overdue.sum().over(ibis.window(group_by=[customer, company])), 0)",
+      "type": "expression"
+     },
+     "new_name": "customer_overdue",
      "type": "mutate"
     }
    ],
