@@ -452,18 +452,21 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertRaises(StockOverReturnError, credit_note.insert)
 
 	def test_credit_note_in_a_larger_uom_cannot_round_the_billed_qty_up(self):
-		"""0.6 Nos billed is 0.0006 of a 1000 Nos UOM, which must not round up to allow 0.001."""
+		"""0.6 of a qty step billed in the return row's UOM must not round up to allow a whole step."""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		item_code = make_item(
-			properties={"stock_uom": "Nos", "uoms": [{"uom": "_Test UOM 1", "conversion_factor": 1000}]}
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "_Test UOM 1", "conversion_factor": 10}]}
 		).name
-		si = create_sales_invoice(item_code=item_code, qty=0.6)
+		si = create_sales_invoice(item_code=item_code, do_not_submit=True)
+		step = 10 ** -si.items[0].precision("qty")
+		si.items[0].qty = 6 * step
+		si.submit()
 
 		credit_note = make_return_doc(si.doctype, si.name)
-		credit_note.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 1000, "qty": -0.001})
+		credit_note.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 10, "qty": -step})
 		self.assertRaises(StockOverReturnError, credit_note.insert)
 
 	def test_return_rate_ceiling_holds_for_large_conversion_factor(self):
