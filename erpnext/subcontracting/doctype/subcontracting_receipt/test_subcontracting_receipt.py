@@ -749,6 +749,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual([row.amount for row in scr.additional_costs], [500, 100])
 		self.assertEqual([row.amount for row in next_scr.additional_costs], [500])
 
+	def test_return_of_one_order_of_a_receipt_keeps_the_other_order_costs(self):
+		first_order = make_order_with_additional_cost_and_transfer(1000)
+		second_order = make_order_with_additional_cost_and_transfer(100)
+		scr = make_subcontracting_receipt(first_order.name)
+		scr = get_mapped_subcontracting_receipt(second_order.name, target_doc=scr)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.set(
+			"items", [row for row in scr_return.items if row.subcontracting_order == first_order.name]
+		)
+		scr_return.save()
+		scr_return.submit()
+		replacement = make_subcontracting_receipt(first_order.name)
+		replacement.save()
+
+		self.assertEqual([row.amount for row in scr_return.additional_costs], [-550, 0])
+		self.assertEqual(replacement.total_additional_costs, 550)
+
 	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
