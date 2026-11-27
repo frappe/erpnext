@@ -364,17 +364,23 @@ def get_subcontracted_work_order_costs(work_order, qty_by_item_row):
 	}
 	additional_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
 	corrective_per_unit = _subcontracted_corrective_cost_per_unit(work_order, sum(qty_by_item_row.values()))
-	precision = frappe.get_precision("Landed Cost Taxes and Charges", "amount")
+	qtys = list(qty_by_item_row.values())
+	amounts = zip(
+		qty_by_item_row,
+		_split_per_unit_cost(additional_per_unit, qtys),
+		_split_per_unit_cost(corrective_per_unit, qtys),
+		strict=True,
+	)
 
 	costs = []
-	for item_row, qty in qty_by_item_row.items():
+	for item_row, additional_amount, corrective_amount in amounts:
 		if additional_per_unit:
 			costs.append(
 				{
 					**row,
 					"item_row": item_row,
 					"description": "Additional Operating Cost",
-					"amount": flt(additional_per_unit * qty, precision),
+					"amount": additional_amount,
 				}
 			)
 		if corrective_per_unit:
@@ -384,10 +390,22 @@ def get_subcontracted_work_order_costs(work_order, qty_by_item_row):
 					"item_row": item_row,
 					"description": "Corrective Operation Cost",
 					"has_corrective_cost": 1,
-					"amount": flt(corrective_per_unit * qty, precision),
+					"amount": corrective_amount,
 				}
 			)
 	return costs
+
+
+def _split_per_unit_cost(per_unit_cost, qtys):
+	"""Cost of each qty, rounded on the running total so the shares add up to the cost of all qtys."""
+	precision = frappe.get_precision("Landed Cost Taxes and Charges", "amount")
+	amounts, allocated, cumulative_qty = [], 0.0, 0.0
+	for qty in qtys:
+		cumulative_qty += qty
+		cumulative_amount = flt(per_unit_cost * cumulative_qty, precision)
+		amounts.append(flt(cumulative_amount - allocated, precision))
+		allocated = cumulative_amount
+	return amounts
 
 
 def _subcontracted_corrective_cost_per_unit(work_order, receipt_qty):
