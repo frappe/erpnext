@@ -79,6 +79,27 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(asset.asset_category, "Computers")
 
+	def test_finance_books_are_fetched_when_depreciation_is_enabled_on_a_draft(self):
+		category = frappe.copy_doc(frappe.get_doc("Asset Category", "Computers"))
+		category.asset_category_name = "_Test Computers With Finance Book"
+		category.append(
+			"finance_books",
+			{
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 3,
+				"frequency_of_depreciation": 3,
+			},
+		)
+		category.insert(ignore_if_duplicate=True)
+
+		asset = create_asset(asset_category=category.name)
+		asset.calculate_depreciation = 1
+		asset.save()
+
+		self.assertEqual(len(asset.finance_books), 1)
+		self.assertEqual(asset.finance_books[0].total_number_of_depreciations, 3)
+		self.assertTrue(get_asset_depr_schedule_doc(asset.name, "Draft"))
+
 	def test_gross_purchase_amount_is_mandatory(self):
 		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
 		asset.gross_purchase_amount = 0
