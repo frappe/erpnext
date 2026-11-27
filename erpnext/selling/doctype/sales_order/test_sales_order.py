@@ -743,7 +743,9 @@ class TestSalesOrder(ERPNextTestSuite):
 		dn.items[0].qty = 1
 		dn.submit()
 		dn_return = make_sales_return(dn.name)
-		dn_return.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -2})
+		dn_return.items[0].update(
+			{"uom": item.stock_uom, "conversion_factor": 1, "qty": -2, "rate": dn_return.items[0].rate / 12}
+		)
 		dn_return.submit()
 
 		si = make_sales_invoice(so.name)
@@ -751,7 +753,9 @@ class TestSalesOrder(ERPNextTestSuite):
 		si.items[0].qty = 1
 		si.submit()
 		credit_note = make_credit_note(si.name)
-		credit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -4})
+		credit_note.items[0].update(
+			{"uom": item.stock_uom, "conversion_factor": 1, "qty": -4, "rate": credit_note.items[0].rate / 12}
+		)
 		credit_note.submit()
 
 		so.reload()
