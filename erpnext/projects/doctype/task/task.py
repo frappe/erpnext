@@ -502,27 +502,16 @@ def check_if_child_exists(name):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_project(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.controllers.queries import get_match_cond
+	search_fields = list(dict.fromkeys(["name", *frappe.get_meta("Project").get_search_fields()]))
 
-	meta = frappe.get_meta(doctype)
-	searchfields = meta.get_search_fields()
-	search_columns = ", " + ", ".join(searchfields) if searchfields else ""
-	search_cond = " or " + " or ".join(field + " like %(txt)s" for field in searchfields)
-
-	return frappe.db.sql(
-		f""" select name {search_columns} from `tabProject`
-		where %(key)s like %(txt)s
-			%(mcond)s
-			{search_cond}
-		order by name
-		limit %(page_len)s offset %(start)s""",
-		{
-			"key": searchfield,
-			"txt": "%" + txt + "%",
-			"mcond": get_match_cond(doctype),
-			"start": start,
-			"page_len": page_len,
-		},
+	return frappe.get_list(
+		"Project",
+		fields=search_fields,
+		or_filters={field: ["like", f"%{txt}%"] for field in search_fields},
+		order_by="name",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
 
 
