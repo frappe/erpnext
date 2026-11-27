@@ -694,7 +694,7 @@ class TestBatch(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_existing_serial_no": 0})
 	def test_split_batch_of_returned_serial_nos(self):
 		from erpnext.stock.doctype.batch.batch import split_batch
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		warehouse = "_Test Warehouse - _TC"
