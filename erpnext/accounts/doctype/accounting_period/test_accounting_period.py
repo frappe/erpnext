@@ -27,6 +27,14 @@ class TestAccountingPeriod(ERPNextTestSuite):
 		)
 		self.assertRaises(OverlapError, ap2.save)
 
+		ap1.disabled = 1
+		ap1.save()
+		ap2.save()
+		ap1.save()
+
+		ap1.disabled = 0
+		self.assertRaises(OverlapError, ap1.save)
+
 	def test_accounting_period(self):
 		ap1 = create_accounting_period(period_name="Test Accounting Period 2")
 		ap1.save()
