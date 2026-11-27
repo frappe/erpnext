@@ -402,6 +402,11 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	already_returned_data = already_returned_items.get(key) or {}
 	returns_nothing = not (flt(args.get("qty")) or flt(args.get("rejected_qty")))
 
+	# an invoice without Update Stock bills in the row's UOM, so its qty is checked in that UOM
+	uom_factor = 1
+	if doc.doctype in ("Purchase Invoice", "Sales Invoice") and not doc.update_stock:
+		uom_factor = flt(args.get("conversion_factor")) or 1
+
 	company_currency = erpnext.get_company_currency(doc.company)
 	field_precision = get_field_precision(
 		frappe.get_meta(doc.doctype + " Item").get_field(
@@ -436,6 +441,9 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = flt(args.get(column)) * args.get("conversion_factor", 1.0)
 
+		reference_qty, returned_qty, current_stock_qty = (
+			flt(qty) / uom_factor for qty in (reference_qty, returned_qty, current_stock_qty)
+		)
 		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
 		label = column.replace("_", " ").title()
 
