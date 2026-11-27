@@ -445,6 +445,7 @@ var set_activity_costs = function (frm) {
 					row.costing_rate = cost.costing_rate;
 					calculate_billing_costing_amount(frm, row.doctype, row.name);
 				});
+			calculate_time_and_amount(frm);
 			frm.refresh_fields("time_logs");
 		});
 	});
