@@ -1971,6 +1971,34 @@ class TestMaterialRequest(ERPNextTestSuite):
 		update_status(mr.name, "Stopped")
 		self.assertRaises(frappe.InvalidStatusError, create_pick_list, mr.name)
 
+	def test_pick_list_maps_the_qty_left_after_a_transfer_and_an_open_pick(self):
+		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry as make_se_from_pick_list
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
+
+		item_code = create_item("_Test MR Open Pick Item", is_stock_item=1).name
+		make_se(item_code=item_code, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		mr = make_material_request(
+			item_code=item_code,
+			material_request_type="Material Transfer",
+			from_warehouse="_Test Warehouse - _TC",
+			warehouse="_Test Warehouse 1 - _TC",
+			uom="Nos",
+		)
+
+		transfer = make_stock_entry(mr.name)
+		transfer.items[0].qty = 4
+		transfer.submit()
+
+		pick_list = create_pick_list(mr.name)
+		pick_list.locations[0].qty = pick_list.locations[0].stock_qty = 5
+		pick_list.submit()
+
+		# 4 transferred directly and 5 picked but not yet transferred
+		self.assertEqual(create_pick_list(mr.name).locations[0].qty, 1)
+
+		frappe.get_doc(make_se_from_pick_list(pick_list.as_json())).submit()
+		self.assertEqual(create_pick_list(mr.name).locations[0].qty, 1)
+
 	def test_mappers_skip_ordered_rows_and_stopped_requests(self):
 		mr = make_material_request(item_code="_Test Item", qty=10)
 		po = make_purchase_order(mr.name)
