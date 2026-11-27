@@ -11,6 +11,7 @@ from frappe.utils import cint, flt, get_datetime
 from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
 from erpnext.stock.report.stock_ledger.stock_ledger import (
+	formatter,
 	get_item_details,
 	get_opening_balance,
 	get_stock_ledger_entries,
