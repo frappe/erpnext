@@ -66,6 +66,217 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		pr.set("invoices", [])
 		self.assertRaises(frappe.ValidationError, pr.validate_allocation)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"currency_precision": 2})
+	def test_invoice_allocation_keeps_fractional_amounts_in_running_balance(self):
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.append(
+			"invoices",
+			{"invoice_type": "Sales Invoice", "invoice_number": "INV-1", "outstanding_amount": 100},
+		)
+		for amount in (25.004, 25.004, 25.004, 25):
+			pr.append(
+				"allocation",
+				{
+					"invoice_type": "Sales Invoice",
+					"invoice_number": "INV-1",
+					"amount": amount,
+					"allocated_amount": amount,
+				},
+			)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "invoice outstanding amount"):
+			pr.validate_allocation()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"currency_precision": 2})
+	def test_allocation_cannot_exceed_payment_balance(self):
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.append(
+			"payments",
+			{
+				"reference_type": "Payment Entry",
+				"reference_name": "PE-1",
+				"amount": 600,
+			},
+		)
+		pr.append(
+			"invoices",
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": "INV-1",
+				"outstanding_amount": 5000,
+			},
+		)
+		for amounts in ([600], [1000], [400, 400], [300, 300], [150.004, 150.004, 150.004, 150]):
+			with self.subTest(amounts=amounts):
+				pr.set("allocation", [])
+				for amount in amounts:
+					pr.append(
+						"allocation",
+						{
+							"reference_type": "Payment Entry",
+							"reference_name": "PE-1",
+							"invoice_type": "Sales Invoice",
+							"invoice_number": "INV-1",
+							"amount": 600,
+							"allocated_amount": amount,
+						},
+					)
+				if sum(amounts) > 600:
+					self.assertRaises(frappe.ValidationError, pr.validate_allocation)
+				else:
+					pr.validate_allocation()
+
+	def test_reconcile_advance_with_allocation_precision_override(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		self.supplier = "_Test Supplier"
+		with self.change_settings("System Settings", {"currency_precision": 3}):
+			order = self.create_purchase_order(rate=100)
+			payment = get_payment_entry(order.doctype, order.name).save().submit()
+			invoices = []
+			for rate in (99.999, 10):
+				invoice = self.create_purchase_invoice(rate=rate, do_not_save=True)
+				invoice.disable_rounded_total = 1
+				invoices.append(invoice.save().submit())
+
+		with self.change_settings("System Settings", {"currency_precision": 2}):
+			precision_override = make_property_setter(
+				"Payment Reconciliation Allocation", "allocated_amount", "precision", 3, "Int"
+			)
+			try:
+				pr = self.create_payment_reconciliation(party_is_customer=False)
+				pr.payment_name = payment.name
+				pr.get_unreconciled_entries()
+				invoice_rows = {row.invoice_number: row.as_dict() for row in pr.invoices}
+				pr.allocate_entries(
+					{
+						"payments": [row.as_dict() for row in pr.payments],
+						"invoices": [invoice_rows[invoice.name] for invoice in invoices],
+					}
+				)
+				self.assertEqual([row.allocated_amount for row in pr.allocation], [99.999, 0.001])
+
+				pr.allocation[1].allocated_amount = 0.002
+				self.assertRaises(frappe.ValidationError, pr.validate_allocation)
+				pr.allocation[1].allocated_amount = 0.001
+				pr.reconcile()
+
+				self.assertEqual(
+					[(row.reference_name, row.allocated_amount) for row in payment.reload().references],
+					[(invoices[0].name, 99.999), (invoices[1].name, 0.001)],
+				)
+			finally:
+				precision_override.delete()
+
+	def test_reconcile_advance_against_invoices_with_finer_precision(self):
+		self.supplier = "_Test Supplier"
+		with self.change_settings("System Settings", {"currency_precision": 3}):
+			order = self.create_purchase_order(rate=100)
+			payment = get_payment_entry(order.doctype, order.name).save().submit()
+			invoices = []
+			for _ in range(4):
+				invoice = self.create_purchase_invoice(rate=25.004, do_not_save=True)
+				invoice.disable_rounded_total = 1
+				invoices.append(invoice.save().submit())
+
+		with self.change_settings("System Settings", {"currency_precision": 2}):
+			pr = self.create_payment_reconciliation(party_is_customer=False)
+			pr.payment_name = payment.name
+			pr.get_unreconciled_entries()
+			invoice_rows = {row.invoice_number: row.as_dict() for row in pr.invoices}
+			pr.allocate_entries(
+				{
+					"payments": [row.as_dict() for row in pr.payments],
+					"invoices": [invoice_rows[invoice.name] for invoice in invoices],
+				}
+			)
+			pr.reconcile()
+
+			references = payment.reload().references
+			self.assertEqual(
+				[row.reference_name for row in references], [invoice.name for invoice in invoices]
+			)
+			self.assertEqual([row.allocated_amount for row in references], [25.004, 25.004, 25.004, 24.988])
+
+	def test_reconcile_advance_rounded_to_allocation_precision(self):
+		self.supplier = "_Test Supplier"
+		with self.change_settings("System Settings", {"currency_precision": 3}):
+			order = self.create_purchase_order(rate=100)
+			payment = get_payment_entry(order.doctype, order.name)
+			payment.paid_amount = payment.received_amount = 99.999
+			payment.references[0].allocated_amount = 99.999
+			payment.save().submit()
+
+		with self.change_settings("System Settings", {"currency_precision": 2}):
+			invoice = self.create_purchase_invoice(rate=100)
+			pr = self.create_payment_reconciliation(party_is_customer=False)
+			pr.payment_name = payment.name
+			pr.invoice_name = invoice.name
+			pr.get_unreconciled_entries()
+			pr.allocate_entries(
+				{
+					"payments": [row.as_dict() for row in pr.payments],
+					"invoices": [row.as_dict() for row in pr.invoices],
+				}
+			)
+			self.assertEqual(pr.allocation[0].allocated_amount, 99.999)
+			pr.allocation[0].allocated_amount = 100
+			pr.reconcile()
+
+			references = payment.reload().references
+			self.assertEqual(len(references), 1)
+			self.assertEqual(references[0].reference_name, invoice.name)
+			self.assertEqual(references[0].allocated_amount, 99.999)
+
+	def test_allocation_and_reconciliation_with_zero_currency_precision(self):
+		system_settings = frappe.get_single("System Settings")
+		original_precision = system_settings.currency_precision
+		system_settings.currency_precision = 0
+		system_settings.save()
+		frappe.db.set_default("currency_precision", 0)
+		frappe.clear_cache()
+		try:
+			pr = frappe.get_doc("Payment Reconciliation")
+			pr.receivable_payable_account = self.debit_to
+			pr.append(
+				"payments",
+				{
+					"reference_type": "Payment Entry",
+					"reference_name": "PE-ZERO-1",
+					"amount": 100.0,
+				},
+			)
+			pr.append(
+				"invoices",
+				{
+					"invoice_type": "Sales Invoice",
+					"invoice_number": "INV-ZERO-1",
+					"outstanding_amount": 99.40,
+				},
+			)
+			pr.append(
+				"invoices",
+				{
+					"invoice_type": "Sales Invoice",
+					"invoice_number": "INV-ZERO-2",
+					"outstanding_amount": 1.0,
+				},
+			)
+			pr.allocate_entries(
+				{
+					"payments": [d.as_dict() for d in pr.payments],
+					"invoices": [d.as_dict() for d in pr.invoices],
+				}
+			)
+			self.assertEqual(len(pr.allocation), 2)
+			# Reconcile validation must NOT reject the allocation generated by Allocate
+			pr.validate_allocation()
+		finally:
+			system_settings.currency_precision = original_precision
+			system_settings.save()
+			frappe.db.set_default("currency_precision", original_precision)
+			frappe.clear_cache()
+
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
@@ -2196,7 +2407,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		pr.reconcile()
 
 	@ERPNextTestSuite.change_settings("System Settings", {"currency_precision": 2})
-	def test_allocate_entries_rounds_running_balance_to_currency_precision(self):
+	def test_allocate_entries_preserves_running_balance_precision(self):
 		pr = frappe.new_doc("Payment Reconciliation")
 		pr.company = self.company
 		pr.party_type = "Customer"
@@ -2224,12 +2435,12 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
 
-		self.assertEqual(payments[0]["amount"], flt(637.585, 2))
+		self.assertAlmostEqual(payments[0]["amount"], 637.585)
 
 	@ERPNextTestSuite.change_settings(
 		"System Settings", {"currency_precision": "", "use_number_format_from_currency": 1}
 	)
-	def test_allocate_entries_rounds_running_balance_to_account_currency_precision(self):
+	def test_allocate_entries_uses_account_currency_precision_to_exhaust_payment(self):
 		account_currency = frappe.get_cached_value("Account", self.debit_to, "account_currency")
 		original_number_format = frappe.db.get_value("Currency", account_currency, "number_format")
 		frappe.db.set_value("Currency", account_currency, "number_format", "#,###.###")
@@ -2249,7 +2460,13 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			{
 				"invoice_type": "Sales Invoice",
 				"invoice_number": "INV-1",
-				"outstanding_amount": 17592.415,
+				"outstanding_amount": 100,
+				"currency": account_currency,
+			},
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": "INV-2",
+				"outstanding_amount": 1,
 				"currency": account_currency,
 			},
 		]
@@ -2257,14 +2474,15 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			{
 				"reference_type": "Payment Entry",
 				"reference_name": "PAY-1",
-				"amount": 18230,
+				"amount": 100.004,
 				"currency": account_currency,
 			}
 		]
 
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
 
-		self.assertEqual(payments[0]["amount"], flt(637.585, 3))
+		self.assertEqual(len(pr.allocation), 2)
+		self.assertAlmostEqual(pr.allocation[1].allocated_amount, 0.004)
 
 	def test_reverse_payment_against_payment_for_supplier(self):
 		"""

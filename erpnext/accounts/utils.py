@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Optional
 import frappe
 import frappe.defaults
 from frappe import _, qb, throw
+from frappe.database.schema import DEFAULT_DECIMAL_PRECISION
 from frappe.desk.reportview import build_match_conditions
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import determine_consecutive_week_number
@@ -557,7 +558,7 @@ def reconcile_against_document(
 					dimensions_dict=dimensions_dict,
 				)
 				if referenced_row.get("outstanding_amount") and entry.get("outstanding_amount") is None:
-					referenced_row.outstanding_amount -= flt(entry.allocated_amount)
+					referenced_row.outstanding_amount -= flt(referenced_row.allocated_amount)
 
 				reposting_rows.append(referenced_row)
 
@@ -770,22 +771,49 @@ def update_reference_in_payment_entry(
 		reference_details.update({"reconcile_effect_on": reconcile_on})
 
 	if d.voucher_detail_no:
-		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
+		existing_rows = payment_entry.get("references", {"name": d["voucher_detail_no"]})
+		if not existing_rows:
+			frappe.throw(
+				_(
+					"Reference row {0} not found in {1} {2}. Please refresh the reconciliation to fetch latest entries."
+				).format(d["voucher_detail_no"], payment_entry.doctype, payment_entry.name)
+			)
+		existing_row = existing_rows[0]
 
-		if d.allocated_amount <= existing_row.allocated_amount:
-			existing_row.allocated_amount -= d.allocated_amount
+		precision = d.get("precision")
+		if precision is None:
+			precision = DEFAULT_DECIMAL_PRECISION
+		excess_amount = d.allocated_amount - existing_row.allocated_amount
+		if flt(excess_amount, precision) > 0:
+			frappe.throw(
+				_(
+					"Cannot allocate {0} against {1} {2}. Only {3} is unallocated in row #{4} of {5} {6}."
+				).format(
+					d.allocated_amount,
+					d.against_voucher_type,
+					d.against_voucher,
+					existing_row.allocated_amount,
+					existing_row.idx,
+					payment_entry.doctype,
+					payment_entry.name,
+				)
+			)
 
-			new_row = payment_entry.append("references")
-			new_row.docstatus = 1
-			for field in list(reference_details):
-				new_row.set(field, reference_details[field])
+		# A difference below the allocation precision must not create a negative advance balance.
+		reference_details["allocated_amount"] = min(d.allocated_amount, existing_row.allocated_amount)
+		existing_row.allocated_amount = max(0, flt(-excess_amount, DEFAULT_DECIMAL_PRECISION))
 
-			if existing_row.reference_doctype in advance_payment_doctypes:
-				new_row.advance_voucher_type = existing_row.reference_doctype
-				new_row.advance_voucher_no = existing_row.reference_name
-				new_row.payment_request = existing_row.payment_request
+		new_row = payment_entry.append("references")
+		new_row.docstatus = 1
+		for field in list(reference_details):
+			new_row.set(field, reference_details[field])
 
-			row = new_row
+		if existing_row.reference_doctype in advance_payment_doctypes:
+			new_row.advance_voucher_type = existing_row.reference_doctype
+			new_row.advance_voucher_no = existing_row.reference_name
+			new_row.payment_request = existing_row.payment_request
+
+		row = new_row
 
 	else:
 		new_row = payment_entry.append("references")
