@@ -3939,6 +3939,39 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual([row.qty for row in stock_entry.items if row.item_code == item_code], [3])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_job_card_secondary_items_kept_when_items_are_fetched_again(self):
+		bom, stock_entry = make_manufacture_entry_with_job_card_secondary_item(
+			{"secondary_item_type": "Scrap"}
+		)
+		stock_entry.fg_completed_qty = 5
+		stock_entry.get_items()
+		secondary_item = bom.secondary_items[0]
+		self.assertEqual(
+			[
+				(row.qty, row.stock_uom)
+				for row in stock_entry.items
+				if row.item_code == secondary_item.item_code
+			],
+			# 3 * 5 / 10, rounded up for the whole-number UOM
+			[(2, secondary_item.stock_uom)],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "BOM", "overproduction_percentage_for_work_order": 100},
+	)
+	def test_overproduction_past_job_card_qty_gets_no_job_card_secondary_items(self):
+		bom, stock_entry = make_manufacture_entry_with_job_card_secondary_item(
+			{"secondary_item_type": "Scrap"}
+		)
+		stock_entry.submit()
+		overproduction = frappe.get_doc(
+			make_stock_entry_for_work_order(stock_entry.work_order, "Manufacture", 1)
+		)
+		item_code = bom.secondary_items[0].item_code
+		self.assertFalse([row for row in overproduction.items if row.item_code == item_code])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
 	def test_job_card_scrap_goes_to_work_order_scrap_warehouse(self):
 		bom, stock_entry = make_manufacture_entry_with_job_card_secondary_item(
 			{"secondary_item_type": "Scrap"}
