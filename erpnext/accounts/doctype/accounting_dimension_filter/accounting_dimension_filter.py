@@ -19,7 +19,7 @@ class AccountingDimensionFilter(Document):
 		from erpnext.accounts.doctype.allowed_dimension.allowed_dimension import AllowedDimension
 		from erpnext.accounts.doctype.applicable_on_account.applicable_on_account import ApplicableOnAccount
 
-		accounting_dimension: DF.Literal[None]
+		accounting_dimension: DF.Literal["", "Cost Center", "Project"]
 		accounts: DF.Table[ApplicableOnAccount]
 		allow_or_restrict: DF.Literal["Allow", "Restrict"]
 		apply_restriction_on_values: DF.Check
