@@ -435,13 +435,17 @@ var set_start_date = function (frm) {
 };
 
 var set_activity_costs = function (frm) {
-	(frm.doc.time_logs || []).forEach((row) => {
-		if (!row.activity_type) return;
-		fetch_activity_cost(frm, row.activity_type, (cost) => {
-			row.billing_rate = cost.billing_rate;
-			row.costing_rate = cost.costing_rate;
+	let activity_types = new Set((frm.doc.time_logs || []).map((row) => row.activity_type).filter(Boolean));
+	activity_types.forEach((activity_type) => {
+		fetch_activity_cost(frm, activity_type, (cost) => {
+			frm.doc.time_logs
+				.filter((row) => row.activity_type === activity_type)
+				.forEach((row) => {
+					row.billing_rate = cost.billing_rate;
+					row.costing_rate = cost.costing_rate;
+					calculate_billing_costing_amount(frm, row.doctype, row.name);
+				});
 			frm.refresh_fields("time_logs");
-			calculate_billing_costing_amount(frm, row.doctype, row.name);
 		});
 	});
 };
