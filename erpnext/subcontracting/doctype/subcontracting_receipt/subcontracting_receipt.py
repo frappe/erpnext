@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
@@ -928,12 +928,55 @@ class SubcontractingReceipt(SubcontractingController):
 			.groupby(charges.subcontracting_order_cost)
 			.run()
 		)
-		rows = frappe.get_all(
-			"Landed Cost Taxes and Charges",
-			filters={"name": ("in", order_costs), "parenttype": "Subcontracting Order"},
-			fields=["name", "parent", "amount"],
+		order = frappe.qb.DocType("Subcontracting Order")
+		rows = (
+			frappe.qb.from_(charges)
+			.inner_join(order)
+			.on(order.name == charges.parent)
+			.select(charges.name, charges.parent, charges.amount, order.total_additional_costs)
+			.where((charges.parenttype == "Subcontracting Order") & charges.name.isin(order_costs))
+			.run(as_dict=True)
 		)
-		return {row.name: (row.parent, flt(row.amount) - flt(taken.get(row.name))) for row in rows}
+		unlinked_taken = self.get_order_costs_taken_by_unlinked_receipts(list({row.parent for row in rows}))
+		costs_left = {}
+		for row in rows:
+			# unlinked receipts take from each order row by its share of the order's cost
+			row_share = (
+				flt(row.amount) / flt(row.total_additional_costs) if flt(row.total_additional_costs) else 0
+			)
+			row_taken = flt(taken.get(row.name)) + flt(unlinked_taken.get(row.parent)) * row_share
+			costs_left[row.name] = (row.parent, flt(row.amount) - row_taken)
+		return costs_left
+
+	def get_order_costs_taken_by_unlinked_receipts(self, orders: list[str]) -> dict[str, float]:
+		"""Additional costs each order's submitted receipts booked without cost rows linked to the order."""
+		receipt = frappe.qb.DocType("Subcontracting Receipt")
+		receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
+		charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		linked_receipts = (
+			frappe.qb.from_(charges)
+			.select(charges.parent)
+			.where(
+				(charges.parenttype == "Subcontracting Receipt")
+				& (IfNull(charges.subcontracting_order_cost, "") != "")
+			)
+		)
+		costing_qty = receipt_item.qty + receipt_item.rejected_qty + receipt_item.process_loss_qty
+		return dict(
+			frappe.qb.from_(receipt_item)
+			.inner_join(receipt)
+			.on(receipt.name == receipt_item.parent)
+			.select(
+				receipt_item.subcontracting_order, Sum(costing_qty * receipt_item.additional_cost_per_qty)
+			)
+			.where(
+				(receipt.docstatus == 1)
+				& receipt_item.subcontracting_order.isin(orders)
+				& receipt.name.notin(linked_receipts)
+			)
+			.groupby(receipt_item.subcontracting_order)
+			.run()
+		)
 
 	def get_order_additional_cost_shares(self) -> dict[str, float]:
 		"""Share of each order's pending additional costs that this receipt's qty takes."""
