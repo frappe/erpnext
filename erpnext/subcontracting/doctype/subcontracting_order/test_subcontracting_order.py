@@ -2980,7 +2980,7 @@ def send_serial_batch(sco, row, batch_no=False):
 		item_code=row.rm_item_code, target=row.reserve_warehouse, qty=row.required_qty, basic_rate=100
 	)
 	bundle = stock_entry.items[0].serial_and_batch_bundle
-	serial_batch = get_batch_from_bundle(bundle) if batch_no else get_serial_numbers_from_bundle(bundle)
+	serial_batch = get_batch_from_bundle(bundle) if batch_no else get_serial_nos_from_bundle(bundle)
 
 	transfer = make_supplied_item_transfer(sco, row)
 	transfer.items[0].update(
