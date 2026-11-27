@@ -181,44 +181,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					? __("Internal Purchase Invoice")
 					: __("Inter Company Purchase Invoice");
 
-<<<<<<< HEAD
-				frappe.call({
-					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
-					args: {
-						reference_name: me.frm.doc.name,
-						doctype: "Purchase Invoice",
-						reference_fieldname: "sales_invoice_item",
-					},
-					callback: function (r) {
-						if (r.exc) return;
-						const received_items = r.message || {};
-						// A Sales Invoice made from a Purchase Invoice links it without item references.
-						const is_made_from_purchase_invoice =
-							doc.inter_company_invoice_reference && $.isEmptyObject(received_items);
-						const has_pending_qty = me.frm.doc.items.some(
-							(item) =>
-								flt(
-									item.stock_qty - flt(received_items[item.name]),
-									precision("stock_qty", item)
-								) > 0
-						);
-						if (is_made_from_purchase_invoice || !has_pending_qty) return;
-
-						me.frm.add_custom_button(
-							__(button_label),
-							function () {
-								me.make_inter_company_invoice();
-							},
-							__("Create")
-						);
-					},
-				});
-			}
-=======
 			this.add_inter_company_button(button_label, "Purchase Invoice", "sales_invoice_item", () =>
 				this.make_inter_company_invoice()
 			);
->>>>>>> c08fb51 (fix(selling): use the shared inter company button check on sales invoice)
 		}
 
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
