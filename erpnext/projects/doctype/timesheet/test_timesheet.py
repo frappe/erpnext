@@ -206,23 +206,17 @@ class TestTimesheet(ERPNextTestSuite):
 
 	def test_foreign_currency_timesheet_without_an_exchange_rate_cannot_be_submitted(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
-		timesheet = frappe.get_doc(
-			{
-				"doctype": "Timesheet",
-				"company": "_Test Company",
-				"employee": emp,
-				"currency": "USD",
-				"time_logs": [
-					{
-						"activity_type": "_Test Activity Type",
-						"from_time": now_datetime(),
-						"hours": 2,
-						"costing_rate": 6,
-					}
-				],
-			}
-		)
+		timesheet = make_usd_timesheet(emp, costing_rate=6)
 		# submit looks the rate up again, so it stays under the patch
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", return_value=0):
+			timesheet.insert()
+			self.assertEqual(timesheet.exchange_rate, 0)
+			self.assertEqual(timesheet.base_total_costing_amount, 0)
+			self.assertRaises(frappe.ValidationError, timesheet.submit)
+
+	def test_draft_with_the_old_fallback_rate_of_one_cannot_be_submitted(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_usd_timesheet(emp, exchange_rate=1, costing_rate=6)
 		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", return_value=0):
 			timesheet.insert()
 			self.assertEqual(timesheet.exchange_rate, 0)
@@ -1119,6 +1113,22 @@ def make_timesheet(
 		timesheet.submit()
 
 	return timesheet
+
+
+def make_usd_timesheet(employee, exchange_rate=None, **time_log):
+	"""An unsaved USD Timesheet with one 2 hour time log."""
+	return frappe.get_doc(
+		{
+			"doctype": "Timesheet",
+			"company": "_Test Company",
+			"employee": employee,
+			"currency": "USD",
+			"exchange_rate": exchange_rate,
+			"time_logs": [
+				{"activity_type": "_Test Activity Type", "from_time": now_datetime(), "hours": 2, **time_log}
+			],
+		}
+	)
 
 
 def patch_usd_rate(inr_per_usd):
