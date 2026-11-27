@@ -4920,6 +4920,15 @@ class TestWorkOrder(ERPNextTestSuite):
 				rates = get_partial_manufacture_scrap_rates(valuation_type, kg_rm_qty=4)
 				self.assertEqual(rates, [(91, 10), (0, 1), (0, 1), (0, 1)])
 
+	def test_capped_secondary_rows_add_up_to_consumed_cost(self):
+		"""Capping rounds the running total, so a small consumed cost leaves no row negative."""
+		entry = frappe.new_doc("Stock Entry")
+		for _ in range(5):
+			entry.append("items", {"transfer_qty": 1, "basic_rate": 1, "basic_amount": 1})
+
+		entry.cap_costed_out_items(entry.items, 0.03)
+		self.assertEqual([row.basic_amount for row in entry.items], [0.01, 0, 0.01, 0, 0.01])
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
