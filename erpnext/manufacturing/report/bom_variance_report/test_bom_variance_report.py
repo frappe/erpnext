@@ -6,7 +6,7 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
 
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry, make_stock_return_entry
 from erpnext.manufacturing.report.bom_variance_report.bom_variance_report import execute, get_work_orders
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -128,6 +128,32 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 		for item_code, per_unit_qty in self.raw_materials.items():
 			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
 			self.assertEqual(raw_material_rows[item_code].get("consumed_qty"), per_unit_qty * 2 + 1)
+
+	def test_raw_material_returned_from_wip_is_not_consumed(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		material = make_item(properties={"is_stock_item": 1}).name
+		production_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=production_item, raw_materials=[material])
+		work_order = make_wo_order_test_record(
+			item=production_item, bom_no=bom.name, qty=10, source_warehouse=self.warehouse
+		)
+		test_stock_entry.make_stock_entry(item_code=material, target=self.warehouse, qty=10, basic_rate=100)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
+		frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 6)).submit()
+		close_work_order(work_order.name, "Closed")
+		make_stock_return_entry(work_order.name).submit()
+
+		row = self.material_rows(work_order)[material]
+		self.assertEqual((row.required_qty, row.consumed_qty), (6, 6))
+
+		# Work Orders saved before returns were counted store consumed_qty net of returns
+		frappe.db.set_value(
+			"Work Order Item", {"parent": work_order.name, "item_code": material}, "consumed_qty", 6
+		)
+		self.assertEqual(self.material_rows(work_order)[material].consumed_qty, 6)
 
 	def test_material_rows_of_hidden_work_orders_are_left_out(self):
 		permitted = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2)
