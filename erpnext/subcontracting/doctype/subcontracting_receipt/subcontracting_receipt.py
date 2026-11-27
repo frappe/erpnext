@@ -532,8 +532,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.remove_returned_secondary_rows_without_qty()
 
 		if recalculate_rate:
-			self.set_additional_costs()
-			self.calculate_items_qty_and_amount()
+			self.set_additional_costs_and_amounts()
 
 	def get_returned_receipt_rows(self) -> dict:
 		"""Rows of the receipt this return is against, by name."""
@@ -818,6 +817,12 @@ class SubcontractingReceipt(SubcontractingController):
 	@frappe.whitelist()
 	def set_missing_values(self):
 		self.set_available_qty_for_consumption()
+		self.set_additional_costs_and_amounts()
+
+	def set_additional_costs_and_amounts(self):
+		if self.distribute_additional_costs_based_on == "Amount" and self.get("additional_costs"):
+			# split on the amounts at the current qty and secondary rows
+			self.calculate_items_qty_and_amount()
 		self.set_additional_costs()
 		self.calculate_items_qty_and_amount()
 
@@ -976,6 +981,8 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rate = self.get_secondary_item_valuation_rate(item)
 
 			if item.valuation_type in ("Valuation Rate", "Manual"):
+				# net of process loss before it is deducted, as the rows below are
+				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
 				item.amount = flt(item.qty) * flt(item.rate)
 				secondary_items_cost_map[item.reference_name] = (
 					secondary_items_cost_map.get(item.reference_name, 0) + item.amount
