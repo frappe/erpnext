@@ -11,6 +11,8 @@ from frappe.query_builder import CustomFunction
 from frappe.query_builder.functions import Count, Sum
 from frappe.utils import date_diff, flt
 
+from erpnext.controllers.status_updater import COMPLETE_PERCENTAGE
+
 DateDiff = CustomFunction("DATEDIFF", ["end_date", "start_date"])
 
 
@@ -180,7 +182,7 @@ def get_total_days_late(scorecard):
 
 
 def get_on_time_shipments(scorecard):
-	"""Counts PO lines (scheduled in the period) fully received on or before their schedule date.
+	"""Counts PO lines (scheduled in the period) fully received, rejected qty included, on or before their schedule date.
 
 	Counting in PO-line units keeps this consistent with get_total_shipments so that
 	get_late_shipments (total - on time) stays non-negative even for split deliveries.
@@ -199,15 +201,23 @@ def get_on_time_shipments(scorecard):
 		.on(PR_Item.purchase_order_item == PO_Item.name)
 		.join(PO)
 		.on(PO_Item.parent == PO.name)
-		.select(PO_Item.name, PO_Item.qty, Sum(PR_Item.qty).as_("received_on_time"))
+		.select(
+			(PO_Item.qty * PO_Item.conversion_factor).as_("ordered"),
+			Sum(PR_Item.received_qty * PR_Item.conversion_factor).as_("received_on_time"),
+		)
 		.where(PO.supplier == scorecard.supplier)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
 		.where(PO_Item.schedule_date >= PR.posting_date)
 		.where(PR_Item.docstatus == 1)
-		.groupby(PO_Item.name, PO_Item.qty)
+		.groupby(PO_Item.name, PO_Item.qty, PO_Item.conversion_factor)
 	).run(as_dict=True)
 
-	return sum(1 for row in rows if flt(row.received_on_time) >= flt(row.qty))
+	# fully received as the PO's per_received counts it; a unit-price line (no qty ordered) counts once received
+	return sum(
+		1
+		for row in rows
+		if not row.ordered or flt(row.received_on_time / row.ordered * 100, 6) >= COMPLETE_PERCENTAGE
+	)
 
 
 def get_late_shipments(scorecard):
