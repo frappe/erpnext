@@ -177,6 +177,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
 			this.frm.add_custom_button(label, () => this.make_payment_entry());
 			this.frm.change_custom_button_type(label, null, "primary");
+			this.frm.custom_make_buttons["Payment Entry"] = label;
 		}
 
 		this.toggle_get_items();
@@ -891,7 +892,7 @@ frappe.ui.form.on("Sales Invoice", {
 			"Delivery Note": "Delivery",
 			"Sales Invoice": "Return / Credit Note",
 			"Payment Request": "Payment Request",
-			"Payment Entry": "Payment",
+			"Payment Entry": "Record Payment",
 		};
 
 		frm.set_query("time_sheet", "timesheets", function (doc, cdt, cdn) {

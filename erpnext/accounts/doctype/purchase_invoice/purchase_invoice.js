@@ -155,6 +155,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
 			this.frm.add_custom_button(label, () => this.make_payment_entry());
 			this.frm.change_custom_button_type(label, null, "primary");
+			this.frm.custom_make_buttons["Payment Entry"] = label;
 		}
 
 		if (doc.docstatus === 0) {
@@ -532,7 +533,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
 		frm.custom_make_buttons = {
 			"Purchase Invoice": "Return / Debit Note",
-			"Payment Entry": "Payment",
+			"Payment Entry": "Record Payment",
 		};
 
 		if (frm.doc.update_stock) {

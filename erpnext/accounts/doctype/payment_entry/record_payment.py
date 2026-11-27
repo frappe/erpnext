@@ -17,11 +17,11 @@ def record_payment(dt: str, names: str | list, values: str | dict, save: bool = 
 
 
 @frappe.whitelist()
-def get_payment_entry_for(dt: str, names: str | list):
+def get_payment_entry_for(dt: str, names: str | list, reference_date: str | None = None):
 	first, *others = sort_by_due_date(dt, frappe.parse_json(names))
-	payment_entry = get_payment_entry(dt, first)
+	payment_entry = get_payment_entry(dt, first, reference_date=reference_date)
 	for name in others:
-		add_invoice(payment_entry, get_payment_entry(dt, name), name)
+		add_invoice(payment_entry, get_payment_entry(dt, name, reference_date=reference_date), name)
 
 	if others:
 		payment_entry.set_amounts()
@@ -55,7 +55,7 @@ def get_unapplied_credit(dt: str, dn: str) -> float:
 class RecordPayment:
 	def __init__(self, dt: str, names: list, values: dict):
 		self.values = frappe._dict(values)
-		self.payment_entry = get_payment_entry_for(dt, names)
+		self.payment_entry = get_payment_entry_for(dt, names, self.values.reference_date)
 		self.is_receive = self.payment_entry.payment_type == "Receive"
 		self.bank_field = "paid_to" if self.is_receive else "paid_from"
 		self.party_currency = self.payment_entry.get(
@@ -162,13 +162,17 @@ class RecordPayment:
 			)
 
 	def set_exchange_rate(self, amount: float, bank_amount: float):
-		payment_entry = self.payment_entry
-		company_currency = frappe.get_cached_value("Company", payment_entry.company, "default_currency")
-		if not bank_amount or payment_entry.get(f"{self.bank_field}_account_currency") != company_currency:
+		if not bank_amount:
 			return
 
-		party_rate_field = "source_exchange_rate" if self.is_receive else "target_exchange_rate"
-		payment_entry.set(party_rate_field, bank_amount / amount)
+		payment_entry = self.payment_entry
+		company_currency = frappe.get_cached_value("Company", payment_entry.company, "default_currency")
+		if payment_entry.get(f"{self.bank_field}_account_currency") == company_currency:
+			party_rate_field = "source_exchange_rate" if self.is_receive else "target_exchange_rate"
+			payment_entry.set(party_rate_field, bank_amount / amount)
+		else:
+			bank_rate_field = "target_exchange_rate" if self.is_receive else "source_exchange_rate"
+			payment_entry.set(bank_rate_field, amount / bank_amount)
 
 	def set_deductions(self):
 		if self.is_refund:

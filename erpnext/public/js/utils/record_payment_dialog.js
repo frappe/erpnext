@@ -13,6 +13,8 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 		this.bank_currency = payment_entry[`${this.bank_field}_account_currency`];
 		this.is_multi_currency = this.party_currency !== this.bank_currency;
 		this.outstanding = RecordPaymentDialog.total_outstanding(payment_entry.references);
+		this.exchange_rate = this.outstanding ? this.get_bank_amount() / this.outstanding : 0;
+		this.posting_date = payment_entry.posting_date;
 		this.is_refund = payment_entry.references[0].outstanding_amount < 0;
 		this.can_deduct = !this.is_refund && !this.is_multi_currency;
 		this.can_write_off = this.can_deduct && RecordPaymentDialog.is_invoice(doctype);
@@ -90,11 +92,12 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 
 	async show() {
 		await frappe.model.with_doctype("Payment Entry");
+		if (this.names.length > 1) await frappe.require("embedded_list.bundle.js");
 		this.can_submit =
 			frappe.perm.has_perm("Payment Entry", 0, "submit") && !frappe.model.has_workflow("Payment Entry");
 		this.set_defaults();
 		this.dialog = new frappe.ui.Dialog({
-			title: this.is_refund ? __("Record Refund") : __("Record Payment"),
+			title: this.get_title(),
 			fields: this.get_fields(),
 			sheet_on_mobile: true,
 			no_submit_on_enter: true,
@@ -104,8 +107,17 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 			secondary_action: () => this.edit_full_form(),
 		});
 		this.dialog.show();
+		this.render_invoices();
 		this.refresh_summary();
 		this.show_unapplied_credit();
+	}
+
+	get_title() {
+		const party = frappe.utils.escape_html(this.payment_entry.party_name || this.payment_entry.party);
+		if (this.is_refund) {
+			return this.is_receive ? __("Refund from {0}", [party]) : __("Refund to {0}", [party]);
+		}
+		return this.is_receive ? __("Payment from {0}", [party]) : __("Payment to {0}", [party]);
 	}
 
 	set_defaults() {
@@ -131,6 +143,7 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 	get_fields() {
 		return [
 			...this.get_payment_fields(),
+			...this.get_invoice_fields(),
 			...this.get_bank_fields(),
 			...this.get_deduction_fields(),
 			...this.get_summary_fields(),
@@ -143,13 +156,6 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 			{ fieldname: "party_currency", fieldtype: "Data", hidden: 1, default: this.party_currency },
 			{ fieldname: "bank_currency", fieldtype: "Data", hidden: 1, default: this.bank_currency },
 			{ fieldname: "account_type", fieldtype: "Data", hidden: 1, default: this.defaults.account_type },
-			{
-				fieldname: "party",
-				fieldtype: "Data",
-				label: __(payment_entry.party_type),
-				read_only: 1,
-				default: payment_entry.party_name || payment_entry.party,
-			},
 			{
 				fieldname: "party_amount",
 				fieldtype: "Currency",
@@ -171,20 +177,61 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 			},
 			{ fieldtype: "Column Break" },
 			{
-				fieldname: "reference_name",
-				fieldtype: "Data",
-				label: this.names.length > 1 ? __("Invoices") : __(this.doctype),
-				read_only: 1,
-				default: [...new Set(payment_entry.references.map((row) => row.reference_name))].join(", "),
-			},
-			{
 				fieldname: "posting_date",
 				fieldtype: "Date",
 				label: __("Posting Date"),
 				reqd: 1,
 				default: payment_entry.posting_date,
+				onchange: () => this.on_posting_date_change(),
 			},
 		];
+	}
+
+	get_invoice_fields() {
+		if (this.names.length < 2) return [];
+		return [{ fieldtype: "Section Break" }, { fieldname: "invoices", fieldtype: "HTML" }];
+	}
+
+	render_invoices() {
+		if (this.names.length < 2) return;
+		const rows = this.get_invoice_rows();
+		new frappe.ui.EmbeddedList({
+			wrapper: this.dialog.fields_dict.invoices.$wrapper,
+			title: __("Invoices"),
+			description: __("The oldest due date is paid first."),
+			show_search: rows.length > 5,
+			get_data: () => Promise.resolve(rows),
+			columns: [
+				{
+					label: __(this.doctype),
+					fieldname: "invoice",
+					type: "link",
+					route: (row) => ["Form", this.doctype, row.invoice],
+				},
+				{
+					label: __("Due Date"),
+					render: (row) => frappe.datetime.str_to_user(row.due_date),
+				},
+				{
+					label: __("Outstanding"),
+					align: "right",
+					render: (row) => format_currency(row.outstanding_amount, this.party_currency),
+				},
+			],
+		}).refresh();
+	}
+
+	get_invoice_rows() {
+		const rows = {};
+		for (const row of this.payment_entry.references) {
+			rows[row.reference_name] ||= {
+				invoice: row.reference_name,
+				due_date: row.due_date,
+				outstanding_amount: 0,
+			};
+			rows[row.reference_name].outstanding_amount += row.outstanding_amount;
+		}
+		return Object.values(rows);
 	}
 
 	get_bank_fields() {
@@ -334,7 +381,7 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 	}
 
 	get_exchange_rate() {
-		return this.outstanding ? this.get_bank_amount() / this.outstanding : 0;
+		return this.exchange_rate;
 	}
 
 	get_exchange_rate_hint() {
@@ -348,6 +395,21 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 			this.dialog.set_value("bank_amount", flt(bank_amount, this.get_precision()));
 		}
 		this.refresh_summary();
+	}
+
+	async on_posting_date_change() {
+		const posting_date = this.dialog.get_value("posting_date");
+		if (!this.is_multi_currency || !posting_date || posting_date === this.posting_date) return;
+		this.posting_date = posting_date;
+		const rate = await frappe.xcall("erpnext.setup.utils.get_exchange_rate", {
+			from_currency: this.party_currency,
+			to_currency: this.bank_currency,
+			transaction_date: posting_date,
+		});
+		if (!rate || this.dialog.get_value("posting_date") !== posting_date) return;
+		this.exchange_rate = rate;
+		this.dialog.set_df_property("bank_amount", "description", this.get_exchange_rate_hint());
+		this.on_amount_change();
 	}
 
 	on_deduction_change() {
@@ -439,14 +501,17 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 		);
 		if (!credit) return;
 
-		const party = frappe.utils.escape_html(this.payment_entry.party_name || this.payment_entry.party);
-		this.dialog.set_alert(
-			__("{0} has {1} in unapplied payments and credit notes.", [
-				party.bold(),
-				format_currency(credit, this.party_currency),
-			])
-		);
-		this.dialog.add_custom_action(__("Apply Credit"), () => this.apply_credit());
+		const amount = format_currency(credit, this.party_currency);
+		frappe.ui
+			.alert({
+				theme: "blue",
+				title:
+					this.payment_entry.party_type === "Customer"
+						? __("This customer has {0} in unapplied payments and credit notes.", [amount])
+						: __("This supplier has {0} in unapplied payments and debit notes.", [amount]),
+				primary_action: { label: __("Apply Credit"), onclick: () => this.apply_credit() },
+			})
+			.prependTo(this.dialog.body);
 	}
 
 	apply_credit() {
