@@ -94,10 +94,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
-			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
-			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
-		}
+		const can_record_payment =
+			doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry");
 
 		if (doc.docstatus == 1 && !doc.is_return) {
 			var is_delivered_by_supplier = false;
@@ -115,7 +113,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					this.make_sales_return.bind(this),
 					__("Create")
 				);
-				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+				if (!can_record_payment) {
+					this.frm.page.set_inner_btn_group_as_primary(__("Create"));
+				}
 			}
 
 			if (cint(doc.update_stock) != 1 && frappe.model.can_create("Delivery Note")) {
@@ -172,6 +172,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				);
 			}
 		}
+
+		if (can_record_payment) {
+			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
+			this.frm.add_custom_button(label, () => this.make_payment_entry());
+			this.frm.change_custom_button_type(label, null, "primary");
+		}
+
 		this.toggle_get_items();
 
 		this.set_default_print_format();

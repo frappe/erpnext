@@ -120,16 +120,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (
-			doc.docstatus == 1 &&
-			doc.outstanding_amount != 0 &&
-			!doc.on_hold &&
-			frappe.model.can_create("Payment Entry")
-		) {
-			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
-			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
-		}
-
 		if (!doc.is_return && doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
 			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				this.frm.add_custom_button(
@@ -154,6 +144,17 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				},
 				__("Create")
 			);
+		}
+
+		if (
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			!doc.on_hold &&
+			frappe.model.can_create("Payment Entry")
+		) {
+			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
+			this.frm.add_custom_button(label, () => this.make_payment_entry());
+			this.frm.change_custom_button_type(label, null, "primary");
 		}
 
 		if (doc.docstatus === 0) {

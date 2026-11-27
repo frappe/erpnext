@@ -41,7 +41,7 @@ frappe.listview_settings["Sales Invoice"] = {
 
 		if (frappe.model.can_create("Payment Entry")) {
 			listview.page.add_action_item(__("Payment"), () => {
-				erpnext.bulk_transaction_processing.create(listview, "Sales Invoice", "Payment Entry");
+				erpnext.accounts.RecordPaymentDialog.record_from_list(listview);
 			});
 		}
 	},
