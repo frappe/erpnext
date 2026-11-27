@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from frappe.desk.query_report import get_column_as_dict, normalize_result
-from frappe.utils import cstr, escape_html
+from frappe.utils import cstr
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -14,13 +14,6 @@ def prepare_serial_batch_report(columns, data, *, serial_fields=(), batch_fields
 	number_columns = prepare_number_columns(columns, serial_fields, batch_fields)
 	set_number_labels(data, number_columns)
 	return columns, data
-
-
-def format_serial_batch_number(value, column, data, default_formatter):
-	"""Escape serial and batch labels, as the desk formatter does."""
-	if column.get("serial_batch"):
-		return escape_html(value or "")
-	return default_formatter(value, column, data)
 
 
 def prepare_number_columns(columns, serial_fields, batch_fields=()):

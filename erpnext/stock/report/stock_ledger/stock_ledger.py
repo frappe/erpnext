@@ -9,14 +9,14 @@ from frappe import _
 from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cint, flt, get_datetime
+from frappe.utils import cint, escape_html, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber
 
 from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
-from erpnext.stock.report.utils import format_serial_batch_number, prepare_serial_batch_report
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -153,7 +153,10 @@ def execute(filters=None):
 
 
 def formatter(value, column, data, default_formatter):
-	value = format_serial_batch_number(value, column, data, default_formatter)
+	if column.get("serial_batch"):
+		return escape_html(value)
+
+	value = default_formatter(value, column, data)
 	if column.fieldname == "out_qty" and data.out_qty < 0:
 		value = f"<span style='color:red'>{value}</span>"
 	elif column.fieldname == "in_qty" and data.in_qty > 0:
