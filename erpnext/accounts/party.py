@@ -793,7 +793,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 
 
 def validate_due_date(posting_date, due_date, bill_date=None, template_name=None, doctype=None):
-	if getdate(due_date) < getdate(posting_date):
+	if getdate(due_date) < getdate(bill_date or posting_date):
 		doctype_date = "Date"
 		if doctype == "Purchase Invoice":
 			doctype_date = "Supplier Invoice Date"
@@ -810,12 +810,15 @@ def validate_due_date_with_template(posting_date, due_date, bill_date, template_
 	if not template_name:
 		return
 
-	default_due_date = format(get_due_date_from_template(template_name, posting_date, bill_date))
+	# a due date counted from bill_date is moved up to posting_date when the invoice is made
+	default_due_date = format(
+		max(get_due_date_from_template(template_name, posting_date, bill_date), getdate(posting_date))
+	)
 
 	if not default_due_date:
 		return
 
-	if getdate(default_due_date) != getdate(posting_date) and getdate(due_date) > getdate(default_due_date):
+	if getdate(due_date) > getdate(default_due_date):
 		if frappe.get_single_value("Accounts Settings", "credit_controller") in frappe.get_roles():
 			party_type = "supplier" if doctype == "Purchase Invoice" else "customer"
 

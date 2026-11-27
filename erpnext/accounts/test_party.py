@@ -10,6 +10,7 @@ from erpnext.accounts.party import (
 	get_party_account,
 	get_party_details,
 	set_price_list,
+	validate_due_date,
 )
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.tests.permission_test_utils import make_fenced_user
@@ -229,6 +230,26 @@ class PartyTestCase(ERPNextTestSuite):
 		self.assertEqual(
 			tax_category(address_without_category, self.create_customer().name, pos_profile.name),
 			"_Test Tax Category 3",
+		)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"credit_controller": ""})
+	def test_zero_credit_days_template_should_limit_the_due_date(self):
+		template = frappe.new_doc("Payment Terms Template")
+		template.template_name = frappe.generate_hash(length=10)
+		template.append(
+			"terms",
+			{"invoice_portion": 100, "due_date_based_on": "Day(s) after invoice date", "credit_days": 0},
+		)
+		template.insert()
+
+		validate_due_date("2026-04-23", "2026-04-23", "2026-04-22", template.name, "Purchase Invoice")
+		self.assertRaises(
+			frappe.ValidationError,
+			validate_due_date,
+			"2026-04-23",
+			"2026-05-23",
+			template_name=template.name,
+			doctype="Sales Invoice",
 		)
 
 	def create_user_with_price_list_permissions(self, price_lists, applicable_for=None):

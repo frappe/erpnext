@@ -833,7 +833,7 @@ class AccountsController(TransactionBase):
 			bill_date = self.bill_date if self.doctype == "Purchase Invoice" else None
 
 			validate_due_date(
-				posting_date=posting_date,
+				posting_date=self.posting_date,
 				due_date=self.due_date,
 				bill_date=bill_date,
 				template_name=self.payment_terms_template,
