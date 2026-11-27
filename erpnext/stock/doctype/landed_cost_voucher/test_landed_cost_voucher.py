@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.accounts.utils import update_gl_entries_after
 from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import set_landed_cost_voucher_amount
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
 	make_purchase_receipt,
@@ -975,6 +976,46 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
+
+	def test_landed_cost_of_all_receipt_rows_read_in_one_query(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Stores - TCP1",
+			do_not_save=True,
+		)
+		for qty in (5, 10):
+			pr.append(
+				"items",
+				{
+					"item_code": "_Test Item",
+					"warehouse": "Stores - TCP1",
+					"cost_center": "Main - TCP1",
+					"qty": qty,
+					"rate": 100,
+				},
+			)
+		pr.submit()
+
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=350,
+		)
+
+		pr.load_from_db()
+		for row in pr.items:
+			row.landed_cost_voucher_amount = 0
+
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			set_landed_cost_voucher_amount(pr)
+
+		landed_cost_queries = [
+			call for call in queries.call_args_list if "tabLanded Cost Item" in str(call.args[0])
+		]
+		self.assertEqual(len(landed_cost_queries), 1)
+		self.assertEqual([row.landed_cost_voucher_amount for row in pr.items], [50, 100, 200])
 
 	def test_multi_currency_lcv(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records

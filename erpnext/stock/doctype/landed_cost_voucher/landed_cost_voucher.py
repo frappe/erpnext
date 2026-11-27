@@ -788,24 +788,28 @@ def get_vendor_invoice_query(filters):
 
 def set_landed_cost_voucher_amount(doc):
 	"""Set landed_cost_voucher_amount on the receipt document's items from submitted LCVs."""
+	landed_costs = get_landed_cost_by_receipt_row(doc)
 	for d in doc.get("items"):
-		lcv_item = frappe.qb.DocType("Landed Cost Item")
-		query = (
-			frappe.qb.from_(lcv_item)
-			.select(Sum(lcv_item.applicable_charges), Max(lcv_item.cost_center))
-			.where((lcv_item.docstatus == 1) & (lcv_item.receipt_document == doc.name))
-		)
+		amount, cost_center = landed_costs.get(d.name, (0.0, None))
+		d.landed_cost_voucher_amount = amount
+		if not d.cost_center and cost_center:
+			d.db_set("cost_center", cost_center)
 
-		if doc.doctype == "Stock Entry":
-			query = query.where(lcv_item.stock_entry_item == d.name)
-		else:
-			query = query.where(lcv_item.purchase_receipt_item == d.name)
 
-		lc_voucher_data = query.run(as_list=True)
+def get_landed_cost_by_receipt_row(doc):
+	lcv_item = frappe.qb.DocType("Landed Cost Item")
+	receipt_row = (
+		lcv_item.stock_entry_item if doc.doctype == "Stock Entry" else lcv_item.purchase_receipt_item
+	)
 
-		d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
-		if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
-			d.db_set("cost_center", lc_voucher_data[0][1])
+	rows = (
+		frappe.qb.from_(lcv_item)
+		.select(receipt_row, Sum(lcv_item.applicable_charges), Max(lcv_item.cost_center))
+		.where((lcv_item.docstatus == 1) & (lcv_item.receipt_document == doc.name))
+		.groupby(receipt_row)
+	).run(as_list=True)
+
+	return {row: (amount, cost_center) for row, amount, cost_center in rows}
 
 
 def has_landed_cost_amount(doc):
