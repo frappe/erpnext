@@ -659,11 +659,30 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(second.total_additional_costs, 600)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_batch_return_uses_accepted_receipt_rate(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 =======
+=======
+	def test_receipt_after_one_without_linked_cost_rows_takes_the_order_cost_balance(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		# stands in for a receipt submitted before cost rows were linked to the order
+		frappe.db.set_value(
+			"Landed Cost Taxes and Charges", {"parent": first.name}, "subcontracting_order_cost", None
+		)
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+
+		self.assertEqual(second.total_additional_costs, 600)
+
+>>>>>>> 0446605 (test: receipt after one without linked cost rows takes the order cost balance)
 	def test_draft_receipts_take_their_share_of_order_additional_costs(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
