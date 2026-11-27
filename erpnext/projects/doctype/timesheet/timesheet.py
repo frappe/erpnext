@@ -92,8 +92,8 @@ class Timesheet(Document):
 			self.exchange_rate = get_exchange_rate(self.currency, company_currency, self.start_date) or 1
 
 	def keep_rates_on_currency_change(self):
-		"""When the currency changes, a rate that was left as it was keeps its worth in
-		company currency."""
+		"""When the currency changes, a rate that was left untouched keeps its worth in
+		company currency. The form sends its rates with their new base rates, so they are kept."""
 		previous = self.get_doc_before_save()
 		if not previous or not previous.currency or previous.currency == self.currency:
 			return
@@ -106,7 +106,11 @@ class Timesheet(Document):
 				continue
 
 			for fieldname in ("billing_rate", "costing_rate"):
-				if flt(time_log.get(fieldname)) == flt(previous_log.get(fieldname)):
+				untouched = all(
+					flt(time_log.get(field)) == flt(previous_log.get(field))
+					for field in (fieldname, f"base_{fieldname}")
+				)
+				if untouched:
 					time_log.set(fieldname, flt(previous_log.get(fieldname)) * conversion)
 
 	def get_company_currency(self):
