@@ -978,6 +978,8 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rate = self.get_secondary_item_valuation_rate(item)
 
 			if item.valuation_type in ("Valuation Rate", "Manual"):
+				# net of process loss before it is deducted, as the rows below are
+				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
 				item.amount = flt(item.qty) * flt(item.rate)
 				secondary_items_cost_map[item.reference_name] = (
 					secondary_items_cost_map.get(item.reference_name, 0) + item.amount
