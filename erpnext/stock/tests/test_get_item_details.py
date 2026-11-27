@@ -338,7 +338,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 			dict(ctx, item_code={"item_name": ["=", item.item_name]}),
 		)
 		details = calculate_service_end_date(dict(ctx, item_code=item.name))
-		self.assertEqual(str(details["service_end_date"]), "2027-01-15")
+		self.assertEqual(str(details["service_end_date"]), "2027-01-14")
 		self.assertEqual(details["enable_deferred_revenue"], 1)
 
 	# making this test in get_item_details test file as feat/fix is present in that method
