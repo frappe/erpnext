@@ -2168,6 +2168,52 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(reservation.status, "Closed")
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 0}
+	)
+	def test_transfer_uses_batched_raw_material_reservation_made_without_auto_reserve(self):
+		service_item = make_item("Subcontracted Service Item Batch Reserve", {"is_stock_item": 0}).name
+		fg_item = make_item(
+			"Subcontracted FG Item Batch Reserve", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		rm_item = make_item(
+			"Subcontracted Batch RM Item Reserve",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-RMRS-.####",
+			},
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 2,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 2,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.reserve_stock = 1
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+		reservation = frappe.get_value(
+			"Stock Reservation Entry",
+			{"voucher_no": sco.name, "docstatus": 1, "warehouse": sco.supplied_items[0].reserve_warehouse},
+			["reserved_qty", "transferred_qty"],
+			as_dict=True,
+		)
+		self.assertEqual(reservation.reserved_qty, 2)
+		self.assertEqual(reservation.transferred_qty, 2)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
 	)
 	def test_transfer_cancel_keeps_earlier_unreserved_qty_off_a_later_reservation(self):
