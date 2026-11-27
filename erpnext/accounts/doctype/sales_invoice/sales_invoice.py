@@ -1104,6 +1104,7 @@ class SalesInvoice(SellingController):
 			if pos.get("account_for_change_amount"):
 				self.account_for_change_amount = pos.get("account_for_change_amount")
 
+			previous_currency = self.currency
 			for fieldname in (
 				"currency",
 				"letter_head",
@@ -1118,6 +1119,8 @@ class SalesInvoice(SellingController):
 			):
 				if (not for_validate) or (for_validate and not self.get(fieldname)):
 					self.set(fieldname, pos.get(fieldname))
+			if self.currency != previous_currency:
+				self.conversion_rate = 0
 
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
