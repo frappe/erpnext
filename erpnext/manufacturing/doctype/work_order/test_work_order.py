@@ -6118,6 +6118,33 @@ class TestWorkOrder(ERPNextTestSuite):
 		scr.save()
 		self.assertEqual(scr.additional_costs[0].expense_account, "Expenses Included In Valuation - _TC")
 
+	def test_work_order_cost_rows_keep_their_accounts_on_first_save(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 2
+		scr.append("items", scr.items[0].as_dict(no_default_fields=True))
+		# rows of an unsaved form carry temporary names
+		for item in scr.items:
+			item.name = f"new-subcontracting-receipt-item-{item.idx}"
+		scr.set_missing_values()
+
+		picked_account = "Expenses Included In Valuation - _TC"
+		cost_rows = [row for row in scr.additional_costs if row.work_order and not row.has_corrective_cost]
+		default_account = cost_rows[0].expense_account
+		cost_rows[1].expense_account = picked_account
+		scr.insert()
+
+		accounts = [
+			row.expense_account
+			for row in scr.additional_costs
+			if row.work_order and not row.has_corrective_cost
+		]
+		self.assertEqual(accounts, [default_account, picked_account])
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 0}
 	)
