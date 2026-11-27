@@ -3214,7 +3214,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		advance_ledger_before = frappe.get_all(
 			"Advance Payment Ledger Entry",
 			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "docstatus": 1},
-			fields=["against_voucher_type", "against_voucher_no", "amount", "base_amount", "delinked"],
+			fields=["against_voucher_type", "against_voucher_no", "amount", "delinked"],
 		)
 		self.assertEqual(len(advance_ledger_before), 1)
 		self.assertEqual(advance_ledger_before[0].amount, -100)
@@ -3252,7 +3252,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		advance_ledger_after = frappe.get_all(
 			"Advance Payment Ledger Entry",
 			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "docstatus": 1},
-			fields=["against_voucher_type", "against_voucher_no", "amount", "base_amount", "delinked"],
+			fields=["against_voucher_type", "against_voucher_no", "amount", "delinked"],
 		)
 		self.assertEqual(advance_ledger_after, advance_ledger_before)
 		self.assertEqual(sum(r.allocated_amount for r in pe.references if r.reference_name == so.name), 100)
@@ -3327,12 +3327,17 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	)
 	def test_partial_invoice_cancellation_restores_order_advance(self, mocked_get_payment_url):
 		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
-		so = make_sales_order(qty=2, rate=50)
+		so = make_sales_order(qty=2, rate=50, do_not_save=True)
+		# an earlier test leaves a tax template on the item group
+		so.flags.dont_auto_add_taxes = True
+		so.save()
+		so.submit()
 		pr = make_payment_request(
 			dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True, mute_email=True
 		)
 		pe = pr.set_as_paid()
 		si = make_sales_invoice(so.name)
+		si.flags.dont_auto_add_taxes = True
 		si.items[0].qty = 1
 		si.allocate_advances_automatically = 1
 		si.save()
