@@ -2581,23 +2581,7 @@ class WorkOrder(Document):
 		return consumption_by_row
 
 	def get_consumed_qty_by_item(self):
-		ste = frappe.qb.DocType("Stock Entry")
-		ste_child = frappe.qb.DocType("Stock Entry Detail")
-		item_code = fn.Coalesce(fn.NullIf(ste_child.original_item, ""), ste_child.item_code)
-		query = (
-			frappe.qb.from_(ste)
-			.inner_join(ste_child)
-			.on(ste_child.parent == ste.name)
-			.select(item_code.as_("item_code"), fn.Sum(ste_child.transfer_qty).as_("qty"))
-			.where(
-				(ste.work_order == self.name)
-				& (ste.purpose.isin(CONSUMPTION_PURPOSES))
-				& (ste.docstatus == 1)
-				& (ste_child.s_warehouse.isnotnull())
-			)
-			.groupby(item_code)
-		)
-		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
+		return get_consumed_qty_by_work_order([self.name]).get(self.name, frappe._dict())
 
 	def update_consumed_qty_in_stock_reservation(self, item, consumed_qty, wip_warehouse):
 		filters = {
@@ -3723,6 +3707,31 @@ def is_row_of_operation(row, operation):
 		return cint(row.operation_row_id) == cint(operation.operation_row_id)
 
 	return not row.operation or row.operation == operation.operation
+
+
+def get_consumed_qty_by_work_order(work_orders):
+	"""Return {work_order: {item_code: qty}} consumed by submitted stock entries, returns excluded."""
+	ste = frappe.qb.DocType("Stock Entry")
+	ste_child = frappe.qb.DocType("Stock Entry Detail")
+	item_code = fn.Coalesce(fn.NullIf(ste_child.original_item, ""), ste_child.item_code)
+	query = (
+		frappe.qb.from_(ste)
+		.inner_join(ste_child)
+		.on(ste_child.parent == ste.name)
+		.select(ste.work_order, item_code.as_("item_code"), fn.Sum(ste_child.transfer_qty).as_("qty"))
+		.where(
+			(ste.work_order.isin(work_orders))
+			& (ste.purpose.isin(CONSUMPTION_PURPOSES))
+			& (ste.docstatus == 1)
+			& (ste_child.s_warehouse.isnotnull())
+		)
+		.groupby(ste.work_order, item_code)
+	)
+
+	consumed = {}
+	for d in query.run(as_dict=1):
+		consumed.setdefault(d.work_order, frappe._dict())[d.item_code] = flt(d.qty)
+	return consumed
 
 
 def distribute_over_rows(rows, qty_by_item):
