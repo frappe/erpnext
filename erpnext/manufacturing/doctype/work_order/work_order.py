@@ -459,7 +459,7 @@ class WorkOrder(Document):
 		return {row.operation_id: flt(row.cost) for row in rows}
 
 	def validate_work_order_against_so(self):
-		# already ordered qty
+		# already ordered qty; sub-assembly Work Orders make input for the parent assembly, not the qty sold
 		wo = frappe.qb.DocType("Work Order")
 		ordered_qty_against_so = (
 			frappe.qb.from_(wo)
@@ -469,6 +469,7 @@ class WorkOrder(Document):
 				& (wo.sales_order == self.sales_order)
 				& (wo.docstatus == 1)
 				& (wo.name != self.name)
+				& (IfNull(wo.production_plan_sub_assembly_item, "") == "")
 			)
 		).run()[0][0]
 
