@@ -6,6 +6,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	distribute_over_rows,
+	get_consumed_qty_by_work_order,
+)
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -116,13 +121,27 @@ def get_materials_by_work_order(work_orders):
 	materials = {}
 	for row in frappe.get_all(
 		"Work Order Item",
-		fields=["parent", "item_code as raw_material_code", "required_qty", "consumed_qty"],
+		fields=["name", "parent", "item_code", "required_qty"],
 		filters={"parent": ["in", work_orders], "parenttype": "Work Order"},
 		order_by="idx",
 	):
 		materials.setdefault(row.pop("parent"), []).append(row)
 
+	set_consumed_qty(materials)
 	return materials
+
+
+def set_consumed_qty(materials):
+	# stored consumed_qty includes returns on newer Work Orders only, so read it from stock entries
+	if not materials:
+		return
+
+	consumed = get_consumed_qty_by_work_order(list(materials))
+	for work_order, rows in materials.items():
+		consumed_by_row = distribute_over_rows(rows, consumed.get(work_order, {}))
+		for row in rows:
+			row.consumed_qty = consumed_by_row[row.pop("name")]
+			row.raw_material_code = row.pop("item_code")
 
 
 @frappe.whitelist()
