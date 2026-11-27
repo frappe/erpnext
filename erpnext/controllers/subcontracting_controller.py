@@ -650,6 +650,7 @@ class SubcontractingController(StockController):
 
 	def initialized_fields(self):
 		self.available_materials = frappe._dict()
+		self.unsupplied_batch_qty = defaultdict(float)
 		self.__transferred_items = frappe._dict()
 		self.alternative_item_details = frappe._dict()
 		self.__get_backflush_based_on()
@@ -840,7 +841,8 @@ class SubcontractingController(StockController):
 
 	def deduct_consumed_qty(self, consumed_qty):
 		"""Take each finished good's consumption from its own transfer first, then from the order's other
-		transfers of the raw material; what none has left, and a net return, goes on its own transfer."""
+		transfers of the raw material; what none has left, and a net return, goes on its own transfer.
+		A batch's consumption none has left is kept in unsupplied_batch_qty."""
 		for own_transfer in (True, False):
 			for (key, batch_no), qty in consumed_qty.items():
 				for transfer_key in self.get_transfer_keys(key):
@@ -859,6 +861,8 @@ class SubcontractingController(StockController):
 		for (key, batch_no), qty in consumed_qty.items():
 			if key in self.available_materials:
 				self.deduct_from_transfer(key, batch_no, qty)
+			if batch_no and qty > 0:
+				self.unsupplied_batch_qty[(key[0], batch_no)] += qty
 
 	def deduct_from_transfer(self, key, batch_no, qty):
 		"""Take the qty, and the batch's if given, from the transfer."""
