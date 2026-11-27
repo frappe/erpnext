@@ -199,11 +199,13 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				name: __("Reference Number"),
 				editable: false,
 				width: 200,
+				format: (value) => frappe.utils.escape_html(value),
 			},
 			{
 				name: __("Party"),
 				editable: false,
 				width: 100,
+				format: (value) => frappe.utils.escape_html(value),
 			},
 		];
 	}
