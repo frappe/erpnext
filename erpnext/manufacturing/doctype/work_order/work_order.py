@@ -779,7 +779,7 @@ class WorkOrder(Document):
 			get_qty_before_process_loss,
 		)
 
-		# already ordered qty
+		# already ordered qty; sub-assembly Work Orders make input for the parent assembly, not the qty sold
 		wo = frappe.qb.DocType("Work Order")
 		plan_item = frappe.qb.DocType("Production Plan Item")
 		ordered_qty_against_so = (
@@ -792,6 +792,7 @@ class WorkOrder(Document):
 				& (wo.sales_order == self.sales_order)
 				& (wo.docstatus == 1)
 				& (wo.name != self.name)
+				& (IfNull(wo.production_plan_sub_assembly_item, "") == "")
 			)
 		).run()[0][0]
 
