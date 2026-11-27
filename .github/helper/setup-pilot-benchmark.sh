@@ -36,9 +36,9 @@ fi
 if [ "$DB" = postgres ] && ! command -v uv >/dev/null; then
     curl -fsSL https://astral.sh/uv/install.sh | sh
 fi
-if [ "$DB" = postgres ] && ! command -v redis-server >/dev/null; then
+if [ "$DB" = postgres ]; then
     sudo apt-get update -qq
-    sudo apt-get install -y -qq redis-server
+    sudo apt-get install -y -qq redis-server libmariadb-dev
 fi
 mkdir -p "$HOME/pilot"
 curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
