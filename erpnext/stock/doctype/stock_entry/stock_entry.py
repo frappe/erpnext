@@ -62,6 +62,7 @@ from erpnext.stock.get_item_details import (
 )
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
+	get_batches_from_bundle,
 	get_empty_batches_based_work_order,
 	get_serial_or_batch_items,
 )
@@ -5497,6 +5498,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# one cancel of the order's transfers at a time
 		order_doc = frappe.get_doc(self.subcontract_data.order_doctype, order, for_update=True)
 		order_doc.set_consumed_qty_in_subcontract_order()
+		self.validate_consumed_batches_are_supplied(order_doc)
 
 		item_codes = list({row.item_code for row in self.items})
 		net_qty_sent = self.get_net_qty_sent(order, item_codes)
@@ -5510,6 +5512,26 @@ class StockEntry(StockController, SubcontractingInwardController):
 						"Cannot cancel: {0} {1} would then supply {2} less of Item {3} than its receipts already consumed and its returns took back."
 					).format(self.subcontract_data.order_doctype, order, qty, item_code)
 				)
+
+	def validate_consumed_batches_are_supplied(self, order_doc):
+		"""The order's other transfers must still supply what its receipts consumed of the batches this entry sent."""
+		batches = self.get_batches_sent()
+		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
+		for (item_code, batch_no), qty in order_doc.get("unsupplied_batch_qty", default={}).items():
+			qty = flt(qty, precision)
+			if batch_no in batches and qty > 0:
+				frappe.throw(
+					_(
+						"Cannot cancel: {0} {1} would then supply {2} less of Batch {3} of Item {4} than its receipts already consumed."
+					).format(order_doc.doctype, order_doc.name, qty, batch_no, item_code)
+				)
+
+	def get_batches_sent(self):
+		"""Batches this entry sent to the supplier."""
+		bundles = [row.serial_and_batch_bundle for row in self.items if row.serial_and_batch_bundle]
+		return {row.batch_no for row in self.items if row.batch_no} | set(
+			get_batches_from_bundle(bundles)
+		)
 
 	def validate_reservation_is_not_consumed(self, order):
 		"""Receipts keep the supplier warehouse reservation of this entry they consumed; the cancel cannot move it to another."""
