@@ -258,7 +258,6 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status(update_bin=False)
-		self.set_consumed_qty_in_subcontract_order()
 		self.make_bundle_for_sales_purchase_return()
 
 		for table_name in ["items", "supplied_items"]:
@@ -266,6 +265,8 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.validate_returned_serial_batches()
 		self.update_stock_ledger()
+		# after the ledger makes the automatic bundles, so consumed serial nos and batches are known
+		self.set_consumed_qty_in_subcontract_order()
 		self.validate_consumed_batches()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
