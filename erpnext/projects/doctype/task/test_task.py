@@ -16,6 +16,7 @@ from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
 	make_company_fenced_user,
+	make_fenced_user,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -635,6 +636,18 @@ class TestTask(ERPNextTestSuite):
 			self.assertEqual(frappe.db.get_value("Task", task.name, "project"), own_project)
 		finally:
 			frappe.flags.in_web_form = False
+
+	def test_project_search_lists_only_permitted_projects(self):
+		from erpnext.projects.doctype.task.task import get_project
+
+		own_project, _other_project, user = make_project_access_fixtures("Search")
+		with as_user(user):
+			for doctype in ("Project", "UOM"):
+				projects = [row[0] for row in get_project(doctype, "_Test Project Search", "name", 0, 20, {})]
+				self.assertEqual(projects, [own_project])
+
+		with as_user(make_fenced_user("project-search-desk@example.com", ["Desk User"])):
+			self.assertRaises(frappe.PermissionError, get_project, "UOM", "", "name", 0, 20, {})
 
 
 def make_project_access_fixtures(label):
