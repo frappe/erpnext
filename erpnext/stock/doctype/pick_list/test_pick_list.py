@@ -2205,6 +2205,20 @@ class TestPickList(ERPNextTestSuite):
 		order_closed.update_status("Draft")
 		self.assertEqual(sum(row.holding_qty for row in get_pick_list_holders([item])), 20)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_bundle_row_with_reserved_components_cannot_close(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		warehouse = "_Test Warehouse - _TC"
+		bundle, _components = create_product_bundle([2], warehouse=warehouse)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=2)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		pick_list.create_stock_reservation_entries(notify=False)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "has reserved stock"):
+			update_closed_status("Sales Order", sales_order.name, [sales_order.items[0].name], 1)
+
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1}).name
