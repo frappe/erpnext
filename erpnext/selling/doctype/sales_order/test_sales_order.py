@@ -2386,6 +2386,48 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.packed_items[0].ordered_qty, 2)
 		self.assertEqual(so.packed_items[1].ordered_qty, 2)
 
+	def test_make_purchase_order_from_overdue_sales_order(self):
+		def make_overdue_so():
+			so = make_sales_order(
+				item_code="_Test Item",
+				qty=10,
+				transaction_date=add_days(nowdate(), -20),
+				do_not_submit=True,
+			)
+			so.delivery_date = add_days(nowdate(), -10)
+			for item in so.items:
+				item.delivery_date = add_days(nowdate(), -10)
+				item.supplier = "_Test Supplier"
+			so.save()
+			so.submit()
+			return so
+
+		so = make_overdue_so()
+		selected_items = [
+			{"name": so.items[0].name, "item_code": so.items[0].item_code, "supplier": "_Test Supplier"}
+		]
+		po = make_purchase_order(so.name, selected_items=selected_items)
+		po.supplier = "_Test Supplier"
+		po.insert()
+
+		self.assertEqual(getdate(po.items[0].schedule_date), getdate(nowdate()))
+		self.assertEqual(getdate(po.schedule_date), getdate(nowdate()))
+
+		so_default = make_overdue_so()
+		selected_items = [
+			{
+				"name": so_default.items[0].name,
+				"item_code": so_default.items[0].item_code,
+				"supplier": "_Test Supplier",
+			}
+		]
+		po_default = make_purchase_order_for_default_supplier(so_default.name, selected_items=selected_items)[
+			0
+		]
+
+		self.assertEqual(getdate(po_default.items[0].schedule_date), getdate(nowdate()))
+		self.assertEqual(getdate(po_default.schedule_date), getdate(nowdate()))
+
 	def test_ordered_qty_is_reset_when_cancelled_sales_order_is_unlinked(self):
 		"""Cancelling a Sales Order unlinks its Purchase Orders, so `ordered_qty` must be recomputed."""
 		selected_items = [{"item_code": "_Test Item", "supplier": "_Test Supplier"}]
