@@ -5,7 +5,11 @@ cd ~ || exit
 echo "Setting Up Bench..."
 
 pip install frappe-bench
+<<<<<<< HEAD
 bench -v init frappe-bench --frappe-branch "${BASE_BRANCH}" --skip-assets --skip-redis-config-generation --python "$(which python)"
+=======
+bench init frappe-bench --frappe-branch "${BASE_BRANCH}" --skip-assets --skip-redis-config-generation --python "$(which python)"
+>>>>>>> 5558659 (ci: build the POT file against the matching Frappe branch)
 cd ./frappe-bench || exit
 
 echo "Get ERPNext..."
