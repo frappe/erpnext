@@ -1487,8 +1487,6 @@ class StockReservation:
 			sre.from_voucher_detail_no = item.get("from_voucher_detail_no")
 			sre.from_voucher_type = item.get("from_voucher_type")
 			sre.reservation_based_on = sre.reservation_based_on or "Qty"
-			if item_details.has_batch_no or item_details.has_serial_no:
-				sre.reservation_based_on = "Serial and Batch"
 
 			sre.save()
 
@@ -1611,7 +1609,7 @@ class StockReservation:
 				if available_qty <= 0:
 					continue
 
-				key = (row.item_code, row.warehouse, entry.voucher_detail_no)
+				key = (row.item_code, row.warehouse, entry.voucher_detail_no, row.reservation_based_on)
 
 				if key not in entries_to_reserve:
 					entries_to_reserve.setdefault(
@@ -1644,10 +1642,10 @@ class StockReservation:
 				entry.qty -= qty_to_reserve
 
 				entries_to_reserve[key]["qty_to_reserve"] += qty_to_reserve
-				if row.has_batch_no:
+				if row.batch_no:
 					entries_to_reserve[key]["batches"][row.batch_no] += qty_to_reserve
 
-				if row.has_serial_no:
+				if row.serial_no:
 					entries_to_reserve[key]["serial_nos"].append(row.serial_no)
 
 				if row.name:
@@ -1854,6 +1852,7 @@ class StockReservation:
 		elif to_doctype == "Subcontracting Order":
 			query = query.select(
 				child_doctype.stock_reserved_qty,
+				child_doctype.required_qty,
 				child_doctype.required_qty.as_("qty"),
 				child_doctype.reserve_warehouse.as_("source_warehouse"),
 			)
