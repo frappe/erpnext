@@ -344,6 +344,8 @@ class Company(NestedSet):
 			"expenses_added_to_stock_account": {"root_type": "Expense"},
 			"expenses_added_to_stock_contra_account": {"root_type": "Expense"},
 			"default_operating_cost_account": {"root_type": "Expense"},
+			"default_purchase_price_variance_account": {},
+			"default_manufacturing_variance_account": {},
 			"default_discount_account": {},
 			"default_deferred_revenue_account": {},
 			"default_deferred_expense_account": {},
