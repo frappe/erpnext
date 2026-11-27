@@ -134,7 +134,9 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	company: function (frm) {
-		frm.trigger("currency");
+		// the currency is the same, so the activity rates are not fetched again
+		set_exchange_rate(frm);
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	currency: function (frm) {
