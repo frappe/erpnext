@@ -1648,6 +1648,24 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 					)
 					self.assertEqual(get_stock_value_on(warehouses=warehouse, item_code=item), 0)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 6, "currency_precision": 2})
+	def test_queue_rate_for_small_leftover(self):
+		"""A small leftover keeps its queue rate, not the rounding remainder of the stock value."""
+		warehouse = "_Test Warehouse - _TC"
+		for valuation_method in ("FIFO", "LIFO"):
+			with self.subTest(valuation_method=valuation_method):
+				item = make_item(properties={"valuation_method": valuation_method, "stock_uom": "Kg"}).name
+				make_stock_entry(item_code=item, target=warehouse, qty=532.804521, rate=2)
+				issue = make_stock_entry(item_code=item, source=warehouse, qty=532.804518)
+
+				valuation_rate = frappe.db.get_value(
+					"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "valuation_rate"
+				)
+				self.assertEqual(valuation_rate, 2)
+
+				receipt = make_stock_entry(item_code=item, target=warehouse, qty=40)
+				self.assertEqual(receipt.items[0].basic_rate, 2)
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 4})
 	def test_negative_qty_with_precision(self):
 		"Test if system precision is respected while validating negative qty."

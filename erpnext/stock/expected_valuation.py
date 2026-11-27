@@ -501,7 +501,7 @@ def value_ledger_entry(stock: ItemWarehouseStock, entry, details: "ValuationDeta
 			stock.carried_value + stock.value - value_before, details.currency_precision
 		)
 
-	return make_expected_values(stock, carried_value_before, basis)
+	return make_expected_values(stock, carried_value_before, basis, details.is_rated_by_queue(entry))
 
 
 def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -> ExpectedValues:
@@ -532,7 +532,7 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 
 	carry_moving_average_rate_from_rounded_value(stock)
 
-	return make_expected_values(stock, carried_value_before, BASIS_ADJUSTED)
+	return make_expected_values(stock, carried_value_before, BASIS_ADJUSTED, details.is_rated_by_queue(entry))
 
 
 def count_in_adjustment_row(stock: ItemWarehouseStock, row, details: "ValuationDetails") -> None:
@@ -600,11 +600,14 @@ def issue_stock(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -
 
 
 def make_expected_values(
-	stock: ItemWarehouseStock, carried_value_before: float, basis: str
+	stock: ItemWarehouseStock, carried_value_before: float, basis: str, rated_by_queue: bool = False
 ) -> ExpectedValues:
 	qty = stock.qty
 
-	if qty:
+	# like the ledger, a queue is rated at its own value, not the rounded balance
+	if rated_by_queue and stock.pool.qty and qty == stock.pool.qty:
+		stock.last_valuation_rate = stock.pool.value / stock.pool.qty
+	elif qty:
 		stock.last_valuation_rate = stock.carried_value / qty
 
 	return ExpectedValues(
@@ -734,9 +737,14 @@ class ValuationDetails:
 		"""Whether the ledger works the entry's balance out afresh as qty x rate, which it does
 		for a moving average entry without serial / batch nos. Every other entry adds its change
 		to the balance carried from the entry before."""
-		if self.valuation_method != "Moving Average":
-			return False
+		return self.valuation_method == "Moving Average" and self.is_valued_in_pool(entry)
 
+	def is_rated_by_queue(self, entry) -> bool:
+		"""Whether the ledger takes the entry's rate from its FIFO / LIFO queue."""
+		return self.valuation_method in ("FIFO", "LIFO") and self.is_valued_in_pool(entry)
+
+	def is_valued_in_pool(self, entry) -> bool:
+		"""Whether the ledger values the entry in the pool, not by its serial / batch nos."""
 		if self.values_everything_in_pool:
 			return True
 
