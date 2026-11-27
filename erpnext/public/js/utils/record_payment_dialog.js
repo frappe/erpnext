@@ -89,7 +89,16 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 	}
 
 	static total_outstanding(references) {
-		return references.reduce((total, row) => total + Math.abs(row.outstanding_amount), 0);
+		return references.reduce(
+			(total, row) => total + Math.abs(RecordPaymentDialog.row_outstanding(row)),
+			0
+		);
+	}
+
+	static row_outstanding(row) {
+		return row.payment_term && row.payment_term_outstanding
+			? row.payment_term_outstanding
+			: row.outstanding_amount;
 	}
 
 	async show() {
@@ -249,7 +258,7 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 				due_date: row.due_date,
 				outstanding_amount: 0,
 			};
-			rows[row.reference_name].outstanding_amount += row.outstanding_amount;
+			rows[row.reference_name].outstanding_amount += RecordPaymentDialog.row_outstanding(row);
 		}
 		return Object.values(rows);
 	}

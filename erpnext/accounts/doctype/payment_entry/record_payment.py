@@ -23,6 +23,10 @@ def get_payment_entry_for(dt: str, names: str | list, reference_date: str | None
 	for name in others:
 		add_invoice(payment_entry, get_payment_entry(dt, name, reference_date=reference_date), name)
 
+	for row in payment_entry.references:
+		if row.payment_term and row.payment_term_outstanding:
+			row.outstanding_amount = row.payment_term_outstanding
+
 	if others:
 		payment_entry.set_amounts()
 	return payment_entry
@@ -152,10 +156,13 @@ class RecordPayment:
 		amount = flt(self.values.party_amount)
 		self.validate_amount(amount)
 
+		payment_entry.source_exchange_rate = payment_entry.target_exchange_rate = 0
+		payment_entry.set_exchange_rate()
+
 		bank_amount = amount
 		if payment_entry.paid_from_account_currency != payment_entry.paid_to_account_currency:
 			bank_amount = flt(self.values.bank_amount)
-			self.set_exchange_rate(amount, bank_amount)
+			self.set_rate_from_amounts(amount, bank_amount)
 
 		if self.is_receive:
 			payment_entry.paid_amount, payment_entry.received_amount = amount, bank_amount
@@ -172,7 +179,7 @@ class RecordPayment:
 				)
 			)
 
-	def set_exchange_rate(self, amount: float, bank_amount: float):
+	def set_rate_from_amounts(self, amount: float, bank_amount: float):
 		if not bank_amount:
 			return
 
