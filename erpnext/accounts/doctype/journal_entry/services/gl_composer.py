@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import flt
 
 import erpnext
+from erpnext.accounts.doctype.journal_entry.services.reference_validator import is_link_used_as_reference_only
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.utils import get_advance_payment_doctypes
 
@@ -96,6 +97,9 @@ class JournalEntryGLComposer(BaseGLComposer):
 					"advance_voucher_no": d.reference_name,
 				}
 			)
+
+		if is_link_used_as_reference_only(doc, d):
+			row.update({"against_voucher_type": None, "against_voucher": None})
 
 		# set flag to skip party validation
 		account_type = frappe.get_cached_value("Account", d.account, "account_type")

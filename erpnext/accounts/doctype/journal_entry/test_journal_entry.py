@@ -923,6 +923,49 @@ class TestJournalEntry(ERPNextTestSuite):
 				jv.insert()
 				self.assertEqual(jv.reference_types[invoice.name], "Purchase Invoice")
 
+	def test_link_only_reference_is_not_validated_or_settled(self):
+		"""A reference that only records the invoice is checked like a payment and settles the invoice."""
+		from erpnext.accounts.doctype.journal_entry.services import gl_composer, reference_validator
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		invoice = make_purchase_invoice()
+		invoice.block_invoice(hold_comment="Under dispute")
+		outstanding = invoice.outstanding_amount
+
+		def tax_row_linked_to_invoice():
+			# debit above the outstanding, no party, invoice on hold: each fails the payment checks
+			jv = make_journal_entry(
+				"_Test Account VAT - _TC", "_Test Cash - _TC", outstanding + 100, save=False
+			)
+			jv.accounts[0].reference_type = "Purchase Invoice"
+			jv.accounts[0].reference_name = invoice.name
+			return jv
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Party / Account does not match", tax_row_linked_to_invoice().insert
+		)
+
+		def link_only(doc, row):
+			return row.reference_type == "Purchase Invoice" and not row.party_type
+
+		with (
+			patch.object(reference_validator, "is_link_used_as_reference_only", link_only),
+			patch.object(gl_composer, "is_link_used_as_reference_only", link_only),
+		):
+			jv = tax_row_linked_to_invoice()
+			jv.submit()
+			self.assertFalse(
+				frappe.db.exists("GL Entry", {"voucher_no": jv.name, "against_voucher": invoice.name})
+			)
+			self.assertEqual(
+				frappe.db.get_value("Purchase Invoice", invoice.name, "outstanding_amount"), outstanding
+			)
+
+			jv.cancel()
+			self.assertEqual(
+				frappe.db.get_value("Purchase Invoice", invoice.name, "outstanding_amount"), outstanding
+			)
+
 	def test_jv_against_blocked_sales_invoice_reference_is_not_checked(self):
 		"""A Sales Invoice has no hold state, so the check must skip it rather than fail."""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
