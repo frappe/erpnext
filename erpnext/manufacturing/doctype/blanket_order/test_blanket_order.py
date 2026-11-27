@@ -137,6 +137,98 @@ class TestBlanketOrder(FrappeTestCase):
 		po.submit()
 		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 96)
 
+	def test_blanket_order_rate_applies_per_stock_uom(self):
+		item = make_box_item("_Test Blanket Order Box Item")
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, item_code=item, rate=100)
+
+		po = make_purchase_order_against(bo, qty=1)
+		po.items[0].update({"uom": "Box", "conversion_factor": 12, "warehouse": "_Test Warehouse - _TC"})
+		po.items[0].rate = 1200
+		po.save()
+
+		po.reload()
+		po.calculate_taxes_and_totals()
+		self.assertEqual(po.items[0].blanket_order_rate, 100)
+		self.assertEqual(po.items[0].rate, 1200)
+		self.assertEqual(po.items[0].discount_amount, 0)
+
+	def test_saved_order_with_different_price_list_and_blanket_rate(self):
+		from erpnext.stock.get_item_details import apply_price_list
+
+		item = make_item("_Test BO Diff Price Item").name
+		if not frappe.db.exists("Item Price", {"item_code": item, "price_list": "_Test Price List"}):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item,
+					"price_list": "_Test Price List",
+					"price_list_rate": 200,
+				}
+			).insert()
+
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, item_code=item, rate=100)
+		po = make_purchase_order_against(bo, qty=100)
+		po.buying_price_list = "_Test Price List"
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.items[0].price_list_rate = 200
+		po.items[0].rate = 100
+		po.save()
+
+		# Server should not calculate an accidental discount against price_list_rate
+		self.assertEqual(po.items[0].blanket_order_rate, 100)
+		self.assertEqual(po.items[0].price_list_rate, 200)
+		self.assertEqual(po.items[0].rate, 100)
+		self.assertEqual(po.items[0].discount_amount, 0)
+
+		# Reload, change qty, and re-apply price list as on the client form
+		po.reload()
+		po.items[0].qty = 10
+		res = apply_price_list(po.as_json())
+		self.assertEqual(res["children"][0]["price_list_rate"], 200)
+
+		po.save()
+		self.assertEqual(po.items[0].blanket_order_rate, 100)
+		self.assertEqual(po.items[0].rate, 100)
+		self.assertEqual(po.items[0].discount_amount, 0)
+
+	def test_order_with_pricing_rule_can_be_invoiced_at_the_same_rate(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		item = make_item("_Test BO Pricing Rule Item", {"is_stock_item": 1}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item,
+				"price_list": "_Test Price List",
+				"price_list_rate": 200,
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test BO Pricing Rule",
+				"apply_on": "Item Code",
+				"items": [{"item_code": item}],
+				"buying": 1,
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 10,
+				"company": "_Test Company",
+				"currency": "INR",
+			}
+		).insert()
+
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, item_code=item, rate=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.buying_price_list = "_Test Price List"
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.items[0].price_list_rate = None
+		po.insert()
+		po.submit()
+
+		pi = make_purchase_invoice(po.name)
+		pi.insert()
+		self.assertEqual(pi.items[0].rate, po.items[0].rate)
+
 	def test_order_must_match_blanket_order_party_and_type(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
 
@@ -194,6 +286,12 @@ class TestBlanketOrder(FrappeTestCase):
 
 		self.assertEqual(po.items[0].blanket_order_rate, 100)
 		self.assertIn("differs from the rate", str(frappe.message_log[-1]))
+
+		po.reload()
+		po.calculate_taxes_and_totals()
+		self.assertEqual(po.items[0].rate, 150)
+		self.assertEqual(po.items[0].discount_amount, 0)
+		self.assertEqual(po.items[0].margin_rate_or_amount, 50)
 
 	def test_order_row_item_must_be_in_the_blanket_order(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order

@@ -22,6 +22,7 @@ from erpnext.controllers.accounts_controller import (
 	validate_inclusive_tax,
 	validate_taxes_and_charges,
 )
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import get_effective_base_rate
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_item_tax_map,
@@ -243,19 +244,21 @@ class calculate_taxes_and_totals:
 				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
 				item._mapped_discount_inclusive_amount = 0
 
+				base_rate, has_pricing_rules, applied_rules = self.get_item_base_rate(item)
+
 				if item.discount_percentage == 100:
 					item.rate = 0.0
-				elif item.price_list_rate:
-					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+				elif base_rate:
+					if not item.rate or (has_pricing_rules and item.discount_percentage > 0):
 						item.rate = flt(
-							item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
+							base_rate * (1.0 - (item.discount_percentage / 100.0)),
 							item.precision("rate"),
 						)
 
-						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+						item.discount_amount = base_rate * (item.discount_percentage / 100.0)
 
-					elif item.discount_amount and item.pricing_rules:
-						item.rate = item.price_list_rate - item.discount_amount
+					elif item.discount_amount and has_pricing_rules:
+						item.rate = base_rate - item.discount_amount
 
 				if item.doctype in [
 					"Quotation Item",
@@ -267,7 +270,9 @@ class calculate_taxes_and_totals:
 					"Purchase Order Item",
 					"Purchase Receipt Item",
 				]:
-					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
+					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(
+						item, base_rate, applied_rules, has_pricing_rules
+					)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(
 							item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)),
@@ -279,10 +284,10 @@ class calculate_taxes_and_totals:
 						else:
 							item.discount_amount = item.rate_with_margin - item.rate
 
-					elif flt(item.price_list_rate) > 0:
-						item.discount_amount = item.price_list_rate - item.rate
-				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
-					item.discount_amount = item.price_list_rate - item.rate
+					elif flt(base_rate) > 0:
+						item.discount_amount = base_rate - item.rate
+				elif flt(base_rate) > 0 and not item.discount_amount:
+					item.discount_amount = base_rate - item.rate
 
 				item.net_rate = item.rate
 
@@ -1290,33 +1295,54 @@ class calculate_taxes_and_totals:
 
 			self.calculate_outstanding_amount()
 
-	def calculate_margin(self, item):
+	def get_item_base_rate(self, item):
+		applied_rules = get_applied_pricing_rules(item.pricing_rules)
+		has_pricing_rules = bool(applied_rules) and not self.doc.ignore_pricing_rule
+		base_rate = (
+			flt(item.price_list_rate)
+			if has_pricing_rules
+			else get_effective_base_rate(item, item.price_list_rate)
+		)
+		return base_rate, has_pricing_rules, applied_rules
+
+	def calculate_margin(self, item, base_rate=None, applied_rules=None, has_pricing_rules=None):
 		rate_with_margin = 0.0
 		base_rate_with_margin = 0.0
-		if item.price_list_rate:
+		if base_rate is None or applied_rules is None or has_pricing_rules is None:
+			computed_base_rate, computed_has_rules, computed_rules = self.get_item_base_rate(item)
+			if base_rate is None:
+				base_rate = computed_base_rate
+			if applied_rules is None:
+				applied_rules = computed_rules
+			if has_pricing_rules is None:
+				has_pricing_rules = computed_has_rules
+
+		if base_rate:
 			# An item no rule applied to may still hold "[]", which must not override the rate typed in
-			applied_rules = get_applied_pricing_rules(item.pricing_rules)
-			if applied_rules and not self.doc.ignore_pricing_rule:
+			if has_pricing_rules:
 				item.margin_type = None
 				item.margin_rate_or_amount = 0.0
 				for d in applied_rules:
 					pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 					apply_pricing_rule_margin(pricing_rule, item, self.doc)
 
-			if not applied_rules and flt(item.rate) > flt(item.price_list_rate):
+			if not has_pricing_rules and flt(item.rate) > flt(base_rate):
 				item.margin_type = "Amount"
 				item.margin_rate_or_amount = flt(
-					item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")
+					item.rate - base_rate, item.precision("margin_rate_or_amount")
 				)
-				item.rate_with_margin = item.rate
+				item.discount_amount = 0.0
+				item.discount_percentage = 0.0
+				rate_with_margin = item.rate
+				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
 
 			elif item.margin_type and item.margin_rate_or_amount:
 				margin_value = (
 					item.margin_rate_or_amount
 					if item.margin_type == "Amount"
-					else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
+					else flt(base_rate) * flt(item.margin_rate_or_amount) / 100
 				)
-				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
+				rate_with_margin = flt(base_rate) + flt(margin_value)
 				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
 
 		return rate_with_margin, base_rate_with_margin
