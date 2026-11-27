@@ -243,29 +243,8 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	employee: function (frm) {
-		if (frm.doc.employee && frm.doc.time_logs) {
-			const selected_employee = frm.doc.employee;
-			frm.doc.time_logs.forEach((row) => {
-				if (row.activity_type) {
-					frappe.call({
-						method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-						args: {
-							employee: frm.doc.employee,
-							activity_type: row.activity_type,
-							currency: frm.doc.currency,
-						},
-						callback: function (r) {
-							if (r.message) {
-								if (selected_employee !== frm.doc.employee) return;
-								row.billing_rate = r.message["billing_rate"];
-								row.costing_rate = r.message["costing_rate"];
-								frm.refresh_fields("time_logs");
-								calculate_billing_costing_amount(frm, row.doctype, row.name);
-							}
-						},
-					});
-				}
-			});
+		if (frm.doc.employee) {
+			set_activity_costs(frm);
 		}
 	},
 });
@@ -273,6 +252,7 @@ frappe.ui.form.on("Timesheet", {
 frappe.ui.form.on("Timesheet Detail", {
 	time_logs_remove: function (frm) {
 		calculate_time_and_amount(frm);
+		set_start_date(frm);
 	},
 
 	task: (frm, cdt, cdn) => {
@@ -286,6 +266,7 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	from_time: function (frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn);
+		set_start_date(frm);
 	},
 
 	to_time: function (frm, cdt, cdn) {
@@ -335,22 +316,13 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	activity_type: function (frm, cdt, cdn) {
-		if (!frappe.get_doc(cdt, cdn).activity_type) return;
+		let activity_type = frappe.get_doc(cdt, cdn).activity_type;
+		if (!activity_type) return;
 
-		frappe.call({
-			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
-			args: {
-				employee: frm.doc.employee,
-				activity_type: frm.selected_doc.activity_type,
-				currency: frm.doc.currency,
-			},
-			callback: function (r) {
-				if (r.message) {
-					frappe.model.set_value(cdt, cdn, "billing_rate", r.message["billing_rate"]);
-					frappe.model.set_value(cdt, cdn, "costing_rate", r.message["costing_rate"]);
-					calculate_billing_costing_amount(frm, cdt, cdn);
-				}
-			},
+		fetch_activity_cost(frm, activity_type, (cost) => {
+			frappe.model.set_value(cdt, cdn, "billing_rate", cost.billing_rate);
+			frappe.model.set_value(cdt, cdn, "costing_rate", cost.costing_rate);
+			calculate_billing_costing_amount(frm, cdt, cdn);
 		});
 	},
 });
@@ -437,10 +409,71 @@ var calculate_time_and_amount = function (frm) {
 	frm.set_value("total_costing_amount", total_costing_amount);
 };
 
+var get_start_date = function (frm) {
+	let dates = (frm.doc.time_logs || []).filter((d) => d.from_time).map((d) => d.from_time.slice(0, 10));
+	return dates.length ? dates.sort()[0] : frappe.datetime.get_today();
+};
+
+// the exchange rate and the converted activity costs are taken on the start date
+var set_start_date = function (frm) {
+	let start_date = get_start_date(frm);
+	if (frm.doc.start_date == start_date) return;
+
+	frm.set_value("start_date", start_date);
+	set_exchange_rate(frm);
+	let base_currency = frappe.defaults.get_global_default("currency");
+	if (frm.doc.currency && frm.doc.currency != base_currency) {
+		set_activity_costs(frm);
+	}
+};
+
+var set_activity_costs = function (frm) {
+	let activity_types = new Set((frm.doc.time_logs || []).map((row) => row.activity_type).filter(Boolean));
+	activity_types.forEach((activity_type) => {
+		fetch_activity_cost(frm, activity_type, (cost) => {
+			frm.doc.time_logs
+				.filter((row) => row.activity_type === activity_type)
+				.forEach((row) => {
+					row.billing_rate = cost.billing_rate;
+					row.costing_rate = cost.costing_rate;
+					calculate_billing_costing_amount(frm, row.doctype, row.name);
+				});
+			calculate_time_and_amount(frm);
+			frm.refresh_fields("time_logs");
+		});
+	});
+};
+
+// drops the response if the employee, currency or start date changed meanwhile
+var fetch_activity_cost = function (frm, activity_type, callback) {
+	const employee = frm.doc.employee;
+	const currency = frm.doc.currency;
+	const transaction_date = get_start_date(frm);
+	frappe.call({
+		method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+		args: {
+			employee: employee,
+			activity_type: activity_type,
+			currency: currency,
+			transaction_date: transaction_date,
+		},
+		callback: function (r) {
+			const is_current =
+				employee === frm.doc.employee &&
+				currency === frm.doc.currency &&
+				transaction_date === get_start_date(frm);
+			if (r.message && is_current) {
+				callback(r.message);
+			}
+		},
+	});
+};
+
 var set_exchange_rate = function (frm) {
 	let company_currency = erpnext.get_currency(frm.doc.company);
+	let transaction_date = get_start_date(frm);
 	// a later call makes this quote stale, so its response is dropped
-	let quote = [frm.doc.currency, company_currency].join("|");
+	let quote = [frm.doc.currency, company_currency, transaction_date].join("|");
 	frm.exchange_rate_quote = quote;
 
 	if (!frm.doc.currency || frm.doc.currency == company_currency) {
@@ -455,6 +488,7 @@ var set_exchange_rate = function (frm) {
 		args: {
 			from_currency: frm.doc.currency,
 			to_currency: company_currency,
+			transaction_date: transaction_date,
 		},
 		callback: function (r) {
 			if (frm.exchange_rate_quote !== quote || !r.message) return;
