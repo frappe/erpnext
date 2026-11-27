@@ -367,6 +367,51 @@ class ValuationFixTestCase(ERPNextTestSuite):
 
 		return item
 
+	def make_standard_cost_item(self, **properties) -> str:
+		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
+			create_item_standard_cost,
+			create_standard_cost_item,
+		)
+
+		item = create_standard_cost_item(**properties).name
+		create_item_standard_cost(item, rate=100, company=COMPANY, effective_date=last_year(70))
+		return item
+
+	def make_standard_cost_balance_qty_wrong(self) -> str:
+		"""A Standard Cost item at 100: the issue left a balance of 7 at 700 behind, where 6 are on
+		hand."""
+		item = self.make_standard_cost_item()
+
+		make_stock_entry(item_code=item, target=WAREHOUSE, qty=10, basic_rate=100, posting_date=last_year(60))
+		issue = make_stock_entry(item_code=item, source=WAREHOUSE, qty=4, posting_date=last_year(50))
+		self.corrupt_entry(
+			issue.name,
+			qty_after_transaction=7,
+			stock_value=700,
+			stock_value_difference=-300,
+			stock_queue=frappe.as_json([[7, 100]]),
+		)
+		make_stock_entry(item_code=item, source=WAREHOUSE, qty=1, posting_date=this_year(1))
+
+		return item
+
+	def make_standard_cost_serial_no_issued_at_wrong_value(self) -> str:
+		"""A serialized Standard Cost item at 100: 3 received, one issued at 150."""
+		item = self.make_standard_cost_item(has_serial_no=1, serial_no_series="SVA-SCS-.#####")
+
+		receipt = make_stock_entry(
+			item_code=item, target=WAREHOUSE, qty=3, basic_rate=100, posting_date=last_year(60)
+		)
+		serial_no = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": receipt.items[0].serial_and_batch_bundle}, "serial_no"
+		)
+		issue = make_stock_entry(
+			item_code=item, source=WAREHOUSE, qty=1, serial_no=[serial_no], posting_date=last_year(50)
+		)
+		self.corrupt_entry(issue.name, stock_value_difference=-150, stock_value=150)
+
+		return item
+
 
 class TestFixingWrongLedgers(ValuationFixTestCase):
 	def test_fifo_issue_at_wrong_value_fixed_by_repost(self):
@@ -523,6 +568,31 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		self.assertEqual(
 			frappe.db.get_value("Bin", {"item_code": item, "warehouse": WAREHOUSE}, "actual_qty"), 2
 		)
+
+	def test_standard_cost_balance_qty_wrong_fixed_by_repost(self):
+		self.fix_by_repost(self.make_standard_cost_balance_qty_wrong())
+
+	def test_standard_cost_balance_qty_wrong_fixed_by_adjustment_entry(self):
+		item = self.make_standard_cost_balance_qty_wrong()
+		adjustment = self.fix_by_adjustment_entry(item)
+
+		# the stock is counted back in at the standard rate on the date
+		self.assertEqual([(row.qty, row.valuation_rate) for row in adjustment.items], [(6, 100)])
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": item, "warehouse": WAREHOUSE}, "actual_qty"), 5
+		)
+
+	def test_standard_cost_serial_no_issued_at_wrong_value_fixed_by_repost(self):
+		self.fix_by_repost(self.make_standard_cost_serial_no_issued_at_wrong_value())
+
+	def test_standard_cost_serial_no_issued_at_wrong_value_fixed_by_adjustment_entry(self):
+		item = self.make_standard_cost_serial_no_issued_at_wrong_value()
+		adjustment = self.fix_by_adjustment_entry(item)
+
+		# the serial nos on hand come back in at the standard rate
+		self.assertEqual([(row.qty, row.valuation_rate) for row in adjustment.items], [(2, 100)])
+		self.assertEqual(len(get_serial_nos(adjustment.items[0].serial_no)), 2)
+		self.assertEqual(adjustment.difference_amount, 50)
 
 
 class TestAdjustmentEntry(ValuationFixTestCase):
