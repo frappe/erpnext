@@ -6142,6 +6142,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(self.get_additional_cost(rest, "Freight"), 80)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 0}
+	)
+	def test_work_order_costs_of_unlinked_receipt_leave_the_order_costs_to_later_receipts(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			get_mapped_subcontracting_receipt,
+		)
+
+		freight = {
+			"expense_account": "Expenses Included In Valuation - _TC",
+			"description": "Freight",
+			"amount": 100,
+		}
+		sco = self.make_subcontracted_work_order_with_costs(additional_costs=[freight])
+
+		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 4}])
+		first.set("additional_costs", [])
+		first.submit()
+		self.assertEqual(self.get_additional_cost(first, "Additional Operating Cost"), 40)
+		rest = self.make_receipt_of_subcontracted_work_order(sco, 6)
+
+		self.assertEqual(self.get_additional_cost(rest, "Freight"), 100)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_work_order_costs_are_booked_on_process_loss_qty_too(self):
