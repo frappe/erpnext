@@ -7,13 +7,8 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
 from frappe.query_builder.functions import Coalesce, Date
-from frappe.utils import cint, cstr, flt, get_datetime, getdate
-=======
-from frappe.query_builder.functions import Coalesce, Concat, Date, Round
 from frappe.utils import cint, cstr, flt, formatdate, get_datetime, getdate
->>>>>>> 3aaa806 (fix(projects): don't submit a foreign currency Timesheet without an exchange rate)
 from frappe.utils.deprecations import deprecated
 
 import erpnext
