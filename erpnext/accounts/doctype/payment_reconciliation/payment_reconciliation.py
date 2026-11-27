@@ -134,21 +134,20 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
-		self.validate_payment_limit()
+		self.validate_limits()
 		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
 
-	def validate_payment_limit(self):
-		if not self.payment_limit:
-			return
-
-		try:
-			self.payment_limit = int(self.payment_limit)
-		except (TypeError, ValueError):
-			frappe.throw(_("Payment Limit must be a non-negative integer"), TypeError)
-
-		if self.payment_limit < 0:
-			frappe.throw(_("Payment Limit must be a non-negative integer"), TypeError)
+	def validate_limits(self):
+		for field, label in (("payment_limit", _("Payment Limit")), ("invoice_limit", _("Invoice Limit"))):
+			if not self.get(field):
+				continue
+			try:
+				if int(self.get(field)) < 0:
+					frappe.throw(_("{0} must be a non-negative integer").format(label))
+				self.set(field, int(self.get(field)))
+			except (TypeError, ValueError):
+				frappe.throw(_("{0} must be a non-negative integer").format(label))
 
 	def get_nonreconciled_payment_entries(self):
 		self.check_mandatory_to_fetch()
