@@ -5511,6 +5511,25 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 4)
 
+	def test_closed_work_order_refuses_entries_marked_as_return(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10, skip_transfer=1)
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 6)).submit()
+		close_work_order(wo.name, "Closed")
+
+		for purpose in ("Manufacture", "Material Consumption for Manufacture"):
+			entry = frappe.get_doc(make_stock_entry(wo.name, purpose, 4))
+			entry.is_return = 1
+			entry.insert()
+			self.assertRaisesRegex(frappe.ValidationError, "closed Work Order", entry.submit)
+
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 6)
+
 	@change_settings(
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 1, "allow_editing_of_items_and_quantities_in_work_order": 0},
