@@ -74,6 +74,7 @@ from erpnext.stock.stock_ledger import (
 )
 from erpnext.stock.utils import (
 	_get_incoming_rate,
+	check_company,
 	get_bin,
 	get_combine_datetime,
 	get_valuation_method,
@@ -6482,6 +6483,7 @@ def get_warehouse_details(args):
 	frappe.has_permission("Stock Entry", "read", throw=True)
 	if args.warehouse:
 		check_stock_entry_warehouse_permission(args.warehouse)
+	check_company(args.get("company"))
 
 	ret = {}
 	if args.warehouse and args.item_code:

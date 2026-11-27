@@ -95,6 +95,18 @@ def get_stock_value_on(
 	return query.run(as_list=True)[0][0]
 
 
+def check_company(company: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	if not company:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Item")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_stock_balance(
 	item_code,
@@ -389,6 +401,10 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 			if allowed_warehouses and warehouse not in allowed_warehouses:
 				frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
 
+	# the caller-supplied company selects the standard rate of a Standard Cost item
+	if isinstance(args, dict | frappe._dict):
+		check_company(args.get("company"))
+
 	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
 
 
@@ -426,7 +442,11 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
 	)
 
-	if (
+	if valuation_method == "Standard Cost":
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		in_rate = get_item_standard_rate(args.get("item_code"), args.get("company"), args.get("posting_date"))
+	elif (
 		item_details
 		and item_details.has_serial_no
 		and args.get("serial_and_batch_bundle")
