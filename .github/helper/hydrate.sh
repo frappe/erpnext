@@ -41,6 +41,8 @@ if [ "${DB:-mariadb}" = "postgres" ]; then
     for conf in redis_cache redis_queue; do
         [ -f "$bench_path/config/$conf.conf" ] && redis-server "$bench_path/config/$conf.conf" --daemonize yes
     done
+elif [ -n "${BENCH_PATH:-}" ]; then
+    honcho start >> "$bench_path/bench_start.log" 2>&1 &
 else
     bench start >> "$bench_path/bench_start.log" 2>&1 &
 fi

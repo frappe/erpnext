@@ -93,9 +93,10 @@ settings["allow_tests"] = True
 site.write_text(json.dumps(settings, indent=2) + "\n")
 PYTHON
 
-# Keep the existing Bench process launcher on shards, which omit node_modules.
-bench setup procfile
-sed -i -E \
-    -e '/^(watch|schedule|socketio|redis_socketio):/s/^/# /' \
-    -e 's@^(web|worker[A-Za-z0-9_-]*): bench @\1: cd sites \&\& ../env/bin/python -m frappe.utils.bench_helper frappe @' \
-    Procfile
+# Shards use the staged Frappe environment and do not carry Node dependencies.
+cat > Procfile <<'EOF'
+redis_cache: redis-server config/redis_cache.conf
+redis_queue: redis-server config/redis_queue.conf
+web: cd sites && "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe serve --port 8000
+worker: (cd sites && "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe worker) >> logs/worker.log 2>&1
+EOF

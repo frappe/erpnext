@@ -181,7 +181,7 @@ jobs:
         env:
           BENCH_SHA256: ${{ needs.setup.outputs.bench_sha256 }}
 
-      - name: Hydrate (start DB on baked datadir + bench start)
+      - name: Hydrate staged MariaDB and Frappe
         run: bash /home/ci/pilot/benches/frappe-bench/hydrate.sh
         env:
           CI_DB_DATADIR: /home/ci/pilot/benches/frappe-bench/mariadb-data
@@ -194,7 +194,7 @@ jobs:
           cd "$BENCH_PATH/sites"
           coverage_flag=""
           if [ "$WITH_COVERAGE" = "true" ]; then coverage_flag="--with-coverage"; fi
-          ../env/bin/python -m frappe.utils.bench_helper frappe --site test_site run-parallel-tests --lightmode --app erpnext \
+          "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe --site test_site run-parallel-tests --lightmode --app erpnext \
             --total-builds ${{ strategy.job-total }} \
             --build-number ${{ matrix.container }} \
             $coverage_flag
