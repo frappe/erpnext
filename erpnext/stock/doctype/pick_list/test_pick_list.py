@@ -2170,6 +2170,40 @@ class TestPickList(ERPNextTestSuite):
 		pick_list = create_pick_list(sales_order.name)
 		self.assertEqual(pick_list.locations, [])
 
+	def test_closed_sales_order_releases_the_stock_its_pick_list_holds(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_holders
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=20, basic_rate=100)
+		make_stock_entry(item=other_item, to_warehouse=warehouse, qty=5, basic_rate=100)
+		row_closed = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100, do_not_submit=1)
+		row_closed.append(
+			"items", {**row_closed.items[0].as_dict(), "name": None, "item_code": other_item, "qty": 5}
+		)
+		row_closed.submit()
+		order_closed = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100)
+		for sales_order in (row_closed, order_closed):
+			create_pick_list(sales_order.name).submit()
+
+		update_closed_status("Sales Order", row_closed.name, [row_closed.items[0].name], 1)
+		self.assertNotEqual(frappe.db.get_value("Sales Order", row_closed.name, "status"), "Closed")
+		self.assertEqual(sum(row.holding_qty for row in get_pick_list_holders([other_item])), 5)
+		order_closed.reload()
+		order_closed.update_status("Closed")
+
+		self.assertEqual(get_pick_list_holders([item]), [])
+		new_order = make_sales_order(item_code=item, warehouse=warehouse, qty=20, rate=100)
+		self.assertEqual([row.qty for row in create_pick_list(new_order.name).locations], [20])
+
+		# reopening holds the stock again
+		update_closed_status("Sales Order", row_closed.name, [row_closed.items[0].name], 0)
+		order_closed.reload()
+		order_closed.update_status("Draft")
+		self.assertEqual(sum(row.holding_qty for row in get_pick_list_holders([item])), 20)
+
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1}).name
