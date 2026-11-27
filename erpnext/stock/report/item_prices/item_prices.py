@@ -187,7 +187,7 @@ def get_last_purchase_rate():
 					(pr_item.base_rate / pr_item.conversion_factor).as_("base_rate"),
 					pr_item.creation,
 				)
-				.where((pr.name == pr_item.parent) & (pr.docstatus == 1))
+				.where((pr.name == pr_item.parent) & (pr.docstatus == 1) & (pr.is_return == 0))
 			)
 			+ (
 				frappe.qb.from_(pi)
@@ -198,7 +198,12 @@ def get_last_purchase_rate():
 					(pi_item.base_rate / pi_item.conversion_factor).as_("base_rate"),
 					pi_item.creation,
 				)
-				.where((pi.name == pi_item.parent) & (pi.docstatus == 1) & (pi.update_stock == 1))
+				.where(
+					(pi.name == pi_item.parent)
+					& (pi.docstatus == 1)
+					& (pi.update_stock == 1)
+					& (pi.is_return == 0)
+				)
 			)
 		)
 		.select("*")
@@ -219,7 +224,7 @@ def get_item_bom_rate():
 	bom = frappe.qb.DocType("BOM")
 	bom_data = (
 		frappe.qb.from_(bom)
-		.select(bom.item, (bom.total_cost / bom.quantity).as_("bom_rate"))
+		.select(bom.item, (bom.base_total_cost / bom.quantity).as_("bom_rate"))
 		.where((bom.is_active == 1) & (bom.is_default == 1))
 	).run(as_dict=True)
 
