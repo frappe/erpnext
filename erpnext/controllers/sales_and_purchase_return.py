@@ -3,6 +3,7 @@
 
 import json
 from collections import defaultdict
+from math import floor
 
 import frappe
 from frappe import _, bold
@@ -403,9 +404,8 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	returns_nothing = not (flt(args.get("qty")) or flt(args.get("rejected_qty")))
 
 	# an invoice without Update Stock bills in the row's UOM, so its qty is checked in that UOM
-	uom_factor = 1
-	if doc.doctype in ("Purchase Invoice", "Sales Invoice") and not doc.update_stock:
-		uom_factor = flt(args.get("conversion_factor")) or 1
+	bills_in_row_uom = doc.doctype in ("Purchase Invoice", "Sales Invoice") and not doc.update_stock
+	uom_factor = (flt(args.get("conversion_factor")) or 1) if bills_in_row_uom else 1
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	field_precision = get_field_precision(
@@ -444,27 +444,35 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		reference_qty, returned_qty, current_stock_qty = (
 			flt(qty) / uom_factor for qty in (reference_qty, returned_qty, current_stock_qty)
 		)
-		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
+		# billed qty converted to the row's UOM is rounded down, so a return never exceeds it
+		billed_qty = (
+			round_down(reference_qty, field_precision)
+			if bills_in_row_uom
+			else flt(reference_qty, field_precision)
+		)
+		max_returnable_qty = flt(billed_qty - returned_qty, field_precision)
 		label = column.replace("_", " ").title()
 
 		if reference_qty or flt(current_stock_qty):
 			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif (
-				flt(returned_qty, field_precision) >= flt(reference_qty, field_precision) and returns_nothing
-			):
+			elif flt(returned_qty, field_precision) >= billed_qty and returns_nothing:
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
-			elif flt(returned_qty + abs(flt(current_stock_qty)), field_precision) > flt(
-				reference_qty, field_precision
-			):
+			elif flt(returned_qty + abs(flt(current_stock_qty)), field_precision) > billed_qty:
 				frappe.throw(
 					_("Row # {0}: Cannot return more than {1} for Item {2}").format(
 						args.idx, max_returnable_qty, args.item_code
 					),
 					StockOverReturnError,
 				)
+
+
+def round_down(value: float, precision: int) -> float:
+	"""Round down to the precision, ignoring float noise so that 9.9999999 stays 10."""
+	factor = 10 ** cint(precision)
+	return floor(flt(flt(value) * factor, 6)) / factor
 
 
 def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
