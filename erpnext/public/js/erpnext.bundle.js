@@ -4,6 +4,7 @@ import "./queries";
 import "./sms_manager";
 import "./utils/party";
 import "./utils/draft_link_guard";
+import "./utils/record_payment_dialog";
 import "./controllers/stock_controller";
 import "./utils/serial_no_batch_selector";
 import "./utils/serial_batch_inline_editor";

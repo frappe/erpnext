@@ -13,6 +13,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
+		this.frm.make_methods = { "Payment Entry": () => this.make_payment_entry() };
+		this.frm.can_make_methods = { "Payment Entry": () => this.can_record_payment() };
 
 		// formatter for purchase invoice item
 		if (this.frm.doc.update_stock) {
@@ -40,6 +42,23 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				},
 			};
 		});
+	}
+
+	can_record_payment() {
+		const doc = this.frm.doc;
+		return (
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			!doc.on_hold &&
+			frappe.model.can_create("Payment Entry")
+		);
+	}
+
+	add_record_payment_button() {
+		if (!this.can_record_payment()) return;
+		const label = this.frm.doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
+		this.frm.add_custom_button(label, () => this.make_payment_entry());
+		this.frm.change_custom_button_type(label, null, "primary");
 	}
 
 	onload() {
@@ -118,16 +137,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 					__("Create")
 				);
 			}
-		}
-
-		if (
-			doc.docstatus == 1 &&
-			doc.outstanding_amount != 0 &&
-			!doc.on_hold &&
-			frappe.model.can_create("Payment Entry")
-		) {
-			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
-			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
 		if (!doc.is_return && doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
@@ -244,7 +253,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			});
 		}
 
-		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
+		Promise.resolve(erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm)).then(() =>
+			this.add_record_payment_button()
+		);
 	}
 
 	unblock_invoice() {
@@ -531,7 +542,6 @@ frappe.ui.form.on("Purchase Invoice", {
 
 		frm.custom_make_buttons = {
 			"Purchase Invoice": "Return / Debit Note",
-			"Payment Entry": "Payment",
 		};
 
 		if (frm.doc.update_stock) {
