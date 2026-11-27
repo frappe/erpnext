@@ -1353,11 +1353,11 @@ class Item(Document):
 			not self.is_new()
 			and self._doc_before_save
 			and self.has_value_changed("valuation_method")
-			and self.valuation_method in ("FIFO", "LIFO")
+			and self.valuation_method in ("FIFO", "LIFO", "Standard Cost")
 		):
 			frappe.throw(
 				_(
-					"Valuation Method for Item {0} must be Moving Average because Serial No Wise Valuation is disabled. Enable Serial No Wise Valuation to use FIFO or LIFO."
+					"Valuation Method for Item {0} must be Moving Average because Serial No Wise Valuation is disabled. Enable Serial No Wise Valuation to use FIFO, LIFO or Standard Cost."
 				).format(frappe.bold(self.name)),
 				title=_("Invalid Valuation Method"),
 			)
