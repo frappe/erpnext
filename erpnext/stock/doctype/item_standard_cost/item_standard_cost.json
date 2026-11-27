@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2026-06-26 11:00:00.000000",
+ "description": "The planned cost of an item, to compare with what it actually cost.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -92,6 +93,7 @@
    "search_index": 1
   }
  ],
+ "icon": "coins",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
