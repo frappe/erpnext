@@ -5683,8 +5683,39 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], costs)
 
+	def test_amount_based_split_uses_the_qty_saved(self):
+		scr = self.make_receipt_with_targeted_additional_cost()
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.items[0].qty = 1
+		scr.save()
+		scr.items[0].qty = 3
+		scr.save()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items], [10.0, 70.0])
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_resave_keeps_amount_based_split_with_a_co_product(self):
+		scr = self.make_amount_split_receipt_with_a_co_product()
+		# the first save reprices the mapped amounts with the BOM's cost allocation
+		scr.save()
+		scr.save()
+		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom]
+		scr.save()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom], costs)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_first_save_keeps_amount_based_split_with_a_co_product(self):
+		scr = self.make_amount_split_receipt_with_a_co_product()
+		scr.save()
+		# the first save adds the secondary rows outside tests
+		scr.get_secondary_items(recalculate_rate=True)
+		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom]
+		scr.save()
+
+		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom], costs)
+
+	def make_amount_split_receipt_with_a_co_product(self):
 		set_backflush_based_on("BOM")
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		service_items = []
@@ -5734,13 +5765,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				"amount": 100,
 			},
 		)
-		# the first save reprices the mapped amounts with the BOM's cost allocation
-		scr.save()
-		scr.save()
-		costs = [flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom]
-		scr.save()
-
-		self.assertEqual([flt(row.additional_cost_per_qty, 2) for row in scr.items if row.bom], costs)
+		return scr
 
 	def test_return_takes_back_targeted_additional_cost_with_its_row(self):
 		scr = self.make_receipt_with_targeted_additional_cost()
