@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import CustomFunction
 from frappe.query_builder.functions import Count, Sum
-from frappe.utils import date_diff
+from frappe.utils import date_diff, flt
 
 DateDiff = CustomFunction("DATEDIFF", ["end_date", "start_date"])
 
@@ -180,36 +180,34 @@ def get_total_days_late(scorecard):
 
 
 def get_on_time_shipments(scorecard):
-	"""Gets the number of late shipments (counting each item) in the period (based on Purchase Receipts vs POs)"""
+	"""Counts PO lines (scheduled in the period) fully received on or before their schedule date.
 
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	Counting in PO-line units keeps this consistent with get_total_shipments so that
+	get_late_shipments (total - on time) stays non-negative even for split deliveries.
+	"""
 
-	# Look up all PO Items with delivery dates between our dates
-	total_items_delivered_on_time = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(pr_item.qty)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Order` po,
-				`tabPurchase Receipt` pr
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.schedule_date <= pr.posting_date
-				AND po_item.qty = pr_item.qty
-				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name
-				AND po_item.parent = po.name
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+	PR = frappe.qb.DocType("Purchase Receipt")
+	PR_Item = frappe.qb.DocType("Purchase Receipt Item")
 
-	if not total_items_delivered_on_time:
-		total_items_delivered_on_time = 0
-	return total_items_delivered_on_time
+	rows = (
+		frappe.qb.from_(PR_Item)
+		.join(PR)
+		.on(PR_Item.parent == PR.name)
+		.join(PO_Item)
+		.on(PR_Item.purchase_order_item == PO_Item.name)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(PO_Item.name, PO_Item.qty, Sum(PR_Item.qty).as_("received_on_time"))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(PO_Item.schedule_date >= PR.posting_date)
+		.where(PR_Item.docstatus == 1)
+		.groupby(PO_Item.name, PO_Item.qty)
+	).run(as_dict=True)
+
+	return sum(1 for row in rows if flt(row.received_on_time) >= flt(row.qty))
 
 
 def get_late_shipments(scorecard):
