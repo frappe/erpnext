@@ -7,12 +7,12 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Coalesce, Date
+from frappe.query_builder.functions import Coalesce, Concat, Date, Round
 from frappe.utils import cint, cstr, flt, get_datetime, getdate, nowdate
 from frappe.utils.deprecations import deprecated
 
+import erpnext
 from erpnext import _refuse, require_permission
-from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -75,10 +75,25 @@ class Timesheet(Document):
 		self.validate_time_logs()
 		self.check_task_and_project_access(self.time_logs)
 		self.validate_tasks_not_cancelled()
+		self.set_dates()
+		self.set_exchange_rate()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
-		self.set_dates()
+
+	def set_exchange_rate(self):
+		"""A company currency Timesheet always has rate 1. A foreign one without a rate gets
+		the current rate. A rate that is set, 1 included, is kept."""
+		company_currency = self.get_company_currency()
+		if not self.currency or self.currency == company_currency:
+			self.exchange_rate = 1
+		elif not flt(self.exchange_rate):
+			self.exchange_rate = get_exchange_rate(self.currency, company_currency) or 1
+
+	def get_company_currency(self):
+		if self.company:
+			return erpnext.get_company_currency(self.company)
+		return erpnext.get_default_currency() or frappe.defaults.get_global_default("currency")
 
 	def validate_tasks_not_cancelled(self):
 		tasks = [log.task for log in self.time_logs if log.task]
@@ -202,7 +217,11 @@ class Timesheet(Document):
 			if data.task and data.task not in tasks:
 				task = frappe.get_doc("Task", data.task)
 				task.update_time_and_costing()
-				task.status = get_task_status(task)
+				status = get_task_status(task)
+				if status == "Completed" and task.status != "Completed" and not task.completed_on:
+					# the work ended on the last completed time log, not when this timesheet is submitted
+					task.completed_on = min(getdate(get_last_completed_log_time(task.name)), getdate())
+				task.status = status
 				task.save(ignore_permissions=True)
 				tasks.append(data.task)
 
@@ -404,8 +423,21 @@ def get_task_status(task: Document) -> str:
 	return "Completed" if any(completed) else "Working"
 
 
+def get_last_completed_log_time(task: str):
+	return frappe.db.get_value(
+		"Timesheet Detail",
+		{"task": task, "docstatus": 1, "parenttype": "Timesheet", "completed": 1},
+		[{"MAX": "to_time"}],
+	)
+
+
 @frappe.whitelist()
-def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
+def get_projectwise_timesheet_data(
+	project: str | None = None,
+	parent: str | None = None,
+	from_time: str | None = None,
+	to_time: str | None = None,
+):
 	tsd = frappe.qb.DocType("Timesheet Detail")
 	ts = frappe.qb.DocType("Timesheet")
 
@@ -456,7 +488,7 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 
 
 @frappe.whitelist()
-def get_timesheet_detail_rate(timelog, currency):
+def get_timesheet_detail_rate(timelog: str, currency: str):
 	allowed_timesheets = frappe.get_list("Timesheet", pluck="name")
 
 	if not allowed_timesheets:
@@ -493,7 +525,7 @@ def get_timesheet_detail_rate(timelog, currency):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
+def get_timesheet(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	if not filters:
 		filters = {}
 
@@ -527,7 +559,7 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def get_timesheet_data(name, project=None):
+def get_timesheet_data(name: str, project: str | None = None):
 	data = None
 	if project:
 		data = get_projectwise_timesheet_data(project, name)
@@ -548,7 +580,9 @@ def get_timesheet_data(name, project=None):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, item_code=None, customer=None, currency=None):
+def make_sales_invoice(
+	source_name: str, item_code: str | None = None, customer: str | None = None, currency: str | None = None
+):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc("Timesheet", source_name)
 	timesheet.check_permission("read")
@@ -608,7 +642,6 @@ def get_activity_cost(
 ):
 	if not frappe.has_permission("Timesheet", "read"):
 		_refuse()
-
 	activity_type = cstr(activity_type)
 	if not activity_type or not frappe.has_permission("Activity Type", "select", doc=activity_type):
 		_refuse()
@@ -616,11 +649,12 @@ def get_activity_cost(
 		employee = cstr(employee)
 		if not frappe.has_permission("Employee", "select", doc=employee):
 			_refuse()
+	return _get_activity_cost(employee, activity_type, currency)
 
-	return _get_activity_cost(employee=employee, activity_type=activity_type, currency=currency)
 
-
-def _get_activity_cost(employee=None, activity_type=None, currency=None):
+def _get_activity_cost(
+	employee: str | None = None, activity_type: str | None = None, currency: str | None = None
+):
 	base_currency = frappe.defaults.get_global_default("currency")
 	rate = frappe.db.get_values(
 		"Activity Cost",
@@ -658,32 +692,42 @@ def _get_activity_cost(employee=None, activity_type=None, currency=None):
 
 
 @frappe.whitelist()
-def get_events(start, end, filters=None):
+def get_events(start: str, end: str, filters: str | list | dict | None = None):
 	"""Returns events for Gantt / Calendar view rendering.
 	:param start: Start date-time.
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
-	filters = json.loads(filters)
-	from frappe.desk.calendar import get_event_conditions
+	from erpnext.utilities.query import get_event_conditions_qb
 
-	conditions = get_event_conditions("Timesheet", filters)
+	filters = frappe.parse_json(filters) if filters else {}
 
-	return frappe.db.sql(
-		"""select `tabTimesheet Detail`.name as name,
-			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time as start_date, hours, activity_type,
-			`tabTimesheet Detail`.project, to_time as end_date,
-			CONCAT(`tabTimesheet Detail`.parent, ' (', ROUND(hours,2),' hrs)') as title
-		from `tabTimesheet Detail`, `tabTimesheet`
-		where `tabTimesheet Detail`.parent = `tabTimesheet`.name
-			and `tabTimesheet`.docstatus < 2
-			and (from_time <= %(end)s and to_time >= %(start)s) {conditions} {match_cond}
-		""".format(conditions=conditions, match_cond=get_match_cond("Timesheet")),
-		{"start": start, "end": end},
-		as_dict=True,
-		update={"allDay": 0},
+	tsd = frappe.qb.DocType("Timesheet Detail")
+	ts = frappe.qb.DocType("Timesheet")
+
+	query = (
+		frappe.qb.from_(tsd)
+		.inner_join(ts)
+		.on(tsd.parent == ts.name)
+		.select(
+			tsd.name.as_("name"),
+			tsd.docstatus.as_("status"),
+			tsd.parent.as_("parent"),
+			tsd.from_time.as_("start_date"),
+			tsd.hours,
+			tsd.activity_type,
+			tsd.project,
+			tsd.to_time.as_("end_date"),
+			Concat(tsd.parent, " (", Round(tsd.hours, 2), " hrs)").as_("title"),
+		)
+		.where((ts.docstatus < 2) & (tsd.from_time <= end) & (tsd.to_time >= start))
 	)
+
+	# user-permission match conditions + calendar filters on Timesheet (query-builder form)
+	for condition in get_event_conditions_qb("Timesheet", filters):
+		query = query.where(condition)
+
+	return query.run(as_dict=True, update={"allDay": 0})
 
 
 def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="creation"):
@@ -714,7 +758,7 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 				child_table.activity_type,
 				table.status,
 				child_table.billing_hours,
-				(table.sales_invoice | child_table.sales_invoice).as_("sales_invoice"),
+				Coalesce(table.sales_invoice, child_table.sales_invoice).as_("sales_invoice"),
 				child_table.project,
 			)
 			.where(table.docstatus == 1)
