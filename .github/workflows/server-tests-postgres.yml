@@ -105,7 +105,7 @@ jobs:
           CI_DB_DATADIR: /home/runner/pgdata
 
       - name: Install
-        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        run: bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot-benchmark.sh"
         env:
           DB: postgres
           TYPE: server
@@ -116,8 +116,7 @@ jobs:
 
       - name: Warm up test data
         run: |
-          cd ~/frappe-bench/
-          bench --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
+          "$HOME/pilot/bin/pilot" -b frappe-bench frappe --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
 
       - name: Stop DB and stage datadir
         run: |
@@ -127,14 +126,14 @@ jobs:
           # cannot crash-recover (full_page_writes is off). Fail the job instead — mirrors the
           # MariaDB sister's "don't bake a dirty datadir" guard.
           "$PG_BIN/pg_ctl" -D /home/runner/pgdata -m fast -w stop
-          mv /home/runner/pgdata /home/runner/frappe-bench/pgdata
+          mv /home/runner/pgdata /home/runner/pilot/benches/frappe-bench/pgdata
 
       - name: Package bench for test shards
         run: |
-          cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/runner/frappe-bench/hydrate.sh
-          cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/runner/frappe-bench/start-db.sh
+          cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/runner/pilot/benches/frappe-bench/hydrate.sh
+          cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/runner/pilot/benches/frappe-bench/start-db.sh
           tar czpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner \
-            --exclude='.git' --exclude='node_modules' frappe-bench
+            --exclude='.git' --exclude='node_modules' pilot/benches/frappe-bench
           ls -lh "${GITHUB_WORKSPACE}/bench.tar.gz"
 
       - name: Upload bench artifact
@@ -171,9 +170,8 @@ jobs:
       # The bench CLI (frappe-bench) and redis are global/system tools — not in the bench tarball.
       # The setup runner got them via install.sh; the MariaDB shards get them from the arc5 image.
       # GitHub-hosted PG shards install them here (cheap vs the build+reinstall that setup did once).
-      - name: Install shard runtime (bench CLI + redis + wkhtmltopdf)
+      - name: Install shard runtime (redis + wkhtmltopdf)
         run: |
-          pip install frappe-bench
           command -v redis-server >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq redis-server; }
           # wkhtmltopdf (patched-qt build) for print-format / PDF tests — same .deb install.sh uses.
           if ! command -v wkhtmltopdf >/dev/null; then
@@ -184,24 +182,26 @@ jobs:
       - name: Untar bench
         run: |
           tar xzpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner
-          ls -ld /home/runner/frappe-bench
+          ls -ld /home/runner/pilot/benches/frappe-bench
 
       - name: Hydrate (start Postgres on the baked datadir)
-        run: bash /home/runner/frappe-bench/hydrate.sh
+        run: bash /home/runner/pilot/benches/frappe-bench/hydrate.sh
         env:
           DB: postgres
           DB_HOST: 127.0.0.1
+          CI_DB_DATADIR: /home/runner/pilot/benches/frappe-bench/pgdata
+          BENCH_PATH: /home/runner/pilot/benches/frappe-bench
 
       - name: Run Tests
         run: |
-          cd ~/frappe-bench/
+          cd "$HOME/pilot/benches/frappe-bench/sites"
           # print-format / PDF tests are engine-independent (they exercise wkhtmltopdf rendering,
           # not postgres SQL — the MariaDB CI already covers them). They only fetch the static asset
           # bundles from http://test_site:8000/assets/..., so a plain static file server over sites/
           # satisfies wkhtmltopdf without the frappe web server (which never bound on a bare runner).
-          ( cd ~/frappe-bench/sites && nohup python3 -m http.server 8000 --bind 127.0.0.1 > ~/frappe-bench/web.log 2>&1 & )
+          ( nohup python3 -m http.server 8000 --bind 127.0.0.1 > ../web.log 2>&1 & )
           for _ in $(seq 1 15); do (exec 3<>/dev/tcp/127.0.0.1/8000) 2>/dev/null && { exec 3>&- 3<&-; break; }; sleep 1; done
-          bench --site test_site run-parallel-tests --lightmode --app erpnext \
+          "$HOME/pilot/benches/frappe-bench/env/bin/python" -m frappe.utils.bench_helper frappe --site test_site run-parallel-tests --lightmode --app erpnext \
             --total-builds ${{ strategy.job-total }} --build-number ${{ matrix.container }}
         env:
           TYPE: server
