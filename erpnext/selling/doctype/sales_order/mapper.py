@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -1058,6 +1059,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 
 	source_doc = frappe.get_doc("Sales Order", source_name)
 	so_items = {row.name: row for row in source_doc.items}
+	picked = get_picked_qty(source_name)
 
 	def should_pick_packed_item(packed_item) -> bool:
 		# a bundle component is pickable only while its parent row is open, warehouse-delivered and has qty left
@@ -1067,20 +1069,49 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 			and not parent.closed
 			and parent.delivered_by_supplier != 1
 			and abs(parent.delivered_qty) < abs(parent.qty)
-			and get_packed_qty_to_pick(packed_item, parent) > 0
+			and packed_qty_to_pick.get(packed_item.name, 0) > 0
 		)
 
-	def get_packed_qty_to_pick(packed_item, parent) -> float:
-		# what is left on this component, as components of one bundle can be picked unevenly
-		delivered_qty = flt(packed_item.qty) * flt(parent.delivered_qty) / flt(parent.qty)
-		return flt(
-			flt(packed_item.qty) - max(flt(packed_item.picked_qty), delivered_qty),
-			packed_item.precision("qty"),
+	def get_packed_qty_to_pick() -> dict:
+		# each row is capped by what it picked; qty delivered without a pick list is shared over the
+		# rows of a component, as a delivery does not tell repeated components of a bundle apart
+		packed_items = [
+			row
+			for row in source_doc.get("packed_items")
+			if flt(so_items.get(row.parent_detail_docname, {}).get("qty"))
+		]
+		delivered_without_pick_list = defaultdict(float)
+		for packed_item in packed_items:
+			parent = so_items[packed_item.parent_detail_docname]
+			key = (parent.name, packed_item.item_code)
+			delivered_without_pick_list[key] += (
+				flt(packed_item.qty) * flt(parent.delivered_qty) / flt(parent.qty)
+			)
+
+		for key, qty in picked.delivered.items():
+			delivered_without_pick_list[key] -= qty
+
+		qty_to_pick = {}
+		for packed_item in packed_items:
+			key = (packed_item.parent_detail_docname, packed_item.item_code)
+			unpicked_qty = flt(packed_item.qty) - picked.by_packed_item.get(packed_item.name, 0)
+			delivered_qty = min(max(unpicked_qty, 0), max(delivered_without_pick_list[key], 0))
+			delivered_without_pick_list[key] -= delivered_qty
+			qty_to_pick[packed_item.name] = flt(unpicked_qty - delivered_qty, packed_item.precision("qty"))
+
+		return qty_to_pick
+
+	packed_qty_to_pick = get_packed_qty_to_pick()
+
+	def get_qty_to_pick(item) -> float:
+		# delivered without a pick list or not, plus what pick lists hold and have not delivered yet
+		picked_qty = picked.undelivered.get((item.name, item.item_code), 0) / (
+			flt(item.conversion_factor) or 1
 		)
+		return flt(flt(item.qty) - flt(item.delivered_qty) - picked_qty, item.precision("qty"))
 
 	def update_item_quantity(source, target, source_parent) -> None:
-		picked_qty = flt(source.picked_qty) / (flt(source.conversion_factor) or 1)
-		qty_to_be_picked = flt(source.qty) - max(picked_qty, flt(source.delivered_qty))
+		qty_to_be_picked = get_qty_to_pick(source)
 
 		target.qty = qty_to_be_picked
 		target.stock_qty = qty_to_be_picked * flt(source.conversion_factor)
@@ -1092,7 +1123,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 
 	def update_packed_item_qty(source, target, source_parent) -> None:
 		# packed qty is in the component's stock UOM, not the bundle row's UOM
-		target.qty = target.stock_qty = get_packed_qty_to_pick(source, so_items[source.parent_detail_docname])
+		target.qty = target.stock_qty = packed_qty_to_pick[source.name]
 		target.conversion_factor = 1
 
 	def should_pick_order_item(item) -> bool:
@@ -1101,6 +1132,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 			and item.delivered_by_supplier != 1
 			and not item.closed
 			and not is_product_bundle(item.item_code)
+			and get_qty_to_pick(item) > 0
 		)
 
 	# Don't allow a Pick List to be created against a Sales Order that has reserved stock.
@@ -1142,6 +1174,38 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		doc.set_item_locations()
 
 	return doc
+
+
+def get_picked_qty(sales_order: str) -> frappe._dict:
+	"""Undelivered and delivered stock qty of submitted pick lists per order row and item, picked qty per bundle row."""
+	pick_list_item = frappe.qb.DocType("Pick List Item")
+	pending_qty = pick_list_item.picked_qty - pick_list_item.delivered_qty
+
+	rows = (
+		frappe.qb.from_(pick_list_item)
+		.select(
+			pick_list_item.sales_order_item,
+			pick_list_item.item_code,
+			pick_list_item.product_bundle_item,
+			Sum(pick_list_item.picked_qty).as_("picked_qty"),
+			Sum(pick_list_item.delivered_qty).as_("delivered_qty"),
+			Sum(Case().when(pending_qty > 0, pending_qty).else_(0)).as_("undelivered_qty"),
+		)
+		.where((pick_list_item.sales_order == sales_order) & (pick_list_item.docstatus == 1))
+		.groupby(
+			pick_list_item.sales_order_item, pick_list_item.item_code, pick_list_item.product_bundle_item
+		)
+	).run(as_dict=True)
+
+	picked = frappe._dict(undelivered=defaultdict(float), delivered=defaultdict(float), by_packed_item={})
+	for row in rows:
+		key = (row.sales_order_item, row.item_code)
+		picked.undelivered[key] += flt(row.undelivered_qty)
+		picked.delivered[key] += flt(row.delivered_qty)
+		if row.product_bundle_item:
+			picked.by_packed_item[row.product_bundle_item] = flt(row.picked_qty)
+
+	return picked
 
 
 @frappe.whitelist()
