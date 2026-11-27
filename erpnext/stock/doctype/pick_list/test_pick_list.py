@@ -2209,6 +2209,65 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(sum(row.stock_qty for row in pick_list.locations), 15)
 
+	def test_order_partly_delivered_without_a_pick_list_is_not_over_picked(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=20, basic_rate=100)
+		bundle, _components = create_product_bundle([2, 1], warehouse=warehouse)
+		sales_order = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100, do_not_submit=1)
+		sales_order.append(
+			"items", {**sales_order.items[0].as_dict(), "name": None, "item_code": bundle, "qty": 3}
+		)
+		sales_order.submit()
+
+		# 4 of the item and 1 bundle go out without a pick list
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.items[0].qty = 4
+		delivery_note.items[1].qty = 1
+		delivery_note.submit()
+
+		pick_list = create_pick_list(sales_order.name)
+		self.assertEqual([row.stock_qty for row in pick_list.locations], [6, 4, 2])
+		pick_list.submit()
+
+		self.assertEqual(create_pick_list(sales_order.name).locations, [])
+
+	def test_repeated_bundle_component_is_not_picked_again_after_a_partial_delivery(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=20, basic_rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		for qty in (1, 2):
+			product_bundle.append("items", {"item_code": component, "qty": qty})
+		product_bundle.insert().submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		# the delivered 3 components all land on the first pick list row
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.items[0].qty = 1
+		delivery_note.submit()
+
+		self.assertEqual(create_pick_list(sales_order.name).locations, [])
+
+		# a row picked short gets the rest, not the other row of the same component
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.locations[0].qty = pick_list.locations[0].stock_qty = 1
+		pick_list.submit()
+
+		pick_list = create_pick_list(sales_order.name)
+		self.assertEqual(
+			[(row.product_bundle_item, row.qty) for row in pick_list.locations],
+			[(sales_order.packed_items[0].name, 2)],
+		)
+		pick_list.submit()
+
 	def test_orders_with_different_discounts_get_their_own_delivery_note(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
