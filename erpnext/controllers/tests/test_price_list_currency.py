@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 import frappe
 from frappe.tests import UnitTestCase
 
-from erpnext.accounts.doctype.sales_invoice.services.pos import POSService
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -43,15 +43,17 @@ class TestPriceListCurrency(UnitTestCase):
 		)
 
 		with (
-			patch("erpnext.accounts.doctype.sales_invoice.services.pos.frappe.get_doc", return_value=profile),
-			patch("erpnext.accounts.doctype.sales_invoice.services.pos.update_multi_mode_option"),
+			patch(
+				"erpnext.accounts.doctype.sales_invoice.sales_invoice.frappe.get_doc", return_value=profile
+			),
+			patch("erpnext.accounts.doctype.sales_invoice.sales_invoice.update_multi_mode_option"),
 			patch("erpnext.controllers.accounts_controller.frappe") as mock_frappe,
 			patch(
 				"erpnext.controllers.accounts_controller.get_exchange_rate", return_value=0.000444444
 			) as exchange_rate,
 		):
 			mock_frappe.db.get_value.return_value = "CDF"
-			POSService(invoice).set_pos_fields()
+			SalesInvoice.set_pos_fields(invoice)
 			AccountsController.set_price_list_currency(invoice, "Selling")
 			self.assertEqual(invoice.currency, "CDF")
 			self.assertEqual(invoice.price_list_currency, "CDF")
@@ -61,13 +63,13 @@ class TestPriceListCurrency(UnitTestCase):
 
 			invoice.conversion_rate = 0.0005
 			exchange_rate.reset_mock()
-			POSService(invoice).set_pos_fields()
+			SalesInvoice.set_pos_fields(invoice)
 			AccountsController.set_price_list_currency(invoice, "Selling")
 			self.assertEqual(invoice.conversion_rate, 0.0005)
 			exchange_rate.assert_not_called()
 
 			profile.currency = "USD"
-			POSService(invoice).set_pos_fields()
+			SalesInvoice.set_pos_fields(invoice)
 			AccountsController.set_price_list_currency(invoice, "Selling")
 			self.assertEqual(invoice.currency, "USD")
 			self.assertEqual(invoice.conversion_rate, 1)
