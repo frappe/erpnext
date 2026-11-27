@@ -759,7 +759,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for d in costed_out_items:
 			self._set_incoming_item_rate(d, *rate_args)
 
-		if has_running_total_share:
+		# Manual rates are kept unless earlier entries consumed part of this entry's share
+		if has_running_total_share and ManufactureStockEntry(self).is_short_of_raw_material_share():
 			self.cap_costed_out_items(costed_out_items, outgoing_items_cost)
 
 		for d in finished_items_last:

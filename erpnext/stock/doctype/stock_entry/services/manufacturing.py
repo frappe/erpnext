@@ -304,6 +304,13 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		required_items = self.wo_doc.required_items
 		return bool(required_items) and not any(self.get_wo_raw_material_qty(row) for row in required_items)
 
+	def is_short_of_raw_material_share(self):
+		"""Earlier entries consumed part of this entry's whole-number share of a raw material."""
+		return self.consumes_running_total_share and any(
+			self.get_wo_raw_material_qty(row) < self.get_wo_raw_material_entry_qty(row)
+			for row in self.wo_doc.required_items
+		)
+
 	@property
 	def consumes_running_total_share(self):
 		"""Raw materials follow the Work Order's running total, so earlier entries may consume a whole unit."""
@@ -670,7 +677,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if qty_per_unit is None:
 			qty_per_unit = row.required_qty / self.wo_doc.qty
 		fg_completed_qty = flt(self.doc.fg_completed_qty)
-		entry_qty = ceil_qty_if_uom_has_whole_number(qty_per_unit * fg_completed_qty, row.stock_uom)
+		entry_qty = self.get_wo_raw_material_entry_qty(row, qty_per_unit)
 		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
 		if self.doc.purpose != "Manufacture" or not is_whole_number:
 			return entry_qty
@@ -681,6 +688,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		)
 		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
 		return min(max(ceil(flt(total_qty - consumed_qty, 9)), 0), entry_qty)
+
+	def get_wo_raw_material_entry_qty(self, row, qty_per_unit=None):
+		"""This entry's own share of a Work Order raw material, rounded up for a whole number UOM."""
+		if qty_per_unit is None:
+			qty_per_unit = row.required_qty / self.wo_doc.qty
+		return ceil_qty_if_uom_has_whole_number(qty_per_unit * flt(self.doc.fg_completed_qty), row.stock_uom)
 
 	def _resolve_rm_warehouse(self, row):
 		if self.wo_doc and self.wo_doc.skip_transfer and not self.wo_doc.from_wip_warehouse:
