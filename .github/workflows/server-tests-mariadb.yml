@@ -93,8 +93,10 @@ jobs:
       - name: Install
         run: |
           chown "$ERPNEXT_CI_USER:$ERPNEXT_CI_USER" "$HOME" "$GITHUB_WORKSPACE"
-          su -m "$ERPNEXT_CI_USER" -s /bin/bash -c 'bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot-self-hosted.sh"'
+          su -m "$ERPNEXT_CI_USER" -s /bin/bash -c 'bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot.sh"'
         env:
+          DB: mariadb
+          TYPE: server
           FRAPPE_USER: ${{ github.event.inputs.user }}
           FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
           CI_GITHUB_TOKEN: ${{ github.token }}
@@ -125,6 +127,12 @@ jobs:
       - name: Stage bench on node (hostPath)
         id: stage
         run: |
+          cat > "$BENCH_PATH/Procfile" <<'EOF'
+          redis_cache: redis-server config/redis_cache.conf
+          redis_queue: redis-server config/redis_queue.conf
+          web: cd sites && "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe serve --port 8000
+          worker: (cd sites && "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe worker) >> logs/worker.log 2>&1
+          EOF
           cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/ci/pilot/benches/frappe-bench/hydrate.sh
           cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/pilot/benches/frappe-bench/start-db.sh
           mkdir -p /opt/ci-bench-staging

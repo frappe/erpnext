@@ -41,6 +41,13 @@ mkdir -p "$HOME/pilot"
 curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
     | tar -xz -C "$HOME/pilot"
 
+mariadb_server=false
+if [ "$DB" = mariadb ] && [ "${TYPE:-}" = server ]; then
+    mariadb_server=true
+    uv venv "$HOME/pilot/.admin-venv"
+    uv pip install --python "$HOME/pilot/.admin-venv/bin/python" -r "$HOME/pilot/pyproject.toml" --extra admin
+fi
+
 pilot new frappe-bench --frappe-branch "$frappebranch" --database "$DB" --admin-password 'PilotAdmin123!'
 pilot -b frappe-bench set-bench-config python "$(command -v python)"
 pilot -b frappe-bench set-bench-config admin_allow_site_to_pilot_communication false
@@ -62,6 +69,8 @@ if [ "$DB" = postgres ]; then
         wget -qO /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
         sudo apt-get install -y -qq /tmp/wkhtmltox.deb
     fi
+fi
+if [ "$DB" = postgres ] || "$mariadb_server"; then
     pilot -b frappe-bench frappe setup-chrome
 fi
 
@@ -73,12 +82,12 @@ git config --global --add safe.directory "$GITHUB_WORKSPACE/.git"
 
 erpnext_branch=${GITHUB_REF_NAME:-$(git -C "$GITHUB_WORKSPACE" branch --show-current)}
 erpnext_commit=${GITHUB_SHA:-$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)}
-if [ "$DB" = postgres ]; then
+if [ "$DB" = postgres ] || "$mariadb_server"; then
     pilot get-app https://github.com/frappe/payments --branch develop --skip-assets
 fi
 pilot get-app "$GITHUB_WORKSPACE" --branch "$erpnext_branch" --commit "$erpnext_commit" --skip-assets
 
-if [ "$DB" = mariadb ]; then
+if [ "$DB" = mariadb ] && ! "$mariadb_server"; then
     mkdir -p sites/test_site
     jq 'del(.install_apps)' "$GITHUB_WORKSPACE/.github/helper/site_config_mariadb.json" > sites/test_site/site_config.json
     printf 'frappe\nerpnext\n' > sites/apps.txt
@@ -91,14 +100,24 @@ SQL
     exit 0
 fi
 
+if "$mariadb_server"; then
+    pilot -b frappe-bench setup requirements
+fi
 uv pip install --python env/bin/python -e "apps/frappe[test]"
 
-redis-server config/redis_cache.conf --daemonize yes
-redis-server config/redis_queue.conf --daemonize yes
-read -r cache_port queue_port < <(python -c 'import tomllib; r = tomllib.load(open("bench.toml", "rb"))["redis"]; print(r["cache_port"], r["queue_port"])')
-for port in "$cache_port" "$queue_port"; do
-    redis-cli -p "$port" ping | grep -qx PONG
-done
+if "$mariadb_server"; then
+    pilot_log=${RUNNER_TEMP:-/tmp}/pilot.log
+    pilot -b frappe-bench start > "$pilot_log" 2>&1 &
+    curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 \
+        http://127.0.0.1:7000/api/v1/health
+else
+    redis-server config/redis_cache.conf --daemonize yes
+    redis-server config/redis_queue.conf --daemonize yes
+    read -r cache_port queue_port < <(python -c 'import tomllib; r = tomllib.load(open("bench.toml", "rb"))["redis"]; print(r["cache_port"], r["queue_port"])')
+    for port in "$cache_port" "$queue_port"; do
+        redis-cli -p "$port" ping | grep -qx PONG
+    done
+fi
 
 if [ ! -f sites/assets/assets.json ]; then
     mkdir -p sites/assets
@@ -112,7 +131,7 @@ import json
 import os
 from pathlib import Path
 
-defaults = Path(os.environ["GITHUB_WORKSPACE"]) / ".github/helper/site_config_postgres.json"
+defaults = Path(os.environ["GITHUB_WORKSPACE"]) / f".github/helper/site_config_{os.environ['DB']}.json"
 site = Path("sites/test_site/site_config.json")
 settings = json.loads(defaults.read_text())
 for key in ("db_name", "db_password", "install_apps"):
