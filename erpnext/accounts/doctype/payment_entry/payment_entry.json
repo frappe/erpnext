@@ -15,61 +15,60 @@
   "naming_series",
   "payment_type",
   "payment_order_status",
-  "column_break_5",
-  "posting_date",
-  "company",
-  "party_section",
-  "party_column",
   "party_type",
   "party",
-  "party_bank_account",
   "party_name",
+  "column_break_5",
+  "company",
+  "posting_date",
+  "party_bank_account",
   "contact_person",
   "contact_email",
-  "column_break_11",
-  "mode_of_payment",
-  "bank_account",
-  "reference_no",
-  "reference_date",
-  "clearance_date",
-  "book_advance_payments_in_separate_party_account",
-  "reconcile_on_advance_payment_date",
-  "payment_accounts_section",
-  "paid_from",
-  "paid_from_account_type",
-  "paid_from_account_currency",
-  "paid_from_bank_account",
-  "column_break_18",
-  "paid_to",
-  "paid_to_account_type",
-  "paid_to_account_currency",
-  "paid_to_bank_account",
   "payment_amounts_section",
   "paid_amount",
   "source_exchange_rate",
   "base_paid_amount",
   "base_paid_amount_after_tax",
+  "paid_amount_after_tax",
+  "received_amount_after_tax",
+  "mode_of_payment",
+  "mode_of_payment_type",
+  "bank_account",
   "column_break_21",
   "received_amount",
   "target_exchange_rate",
   "base_received_amount",
   "base_received_amount_after_tax",
-  "paid_amount_after_tax",
-  "received_amount_after_tax",
+  "reference_no",
+  "reference_date",
+  "clearance_date",
   "section_break_14",
   "get_outstanding_invoices",
   "get_outstanding_orders",
   "references",
   "payment_term_discounts_calculated",
-  "section_break_34",
+  "references_totals_section",
+  "total_outstanding_amount",
+  "column_break_allocation",
   "total_allocated_amount",
   "base_total_allocated_amount",
   "column_break_36",
   "unallocated_amount",
-  "column_break_allocation",
   "difference_amount",
+  "payment_accounts_section",
+  "paid_from",
+  "paid_from_account_type",
+  "paid_from_account_currency",
+  "paid_from_bank_account",
+  "book_advance_payments_in_separate_party_account",
+  "reconcile_on_advance_payment_date",
+  "column_break_18",
+  "paid_to",
+  "paid_to_account_type",
+  "paid_to_account_currency",
+  "paid_to_bank_account",
+  "section_break_34",
   "write_off_difference_amount",
-  "deductions_or_loss_section",
   "deductions",
   "accounting_dimensions_section",
   "project",
@@ -181,14 +180,12 @@
    "options": "Mode of Payment"
   },
   {
-   "fieldname": "party_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Details"
-  },
-  {
-   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
-   "fieldname": "party_column",
-   "fieldtype": "Column Break"
+   "fieldname": "mode_of_payment_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "is_virtual": 1,
+   "label": "Mode of Payment Type",
+   "read_only": 1
   },
   {
    "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
@@ -220,10 +217,6 @@
    "label": "Party Name"
   },
   {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "eval: doc.party && doc.party_type !== \"Employee\"",
    "fieldname": "contact_person",
    "fieldtype": "Link",
@@ -239,9 +232,12 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.payment_type == \"Internal Transfer\" || !doc.paid_from || !doc.paid_to || (doc.source_exchange_rate || 1) != 1 || (doc.target_exchange_rate || 1) != 1",
+   "depends_on": "eval:doc.party || doc.payment_type == \"Internal Transfer\"",
    "fieldname": "payment_accounts_section",
    "fieldtype": "Section Break",
-   "label": "Accounts"
+   "label": "Accounting Details"
   },
   {
    "bold": 1,
@@ -305,13 +301,14 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:(doc.paid_to && doc.paid_from)",
+   "depends_on": "eval:doc.party || (doc.payment_type == \"Internal Transfer\" && doc.paid_from && doc.paid_to)",
    "fieldname": "payment_amounts_section",
    "fieldtype": "Section Break",
-   "label": "Amount"
+   "label": "Payment Details"
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.paid_from && doc.paid_to",
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -342,6 +339,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.paid_from && doc.paid_to",
    "fieldname": "received_amount",
    "fieldtype": "Currency",
    "label": "Received Amount",
@@ -368,10 +366,9 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:(doc.party && doc.paid_from && doc.paid_to && doc.paid_amount && doc.received_amount)",
+   "depends_on": "eval:doc.party && (doc.payment_type == \"Receive\" ? doc.paid_from : doc.paid_to)",
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break",
-   "label": "Reference"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "references",
@@ -380,14 +377,15 @@
    "options": "Payment Entry Reference"
   },
   {
-   "depends_on": "eval:doc.paid_from && doc.paid_to && (doc.party || doc.difference_amount)",
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.difference_amount || (doc.deductions && doc.deductions.length)",
+   "depends_on": "eval:doc.paid_from && doc.paid_to",
    "fieldname": "section_break_34",
    "fieldtype": "Section Break",
-   "label": "Writeoff"
+   "label": "Adjustments and Deductions"
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.party && doc.paid_amount && doc.received_amount && doc.references)",
    "fieldname": "total_allocated_amount",
    "fieldtype": "Currency",
    "label": "Total Allocated Amount",
@@ -418,7 +416,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.docstatus == 0 && doc.paid_amount && doc.received_amount",
+   "depends_on": "eval:doc.docstatus == 0 && doc.difference_amount",
    "description": "Must be zero to submit. Use Write Off Difference Amount, or add a row under Deductions or Loss.",
    "fieldname": "difference_amount",
    "fieldtype": "Currency",
@@ -435,14 +433,6 @@
    "label": "Write Off Difference Amount"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "deductions",
-   "depends_on": "eval:(doc.paid_amount && doc.received_amount)",
-   "fieldname": "deductions_or_loss_section",
-   "fieldtype": "Section Break",
-   "label": "Deductions or Loss"
-  },
-  {
    "description": "Bank charges, discounts or rounding that make up the difference between the amount paid and the invoices settled. Each row is booked to its own account.",
    "fieldname": "deductions",
    "fieldtype": "Table",
@@ -451,7 +441,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_from && doc.paid_to)",
+   "depends_on": "eval:doc.reference_no || (doc.payment_type == \"Receive\" ? doc.paid_to_account_type : doc.paid_from_account_type) == \"Bank\" || (doc.mode_of_payment_type && doc.mode_of_payment_type != \"Cash\")",
    "description": "Cheque Number, UTR or Bank Transaction ID.",
    "fieldname": "reference_no",
    "fieldtype": "Data",
@@ -459,17 +449,17 @@
    "in_import_template": 1,
    "in_standard_filter": 1,
    "label": "Cheque/Reference No",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
+   "mandatory_depends_on": "eval:(doc.payment_type == \"Receive\" ? doc.paid_to_account_type : doc.paid_from_account_type) == \"Bank\"",
    "show_description_on_click": 1
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_from && doc.paid_to)",
+   "depends_on": "eval:doc.reference_date || (doc.payment_type == \"Receive\" ? doc.paid_to_account_type : doc.paid_from_account_type) == \"Bank\" || (doc.mode_of_payment_type && doc.mode_of_payment_type != \"Cash\")",
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "in_import_template": 1,
    "label": "Cheque/Reference Date",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
+   "mandatory_depends_on": "eval:(doc.payment_type == \"Receive\" ? doc.paid_to_account_type : doc.paid_from_account_type) == \"Bank\"",
    "search_index": 1
   },
   {
@@ -573,7 +563,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
+   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type) && (doc.bank_account || (doc.mode_of_payment_type || (doc.payment_type == \"Receive\" ? doc.paid_to_account_type : doc.paid_from_account_type)) != \"Cash\")",
    "fieldname": "bank_account",
    "fieldtype": "Link",
    "label": "Company Bank Account",
@@ -597,6 +587,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:doc.party || doc.payment_type == \"Internal Transfer\"",
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -845,6 +836,19 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.references && doc.references.length",
+   "fieldname": "references_totals_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_outstanding_amount",
+   "fieldtype": "Currency",
+   "is_virtual": 1,
+   "label": "Total Outstanding",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "payment_tab",
    "fieldtype": "Tab Break",
    "label": "Details"
@@ -914,7 +918,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-11-24 01:08:11.570380",
+ "modified": "2026-11-26 02:05:51.335246",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
