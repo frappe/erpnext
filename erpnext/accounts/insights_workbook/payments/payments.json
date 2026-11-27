@@ -606,7 +606,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-24 21:30:00.000000",
+ "modified": "2026-11-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "payments",
@@ -1105,7 +1105,7 @@
         "column_name": "overdue",
         "type": "column"
        },
-       "operator": ">",
+       "operator": "!=",
        "value": 0
       }
      ],
@@ -1150,20 +1150,6 @@
      "type": "source"
     },
     {
-     "filters": [
-      {
-       "column": {
-        "column_name": "overdue",
-        "type": "column"
-       },
-       "operator": ">",
-       "value": 0
-      }
-     ],
-     "logical_operator": "And",
-     "type": "filter_group"
-    },
-    {
      "dimensions": [
       {
        "column_name": "customer",
@@ -1178,15 +1164,35 @@
      ],
      "measures": [
       {
+       "data_type": "Decimal",
+       "expression": {
+        "expression": "sum(overdue)",
+        "type": "expression"
+       },
+       "measure_name": "overdue"
+      },
+      {
        "data_type": "Integer",
        "expression": {
-        "expression": "count()",
+        "expression": "count_if(overdue > 0)",
         "type": "expression"
        },
        "measure_name": "overdue_vouchers"
       }
      ],
      "type": "summarize"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "abs(overdue) >= 0.005",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
     },
     {
      "data_type": "String",
@@ -1228,7 +1234,7 @@
     {
      "data_type": "Decimal",
      "expression": {
-      "expression": "if_else((outstanding >= 0.005) & (due_date < today()), outstanding, 0)",
+      "expression": "if_else((abs(outstanding) >= 0.005) & (due_date < today()), outstanding, 0)",
       "type": "expression"
      },
      "new_name": "overdue",
@@ -1237,7 +1243,7 @@
     {
      "data_type": "Decimal",
      "expression": {
-      "expression": "if_else((outstanding_a_month_ago >= 0.005) & (due_date < date_sub(today(), 1, 'month')), outstanding_a_month_ago, 0)",
+      "expression": "if_else((abs(outstanding_a_month_ago) >= 0.005) & (due_date < date_sub(today(), 1, 'month')), outstanding_a_month_ago, 0)",
       "type": "expression"
      },
      "new_name": "overdue_a_month_ago",
@@ -1523,7 +1529,7 @@
     {
      "data_type": "Decimal",
      "expression": {
-      "expression": "if_else((outstanding >= 0.005) & (due_date < today()), outstanding, 0)",
+      "expression": "if_else((abs(outstanding) >= 0.005) & (due_date < today()), outstanding, 0)",
       "type": "expression"
      },
      "new_name": "overdue",
