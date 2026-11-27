@@ -95,4 +95,7 @@ PYTHON
 
 # Keep the existing Bench process launcher on shards, which omit node_modules.
 bench setup procfile
-sed -i -E 's/^(watch|schedule|socketio|redis_socketio):/# &/' Procfile
+sed -i -E \
+    -e '/^(watch|schedule|socketio|redis_socketio):/s/^/# /' \
+    -e 's/^(web|worker[A-Za-z0-9_-]*): bench /\1: cd sites \&\& ../env/bin/python -m frappe.utils.bench_helper frappe /' \
+    Procfile

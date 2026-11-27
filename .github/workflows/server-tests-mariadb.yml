@@ -191,10 +191,10 @@ jobs:
       - name: Run Tests
         run: |
           su -m "${ERPNEXT_CI_USER:-frappe}" -s /bin/bash <<'EOF'
-          cd "$BENCH_PATH"
+          cd "$BENCH_PATH/sites"
           coverage_flag=""
           if [ "$WITH_COVERAGE" = "true" ]; then coverage_flag="--with-coverage"; fi
-          bench --site test_site run-parallel-tests --lightmode --app erpnext \
+          ../env/bin/python -m frappe.utils.bench_helper frappe --site test_site run-parallel-tests --lightmode --app erpnext \
             --total-builds ${{ strategy.job-total }} \
             --build-number ${{ matrix.container }} \
             $coverage_flag
