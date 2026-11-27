@@ -228,22 +228,6 @@ class SellingController(StockController):
 				"Company", self.company, "default_sales_contact"
 			)
 
-	def remove_shipping_charge(self):
-		if self.shipping_rule:
-			shipping_rule = frappe.get_last_doc("Shipping Rule", self.shipping_rule)
-			existing_shipping_charge = self.get(
-				"taxes",
-				{
-					"doctype": "Sales Taxes and Charges",
-					"charge_type": "Actual",
-					"account_head": shipping_rule.account,
-					"cost_center": shipping_rule.cost_center,
-				},
-			)
-			if existing_shipping_charge:
-				self.get("taxes").remove(existing_shipping_charge[-1])
-				self.calculate_taxes_and_totals()
-
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 

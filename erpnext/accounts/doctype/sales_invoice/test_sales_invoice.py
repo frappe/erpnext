@@ -3090,8 +3090,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertEqual(si.net_total, 1250)
 
-		self.assertEqual(si.total_taxes_and_charges, 468.85)
-		self.assertEqual(si.grand_total, 1718.85)
+		self.assertEqual(si.total_taxes_and_charges, 577.05)
+		self.assertEqual(si.grand_total, 1827.05)
 
 	def test_create_invoice_without_terms(self):
 		si = create_sales_invoice(do_not_save=1)

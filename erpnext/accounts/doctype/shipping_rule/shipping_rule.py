@@ -7,7 +7,7 @@
 import frappe
 from frappe import _, msgprint, throw
 from frappe.model.document import Document
-from frappe.utils import flt, fmt_money
+from frappe.utils import cint, flt, fmt_money
 
 import erpnext
 
@@ -177,6 +177,7 @@ class ShippingRule(Document):
 			"charge_type": "Actual",
 			"account_head": self.account,
 			"cost_center": self.cost_center,
+			"set_by_shipping_rule": 1,
 		}
 		if self.shipping_rule_type == "Selling":
 			# check if not applied on purchase
@@ -194,21 +195,22 @@ class ShippingRule(Document):
 			)
 			shipping_charge["add_deduct_tax"] = "Add"
 
-		shipping_charge_filters = shipping_charge.copy()
-		if not self.cost_center:
-			shipping_charge_filters["cost_center"] = (
-				"in",
-				(None, "", erpnext.get_default_cost_center(doc.company)),
-			)
-
-		existing_shipping_charge = doc.get("taxes", filters=shipping_charge_filters)
+		existing_shipping_charge = doc.get("taxes", filters={"set_by_shipping_rule": 1})
 		if existing_shipping_charge:
 			# take the last record found
+			self.update_shipping_row(existing_shipping_charge[-1])
 			existing_shipping_charge[-1].tax_amount = shipping_amount
 		else:
 			shipping_charge["tax_amount"] = shipping_amount
 			shipping_charge["description"] = self.label
 			doc.append("taxes", shipping_charge)
+
+	def update_shipping_row(self, row):
+		# the row follows the rule, also when the rule is switched
+		row.account_head = self.account
+		row.description = self.label
+		if self.cost_center:
+			row.cost_center = self.cost_center
 
 	def sort_shipping_rule_conditions(self):
 		"""Sort Shipping Rule Conditions based on increasing From Value"""
@@ -252,3 +254,43 @@ class ShippingRule(Document):
 				)
 
 			msgprint("\n".join(messages), raise_exception=OverlappingConditionError)
+
+
+def validate_untaxed_shipping_charge(doc):
+	taxes = doc.get("taxes")
+	for shipping_row in doc.get("taxes", {"set_by_shipping_rule": 1}):
+		for tax in taxes[shipping_row.idx :]:
+			if is_charged_on_row(tax, shipping_row.idx):
+				frappe.throw(
+					_(
+						"Row #{0}: tax cannot be charged on the shipping charge in row #{1}. Select the Taxes and Charges Template again to add the shipping charge after the taxes, or add shipping as a service item to charge tax on it."
+					).format(tax.idx, shipping_row.idx),
+					title=_("Shipping Charge Taxed"),
+				)
+
+
+def is_charged_on_row(tax, row):
+	if tax.charge_type == "On Previous Row Total":
+		return cint(tax.row_id) >= row
+
+	return tax.charge_type == "On Previous Row Amount" and cint(tax.row_id) == row
+
+
+def remove_shipping_charges(doc):
+	shipping_rows = doc.get("taxes", {"set_by_shipping_rule": 1})
+	for row in shipping_rows:
+		position = doc.get("taxes").index(row) + 1
+		doc.remove(row)
+		for tax in doc.get("taxes"):
+			if shifts_with_removed_row(tax, position):
+				tax.row_id = str(cint(tax.row_id) - 1)
+
+	return bool(shipping_rows)
+
+
+def shifts_with_removed_row(tax, position):
+	# a running total up to the removed row is the total up to the row above it
+	if tax.charge_type == "On Previous Row Total":
+		return cint(tax.row_id) >= position
+
+	return tax.charge_type == "On Previous Row Amount" and cint(tax.row_id) > position

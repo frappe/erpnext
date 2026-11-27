@@ -14,6 +14,7 @@ import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule_margin
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.accounts.doctype.shipping_rule.shipping_rule import remove_shipping_charges
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	get_billed_qty,
 	get_billed_stock_qty,
@@ -537,15 +538,21 @@ class calculate_taxes_and_totals:
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
 	def calculate_shipping_charges(self):
+		if not hasattr(self.doc, "shipping_rule"):
+			return
+
+		if not self.doc.shipping_rule:
+			if remove_shipping_charges(self.doc):
+				self.calculate_discounted_totals()
+			return
+
 		# Do not apply shipping rule for POS
 		if self.doc.get("is_pos"):
 			return
 
-		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
-			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
-			shipping_rule.apply(self.doc)
-
-			self.calculate_discounted_totals()
+		shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
+		shipping_rule.apply(self.doc)
+		self.calculate_discounted_totals()
 
 	def calculate_taxes(self):
 		# reset value from earlier calculations

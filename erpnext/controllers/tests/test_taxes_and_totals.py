@@ -372,6 +372,19 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 
 		self.assertEqual(so.items[0].amount, 300)
 
+	def test_inclusive_previous_row_total_below_exclusive_row(self):
+		so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+		so.set("taxes", [])
+		for tax in (
+			{"charge_type": "Actual", "tax_amount": 150},
+			{"charge_type": "On Net Total", "rate": 10, "included_in_print_rate": 1},
+			{"charge_type": "On Previous Row Total", "rate": 5, "row_id": "2", "included_in_print_rate": 1},
+		):
+			so.append("taxes", {"account_head": "_Test Account VAT - _TC", "description": "Tax", **tax})
+
+		with self.assertRaisesRegex(frappe.ValidationError, "taxes in rows 1 - 2 must also be included"):
+			calculate_taxes_and_totals(so)
+
 	def make_sales_order_with_shipping_rule(self, rate):
 		so = make_sales_order(qty=1, rate=rate, do_not_save=True)
 		so.set("taxes", [])

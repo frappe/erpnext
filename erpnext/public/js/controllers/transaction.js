@@ -1680,7 +1680,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	shipping_rule() {
 		var me = this;
-		if (this.frm.doc.shipping_rule) {
+		// with no rule, the server removes the row the previous rule added
+		if (this.frm.doc.shipping_rule || this.frm.doc.taxes?.some((tax) => tax.set_by_shipping_rule)) {
 			return this.frm
 				.call({
 					doc: this.frm.doc,
@@ -2828,16 +2829,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								tax.cost_center = me.frm.doc.cost_center;
 							}
 						});
-						if (me.frm.doc.shipping_rule && me.frm.doc.taxes) {
-							for (let tax of taxes) {
-								me.frm.add_child("taxes", tax);
-							}
-
-							refresh_field("taxes");
-						} else {
-							me.frm.set_value("taxes", taxes);
-							me.refresh_item_tax_rates();
-						}
+						// the server re-adds the shipping row after the template rows
+						me.frm.set_value("taxes", taxes);
+						me.refresh_item_tax_rates();
 					}
 				},
 			});
