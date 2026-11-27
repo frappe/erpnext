@@ -4680,6 +4680,34 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.items[0].rejected_warehouse = wh.rejected
 		return pr, wh, company, batch_no
 
+	def test_return_of_only_the_rejected_batch_of_an_internal_transfer(self):
+		"""A return of only the rejected qty of an internal batch receipt puts it back in transit."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item_doc = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BT-RORB-.####",
+				"stock_uom": "Kg",
+			},
+			uoms=[{"uom": "Box", "conversion_factor": 0.5}],
+		)
+		pr, warehouses, *_ = self.make_transfer_receipt(
+			"Rejected Only Return", item_doc, 3, 3, uom="Box", conversion_factor=0.5
+		)
+		pr.submit()
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].update({"qty": 0, "rejected_qty": -3, "received_qty": -3})
+		pr_return.submit()
+
+		stock_qty = {d.warehouse: d.actual_qty for d in get_sl_entries("Purchase Receipt", pr_return.name)}
+		self.assertEqual(stock_qty, {warehouses.transit: 1.5, warehouses.rejected: -1.5})
+		self.assertEqual(
+			get_stock_value_by_warehouse(pr_return.name), {warehouses.transit: 150, warehouses.rejected: -150}
+		)
+
 	def test_internal_pr_with_rejected_stock_qty_rounding_to_zero(self):
 		"""A rejected qty that rounds to 0 in the stock UOM posts no rejected stock, and can be returned."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
