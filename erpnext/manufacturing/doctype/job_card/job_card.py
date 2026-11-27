@@ -2461,6 +2461,8 @@ class JobCard(Document):
 		ste.make_stock_entry()
 		ste.stock_entry.flags.ignore_mandatory = True
 		wo_doc = frappe.get_doc("Work Order", self.work_order)
+		# the stored cost may predate the current costing
+		wo_doc.calculate_operating_cost()
 		add_additional_cost(ste.stock_entry, wo_doc, self)
 		ManufactureStockEntry(ste.stock_entry).add_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
