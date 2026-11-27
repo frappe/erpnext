@@ -816,7 +816,7 @@ class SubcontractingReceipt(SubcontractingController):
 	@frappe.whitelist()
 	def set_missing_values(self):
 		self.set_available_qty_for_consumption()
-		if self.distribute_additional_costs_based_on == "Amount":
+		if self.distribute_additional_costs_based_on == "Amount" and self.get("additional_costs"):
 			# split on the amounts at the current qty
 			self.calculate_items_qty_and_amount()
 		self.set_additional_costs()
