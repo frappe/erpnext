@@ -6,6 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.report.cash_flow.cash_flow import execute as execute_cash_flow
 from erpnext.accounts.report.gross_and_net_profit_report.gross_and_net_profit_report import execute
 
 BANK = "_Test Bank - _TC"
@@ -46,6 +47,41 @@ class TestGrossAndNetProfitReport(FrappeTestCase):
 
 	def report_row(self, data, account):
 		return next(row for row in data if row.get("account") == account)
+
+	def test_accumulated_mid_month_periods_keep_both_fiscal_years(self):
+		income = self.make_account("_Test GNP Fiscal Year Boundary", INCOME_PARENT, include_in_gross=1)
+		self.book_income(income, 1000, posting_date="2049-12-01")
+		self.book_income(income, 500, posting_date="2050-01-10")
+
+		for periodicity, start_date in (
+			("Yearly", "2049-01-17"),
+			("Half-Yearly", "2049-07-17"),
+			("Quarterly", "2049-10-17"),
+		):
+			for accumulated in (0, 1):
+				with self.subTest(periodicity=periodicity, accumulated=accumulated):
+					filters = frappe._dict(
+						company="_Test Company",
+						filter_based_on="Date Range",
+						period_start_date=start_date,
+						period_end_date="2050-01-16",
+						periodicity=periodicity,
+						accumulated_values=accumulated,
+					)
+					data = execute(filters.copy())[1]
+					profit = self.report_row(data, "'Net Profit'")
+					self.assertEqual(profit["total"], 1500)
+					if accumulated:
+						self.assertEqual(profit["dec_2049"], 1000)
+						self.assertEqual(profit["jan_2050"], 500)
+					else:
+						self.assertEqual(profit["jan_2050"], 1500)
+
+					cash_flow = execute_cash_flow(filters.copy())[1]
+					cash_change = next(
+						row for row in cash_flow if row.get("section") == "'Net Change in Cash'"
+					)
+					self.assertEqual(cash_change["total"], 1500)
 
 	def test_date_range_across_fiscal_years_counts_both_years(self):
 		income = self.make_account("_Test GNP Range Income", INCOME_PARENT, include_in_gross=1)
