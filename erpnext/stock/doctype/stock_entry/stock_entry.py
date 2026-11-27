@@ -2591,6 +2591,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 			serial_nos_list, batch_nos_list = take_reserved_entries(
 				reserved[row.scio_detail], row.transfer_qty, *entered
 			)
+			short_qty = flt(
+				row.transfer_qty - (sum(batch_nos_list.values()) or len(serial_nos_list)),
+				frappe.get_precision("Serial and Batch Entry", "qty"),
+			)
+			if any(entered) and short_qty > 0 and is_entered_taken(entered, serial_nos_list, batch_nos_list):
+				# an earlier draft save filled these for a smaller qty, so top them up from the reserved entries
+				more_serial_nos, more_batches = take_reserved_entries(reserved[row.scio_detail], short_qty)
+				serial_nos_list += more_serial_nos
+				for batch_no, qty in more_batches.items():
+					batch_nos_list[batch_no] = batch_nos_list.get(batch_no, 0) + qty
+				row.serial_no = row.batch_no = None
 
 			if len(batch_nos_list) > 1:
 				row.use_serial_batch_fields = 0
@@ -5441,6 +5452,14 @@ def get_entered_serial_nos_and_batch(row):
 
 	serial_nos, batches = get_serial_batch_list_from_item(row)
 	return serial_nos or None, batches[0] if batches else None
+
+
+def is_entered_taken(entered, serial_nos_list, batch_nos_list):
+	"""Every entered serial no, or the entered batch, was taken from the reserved entries."""
+	serial_nos, batch_no = entered
+	if serial_nos:
+		return set(serial_nos) <= set(serial_nos_list)
+	return batch_no in batch_nos_list
 
 
 def take_reserved_entries(entries, qty, serial_nos=None, batch_no=None):
