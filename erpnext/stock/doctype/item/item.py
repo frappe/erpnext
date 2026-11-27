@@ -152,7 +152,7 @@ class Item(Document):
 		total_projected_qty: DF.Float
 		uoms: DF.Table[UOMConversionDetail]
 		use_serial_no_wise_valuation: DF.Check
-		valuation_method: DF.Literal["", "FIFO", "Moving Average", "LIFO"]
+		valuation_method: DF.Literal["", "FIFO", "Moving Average", "LIFO", "Standard Cost"]
 		valuation_rate: DF.Currency
 		variant_based_on: DF.Literal["Item Attribute", "Manufacturer"]
 		variant_of: DF.Link | None
@@ -272,6 +272,7 @@ class Item(Document):
 		self.validate_serialized_change_with_bundle()
 		self.validate_serial_no_wise_valuation()
 		self.set_valuation_method_for_serial_no_wise_valuation()
+		self.validate_standard_cost_change()
 		self.validate_item_tax_net_rate_range()
 
 		if not self.is_new():
@@ -1251,6 +1252,30 @@ class Item(Document):
 
 		return get_values(self) != get_values(doc_before_save)
 
+	def validate_standard_cost_change(self):
+		"""Once stock exists, an item's valuation method cannot be switched to or from Standard
+		Cost — either change would leave existing stock valued on a basis the ledger never
+		recorded."""
+		if not self.is_standard_cost_valuation_change():
+			return
+
+		if self.stock_ledger_created():
+			frappe.throw(
+				_(
+					"Valuation Method cannot be changed to or from 'Standard Cost' for {0} because stock transactions already exist for it."
+				).format(frappe.bold(self.name))
+			)
+
+	def is_standard_cost_valuation_change(self):
+		"""True if this save switches the valuation method into or out of Standard Cost."""
+		if self.is_new() or not self.has_value_changed("valuation_method"):
+			return False
+
+		previous = self.get_doc_before_save()
+		was_standard = previous and previous.valuation_method == "Standard Cost"
+		is_standard = self.valuation_method == "Standard Cost"
+		return bool(was_standard or is_standard)
+
 	def cant_change(self):
 		if self.is_new():
 			return
@@ -1328,11 +1353,11 @@ class Item(Document):
 			not self.is_new()
 			and self._doc_before_save
 			and self.has_value_changed("valuation_method")
-			and self.valuation_method in ("FIFO", "LIFO")
+			and self.valuation_method in ("FIFO", "LIFO", "Standard Cost")
 		):
 			frappe.throw(
 				_(
-					"Valuation Method for Item {0} must be Moving Average because Serial No Wise Valuation is disabled. Enable Serial No Wise Valuation to use FIFO or LIFO."
+					"Valuation Method for Item {0} must be Moving Average because Serial No Wise Valuation is disabled. Enable Serial No Wise Valuation to use FIFO, LIFO or Standard Cost."
 				).format(frappe.bold(self.name)),
 				title=_("Invalid Valuation Method"),
 			)

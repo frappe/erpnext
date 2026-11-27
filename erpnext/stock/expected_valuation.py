@@ -46,6 +46,7 @@ How an entry is valued
   as there is nothing to check it against.
 * Like the ledger, the stock value is rounded to the currency precision after
   every entry.
+* Standard Cost items are carried at the standard rate on the posting date.
 * An Adjustment Entry (erpnext.stock.valuation_adjustment) resets the stock to its rows. Its
   entries count out whatever the ledger holds, right or wrong, so they are taken as they are, up
   to the last one of each item-warehouse, after which the stock must be what the rows count in.
@@ -75,6 +76,7 @@ BASIS_BATCH_AVERAGE = "Batch average"
 BASIS_SERIAL_RATE = "Serial no receipt rate"
 BASIS_RECONCILED = "Reconciled qty and rate"
 BASIS_WRITE_OFF = "Write-off of leftover value"
+BASIS_STANDARD_COST = "Standard cost"
 BASIS_NO_STOCK = "No stock on hand (fallback rate)"
 BASIS_ADJUSTMENT_RESET = "Counted out by an Adjustment Entry at the ledger's value"
 BASIS_ADJUSTED = "Set by an Adjustment Entry"
@@ -471,6 +473,9 @@ def value_ledger_entry(stock: ItemWarehouseStock, entry, details: "ValuationDeta
 	if details.is_adjustment_voucher(entry):
 		return value_adjustment_entry(stock, entry, details)
 
+	if details.valuation_method == "Standard Cost":
+		return value_at_standard_cost(stock, entry, details)
+
 	carried_value_before = stock.carried_value
 	value_before = stock.value
 	stock.ledger_rate_of_entry = get_ledger_rate(entry)
@@ -525,10 +530,14 @@ def value_adjustment_entry(stock: ItemWarehouseStock, entry, details: "Valuation
 		value_before = stock.value
 		count_in_adjustment_row(stock, row, details)
 
-		# the ledger counts in every row as an entry of its own
-		stock.carried_value = flt(
-			stock.carried_value + stock.value - value_before, details.currency_precision
-		)
+		# the ledger counts in every row as an entry of its own, and values a Standard Cost item's
+		# whole balance at the standard rate
+		if details.valuation_method == "Standard Cost":
+			stock.carried_value = flt(stock.value, details.currency_precision)
+		else:
+			stock.carried_value = flt(
+				stock.carried_value + stock.value - value_before, details.currency_precision
+			)
 
 	carry_moving_average_rate_from_rounded_value(stock)
 
@@ -539,11 +548,15 @@ def count_in_adjustment_row(stock: ItemWarehouseStock, row, details: "ValuationD
 	rate = flt(row.valuation_rate)
 	if row.serial_no:
 		for serial_no in get_serial_nos(row.serial_no):
-			if details.values_everything_in_pool:
+			if details.values_everything_in_pool or details.valuation_method == "Standard Cost":
 				stock.receive_into_pool(1, rate)
 			else:
 				stock.receive_serial(serial_no, rate)
-	elif row.batch_no and details.is_valued_batch_wise(row.batch_no):
+	elif (
+		row.batch_no
+		and details.valuation_method != "Standard Cost"
+		and details.is_valued_batch_wise(row.batch_no)
+	):
 		stock.receive_into_batch(row.batch_no, flt(row.qty), rate)
 	elif flt(row.qty):
 		stock.receive_into_pool(flt(row.qty), rate)
@@ -599,6 +612,22 @@ def issue_stock(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -
 	return ", ".join(dict.fromkeys(bases))
 
 
+def value_at_standard_cost(stock: ItemWarehouseStock, entry, details: "ValuationDetails") -> ExpectedValues:
+	carried_value_before = stock.carried_value
+	rate = details.get_standard_rate(entry.posting_date)
+
+	# a bundle leg moves stock, as in StockLedger.process_standard_cost
+	if details.is_reconciled_balance(entry) and not entry.serial_and_batch_bundle:
+		qty, _rate = details.get_reconciled_balance(entry)
+	else:
+		qty = stock.pool.qty + flt(entry.actual_qty)
+
+	stock.pool.set_balance(qty, rate)
+	stock.carried_value = flt(stock.value, details.currency_precision)
+
+	return make_expected_values(stock, carried_value_before, BASIS_STANDARD_COST)
+
+
 def make_expected_values(
 	stock: ItemWarehouseStock, carried_value_before: float, basis: str, rated_by_queue: bool = False
 ) -> ExpectedValues:
@@ -638,7 +667,7 @@ class ValuationSettings:
 class LedgerData:
 	"""Everything the replay needs beyond the ledger entries themselves, read in bulk for
 	a set of item-warehouses: bundle rows, batch valuation flags, reconciled balances,
-	item and company settings and purchase return rates."""
+	item and company settings, purchase return rates and standard costs."""
 
 	def __init__(self, entries_by_item_warehouse: dict, settings: ValuationSettings):
 		ledger_entries = [entry for entries in entries_by_item_warehouse.values() for entry in entries]
@@ -657,6 +686,13 @@ class LedgerData:
 		self.items = get_item_settings({entry.item_code for entry in ledger_entries})
 		self.company_valuation_methods = get_company_valuation_methods()
 		self.purchase_return_rates = get_purchase_return_rates(ledger_entries)
+		self.standard_rates = get_standard_rates(
+			[
+				entry
+				for entry in ledger_entries
+				if self.get_valuation_method(entry.item_code, entry.company) == "Standard Cost"
+			]
+		)
 
 	def get_batches(self, ledger_entries) -> set[str]:
 		batches = {entry.batch_no for entry in ledger_entries if entry.batch_no}
@@ -792,6 +828,16 @@ class ValuationDetails:
 			return None
 
 		return self.data.purchase_return_rates.get(entry.name)
+
+	def get_standard_rate(self, posting_date) -> float:
+		"""The standard rate in effect on the posting date: the latest one effective on or before it."""
+		rate = 0.0
+		for effective_date, standard_rate in self.data.standard_rates.get((self.item_code, self.company), []):
+			if effective_date > getdate(posting_date):
+				break
+			rate = standard_rate
+
+		return flt(rate)
 
 
 def get_ledger_entries(item_warehouses: list[tuple[str, str]], to_date, settings: ValuationSettings) -> dict:
@@ -1007,6 +1053,26 @@ def get_purchase_return_rates(ledger_entries) -> dict[str, float | None]:
 				rates[entry.name] = rate
 
 	return rates
+
+
+def get_standard_rates(ledger_entries) -> dict[tuple[str, str], list[tuple]]:
+	"""The submitted standard rates of the entries' items, per (item, company), oldest first."""
+	item_codes = {entry.item_code for entry in ledger_entries}
+	if not item_codes:
+		return {}
+
+	standard_rates = {}
+	for standard_cost in frappe.get_all(
+		"Item Standard Cost",
+		filters={"item_code": ("in", list(item_codes)), "docstatus": 1},
+		fields=["item_code", "company", "effective_date", "standard_rate"],
+		order_by="effective_date asc, creation asc",
+	):
+		standard_rates.setdefault((standard_cost.item_code, standard_cost.company), []).append(
+			(getdate(standard_cost.effective_date), flt(standard_cost.standard_rate))
+		)
+
+	return standard_rates
 
 
 def get_inventory_dimension_fields() -> list[str]:

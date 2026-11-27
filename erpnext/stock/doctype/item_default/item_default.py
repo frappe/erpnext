@@ -30,6 +30,7 @@ class ItemDefault(Document):
 		expenses_added_to_stock_contra_account: DF.Link | None
 		income_account: DF.Link | None
 		inventory_account_currency: DF.Link | None
+		manufacturing_variance_account: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
