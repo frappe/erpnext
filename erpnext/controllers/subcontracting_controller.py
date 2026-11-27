@@ -769,7 +769,6 @@ class SubcontractingController(StockController):
 				supplied_item.batch_no,
 				supplied_item.consumed_qty,
 				supplied_item.main_item_code,
-				supplied_item.serial_and_batch_bundle,
 			)
 			.where(
 				(supplied_item.docstatus == 1)
@@ -778,6 +777,9 @@ class SubcontractingController(StockController):
 			)
 			.orderby(receipt.posting_date, receipt.posting_time, receipt.creation, supplied_item.idx)
 		)
+
+		if self.subcontract_data.receipt_supplied_items_field != "Purchase Receipt Item Supplied":
+			query = query.select(supplied_item.serial_and_batch_bundle)
 
 		return query.run(as_dict=True)
 
@@ -791,31 +793,13 @@ class SubcontractingController(StockController):
 		consumed_materials = self.__get_consumed_items(doctype, receipt_items.keys())
 		bundle_entries = self.get_bundle_entries(consumed_materials)
 
-<<<<<<< HEAD
-		if return_consumed_items:
-			return (consumed_materials, receipt_items)
-
-		if not consumed_materials:
-			return
-
-		voucher_nos = [d.voucher_no for d in consumed_materials if d.voucher_no]
-		voucher_bundle_data = (
-			get_voucher_wise_serial_batch_from_bundle(
-				voucher_no=voucher_nos,
-				is_outward=1,
-				get_subcontracted_item=("Subcontracting Receipt Supplied Item", "main_item_code"),
-			)
-			if voucher_nos
-			else {}
-		)
-
 		stored_serial_nos = get_stored_serial_nos(consumed_materials)
-=======
 		consumed_qty = defaultdict(float)
->>>>>>> ced8174 (fix(subcontracting): allocate consumption to the transfers it was taken from)
 		for row in consumed_materials:
 			key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
-			entries = bundle_entries.get(row.get("serial_and_batch_bundle")) or get_entries_from_fields(row)
+			entries = bundle_entries.get(row.get("serial_and_batch_bundle")) or get_entries_from_fields(
+				row, stored_serial_nos
+			)
 			for batch_no, qty in self.move_consumed_serial_nos(key, row.consumed_qty, entries).items():
 				consumed_qty[(key, batch_no)] += qty
 
@@ -854,12 +838,6 @@ class SubcontractingController(StockController):
 
 		return False
 
-<<<<<<< HEAD
-			if consumed_bundles.serial_nos:
-				update_serial_nos_at_supplier(
-					self.available_materials[key], consumed_bundles.serial_nos, True
-				)
-=======
 	def deduct_consumed_qty(self, consumed_qty):
 		"""Take each finished good's consumption from its own transfer first, then from the order's other
 		transfers of the raw material; what none has left, and a net return, goes on its own transfer."""
@@ -868,7 +846,6 @@ class SubcontractingController(StockController):
 				for transfer_key in self.get_transfer_keys(key):
 					if own_transfer != (transfer_key == key):
 						continue
->>>>>>> ced8174 (fix(subcontracting): allocate consumption to the transfers it was taken from)
 
 					details = self.available_materials[transfer_key]
 					qty_left = details.batch_no.get(batch_no, 0) if batch_no else details.qty
@@ -877,16 +854,6 @@ class SubcontractingController(StockController):
 						self.deduct_from_transfer(transfer_key, batch_no, deducted)
 						qty -= deducted
 
-<<<<<<< HEAD
-			# Will be deprecated in v16
-			if row.serial_no and not consumed_bundles.serial_nos:
-				serial_nos = [stored_serial_nos[serial_no] for serial_no in get_serial_nos(row.serial_no)]
-				update_serial_nos_at_supplier(self.available_materials[key], serial_nos, True)
-
-			# Will be deprecated in v16
-			if row.batch_no and not consumed_bundles.batch_nos:
-				self.available_materials[key]["batch_no"][row.batch_no] -= row.consumed_qty
-=======
 				consumed_qty[(key, batch_no)] = qty
 
 		for (key, batch_no), qty in consumed_qty.items():
@@ -917,7 +884,6 @@ class SubcontractingController(StockController):
 				qty = min(consumed_qty, max(sent_qty, 0))
 				qty_left[order_row] = sent_qty - qty
 				consumed_qty -= qty
->>>>>>> ced8174 (fix(subcontracting): allocate consumption to the transfers it was taken from)
 
 			details.qty = flt(details.qty, precision)
 			for batch_no, qty in details.batch_no.items():
@@ -998,16 +964,12 @@ class SubcontractingController(StockController):
 			self.__set_alternative_item_details(row)
 
 		self.__transferred_items = copy.deepcopy(self.available_materials)
-<<<<<<< HEAD
 		if self.get("is_old_subcontracting_flow"):
 			for doctype in ["Purchase Receipt", "Purchase Invoice"]:
 				self.__update_consumed_materials(doctype)
 		else:
 			self.__update_consumed_materials("Subcontracting Receipt")
-=======
-		self.__update_consumed_materials("Subcontracting Receipt")
 		self.set_qty_left_on_order_rows()
->>>>>>> ced8174 (fix(subcontracting): allocate consumption to the transfers it was taken from)
 
 	def __remove_changed_rows(self):
 		if not self.__changed_name:
@@ -1620,28 +1582,9 @@ class SubcontractingController(StockController):
 			"is_old_subcontracting_flow"
 		):
 			self.__get_subcontract_orders()
-<<<<<<< HEAD
-			itemwise_consumed_qty = defaultdict(float)
-			if self.get("is_old_subcontracting_flow"):
-				doctypes = ["Purchase Receipt", "Purchase Invoice"]
-			else:
-				doctypes = ["Subcontracting Receipt"]
-
-			for doctype in doctypes:
-				consumed_items, receipt_items = self.__update_consumed_materials(
-					doctype, return_consumed_items=True
-				)
-
-				for row in consumed_items:
-					key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
-					itemwise_consumed_qty[key] += row.consumed_qty
-
-			self.__update_consumed_qty_in_subcontract_order(itemwise_consumed_qty)
-=======
 			self.initialized_fields()
 			self.get_available_materials()
 			self.__update_consumed_qty_in_subcontract_order()
->>>>>>> ced8174 (fix(subcontracting): allocate consumption to the transfers it was taken from)
 
 	def update_ordered_and_reserved_qty(self):
 		sco_map = {}
@@ -1873,15 +1816,13 @@ def get_stored_serial_nos(rows) -> dict[str, str]:
 	}
 
 
-def get_entries_from_fields(row):
+def get_entries_from_fields(row, stored_serial_nos):
 	"""Serial and batch entries of a row's serial no and batch fields, signed as in a bundle."""
 	sign = -1 if row.consumed_qty > 0 else 1
 	if row.serial_no:
-		serial_nos = SerialBatchIdentity("Serial No").resolve(
-			row.rm_item_code, get_serial_nos(row.serial_no), ignore_permissions=True
-		)
 		return [
-			frappe._dict(serial_no=serial_no, batch_no=row.batch_no, qty=sign) for serial_no in serial_nos
+			frappe._dict(serial_no=stored_serial_nos[serial_no], batch_no=row.batch_no, qty=sign)
+			for serial_no in get_serial_nos(row.serial_no)
 		]
 
 	if row.batch_no:
