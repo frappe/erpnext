@@ -662,6 +662,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// (e.g. triggered by a date change).
 		this._doc_currency = this.frm.doc.currency;
 		this._schedule_base_date = this.get_schedule_base_date();
+		this._doc_conversion_rate = flt(this.frm.doc.conversion_rate);
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
@@ -1582,7 +1583,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// Currency the stored margins/actual charges are denominated in, captured
 		// before this trigger updates the tracker for the next one.
 		let previous_currency = this._doc_currency;
+		let previous_rate = this._doc_conversion_rate;
 		this._doc_currency = this.frm.doc.currency;
+		let currency_changed = previous_currency !== this.frm.doc.currency;
 		// A mapped document keeps its source's rate, unless its currency is changed
 		if (
 			this.frm.doc.currency &&
@@ -1590,22 +1593,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			(!this.frm.doc.__onload?.load_after_mapping ||
 				inter_company_reference ||
 				this.frm.doc.use_transaction_date_exchange_rate ||
-				previous_currency !== this.frm.doc.currency)
+				currency_changed)
 		) {
 			this.get_exchange_rate(
 				transaction_date,
 				this.frm.doc.currency,
 				company_currency,
 				function (exchange_rate) {
+					// A mere rate refresh (e.g. by a date change) keeps the entered amounts
+					if (currency_changed) {
+						me.convert_amounts_to_new_currency(previous_rate, exchange_rate);
+					}
 					if (exchange_rate != me.frm.doc.conversion_rate) {
-						// Margins and actual charges are amounts in the transaction
-						// currency; convert them only when the currency itself changed,
-						// not when just the exchange rate was refreshed (e.g. by a date
-						// change), otherwise the entered margin keeps shrinking.
-						if (previous_currency !== me.frm.doc.currency) {
-							me.set_margin_amount_based_on_currency(exchange_rate);
-							me.set_actual_charges_based_on_currency(exchange_rate);
-						}
 						me.frm.set_value("conversion_rate", exchange_rate);
 					}
 				}
@@ -1614,6 +1613,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			// company currency and doc currency is same
 			// this will prevent unnecessary conversion rate triggers
 			if (this.frm.doc.currency === this.get_company_currency()) {
+				if (currency_changed) {
+					this.convert_amounts_to_new_currency(previous_rate, 1.0);
+				}
 				this.frm.set_value("conversion_rate", 1.0);
 			} else {
 				this.conversion_rate();
@@ -1625,6 +1627,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const me = this.frm;
 		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
+		}
+		// a change that arrives before the currency handler belongs to the old currency's tracker
+		if (this.frm.doc.currency === this._doc_currency) {
+			this._doc_conversion_rate = flt(this.frm.doc.conversion_rate);
 		}
 		const plc_follows_currency = this.frm.doc.currency === this.frm.doc.price_list_currency;
 		if (plc_follows_currency && this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
@@ -1672,45 +1678,45 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	set_margin_amount_based_on_currency(exchange_rate) {
-		if (
-			(in_list([
-				"Quotation",
-				"Sales Order",
-				"Delivery Note",
-				"Sales Invoice",
-				"Purchase Invoice",
-				"Purchase Order",
-				"Purchase Receipt",
-			]),
-			this.frm.doc.doctype)
-		) {
-			var me = this;
-			$.each(this.frm.doc.items || [], function (i, d) {
-				if (d.margin_type == "Amount") {
-					frappe.model.set_value(
-						d.doctype,
-						d.name,
-						"margin_rate_or_amount",
-						flt(d.margin_rate_or_amount) / flt(exchange_rate)
-					);
-				}
-			});
+	convert_amounts_to_new_currency(from_rate, to_rate) {
+		this._doc_conversion_rate = flt(to_rate);
+		if (!flt(from_rate) || !flt(to_rate) || flt(from_rate) === flt(to_rate)) return;
+
+		const factor = flt(from_rate) / flt(to_rate);
+		this.convert_item_amounts(factor);
+		this.convert_actual_charges(factor);
+
+		// a percentage discount is recalculated from the converted totals
+		if (!this.frm.doc.additional_discount_percentage && this.frm.doc.discount_amount) {
+			const discount = flt(this.frm.doc.discount_amount * factor, precision("discount_amount"));
+			this.frm.set_value("discount_amount", discount);
 		}
 	}
 
-	set_actual_charges_based_on_currency(exchange_rate) {
-		var me = this;
-		$.each(this.frm.doc.taxes || [], function (i, d) {
-			if (d.charge_type == "Actual") {
-				frappe.model.set_value(
-					d.doctype,
-					d.name,
-					"tax_amount",
-					flt(d.base_tax_amount) / flt(exchange_rate)
+	convert_item_amounts(factor) {
+		for (const item of this.frm.doc.items || []) {
+			if (item.margin_type == "Amount" && item.margin_rate_or_amount) {
+				const margin = flt(
+					item.margin_rate_or_amount * factor,
+					precision("margin_rate_or_amount", item)
 				);
+				frappe.model.set_value(item.doctype, item.name, "margin_rate_or_amount", margin);
 			}
-		});
+			// a percentage discount is recalculated from the converted price list rate
+			if (!item.discount_percentage && item.discount_amount) {
+				const discount = flt(item.discount_amount * factor, precision("discount_amount", item));
+				frappe.model.set_value(item.doctype, item.name, "discount_amount", discount);
+			}
+		}
+	}
+
+	convert_actual_charges(factor) {
+		for (const tax of this.frm.doc.taxes || []) {
+			if (tax.charge_type == "Actual") {
+				const tax_amount = flt(tax.tax_amount * factor, precision("tax_amount", tax));
+				frappe.model.set_value(tax.doctype, tax.name, "tax_amount", tax_amount);
+			}
+		}
 	}
 
 	get_exchange_rate(transaction_date, from_currency, to_currency, callback) {
