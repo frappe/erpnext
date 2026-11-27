@@ -250,6 +250,11 @@ frappe.ui.form.on("Timesheet", {
 			set_activity_costs(frm);
 		}
 	},
+
+	validate: function (frm) {
+		// a save waits for the activity rates that are still being fetched
+		return frm.activity_rates_refresh;
+	},
 });
 
 frappe.ui.form.on("Timesheet Detail", {
@@ -432,7 +437,7 @@ var set_start_date = function (frm) {
 
 var set_activity_costs = function (frm) {
 	let activity_types = new Set((frm.doc.time_logs || []).map((row) => row.activity_type).filter(Boolean));
-	activity_types.forEach((activity_type) => {
+	let calls = [...activity_types].map((activity_type) =>
 		fetch_activity_cost(frm, activity_type, (cost) => {
 			frm.doc.time_logs
 				.filter((row) => row.activity_type === activity_type)
@@ -443,8 +448,9 @@ var set_activity_costs = function (frm) {
 				});
 			calculate_time_and_amount(frm);
 			frm.refresh_fields("time_logs");
-		});
-	});
+		})
+	);
+	frm.activity_rates_refresh = Promise.allSettled(calls);
 };
 
 // drops the response if the employee, currency or start date changed meanwhile
@@ -452,7 +458,7 @@ var fetch_activity_cost = function (frm, activity_type, callback) {
 	const employee = frm.doc.employee;
 	const currency = frm.doc.currency;
 	const transaction_date = get_start_date(frm);
-	frappe.call({
+	return frappe.call({
 		method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 		args: {
 			employee: employee,
