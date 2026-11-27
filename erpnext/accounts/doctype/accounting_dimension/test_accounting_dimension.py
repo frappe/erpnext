@@ -99,6 +99,33 @@ class TestAccountingDimension(ERPNextTestSuite):
 		self.assertEqual(gle.get("department"), "_Test Department - _TC")
 		self.assertEqual(gle1.get("department"), "_Test Department - _TC")
 
+	def test_dimension_filter_options_follow_dimensions(self):
+		def filter_options():
+			meta = frappe.get_meta("Accounting Dimension Filter")
+			return meta.get_field("accounting_dimension").options.split("\n")
+
+		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Driver"}).insert()
+		self.assertIn("Driver", filter_options())
+
+		dimension.disabled = 1
+		dimension.save()
+		self.assertIn("Driver", filter_options())
+
+		frappe.get_doc(
+			{
+				"doctype": "Accounting Dimension Filter",
+				"accounting_dimension": "Driver",
+				"allow_or_restrict": "Restrict",
+				"apply_restriction_on_values": 0,
+				"company": "_Test Company",
+				"accounts": [{"applicable_on_account": "Sales - _TC"}],
+			}
+		).insert()
+
+		dimension.delete()
+		self.assertNotIn("Driver", filter_options())
+		self.assertFalse(frappe.db.exists("Accounting Dimension Filter", {"accounting_dimension": "Driver"}))
+
 	def test_child_table_not_allowed_as_dimension(self):
 		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Sales Team"})
 		self.assertRaises(frappe.ValidationError, dimension.insert)
