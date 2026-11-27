@@ -6,6 +6,8 @@ from frappe.utils import add_days, today
 
 from erpnext.accounts.report.asset_depreciations_and_balances.asset_depreciations_and_balances import (
 	execute,
+	get_assets_for_grouped_by_asset,
+	get_assets_for_grouped_by_category,
 )
 from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
@@ -72,6 +74,16 @@ class TestAssetDepreciationsAndBalancesReport(AssetSetup):
 
 		self.assertIn(permitted_asset.name, assets)
 		self.assertNotIn(other_asset.name, assets)
+
+	def test_asset_and_category_filters_are_matched_as_values(self):
+		create_asset(submit=1)
+		filters = frappe._dict(company="_Test Company", from_date="2015-01-01", to_date=today())
+		injected = "No Such Value' or '1'='1"
+
+		self.assertEqual(
+			get_assets_for_grouped_by_category(filters.copy().update(asset_category=injected)), []
+		)
+		self.assertEqual(get_assets_for_grouped_by_asset(filters.copy().update(asset=injected)), [])
 
 	def test_value_adjustment_of_another_finance_book_is_excluded(self):
 		asset = create_asset_with_two_finance_books()
