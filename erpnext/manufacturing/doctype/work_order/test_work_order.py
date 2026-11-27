@@ -6053,7 +6053,7 @@ class TestWorkOrder(ERPNextTestSuite):
 	def test_work_order_cost_shares_add_up_to_the_cost(self):
 		from erpnext.manufacturing.doctype.bom.services.operations_cost import _split_per_unit_cost
 
-		shares = _split_per_unit_cost(50 / 3, [1, 1, 1])
+		shares = _split_per_unit_cost(50 / 3, [1, 1, 1], 2)
 		self.assertEqual(shares, [16.67, 16.66, 16.67])
 		self.assertEqual(flt(sum(shares), 2), 50)
 

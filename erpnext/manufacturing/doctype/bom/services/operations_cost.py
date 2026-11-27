@@ -12,6 +12,8 @@ from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt
 
+import erpnext
+
 
 def add_additional_cost(stock_entry, work_order, job_card=None):
 	# Add non stock items cost in the additional cost
@@ -367,10 +369,13 @@ def get_subcontracted_work_order_costs(work_order, qty_by_item_row):
 	additional_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
 	corrective_per_unit = _subcontracted_corrective_cost_per_unit(work_order, sum(qty_by_item_row.values()))
 	qtys = list(qty_by_item_row.values())
+	precision = frappe.get_precision(
+		"Landed Cost Taxes and Charges", "amount", currency=erpnext.get_company_currency(work_order.company)
+	)
 	amounts = zip(
 		qty_by_item_row,
-		_split_per_unit_cost(additional_per_unit, qtys),
-		_split_per_unit_cost(corrective_per_unit, qtys),
+		_split_per_unit_cost(additional_per_unit, qtys, precision),
+		_split_per_unit_cost(corrective_per_unit, qtys, precision),
 		strict=True,
 	)
 
@@ -398,9 +403,8 @@ def get_subcontracted_work_order_costs(work_order, qty_by_item_row):
 	return costs
 
 
-def _split_per_unit_cost(per_unit_cost, qtys):
+def _split_per_unit_cost(per_unit_cost, qtys, precision):
 	"""Cost of each qty, rounded on the running total so the shares add up to the cost of all qtys."""
-	precision = frappe.get_precision("Landed Cost Taxes and Charges", "amount")
 	amounts, allocated, cumulative_qty = [], 0.0, 0.0
 	for qty in qtys:
 		cumulative_qty += qty
