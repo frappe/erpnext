@@ -725,9 +725,9 @@ class StatusUpdater(Document):
 					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 					frappe.db.sql(
 						"""
-						(select coalesce(sum({source_field}), 0)
+						select coalesce(sum({source_field}), 0)
 							from `tab{source_dt}` where `{join_field}`=%(detail_id)s
-							and (docstatus=1 {cond}) {extra_cond})
+							and (docstatus=1 {cond}) {extra_cond}
 				""".format(**args),
 						{"detail_id": args["detail_id"]},
 					)[0][0]
