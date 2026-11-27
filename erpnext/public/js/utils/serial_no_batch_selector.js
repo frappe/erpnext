@@ -76,7 +76,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let batch_number;
 		if (batch_no) {
 			const numbers = await frappe.xcall(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
+				"erpnext.stock.doctype.serial_and_batch_bundle.api.get_serial_batch_numbers",
 				{ item_code: this.item.item_code, doctype: "Batch", names: [batch_no] }
 			);
 			batch_number = numbers[batch_no];
@@ -356,7 +356,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			csvFileData = ["Batch No", "Quantity"];
 		}
 
-		const method = `/api/method/erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.download_blank_csv_template?content=${encodeURIComponent(
+		const method = `/api/method/erpnext.stock.doctype.serial_and_batch_bundle.csv_import.download_blank_csv_template?content=${encodeURIComponent(
 			JSON.stringify(csvFileData)
 		)}`;
 		const w = window.open(frappe.urllib.get_full_url(method));
@@ -369,7 +369,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		const file_path = this.dialog.get_value("attach_serial_batch_csv");
 		const [serials, batches] = file_path
 			? await frappe.xcall(
-					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.read_serial_batch_csv",
+					"erpnext.stock.doctype.serial_and_batch_bundle.csv_import.read_serial_batch_csv",
 					{ file_path }
 			  )
 			: [[], []];
@@ -576,7 +576,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		if (qty) {
 			frappe.call({
-				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_auto_data",
+				method: "erpnext.stock.doctype.serial_and_batch_bundle.api.get_auto_data",
 				args: {
 					item_code: this.item.item_code,
 					warehouse: warehouse,
@@ -619,7 +619,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		this.dialog.get_primary_btn().prop("disabled", true);
 		try {
 			const record = await frappe.xcall(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_scan",
+				"erpnext.stock.doctype.serial_and_batch_bundle.api.get_serial_batch_scan",
 				{ item_code: this.item.item_code, number, doctype }
 			);
 			if (!record.name && this.item.type_of_transaction === "Outward") {
@@ -736,7 +736,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	create_bundle_entries(entries, warehouse, csv_entries = []) {
 		frappe
 			.call({
-				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers",
+				method: "erpnext.stock.doctype.serial_and_batch_bundle.api.add_serial_batch_ledgers",
 				args: {
 					entries: entries,
 					csv_entries: csv_entries,
@@ -809,7 +809,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		if (this.bundle || (this.frm.doc.is_return && this.frm.doc.return_against)) {
 			frappe
 				.call({
-					method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers",
+					method: "erpnext.stock.doctype.serial_and_batch_bundle.api.get_serial_batch_ledgers",
 					args: {
 						item_code: this.item.item_code,
 						name: this.bundle,

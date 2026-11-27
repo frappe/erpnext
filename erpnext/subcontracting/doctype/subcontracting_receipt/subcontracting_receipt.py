@@ -285,7 +285,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_production_plan_received_qty()
 
 	def validate_consumed_batches(self):
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		bundles = frappe._dict(
 			frappe.get_all(
@@ -298,7 +298,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for row in self.supplied_items:
 			row.serial_and_batch_bundle = bundles.get(row.name) or row.serial_and_batch_bundle
 
-		SerialBatchBundleService(self).validate_outward_bundle_batches(
+		SerialBatchValidationService(self).validate_outward_bundle_batches(
 			check_expiry=False, rows=self.supplied_items, qty_field="consumed_qty"
 		)
 

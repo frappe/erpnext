@@ -22,10 +22,6 @@ from erpnext.stock.doctype.packed_item.packed_item import (
 	get_product_bundle_items_by_name,
 	pop_order_packed_item,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_auto_batch_nos,
-	get_reserved_serial_nos_for_sre,
-)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
@@ -33,6 +29,8 @@ from erpnext.stock.serial_batch_bundle import (
 	get_batches_from_bundle,
 	get_serial_batch_list_from_item,
 )
+from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
+from erpnext.stock.serial_batch_bundle.availability.reservations import get_reserved_serial_nos_for_sre
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -210,9 +208,7 @@ class PickList(TransactionBase):
 		return flt(row.stock_qty)
 
 	def validate_batch_stock_qty(self, picked_qty):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_batch_qty_for_stock,
-		)
+		from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
 
 		if not picked_qty:
 			return

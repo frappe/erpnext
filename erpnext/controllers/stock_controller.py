@@ -67,21 +67,22 @@ class StockController(AccountsController):
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
-		sbb = SerialBatchBundleService(self)
+		validation = SerialBatchValidationService(self)
 
 		super().validate()
 
 		if self.docstatus == 0:
 			for table_name in ["items", "packed_items", "supplied_items"]:
-				sbb.validate_duplicate_serial_and_batch_bundle(table_name)
+				validation.validate_duplicate_serial_and_batch_bundle(table_name)
 
 		if not self.get("is_return"):
 			self.validate_inspection()
 
-		sbb.validate_warehouse_of_sabb()
-		sbb.validate_serialized_batch()
-		sbb.clean_serial_nos()
+		validation.validate_warehouse_of_sabb()
+		validation.validate_serialized_batch()
+		SerialBatchBundleService(self).clean_serial_nos()
 		self.validate_customer_provided_item()
 		# before the stock UOM rate, which divides by the factor
 		self.reset_conversion_factor()

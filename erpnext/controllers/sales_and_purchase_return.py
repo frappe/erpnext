@@ -1719,7 +1719,7 @@ def remove_picked_serial_batches(data, picked, parent_doc):
 
 
 def get_available_batch_qty(parent_doc, batch_no, warehouse):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
+	from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
 
 	return get_batch_qty_for_stock(
 		batch_no,
