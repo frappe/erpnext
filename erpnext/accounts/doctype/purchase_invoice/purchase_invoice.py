@@ -1371,6 +1371,11 @@ class PurchaseInvoice(BuyingController):
 						self.make_provisional_gl_entry(gl_entries, item)
 
 					if not self.is_internal_transfer():
+						# When Update Stock is disabled, this invoice has no stock impact: the linked
+						# Purchase Receipt already booked the stock (at standard) and the Purchase Price
+						# Variance. Here we only clear "Stock Received But Not Billed" at the full billed
+						# amount against the supplier - booking PPV again would double count it and leave
+						# SRBNB partially uncleared.
 						gl_entries.append(
 							self.get_gl_dict(
 								{
@@ -1633,6 +1638,34 @@ class PurchaseInvoice(BuyingController):
 		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
 		return None if stock_value is None else -flt(stock_value)
 
+	def get_stock_variance_account(self, item):
+		"""Return the account for stock valuation difference.
+		Standard Cost items use the Purchase Price Variance account. Other items use
+		the default expense account, falling back to the item expense account for
+		returns and the stock/asset received but not billed account for non-returns."""
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_purchase_price_variance_account,
+		)
+		from erpnext.stock.utils import get_valuation_method
+
+		if item.item_code and get_valuation_method(item.item_code, self.company) == "Standard Cost":
+			return get_purchase_price_variance_account(item.item_code, self.company)
+
+		default_expense = self.get_company_default("default_expense_account", ignore_validation=True)
+		if default_expense:
+			return default_expense
+
+		if self.is_return and item.expense_account:
+			return item.expense_account
+
+		stock_asset_rbnb = (
+			self.get_company_default("asset_received_but_not_billed", ignore_validation=True)
+			if item.is_fixed_asset
+			else self.get_company_default("stock_received_but_not_billed", ignore_validation=True)
+		)
+
+		return stock_asset_rbnb or item.expense_account
+
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		net_amt_precision = item.precision("base_net_amount")
 
@@ -1677,20 +1710,7 @@ class PurchaseInvoice(BuyingController):
 			)
 
 			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
-				stock_asset_rbnb = (
-					self.get_company_default("asset_received_but_not_billed", ignore_validation=True)
-					if item.is_fixed_asset
-					else self.get_company_default("stock_received_but_not_billed", ignore_validation=True)
-				)
-				fallback_account = (
-					(item.expense_account or stock_asset_rbnb)
-					if self.is_return
-					else (stock_asset_rbnb or item.expense_account)
-				)
-				cost_of_goods_sold_account = (
-					self.get_company_default("default_expense_account", ignore_validation=True)
-					or fallback_account
-				)
+				cost_of_goods_sold_account = self.get_stock_variance_account(item)
 				stock_adjustment_amt = stock_amount - returned_stock_value
 
 				gl_entries.append(
@@ -1715,20 +1735,7 @@ class PurchaseInvoice(BuyingController):
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
-			stock_asset_rbnb = (
-				self.get_company_default("asset_received_but_not_billed", ignore_validation=True)
-				if item.is_fixed_asset
-				else self.get_company_default("stock_received_but_not_billed", ignore_validation=True)
-			)
-			fallback_account = (
-				(item.expense_account or stock_asset_rbnb)
-				if self.is_return
-				else (stock_asset_rbnb or item.expense_account)
-			)
-			cost_of_goods_sold_account = (
-				self.get_company_default("default_expense_account", ignore_validation=True)
-				or fallback_account
-			)
+			cost_of_goods_sold_account = self.get_stock_variance_account(item)
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 

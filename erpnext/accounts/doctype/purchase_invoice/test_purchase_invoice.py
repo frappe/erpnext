@@ -1980,6 +1980,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			return_against = None
 			project = None
 			get_transit_stock_value = PurchaseInvoice.get_transit_stock_value
+			get_stock_variance_account = PurchaseInvoice.get_stock_variance_account
 
 			def __init__(self, is_return, defaults):
 				self.is_return = is_return
