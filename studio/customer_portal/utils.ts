@@ -185,14 +185,10 @@ export function formatQty(value: number | null | undefined, uom?: string): strin
 	return withMinusSign(Number.isInteger(qty) ? String(qty) : qty.toFixed(2)) + (uom ? " " + uom : "")
 }
 
-/** An item's description, stripped of markup. Falls back to the item code, and
- *  stays empty when it would only repeat the item name. */
+/** An item's description, stripped of markup. Empty when there is none or it only repeats the item name. */
 export function descriptionOf(row: any): string {
 	const text = String(row.description ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-	const name = (row.item_name || "").trim()
-	if (text && text !== name) return text
-	// the code adds nothing when it is the name again
-	return row.item_code && row.item_code !== name ? row.item_code : ""
+	return text === (row.item_name || "").trim() ? "" : text
 }
 
 /** Rich text (such as terms) as plain text that keeps its paragraphs; it is never rendered as HTML. */
