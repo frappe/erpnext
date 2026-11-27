@@ -143,10 +143,11 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 	get_fields() {
 		return [
 			...this.get_payment_fields(),
+			...this.get_summary_fields(),
 			...this.get_invoice_fields(),
 			...this.get_bank_fields(),
 			...this.get_deduction_fields(),
-			...this.get_summary_fields(),
+			...this.get_email_fields(),
 		];
 	}
 
@@ -337,7 +338,6 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 				read_only: 1,
 				hidden: 1,
 			},
-			...this.get_email_fields(),
 		];
 	}
 
@@ -509,12 +509,12 @@ erpnext.accounts.RecordPaymentDialog = class RecordPaymentDialog {
 					this.payment_entry.party_type === "Customer"
 						? __("This customer has {0} in unapplied payments and credit notes.", [amount])
 						: __("This supplier has {0} in unapplied payments and debit notes.", [amount]),
-				primary_action: { label: __("Apply Credit"), onclick: () => this.apply_credit() },
+				primary_action: { label: __("Reconcile"), onclick: () => this.open_reconciliation() },
 			})
 			.prependTo(this.dialog.body);
 	}
 
-	apply_credit() {
+	open_reconciliation() {
 		const { company, party_type, party } = this.payment_entry;
 		this.dialog.hide();
 		frappe.route_options = { company, party_type, party };
