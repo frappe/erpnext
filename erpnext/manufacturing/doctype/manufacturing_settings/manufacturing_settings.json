@@ -25,6 +25,8 @@
   "transfer_extra_materials_percentage",
   "column_break_kemp",
   "job_card_section",
+  "enable_operations_and_job_cards",
+  "job_card_settings_section",
   "add_corrective_operation_cost_in_finished_good_valuation",
   "enforce_time_logs",
   "column_break_24",
@@ -43,6 +45,7 @@
  ],
  "fields": [
   {
+   "depends_on": "enable_operations_and_job_cards",
    "fieldname": "capacity_planning",
    "fieldtype": "Section Break",
    "label": "Capacity Planning"
@@ -239,6 +242,20 @@
    "fieldname": "set_op_cost_and_secondary_items_from_sub_assemblies",
    "fieldtype": "Check",
    "label": "Set Operating Cost / Secondary Items From Sub-assemblies"
+  },
+  {
+   "default": "0",
+   "description": "Allows operations in a BOM. Work Orders make Job Cards for these operations.",
+   "fieldname": "enable_operations_and_job_cards",
+   "fieldtype": "Check",
+   "label": "Enable Operations & Job Cards",
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "enable_operations_and_job_cards",
+   "fieldname": "job_card_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Job Card"
   }
  ],
  "hide_toolbar": 0,
@@ -246,7 +263,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-20 10:00:00.000000",
+ "modified": "2026-11-24 12:58:33.672351",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

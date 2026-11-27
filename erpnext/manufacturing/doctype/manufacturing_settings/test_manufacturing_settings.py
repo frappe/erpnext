@@ -1,10 +1,12 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.bom.test_bom import operations_and_job_cards_disabled
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_capacity_planning_days,
 	get_mins_between_operations,
@@ -38,6 +40,35 @@ class TestManufacturingSettings(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Manufacturing Settings", "mins_between_operations", 0)
 		self.assertEqual(get_mins_between_operations().minutes, 0)
+
+	def test_operations_cannot_be_disabled_while_boms_have_operations(self):
+		settings = frappe.get_doc("Manufacturing Settings")
+		settings.enable_operations_and_job_cards = 0
+		with self.assertRaisesRegex(frappe.ValidationError, "BOMs with operations"):
+			settings.save()
+
+	def test_settings_save_while_operations_stay_disabled(self):
+		with operations_and_job_cards_disabled():
+			settings = frappe.get_doc("Manufacturing Settings")
+			settings.allow_overtime = 1
+			settings.save()
+
+			self.assertEqual(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime"), 1)
+
+	def test_operations_patch_enables_setting_for_sites_using_operations(self):
+		from erpnext.patches.v16_0.enable_operations_and_job_cards import execute
+
+		with operations_and_job_cards_disabled():
+			with patch.object(frappe, "get_all", return_value=[]):
+				execute()
+			self.assertFalse(
+				frappe.db.get_single_value("Manufacturing Settings", "enable_operations_and_job_cards")
+			)
+
+			execute()
+			self.assertTrue(
+				frappe.db.get_single_value("Manufacturing Settings", "enable_operations_and_job_cards")
+			)
 
 	@change_settings(
 		"Manufacturing Settings",

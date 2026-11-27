@@ -56,6 +56,9 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.pick_serial_and_batch_based_on = frappe.get_single_value(
 			"Stock Settings", "pick_serial_and_batch_based_on"
 		)
+		bootinfo.sysdefaults.enable_operations_and_job_cards = cint(
+			frappe.get_single_value("Manufacturing Settings", "enable_operations_and_job_cards")
+		)
 
 		remove_disabled_price_list_defaults(bootinfo)
 
