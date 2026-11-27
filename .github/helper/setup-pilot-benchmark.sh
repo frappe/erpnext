@@ -32,15 +32,17 @@ elif [ "$probe" -ne 0 ]; then
     exit "$probe"
 fi
 
-# The ARC image already provides the system dependencies and uv.
-if [ "${DB:-}" = postgres ]; then
-    curl -fsSL https://raw.githubusercontent.com/frappe/pilot/develop/install.sh | sh -s -- --ci
-else
-    # Patch only needs the CLI. Redis and Frappe run directly during migrations.
-    mkdir -p "$HOME/pilot"
-    curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
-        | tar -xz -C "$HOME/pilot"
+# Both jobs use the Pilot CLI. Site setup only needs the database and Redis.
+if [ "$DB" = postgres ] && ! command -v uv >/dev/null; then
+    curl -fsSL https://astral.sh/uv/install.sh | sh
 fi
+if [ "$DB" = postgres ] && ! command -v redis-server >/dev/null; then
+    sudo apt-get update -qq
+    sudo apt-get install -y -qq redis-server
+fi
+mkdir -p "$HOME/pilot"
+curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
+    | tar -xz -C "$HOME/pilot"
 
 pilot new frappe-bench --frappe-branch "$frappebranch" --database "$DB" --admin-password 'PilotAdmin123!'
 pilot -b frappe-bench set-bench-config python "$(command -v python)"
@@ -92,13 +94,14 @@ SQL
     exit 0
 fi
 
-pilot -b frappe-bench setup requirements
 uv pip install --python env/bin/python -e "apps/frappe[test]"
 
-pilot_log=${RUNNER_TEMP:-/tmp}/pilot.log
-pilot -b frappe-bench start > "$pilot_log" 2>&1 &
-curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 \
-    http://127.0.0.1:7000/api/v1/health
+redis-server config/redis_cache.conf --daemonize yes
+redis-server config/redis_queue.conf --daemonize yes
+read -r cache_port queue_port < <(python -c 'import tomllib; r = tomllib.load(open("bench.toml", "rb"))["redis"]; print(r["cache_port"], r["queue_port"])')
+for port in "$cache_port" "$queue_port"; do
+    redis-cli -p "$port" ping | grep -qx PONG
+done
 
 if [ ! -f sites/assets/assets.json ]; then
     mkdir -p sites/assets

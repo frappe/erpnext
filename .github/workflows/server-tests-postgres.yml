@@ -84,20 +84,6 @@ jobs:
           key: ${{ runner.os }}-deps-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/yarn.lock') }}
           restore-keys: ${{ runner.os }}-deps-
 
-      # Warm-bench cache (the big one): install.sh saves the built base bench — frappe + env +
-      # node_modules + assets — here as frappe-bench-base-*.tar.zst. Later runs restore it and only
-      # fast-forward to the live develop SHA + rebuild the delta, so the bench BUILD is near-free and
-      # only the test_site reinstall (per-run DB, uncacheable) stays slow — matching the self-hosted
-      # box. The first run after a deps change populates it; every run after that is fast.
-      - name: Cache warm bench (base build)
-        uses: actions/cache@v4
-        with:
-          path: ~/bench-cache
-          key: ${{ runner.os }}-warmbench-v2-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-warmbench-v2-
-
-      # Postgres runs in-runner on a PGDATA OUTSIDE the bench (install.sh wipes ~/frappe-bench);
-      # after the reinstall it's moved into the bench so it ships in the artifact.
       - name: Start DB
         run: bash ${GITHUB_WORKSPACE}/.github/helper/start-db.sh
         env:
@@ -112,7 +98,6 @@ jobs:
           FRAPPE_BRANCH: develop
           # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
           CI_GITHUB_TOKEN: ${{ github.token }}
-          BENCH_CACHE_DIR: /home/runner/bench-cache
 
       - name: Warm up test data
         run: |
@@ -132,15 +117,15 @@ jobs:
         run: |
           cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/runner/pilot/benches/frappe-bench/hydrate.sh
           cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/runner/pilot/benches/frappe-bench/start-db.sh
-          tar czpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner \
+          tar -I "zstd -T0 -3" -cpf "${GITHUB_WORKSPACE}/bench.tar.zst" -C /home/runner \
             --exclude='.git' --exclude='node_modules' pilot/benches/frappe-bench
-          ls -lh "${GITHUB_WORKSPACE}/bench.tar.gz"
+          ls -lh "${GITHUB_WORKSPACE}/bench.tar.zst"
 
       - name: Upload bench artifact
         uses: actions/upload-artifact@v4
         with:
           name: bench-pg
-          path: bench.tar.gz
+          path: bench.tar.zst
           retention-days: 1
           compression-level: 0
 
@@ -167,9 +152,6 @@ jobs:
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
 
-      # The bench CLI (frappe-bench) and redis are global/system tools — not in the bench tarball.
-      # The setup runner got them via install.sh; the MariaDB shards get them from the arc5 image.
-      # GitHub-hosted PG shards install them here (cheap vs the build+reinstall that setup did once).
       - name: Install shard runtime (redis + wkhtmltopdf)
         run: |
           command -v redis-server >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq redis-server; }
@@ -181,7 +163,7 @@ jobs:
 
       - name: Untar bench
         run: |
-          tar xzpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner
+          tar -I zstd -xpf "${GITHUB_WORKSPACE}/bench.tar.zst" -C /home/runner
           ls -ld /home/runner/pilot/benches/frappe-bench
 
       - name: Hydrate (start Postgres on the baked datadir)
