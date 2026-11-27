@@ -2500,11 +2500,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not serial_or_batch_items:
 			return
 
-		# picked on submit, so a draft whose qty changes later does not keep the batches of its old qty
+		serial_nos, batch_nos = self.set_serial_batch_fields_for_subcontracting_inward()
+
 		if self.docstatus == 0:
 			return
-
-		serial_nos, batch_nos = self.set_serial_batch_fields_for_subcontracting_inward()
 
 		already_picked_serial_nos = []
 		already_picked_batches = frappe._dict()
