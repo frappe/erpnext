@@ -1069,8 +1069,10 @@ class SubcontractingReceipt(SubcontractingController):
 
 		# a targeted row is taken back with its item row, the others share what is left
 		targeted_rows = [row for row in original.additional_costs if row.item_row]
+		returned_orders = {original_rows[name].subcontracting_order for name in returned_ratios}
+		kept_rows = self.get_order_costs_kept_by_return(original, returned_orders)
 		untargeted_cost = flt(
-			total_cost - sum(flt(row.amount) for row in targeted_rows),
+			total_cost - sum(flt(row.amount) for row in targeted_rows + kept_rows),
 			self.precision("total_additional_costs"),
 		)
 		if untargeted_cost:
@@ -1082,6 +1084,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set("additional_costs", [])
 		for row in original.additional_costs:
 			row_ratio = returned_ratios[row.item_row] if row.item_row else ratio
+			if row in kept_rows:
+				row_ratio = 0.0
 			self.append(
 				"additional_costs",
 				{
@@ -1098,6 +1102,33 @@ class SubcontractingReceipt(SubcontractingController):
 				},
 			)
 		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
+
+	def get_order_costs_kept_by_return(self, original: Document, returned_orders: set[str]) -> list:
+		"""Original cost rows of orders none of whose goods are returned; no later receipt books them again."""
+		linked_rows = [
+			row for row in original.additional_costs if row.subcontracting_order_cost and not row.item_row
+		]
+		if not linked_rows:
+			return []
+
+		order_of_cost = dict(
+			frappe.get_all(
+				"Landed Cost Taxes and Charges",
+				filters={"name": ("in", [row.subcontracting_order_cost for row in linked_rows])},
+				fields=["name", "parent"],
+				as_list=True,
+			)
+		)
+		kept_rows = [
+			row
+			for row in linked_rows
+			if order_of_cost.get(row.subcontracting_order_cost) not in returned_orders
+		]
+		# keep them only if other rows are left to take back the returned cost
+		shared_cost = sum(
+			flt(row.amount) for row in original.additional_costs if not row.item_row and row not in kept_rows
+		)
+		return kept_rows if flt(shared_cost, self.precision("total_additional_costs")) else []
 
 	def get_amount_for_costing(self, item):
 		"""Row amount without the additional costs it took last time, so a re-save keeps the same weights."""
