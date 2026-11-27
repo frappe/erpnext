@@ -6,7 +6,7 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.report.stock_ledger.stock_ledger import execute
+from erpnext.stock.report.stock_ledger.stock_ledger import execute, formatter
 from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -721,3 +721,18 @@ class TestStockLedgerReport(ERPNextTestSuite):
 			rows = list(execute(filters)[1])
 
 		self.assertEqual([row["qty_after_transaction"] for row in rows], [3])
+
+	def test_server_pdf_escapes_serial_and_batch_labels(self):
+		def default_formatter(value, column, data):
+			return value
+
+		label_column = frappe._dict(fieldname="serial_no_number", serial_batch={"doctype": "Serial No"})
+		qty_column = frappe._dict(fieldname="in_qty")
+
+		self.assertEqual(
+			formatter("S&copy;12", label_column, frappe._dict(), default_formatter), "S&amp;copy;12"
+		)
+		self.assertEqual(
+			formatter(1, qty_column, frappe._dict(in_qty=1), default_formatter),
+			"<span style='color:green'>1</span>",
+		)
