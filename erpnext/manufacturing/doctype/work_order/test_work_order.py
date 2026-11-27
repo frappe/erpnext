@@ -4980,6 +4980,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		entry.cap_costed_out_items(entry.items, 1)
 		self.assertEqual([row.basic_amount for row in entry.items], [1, 0])
 
+	def test_capping_sets_negative_secondary_rows_to_zero_within_the_consumed_cost(self):
+		"""Rows that add up to less than the consumed cost still keep no negative row."""
+		entry = frappe.new_doc("Stock Entry")
+		for amount in (0.6, -0.05):
+			entry.append("items", {"transfer_qty": 1, "basic_rate": amount, "basic_amount": amount})
+
+		entry.cap_costed_out_items(entry.items, 1)
+		self.assertEqual([row.basic_amount for row in entry.items], [0.6, 0])
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
