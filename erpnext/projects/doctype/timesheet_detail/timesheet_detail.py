@@ -94,7 +94,7 @@ class TimesheetDetail(Document):
 		self.billing_amount = self.billing_rate * flt(self.billing_hours)
 		self.costing_amount = self.costing_rate * flt(self.hours)
 
-		exchange_rate = flt(exchange_rate) or 1.0
+		exchange_rate = flt(exchange_rate)
 		self.base_billing_rate = flt(self.billing_rate * exchange_rate, self.precision("base_billing_rate"))
 		self.base_costing_rate = flt(self.costing_rate * exchange_rate, self.precision("base_costing_rate"))
 		self.base_billing_amount = flt(
