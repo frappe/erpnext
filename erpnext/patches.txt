@@ -592,3 +592,4 @@ erpnext.patches.v16_0.create_default_workstation_types
 erpnext.patches.v16_0.enable_operations_and_job_cards
 erpnext.patches.v16_0.set_accounting_dimension_filter_options
 erpnext.patches.v16_0.set_posting_date_in_payment_entry_reference
+erpnext.patches.v16_0.drop_warehouse_serial_no_index_from_serial_and_batch_entry
