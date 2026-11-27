@@ -4888,16 +4888,17 @@ class TestWorkOrder(ERPNextTestSuite):
 		"""A semi-finished goods entry is checked on its own BOM, not on the Work Order's running total."""
 		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
 
-		# the Work Order row needs 1 Nos per 4 finished goods, the Job Card BOM 1 Nos per unit
+		# the Work Order's BOM needs 1 Nos per 4 finished goods, the Job Card BOM 1 Nos per unit
 		work_order, rm_item = make_whole_number_partial_work_order(rm_qty=1)
-		bom_item = frappe._dict(item_code=rm_item, qty=1, stock_uom="Nos")
 		entry = frappe.new_doc("Stock Entry", purpose="Manufacture", fg_completed_qty=4)
 		service = ManufactureStockEntry(entry)
 		service._wo_doc = work_order
-		self.assertEqual(service.get_bom_component_qty(bom_item), 1)
+		work_order_bom_item = frappe._dict(item_code=rm_item, qty=0.25, stock_uom="Nos")
+		self.assertEqual(service.get_bom_component_qty(work_order_bom_item), 1)
 
 		work_order.track_semi_finished_goods = 1
-		self.assertEqual(service.get_bom_component_qty(bom_item), 4)
+		job_card_bom_item = frappe._dict(item_code=rm_item, qty=1, stock_uom="Nos")
+		self.assertEqual(service.get_bom_component_qty(job_card_bom_item), 4)
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
