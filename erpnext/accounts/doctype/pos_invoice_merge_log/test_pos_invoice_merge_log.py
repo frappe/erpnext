@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import
 	consolidate_pos_invoices,
 )
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
@@ -49,6 +50,7 @@ def perpetual_inventory(company):
 		frappe.local.enable_perpetual_inventory[company] = previous
 
 
+<<<<<<< HEAD
 @contextmanager
 def pos_session():
 	frappe.db.sql("delete from `tabPOS Invoice`")
@@ -70,8 +72,11 @@ def close_pos_session(session):
 
 
 def sell_over_the_counter(lines, discount_percentage=0):
+=======
+def sell_over_the_counter(lines, discount_percentage=0, customer="_Test Customer"):
+>>>>>>> 41811a9 (test(accounts): cover POS closing after stock returns)
 	item_code, qty, rate = lines[0]
-	sale = create_pos_invoice(item_code=item_code, qty=qty, rate=rate, do_not_save=True)
+	sale = create_pos_invoice(item_code=item_code, qty=qty, rate=rate, customer=customer, do_not_save=True)
 	for item_code, qty, rate in lines[1:]:
 		sale.append(
 			"items",
@@ -161,7 +166,104 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			pos_inv3.load_from_db()
 			self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv3.consolidated_invoice))
 
+<<<<<<< HEAD
 			self.assertFalse(pos_inv.consolidated_invoice == pos_inv3.consolidated_invoice)
+=======
+	def test_consolidation_preserves_stock_returned_before_resale(self):
+		for customer in ("_Test Customer", "_Test Customer 2"):
+			with (
+				self.subTest(customer=customer),
+				self.change_settings("Stock Settings", {"allow_negative_stock": 0}),
+				perpetual_inventory("_Test Company"),
+			):
+				with self.set_user("Administrator"):
+					company = frappe.get_doc("Company", "_Test Company")
+					company.enable_perpetual_inventory = 1
+					company.default_inventory_account = "Stock In Hand - _TC"
+					company.stock_adjustment_account = "Stock Adjustment - _TC"
+					company.save()
+					item = make_item("_Test POS Returned Stock", {"is_stock_item": 1})
+					stock_entry = make_stock_entry(
+						item_code=item.name,
+						qty=2,
+						rate=50,
+						to_warehouse="_Test Warehouse - _TC",
+						expense_account="Stock Adjustment - _TC",
+					)
+
+				first_sale = sell_over_the_counter([(item.name, 1, 100)], customer=customer)
+				second_sale = sell_over_the_counter([(item.name, 1, 100)])
+				credit_note = refund_over_the_counter(second_sale)
+				last_sale = sell_over_the_counter([(item.name, 1, 100)], customer=customer)
+
+				closing_entry = self.make_closing_entry()
+				for invoice in (first_sale, second_sale, credit_note, last_sale):
+					invoice.reload()
+					self.assertTrue(invoice.consolidated_invoice)
+				self.assertEqual(
+					first_sale.consolidated_invoice == second_sale.consolidated_invoice,
+					customer == second_sale.customer,
+				)
+				self.assertNotEqual(first_sale.consolidated_invoice, last_sale.consolidated_invoice)
+				consolidated_return = frappe.get_doc("Sales Invoice", credit_note.consolidated_invoice)
+				self.assertEqual(consolidated_return.return_against, second_sale.consolidated_invoice)
+				self.assertEqual(consolidated_return.posting_time, credit_note.posting_time)
+				self.assertEqual(
+					frappe.db.get_value(
+						"Bin",
+						{"item_code": item.name, "warehouse": "_Test Warehouse - _TC"},
+						"actual_qty",
+					),
+					0,
+				)
+				ledger = frappe.get_all(
+					"GL Entry",
+					filters={
+						"voucher_type": "Sales Invoice",
+						"voucher_no": [
+							"in",
+							[
+								doc.consolidated_invoice
+								for doc in (first_sale, second_sale, credit_note, last_sale)
+							],
+						],
+						"is_cancelled": 0,
+					},
+					fields=["account", "debit", "credit"],
+				)
+				self.assertEqual(sum(row.debit - row.credit for row in ledger), 0)
+				self.assertEqual(
+					sum(row.debit - row.credit for row in ledger if row.account == "Cash - _TC"), 200
+				)
+				self.assertEqual(
+					sum(
+						row.debit - row.credit
+						for row in ledger
+						if row.account == first_sale.items[0].expense_account
+					),
+					100,
+				)
+				closing_entry.cancel()
+				self.assertEqual(
+					frappe.db.get_value(
+						"Bin",
+						{"item_code": item.name, "warehouse": "_Test Warehouse - _TC"},
+						"actual_qty",
+					),
+					2,
+				)
+				for invoice in (credit_note, last_sale, second_sale, first_sale):
+					invoice.reload().cancel()
+				with self.set_user("Administrator"):
+					stock_entry.cancel()
+
+	def test_consolidation_for_customer_on_hold(self):
+		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
+		pos_inv.save()
+		pos_inv.submit()
+		frappe.db.set_value("Customer", pos_inv.customer, "on_hold", 1)
+>>>>>>> 41811a9 (test(accounts): cover POS closing after stock returns)
 
 			consolidated = frappe.get_doc("Sales Invoice", pos_inv3.consolidated_invoice)
 			self.assertEqual(consolidated.docstatus, 1)
@@ -726,11 +828,19 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.db.sql("delete from `tabPOS Invoice`")
 
 	def test_consolidating_standalone_return_without_stock_history(self):
+<<<<<<< HEAD
 		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
+=======
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", "Stock In Hand - _TC")
+		item_code = make_item("_Test Standalone POS Return Item", {"is_stock_item": 1}).name
+		pos_return = create_pos_invoice(item_code=item_code, qty=-1, rate=100, is_return=1, do_not_save=1)
+		pos_return.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": -100})
+		pos_return.paid_amount = pos_return.base_paid_amount = -100
+>>>>>>> 41811a9 (test(accounts): cover POS closing after stock returns)
 
 		try:
 			frappe.db.set_value(
