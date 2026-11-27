@@ -5529,9 +5529,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def get_batches_sent(self):
 		"""Batches this entry sent to the supplier."""
 		bundles = [row.serial_and_batch_bundle for row in self.items if row.serial_and_batch_bundle]
-		return {row.batch_no for row in self.items if row.batch_no} | set(
-			get_batches_from_bundle(bundles)
-		)
+		return {row.batch_no for row in self.items if row.batch_no} | set(get_batches_from_bundle(bundles))
 
 	def validate_reservation_is_not_consumed(self, order):
 		"""Receipts keep the supplier warehouse reservation of this entry they consumed; the cancel cannot move it to another."""
