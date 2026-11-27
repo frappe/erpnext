@@ -305,11 +305,20 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return bool(required_items) and not any(self.get_wo_raw_material_qty(row) for row in required_items)
 
 	def is_short_of_raw_material_share(self):
-		"""Earlier entries consumed part of this entry's whole-number share of a raw material."""
-		return self.consumes_running_total_share and any(
-			self.get_wo_raw_material_qty(row) < self.get_wo_raw_material_entry_qty(row)
-			for row in self.wo_doc.required_items
-		)
+		"""The entry consumes less than its own share of a whole-number raw material. Read from the
+		entry alone, not the Work Order's totals, so a repost gives the same answer."""
+		if not self.consumes_running_total_share:
+			return False
+
+		consumed_qty, share_qty = defaultdict(float), defaultdict(float)
+		for d in self.doc.items:
+			if d.s_warehouse:
+				consumed_qty[get_original_item(d)] += flt(d.transfer_qty)
+		for row in self.wo_doc.required_items:
+			if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
+				share_qty[row.item_code] += self.get_wo_raw_material_entry_qty(row)
+
+		return any(consumed_qty[item_code] < qty for item_code, qty in share_qty.items())
 
 	@property
 	def consumes_running_total_share(self):
