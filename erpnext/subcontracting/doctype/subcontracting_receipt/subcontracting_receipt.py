@@ -691,13 +691,33 @@ class SubcontractingReceipt(SubcontractingController):
 				returned_cost += flt(row.qty) * row.additional_cost_per_qty
 				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
 
+<<<<<<< HEAD
 		if total_cost:
 			ratio = returned_cost / total_cost
+=======
+		# a targeted row is taken back with its item row, the others share what is left
+		targeted_rows = [row for row in original.additional_costs if row.item_row]
+		returned_orders = {original_rows[name].subcontracting_order for name in returned_ratios}
+		kept_rows = self.get_order_costs_kept_by_return(original, returned_orders)
+		untargeted_cost = flt(
+			total_cost - sum(flt(row.amount) for row in targeted_rows + kept_rows),
+			self.precision("total_additional_costs"),
+		)
+		if untargeted_cost:
+			targeted_returned = sum(flt(row.amount) * returned_ratios[row.item_row] for row in targeted_rows)
+			ratio = (returned_cost - targeted_returned) / untargeted_cost
+>>>>>>> 26006f3 (fix(subcontracting): return takes no costs back from orders whose goods are kept)
 		else:
 			ratio = returned_basis / total_basis if total_basis else 0.0
 
 		self.set("additional_costs", [])
 		for row in original.additional_costs:
+<<<<<<< HEAD
+=======
+			row_ratio = returned_ratios[row.item_row] if row.item_row else ratio
+			if row in kept_rows:
+				row_ratio = 0.0
+>>>>>>> 26006f3 (fix(subcontracting): return takes no costs back from orders whose goods are kept)
 			self.append(
 				"additional_costs",
 				{
@@ -720,6 +740,49 @@ class SubcontractingReceipt(SubcontractingController):
 			)
 		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
 
+<<<<<<< HEAD
+=======
+	def get_order_costs_kept_by_return(self, original: Document, returned_orders: set[str]) -> list:
+		"""Original cost rows of orders none of whose goods are returned; no later receipt books them again."""
+		linked_rows = [
+			row for row in original.additional_costs if row.subcontracting_order_cost and not row.item_row
+		]
+		if not linked_rows:
+			return []
+
+		order_of_cost = dict(
+			frappe.get_all(
+				"Landed Cost Taxes and Charges",
+				filters={"name": ("in", [row.subcontracting_order_cost for row in linked_rows])},
+				fields=["name", "parent"],
+				as_list=True,
+			)
+		)
+		kept_rows = [
+			row
+			for row in linked_rows
+			if order_of_cost.get(row.subcontracting_order_cost) not in returned_orders
+		]
+		# keep them only if other rows are left to take back the returned cost
+		shared_cost = sum(
+			flt(row.amount) for row in original.additional_costs if not row.item_row and row not in kept_rows
+		)
+		return kept_rows if flt(shared_cost, self.precision("total_additional_costs")) else []
+
+	def get_amount_for_costing(self, item):
+		"""Row amount without the additional costs it took last time, so a re-save keeps the same weights."""
+		# the amount holds only the finished good's allocated share of its cost
+		allocation = flt(frappe.get_value("BOM", item.bom, "cost_allocation_per")) / 100 if item.bom else 1
+		additional_cost = self.get_qty_for_costing(item) * flt(item.additional_cost_per_qty) * allocation
+		return flt(item.amount) - additional_cost
+
+	def set_additional_costs_base_amount(self):
+		for row in self.get("additional_costs"):
+			row.base_amount = flt(
+				flt(row.amount) * (flt(row.exchange_rate) or 1), row.precision("base_amount")
+			)
+
+>>>>>>> 26006f3 (fix(subcontracting): return takes no costs back from orders whose goods are kept)
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
 
