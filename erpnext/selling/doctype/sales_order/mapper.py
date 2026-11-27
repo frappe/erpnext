@@ -1073,32 +1073,28 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		)
 
 	def get_packed_qty_to_pick() -> dict:
-		# each row is capped by what it picked and by its share of the delivered bundles; qty delivered
-		# without a pick list is pooled per component, as pick list deliveries do not tell repeated
-		# components of a bundle apart
-		delivered_share, delivered_without_pick_list = {}, defaultdict(float)
-		for row in source_doc.get("packed_items"):
-			parent = so_items.get(row.parent_detail_docname)
-			if parent and flt(parent.qty):
-				delivered_share[row.name] = flt(row.qty) * flt(parent.delivered_qty) / flt(parent.qty)
-				delivered_without_pick_list[(parent.name, row.item_code)] += delivered_share[row.name]
-
-		for key, qty in delivered_from_pick_lists.items():
-			delivered_without_pick_list[key] -= qty
+		# left to pick is what a row has not picked, less its part of the bundles delivered without a pick
+		# list; pick list deliveries are known only per component, as they do not tell repeated components apart
+		packed_items = [
+			row
+			for row in source_doc.get("packed_items")
+			if flt(row.qty) and flt(so_items.get(row.parent_detail_docname, {}).get("qty"))
+		]
+		ordered_qty = defaultdict(float)
+		for packed_item in packed_items:
+			ordered_qty[(packed_item.parent_detail_docname, packed_item.item_code)] += flt(packed_item.qty)
 
 		qty_to_pick = {}
-		for packed_item in source_doc.get("packed_items"):
-			if packed_item.name not in delivered_share:
-				continue
-
-			key = (packed_item.parent_detail_docname, packed_item.item_code)
+		for packed_item in packed_items:
+			parent = so_items[packed_item.parent_detail_docname]
+			key = (parent.name, packed_item.item_code)
+			share_delivered_without_pick_list = flt(parent.delivered_qty) / flt(parent.qty)
+			share_delivered_without_pick_list -= delivered_from_pick_lists.get(key, 0) / ordered_qty[key]
 			unpicked_qty = flt(packed_item.qty) - flt(packed_item.picked_qty)
-			delivered_qty = min(
-				unpicked_qty, delivered_without_pick_list[key], delivered_share[packed_item.name]
+			qty_to_pick[packed_item.name] = flt(
+				unpicked_qty - flt(packed_item.qty) * max(share_delivered_without_pick_list, 0),
+				packed_item.precision("qty"),
 			)
-			delivered_qty = max(delivered_qty, 0)
-			delivered_without_pick_list[key] -= delivered_qty
-			qty_to_pick[packed_item.name] = flt(unpicked_qty - delivered_qty, packed_item.precision("qty"))
 
 		return qty_to_pick
 
