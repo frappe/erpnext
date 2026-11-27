@@ -1470,6 +1470,8 @@ class SerialandBatchBundle(Document):
 
 	def get_subcontracting_return_rates(self) -> dict:
 		"""Rate the returned Subcontracting Receipt consumed each serial/batch of a supplied item at."""
+		from erpnext.stock.utils import get_valuation_method
+
 		if self.voucher_type != "Subcontracting Receipt" or not self.voucher_detail_no:
 			return {}
 
@@ -1483,8 +1485,12 @@ class SerialandBatchBundle(Document):
 			return {}
 
 		receipt = frappe.get_doc("Subcontracting Receipt", row.parent)
-		# rejected returns keep the row rate
-		if not receipt.is_return or row.reference_name in receipt.get_rejected_return_rows():
+		# rejected returns and Standard Cost items keep the row rate
+		if (
+			not receipt.is_return
+			or row.reference_name in receipt.get_rejected_return_rows()
+			or get_valuation_method(self.item_code, self.company) == "Standard Cost"
+		):
 			return {}
 
 		receipt_item = receipt.get("items", {"name": row.reference_name})[0].subcontracting_receipt_item

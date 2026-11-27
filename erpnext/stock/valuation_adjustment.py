@@ -10,8 +10,9 @@ erpnext.stock.expected_valuation says they should be.
 
 An Adjustment Entry is a Stock Reconciliation with purpose "Adjustment Entry". Its rows are the
 stock each item-warehouse should hold on the date: the serial nos at their own rates, the batches
-valued batch-wise at theirs, and the stock valued in the pool layer by layer, with the batches or
-serial nos in the pool spread over the layers. On submit, every item-warehouse is reset:
+valued batch-wise at theirs, the stock valued in the pool layer by layer, with the batches or
+serial nos in the pool spread over the layers, and the stock of a Standard Cost item at the standard
+rate on the date. On submit, every item-warehouse is reset:
 
 1. Primed: a batch valued batch-wise holds a value of its own that only leaves with its qty, so a
    batch holding value with no qty, or less than none, is brought up to one unit first. A batch
@@ -168,10 +169,13 @@ def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, 
 
 def get_pool_layers(stock, details, posting_datetime) -> list[tuple[float, float]]:
 	"""The [qty, rate] layers the pool should hold, oldest first: counted in in this order, they
-	give a FIFO queue or a LIFO stack back as it should be. A moving average pool is one layer."""
+	give a FIFO queue or a LIFO stack back as it should be. A moving average pool is one layer, and
+	so is a Standard Cost item's stock, at the standard rate on the date."""
 	pool = stock.pool
 
-	if isinstance(pool, QueuePool):
+	if details.valuation_method == "Standard Cost":
+		layers = [(pool.qty, details.get_standard_rate(getdate(posting_datetime)))]
+	elif isinstance(pool, QueuePool):
 		layers = pool.layers
 	else:
 		layers = [(pool.qty, pool.rate)]
@@ -197,14 +201,18 @@ def get_pooled_lots(plan: AdjustmentPlan, details, posting_datetime, exclude_vou
 	return [
 		[batch_no, qty]
 		for batch_no, qty in lots.batch_qty.items()
-		if qty >= details.qty_tolerance and not details.is_valued_batch_wise(batch_no)
+		if qty >= details.qty_tolerance
+		and (details.valuation_method == "Standard Cost" or not details.is_valued_batch_wise(batch_no))
 	]
 
 
 def values_serial_nos_in_pool(item, details) -> bool:
 	"""Whether the item's serial nos are valued with the rest of its stock rather than one by one:
-	without serial no wise valuation."""
-	return bool(item.has_serial_no and details.values_everything_in_pool)
+	without serial no wise valuation, or at Standard Cost."""
+	return bool(
+		item.has_serial_no
+		and (details.values_everything_in_pool or details.valuation_method == "Standard Cost")
+	)
 
 
 def spread_over_layers(layers, pooled_lots: list[list], details, is_serial: bool) -> list[AdjustmentRow]:

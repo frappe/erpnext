@@ -61,10 +61,19 @@ class Bin(Document):
 		)
 
 	def set_stock_values_from_ledger(self):
+		from erpnext.stock.utils import get_valuation_method
+
 		last_sle = get_last_sle_values(self.item_code, self.warehouse)
 		self.actual_qty = last_sle.qty_after_transaction
 		self.valuation_rate = last_sle.valuation_rate
 		self.stock_value = last_sle.stock_value
+
+		if get_valuation_method(self.item_code, self.company) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+			self.stock_value = flt(self.actual_qty) * flt(
+				get_item_standard_rate(self.item_code, self.company)
+			)
 
 	def set_pending_and_reserved_qty(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
@@ -283,19 +292,27 @@ def update_qty(bin_name, args):
 		- flt(bin_details.reserved_qty_for_production_plan)
 	)
 
-	frappe.db.set_value(
-		"Bin",
-		bin_name,
-		{
-			"actual_qty": actual_qty,
-			"ordered_qty": ordered_qty,
-			"reserved_qty": reserved_qty,
-			"indented_qty": indented_qty,
-			"planned_qty": planned_qty,
-			"projected_qty": projected_qty,
-		},
-		update_modified=True,
-	)
+	bin_values = {
+		"actual_qty": actual_qty,
+		"ordered_qty": ordered_qty,
+		"reserved_qty": reserved_qty,
+		"indented_qty": indented_qty,
+		"planned_qty": planned_qty,
+		"projected_qty": projected_qty,
+	}
+
+	# Standard Cost items are not reposted on backdated entries, so the Bin's stock value is not
+	# refreshed by a repost. Keep it in step with the balance at the standard rate.
+	from erpnext.stock.utils import get_valuation_method
+
+	if get_valuation_method(args.get("item_code"), args.get("company")) == "Standard Cost":
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		bin_values["stock_value"] = flt(actual_qty) * flt(
+			get_item_standard_rate(args.get("item_code"), args.get("company"))
+		)
+
+	frappe.db.set_value("Bin", bin_name, bin_values, update_modified=True)
 
 
 def get_actual_qty(item_code, warehouse):
