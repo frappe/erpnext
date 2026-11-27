@@ -759,8 +759,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# Manual rates are kept unless earlier entries consumed part of this entry's share
 		manufacture = ManufactureStockEntry(self) if has_running_total_share else None
 		is_short = bool(manufacture and manufacture.is_short_of_raw_material_share())
-		if is_short:
-			# a rate capped on an earlier save goes back up when the consumed cost rises
+		if is_short and not self.flags.via_repost:
+			# a rate capped on an earlier save goes back up when the consumed cost rises;
+			# a repost keeps the submitted rate, as the BOM may have changed since
 			manufacture.set_manual_secondary_rates_from_bom(costed_out_items)
 
 		for d in costed_out_items:
