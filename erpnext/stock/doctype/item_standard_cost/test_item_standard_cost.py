@@ -352,6 +352,123 @@ class TestItemStandardCost(ERPNextTestSuite):
 		)
 		self.assertEqual(booked, 200)
 
+	def reconciliation_difference(self, reco):
+		# the reconciliation's value difference as the ledger, the document and the GL carry it
+		sle_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": reco.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		stock_adjustment = frappe.get_cached_value("Company", PI_COMPANY, "stock_adjustment_account")
+		booked = sum(
+			flt(gle.credit) - flt(gle.debit)
+			for gle in frappe.get_all(
+				"GL Entry",
+				{"voucher_no": reco.name, "account": stock_adjustment, "is_cancelled": 0},
+				["debit", "credit"],
+			)
+		)
+		return (
+			flt(sle_difference),
+			flt(frappe.db.get_value("Stock Reconciliation", reco.name, "difference_amount")),
+			booked,
+		)
+
+	def test_backdated_entry_before_reconciliation_is_reposted(self):
+		# the in-place shift stops at the next Stock Reconciliation, whose value difference and GL
+		# depend on the balance before it, so that case still needs a repost
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = create_standard_cost_item()
+		create_item_standard_cost(
+			item.name, rate=100, company=PI_COMPANY, effective_date=add_days(today(), -10)
+		)
+		make_stock_entry(
+			item_code=item.name,
+			target=PI_STORES,
+			company=PI_COMPANY,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -8),
+		)
+		reco = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=PI_STORES,
+			qty=12,
+			rate=100,
+			company=PI_COMPANY,
+			posting_date=add_days(today(), -4),
+		)
+		self.assertEqual(self.reconciliation_difference(reco), (200, 200, 200))
+
+		make_stock_entry(
+			item_code=item.name,
+			target=PI_STORES,
+			company=PI_COMPANY,
+			qty=5,
+			basic_rate=100,
+			posting_date=add_days(today(), -6),
+		)
+
+		# a repost is queued for the item and warehouse; in tests it runs on submit
+		repost = frappe.db.get_value(
+			"Repost Item Valuation",
+			{"item_code": item.name, "warehouse": PI_STORES, "docstatus": 1},
+			"status",
+		)
+		self.assertEqual(repost, "Completed")
+
+		# the count of 12 now follows a balance of 15, so it writes off 300
+		self.assertEqual(self.reconciliation_difference(reco), (-300, -300, -300))
+
+	def test_cancel_before_reconciliation_is_reposted(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = create_standard_cost_item()
+		create_item_standard_cost(
+			item.name, rate=100, company=PI_COMPANY, effective_date=add_days(today(), -10)
+		)
+		make_stock_entry(
+			item_code=item.name,
+			target=PI_STORES,
+			company=PI_COMPANY,
+			qty=12,
+			basic_rate=100,
+			posting_date=add_days(today(), -8),
+		)
+		issue = make_stock_entry(
+			item_code=item.name,
+			source=PI_STORES,
+			company=PI_COMPANY,
+			qty=2,
+			posting_date=add_days(today(), -3),
+		)
+		reco = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=PI_STORES,
+			qty=15,
+			rate=100,
+			company=PI_COMPANY,
+			posting_date=add_days(today(), -1),
+		)
+		self.assertEqual(self.reconciliation_difference(reco), (500, 500, 500))
+
+		issue.reload()
+		issue.cancel()
+
+		# a repost is queued for the item and warehouse; in tests it runs on submit
+		repost = frappe.db.get_value(
+			"Repost Item Valuation",
+			{"item_code": item.name, "warehouse": PI_STORES, "docstatus": 1},
+			"status",
+		)
+		self.assertEqual(repost, "Completed")
+
+		# without the issue the count of 15 follows a balance of 12, so it adds 300
+		self.assertEqual(self.reconciliation_difference(reco), (300, 300, 300))
+
 	def test_opening_reconciliation_creates_standard_cost(self):
 		# With no Item Standard Cost yet, an opening Stock Reconciliation may set the rate; that rate is
 		# captured into an Item Standard Cost record so the resulting stock (and later transactions) are
