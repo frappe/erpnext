@@ -1191,10 +1191,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 								? __("Internal Purchase Order")
 								: __("Inter Company Purchase Order");
 
-						this.add_inter_company_order_button(
+						this.add_inter_company_button(
 							button_label,
 							"Purchase Order",
-							"sales_order_item"
+							"sales_order_item",
+							() => this.make_inter_company_order()
 						);
 					}
 				}
