@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
@@ -971,12 +971,16 @@ class SubcontractingReceipt(SubcontractingController):
 		receipt = frappe.qb.DocType("Subcontracting Receipt")
 		receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
 		charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		order_charges = frappe.qb.DocType("Landed Cost Taxes and Charges").as_("order_charges")
+		# receipts with a cost row linked to this item row's order
 		linked_receipts = (
 			frappe.qb.from_(charges)
+			.inner_join(order_charges)
+			.on(order_charges.name == charges.subcontracting_order_cost)
 			.select(charges.parent)
 			.where(
 				(charges.parenttype == "Subcontracting Receipt")
-				& (IfNull(charges.subcontracting_order_cost, "") != "")
+				& (order_charges.parent == receipt_item.subcontracting_order)
 			)
 		)
 		costing_qty = receipt_item.qty + receipt_item.rejected_qty + receipt_item.process_loss_qty
