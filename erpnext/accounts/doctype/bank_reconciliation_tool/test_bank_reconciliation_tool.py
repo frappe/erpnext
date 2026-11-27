@@ -380,10 +380,146 @@ class TestBankReconciliationToolPermissions(AccountsTestMixin, FrappeTestCase):
 			paid_to=self.bank,
 			paid_amount=100,
 		)
+<<<<<<< HEAD
 		payment.reference_no = reference
 		payment.reference_date = add_days(today(), -1)
 		payment.save().submit()
 		transaction = (
+=======
+		create_payment_entry(paid_from=self.bank, paid_amount=240, save=1, submit=1)
+
+		# the opening balance is the ledger balance, while the cleared balance ignores uncleared entries
+		self.assertEqual(opening() - opening_before, 12460)
+		self.assertEqual(cleared() - cleared_before, 0)
+
+	def test_auto_reconcile_message_for_no_matches(self):
+		message, indicator = get_auto_reconcile_message([], [])
+		self.assertEqual(indicator, "blue")
+		self.assertIn("No matches", message)
+
+	def test_auto_reconcile_message_counts_and_pluralizes(self):
+		# reconciled count is reported and the indicator turns green
+		message, indicator = get_auto_reconcile_message([], ["t1", "t2"])
+		self.assertEqual(indicator, "green")
+		self.assertIn("2 Transaction(s) Reconciled", message)
+
+		# partially-reconciled label is singular for one, plural for many
+		singular, _ = get_auto_reconcile_message(["p1"], [])
+		self.assertIn("1 Transaction Partially Reconciled", singular)
+		plural, _ = get_auto_reconcile_message(["p1", "p2"], [])
+		self.assertIn("2 Transactions Partially Reconciled", plural)
+
+	def test_multi_currency_pay_converts_and_balances(self):
+		# withdrawal from an INR bank paying a USD supplier; rate 3.0 makes 100/3 non-exact
+		self.enable_multi_currency_setup()
+		pe = self.reconcile_new_payment(
+			self.make_multi_currency_txn(withdrawal=100),
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			party_account=self.creditors_usd,
+			paid_from=self.bank,
+			paid_to=self.creditors_usd,
+			rate=3.0,
+		)
+		self.assertEqual(pe.docstatus, 1)  # submits despite the rounding residual
+		self.assertEqual((pe.source_exchange_rate, pe.target_exchange_rate), (1.0, 3.0))
+		self.assertEqual((pe.paid_amount, pe.received_amount), (100, 33.33))  # bank side kept, 100/3
+		self.assertEqual(pe.difference_amount, 0)
+		# Payment Entry auto-books the rounding residual to Exchange Gain/Loss
+		self.assertTrue(pe.deductions[0].is_exchange_gain_loss)
+		self.assertEqual(pe.deductions[0].amount, 0.01)  # 100 - 33.33 * 3
+
+	def test_multi_currency_receive_converts_and_balances(self):
+		# deposit into an INR bank from a USD customer; the party side must convert
+		self.enable_multi_currency_setup()
+		pe = self.reconcile_new_payment(
+			self.make_multi_currency_txn(deposit=100),
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			party_account=self.debtors_usd,
+			paid_from=self.debtors_usd,
+			paid_to=self.bank,
+			rate=3.0,
+		)
+		self.assertEqual(pe.docstatus, 1)
+		self.assertEqual((pe.source_exchange_rate, pe.target_exchange_rate), (3.0, 1.0))
+		self.assertEqual((pe.received_amount, pe.paid_amount), (100, 33.33))  # bank side kept, 100/3
+		self.assertEqual(pe.difference_amount, 0)
+
+	def test_payment_entry_bts_rounds_the_party_amount(self):
+		self.enable_multi_currency_setup()
+		txn = self.make_multi_currency_txn(deposit=1000)
+
+		def exchange_rate(from_currency, to_currency, posting_date=None):
+			return 83 if (from_currency, to_currency) == ("USD", "INR") else 1 / 83
+
+		with patch(RATE_METHOD, side_effect=exchange_rate):
+			create_payment_entry_bts(
+				txn.name,
+				party_type="Customer",
+				party=self.customer,
+				posting_date=today(),
+				reference_number="TEST-FX-RECEIVE",
+				reference_date=today(),
+			)
+
+		payment_name = frappe.get_value(
+			"Bank Transaction Payments",
+			{"parent": txn.name, "payment_document": "Payment Entry"},
+			"payment_entry",
+		)
+		pe = frappe.get_doc("Payment Entry", payment_name)
+		self.assertEqual((pe.paid_amount, pe.received_amount), (12.05, 1000))
+		self.assertTrue(pe.deductions[0].is_exchange_gain_loss)
+		self.assertEqual(pe.deductions[0].amount, 0.15)
+
+		entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+			fields=["account", "debit", "credit"],
+		)
+		self.assertTrue(any(row.account == "Exchange Gain/Loss - _TC" for row in entries))
+		self.assertFalse(any(row.account == "Round Off - _TC" for row in entries))
+
+	def test_multi_currency_bulk_pay_converts_and_balances(self):
+		# the bulk path builds the Payment Entry itself, so it must convert too
+		self.enable_multi_currency_setup()
+		txn = self.make_multi_currency_txn(withdrawal=100)
+		with patch(RATE_METHOD, return_value=3.0):
+			result = create_bulk_payment_entry_and_reconcile(
+				[txn.name], "Supplier", self.supplier, self.creditors_usd
+			)
+
+		pe = frappe.get_doc("Payment Entry", result[0]["payment_entry"].name)
+		self.assertEqual(pe.docstatus, 1)
+		self.assertEqual(pe.target_exchange_rate, 3.0)
+		self.assertEqual((pe.paid_amount, pe.received_amount), (100, 33.33))
+		self.assertEqual(pe.difference_amount, 0)
+
+	def enable_multi_currency_setup(self):
+		# USD party/accounts + a company gain/loss account to absorb rounding residuals
+		self.company_abbr = "_TC"
+		self.create_supplier(supplier_name="_Test Supplier USD", currency="USD")
+		self.create_customer(customer_name="_Test Customer USD", currency="USD")
+		self.create_usd_payable_account()
+		self.create_usd_receivable_account()
+		self.set_party_account("Supplier", self.supplier, self.creditors_usd)
+		if not frappe.db.get_value("Company", self.company, "exchange_gain_loss_account"):
+			frappe.db.set_value(
+				"Company", self.company, "exchange_gain_loss_account", "Exchange Gain/Loss - _TC"
+			)
+
+	def set_party_account(self, party_type, party, account):
+		doc = frappe.get_doc(party_type, party)
+		if not any(row.company == self.company for row in doc.accounts):
+			doc.append("accounts", {"company": self.company, "account": account})
+			doc.save()
+
+	def make_multi_currency_txn(self, withdrawal=0, deposit=0):
+		return (
+>>>>>>> d63228d (test(accounts): cover bank reconciliation FX rounding)
 			frappe.get_doc(
 				{
 					"doctype": "Bank Transaction",
