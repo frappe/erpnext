@@ -27,6 +27,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Accounting Dimension",
+   "options": "\nCost Center\nProject",
    "reqd": 1
   },
   {
@@ -103,7 +104,7 @@
  "icon": "funnel",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-08 14:13:22.203011",
+ "modified": "2026-11-26 16:17:43.410277",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Filter",
@@ -130,21 +131,18 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts User",
+   "role": "Accounts Manager",
    "share": 1,
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts Manager",
-   "share": 1,
-   "write": 1
+   "role": "Accounts User",
+   "share": 1
   }
  ],
  "quick_entry": 1,

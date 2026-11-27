@@ -570,3 +570,4 @@ erpnext.patches.v16_0.recalculate_transferred_qty_of_work_orders_with_mixed_tran
 erpnext.patches.v16_0.set_reserved_components_return_cutoff
 erpnext.patches.v16_0.encrypt_bank_plaid_access_token
 erpnext.patches.v16_0.enable_operations_and_job_cards
+erpnext.patches.v16_0.set_accounting_dimension_filter_options
