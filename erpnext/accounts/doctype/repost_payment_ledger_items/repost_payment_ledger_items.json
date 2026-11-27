@@ -14,20 +14,22 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "reqd": 1
   },
   {
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "label": "Voucher No",
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "reqd": 1
   }
  ],
  "istable": 1,
  "link_display_mode": "Search",
  "links": [],
- "modified": "2026-11-25 20:54:19.871514",
+ "modified": "2026-11-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Payment Ledger Items",
