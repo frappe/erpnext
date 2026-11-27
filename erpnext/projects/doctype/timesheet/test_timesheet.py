@@ -128,10 +128,81 @@ class TestTimesheet(ERPNextTestSuite):
 
 	def test_base_amounts_use_the_exchange_rate_being_saved(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
-		timesheet = make_timesheet(emp, simulate=True, is_billable=1, exchange_rate=2, do_not_submit=True)
+		with patch_usd_rate(2):
+			timesheet = make_timesheet(
+				emp,
+				simulate=True,
+				is_billable=1,
+				exchange_rate=3,
+				do_not_submit=True,
+				timesheet_currency="USD",
+			)
 
-		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 200)
-		self.assertEqual(timesheet.base_total_billable_amount, 200)
+		# 50 INR is billed as 25 USD a hour and kept at the typed rate of 3
+		self.assertEqual(timesheet.exchange_rate, 3)
+		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 150)
+		self.assertEqual(timesheet.base_total_billable_amount, 150)
+
+	def test_company_currency_timesheet_resets_a_foreign_exchange_rate(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(
+			emp, simulate=True, is_billable=1, exchange_rate=83, do_not_submit=True, timesheet_currency="INR"
+		)
+
+		self.assertEqual(timesheet.exchange_rate, 1)
+		self.assertEqual(timesheet.base_total_billable_amount, 100)
+		self.assertEqual(timesheet.base_total_costing_amount, 40)
+
+	def test_foreign_currency_timesheet_fetches_a_missing_exchange_rate(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		with patch_usd_rate(2):
+			timesheet = make_timesheet(
+				emp, simulate=True, is_billable=1, do_not_submit=True, timesheet_currency="USD"
+			)
+
+		self.assertEqual(timesheet.exchange_rate, 2)
+		self.assertEqual(timesheet.total_billable_amount, 50)
+		self.assertEqual(timesheet.base_total_billable_amount, 100)
+		self.assertEqual(timesheet.base_total_costing_amount, 40)
+
+	def test_foreign_currency_timesheet_keeps_an_exchange_rate_of_one(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		with patch_usd_rate(80):
+			timesheet = make_timesheet(
+				emp, simulate=True, exchange_rate=1, do_not_submit=True, timesheet_currency="USD"
+			)
+			timesheet.save()
+
+		self.assertEqual(timesheet.exchange_rate, 1)
+		self.assertEqual(timesheet.base_total_costing_amount, timesheet.total_costing_amount)
+
+	def test_foreign_currency_timesheet_gets_the_exchange_rate_on_its_start_date(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"employee": emp,
+				"currency": "USD",
+				"time_logs": [
+					{
+						"activity_type": "_Test Activity Type",
+						"from_time": "2026-09-25 10:00:00",
+						"hours": 2,
+						"costing_rate": 6,
+					}
+				],
+			}
+		)
+
+		def get_exchange_rate(from_currency, to_currency, transaction_date=None, *args):
+			return 80 if str(transaction_date) == "2026-09-25" else 62.9
+
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", get_exchange_rate):
+			timesheet.insert()
+
+		self.assertEqual(timesheet.exchange_rate, 80)
+		self.assertEqual(timesheet.base_total_costing_amount, 960)
 
 	def test_amounts_follow_the_rates_without_an_activity_type(self):
 		from_time = now_datetime()
@@ -989,11 +1060,13 @@ def make_timesheet(
 	currency=None,
 	exchange_rate=None,
 	do_not_submit=False,
+	timesheet_currency=None,
 ):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
 	timesheet.company = company or "_Test Company"
+	timesheet.currency = timesheet_currency
 	timesheet.exchange_rate = exchange_rate
 	timesheet_detail = timesheet.append("time_logs", {})
 	timesheet_detail.is_billable = is_billable
@@ -1021,6 +1094,17 @@ def make_timesheet(
 		timesheet.submit()
 
 	return timesheet
+
+
+def patch_usd_rate(inr_per_usd):
+	"""Patch the Timesheet exchange rate lookup with one USD to INR rate, both ways."""
+
+	def get_exchange_rate(from_currency, to_currency, *args, **kwargs):
+		if from_currency == to_currency:
+			return 1
+		return inr_per_usd if from_currency == "USD" else 1 / inr_per_usd
+
+	return patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", get_exchange_rate)
 
 
 def update_activity_type(activity_type):
