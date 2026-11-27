@@ -74,6 +74,31 @@ class TestStockSettings(ERPNextTestSuite):
 		):
 			settings.save()
 
+	def test_company_valuation_method_drives_reposting(self):
+		from frappe.utils import add_days, today
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		frappe.db.set_single_value("Stock Settings", "valuation_method", "Standard Cost")
+		frappe.db.set_value("Company", "_Test Company", "valuation_method", "FIFO")
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": ""}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(item_code=item, target=warehouse, qty=10, rate=100)
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=5)
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=200, posting_date=add_days(today(), -1)
+		)
+
+		issue_value = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(issue_value, -1000)
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": item, "warehouse": warehouse}, "stock_value"), 2000
+		)
+
 	def test_split_batch_uses_warehouse_company_valuation(self):
 		from erpnext.stock.doctype.batch.batch import split_batch
 		from erpnext.stock.doctype.item.test_item import make_item
