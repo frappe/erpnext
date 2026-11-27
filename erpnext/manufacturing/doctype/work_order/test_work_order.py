@@ -6010,6 +6010,195 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.reload()
 		return wo
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_subcontracted_final_operation_books_work_order_costs(self):
+		sco = self.make_subcontracted_work_order_with_costs()
+
+		first = self.make_receipt_of_subcontracted_work_order(sco, 4)
+		second = self.make_receipt_of_subcontracted_work_order(sco, 6)
+
+		for scr, additional, corrective in ((first, 40, 20), (second, 60, 30)):
+			self.assertEqual(self.get_additional_cost(scr, "Additional Operating Cost"), additional)
+			self.assertEqual(self.get_additional_cost(scr, "Corrective Operation Cost"), corrective)
+			self.assertEqual({row.item_row for row in scr.additional_costs}, {scr.items[0].name})
+		self.assertEqual(flt(first.items[0].additional_cost_per_qty), 15)
+
+	def test_work_order_cost_shares_add_up_to_the_cost(self):
+		from erpnext.manufacturing.doctype.bom.bom import _split_per_unit_cost
+
+		shares = _split_per_unit_cost(50 / 3, [1, 1, 1], 2)
+		self.assertEqual(shares, [16.67, 16.66, 16.67])
+		self.assertEqual(flt(sum(shares), 2), 50)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_returned_corrective_operation_cost_is_booked_again(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		scr = self.make_receipt_of_subcontracted_work_order(sco, 4)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.submit()
+		self.assertEqual(self.get_additional_cost(scr_return, "Corrective Operation Cost"), -10)
+
+		rest = self.make_receipt_of_subcontracted_work_order(sco, 8)
+		self.assertEqual(self.get_additional_cost(rest, "Corrective Operation Cost"), 40)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 0}
+	)
+	def test_work_order_costs_are_replaced_on_save(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 4
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "Freight",
+				"amount": 10,
+			},
+		)
+		scr.save()
+		scr.save()
+
+		self.assertEqual(
+			[(row.description, row.amount) for row in scr.additional_costs],
+			[("Freight", 10), ("Additional Operating Cost", 40)],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 0}
+	)
+	def test_work_order_cost_keeps_the_account_picked(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 4
+		scr.save()
+
+		scr.additional_costs[0].expense_account = "Expenses Included In Valuation - _TC"
+		scr.save()
+		self.assertEqual(scr.additional_costs[0].expense_account, "Expenses Included In Valuation - _TC")
+
+	def test_work_order_cost_rows_keep_their_accounts_on_first_save(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 2
+		scr.append("items", scr.items[0].as_dict(no_default_fields=True))
+		# rows of an unsaved form carry temporary names
+		for item in scr.items:
+			item.name = f"new-subcontracting-receipt-item-{item.idx}"
+		scr.set_missing_values()
+
+		picked_account = "Expenses Included In Valuation - _TC"
+		cost_rows = [row for row in scr.additional_costs if row.work_order and not row.has_corrective_cost]
+		default_account = cost_rows[0].expense_account
+		cost_rows[1].expense_account = picked_account
+		scr.insert()
+
+		accounts = [
+			row.expense_account
+			for row in scr.additional_costs
+			if row.work_order and not row.has_corrective_cost
+		]
+		self.assertEqual(accounts, [default_account, picked_account])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 0}
+	)
+	def test_work_order_costs_leave_the_order_costs_to_later_receipts(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		freight = {
+			"expense_account": "Expenses Included In Valuation - _TC",
+			"description": "Freight",
+			"amount": 100,
+		}
+		sco = self.make_subcontracted_work_order_with_costs(additional_costs=[freight])
+
+		first = self.make_receipt_of_subcontracted_work_order(sco, 4)
+		scr_return = make_return_doc("Subcontracting Receipt", first.name)
+		scr_return.items[0].qty = -2
+		scr_return.submit()
+		rest = self.make_receipt_of_subcontracted_work_order(sco, 8)
+
+		self.assertEqual(self.get_additional_cost(rest, "Freight"), 80)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_work_order_costs_are_booked_on_process_loss_qty_too(self):
+		sco = self.make_subcontracted_work_order_with_costs()
+
+		receipts = [
+			self.make_receipt_of_subcontracted_work_order(sco, 5, process_loss_qty=1) for _ in range(2)
+		]
+
+		for description, cost in (("Additional Operating Cost", 100), ("Corrective Operation Cost", 50)):
+			self.assertEqual(sum(self.get_additional_cost(scr, description) for scr in receipts), cost)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_rejected_return_leaves_the_corrective_cost_to_later_receipts(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			get_mapped_subcontracting_receipt,
+		)
+
+		sco = self.make_subcontracted_work_order_with_costs()
+		first = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 5}])
+		first.items[0].qty = 4
+		first.items[0].rejected_qty = 1
+		first.items[0].rejected_warehouse = create_warehouse("Test SOI Rejected WH", company="_Test Company")
+		first.submit()
+		make_return_doc("Subcontracting Receipt", first.name, return_against_rejected_qty=True).submit()
+		rest = self.make_receipt_of_subcontracted_work_order(sco, 6)
+
+		self.assertEqual(self.get_additional_cost(rest, "Corrective Operation Cost"), 30)
+
+	def make_subcontracted_work_order_with_costs(self, additional_costs=()):
+		"""Subcontracting Order for all of a Work Order with 100 additional and 50 corrective operation cost."""
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		wo = self.make_subcontracted_operation_work_order(skip_transfer=1)
+		wo.db_set({"additional_operating_cost": 100, "corrective_operation_cost": 50})
+		test_stock_entry.make_stock_entry(
+			item_code=wo.required_items[0].item_code, target="Stores - _TC", qty=10, basic_rate=100
+		)
+		sco = self.subcontract_work_order(wo, 10, additional_costs=additional_costs)
+		frappe.get_doc(make_rm_stock_entry(sco.name)).submit()
+		return sco
+
+	def make_receipt_of_subcontracted_work_order(self, sco, qty, process_loss_qty=0):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			get_mapped_subcontracting_receipt,
+		)
+
+		scr = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": qty}])
+		scr.items[0].qty = qty - process_loss_qty
+		scr.items[0].process_loss_qty = process_loss_qty
+		scr.submit()
+		return scr
+
 	def make_subcontracted_operation_work_order(self, **kwargs):
 		"""A Work Order for 10 shirts whose only operation, a subcontracted dyeing, uses 10 cloth."""
 		company = "_Test Company"
@@ -6079,7 +6268,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			**kwargs,
 		)
 
-	def subcontract_work_order(self, wo, qty, reserve_warehouse=None):
+	def subcontract_work_order(self, wo, qty, reserve_warehouse=None, additional_costs=()):
 		"""Submit a Subcontracting Order for qty of the Work Order's subcontracted Job Card."""
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
 		from erpnext.manufacturing.doctype.job_card.job_card import make_subcontracting_po
@@ -6099,6 +6288,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		sco = make_subcontracting_order(po.name)
 		sco.supplier_warehouse = supplier_warehouse
 		sco.set_reserve_warehouse = reserve_warehouse
+		for row in additional_costs:
+			sco.append("additional_costs", row)
 		sco.insert()
 		sco.submit()
 		return sco

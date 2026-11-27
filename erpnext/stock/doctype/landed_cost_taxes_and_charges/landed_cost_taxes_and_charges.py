@@ -29,6 +29,7 @@ class LandedCostTaxesandCharges(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		qty: DF.Float
+		work_order: DF.Link | None
 	# end: auto-generated types
 
 	pass
