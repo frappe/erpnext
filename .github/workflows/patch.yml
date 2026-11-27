@@ -57,9 +57,7 @@ jobs:
           fi
 
       - name: Add to Hosts
-        run: |
-          printf 'Hosts step entered the container at %s\n' "$(date -u +%FT%T.%NZ)"
-          time echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
 
       - name: Start DB
         run: bash ${GITHUB_WORKSPACE}/.github/helper/start-db.sh
@@ -85,7 +83,7 @@ jobs:
       - name: Install
         run: |
           chown "$ERPNEXT_CI_USER:$ERPNEXT_CI_USER" "$HOME" "$GITHUB_WORKSPACE"
-          su -m "$ERPNEXT_CI_USER" -s /bin/bash -c 'bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot-benchmark.sh"'
+          su -m "$ERPNEXT_CI_USER" -s /bin/bash -c 'bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot.sh"'
         env:
           DB: mariadb
           CI_GITHUB_TOKEN: ${{ github.token }}
@@ -115,7 +113,7 @@ jobs:
           for app in frappe erpnext; do
             git -C "apps/$app" remote add migration-upstream "https://github.com/frappe/$app.git"
           done
-          git -C apps/erpnext branch -f benchmark-head HEAD
+          git -C apps/erpnext branch -f ci-head HEAD
 
           migrate_with_python() {
             for app in frappe erpnext; do
@@ -184,6 +182,6 @@ jobs:
           fi
           retry git -C "apps/frappe" fetch --depth 1 migration-upstream "$frappe_ref"
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
-          git -C "apps/erpnext" checkout -q -f benchmark-head
+          git -C "apps/erpnext" checkout -q -f ci-head
           migrate_with_python python3.14
           EOF

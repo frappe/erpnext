@@ -91,7 +91,7 @@ jobs:
           CI_DB_DATADIR: /home/runner/pgdata
 
       - name: Install
-        run: bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot-benchmark.sh"
+        run: bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot.sh"
         env:
           DB: postgres
           TYPE: server
