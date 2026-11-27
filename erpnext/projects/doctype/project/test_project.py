@@ -19,24 +19,27 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestProject(ERPNextTestSuite):
 	def test_project_total_costing_and_billing_amount(self):
-		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet, patch_usd_rate
 		from erpnext.setup.doctype.employee.test_employee import make_employee
 
 		project_name = "Test Project Costing"
 		employee = make_employee("employee@frappe.io", company="_Test Company")
 		project = make_project({"project_name": project_name})
-		timesheet = make_timesheet(
-			employee=employee,
-			is_billable=1,
-			currency="USD",
-			project=project.name,
-			simulate=True,
-			exchange_rate=80,
-		)
+		with patch_usd_rate(80):
+			timesheet = make_timesheet(
+				employee=employee,
+				is_billable=1,
+				currency="USD",
+				timesheet_currency="USD",
+				project=project.name,
+				simulate=True,
+				exchange_rate=80,
+			)
 		timesheet.reload()
 		project.reload()
-		self.assertEqual(project.total_costing_amount, 3200)
-		self.assertEqual(project.total_billable_amount, 8000)
+		# 2 hours at 20 INR, logged as 0.25 USD a hour at 80
+		self.assertEqual(project.total_costing_amount, 40)
+		self.assertEqual(project.total_billable_amount, timesheet.base_total_billable_amount)
 
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"

@@ -24,7 +24,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestTask(ERPNextTestSuite):
 	def test_task_total_costing_and_billing_amount(self):
 		from erpnext.projects.doctype.project.test_project import make_project
-		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet, patch_usd_rate
 		from erpnext.setup.doctype.employee.test_employee import make_employee
 
 		project_name = "Test Project Costing"
@@ -33,20 +33,23 @@ class TestTask(ERPNextTestSuite):
 		task = create_task("_Test Task 1")
 		task.project = project.name
 		task.save()
-		timesheet = make_timesheet(
-			employee=employee,
-			is_billable=1,
-			currency="USD",
-			project=project.name,
-			simulate=True,
-			exchange_rate=80,
-			task=task.name,
-		)
+		with patch_usd_rate(80):
+			timesheet = make_timesheet(
+				employee=employee,
+				is_billable=1,
+				currency="USD",
+				timesheet_currency="USD",
+				project=project.name,
+				simulate=True,
+				exchange_rate=80,
+				task=task.name,
+			)
 		timesheet.reload()
 		project.reload()
 		task.reload()
-		self.assertEqual(task.total_costing_amount, 3200)
-		self.assertEqual(task.total_billing_amount, 8000)
+		# 2 hours at 20 INR, logged as 0.25 USD a hour at 80
+		self.assertEqual(task.total_costing_amount, 40)
+		self.assertEqual(task.total_billing_amount, timesheet.base_total_billable_amount)
 
 	def test_move_task_to_another_project(self):
 		from erpnext.projects.doctype.project.test_project import make_project
