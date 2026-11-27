@@ -20,7 +20,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import find_party_account, get_party_account
 from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes, get_currency_precision
-from erpnext.utilities import get_email_to_store, payment_app_import_guard
+from erpnext.utilities import get_user_email, payment_app_import_guard
 
 ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"Sales Order",
@@ -588,7 +588,7 @@ class PaymentRequest(Document):
 				"description": self.subject,
 				"reference_doctype": "Payment Request",
 				"reference_docname": self.name,
-				"payer_email": self.email_to or get_email_to_store(),
+				"payer_email": self.email_to or get_user_email(),
 				"payer_name": data.customer_name,
 				"order_id": self.name,
 				"currency": self.currency,
@@ -1000,7 +1000,7 @@ def make_payment_request(**args):
 				"party_account_currency": party_account_currency,
 				"grand_total": grand_total,
 				"mode_of_payment": args.mode_of_payment,
-				"email_to": args.recipient_id or get_email_to_store(ref_doc.owner),
+				"email_to": args.recipient_id or get_user_email(ref_doc.owner),
 				"subject": _("Payment Request for {0}").format(args.dn),
 				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 				"reference_doctype": ref_doc.doctype,

@@ -25,7 +25,7 @@ from frappe.utils import (
 )
 
 from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year, get_fiscal_years
-from erpnext.utilities import get_email_to_store
+from erpnext.utilities import get_user_email
 
 user_specific_content = ["calendar_events", "todo_list"]
 
@@ -143,7 +143,7 @@ class EmailDigest(Document):
 			frappe.local.form_dict = original_form
 		if message:
 			frappe.sendmail(
-				recipients=get_email_to_store(recipient),
+				recipients=get_user_email(recipient),
 				subject=_("{0} Digest").format(_(self.frequency)),
 				message=message,
 				reference_doctype=self.doctype,

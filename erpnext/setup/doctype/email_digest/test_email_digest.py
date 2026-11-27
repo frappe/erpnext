@@ -47,7 +47,7 @@ class TestEmailDigest(ERPNextTestSuite):
 		messages = []
 		with patch("frappe.sendmail", side_effect=lambda **kwargs: messages.append(kwargs["recipients"])):
 			digest.send()
-		self.assertEqual(messages, [system_user.name])
+		self.assertEqual(messages, [system_user.email])
 
 	def test_company_totals_are_not_sent_without_transaction_access(self):
 		from unittest.mock import patch
@@ -137,8 +137,9 @@ class TestEmailDigest(ERPNextTestSuite):
 		):
 			digest.send()
 		for i, user in enumerate(users):
-			self.assertIn(f"Digest private event {i}", messages[user])
-			self.assertNotIn(f"Digest private event {1 - i}", messages[user])
+			email = frappe.utils.get_email_address(user)
+			self.assertIn(f"Digest private event {i}", messages[email])
+			self.assertNotIn(f"Digest private event {1 - i}", messages[email])
 
 	def test_overdue_purchase_orders_respect_user_permissions(self):
 		user = "digest-purchase@example.com"

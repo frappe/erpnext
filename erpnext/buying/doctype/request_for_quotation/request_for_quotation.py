@@ -8,7 +8,7 @@ from frappe.contacts.doctype.contact.contact import get_full_name
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import get_email_address, get_url, get_user_by_email
+from frappe.utils import get_url, get_user_by_email
 from frappe.utils.html_utils import sanitize_html
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
@@ -16,8 +16,7 @@ from frappe.utils.user import get_user_fullname
 from erpnext.accounts.party import validate_party_frozen_disabled
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
-
-STANDARD_USERS = ("Guest", "Administrator")
+from erpnext.utilities import get_user_email
 
 
 class RequestforQuotation(BuyingController):
@@ -351,7 +350,7 @@ class RequestforQuotation(BuyingController):
 		if fixed_procurement_email:
 			sender = frappe.db.get_value("Email Account", fixed_procurement_email, "email_id")
 		else:
-			sender = (frappe.session.user not in STANDARD_USERS and get_email_address()) or None
+			sender = get_user_email()
 
 		message_template = self.mfs_html if self.use_html else self.message_for_supplier
 		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti

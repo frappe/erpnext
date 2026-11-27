@@ -4,7 +4,7 @@ import frappe
 from frappe.core.doctype.doctype.doctype import DocType
 
 from erpnext.tests.utils import ERPNextTestSuite
-from erpnext.utilities import get_email_to_store, update_doctypes
+from erpnext.utilities import get_user_email, update_doctypes
 
 
 class TestUtilitiesInit(ERPNextTestSuite):
@@ -63,10 +63,10 @@ class TestUtilitiesInit(ERPNextTestSuite):
 		with patch.object(DocType, "save", autospec=True):
 			update_doctypes()
 
-	def test_email_to_store_keeps_standard_users_by_name(self):
+	def test_user_email_keeps_standard_users_by_name(self):
 		from frappe.core.doctype.user.test_user import test_user
 
-		self.assertEqual(get_email_to_store("Administrator"), "Administrator")
-		self.assertEqual(get_email_to_store("Guest"), "Guest")
+		self.assertEqual(get_user_email("Administrator"), "Administrator")
+		self.assertEqual(get_user_email("Guest"), "Guest")
 		with test_user(roles=[], generated_id=True) as user:
-			self.assertEqual(get_email_to_store(user.name), user.email)
+			self.assertEqual(get_user_email(user.name), user.email)
