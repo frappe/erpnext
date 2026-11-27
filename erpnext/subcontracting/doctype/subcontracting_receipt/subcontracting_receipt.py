@@ -840,9 +840,10 @@ class SubcontractingReceipt(SubcontractingController):
 				accounts.setdefault((row.work_order, corrective), row.expense_account)
 
 		self.set("additional_costs", [row for row in self.get("additional_costs") if not row.work_order])
-		for work_order_name, qty_by_item_row in self.get_final_operation_qty().items():
-			work_order = frappe.get_doc("Work Order", work_order_name)
-			for row in get_subcontracted_work_order_costs(work_order, qty_by_item_row):
+		qty_by_work_order = self.get_final_operation_qty()
+		work_orders = self.get_final_operation_work_orders(list(qty_by_work_order))
+		for work_order_name, qty_by_item_row in qty_by_work_order.items():
+			for row in get_subcontracted_work_order_costs(work_orders[work_order_name], qty_by_item_row):
 				corrective = cint(row.get("has_corrective_cost"))
 				row["expense_account"] = (
 					accounts.get((row["work_order"], row["item_row"], corrective))
@@ -850,6 +851,25 @@ class SubcontractingReceipt(SubcontractingController):
 					or row["expense_account"]
 				)
 				self.append("additional_costs", row)
+
+	def get_final_operation_work_orders(self, names: list[str]) -> dict:
+		"""Work Orders by name, with the fields their costs are worked out from."""
+		if not names:
+			return {}
+
+		work_orders = frappe.get_all(
+			"Work Order",
+			filters={"name": ("in", names)},
+			fields=[
+				"name",
+				"company",
+				"qty",
+				"production_item",
+				"additional_operating_cost",
+				"corrective_operation_cost",
+			],
+		)
+		return {work_order.name: work_order for work_order in work_orders}
 
 	def get_final_operation_qty(self) -> dict[str, dict[str, float]]:
 		"""Accepted and process loss qty of each item row, by the Work Order whose final operation its job card is."""

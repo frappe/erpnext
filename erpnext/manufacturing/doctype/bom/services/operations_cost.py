@@ -359,7 +359,9 @@ def _manufacture_stock_entries(work_order):
 def get_subcontracted_work_order_costs(work_order, qty_by_item_row):
 	"""Additional cost rows of a Work Order for the finished goods of its subcontracted final operation."""
 	row = {
-		"expense_account": frappe.get_value("Company", work_order.company, "default_operating_cost_account"),
+		"expense_account": frappe.get_cached_value(
+			"Company", work_order.company, "default_operating_cost_account"
+		),
 		"work_order": work_order.name,
 	}
 	additional_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
