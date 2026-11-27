@@ -102,19 +102,20 @@ class OperationsService:
 
 		job_card = frappe.qb.DocType("Job Card")
 		operation = frappe.qb.DocType("Work Order Operation")
-		# Job Cards on the planned workstation made before they stored a rate are costed at the operation's rate
-		hour_rate = (
+		workstation = frappe.qb.DocType("Workstation")
+		# Job Cards made before they stored a rate: the operation's rate on its workstation, else their workstation's
+		legacy_rate = (
 			Case()
-			.when(
-				(IfNull(job_card.hour_rate, 0) == 0) & (job_card.workstation == operation.workstation),
-				operation.hour_rate,
-			)
-			.else_(job_card.hour_rate)
+			.when(job_card.workstation == operation.workstation, operation.hour_rate)
+			.else_(IfNull(workstation.hour_rate, 0))
 		)
+		hour_rate = Case().when(IfNull(job_card.hour_rate, 0) == 0, legacy_rate).else_(job_card.hour_rate)
 		rows = (
 			frappe.qb.from_(job_card)
 			.join(operation)
 			.on(operation.name == job_card.operation_id)
+			.left_join(workstation)
+			.on(workstation.name == job_card.workstation)
 			.select(
 				job_card.operation_id,
 				Sum(job_card.total_time_in_mins * hour_rate / 60.0).as_("cost"),
