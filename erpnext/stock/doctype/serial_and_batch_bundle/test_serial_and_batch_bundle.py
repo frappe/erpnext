@@ -337,6 +337,53 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 		self.assertEqual(flt(stock_value_difference, 2), -300)
 
+	def test_outward_serial_rate_ignores_inward_of_other_warehouse(self):
+		from erpnext.stock.serial_batch_bundle import SerialNoValuation
+
+		item_code, serial_no_ids = self.make_serials_received_again_in_other_warehouse()
+		sle = frappe._dict(
+			{"item_code": item_code, "warehouse": "_Test Warehouse - _TC", "serial_nos": serial_no_ids}
+		)
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			self.assertEqual(SerialNoValuation(sle=sle).stock_value_change, 200)
+
+		if frappe.db.db_type == "mariadb":
+			query, values = next(
+				call.args[:2]
+				for call in queries.call_args_list
+				if "`incoming_rate` FROM `tabSerial and Batch Entry`" in str(call.args[0])
+			)
+			plan = frappe.db.sql(f"EXPLAIN {query}", values, as_dict=True)[0]
+			self.assertNotIn("warehouse_serial_no_posting_datetime_index", plan.possible_keys or "")
+
+	def make_serials_received_again_in_other_warehouse(self):
+		item_code = make_item(
+			"_Test Serial Rate Other Warehouse Item",
+			{"has_serial_no": 1, "serial_no_series": "TEST-SER-ROW-.#####", "is_stock_item": 1},
+		).name
+		warehouse = "_Test Warehouse - _TC"
+		receipt = make_stock_entry(
+			item_code=item_code, qty=2, rate=100, target=warehouse, posting_date=add_days(today(), -10)
+		)
+		serial_no_ids = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		serial_nos = [frappe.db.get_value("Serial No", name, "serial_no") for name in serial_no_ids]
+		for days, rate, target, source in (
+			(-8, 0, None, warehouse),
+			(-6, 150, "_Test Warehouse 1 - _TC", None),
+		):
+			make_stock_entry(
+				item_code=item_code,
+				qty=2,
+				rate=rate,
+				target=target,
+				source=source,
+				serial_no=serial_nos,
+				posting_date=add_days(today(), days),
+				use_serial_batch_fields=1,
+			)
+
+		return item_code, serial_no_ids
+
 	def test_repost_values_serial_without_later_inward_on_same_posting_datetime(self):
 		item_code = make_item(
 			"_Test Serial Same Posting Datetime Item",
