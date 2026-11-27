@@ -1564,7 +1564,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				exclude_batch_qty=received[d.ste_detail].batch_qty,
 			)
 			# the row runs on the bundle, which holds only what is left in transit
-			d.serial_no = d.batch_no = None
+			d.serial_no = None
 			d.use_serial_batch_fields = 0
 
 	def get_serial_batch_received_from_transit(self, outward_rows):
