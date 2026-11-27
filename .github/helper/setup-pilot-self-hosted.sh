@@ -14,8 +14,6 @@ if [ -n "$ci_github_token" ]; then
     export GIT_CONFIG_KEY_1="credential.https://github.com.username"
     export GIT_CONFIG_VALUE_1="x-access-token"
     export GIT_CONFIG_KEY_2="credential.https://github.com.helper"
-    # The helper shell expands the token when git invokes it, not when this script exports it.
-    # shellcheck disable=SC2016
     export GIT_CONFIG_VALUE_2='!f() { test "$1" = get && echo "password=$CI_GITHUB_TOKEN"; }; f'
 fi
 export GIT_TERMINAL_PROMPT=0
@@ -32,7 +30,6 @@ elif [ "$probe" -ne 0 ]; then
     exit "$probe"
 fi
 
-# The ARC image already provides the system dependencies and uv.
 mkdir -p "$HOME/pilot"
 curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
     | tar -xz -C "$HOME/pilot"
@@ -63,7 +60,6 @@ pilot get-app "$GITHUB_WORKSPACE" --branch "$erpnext_branch" --commit "$erpnext_
 
 uv pip install --python env/bin/python -e "apps/frappe[test]"
 
-# The bootstrap tests need Redis and the staged database.
 redis-server config/redis_cache.conf --daemonize yes
 redis-server config/redis_queue.conf --daemonize yes
 read -r cache_port queue_port < <(python -c 'import tomllib; r = tomllib.load(open("bench.toml", "rb"))["redis"]; print(r["cache_port"], r["queue_port"])')
@@ -93,7 +89,6 @@ settings["allow_tests"] = True
 site.write_text(json.dumps(settings, indent=2) + "\n")
 PYTHON
 
-# Shards use the staged Frappe environment and do not carry Node dependencies.
 cat > Procfile <<'EOF'
 redis_cache: redis-server config/redis_cache.conf
 redis_queue: redis-server config/redis_queue.conf
