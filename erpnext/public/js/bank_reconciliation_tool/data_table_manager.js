@@ -55,6 +55,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				name: __("Description"),
 				editable: false,
 				width: 350,
+				format: (value) => frappe.utils.escape_html(value),
 			},
 			{
 				name: __("Deposit"),
@@ -83,6 +84,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				name: __("Reference Number"),
 				editable: false,
 				width: 140,
+				format: (value) => frappe.utils.escape_html(value),
 			},
 			{
 				name: __("Actions"),
