@@ -219,8 +219,8 @@ class Timesheet(Document):
 				task.update_time_and_costing()
 				status = get_task_status(task)
 				if status == "Completed" and task.status != "Completed" and not task.completed_on:
-					# the work ended on the last time log, not when this timesheet is submitted
-					task.completed_on = min(getdate(task.act_end_date), getdate())
+					# the work ended on the last completed time log, not when this timesheet is submitted
+					task.completed_on = min(getdate(get_last_completed_log_time(task.name)), getdate())
 				task.status = status
 				task.save(ignore_permissions=True)
 				tasks.append(data.task)
@@ -421,6 +421,14 @@ def get_task_status(task: Document) -> str:
 	if not completed:
 		return "Open"
 	return "Completed" if any(completed) else "Working"
+
+
+def get_last_completed_log_time(task: str):
+	return frappe.db.get_value(
+		"Timesheet Detail",
+		{"task": task, "docstatus": 1, "parenttype": "Timesheet", "completed": 1},
+		[{"MAX": "to_time"}],
+	)
 
 
 @frappe.whitelist()
