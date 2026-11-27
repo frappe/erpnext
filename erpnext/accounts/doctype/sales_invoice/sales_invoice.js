@@ -26,6 +26,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		const doc = this.frm.doc;
 		return doc.docstatus == 1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry");
 	}
+	add_record_payment_button() {
+		if (!this.can_record_payment()) return;
+		const label = this.frm.doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
+		this.frm.add_custom_button(label, () => this.make_payment_entry());
+		this.frm.change_custom_button_type(label, null, "primary");
+	}
 	company() {
 		super.company();
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
@@ -178,11 +184,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			}
 		}
 
-		if (can_record_payment) {
-			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
-			this.frm.page.set_primary_action(label, () => this.make_payment_entry());
-		}
-
 		this.toggle_get_items();
 
 		this.set_default_print_format();
@@ -228,7 +229,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			}
 		}
 
-		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
+		Promise.resolve(erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm)).then(() =>
+			this.add_record_payment_button()
+		);
 
 		if (this.frm.doc.is_created_using_pos && !this.frm.doc.is_return) {
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);

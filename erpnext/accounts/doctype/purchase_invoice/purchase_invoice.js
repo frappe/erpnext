@@ -54,6 +54,13 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		);
 	}
 
+	add_record_payment_button() {
+		if (!this.can_record_payment()) return;
+		const label = this.frm.doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
+		this.frm.add_custom_button(label, () => this.make_payment_entry());
+		this.frm.change_custom_button_type(label, null, "primary");
+	}
+
 	onload() {
 		super.onload();
 
@@ -158,11 +165,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			);
 		}
 
-		if (this.can_record_payment()) {
-			const label = doc.outstanding_amount < 0 ? __("Record Refund") : __("Record Payment");
-			this.frm.page.set_primary_action(label, () => this.make_payment_entry());
-		}
-
 		if (doc.docstatus === 0) {
 			this.frm.add_custom_button(
 				__("Purchase Order"),
@@ -251,7 +253,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			});
 		}
 
-		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
+		Promise.resolve(erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm)).then(() =>
+			this.add_record_payment_button()
+		);
 	}
 
 	unblock_invoice() {

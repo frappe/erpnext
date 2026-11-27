@@ -13,7 +13,7 @@ erpnext.accounts.unreconcile_payment = {
 				return;
 			}
 
-			frappe.call({
+			return frappe.call({
 				method: "erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment.doc_has_references",
 				args: {
 					doctype: frm.doc.doctype,
