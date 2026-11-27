@@ -3,14 +3,17 @@ from frappe import _
 from frappe.core.doctype.communication.email import make
 from frappe.model.workflow import get_workflow_name
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, fmt_money, get_link_to_form
+from frappe.utils import cstr, flt, fmt_money, get_link_to_form
 
+import erpnext
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+PAYABLE_DOCTYPES = ("Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order")
 
 
 @frappe.whitelist()
 def record_payment(dt: str, names: str | list, values: str | dict, save: bool = True):
-	payment = RecordPayment(dt, frappe.parse_json(names), frappe.parse_json(values))
+	payment = RecordPayment(dt, get_permitted_names(dt, names), frappe.parse_json(values))
 	if not save:
 		return payment.payment_entry
 	return payment.save()
@@ -18,7 +21,7 @@ def record_payment(dt: str, names: str | list, values: str | dict, save: bool = 
 
 @frappe.whitelist()
 def get_payment_entry_for(dt: str, names: str | list, reference_date: str | None = None):
-	first, *others = sort_by_due_date(dt, frappe.parse_json(names))
+	first, *others = sort_by_due_date(dt, get_permitted_names(dt, names))
 	payment_entry = get_payment_entry(dt, first, reference_date=reference_date)
 	for name in others:
 		add_invoice(payment_entry, get_payment_entry(dt, name, reference_date=reference_date), name)
@@ -34,8 +37,11 @@ def get_payment_entry_for(dt: str, names: str | list, reference_date: str | None
 
 @frappe.whitelist()
 def get_unapplied_credit(dt: str, dn: str) -> float:
-	doc = frappe.get_doc(dt, dn)
-	doc.check_permission()
+	if dt not in ("Sales Invoice", "Purchase Invoice"):
+		erpnext._refuse()
+	frappe.has_permission("Payment Entry", "create", throw=True)
+	erpnext.require_permission(dt, dn)
+	doc = frappe.get_doc(dt, cstr(dn))
 	party_type, account = ("Customer", doc.debit_to) if dt == "Sales Invoice" else ("Supplier", doc.credit_to)
 
 	ple = frappe.qb.DocType("Payment Ledger Entry")
@@ -59,6 +65,8 @@ def get_unapplied_credit(dt: str, dn: str) -> float:
 class RecordPayment:
 	def __init__(self, dt: str, names: list, values: dict):
 		self.values = frappe._dict(values)
+		for fieldname in ("account", "mode_of_payment", "reference_no", "tax_withheld_account"):
+			self.values[fieldname] = cstr(self.values.get(fieldname)) or None
 		self.payment_entry = get_payment_entry_for(dt, names, self.values.reference_date)
 		self.is_receive = self.payment_entry.payment_type == "Receive"
 		self.bank_field = "paid_to" if self.is_receive else "paid_from"
@@ -132,8 +140,16 @@ class RecordPayment:
 
 		payment_entry = self.payment_entry
 		details = frappe.get_cached_value(
-			"Account", account, ["account_type", "account_currency"], as_dict=True
+			"Account", account, ["account_type", "account_currency", "company"], as_dict=True
 		)
+		if (
+			not details
+			or details.company != payment_entry.company
+			or details.account_type not in ("Bank", "Cash")
+		):
+			frappe.throw(
+				_("Select a bank or cash account of {0}.").format(frappe.bold(payment_entry.company))
+			)
 		if details.account_currency != payment_entry.get(f"{self.bank_field}_account_currency"):
 			frappe.throw(
 				_(
@@ -278,3 +294,12 @@ def add_invoice(payment_entry, invoice_payment, name: str):
 			payment_entry.append(table, row.as_dict(no_default_fields=True))
 	payment_entry.paid_amount += invoice_payment.paid_amount
 	payment_entry.received_amount += invoice_payment.received_amount
+
+
+def get_permitted_names(dt: str, names: str | list) -> list[str]:
+	names = frappe.parse_json(names)
+	if dt not in PAYABLE_DOCTYPES or not isinstance(names, list) or not names:
+		erpnext._refuse()
+	for name in names:
+		erpnext.require_permission(dt, name)
+	return [cstr(name) for name in names]
