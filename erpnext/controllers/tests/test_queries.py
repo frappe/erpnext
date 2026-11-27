@@ -6,11 +6,12 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_user_permission
+from frappe.share import add as add_share
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+from erpnext.tests.permission_test_utils import as_user, make_company_fenced_user, make_fenced_user
 
 
 def add_default_params(func, doctype):
@@ -161,10 +162,58 @@ class TestQueries(unittest.TestCase):
 
 		self.assertGreaterEqual(len(query(filters={"company": "_Test Company"})), 1)
 
+	def test_income_account_query_requires_account_permission(self):
+		self.addCleanup(frappe.db.rollback)
+		query = add_default_params(queries.get_income_account, "Account")
+		accounts_user = create_user("income_account_accounts_user@example.com", "Accounts User")
+		website_manager = create_user("income_account_website_manager@example.com", "Website Manager")
+
+		restricted_user = create_user("income_account_restricted_user@example.com", "Accounts User")
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": restricted_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+			}
+		).insert()
+
+		with as_user(accounts_user.name):
+			self.assert_nested_in("Sales - _TC", query(filters={"company": "_Test Company"}))
+
+		with as_user(restricted_user.name):
+			self.assertFalse(query(filters={"company": "_Test Company"}))
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"company": "_Test Company"})
+
 	def test_expense_account_query(self):
 		query = add_default_params(queries.get_expense_account, "Account")
 
 		self.assertGreaterEqual(len(query(filters={"company": "_Test Company"})), 1)
+
+	def test_expense_account_query_requires_account_permission(self):
+		self.addCleanup(frappe.db.rollback)
+		query = add_default_params(queries.get_expense_account, "Account")
+		purchase_user = create_user("expense_account_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("expense_account_website_manager@example.com", "Website Manager")
+
+		with as_user(purchase_user.name):
+			self.assert_nested_in("Cost of Goods Sold - _TC", query(filters={"company": "_Test Company"}))
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"company": "_Test Company"})
+
+	def test_account_queries_show_only_shared_accounts_to_users_without_account_access(self):
+		self.addCleanup(frappe.db.rollback)
+		user = create_user("account_query_shared_user@example.com", "Website Manager")
+		for account in ("Sales - _TC", "Debtors - _TC"):
+			add_share("Account", account, user.name, read=1, flags={"ignore_share_permission": True})
+
+		with as_user(user.name):
+			for method in (queries.get_income_account, queries.get_expense_account):
+				rows = add_default_params(method, "Account")(filters={"company": "_Test Company"})
+				self.assertEqual([row[0] for row in rows], ["Sales - _TC"])
 
 	def test_warehouse_address_query_requires_warehouse_read_permission(self):
 		self.addCleanup(frappe.db.rollback)
@@ -230,6 +279,38 @@ class TestQueries(unittest.TestCase):
 
 		self.assert_nested_in(open_dn.name, result)
 		self.assertNotIn(returned_dn.name, [row[0] for row in result])
+
+	def test_get_delivery_notes_to_be_billed_requires_delivery_note_permission(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		self.addCleanup(frappe.db.rollback)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		dn = create_delivery_note()
+		query = add_default_params(queries.get_delivery_notes_to_be_billed, "Delivery Note")
+		filters = {"name": dn.name}
+
+		accounts_user = create_user("dn_to_bill_accounts_user@example.com", "Accounts User")
+		website_manager = create_user("dn_to_bill_website_manager@example.com", "Website Manager")
+		other_company_user = make_company_fenced_user(
+			"dn_to_bill_other_company_user@example.com", ["Sales User"], "_Test Company 1"
+		)
+
+		with as_user(accounts_user.name):
+			self.assert_nested_in(dn.name, query(filters=filters))
+
+		with as_user(other_company_user):
+			self.assertFalse(query(filters=filters))
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters=filters)
+
+		other_dn = create_delivery_note()
+		add_share(
+			"Delivery Note", dn.name, website_manager.name, read=1, flags={"ignore_share_permission": True}
+		)
+		with as_user(website_manager.name):
+			rows = query(filters={"name": ["in", [dn.name, other_dn.name]]})
+			self.assertEqual([row[0] for row in rows], [dn.name])
 
 	def make_batches_in_stock(self, *batch_ids):
 		self.addCleanup(frappe.db.rollback)

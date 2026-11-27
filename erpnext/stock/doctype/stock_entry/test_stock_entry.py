@@ -226,6 +226,39 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertTrue(item_code in items)
 
+	def test_end_transit_entry_cannot_be_posted_before_transit_entry(self):
+		transit_warehouse = get_in_transit_warehouse("_Test Company")
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=7,
+			basic_rate=13.37,
+			posting_date=add_days(today(), -3),
+		)
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target=transit_warehouse,
+			purpose="Material Transfer",
+			add_to_transit=1,
+			qty=3,
+			posting_date=add_days(today(), -1),
+			posting_time="10:30:00",
+		)
+
+		end_transit_entry = make_stock_in_entry(transit_entry.name)
+		end_transit_entry.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		end_transit_entry.update(
+			{"set_posting_time": 1, "posting_date": transit_entry.posting_date, "posting_time": "10:29:59"}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be before", end_transit_entry.save)
+
+		# received at the same time as it was sent
+		end_transit_entry.posting_time = "10:30:00"
+		end_transit_entry.submit()
+		self.assertEqual(end_transit_entry.items[0].valuation_rate, 13.37)
+
 	def test_add_to_transit_entry(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
@@ -5204,6 +5237,12 @@ class TestStockEntry(FrappeTestCase):
 			entry = new_stock_entry(purpose="Manufacture", work_order=other_work_order.name)
 			self.assertRaises(frappe.PermissionError, entry.get_stock_and_rate)
 
+	def test_ceil_qty_ignores_float_noise(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import ceil_qty_if_uom_has_whole_number
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(0.07 * 100, "Nos"), 7)
+
 	def test_disassemble_get_items_checks_manufacture_entry_permission(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
@@ -5547,6 +5586,59 @@ class TestStockEntry(FrappeTestCase):
 				get_warehouse_details,
 				{**args, "warehouse": "_Test Warehouse 2 - _TC1"},
 			)
+
+	def test_submit_locks_bins_before_validate(self):
+		from unittest.mock import patch
+
+		from frappe.utils import get_datetime
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+		from erpnext.stock.utils import lock_bins
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PTRB-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			do_not_submit=True,
+		)
+
+		calls = []
+		validate = StockEntry.validate
+		lock_time = get_datetime(f"{transfer.posting_date} 23:59:59.123456")
+		with (
+			patch(
+				"erpnext.stock.utils.lock_bins",
+				lambda item_warehouses: calls.append("lock_bins") or lock_bins(item_warehouses),
+			),
+			patch.object(StockEntry, "validate", lambda doc: calls.append("validate") or validate(doc)),
+			patch("erpnext.utilities.transaction_base.now_datetime", return_value=lock_time),
+		):
+			transfer.submit()
+
+		self.assertEqual(calls, ["lock_bins", "validate"])
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": transfer.name},
+			fields=["posting_datetime", "serial_and_batch_bundle"],
+		)
+		self.assertEqual(len(sles), 2)
+		for sle in sles:
+			self.assertEqual(get_datetime(sle.posting_datetime), lock_time)
+			bundle_time = frappe.db.get_value(
+				"Serial and Batch Bundle", sle.serial_and_batch_bundle, "posting_datetime"
+			)
+			self.assertEqual(get_datetime(bundle_time), lock_time)
 
 
 def make_serialized_item(**args):

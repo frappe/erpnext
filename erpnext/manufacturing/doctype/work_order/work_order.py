@@ -526,7 +526,11 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if flt(self.material_transferred_for_manufacturing) > 0 or self.has_transferred_material():
+				if (
+					flt(self.material_transferred_for_manufacturing) > 0
+					or self.has_transferred_material()
+					or self.has_consumed_material()
+				):
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -563,6 +567,19 @@ class WorkOrder(Document):
 			)
 		).run()[0][0]
 		return flt(qty) > 0
+
+	def has_consumed_material(self):
+		"""True if a submitted Material Consumption entry exists, e.g. on a skip-transfer order."""
+		return bool(
+			frappe.db.exists(
+				"Stock Entry",
+				{
+					"work_order": self.name,
+					"docstatus": 1,
+					"purpose": "Material Consumption for Manufacture",
+				},
+			)
+		)
 
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
@@ -913,15 +930,33 @@ class WorkOrder(Document):
 
 		for idx, row in enumerate(self.operations):
 			qty = self.qty
+			card_times = []
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self, row, qty)
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
+					card_times.append(
+						(get_datetime(row.planned_start_time), get_datetime(row.planned_end_time))
+					)
+
+			self.set_batch_operation_time(row, card_times)
 
 		# operations with the same Sequence ID run in parallel, so the last row may not end last
 		end_times = [get_datetime(row.planned_end_time) for row in self.operations if row.planned_end_time]
 		if end_times:
 			self.db_set("planned_end_date", max(end_times))
+
+	@staticmethod
+	def set_batch_operation_time(row, card_times):
+		"""Batch cards can be scheduled out of order, so the operation spans all of them."""
+		if len(card_times) < 2:
+			return
+
+		start = min(start for start, _end in card_times)
+		end = max(end for _start, end in card_times)
+		if (start, end) != card_times[-1]:
+			row.planned_start_time, row.planned_end_time = start, end
+			row.db_update()
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
@@ -1700,7 +1735,7 @@ class WorkOrder(Document):
 			.on(se.name == sed.parent)
 			.select(sed.item_code, sed.s_warehouse, Sum(sed.transfer_qty).as_("qty"))
 			.where(
-				(se.purpose == "Manufacture")
+				se.purpose.isin(["Manufacture", "Material Consumption for Manufacture"])
 				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
 				& (se.docstatus == 1)
 				& (se.work_order == self.name)

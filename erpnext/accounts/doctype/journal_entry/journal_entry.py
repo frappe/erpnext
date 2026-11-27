@@ -1495,14 +1495,15 @@ class JournalEntryTaxWithholding:
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_mode_of_payment_account
 
 	# `select`, not `read`: also runs server-side from get_payment_entry, and Auditor/HR User/
 	# Desk User hold only the select row on Company. doc= for User Permissions.
 	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
 
 	if mode_of_payment:
-		account = get_bank_cash_account(mode_of_payment, company).get("account")
+		frappe.has_permission("Mode of Payment", "select", mode_of_payment, throw=True)
+		account = get_mode_of_payment_account(mode_of_payment, company).get("account")
 
 	if not account:
 		"""
@@ -1761,6 +1762,9 @@ def get_outstanding(args):
 
 	if isinstance(args, str):
 		args = json.loads(args)
+
+	if args.get("doctype") in ("Journal Entry", "Sales Invoice", "Purchase Invoice"):
+		frappe.has_permission(args["doctype"], "read", doc=args.get("docname"), throw=True)
 
 	company_currency = erpnext.get_company_currency(args.get("company"))
 	due_date = None

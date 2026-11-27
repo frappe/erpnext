@@ -19,6 +19,7 @@ from frappe.utils import (
 	comma_or,
 	cstr,
 	flt,
+	format_datetime,
 	format_time,
 	formatdate,
 	get_link_to_form,
@@ -259,6 +260,9 @@ class StockEntry(StockController):
 		self.validate_warehouses_company()
 		self.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
+		self.validate_posting_datetime_with_outgoing_entry()
+		if self.purpose == "Disassemble":
+			self.validate_posting_datetime_with_source_entry()
 		self.validate_purpose()
 		self.validate_item()
 		self.validate_customer_provided_item()
@@ -383,6 +387,23 @@ class StockEntry(StockController):
 				references["Stock Entry"].add(row.against_stock_entry)
 
 		return references
+
+	def get_item_warehouses(self):
+		item_warehouses = super().get_item_warehouses()
+		order = self.get(self.subcontract_data.order_field)
+		if not order:
+			return item_warehouses
+
+		item_codes = {row.original_item or row.item_code for row in self.items}
+		supplied_items = frappe.get_all(
+			self.subcontract_data.order_supplied_items_field,
+			filters={"parent": order, "rm_item_code": ("in", item_codes)},
+			fields=["rm_item_code", "reserve_warehouse"],
+		)
+		item_warehouses.update(
+			(row.rm_item_code, row.reserve_warehouse) for row in supplied_items if row.reserve_warehouse
+		)
+		return item_warehouses
 
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
@@ -1704,6 +1725,56 @@ class StockEntry(StockController):
 					DuplicateEntryForWorkOrderError,
 				)
 
+	def validate_posting_datetime_with_outgoing_entry(self):
+		"""The stock-in takes the cost of the outgoing entry, so it cannot be posted before it."""
+		from erpnext.stock.utils import get_combine_datetime
+
+		if not self.outgoing_stock_entry:
+			return
+
+		outgoing = frappe.db.get_value(
+			"Stock Entry", self.outgoing_stock_entry, ["posting_date", "posting_time"], as_dict=True
+		)
+		outgoing_datetime = get_combine_datetime(outgoing.posting_date, outgoing.posting_time)
+		posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		if posting_datetime >= outgoing_datetime:
+			return
+
+		frappe.throw(
+			_(
+				"Posting Date and Time {0} cannot be before {1}, when Stock Entry {2} sent this material."
+			).format(
+				bold(format_datetime(posting_datetime)),
+				bold(format_datetime(outgoing_datetime)),
+				get_link_to_form("Stock Entry", self.outgoing_stock_entry),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
+
+	def validate_posting_datetime_with_source_entry(self):
+		"""The components take the rates of the source manufacture entry, so it cannot be posted before it."""
+		if not self.source_stock_entry:
+			return
+
+		source = frappe.db.get_value(
+			"Stock Entry", self.source_stock_entry, ["posting_date", "posting_time"], as_dict=True
+		)
+		source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
+		posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		if posting_datetime >= source_datetime:
+			return
+
+		frappe.throw(
+			_(
+				"Posting Date and Time {0} cannot be before {1}, when Stock Entry {2} manufactured this finished good."
+			).format(
+				bold(format_datetime(posting_datetime)),
+				bold(format_datetime(source_datetime)),
+				get_link_to_form("Stock Entry", self.source_stock_entry),
+			),
+			title=_("Invalid Posting Date and Time"),
+		)
+
 	def validate_warehouses_company(self):
 		warehouses = {d.s_warehouse for d in self.get("items")} | {d.t_warehouse for d in self.get("items")}
 		for warehouse in warehouses - {None, ""}:
@@ -1767,7 +1838,7 @@ class StockEntry(StockController):
 
 		raw_materials = self.get_bom_raw_materials(self.fg_completed_qty, split_alternative_items=False)
 
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for item_code, bom_qty in get_bom_stock_qty_by_item(raw_materials).items():
 			matched_items = self.get_matched_items(item_code)
 			if not matched_items:
@@ -2020,16 +2091,6 @@ class StockEntry(StockController):
 				).format(frappe.bold(items[0]))
 
 			frappe.msgprint(message, alert=True)
-
-	@property
-	def first_sle_creation(self):
-		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
-		return frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
-			"creation",
-			order_by="creation asc",
-		)
 
 	def has_consumption_basis(self) -> bool:
 		"""Whether the cost of the consumed items is known, even when that cost is zero."""
@@ -2893,7 +2954,8 @@ class StockEntry(StockController):
 			pro_doc.status == "Closed"
 			and self.docstatus == 1
 			and not self.is_return
-			and self.purpose in ("Material Transfer for Manufacture", "Manufacture")
+			and self.purpose
+			in ("Material Transfer for Manufacture", "Manufacture", "Material Consumption for Manufacture")
 		)
 
 	def update_work_order(self):
@@ -4234,6 +4296,14 @@ class StockEntry(StockController):
 				fields=["name", "item_code", "warehouse", "picked_qty", "transferred_qty"],
 			)
 		}
+		precision = frappe.get_precision("Pick List Item", "transferred_qty")
+		wo_allowance = 0.0
+		if self.work_order:
+			wo_allowance = flt(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "overproduction_percentage_for_work_order"
+				)
+			)
 		transfer_qty = defaultdict(float)
 		for d in self.items:
 			picked_row = picked_rows.get(d.pick_list_item)
@@ -4265,11 +4335,17 @@ class StockEntry(StockController):
 
 			precision = self.precision("transfer_qty", d)
 			transfer_qty[d.pick_list_item] += flt(d.transfer_qty)
-			total_transferred = flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item]
-			if flt(total_transferred, precision) > flt(picked_row.picked_qty, precision):
+			transferred_qty = flt(flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item], precision)
+			allowed_qty = flt(
+				flt(picked_row.picked_qty) + (flt(picked_row.picked_qty) * (wo_allowance / 100))
+				if self.work_order
+				else picked_row.picked_qty,
+				precision,
+			)
+			if transferred_qty > allowed_qty:
 				frappe.throw(
-					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
-						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
+					_("Row #{0}: Item {1} is transferred more than the {2} allowed in {3}.").format(
+						d.idx, frappe.bold(d.item_code), allowed_qty, self.pick_list
 					)
 				)
 
@@ -4715,10 +4791,9 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 
 @frappe.whitelist()
-def get_work_order_details(work_order: str, company: str):
+def get_work_order_details(work_order: str, company: str, purpose: str | None = None):
 	work_order = frappe.get_doc("Work Order", work_order)
 	work_order.check_permission("read")
-	pending_qty_to_produce = flt(work_order.qty) - flt(work_order.produced_qty)
 
 	return {
 		"from_bom": 1,
@@ -4726,8 +4801,27 @@ def get_work_order_details(work_order: str, company: str):
 		"use_multi_level_bom": work_order.use_multi_level_bom,
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
-		"fg_completed_qty": pending_qty_to_produce,
+		"fg_completed_qty": get_pending_fg_qty(work_order, purpose),
 	}
+
+
+def get_pending_fg_qty(work_order, purpose):
+	"""Default Finished Good Quantity of a new entry of this purpose for the Work Order."""
+	if purpose == "Disassemble":
+		qty = flt(work_order.produced_qty) - flt(work_order.disassembled_qty)
+	elif purpose == "Material Transfer for Manufacture":
+		qty = flt(work_order.qty) - flt(work_order.material_transferred_for_manufacturing)
+	elif purpose == "Manufacture":
+		transferred_qty = (
+			0 if work_order.skip_transfer else flt(work_order.material_transferred_for_manufacturing)
+		)
+		# extra material transferred is no allowance to produce more
+		planned_qty = min(transferred_qty or flt(work_order.qty), flt(work_order.qty))
+		qty = planned_qty - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
+	else:
+		qty = flt(work_order.qty) - flt(work_order.produced_qty)
+
+	return max(flt(qty, work_order.precision("qty")), 0)
 
 
 def get_consumed_operating_cost(work_order, bom_no, operation_id=None):
@@ -4820,12 +4914,26 @@ def get_used_alternative_items(
 
 def get_bom_stock_qty_by_item(raw_materials):
 	stock_qty_by_item = {}
+	stock_uom_by_item = {}
 	for key, details in raw_materials.items():
 		item_code = key[0] if isinstance(key, tuple) else key
 		stock_qty = flt(details.get("qty")) * (flt(details.get("conversion_factor")) or 1)
 		stock_qty_by_item[item_code] = stock_qty_by_item.get(item_code, 0.0) + stock_qty
+		stock_uom_by_item[item_code] = details.get("stock_uom")
 
-	return stock_qty_by_item
+	# a whole number stock UOM is consumed in whole units
+	return {
+		item_code: ceil_qty_if_uom_has_whole_number(stock_qty, stock_uom_by_item[item_code])
+		for item_code, stock_qty in stock_qty_by_item.items()
+	}
+
+
+def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
+	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
+		# rounding to 9 decimals first keeps float noise (0.07 * 100) from adding a unit
+		qty = frappe.utils.ceil(flt(qty, 9))
+
+	return qty
 
 
 def get_alternative_items_for_work_order(work_order, item_codes, exclude_stock_entry=None):

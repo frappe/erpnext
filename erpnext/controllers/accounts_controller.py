@@ -68,8 +68,11 @@ from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.exceptions import InvalidCurrency
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.stock.doctype.item.item import get_uom_conv_factor, validate_item_uoms
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_packed_items_of_order_rows,
+	make_packing_list,
+)
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_bin_details,
@@ -4401,6 +4404,11 @@ def update_bin_on_delete(rows, parent):
 		frappe.get_doc("Material Request", material_request).update_requested_qty(items)
 
 
+def validate_changed_uoms(parent, data, child_docname) -> None:
+	current_uoms = {row.name: row.uom for row in parent.get(child_docname)}
+	validate_item_uoms([frappe._dict(d) for d in data if d.get("uom") != current_uoms.get(d.get("docname"))])
+
+
 def validate_blanket_order_changes(parent, data) -> None:
 	if parent.doctype not in ("Sales Order", "Purchase Order"):
 		return
@@ -4767,6 +4775,11 @@ def update_child_qty_rate(
 	validate_parent_status(parent)
 	validate_rows_belong_to_parent(parent, data)
 	validate_blanket_order_changes(parent, data)
+	validate_changed_uoms(parent, data, child_docname)
+
+	packed_items_before_update = {}
+	if parent_doctype == "Sales Order":
+		packed_items_before_update = get_packed_items_of_order_rows({row.name for row in parent.items})
 
 	if parent_doctype == "Quotation":
 		ordered_items = get_ordered_items(parent.name)
@@ -4947,7 +4960,7 @@ def update_child_qty_rate(
 	parent.set_total_in_words()
 	parent.validate_party_specific_items()
 	if parent_doctype == "Sales Order":
-		make_packing_list(parent)
+		make_packing_list(parent, packed_items_before_update)
 		parent.set_gross_profit()
 	elif parent_doctype == "Quotation":
 		make_packing_list(parent)

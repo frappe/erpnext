@@ -11,7 +11,8 @@ from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController, add_picked_batches
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
-from erpnext.stock.doctype.item.item import set_item_default
+from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
+from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
@@ -48,6 +49,7 @@ class SellingController(StockController):
 		validate_terms_and_conditions(self.get("tc_name"), "selling")
 		super().validate()
 		self.validate_items()
+		validate_item_uoms(self.get("items"))
 		if not (self.get("is_debit_note") or self.get("is_return")):
 			self.validate_max_discount()
 		self.validate_selling_price()
@@ -422,6 +424,8 @@ class SellingController(StockController):
 			return
 
 		is_internal_customer = self.get("is_internal_customer")
+		# bundle rows priced from their components get their final rate only once packed
+		check_bundles = not frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 		for item in self.items:
 			if not item.item_code or item.is_free_item:
@@ -438,7 +442,8 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			if is_internal_customer or not is_stock_item:
+			is_bundle = check_bundles and not is_stock_item and is_product_bundle(item.item_code)
+			if is_internal_customer or not (is_stock_item or is_bundle):
 				continue
 
 			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
@@ -454,13 +459,26 @@ class SellingController(StockController):
 					"valuation rate",
 				)
 
+	def make_packed_item_bundles(self):
+		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
+		packed_rows = [p for p in self.get_current_packed_rows() if not p.serial_and_batch_bundle]
+		if not packed_rows:
+			return
+
+		picked_serial_nos = self.get_serial_nos_used_in_rows()
+		picked_batches = self.get_batches_used_in_rows()
+		item_rows = {d.name: d for d in self.items}
+		for p in packed_rows:
+			get_serial_and_batch_bundle(
+				p, self, item_rows[p.parent_detail_docname], picked_serial_nos, picked_batches
+			)
+
+		# validate ran before these bundles existed
+		if self.is_batch_check_needed():
+			self.validate_outward_bundle_batches(rows=packed_rows)
+
 	def get_item_list(self):
 		il = []
-		picked_serial_nos = picked_batches = None
-		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
-			picked_serial_nos = self.get_serial_nos_used_in_rows()
-			picked_batches = self.get_batches_used_in_rows()
-
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
@@ -475,10 +493,7 @@ class SellingController(StockController):
 									"serial_no": p.serial_no if self.docstatus == 2 else None,
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
-									"serial_and_batch_bundle": p.serial_and_batch_bundle
-									or get_serial_and_batch_bundle(
-										p, self, d, picked_serial_nos, picked_batches
-									),
+									"serial_and_batch_bundle": p.serial_and_batch_bundle,
 									"name": d.name,
 									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
@@ -777,6 +792,7 @@ class SellingController(StockController):
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		self.update_reserved_qty()
+		self.make_packed_item_bundles()
 
 		sl_entries = []
 		# Loop over items and packed items table
@@ -921,12 +937,18 @@ class SellingController(StockController):
 			]
 
 	def set_gross_profit(self):
-		if self.doctype in ["Sales Order", "Quotation"]:
-			for item in self.items:
-				item.gross_profit = flt(
-					((flt(item.stock_uom_rate) - flt(item.valuation_rate)) * item.stock_qty),
-					self.precision("amount", item),
-				)
+		for item in self.items:
+			self.set_item_gross_profit(item)
+
+	def set_item_gross_profit(self, item):
+		if self.doctype not in ["Sales Order", "Quotation"]:
+			return
+
+		rate = flt(item.rate) / (flt(item.conversion_factor) or 1)
+		item.gross_profit = flt(
+			(rate - flt(item.valuation_rate)) * flt(item.stock_qty),
+			self.precision("amount", item),
+		)
 
 	def set_customer_address(self):
 		address_dict = {

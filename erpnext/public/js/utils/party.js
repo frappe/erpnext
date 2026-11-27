@@ -204,12 +204,16 @@ erpnext.utils.set_taxes_from_address = function (
 		return;
 	}
 
+	const [party_type, party] = address_party(frm, billing_address_field);
+
 	frappe.call({
 		method: "erpnext.accounts.party.get_address_tax_category",
 		args: {
-			tax_category: frm.doc.tax_category,
 			billing_address: frm.doc[billing_address_field],
 			shipping_address: frm.doc[shipping_address_field],
+			party_type,
+			party,
+			pos_profile: frm.doc.is_pos ? frm.doc.pos_profile : "",
 		},
 		callback: function (r) {
 			if (!r.exc) {
@@ -258,7 +262,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 	if (frm.doc.lead) {
 		party_type = "Lead";
 		party = frm.doc.lead;
-	} else if (frm.doc.customer) {
+	} else if (frm.doctype != "Purchase Order" && frm.doc.customer) {
 		party_type = "Customer";
 		party = frm.doc.customer;
 	} else if (frm.doc.supplier) {
@@ -283,8 +287,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 			customer_group: frm.doc.customer_group,
 			supplier_group: frm.doc.supplier_group,
 			tax_category: frm.doc.tax_category,
-			billing_address:
-				frm.doc.customer || frm.doc.lead ? frm.doc.customer_address : frm.doc.supplier_address,
+			billing_address: party_type === "Supplier" ? frm.doc.supplier_address : frm.doc.customer_address,
 			shipping_address: frm.doc.shipping_address_name,
 		},
 		callback: function (r) {
@@ -383,3 +386,13 @@ erpnext.utils.get_shipping_address = function (frm, callback) {
 		frappe.msgprint(__("Select company first"));
 	}
 };
+
+function address_party(frm, billing_address_field) {
+	if (billing_address_field === "supplier_address") {
+		return ["Supplier", frm.doc.supplier];
+	}
+	if (frm.doc.quotation_to) {
+		return [frm.doc.quotation_to, frm.doc.party_name];
+	}
+	return ["Customer", frm.doc.customer];
+}

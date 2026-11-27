@@ -108,7 +108,12 @@ def _get_item_details(
 	for_validate = process_string_args(for_validate)
 	overwrite_warehouse = process_string_args(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", args.item_code)
-	item.check_permission()
+	# the supplier portal saves a Supplier Quotation with ignore_permissions
+	is_portal_quotation = (
+		isinstance(doc, Document) and doc.doctype == "Supplier Quotation" and doc.flags.ignore_permissions
+	)
+	if not is_portal_quotation:
+		item.check_permission()
 	validate_item_details(args, item)
 
 	if isinstance(doc, str):
@@ -180,7 +185,7 @@ def _get_item_details(
 		and not args.get("serial_and_batch_bundle")
 		and (args.get("use_serial_batch_fields") or args.get("doctype") == "POS Invoice")
 	):
-		update_stock(args, out, doc)
+		update_stock(args, out, doc, has_locked_rate=bool(source_row))
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date, item.lead_time_days)
@@ -188,7 +193,6 @@ def _get_item_details(
 	if args.get("is_subcontracted"):
 		out.bom = args.get("bom") or get_default_bom(args.item_code)
 
-	get_gross_profit(out)
 	if args.doctype == "Material Request":
 		out.rate = args.rate or out.price_list_rate
 		out.amount = flt(args.qty) * flt(out.rate)
@@ -262,6 +266,8 @@ def lock_source_rate(out, source_row):
 
 
 def set_valuation_rate(out, args):
+	from erpnext.stock.doctype.packed_item.packed_item import get_component_stock_qty_per_unit
+
 	if frappe.db.exists("Product Bundle", {"name": args.item_code, "disabled": 0}, cache=True):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
@@ -271,7 +277,7 @@ def set_valuation_rate(out, args):
 				_get_valuation_rate(bundle_item.item_code, args.company, out.get("warehouse")).get(
 					"valuation_rate"
 				)
-				* bundle_item.qty
+				* get_component_stock_qty_per_unit(bundle_item, None)
 			)
 
 		out.update({"valuation_rate": valuation_rate})
@@ -294,7 +300,7 @@ def update_bin_details(args, out, doc):
 		out.update(bin_details)
 
 
-def update_stock(ctx, out, doc=None):
+def update_stock(ctx, out, doc=None, has_locked_rate=False):
 	if (
 		(
 			ctx.get("doctype") in ["Delivery Note", "POS Invoice"]
@@ -327,16 +333,17 @@ def update_stock(ctx, out, doc=None):
 			batch_no = get_batch_no_covering_qty(kwargs, doc, out.stock_qty)
 			if batch_no:
 				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
-				rate = _get_batch_based_item_price(
-					{
-						"price_list": doc.get("selling_price_list") if doc else ctx.price_list,
-						"uom": out.uom,
-						"batch_no": batch_no,
-					},
-					out.item_code,
-				)
-				if rate:
-					out.update({"rate": rate, "price_list_rate": rate})
+				if not has_locked_rate:
+					rate = _get_batch_based_item_price(
+						{
+							"price_list": doc.get("selling_price_list") if doc else ctx.price_list,
+							"uom": out.uom,
+							"batch_no": batch_no,
+						},
+						out.item_code,
+					)
+					if rate:
+						out.update({"rate": rate, "price_list_rate": rate})
 
 		if out.has_serial_no and needs_serial_nos(ctx, out):
 			set_serial_nos_for_outward(ctx, out, kwargs, doc)
@@ -359,9 +366,9 @@ def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	if out.has_batch_no and batch_no:
 		kwargs["batches"] = [batch_no]
 
-	serial_nos = get_serial_nos_for_outward(kwargs)
 	if doc:
-		serial_nos = get_filtered_serial_nos(serial_nos, doc)
+		kwargs["ignore_serial_nos"] = [*(kwargs.get("ignore_serial_nos") or []), *get_used_serial_nos(doc)]
+	serial_nos = get_serial_nos_for_outward(kwargs)
 	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
 
 
@@ -406,7 +413,7 @@ def get_batch_qty_taken_by_rows(doc, item_code, warehouse):
 	# a later row without a warehouse yet may get this one from set_warehouse, item or POS defaults
 	rows = [
 		row
-		for row in [*doc.get("items"), *(doc.get("packed_items") or [])]
+		for row in [*doc.get("items"), *get_current_packed_items(doc)]
 		if row.get("warehouse") in (None, "", warehouse)
 	]
 	taken = [(row.get("batch_no"), get_row_stock_qty(row, item_code)) for row in rows if row.get("batch_no")]
@@ -427,6 +434,35 @@ def get_batch_qty_taken_by_rows(doc, item_code, warehouse):
 	return taken
 
 
+def get_current_packed_items(doc):
+	"""Packed rows at the qty this save gives them; the rows of a removed bundle row are left out."""
+	from erpnext.stock.doctype.packed_item.packed_item import get_kept_packed_items
+
+	if not doc.get("packed_items"):
+		return []
+
+	if not isinstance(doc, Document):
+		doc = frappe.get_doc(doc)
+
+	precision = frappe.get_precision("Packed Item", "qty")
+	return [
+		frappe._dict(
+			packed_row.as_dict(),
+			qty=flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision),
+		)
+		for packed_row, item_row, qty_per_unit in get_kept_packed_items(doc)
+	]
+
+
+def get_bundle_row_stock_qty(item_row):
+	"""The stock_qty set_qty_as_per_stock_uom gives a bundle row, which packing scales its components by."""
+	stock_qty = get_row_stock_qty(item_row, item_row.item_code)
+	if frappe.db.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+		return flt(stock_qty, item_row.precision("stock_qty"))
+
+	return stock_qty
+
+
 def get_row_stock_qty(row, item_code):
 	"""A row's stock_qty and conversion_factor can be missing or stale until validate resets them."""
 	item = frappe.get_cached_value("Item", item_code, ["stock_uom", "sales_uom"], as_dict=True)
@@ -445,18 +481,21 @@ def get_uom_conversion_factor(item_code, uom):
 
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
+	used = get_used_serial_nos(doc, table)
+	return [serial_no for serial_no in serial_nos if serial_no not in used]
+
+
+def get_used_serial_nos(doc, table=None):
+	"""Serial nos held by the rows of ``table``, or of the items and packed items."""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	if not table:
-		table = "items"
-
-	for row in doc.get(table):
+	rows = doc.get(table) if table else [*doc.get("items"), *get_current_packed_items(doc)]
+	used = set()
+	for row in rows:
 		if row.get("serial_no"):
-			for serial_no in get_serial_nos(row.get("serial_no")):
-				if serial_no in serial_nos:
-					serial_nos.remove(serial_no)
+			used.update(get_serial_nos(row.get("serial_no")))
 
-	return serial_nos
+	return used
 
 
 def process_args(args):
@@ -1977,13 +2016,6 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 		return {"valuation_rate": 0.0}
 
 
-def get_gross_profit(out):
-	if out.valuation_rate:
-		out.update({"gross_profit": ((out.base_rate - out.valuation_rate) * out.stock_qty)})
-
-	return out
-
-
 @frappe.whitelist()
 def get_serial_no(args, serial_nos=None, sales_order=None):
 	serial_nos = serial_nos or []
@@ -1992,9 +2024,7 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 
 def update_party_blanket_order(args, out):
 	if out["against_blanket_order"]:
-		blanket_order_details = _get_blanket_order_details(args)
-		if blanket_order_details:
-			out.update(blanket_order_details)
+		out.update(_get_blanket_order_details(args) or {"blanket_order": None, "blanket_order_rate": 0})
 
 
 @frappe.whitelist()

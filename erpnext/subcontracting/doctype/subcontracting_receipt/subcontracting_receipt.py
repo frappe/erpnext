@@ -21,6 +21,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.utils import get_combine_datetime
 
 ROW_BASED_CHARGE_TYPES = ("On Previous Row Amount", "On Previous Row Total")
 
@@ -440,6 +441,18 @@ class SubcontractingReceipt(SubcontractingController):
 			self.set_additional_costs()
 			self.calculate_items_qty_and_amount()
 
+	def get_valuation_rate_at_posting(self, item_code, warehouse):
+		return get_valuation_rate(
+			item_code,
+			warehouse,
+			self.doctype,
+			self.name,
+			currency=erpnext.get_company_currency(self.company),
+			company=self.company,
+			posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
+			creation=self.first_sle_creation,
+		)
+
 	def add_scrap_items(self):
 		self.remove_scrap_items()
 
@@ -449,14 +462,7 @@ class SubcontractingReceipt(SubcontractingController):
 				for scrap_item in bom.scrap_items:
 					qty = flt(item.qty) * (flt(scrap_item.stock_qty) / flt(bom.quantity))
 					rate = (
-						get_valuation_rate(
-							scrap_item.item_code,
-							self.set_warehouse,
-							self.doctype,
-							self.name,
-							currency=erpnext.get_company_currency(self.company),
-							company=self.company,
-						)
+						self.get_valuation_rate_at_posting(scrap_item.item_code, self.set_warehouse)
 						or scrap_item.rate
 					)
 					self.append(
@@ -986,26 +992,25 @@ class SubcontractingReceipt(SubcontractingController):
 							"stock_adjustment_account", ignore_validation=True
 						)
 
-						# Loss Account (Credit)
+						# the receipt amount the ledger did not take into stock is a loss
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=loss_account,
 							cost_center=item.cost_center,
-							debit=0.0,
-							credit=divisional_loss,
+							debit=divisional_loss,
+							credit=0.0,
 							remarks=remarks,
 							against_account=item.expense_account,
 							account_currency=get_account_currency(loss_account),
 							project=item.project,
 							item=item,
 						)
-						# Expense Account (Debit)
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=item.expense_account,
 							cost_center=item.cost_center,
-							debit=divisional_loss,
-							credit=0.0,
+							debit=0.0,
+							credit=divisional_loss,
 							remarks=remarks,
 							against_account=loss_account,
 							account_currency=get_account_currency(item.expense_account),

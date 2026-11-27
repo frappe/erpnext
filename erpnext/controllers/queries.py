@@ -8,6 +8,7 @@ from collections import OrderedDict, defaultdict
 import frappe
 from frappe import _, qb
 from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.model.db_query import requires_owner_constraint
 from frappe.permissions import has_permission
 from frappe.query_builder import Criterion, CustomFunction
 from frappe.query_builder.functions import Concat, Locate, Sum
@@ -17,6 +18,7 @@ from pypika import Order
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
+from erpnext.stock.doctype.item.item import get_allowed_uoms
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 
@@ -366,6 +368,9 @@ def get_project_name(
 def get_delivery_notes_to_be_billed(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool = False
 ):
+	permission_type = "select" if frappe.only_has_select_perm("Delivery Note") else "read"
+	frappe.has_permission("Delivery Note", permission_type, throw=True)
+
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 
 	fields = get_fields(doctype, ["name", "customer", "posting_date"])
@@ -397,12 +402,24 @@ def get_delivery_notes_to_be_billed(
 				)
 			)
 		)
+		.where(get_permitted_delivery_note_criterion(DeliveryNote))
 		.orderby(DeliveryNote[searchfield], order=Order.asc)
 		.limit(page_len)
 		.offset(start)
 	)
 
 	return query.run(as_dict=as_dict)
+
+
+def get_permitted_delivery_note_criterion(delivery_note):
+	role_permissions = frappe.permissions.get_role_permissions("Delivery Note")
+	if not (role_permissions.get("read") or role_permissions.get("select")):
+		return delivery_note.name.isin(frappe.share.get_shared("Delivery Note") or [""])
+
+	if requires_owner_constraint(role_permissions):
+		return delivery_note.owner == frappe.session.user
+
+	return Criterion.all(build_qb_match_conditions("Delivery Note"))
 
 
 @frappe.whitelist()
@@ -670,30 +687,15 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	if not filters:
 		filters = {}
 
-	dt = "Account"
-
-	acc = qb.DocType(dt)
-	condition = [
-		(acc.report_type.eq("Profit and Loss") | acc.account_type.isin(["Income Account", "Temporary"])),
-		acc.is_group.eq(0),
-		acc.disabled.eq(0),
-	]
-	if txt:
-		condition.append(acc.name.like(f"%{txt}%"))
-
-	if filters.get("company"):
-		condition.append(acc.company.eq(filters.get("company")))
-
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
-	return (
-		qb.from_(acc)
-		.select(acc.name)
-		.where(Criterion.all(condition))
-		.orderby(acc.idx, order=Order.desc)
-		.orderby(acc.name)
-		.run()
+	return frappe.get_list(
+		"Account",
+		filters=get_account_query_filters(txt, filters),
+		or_filters={
+			"report_type": "Profit and Loss",
+			"account_type": ("in", ["Income Account", "Temporary"]),
+		},
+		order_by="idx desc, name asc",
+		as_list=True,
 	)
 
 
@@ -757,35 +759,35 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	if not filters:
 		filters = {}
 
-	dt = "Account"
-
-	acc = qb.DocType(dt)
-	condition = [
-		(
-			acc.report_type.eq("Profit and Loss")
-			| acc.account_type.isin(
+	return frappe.get_list(
+		"Account",
+		filters=get_account_query_filters(txt, filters),
+		or_filters={
+			"report_type": "Profit and Loss",
+			"account_type": (
+				"in",
 				[
 					"Expense Account",
 					"Fixed Asset",
 					"Temporary",
 					"Asset Received But Not Billed",
 					"Capital Work in Progress",
-				]
-			)
-		),
-		acc.is_group.eq(0),
-		acc.disabled.eq(0),
-	]
+				],
+			),
+		},
+		as_list=True,
+	)
+
+
+def get_account_query_filters(txt, filters):
+	account_filters = {"is_group": 0, "disabled": 0}
 	if txt:
-		condition.append(acc.name.like(f"%{txt}%"))
+		account_filters["name"] = ("like", f"%{txt}%")
 
 	if filters.get("company"):
-		condition.append(acc.company.eq(filters.get("company")))
+		account_filters["company"] = filters.get("company")
 
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
-	return qb.from_(acc).select(acc.name).where(Criterion.all(condition)).run()
+	return account_filters
 
 
 @frappe.whitelist()
@@ -1138,23 +1140,14 @@ def check_linked_filter_permissions(doctype: str, filters: dict) -> None:
 def get_item_uom_query(doctype, txt, searchfield, start, page_len, filters):
 	if frappe.db.get_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item"):
 		item_code = filters.get("item_code")
-		if not item_code or not frappe.get_list("Item", filters=[["name", "=", item_code]], pluck="name"):
+		items = item_code and frappe.get_list(
+			"Item", filters=[["name", "=", item_code]], fields=["name", "stock_uom", "variant_of"]
+		)
+		if not items:
 			return []
 
-		query_filters = {"parent": item_code, "parenttype": "Item"}
-
-		if txt:
-			query_filters["uom"] = ["like", f"%{txt}%"]
-
-		return frappe.get_all(
-			"UOM Conversion Detail",
-			filters=query_filters,
-			fields=["uom", "conversion_factor"],
-			limit_start=start,
-			limit_page_length=page_len,
-			order_by="idx",
-			as_list=1,
-		)
+		uoms = get_allowed_uoms(items)[items[0].name].items()
+		return [[uom, factor] for uom, factor in uoms if txt.lower() in uom.lower()][start : start + page_len]
 
 	return frappe.get_list(
 		"UOM",
