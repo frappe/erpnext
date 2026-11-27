@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import add_days, nowdate
 
+from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 	make_supplier_quotation_from_rfq,
@@ -15,6 +16,7 @@ from erpnext.buying.doctype.request_for_quotation.test_request_for_quotation imp
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
 	get_item_workdays,
+	get_on_time_shipments,
 	get_rfq_response_days,
 	get_rfq_total_number,
 	get_sq_total_number,
@@ -40,6 +42,28 @@ class TestSupplierScorecardVariable(ERPNextTestSuite):
 
 		for d in test_bad_variables:
 			self.assertRaises(VariablePathNotFound, frappe.get_doc(d).insert)
+
+	def test_on_time_and_late_shipments(self):
+		supplier = create_scorecard_supplier("_Test Supplier Scorecard On Time")
+		on_time_po = create_scorecard_po(supplier, add_days(nowdate(), 5))
+		late_po = create_scorecard_po(supplier, add_days(nowdate(), -5), add_days(nowdate(), -10))
+		make_purchase_receipt(on_time_po.name).submit()
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
+		make_purchase_receipt(late_po.name).submit()
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
+
+	def test_split_on_time_receipts_count_as_one_shipment(self):
+		supplier = create_scorecard_supplier("_Test Supplier Scorecard Split")
+		po = create_scorecard_po(supplier, add_days(nowdate(), 5))
+		for received in (6, 4):
+			receipt = make_purchase_receipt(po.name)
+			receipt.items[0].qty = received
+			receipt.items[0].received_qty = received
+			receipt.items[0].stock_qty = received
+			receipt.submit()
+
+		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
 	def test_draft_and_cancelled_orders_are_not_late(self):
 		supplier = create_scorecard_supplier("_Test Supplier SC Draft Orders")
