@@ -121,16 +121,22 @@ class TestTimesheet(ERPNextTestSuite):
 		emp = make_employee("test_employee_completed_on@salary.com", company="_Test Company")
 		task = create_task("_Test Timesheet Completed On Task")
 
-		timesheet = make_timesheet(emp, simulate=True, task=task.name, do_not_submit=True)
-		log = timesheet.time_logs[0]
-		log.from_time = add_to_date(now_datetime(), days=-10)
-		log.to_time = add_to_date(log.from_time, hours=2)
-		log.completed = 1
-		timesheet.submit()
+		log = log_task_time(emp, task.name, days_ago=10, completed=1)
 
 		task.reload()
 		self.assertEqual(task.status, "Completed")
 		self.assertEqual(getdate(task.completed_on), getdate(log.to_time))
+
+	def test_task_completed_on_ignores_later_unchecked_time_logs(self):
+		emp = make_employee("test_employee_completed_on@salary.com", company="_Test Company")
+		task = create_task("_Test Timesheet Completed On Backdated Task")
+
+		log_task_time(emp, task.name, days_ago=5)
+		completed_log = log_task_time(emp, task.name, days_ago=10, completed=1)
+
+		task.reload()
+		self.assertEqual(task.status, "Completed")
+		self.assertEqual(getdate(task.completed_on), getdate(completed_log.to_time))
 
 	def test_timesheet_base_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
@@ -957,6 +963,17 @@ def make_portal_user(customer):
 		timesheet.employee = second
 		timesheet.save()
 		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", second, "employee_name"))
+
+
+def log_task_time(employee, task, days_ago, completed=0):
+	"""Submit a 2 hour time log on the task, `days_ago` days back."""
+	timesheet = make_timesheet(employee, simulate=True, task=task, do_not_submit=True)
+	log = timesheet.time_logs[0]
+	log.from_time = add_to_date(now_datetime(), days=-days_ago)
+	log.to_time = add_to_date(log.from_time, hours=2)
+	log.completed = completed
+	timesheet.submit()
+	return log
 
 
 def make_timesheet_without_employee(start, hours):
