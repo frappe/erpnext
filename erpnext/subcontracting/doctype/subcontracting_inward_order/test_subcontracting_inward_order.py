@@ -760,6 +760,35 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery.items[0].serial_no = "\n".join(delivery_serial_list)
 		self.assertRaises(frappe.ValidationError, delivery.submit)
 
+	def test_subcontracting_delivery_draft_with_raised_qty_takes_more_reserved_serial_nos(self):
+		from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+
+		so, scio = create_so_scio(service_item="Service Item 2", fg_item="FG Item with Serial")
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.submit()
+		serial_list, _ = get_serial_batch_list_from_item(
+			next(item for item in manufacture.items if item.is_finished_item)
+		)
+
+		scio.reload()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.items[0].update({"qty": 2, "use_serial_batch_fields": 1})
+		delivery.save()
+		self.assertEqual(len(get_serial_batch_list_from_item(delivery.items[0])[0]), 2)
+
+		delivery.items[0].qty = 5
+		delivery.save()
+		delivery.submit()
+		self.assertEqual(sorted(get_serial_batch_list_from_item(delivery.items[0])[0]), sorted(serial_list))
+
 	def test_fg_item_fields(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
