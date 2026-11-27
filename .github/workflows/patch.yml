@@ -95,7 +95,6 @@ jobs:
           cd "$HOME/pilot/benches/frappe-bench"
           bench_path="$PWD"
 
-          # Keep Redis available across the version hops without background workers.
           redis-server config/redis_cache.conf --daemonize yes
           redis-server config/redis_queue.conf --daemonize yes
           read -r cache_port queue_port < <(python3 -c 'import tomllib; r = tomllib.load(open("bench.toml", "rb"))["redis"]; print(r["cache_port"], r["queue_port"])')

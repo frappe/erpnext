@@ -14,8 +14,6 @@ if [ -n "$ci_github_token" ]; then
     export GIT_CONFIG_KEY_1="credential.https://github.com.username"
     export GIT_CONFIG_VALUE_1="x-access-token"
     export GIT_CONFIG_KEY_2="credential.https://github.com.helper"
-    # The helper shell expands the token when git invokes it, not when this script exports it.
-    # shellcheck disable=SC2016
     export GIT_CONFIG_VALUE_2='!f() { test "$1" = get && echo "password=$CI_GITHUB_TOKEN"; }; f'
 fi
 export GIT_TERMINAL_PROMPT=0
@@ -32,7 +30,6 @@ elif [ "$probe" -ne 0 ]; then
     exit "$probe"
 fi
 
-# Both jobs use the Pilot CLI. Site setup only needs the database and Redis.
 if [ "$DB" = postgres ] && ! command -v uv >/dev/null; then
     curl -fsSL https://astral.sh/uv/install.sh | sh
 fi
