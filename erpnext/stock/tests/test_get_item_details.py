@@ -150,6 +150,55 @@ class TestGetItemDetail(ERPNextTestSuite):
 				self.assertEqual(details.get("actual_qty"), 100)
 				self.assertEqual(details.get("company_total_stock"), 150)
 
+	def test_company_total_stock_read_only_for_rows_with_the_field(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=100, rate=100)
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=50, rate=100)
+
+		args = frappe._dict(
+			{
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company",
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1.0,
+				"transaction_date": None,
+				"name": None,
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+
+		receipt_row = get_item_details(
+			args.copy().update(
+				{
+					"doctype": "Purchase Receipt",
+					"child_doctype": "Purchase Receipt Item",
+					"supplier": "_Test Supplier",
+					"price_list": "_Test Buying Price List",
+				}
+			)
+		)
+		self.assertEqual(receipt_row.get("actual_qty"), 100)
+		self.assertIsNone(receipt_row.get("company_total_stock"))
+
+		order_row = get_item_details(
+			args.copy().update(
+				{
+					"doctype": "Sales Order",
+					"child_doctype": "Sales Order Item",
+					"customer": "_Test Customer",
+					"price_list": "_Test Price List",
+				}
+			)
+		)
+		self.assertEqual(order_row.get("company_total_stock"), 150)
+
 	def make_stock_item_in_two_warehouses(self):
 		"""Stock item defaulting to `_Test Warehouse - _TC` (rate 100), also stocked in `_Test Warehouse 1 - _TC` (rate 50)."""
 		from erpnext.stock.doctype.item.test_item import make_item
