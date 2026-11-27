@@ -33,7 +33,7 @@ from erpnext.stock.get_item_details import (
 	get_item_warehouse_,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.stock.utils import _get_incoming_rate
+from erpnext.stock.utils import _get_incoming_rate, check_company
 
 force_fields = [
 	"target_item_name",
@@ -832,6 +832,8 @@ def _get_warehouse_details(args) -> dict:
 	if not (args.warehouse and args.item_code):
 		return {}
 
+	# the caller-supplied company selects the standard rate of a Standard Cost item
+	check_company(args.get("company"))
 	return {
 		"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
 		"valuation_rate": _get_incoming_rate(args, raise_error_if_no_rate=False),

@@ -9,10 +9,16 @@ from frappe.utils import add_days, flt, today
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
+	create_item_standard_cost,
+	create_standard_cost_item,
+	ensure_ppv_account,
+)
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
+COMPANY = "_Test Company"
 WAREHOUSE = "_Test Warehouse - _TC"
 
 
@@ -99,6 +105,20 @@ class TestReturnValuation(ERPNextTestSuite):
 			400,
 			[[10, 100], [5, 200], [10, 300], [2, 200]],
 		)
+
+	def test_standard_cost_returns_at_current_standard_rate(self):
+		ensure_ppv_account(COMPANY)
+		item_code = create_standard_cost_item().name
+		create_item_standard_cost(item_code, rate=100, effective_date=add_days(today(), -10))
+
+		receipt = make_purchase_receipt(
+			item_code=item_code, warehouse=WAREHOUSE, qty=10, rate=150, posting_date=add_days(today(), -5)
+		)
+		delivery = self.deliver(item_code, 4, posting_date=add_days(today(), -4))
+		create_item_standard_cost(item_code, rate=130, effective_date=add_days(today(), -1))
+
+		self.assertReturnValued(make_return("Purchase Receipt", receipt.name, 2), -260)
+		self.assertReturnValued(make_return("Delivery Note", delivery.name, 1), 130)
 
 	def test_batch_sales_return_at_delivery_rate_after_batch_rate_changes(self):
 		item_code = make_item(

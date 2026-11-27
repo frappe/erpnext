@@ -35,6 +35,10 @@ class TestBrand(ERPNextTestSuite):
 
 	def test_brand_account_and_price_defaults(self):
 		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_manufacturing_variance_account,
+			get_purchase_price_variance_account,
+		)
 		from erpnext.stock.get_item_details import get_default_deferred_account
 
 		brand = frappe.get_doc({"doctype": "Brand", "brand": "Test Brand Propagation"})
@@ -44,6 +48,8 @@ class TestBrand(ERPNextTestSuite):
 				"company": "_Test Company",
 				"default_warehouse": "_Test Warehouse - _TC",
 				"deferred_revenue_account": "_Test Account Sales - _TC",
+				"purchase_price_variance_account": "_Test Account Stock Expenses - _TC",
+				"manufacturing_variance_account": "_Test Account Stock Expenses - _TC",
 				"default_price_list": "_Test Price List",
 			},
 		)
@@ -59,6 +65,14 @@ class TestBrand(ERPNextTestSuite):
 				"deferred_revenue_account",
 			),
 			"_Test Account Sales - _TC",
+		)
+		self.assertEqual(
+			get_purchase_price_variance_account(item.name, "_Test Company"),
+			"_Test Account Stock Expenses - _TC",
+		)
+		self.assertEqual(
+			get_manufacturing_variance_account(item.name, "_Test Company"),
+			"_Test Account Stock Expenses - _TC",
 		)
 		self.assertTrue(
 			frappe.db.exists("Item Price", {"item_code": item.name, "price_list": "_Test Price List"})

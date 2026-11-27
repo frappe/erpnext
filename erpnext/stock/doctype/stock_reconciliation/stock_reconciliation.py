@@ -10,7 +10,7 @@ from frappe import _, bold, json, msgprint
 from frappe.model.docstatus import DocStatus
 from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
+from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, get_link_to_form, now
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
@@ -28,7 +28,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
+from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance, get_valuation_method
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
 
 
@@ -81,6 +81,7 @@ class StockReconciliation(StockController):
 			self.validate_adjustment_entry()
 			return
 
+		self.validate_standard_cost_items()
 		self.validate_items_exist()
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
@@ -152,6 +153,7 @@ class StockReconciliation(StockController):
 			self.repost_future_sle_and_gle()
 			return
 
+		self.set_standard_cost_from_reconciliation()
 		self.make_bundle_for_current_qty()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
@@ -167,12 +169,73 @@ class StockReconciliation(StockController):
 					"Serial and Batch Bundle", row.current_serial_and_batch_bundle
 				).validate_future_batch_quantity()
 
+	def set_standard_cost_from_reconciliation(self):
+		if self.flags.via_item_standard_cost:
+			return
+
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_item_standard_rate,
+			has_item_standard_cost,
+		)
+
+		created = set()
+		for item in self.items:
+			if not item.item_code or item.item_code in created:
+				continue
+			if not is_standard_cost_item(item.item_code, self.company) or not flt(item.valuation_rate):
+				continue
+
+			if has_item_standard_cost(item.item_code, self.company):
+				standard_rate = get_item_standard_rate(item.item_code, self.company, self.posting_date)
+				precision = item.precision("valuation_rate")
+				if flt(item.valuation_rate, precision) == flt(standard_rate, precision):
+					# Rate unchanged: a plain quantity adjustment, valued at the existing standard rate.
+					continue
+
+			isc = frappe.new_doc("Item Standard Cost")
+			isc.item_code = item.item_code
+			isc.company = self.company
+			isc.effective_date = self.posting_date
+			isc.standard_rate = item.valuation_rate
+			isc.revaluation_entry = self.name
+			isc.insert()
+			isc.submit()
+			created.add(item.item_code)
+
+	def cancel_created_item_standard_cost(self):
+		if self.flags.via_item_standard_cost:
+			return
+
+		records = frappe.get_all(
+			"Item Standard Cost",
+			filters={
+				"revaluation_entry": self.name,
+				"docstatus": 1,
+				"creation": [">", self.creation],
+			},
+			fields=["name", "item_code", "company"],
+		)
+		for record in records:
+			isc = frappe.get_doc("Item Standard Cost", record.name)
+
+			# This runs after make_sle_on_cancel has already marked this reco's SLEs is_cancelled=1, so
+			# the only remaining activity on/after the effective date is genuine later stock (receipts,
+			# issues) valued at this standard rate. Skip those — cancelling would corrupt their valuation.
+			# Checking on-hand Bin qty instead would falsely skip a plain rate change, whose on-hand qty
+			# reverts on cancellation, silently leaving the standard rate out of sync with every SLE.
+			if isc.has_stock_activity_on_or_after_effective_date():
+				continue
+
+			isc.flags.from_source_reconciliation = True
+			isc.cancel()
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Item Standard Cost",
 		)
 
 		if self.purpose == ADJUSTMENT_ENTRY:
@@ -188,6 +251,7 @@ class StockReconciliation(StockController):
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.delete_auto_created_batches()
+		self.cancel_created_item_standard_cost()
 
 	def make_bundle_for_current_qty(self):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -228,6 +292,71 @@ class StockReconciliation(StockController):
 						"current_serial_no": "",
 					}
 				)
+
+	def validate_standard_cost_items(self):
+		"""Validate the Standard Cost rows of the reconciliation.
+
+		For a Standard Cost item the valuation rate is owned by Item Standard Cost, so a reconciliation
+		is primarily a quantity adjustment (the value difference is booked to Stock Adjustment at the
+		standard rate). Two things it may do with the rate, handled on submit:
+		- opening entry (no Item Standard Cost yet): the entered rate sets the item's standard cost
+		  (set_standard_cost_for_opening_items);
+		- rate change (rate differs from the current standard): a new Item Standard Cost is created,
+		  which revalues on-hand stock (apply_standard_cost_rate_changes).
+
+		Here we only guard the inputs: an opening row needs a positive rate, and because a standard cost
+		is company-wide, all rows for the same item must carry the same rate."""
+		if self.flags.via_item_standard_cost:
+			return
+
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import has_item_standard_cost
+
+		rates = {}
+		for item in self.items:
+			if not item.item_code or not is_standard_cost_item(item.item_code, self.company):
+				continue
+
+			if not has_item_standard_cost(item.item_code, self.company) and flt(item.valuation_rate) <= 0:
+				# Opening entry with no standard cost yet: there is no rate to value the stock at.
+				frappe.throw(
+					_(
+						"Row #{0}: Enter a Valuation Rate for Item {1} to set up its opening Standard Cost."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
+				)
+
+			if flt(item.valuation_rate):
+				rate = flt(item.valuation_rate, item.precision("valuation_rate"))
+				if rates.setdefault(item.item_code, rate) != rate:
+					frappe.throw(
+						_(
+							"Row #{0}: Valuation Rate for Item {1} must be the same across all rows, as it is the item's company-wide Standard Cost."
+						).format(item.idx, get_link_to_form("Item", item.item_code))
+					)
+
+		for item_code, rate in rates.items():
+			self.validate_rate_change_covers_stocked_warehouses(item_code, rate)
+
+	def validate_rate_change_covers_stocked_warehouses(self, item_code, rate):
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_item_standard_rate,
+			has_item_standard_cost,
+		)
+
+		if not has_item_standard_cost(item_code, self.company):
+			return
+
+		standard_rate = get_item_standard_rate(item_code, self.company, self.posting_date)
+		if flt(rate) == flt(standard_rate):
+			return
+
+		reco_warehouses = {row.warehouse for row in self.items if row.item_code == item_code}
+		missing = [wh for wh in get_stocked_warehouses(item_code, self.company) if wh not in reco_warehouses]
+		if missing:
+			frappe.throw(
+				_(
+					"The Standard Cost of Item {0} applies to the whole company. Add rows for warehouses {1} that hold its stock, or change the rate through Item Standard Cost."
+				).format(get_link_to_form("Item", item_code), ", ".join(frappe.bold(wh) for wh in missing))
+			)
 
 	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
@@ -611,7 +740,7 @@ class StockReconciliation(StockController):
 							dimension.get("fieldname")
 						)
 
-			item_dict = get_stock_balance_for(
+			item_dict = _get_stock_balance_for(
 				item.item_code,
 				item.warehouse,
 				self.posting_date,
@@ -1423,6 +1552,25 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 
+def get_stocked_warehouses(item_code, company):
+	bin_table = frappe.qb.DocType("Bin")
+	warehouse = frappe.qb.DocType("Warehouse")
+	return (
+		frappe.qb.from_(bin_table)
+		.inner_join(warehouse)
+		.on(bin_table.warehouse == warehouse.name)
+		.select(bin_table.warehouse)
+		.where(
+			(bin_table.item_code == item_code) & (warehouse.company == company) & (bin_table.actual_qty != 0)
+		)
+		.run(pluck=True)
+	)
+
+
+def is_standard_cost_item(item_code, company):
+	return get_valuation_method(item_code, company) == "Standard Cost"
+
+
 @frappe.whitelist()
 def get_items(
 	warehouse: str,
@@ -1641,6 +1789,30 @@ def get_stock_balance_for(
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
+	return _get_stock_balance_for(
+		item_code,
+		warehouse,
+		posting_date,
+		posting_time,
+		batch_no=batch_no,
+		with_valuation_rate=with_valuation_rate,
+		inventory_dimensions_dict=inventory_dimensions_dict,
+		row=row,
+		company=company,
+	)
+
+
+def _get_stock_balance_for(
+	item_code,
+	warehouse,
+	posting_date,
+	posting_time,
+	batch_no=None,
+	with_valuation_rate=True,
+	inventory_dimensions_dict=None,
+	row=None,
+	company=None,
+):
 	item_dict = frappe.get_cached_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
 
 	if isinstance(row, str):
@@ -1728,6 +1900,18 @@ def get_stock_balance_for(
 					}
 				)
 			)
+
+	# For a Standard Cost item with no on-hand stock to derive a rate from (an opening entry, or an
+	# empty warehouse), default the rate to the standard rate effective on the posting date so the form
+	# shows it. When stock already exists, the balance rate is already the standard rate, so it is left
+	# alone - overriding it with the (possibly just-changed) standard rate would hide a real value change
+	# from remove_items_with_no_change.
+	if not rate and company and is_standard_cost_item(item_code, company):
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		standard_rate = get_item_standard_rate(item_code, company, posting_date)
+		if standard_rate is not None:
+			rate = standard_rate
 
 	return {
 		"qty": qty,
