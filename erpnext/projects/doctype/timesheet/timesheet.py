@@ -13,6 +13,7 @@ from frappe.utils import (
 	cint,
 	cstr,
 	flt,
+	formatdate,
 	get_datetime,
 	getdate,
 	time_diff_in_hours,
@@ -91,12 +92,24 @@ class Timesheet(Document):
 
 	def set_exchange_rate(self):
 		"""A company currency Timesheet always has rate 1. A foreign one without a rate gets
-		the rate on its start date. A rate that is set, 1 included, is kept."""
+		the rate on its start date. A set rate is kept, but 1 only while a rate exists:
+		drafts used to get 1 when none was found."""
 		company_currency = self.get_company_currency()
 		if not self.currency or self.currency == company_currency:
 			self.exchange_rate = 1
-		elif not flt(self.exchange_rate):
-			self.exchange_rate = get_exchange_rate(self.currency, company_currency, self.start_date) or 1
+		elif flt(self.exchange_rate) in (0, 1):
+			rate = get_exchange_rate(self.currency, company_currency, self.start_date)
+			if not rate or not flt(self.exchange_rate):
+				self.exchange_rate = rate
+
+	def validate_exchange_rate(self):
+		if not flt(self.exchange_rate):
+			frappe.throw(
+				_(
+					"No exchange rate was found for {0} to {1} on {2}. Please set the Exchange Rate, or create a Currency Exchange record for a rate of 1."
+				).format(self.currency, self.get_company_currency(), formatdate(self.start_date)),
+				title=_("Exchange Rate Missing"),
+			)
 
 	def get_company_currency(self):
 		if self.company:
@@ -187,6 +200,9 @@ class Timesheet(Document):
 
 	def on_cancel(self):
 		self.update_task_and_project()
+
+	def before_submit(self):
+		self.validate_exchange_rate()
 
 	def on_submit(self):
 		self.validate_mandatory_fields()
@@ -369,9 +385,10 @@ class Timesheet(Document):
 		for data in self.time_logs:
 			self.update_billing_hours(data)
 			needs_rate = not flt(data.costing_rate) or (data.is_billable and not flt(data.billing_rate))
+			# a draft without an exchange rate cannot convert the activity cost either
 			rate = (
 				_get_activity_cost(self.employee, data.activity_type, self.currency, self.start_date)
-				if data.activity_type and needs_rate
+				if data.activity_type and needs_rate and flt(self.exchange_rate)
 				else {}
 			)
 			data.billing_rate = flt(data.billing_rate) or flt(rate.get("billing_rate"))
@@ -380,7 +397,7 @@ class Timesheet(Document):
 			data.billing_amount = data.billing_rate * flt(data.billing_hours)
 			data.costing_amount = data.costing_rate * flt(data.hours)
 
-			exchange_rate = flt(self.get("exchange_rate")) or 1.0
+			exchange_rate = flt(self.get("exchange_rate"))
 			data.base_billing_rate = flt(
 				data.billing_rate * exchange_rate, data.precision("base_billing_rate")
 			)
