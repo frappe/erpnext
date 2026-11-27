@@ -466,11 +466,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
-<<<<<<< HEAD
- "modified": "2026-11-19 12:00:00.000000",
-=======
- "modified": "2026-11-24 17:27:51.000000",
->>>>>>> 01c65d4 (fix(projects): show holiday list when a project template is set)
+ "modified": "2026-11-27 11:02:31.288247",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
