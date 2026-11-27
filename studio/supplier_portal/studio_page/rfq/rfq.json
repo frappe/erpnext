@@ -531,6 +531,9 @@
                    "parentBlockId": "ListRows-b1c4d6fd74",
                    "slotContent": [
                     {
+                     "attributes": {
+                      "data-one-line": "{{ (itemImages && !item.description) || null }}"
+                     },
                      "blockName": "ListRow",
                      "children": [
                       {
@@ -578,7 +581,7 @@
                           "image": "{{ item.image }}",
                           "label": "{{ item.name }}",
                           "shape": "square",
-                          "size": "xl"
+                          "size": "2xl"
                          },
                          "componentSlots": {},
                          "visibilityCondition": "{{ itemImages }}"
@@ -979,6 +982,9 @@
                    "parentBlockId": "ListRows-byscwnf73",
                    "slotContent": [
                     {
+                     "attributes": {
+                      "data-one-line": "{{ (itemImages && !item.description) || null }}"
+                     },
                      "blockName": "ListRow",
                      "children": [
                       {
@@ -1026,7 +1032,7 @@
                           "image": "{{ item.image }}",
                           "label": "{{ item.name }}",
                           "shape": "square",
-                          "size": "xl"
+                          "size": "2xl"
                          },
                          "componentSlots": {},
                          "visibilityCondition": "{{ itemImages }}"
