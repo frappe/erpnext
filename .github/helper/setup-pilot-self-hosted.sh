@@ -32,7 +32,12 @@ elif [ "$probe" -ne 0 ]; then
     exit "$probe"
 fi
 
-curl -fsSL https://raw.githubusercontent.com/frappe/pilot/develop/install.sh | sh -s -- --ci
+# The ARC image already provides the system dependencies and uv.
+mkdir -p "$HOME/pilot"
+curl -fsSL https://github.com/frappe/pilot/releases/download/v1.0.0-rc.5/pilot.tar.gz \
+    | tar -xz -C "$HOME/pilot"
+uv venv "$HOME/pilot/.admin-venv"
+uv pip install --python "$HOME/pilot/.admin-venv/bin/python" -r "$HOME/pilot/pyproject.toml" --extra admin
 
 pilot new frappe-bench --frappe-branch "$frappebranch" --admin-password 'PilotAdmin123!'
 pilot -b frappe-bench set-bench-config python "$(command -v python)"
