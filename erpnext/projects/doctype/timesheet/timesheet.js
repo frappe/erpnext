@@ -450,20 +450,25 @@ var set_activity_costs = function (frm) {
 	});
 };
 
-// drops the response if the employee or start date changed meanwhile
+// drops the response if the employee, currency or start date changed meanwhile
 var fetch_activity_cost = function (frm, activity_type, callback) {
 	const employee = frm.doc.employee;
+	const currency = frm.doc.currency;
 	const transaction_date = get_start_date(frm);
 	frappe.call({
 		method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 		args: {
 			employee: employee,
 			activity_type: activity_type,
-			currency: frm.doc.currency,
+			currency: currency,
 			transaction_date: transaction_date,
 		},
 		callback: function (r) {
-			if (r.message && employee === frm.doc.employee && transaction_date === get_start_date(frm)) {
+			const is_current =
+				employee === frm.doc.employee &&
+				currency === frm.doc.currency &&
+				transaction_date === get_start_date(frm);
+			if (r.message && is_current) {
 				callback(r.message);
 			}
 		},
