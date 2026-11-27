@@ -58,10 +58,11 @@ frappe.ui.form.on("Repost Payment Ledger", {
 	toggle_vouchers_read_only: function (frm) {
 		if (frm.doc.docstatus !== 0) return;
 
+		frm.set_df_property("repost_vouchers", "read_only", frm.doc.add_manually ? 0 : 1);
 		if (frm.doc.add_manually) {
 			// ControlTable.get_status() reads the grid's stale "Read" status and hides an empty table
 			frm.fields_dict.repost_vouchers.grid.display_status = "Write";
+			frm.refresh_field("repost_vouchers");
 		}
-		frm.set_df_property("repost_vouchers", "read_only", frm.doc.add_manually ? 0 : 1);
 	},
 });
