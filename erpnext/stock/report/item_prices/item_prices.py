@@ -182,7 +182,7 @@ def get_last_purchase_rate():
 					(pr_item.base_rate / pr_item.conversion_factor).as_("base_rate"),
 					pr_item.creation,
 				)
-				.where((pr.name == pr_item.parent) & (pr.docstatus == 1))
+				.where((pr.name == pr_item.parent) & (pr.docstatus == 1) & (pr.is_return == 0))
 			)
 			+ (
 				frappe.qb.from_(pi)
@@ -193,7 +193,12 @@ def get_last_purchase_rate():
 					(pi_item.base_rate / pi_item.conversion_factor).as_("base_rate"),
 					pi_item.creation,
 				)
-				.where((pi.name == pi_item.parent) & (pi.docstatus == 1) & (pi.update_stock == 1))
+				.where(
+					(pi.name == pi_item.parent)
+					& (pi.docstatus == 1)
+					& (pi.update_stock == 1)
+					& (pi.is_return == 0)
+				)
 			)
 		)
 		.select("*")
@@ -206,36 +211,6 @@ def get_last_purchase_rate():
 	return item_last_purchase_rate_map
 
 
-<<<<<<< HEAD
-=======
-def get_purchase_rate_query(doctype, date_field):
-	parent = frappe.qb.DocType(doctype)
-	child = frappe.qb.DocType(f"{doctype} Item")
-	query = (
-		frappe.qb.from_(parent)
-		.from_(child)
-		.select(
-			child.item_code,
-			parent[date_field].as_("posting_date"),
-			(child.base_rate / child.conversion_factor).as_("base_rate"),
-			child.creation,
-		)
-		.where((parent.name == child.parent) & (parent.docstatus == 1))
-	)
-
-	if doctype == "Purchase Invoice":
-		query = query.where(parent.update_stock == 1)
-
-	if doctype != "Purchase Order":
-		query = query.where(parent.is_return == 0)
-
-	if condition := get_allowed_companies_condition(parent.company, doctype):
-		query = query.where(condition)
-
-	return query
-
-
->>>>>>> 443af93 (fix(stock): item prices bom rate in company currency and last purchase rate without returns)
 def get_item_bom_rate():
 	"""Get BOM rate of an item from BOM"""
 
