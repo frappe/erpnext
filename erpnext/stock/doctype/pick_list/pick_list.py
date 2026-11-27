@@ -1009,6 +1009,8 @@ class PickList(TransactionBase):
 	def _get_pick_list_items(self, items):
 		pi = frappe.qb.DocType("Pick List")
 		pi_item = frappe.qb.DocType("Pick List Item")
+		pending_qty = pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty
+		is_picked = (pi_item.picked_qty > 0) & (pi_item.docstatus == 1)
 		query = (
 			frappe.qb.from_(pi)
 			.inner_join(pi_item)
@@ -1021,10 +1023,8 @@ class PickList(TransactionBase):
 				pi_item.serial_no,
 				(
 					Case()
-					.when(
-						(pi_item.picked_qty > 0) & (pi_item.docstatus == 1),
-						pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty,
-					)
+					.when(is_picked & (pending_qty > 0), pending_qty)
+					.when(is_picked, 0)
 					.else_(pi_item.stock_qty)
 				).as_("picked_qty"),
 			)
