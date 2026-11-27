@@ -2179,11 +2179,12 @@ class TestPickList(ERPNextTestSuite):
 		other_item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse=warehouse, qty=20, basic_rate=100)
 		make_stock_entry(item=other_item, to_warehouse=warehouse, qty=5, basic_rate=100)
-		row_closed = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100, do_not_submit=1)
-		row_closed.append(
-			"items", {**row_closed.items[0].as_dict(), "name": None, "item_code": other_item, "qty": 5}
+		row_closed = make_sales_order(
+			item_list=[
+				{"item_code": item, "warehouse": warehouse, "qty": 10, "rate": 100},
+				{"item_code": other_item, "warehouse": warehouse, "qty": 5, "rate": 100},
+			]
 		)
-		row_closed.submit()
 		order_closed = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100)
 		for sales_order in (row_closed, order_closed):
 			create_pick_list(sales_order.name).submit()
