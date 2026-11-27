@@ -11,6 +11,7 @@ from frappe.utils import cint, flt, get_datetime
 from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
 from erpnext.stock.report.stock_ledger.stock_ledger import (
+	formatter,
 	get_item_details,
 	get_opening_balance,
 	get_stock_ledger_entries,
@@ -42,16 +43,6 @@ def execute(filters=None):
 		sl_entries, item_details, opening_row, precision, filters=filters, opening_entries=opening_entries
 	)
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no", "balance_serial_no"))
-
-
-def formatter(value, column, data, default_formatter):
-	value = default_formatter(value, column, data)
-	if column.fieldname == "out_qty" and data.out_qty < 0:
-		value = f"<span style='color:red'>{value}</span>"
-	elif column.fieldname == "in_qty" and data.in_qty > 0:
-		value = f"<span style='color:green'>{value}</span>"
-
-	return value
 
 
 def process_stock_ledger_entries(
