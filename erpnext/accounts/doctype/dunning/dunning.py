@@ -20,6 +20,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
+from erpnext.accounts.doctype.dunning_letter_text.dunning_letter_text import render_letter_text
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.setup.utils import get_exchange_rate
 
@@ -443,12 +444,12 @@ class Dunning(AccountsController):
 			frappe.msgprint(msg, alert=True, indicator="yellow")
 
 		self.body_text = (
-			frappe.render_template(letter_text.body_text, self.as_dict(), restrict_globals=True)
+			render_letter_text(letter_text.body_text, self.as_dict(), self.dunning_type)
 			if letter_text
 			else None
 		)
 		self.closing_text = (
-			frappe.render_template(letter_text.closing_text, self.as_dict(), restrict_globals=True)
+			render_letter_text(letter_text.closing_text, self.as_dict(), self.dunning_type)
 			if letter_text
 			else None
 		)

@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from frappe.utils import comma_and
 from frappe.utils.jinja import validate_template
 
+from erpnext.accounts.doctype.dunning_letter_text.dunning_letter_text import validate_letter_globals
+
 
 class DunningType(Document):
 	# begin: auto-generated types
@@ -148,11 +150,10 @@ class DunningType(Document):
 
 	def validate_dunning_letter_text_templates(self):
 		for d in self.dunning_letter_text:
-			if d.body_text:
-				validate_template(d.body_text, restrict_globals=True)
-
-			if d.closing_text:
-				validate_template(d.closing_text, restrict_globals=True)
+			for template in (d.body_text, d.closing_text):
+				if template:
+					validate_template(template, restrict_globals=True)
+					validate_letter_globals(template)
 
 	def set_default_dunning_type(self):
 		if self.is_default != 1:
