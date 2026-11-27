@@ -682,7 +682,18 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(second.total_additional_costs, 600)
 
+<<<<<<< HEAD
 >>>>>>> 0446605 (test: receipt after one without linked cost rows takes the order cost balance)
+=======
+	def test_receipt_cannot_repeat_an_order_additional_cost_row(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.append("additional_costs", scr.additional_costs[0].as_dict(no_default_fields=True))
+
+		self.assertRaisesRegex(frappe.ValidationError, "repeats a cost", scr.save)
+
+>>>>>>> 91c69dc (test: receipt cannot repeat an order additional cost row)
 	def test_draft_receipts_take_their_share_of_order_additional_costs(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
