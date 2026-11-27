@@ -1571,24 +1571,27 @@ class StockController(AccountsController):
 		return sl_dict
 
 	def set_landed_cost_voucher_amount(self):
+		landed_costs = self.get_landed_cost_by_receipt_row()
 		for d in self.get("items"):
-			lcv_item = frappe.qb.DocType("Landed Cost Item")
-			query = (
-				frappe.qb.from_(lcv_item)
-				.select(Sum(lcv_item.applicable_charges), lcv_item.cost_center)
-				.where((lcv_item.docstatus == 1) & (lcv_item.receipt_document == self.name))
-			)
+			amount, cost_center = landed_costs.get(d.name, (0.0, None))
+			d.landed_cost_voucher_amount = amount
+			if not d.cost_center and cost_center:
+				d.db_set("cost_center", cost_center)
 
-			if self.doctype == "Stock Entry":
-				query = query.where(lcv_item.stock_entry_item == d.name)
-			else:
-				query = query.where(lcv_item.purchase_receipt_item == d.name)
+	def get_landed_cost_by_receipt_row(self):
+		lcv_item = frappe.qb.DocType("Landed Cost Item")
+		receipt_row = (
+			lcv_item.stock_entry_item if self.doctype == "Stock Entry" else lcv_item.purchase_receipt_item
+		)
 
-			lc_voucher_data = query.run(as_list=True)
+		rows = (
+			frappe.qb.from_(lcv_item)
+			.select(receipt_row, Sum(lcv_item.applicable_charges), Max(lcv_item.cost_center))
+			.where((lcv_item.docstatus == 1) & (lcv_item.receipt_document == self.name))
+			.groupby(receipt_row)
+		).run(as_list=True)
 
-			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
-			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
-				d.db_set("cost_center", lc_voucher_data[0][1])
+		return {row: (amount, cost_center) for row, amount, cost_center in rows}
 
 	def has_landed_cost_amount(self):
 		for row in self.items:
