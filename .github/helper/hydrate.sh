@@ -11,7 +11,6 @@ set -e
 
 ci_user="${ERPNEXT_CI_USER:-frappe}"
 db_host="${DB_HOST:-127.0.0.1}"
-bench_path="${BENCH_PATH:-$HOME/frappe-bench}"
 
 # Re-exec as the ci user (uid 1001) so bench/cache ownership matches the artifact, same as
 # install.sh. The workflow untar'd as root with -p, so the files are already owned by ci.
@@ -20,6 +19,7 @@ if [ "$(id -u)" = "0" ] && [ "${SKIP_SYSTEM_SETUP:-0}" = "1" ] && [ "$ci_user" !
         "ERPNEXT_CI_USER='$ci_user' DB_HOST='$db_host' DB='${DB:-}' bash '$0'"
 fi
 
+bench_path="${BENCH_PATH:-$HOME/frappe-bench}"
 cd "$bench_path"
 
 # Start the DB on the datadir baked into the artifact. It's already populated (the setup job
@@ -44,7 +44,7 @@ if [ "${DB:-mariadb}" = "postgres" ]; then
 elif [ -n "${BENCH_PATH:-}" ]; then
     honcho start >> "$bench_path/bench_start.log" 2>&1 &
 else
-    bench start >> "$bench_path/bench_start.log" 2>&1 &
+    bench start >> ~/frappe-bench/bench_start.log 2>&1 &
 fi
 
 # Wait for redis, failing fast instead of silently burning minutes if it never comes up.

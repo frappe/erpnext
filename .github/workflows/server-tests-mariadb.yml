@@ -27,9 +27,6 @@ concurrency:
   group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
-# Shared across both jobs. Both run in the SAME CI image so the bench lives at the identical
-# path (/home/ci/pilot/benches/frappe-bench) on the setup runner and the test shards — that's what makes the
-# packaged Python venv portable between them.
 env:
   BENCH_PATH: /home/ci/pilot/benches/frappe-bench
   TZ: 'Asia/Kolkata'
