@@ -813,23 +813,21 @@ class StockEntry(StockController, SubcontractingInwardController):
 		)
 
 	def cap_costed_out_items(self, rows, consumed_cost):
-		"""Scale Valuation Rate and Manual secondary rows down to the consumed cost, as an earlier
-		entry may have consumed the whole unit they come from. The largest row takes the rounding."""
+		"""Scale the rows deducted from the finished good down to the consumed cost, as an earlier
+		entry may have consumed the whole unit they come from. Rounds the running total, so no row
+		goes negative and the rows add up to the consumed cost."""
 		rows = [d for d in rows if flt(d.basic_amount)]
 		costed_out_cost = sum(flt(d.basic_amount) for d in rows)
 		if costed_out_cost <= consumed_cost:
 			return
 
-		largest_row = max(rows, key=lambda d: flt(d.basic_amount))
+		scaled_cost = allocated_cost = 0.0
 		for d in rows:
-			d.basic_rate = flt(d.basic_rate) * consumed_cost / costed_out_cost
-			d.basic_amount = flt(flt(d.transfer_qty) * d.basic_rate, d.precision("basic_amount"))
-
-		largest_row.basic_amount = flt(
-			consumed_cost - sum(flt(d.basic_amount) for d in rows if d is not largest_row),
-			largest_row.precision("basic_amount"),
-		)
-		largest_row.basic_rate = largest_row.basic_amount / flt(largest_row.transfer_qty)
+			scaled_cost += flt(d.basic_amount) * consumed_cost / costed_out_cost
+			total_cost = flt(scaled_cost, d.precision("basic_amount"))
+			d.basic_amount = flt(total_cost - allocated_cost, d.precision("basic_amount"))
+			d.basic_rate = d.basic_amount / flt(d.transfer_qty)
+			allocated_cost = total_cost
 
 	def is_rm_cost_from_consumption_entries(self) -> bool:
 		"""Whether the consumption entries replace the raw materials of this entry."""
