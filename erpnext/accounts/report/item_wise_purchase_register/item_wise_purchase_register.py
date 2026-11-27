@@ -118,10 +118,8 @@ def _execute(filters=None, additional_table_columns=None):
 
 
 def formatter(value, column, data, default_formatter):
-	value = default_formatter(value, column, data)
-	if data.bold:
-		value = f"<b>{value}</b>"
-	return value
+	"""Lets the server build the PDF; the print grid already bolds subtotal rows."""
+	return default_formatter(value, column, data)
 
 
 def get_columns(additional_table_columns, filters):

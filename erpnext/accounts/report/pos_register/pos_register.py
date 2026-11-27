@@ -51,10 +51,8 @@ def execute(filters=None):
 
 
 def formatter(value, column, data, default_formatter):
-	value = default_formatter(value, column, data)
-	if data.bold:
-		value = f"<b>{value}</b>"
-	return value
+	"""Lets the server build the PDF; the print grid already bolds subtotal rows."""
+	return default_formatter(value, column, data)
 
 
 def get_pos_entries(filters, group_by_field):
