@@ -446,8 +446,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not self.doc.fg_completed_qty or consumes_transferred_qty:
 			return
 
+		# an entry left without raw materials by earlier entries may still owe one per the BOM
 		rm_items = [item for item in self.doc.items if item.s_warehouse]
-		if not rm_items:
+		if not rm_items and not self.consumes_running_total_share:
 			return
 
 		# continuous consumption takes each entry's share of what is unconsumed, not of the running total
