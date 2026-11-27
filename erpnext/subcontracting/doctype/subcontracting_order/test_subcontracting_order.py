@@ -1056,8 +1056,9 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			transfer.submit()
 		make_receipt_for_finished_good(sco, sco.items[2].item_code).submit()
 
-		self.assertRaisesRegex(frappe.ValidationError, "reserved at the supplier", transfers[0].cancel)
+		# B's transfer first: a failed cancel is not rolled back within a test
 		transfers[1].cancel()
+		self.assertRaisesRegex(frappe.ValidationError, "reserved at the supplier", transfers[0].cancel)
 
 	def test_transfer_of_a_consumed_batch_cannot_be_cancelled_while_another_batch_is_sent(self):
 		"""Batch X is sent for FG A and batch Y for FG B, a receipt of FG A consumes X, and the supplier holds X of another order."""
