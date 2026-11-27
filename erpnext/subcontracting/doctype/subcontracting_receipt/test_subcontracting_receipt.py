@@ -652,6 +652,22 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(first.total_additional_costs, 400)
 		self.assertEqual(second.total_additional_costs, 600)
 
+	def test_receipt_after_one_without_linked_cost_rows_takes_the_order_cost_balance(self):
+		sco = make_order_with_additional_cost_and_transfer(1000)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		# stands in for a receipt submitted before cost rows were linked to the order
+		frappe.db.set_value(
+			"Landed Cost Taxes and Charges", {"parent": first.name}, "subcontracting_order_cost", None
+		)
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+
+		self.assertEqual(second.total_additional_costs, 600)
+
 	def test_draft_receipts_take_their_share_of_order_additional_costs(self):
 		sco = make_order_with_additional_cost_and_transfer(1000)
 
