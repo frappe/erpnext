@@ -96,9 +96,9 @@ class Timesheet(Document):
 	def validate_exchange_rate(self):
 		if not flt(self.exchange_rate):
 			frappe.throw(
-				_("No exchange rate was found for {0} to {1} on {2}. Please set the Exchange Rate.").format(
-					self.currency, self.get_company_currency(), formatdate(self.start_date)
-				),
+				_(
+					"No exchange rate was found for {0} to {1} on {2}. Please set the Exchange Rate, or create a Currency Exchange record for a rate of 1."
+				).format(self.currency, self.get_company_currency(), formatdate(self.start_date)),
 				title=_("Exchange Rate Missing"),
 			)
 
