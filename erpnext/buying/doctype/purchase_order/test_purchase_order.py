@@ -1533,11 +1533,22 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			{"item_code": "_Test Item", "qty": 1, "rate": 100, "schedule_date": add_days(nowdate(), 5)},
 		)
 		po.save()
-		self.assertEqual(po.schedule_date, add_days(nowdate(), 1))
+		self.assertEqual(po.schedule_date, getdate(add_days(nowdate(), 1)))
 
 		po.items[0].schedule_date = add_days(nowdate(), 2)
 		po.save()
-		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
+		self.assertEqual(po.schedule_date, getdate(add_days(nowdate(), 2)))
+
+		# Test mixed string, date object, and blank string across rows
+		po.items[0].schedule_date = getdate(add_days(nowdate(), 4))
+		po.items[1].schedule_date = add_days(nowdate(), 3)
+		po.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "schedule_date": ""},
+		)
+		po.save()
+		self.assertEqual(po.schedule_date, getdate(add_days(nowdate(), 3)))
+		self.assertEqual(getdate(po.items[2].schedule_date), getdate(add_days(nowdate(), 3)))
 
 	def test_po_optional_blanket_order(self):
 		"""
