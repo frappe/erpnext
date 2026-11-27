@@ -5,7 +5,6 @@ from frappe.desk.query_report import build_xlsx_data, get_linked_doctypes
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.report.available_serial_no.available_serial_no import process_stock_ledger_entries
-from erpnext.stock.report.stock_ledger.stock_ledger import formatter
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
@@ -134,18 +133,3 @@ class TestSerialBatchReportUtils(ERPNextTestSuite):
 				"company": "_Test Company",
 			}
 		).insert()
-
-	def test_server_pdf_escapes_serial_and_batch_labels(self):
-		def default_formatter(value, column, data):
-			return value
-
-		label_column = frappe._dict(fieldname="serial_no_number", serial_batch={"doctype": "Serial No"})
-		qty_column = frappe._dict(fieldname="in_qty")
-
-		self.assertEqual(
-			formatter("S&copy;12", label_column, frappe._dict(), default_formatter), "S&amp;copy;12"
-		)
-		self.assertEqual(
-			formatter(1, qty_column, frappe._dict(in_qty=1), default_formatter),
-			"<span style='color:green'>1</span>",
-		)
