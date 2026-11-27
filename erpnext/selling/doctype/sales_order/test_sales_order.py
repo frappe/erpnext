@@ -104,6 +104,22 @@ class TestSalesOrder(ERPNextTestSuite):
 		mr = make_material_request(so.name)
 		self.assertEqual(mr.items[0].qty, 6)
 
+	def test_bundle_component_requested_in_another_uom_records_the_stock_qty(self):
+		component = make_item(
+			"_Test Bundle Component In Box",
+			{"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 10}]},
+		).name
+		bundle_item = make_item("_Test Bundle Of Boxed Component", {"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [component], qty=10)
+
+		so = make_sales_order(item_code=bundle_item, qty=2)
+		mr = make_material_request(so.name)
+		mr.items[0].update({"uom": "Box", "conversion_factor": 10, "qty": 1, "schedule_date": today()})
+		mr.submit()
+
+		self.assertEqual(frappe.db.get_value("Packed Item", so.packed_items[0].name, "requested_qty"), 10)
+		self.assertEqual(make_material_request(so.name).items[0].qty, 10)
+
 	def test_sales_order_with_full_material_request(self):
 		so = make_sales_order(item_code="_Test Item", qty=5, do_not_submit=True)
 		so.submit()

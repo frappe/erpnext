@@ -7,7 +7,7 @@ def execute():
 
 	mri_query = (
 		frappe.qb.from_(MaterialRequestItem)
-		.select(MaterialRequestItem.packed_item, Sum(MaterialRequestItem.qty))
+		.select(MaterialRequestItem.packed_item, Sum(MaterialRequestItem.stock_qty))
 		.where((MaterialRequestItem.packed_item.isnotnull()) & (MaterialRequestItem.docstatus == 1))
 		.groupby(MaterialRequestItem.packed_item)
 	)
