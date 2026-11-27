@@ -50,9 +50,11 @@ pilot -b frappe-bench set-bench-config watch_apps_js false
 pilot -b frappe-bench set-bench-config "${DB}_existing" true
 pilot -b frappe-bench set-bench-config "${DB}_host" 127.0.0.1
 if [ "$DB" = postgres ]; then
+    pilot -b frappe-bench set-bench-config postgres_port 5432
     pilot -b frappe-bench set-bench-config postgres_admin_user postgres
     pilot -b frappe-bench set-bench-config postgres_password travis
 else
+    pilot -b frappe-bench set-bench-config mariadb_port 3306
     pilot -b frappe-bench set-bench-config mariadb_admin_user root
     pilot -b frappe-bench set-bench-config mariadb_password root
 fi

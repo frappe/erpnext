@@ -98,7 +98,8 @@ jobs:
           # Keep Redis available across the version hops without background workers.
           redis-server config/redis_cache.conf --daemonize yes
           redis-server config/redis_queue.conf --daemonize yes
-          for port in 13000 11000; do
+          read -r cache_port queue_port < <(python3 -c 'import tomllib; r = tomllib.load(open("bench.toml", "rb"))["redis"]; print(r["cache_port"], r["queue_port"])')
+          for port in "$cache_port" "$queue_port"; do
             redis-cli -p "$port" ping | grep -qx PONG
           done
 
@@ -121,8 +122,8 @@ jobs:
             rm -rf env
             uv venv --python "$1" env
             uv pip install --python env/bin/python -e apps/frappe -e apps/erpnext
-            redis-cli -p 13000 flushall
-            redis-cli -p 11000 flushall
+            redis-cli -p "$cache_port" flushall
+            redis-cli -p "$queue_port" flushall
             frappe_site clear-cache
             frappe_site migrate
           }
