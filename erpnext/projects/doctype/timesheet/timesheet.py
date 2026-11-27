@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, Date
-from frappe.utils import cint, cstr, flt, get_datetime, getdate
+from frappe.utils import cint, cstr, flt, formatdate, get_datetime, getdate
 from frappe.utils.deprecations import deprecated
 
 import erpnext
@@ -84,12 +84,24 @@ class Timesheet(Document):
 
 	def set_exchange_rate(self):
 		"""A company currency Timesheet always has rate 1. A foreign one without a rate gets
-		the rate on its start date. A rate that is set, 1 included, is kept."""
+		the rate on its start date. A set rate is kept, but 1 only while a rate exists:
+		drafts used to get 1 when none was found."""
 		company_currency = self.get_company_currency()
 		if not self.currency or self.currency == company_currency:
 			self.exchange_rate = 1
-		elif not flt(self.exchange_rate):
-			self.exchange_rate = get_exchange_rate(self.currency, company_currency, self.start_date) or 1
+		elif flt(self.exchange_rate) in (0, 1):
+			rate = get_exchange_rate(self.currency, company_currency, self.start_date)
+			if not rate or not flt(self.exchange_rate):
+				self.exchange_rate = rate
+
+	def validate_exchange_rate(self):
+		if not flt(self.exchange_rate):
+			frappe.throw(
+				_(
+					"No exchange rate was found for {0} to {1} on {2}. Please set the Exchange Rate, or create a Currency Exchange record for a rate of 1."
+				).format(self.currency, self.get_company_currency(), formatdate(self.start_date)),
+				title=_("Exchange Rate Missing"),
+			)
 
 	def get_company_currency(self):
 		if self.company:
@@ -195,6 +207,9 @@ class Timesheet(Document):
 
 	def on_cancel(self):
 		self.update_task_and_project()
+
+	def before_submit(self):
+		self.validate_exchange_rate()
 
 	def on_submit(self):
 		self.validate_mandatory_fields()
