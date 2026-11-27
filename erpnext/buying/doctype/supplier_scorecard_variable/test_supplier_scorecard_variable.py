@@ -67,7 +67,7 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
 	def test_on_time_receipt_with_rejected_qty_counts_as_on_time(self):
-		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		supplier = create_scorecard_supplier("_Test Supplier SC Rejected Qty")
 		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=10, rate=100)
 		receipt = make_purchase_receipt(po.name)
 		receipt.items[0].qty = 8
@@ -79,7 +79,7 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 
 	def test_on_time_receipt_is_compared_in_stock_qty(self):
 		# 2 boxes of 2999.5 received against 2 boxes of 3000 ordered is 1 unit short
-		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		supplier = create_scorecard_supplier("_Test Supplier SC Stock Qty")
 		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=2, rate=100, submit=False)
 		po.items[0].uom = "Box"
 		po.items[0].conversion_factor = 3000
@@ -92,7 +92,7 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 
 	def test_receipts_short_only_by_conversion_rounding_count_as_on_time(self):
 		# factors as set from edited stock qtys (332 and 333.42); the PO shows them fully received
-		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		supplier = create_scorecard_supplier("_Test Supplier SC Rounding")
 		item_code = make_item(properties={"stock_uom": "Kg"}).name
 		po = create_scorecard_po(
 			supplier, add_days(nowdate(), 5), qty=1467, rate=100, submit=False, item_code=item_code
@@ -109,8 +109,11 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 		self.assertEqual(get_on_time_shipments(scorecard_for(supplier)), 1)
 
 	def test_short_receipt_rounding_to_ordered_stock_qty_is_late(self):
-		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
-		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=1000, rate=100, submit=False)
+		supplier = create_scorecard_supplier("_Test Supplier SC Short Receipt")
+		item_code = make_item(properties={"stock_uom": "Kg"}).name
+		po = create_scorecard_po(
+			supplier, add_days(nowdate(), 5), qty=1000, rate=100, submit=False, item_code=item_code
+		)
 		po.items[0].uom = "Box"
 		po.items[0].conversion_factor = 0.001
 		po.submit()
@@ -122,7 +125,7 @@ class TestSupplierScorecardVariable(FrappeTestCase):
 
 	@change_settings("Buying Settings", {"allow_zero_qty_in_purchase_order": 1})
 	def test_on_time_receipt_against_unit_price_line_counts_as_on_time(self):
-		supplier = create_scorecard_supplier("_Test Supplier Scorecard")
+		supplier = create_scorecard_supplier("_Test Supplier SC Unit Price")
 		po = create_scorecard_po(supplier, add_days(nowdate(), 5), qty=0, rate=100)
 		receipt = make_purchase_receipt(po.name)
 		receipt.items[0].qty = 5
