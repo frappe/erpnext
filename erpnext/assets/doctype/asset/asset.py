@@ -129,12 +129,12 @@ class Asset(AccountsController):
 		self.validate_precision()
 		self.validate_linked_purchase_docs()
 		self.set_purchase_doc_row_item()
+		self.set_missing_values()
 		self.validate_asset_values()
 		self.validate_opening_accumulated_depreciation()
 		self.validate_asset_and_reference()
 		self.validate_item()
 		self.validate_cost_center()
-		self.set_missing_values()
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
 
