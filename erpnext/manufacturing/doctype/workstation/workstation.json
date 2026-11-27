@@ -114,6 +114,7 @@
    "label": "Description"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "workstation_type",
    "fieldtype": "Link",
@@ -228,7 +229,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2025-08-19 12:07:05.374386",
+ "modified": "2026-11-27 10:20:31.208254",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
