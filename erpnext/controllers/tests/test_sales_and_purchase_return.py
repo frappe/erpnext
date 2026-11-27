@@ -434,6 +434,23 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_in_nos(si, -5, 200).insert()
 		self.assertRaises(frappe.ValidationError, return_in_nos(si, -1, 2400).insert)
 
+	def test_credit_note_qty_is_checked_in_return_row_uom(self):
+		"""A tiny conversion factor must not round an over-credit away in stock UOM."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "_Test UOM 1", "conversion_factor": 0.000001}]}
+		).name
+		si = create_sales_invoice(item_code=item_code, do_not_submit=True)
+		si.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 0.000001, "qty": 1})
+		si.submit()
+
+		credit_note = make_return_doc(si.doctype, si.name)
+		credit_note.items[0].qty = -100
+		self.assertRaises(StockOverReturnError, credit_note.insert)
+
 	def test_return_rate_ceiling_holds_for_large_conversion_factor(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
