@@ -2953,7 +2953,7 @@ class StockEntry(StockController):
 		return (
 			pro_doc.status == "Closed"
 			and self.docstatus == 1
-			and not self.is_return
+			and not (self.purpose == "Material Transfer for Manufacture" and self.is_return)
 			and self.purpose
 			in ("Material Transfer for Manufacture", "Manufacture", "Material Consumption for Manufacture")
 		)
