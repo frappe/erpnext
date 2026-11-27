@@ -1432,7 +1432,9 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn = create_dn_against_so(so.name, 2)
 
 		dn_return = make_sales_return(dn.name)
-		dn_return.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -4})
+		dn_return.items[0].update(
+			{"uom": item.stock_uom, "conversion_factor": 1, "qty": -4, "rate": dn_return.items[0].rate / 4}
+		)
 		dn_return.submit()
 
 		si = make_sales_invoice(dn.name)
@@ -1440,7 +1442,9 @@ class TestDeliveryNote(ERPNextTestSuite):
 		si.submit()
 
 		credit_note = make_credit_note(si.name)
-		credit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -1})
+		credit_note.items[0].update(
+			{"uom": item.stock_uom, "conversion_factor": 1, "qty": -1, "rate": credit_note.items[0].rate / 4}
+		)
 		credit_note.submit()
 		self.assertEqual(make_sales_invoice(dn.name).items[0].qty, 0.25)
 
