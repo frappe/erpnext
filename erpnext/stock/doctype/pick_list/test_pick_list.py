@@ -2216,7 +2216,7 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.submit()
 		pick_list.create_stock_reservation_entries(notify=False)
 
-		with self.assertRaisesRegex(frappe.ValidationError, "has reserved stock"):
+		with self.assertRaisesRegex(frappe.ValidationError, "Unreserve it before closing the row"):
 			update_closed_status("Sales Order", sales_order.name, [sales_order.items[0].name], 1)
 
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
