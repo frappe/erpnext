@@ -450,18 +450,23 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return bool(self.wo_doc) and not self.wo_doc.track_semi_finished_goods
 
 	def get_bom_component_qty(self, bom_item):
-		"""Qty Get Items takes of a BOM item: a whole-number item's share of the running total."""
+		"""Qty a BOM item must have: a whole-number item's share of the running total at the BOM qty."""
 		is_whole_number = cint(frappe.get_cached_value("UOM", bom_item.stock_uom, "must_be_whole_number"))
 		required_items = (
 			[row for row in self.wo_doc.required_items if row.item_code == bom_item.item_code]
 			if self.takes_running_total_share and is_whole_number
 			else []
 		)
-		if not required_items:
+		required_qty = sum(flt(row.required_qty) for row in required_items)
+		if not required_qty:
 			return ceil_qty_if_uom_has_whole_number(
 				bom_item.qty * flt(self.doc.fg_completed_qty), bom_item.stock_uom
 			)
-		return sum(self.get_wo_raw_material_qty(row) for row in required_items)
+		# the BOM qty, not the Work Order's editable one, split over the item's Work Order rows
+		return sum(
+			self.get_wo_raw_material_qty(row, bom_item.qty * flt(row.required_qty) / required_qty)
+			for row in required_items
+		)
 
 	def validate_work_order(self):
 		if not self.doc.work_order:
@@ -658,11 +663,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		item_args["transfer_qty"] = item_args["qty"]
 		self.append_raw_material_with_alternatives(item_args, alternative_items.get(row.item_code))
 
-	def get_wo_raw_material_qty(self, row):
+	def get_wo_raw_material_qty(self, row, qty_per_unit=None):
 		"""For a whole number UOM, round up the running total of the order's Manufacture entries
 		and take what earlier entries did not consume, so partial entries do not consume a whole unit each.
 		Never more than this entry's own share: a shortfall of earlier entries is not taken."""
-		qty_per_unit = row.required_qty / self.wo_doc.qty
+		if qty_per_unit is None:
+			qty_per_unit = row.required_qty / self.wo_doc.qty
 		fg_completed_qty = flt(self.doc.fg_completed_qty)
 		entry_qty = ceil_qty_if_uom_has_whole_number(qty_per_unit * fg_completed_qty, row.stock_uom)
 		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
