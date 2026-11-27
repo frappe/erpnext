@@ -31,6 +31,7 @@ def execute(filters=None):
 		filters.periodicity,
 		accumulated_values=filters.accumulated_values,
 		company=filters.company,
+		split_on_fiscal_year=bool(filters.accumulated_values),
 	)
 
 	cash_flow_sections = get_cash_flow_accounts()

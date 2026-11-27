@@ -4,13 +4,12 @@
 
 import copy
 import functools
-import math
 import re
 
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
+from frappe.utils import add_days, add_months, cstr, flt, formatdate, get_first_day, getdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -37,6 +36,7 @@ def get_period_list(
 	company=None,
 	reset_period_on_fy_change=True,
 	ignore_fiscal_year=False,
+	split_on_fiscal_year=False,
 ):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 	Periodicity can be (Yearly, Quarterly, Monthly)"""
@@ -56,17 +56,14 @@ def get_period_list(
 	period_list = []
 
 	start_date = year_start_date
-	months = get_months(year_start_date, year_end_date)
 
-	for i in range(cint(math.ceil(months / months_to_add))):
+	while start_date <= year_end_date:
 		period = frappe._dict({"from_date": start_date})
 
-		if i == 0 and filter_based_on == "Date Range":
+		if start_date == year_start_date and filter_based_on == "Date Range" and periodicity == "Monthly":
 			to_date = add_months(get_first_day(start_date), months_to_add)
 		else:
 			to_date = add_months(start_date, months_to_add)
-
-		start_date = to_date
 
 		# Subtract one day from to_date, as it may be first day in next fiscal year or month
 		to_date = add_days(to_date, -1)
@@ -79,17 +76,24 @@ def get_period_list(
 			period.to_date = year_end_date
 
 		if not ignore_fiscal_year:
+			fiscal_year = get_fiscal_year(period.from_date, company=company)
+			if split_on_fiscal_year:
+				# Reports that reset accumulated values must retain each fiscal year's final balance.
+				period.to_date = min(period.to_date, getdate(fiscal_year[2]))
 			period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
-			period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
+			period.from_date_fiscal_year_start_date = fiscal_year[1]
 
 		period_list.append(period)
-
-		if period.to_date == year_end_date:
-			break
+		start_date = add_days(period.to_date, 1)
 
 	# common processing
+	used_keys = set()
 	for opts in period_list:
 		key = opts["to_date"].strftime("%b_%Y").lower()
+		if key in used_keys:
+			key = f"{key}_{opts['to_date'].day}"
+		used_keys.add(key)
+
 		if periodicity == "Monthly" and not accumulated_values:
 			label = formatdate(opts["to_date"], "MMM YYYY")
 		else:
