@@ -149,14 +149,14 @@ class Customer(TransactionBase):
 			name_prefix = f"{self.customer_name} - %"
 			Customer = frappe.qb.DocType("Customer")
 
-			if frappe.db.db_type == "postgres":
+			if frappe.db.db_type in {"postgres", "sqlite"}:
 				# Mirror MariaDB's CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED): take the last
 				# whitespace-delimited token, then its LEADING digits, and cast to int. So "X - 3" -> 3,
 				# "X - 3a" -> 3, "X - 1.5" -> 1, matching MariaDB exactly. A non-numeric token (e.g.
 				# "X - Foo") strips to '' which NULLIF turns into NULL: MAX() skips it and COALESCE floors
 				# to 0, matching MariaDB's CAST(... AS UNSIGNED) -> 0. (pypika's Substring is start/length,
-				# not a regex; UNSIGNED doesn't exist on postgres, and a raw CAST of a non-numeric token to
-				# INTEGER would raise instead of yielding NULL.)
+				# not a regex; UNSIGNED doesn't exist on these databases, and a raw CAST of a non-numeric
+				# token to INTEGER would either raise or produce backend-specific results.)
 				regexp_replace = CustomFunction("regexp_replace", ["source", "pattern", "replacement"])
 				nullif = CustomFunction("NULLIF", ["expr", "value"])
 				last_token = regexp_replace(Customer.name, r"^.*\s", "")
