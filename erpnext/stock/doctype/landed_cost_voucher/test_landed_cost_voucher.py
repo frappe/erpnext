@@ -3,6 +3,7 @@
 
 
 import copy
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
@@ -973,6 +974,46 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
+
+	def test_landed_cost_of_all_receipt_rows_read_in_one_query(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Stores - TCP1",
+			do_not_save=True,
+		)
+		for qty in (5, 10):
+			pr.append(
+				"items",
+				{
+					"item_code": "_Test Item",
+					"warehouse": "Stores - TCP1",
+					"cost_center": "Main - TCP1",
+					"qty": qty,
+					"rate": 100,
+				},
+			)
+		pr.submit()
+
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=350,
+		)
+
+		pr.load_from_db()
+		for row in pr.items:
+			row.landed_cost_voucher_amount = 0
+
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			pr.set_landed_cost_voucher_amount()
+
+		landed_cost_queries = [
+			call for call in queries.call_args_list if "tabLanded Cost Item" in str(call.args[0])
+		]
+		self.assertEqual(len(landed_cost_queries), 1)
+		self.assertEqual([row.landed_cost_voucher_amount for row in pr.items], [50, 100, 200])
 
 	def test_multi_currency_lcv(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import save_new_records
