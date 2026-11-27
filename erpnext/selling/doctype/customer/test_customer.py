@@ -68,6 +68,18 @@ class TestCustomer(ERPNextTestSuite):
 		self.assertNotEqual(flt(quotation.conversion_rate), 0.0)
 		self.assertEqual(flt(quotation.conversion_rate), rate)
 
+	def test_buying_price_list_cannot_be_customer_default(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Buying Price Customer",
+				"customer_type": "Individual",
+				"default_price_list": "Standard Buying",
+			}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			customer.insert()
+
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
 		doc.customer_group_name = "_Testing Customer Group"
@@ -78,11 +90,13 @@ class TestCustomer(ERPNextTestSuite):
 		test_account_details = {
 			"company": "_Test Company",
 			"account": "Debtors - _TC",
+			"advance_account": "Debtors - _TC",
 		}
 		test_credit_limits = {
 			"company": "_Test Company",
 			"credit_limit": 350000,
 			"overdue_billing_threshold": 5000,
+			"bypass_credit_limit_check": 1,
 		}
 		doc.append("accounts", test_account_details)
 		doc.append("credit_limits", test_credit_limits)
@@ -100,10 +114,12 @@ class TestCustomer(ERPNextTestSuite):
 
 		self.assertEqual(c_doc.accounts[0].company, "_Test Company")
 		self.assertEqual(c_doc.accounts[0].account, "Debtors - _TC")
+		self.assertEqual(c_doc.accounts[0].advance_account, "Debtors - _TC")
 
 		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
 		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
 		self.assertEqual(c_doc.credit_limits[0].overdue_billing_threshold, 5000)
+		self.assertEqual(c_doc.credit_limits[0].bypass_credit_limit_check, 1)
 		c_doc.delete()
 		doc.delete()
 
@@ -295,6 +311,23 @@ class TestCustomer(ERPNextTestSuite):
 		frappe.db.set_value("Customer", sales_invoice.customer, "on_hold", 1)
 
 		make_sales_return(sales_invoice.name).submit()
+
+	def test_is_consolidated_key_does_not_skip_blocked_customer_check(self):
+		"""Only POS consolidation may skip the blocked customer check."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		frappe.db.set_value("Customer", "_Test Customer", "on_hold", 1)
+
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.is_consolidated = 1
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is blocked", sales_order.ensure_customer_is_not_blocked
+		)
+
+		sales_invoice = create_sales_invoice(do_not_save=True)
+		sales_invoice.is_consolidated = 1
+		self.assertRaisesRegex(frappe.ValidationError, "is blocked", sales_invoice.insert)
 
 	def test_duplicate_customer(self):
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):

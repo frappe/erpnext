@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 
 from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
 
 
 def execute(filters=None):
@@ -45,6 +46,12 @@ def get_filter_conditions(filters):
 		["Serial and Batch Entry", "docstatus", "=", 1],
 		["Serial and Batch Entry", "is_cancelled", "=", 0],
 	]
+
+	# show reserving bundles only when asked for
+	if not filters.get("voucher_type"):
+		filter_conditions.append(
+			["Serial and Batch Bundle", "voucher_type", "not in", RESERVING_VOUCHER_TYPES]
+		)
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
@@ -236,7 +243,7 @@ def get_serial_nos(doctype: str, txt: str, searchfield: str, start: int, page_le
 
 	else:
 		query_filters["item_code"] = filters.get("item_code")
-		return frappe.get_all("Serial No", filters=query_filters, as_list=True)
+		return frappe.get_list("Serial No", filters=query_filters, as_list=True)
 
 
 @frappe.whitelist()
@@ -278,7 +285,7 @@ def get_batch_nos(doctype: str, txt: str, searchfield: str, start: int, page_len
 			query_filters["name"] = ["like", f"%{txt}%"]
 
 		query_filters["item"] = filters.get("item_code")
-		return frappe.get_all("Batch", filters=query_filters, as_list=True)
+		return frappe.get_list("Batch", filters=query_filters, as_list=True)
 
 
 def has_filter_scope(filters):

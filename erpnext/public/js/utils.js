@@ -332,7 +332,7 @@ $.extend(erpnext.utils, {
 		let filters = frappe.query_reports[report_name].filters;
 
 		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions_for_user",
 			callback: function (r) {
 				let accounting_dimensions = r.message[0];
 				accounting_dimensions.forEach((dimension) => {
@@ -888,6 +888,10 @@ erpnext.utils.update_child_items = function (opts) {
 			read_only: 0,
 			label: __("UOM"),
 			reqd: 1,
+			get_query: (row) => ({
+				query: "erpnext.controllers.queries.get_item_uom_query",
+				filters: { item_code: row.item_code },
+			}),
 			onchange: function () {
 				frappe.call({
 					method: "erpnext.stock.get_item_details.get_conversion_factor",
@@ -1485,3 +1489,18 @@ $.extend(erpnext.stock.utils, {
 		});
 	},
 });
+
+erpnext.utils.task_priority_html = function (priority) {
+	if (!priority) return "";
+	const icons = {
+		Urgent: "priority-urgent",
+		High: "priority-high",
+		Medium: "priority-medium",
+		Low: "priority-low",
+	};
+	const icon = icons[priority]
+		? frappe.utils.icon(icons[priority], "sm", "", "", "mr-2 text-ink-gray-7", true)
+		: "";
+	const label = frappe.utils.escape_html(__(priority));
+	return `<span class="inline-flex items-center whitespace-nowrap">${icon}<span>${label}</span></span>`;
+};

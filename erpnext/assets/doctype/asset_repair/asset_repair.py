@@ -608,11 +608,15 @@ def get_expense_accounts(doctype, txt, searchfield, start, page_len, filters):
 	Get expense accounts for non-stock (service) items from the purchase invoice.
 	Used as a query function for link fields.
 	"""
-	check_asset_repair_access()
-
 	purchase_invoice = filters.get("purchase_invoice")
-	if not purchase_invoice:
+	if not isinstance(purchase_invoice, str) or not purchase_invoice:
 		return []
+
+	company = frappe.db.get_value("Purchase Invoice", purchase_invoice, "company")
+	if not company:
+		return []
+
+	check_asset_repair_access(company)
 
 	expense_accounts = _get_expense_accounts_for_purchase_invoice(purchase_invoice)
 

@@ -296,6 +296,43 @@ class TestSerialNo(ERPNextTestSuite):
 		)
 		self.assertEqual(serial_nos, [f"SNF-{pr.name}-00001", f"SNF-{pr.name}-00002"])
 
+	def test_serial_auto_fetch_checks_warehouse_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission, remove_user_permission
+
+		item_code = make_item(properties={"has_serial_no": 1, "is_stock_item": 1}).name
+		for serial_no, warehouse in (
+			(f"{item_code}-001", "_Test Warehouse - _TC"),
+			(f"{item_code}-002", "_Test Warehouse 1 - _TC"),
+		):
+			serial = frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": serial_no,
+					"item_code": item_code,
+					"company": "_Test Company",
+				}
+			).insert()
+			serial.db_set("warehouse", warehouse)
+
+		stock_user = create_user("test_serial_fetch_stock_user@example.com", "Stock User").name
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", stock_user)
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", stock_user)
+		projects_user = create_user("test_serial_fetch_projects_user@example.com", "Projects User").name
+
+		with self.set_user(stock_user):
+			self.assertEqual(
+				auto_fetch_serial_number(5, item_code, "_Test Warehouse - _TC"), [f"{item_code}-001"]
+			)
+			self.assertRaises(
+				frappe.PermissionError, auto_fetch_serial_number, 5, item_code, "_Test Warehouse 1 - _TC"
+			)
+
+		with self.set_user(projects_user):
+			self.assertRaises(
+				frappe.PermissionError, auto_fetch_serial_number, 5, item_code, "_Test Warehouse - _TC"
+			)
+
 	def test_auto_fetch(self):
 		item_code = make_item(
 			properties={
@@ -400,6 +437,64 @@ class TestSerialNo(ERPNextTestSuite):
 		)
 
 		self.assertEqual(non_expired_serials, [])
+
+	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
+	def test_pos_screen_reservation_lookup_requires_pos_invoice_and_warehouse_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission, remove_user_permission
+
+		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+			make_closing_entry_from_opening,
+		)
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+
+		pos_user, pos_profile = init_user_and_profile()
+		self.addCleanup(frappe.set_user, "Administrator")
+		opening_entry = create_opening_entry(pos_profile, pos_user.name)
+		frappe.set_user("Administrator")
+		item_code = make_item(properties={"has_serial_no": 1, "is_stock_item": 1}).name
+		serial_no = f"{item_code}-POS-001"
+		frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"serial_no": serial_no,
+				"item_code": item_code,
+				"company": "_Test Company",
+			}
+		).insert()
+		make_stock_entry(
+			item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100, serial_no=[serial_no]
+		)
+		pos_invoice = create_pos_invoice(
+			item=item_code,
+			qty=1,
+			rate=100,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			pos_profile=pos_profile.name,
+			do_not_save=1,
+		)
+		pos_invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100, "default": 1})
+		pos_invoice.submit()
+
+		accounts_user = create_user("test_pos_reserved_accounts_user@example.com", "Accounts User").name
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", accounts_user)
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", accounts_user)
+		projects_user = create_user("test_pos_reserved_projects_user@example.com", "Projects User").name
+
+		def get_reserved(warehouse):
+			return get_pos_reserved_serial_nos({"item_code": item_code, "warehouse": warehouse})
+
+		with self.set_user(accounts_user):
+			self.assertEqual(get_reserved("_Test Warehouse - _TC"), [serial_no])
+			self.assertRaises(frappe.PermissionError, get_reserved, "_Test Warehouse 1 - _TC")
+
+		with self.set_user(projects_user):
+			self.assertRaises(frappe.PermissionError, get_reserved, "_Test Warehouse - _TC")
+
+		make_closing_entry_from_opening(opening_entry).submit()
 
 
 def get_auto_serial_nos(kwargs):

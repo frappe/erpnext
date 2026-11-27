@@ -27,12 +27,12 @@ frappe.listview_settings["Delivery Note"] = {
 		}
 	},
 	onload: function (doclist) {
-		const action = () => {
-			const selected_docs = doclist.get_checked_items();
+		const action = async () => {
 			const docnames = doclist.get_checked_items(true);
 
-			if (selected_docs.length > 0) {
-				frappe.new_doc("Delivery Trip").then(() => {
+			if (docnames.length > 0) {
+				const { message } = await frappe.db.get_value("Delivery Note", docnames[0], "company");
+				frappe.new_doc("Delivery Trip", { company: message.company }).then(() => {
 					// Empty out the child table before inserting new ones
 					cur_frm.set_value("delivery_stops", []);
 

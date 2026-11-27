@@ -345,7 +345,7 @@ def apply_conditions(query, filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if to_date := filters.get("to_date"):
-		to_date = get_datetime(str(to_date) + " 23:59:59")
+		to_date = get_datetime(str(to_date) + " 23:59:59.999999")
 		query = query.where(sle.posting_datetime <= to_date)
 	else:
 		frappe.throw(_("'To Date' is required"))
@@ -355,6 +355,11 @@ def apply_conditions(query, filters):
 
 	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Stock Entry"):
 		query = query.where(sle.warehouse.isin(warehouses))
+
+	if companies := get_allowed_docs_for_doctype(
+		get_user_permissions().get("Company", []), "Stock Ledger Entry"
+	):
+		query = query.where(sle.company.isin(companies))
 
 	if filters.get("warehouse"):
 		query = apply_warehouse_filter(query, sle, filters)

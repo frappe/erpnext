@@ -11,7 +11,7 @@ from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cstr, flt
 from frappe.utils.data import comma_and
 
-from erpnext import _refuse
+from erpnext import _refuse, require_permission, require_user_permission
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_linked_exchange_gain_loss_journal,
@@ -47,6 +47,38 @@ class UnreconcilePayment(Document):
 		if self.voucher_type not in self.supported_types:
 			frappe.throw(_("Only {0} are supported").format(comma_and(self.supported_types)))
 
+		self.validate_voucher_permissions()
+
+	def validate_voucher_permissions(self):
+		if self.flags.ignore_permissions:
+			return
+
+		require_permission(self.voucher_type, self.voucher_no, "write")
+		for alloc in self.allocations:
+			# orders can be unreconciled without write on them, so check only User Permissions
+			require_user_permission(alloc.reference_doctype, alloc.reference_name)
+
+	def before_submit(self):
+		self.set_allocations_from_ledger()
+
+	def set_allocations_from_ledger(self):
+		linked = {(x.reference_doctype, x.reference_name): x for x in self.get_allocations_from_payment()}
+		for alloc in self.allocations:
+			details = linked.get((alloc.reference_doctype, alloc.reference_name))
+			if not details:
+				frappe.throw(
+					_("Row #{0}: {1} {2} is not allocated against {3} {4}").format(
+						alloc.idx,
+						_(alloc.reference_doctype),
+						frappe.bold(alloc.reference_name),
+						_(self.voucher_type),
+						frappe.bold(self.voucher_no),
+					)
+				)
+
+			for field in ("account", "party_type", "party", "allocated_amount", "account_currency"):
+				alloc.set(field, details.get(field))
+
 	@frappe.whitelist()
 	def get_allocations_from_payment(self):
 		return get_linked_payments_for_doc(
@@ -76,6 +108,7 @@ class UnreconcilePayment(Document):
 				alloc.account,
 				alloc.party_type,
 				alloc.party,
+				update_payment_schedule=True,
 			)
 
 			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", True)

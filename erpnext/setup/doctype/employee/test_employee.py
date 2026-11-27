@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 import unittest
+from unittest.mock import MagicMock, patch
 
 import frappe
 import frappe.utils
@@ -8,7 +9,7 @@ from frappe.query_builder import Criterion
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
+from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError, is_holiday
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -212,6 +213,52 @@ class TestEmployee(ERPNextTestSuite):
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
 
+	def test_disabled_department_cannot_be_assigned(self):
+		department = frappe.get_doc(
+			{
+				"doctype": "Department",
+				"department_name": "Employee Disabled Department",
+				"company": "_Test Company",
+			}
+		).insert()
+		employee = frappe.get_doc(
+			"Employee",
+			make_employee(
+				"test_disabled_department@company.com",
+				company="_Test Company",
+				department=department.name,
+			),
+		)
+		other_doc = frappe.get_doc(
+			"Employee",
+			make_employee(
+				"test_other_department@company.com", company="_Test Company", department=department.name
+			),
+		)
+		department.disabled = 1
+		department.save()
+
+		# Existing assignments remain valid until the department link changes.
+		employee.save()
+		other_doc.department = None
+		other_doc.save()
+		other_doc.department = department.name
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled Department"):
+			other_doc.save()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled Department"):
+			frappe.get_doc(
+				{
+					"doctype": "Employee",
+					"first_name": "Disabled Department Test",
+					"company": "_Test Company",
+					"department": department.name,
+					"gender": "Female",
+					"date_of_birth": "1990-05-08",
+					"date_of_joining": "2013-01-01",
+				}
+			).insert()
+
 	def test_create_user_automatically(self):
 		def get_new_employee(email: str, create_user_permission: int):
 			return frappe.get_doc(
@@ -263,6 +310,16 @@ class TestEmployee(ERPNextTestSuite):
 				"User Permission", {"allow": "Company", "for_value": employee2.company, "user": user2}
 			)
 		)
+
+	def test_is_holiday_passes_date_to_holiday_list_override(self):
+		override = MagicMock(return_value=None)
+		with (
+			patch("frappe.get_hooks", return_value=["holiday_list.override"]),
+			patch("frappe.get_attr", return_value=override),
+		):
+			is_holiday("_T-Employee-00001", date="2026-01-01")
+
+		override.assert_called_once_with("_T-Employee-00001", True, "2026-01-01")
 
 
 def new_employee(user_id: str):

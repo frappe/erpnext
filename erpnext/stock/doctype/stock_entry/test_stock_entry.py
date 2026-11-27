@@ -92,6 +92,25 @@ class TestStockEntry(ERPNextTestSuite):
 		se.save()
 		self.assertEqual(se.items[0].qty, 1)
 
+	def test_material_receipt_without_rate_takes_buying_price_per_stock_uom(self):
+		item_code = make_item(
+			properties={"is_stock_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 12}]
+		).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": "_Test Price List India",
+				"uom": "Box",
+				"price_list_rate": 1200,
+			}
+		).insert()
+
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5)
+
+		self.assertEqual(receipt.items[0].basic_rate, 100)
+		self.assertEqual(receipt.items[0].basic_amount, 500)
+
 	def test_fifo(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
@@ -205,6 +224,39 @@ class TestStockEntry(ERPNextTestSuite):
 				items.append(d.item_code)
 
 		self.assertTrue(item_code in items)
+
+	def test_end_transit_entry_cannot_be_posted_before_transit_entry(self):
+		transit_warehouse = get_in_transit_warehouse("_Test Company")
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=7,
+			basic_rate=13.37,
+			posting_date=add_days(today(), -3),
+		)
+		transit_entry = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target=transit_warehouse,
+			purpose="Material Transfer",
+			add_to_transit=1,
+			qty=3,
+			posting_date=add_days(today(), -1),
+			posting_time="10:30:00",
+		)
+
+		end_transit_entry = make_stock_in_entry(transit_entry.name)
+		end_transit_entry.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		end_transit_entry.update(
+			{"set_posting_time": 1, "posting_date": transit_entry.posting_date, "posting_time": "10:29:59"}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be before", end_transit_entry.save)
+
+		# received at the same time as it was sent
+		end_transit_entry.posting_time = "10:30:00"
+		end_transit_entry.submit()
+		self.assertEqual(end_transit_entry.items[0].valuation_rate, 13.37)
 
 	def test_add_to_transit_entry(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -1091,8 +1143,8 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertNotIn("Stock Adjustment - TCP1", gl_map)
 
 		stock_in_hand_account = get_inventory_account(company, warehouse)
-		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 99.99)
-		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 99.99)
+		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 100)
+		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 100)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[1])
@@ -1329,8 +1381,67 @@ class TestStockEntry(ERPNextTestSuite):
 			st1 = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
 			st1.get("items")[0].t_warehouse = "_Test Warehouse 2 - _TC1"
 			st1.set_stock_entry_type()
-			st1.insert()
-			self.assertRaises(InvalidWarehouseCompany, st1.submit)
+			self.assertRaises(InvalidWarehouseCompany, st1.insert)
+
+	def test_warehouse_of_other_company_is_not_priced(self):
+		from erpnext.stock.utils import InvalidWarehouseCompany
+
+		item_code = make_item("_Test Steel Rod", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=40, basic_rate=123.45)
+
+		def new_material_issue(warehouse):
+			entry = make_stock_entry(
+				item_code=item_code, source=warehouse, qty=1, company="_Test Company", do_not_save=True
+			)
+			entry.items[0].basic_rate = 0
+			return entry
+
+		own_entry = new_material_issue("_Test Warehouse - _TC")
+		own_entry.get_stock_and_rate()
+		self.assertEqual(own_entry.items[0].basic_rate, 123.45)
+		own_entry.insert()
+		self.assertEqual(own_entry.items[0].basic_rate, 123.45)
+
+		other_entry = new_material_issue("_Test Warehouse 2 - _TC1")
+		self.assertRaises(InvalidWarehouseCompany, other_entry.get_stock_and_rate)
+		self.assertRaises(InvalidWarehouseCompany, other_entry.insert)
+
+	def test_header_warehouse_of_other_company_is_not_priced(self):
+		from erpnext.stock.utils import InvalidWarehouseCompany
+
+		item_code = make_item("_Test Steel Bar", {"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse 2 - _TC1",
+			qty=40,
+			basic_rate=123.45,
+			company="_Test Company 1",
+		)
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=40, basic_rate=67.89)
+
+		def new_material_issue(header_warehouse):
+			entry = make_stock_entry(
+				item_code=item_code,
+				source="_Test Warehouse - _TC",
+				qty=1,
+				company="_Test Company",
+				do_not_save=True,
+			)
+			entry.from_warehouse = header_warehouse
+			entry.items[0].s_warehouse = None
+			entry.items[0].basic_rate = 0
+			return entry
+
+		own_entry = new_material_issue("_Test Warehouse - _TC")
+		own_entry.insert()
+		self.assertEqual(own_entry.items[0].s_warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(own_entry.items[0].basic_rate, 67.89)
+
+		other_entry = new_material_issue("_Test Warehouse 2 - _TC1")
+		other_entry.get_stock_and_rate()
+		self.assertNotEqual(other_entry.items[0].basic_rate, 123.45)
+		self.assertRaises(InvalidWarehouseCompany, other_entry.insert)
+		self.assertNotEqual(other_entry.items[0].basic_rate, 123.45)
 
 	# permission tests
 	def test_warehouse_user(self):
@@ -3048,6 +3159,36 @@ class TestStockEntry(ERPNextTestSuite):
 			sorted([["Stock In Hand - TCP1", 100.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 100.0]]),
 		)
 
+	def test_additional_cost_split_over_equal_rows_adds_up_to_the_cost(self):
+		receipt = make_stock_entry(
+			company="_Test Company with perpetual inventory", purpose="Material Receipt", do_not_save=True
+		)
+		receipt.items = []
+		for _ in range(3):
+			item_code = make_item(properties={"is_stock_item": 1}).name
+			receipt.append(
+				"items",
+				stock_entry_row(
+					item_code, 1, t_warehouse="Stores - TCP1", cost_center="Main - TCP1", basic_rate=100
+				),
+			)
+
+		expense_account = "Miscellaneous Expenses - TCP1"
+		receipt.append(
+			"additional_costs", {"expense_account": expense_account, "description": "Freight", "amount": 100}
+		)
+		receipt.insert()
+		receipt.submit()
+		receipt.reload()
+
+		self.assertEqual(flt(sum(d.additional_cost for d in receipt.items), 2), 100)
+		cost_credit = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": receipt.name, "account": expense_account, "is_cancelled": 0},
+			pluck="credit",
+		)
+		self.assertEqual(flt(sum(cost_credit), 2), 100)
+
 	def test_conversion_factor_change(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		repack_entry = frappe.copy_doc(self.globalTestRecords["Stock Entry"][3])
@@ -3284,6 +3425,25 @@ class TestStockEntry(ERPNextTestSuite):
 
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
+
+	def test_additional_cost_split_gives_nothing_to_a_zero_value_row(self):
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Material Receipt",
+			additional_costs=[frappe._dict(base_amount=100)],
+			items=[
+				*[
+					frappe._dict(item_code=f"RECEIVED_{i}", basic_amount=100, t_warehouse="X")
+					for i in range(6)
+				],
+				frappe._dict(item_code="FREE", basic_amount=0, t_warehouse="X"),
+			],
+		)
+
+		se.distribute_additional_costs()
+
+		self.assertEqual(se.items[-1].additional_cost, 0)
+		self.assertEqual(flt(sum(d.additional_cost for d in se.items), 2), 100)
 
 	def test_independent_manufacture_entry(self):
 		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."
@@ -4503,6 +4663,95 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
 
+	def make_co_product_repack(self):
+		"""Unsaved Repack of 2 FG from 2,000 of raw material, with a co-product at 20% of component cost."""
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		co_product = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=20, basic_rate=100)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": rm_item, "qty": 10})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 2,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		bom.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = entry.stock_entry_type = "Repack"
+		entry.update(
+			{
+				"company": "_Test Company",
+				"from_bom": 1,
+				"bom_no": bom.name,
+				"fg_completed_qty": 2,
+				"from_warehouse": warehouse,
+				"to_warehouse": warehouse,
+			}
+		)
+		entry.get_items()
+		return entry, fg_item, co_product
+
+	def append_manual_finished_good(self, entry, item_code, qty, rate):
+		entry.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": qty,
+				"t_warehouse": entry.to_warehouse,
+				"is_finished_item": 1,
+				"set_basic_rate_manually": 1,
+				"basic_rate": rate,
+			},
+		)
+
+	def test_repack_co_product_shares_the_cost_left_after_a_manual_finished_good(self):
+		"""A manual finished good takes its value first; the BOM percentages split what is left."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		next(d for d in entry.items if d.is_finished_item).qty = 1
+		self.append_manual_finished_good(entry, fg_item, qty=1, rate=300)
+		entry.insert()
+
+		amounts = {(d.item_code, d.set_basic_rate_manually): d.basic_amount for d in entry.items}
+		self.assertEqual(amounts[(co_product, 0)], 340)
+		self.assertEqual(amounts[(fg_item, 0)], 1360)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
+		entry.submit()
+		ledger = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": entry.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		for row in entry.items:
+			if row.t_warehouse:
+				self.assertEqual(ledger[row.name], row.basic_amount)
+		# in equals out, so nothing is left for Stock Adjustment
+		self.assertEqual(sum(ledger.values()), 0)
+
+	def test_repack_co_product_keeps_its_share_when_every_finished_good_is_manual(self):
+		"""With no automatic finished good, the co-product takes its percentage of the whole cost."""
+		entry, fg_item, co_product = self.make_co_product_repack()
+		entry.remove(next(d for d in entry.items if d.is_finished_item))
+		self.append_manual_finished_good(entry, fg_item, qty=2, rate=800)
+		entry.insert()
+
+		co_row = next(d for d in entry.items if d.item_code == co_product)
+		self.assertEqual(co_row.basic_amount, 400)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
 	def test_secondary_item_with_zero_cost_allocation_carries_no_value(self):
 		"""A BOM that allocates 0% to a secondary item gives the finished good everything."""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -5342,6 +5591,91 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(se.process_loss_qty, 50)
 
+	def test_stock_entry_refuses_work_order_of_other_company(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_transfer_entry,
+		)
+
+		fg_item = make_item("_Test Gear Box", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Gear Wheel", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		other_bom = make_bom(item=fg_item, raw_materials=[rm_item], company="_Test Company 1")
+
+		def new_transfer_entry(work_order):
+			entry = frappe.get_doc(
+				make_transfer_entry(work_order.name, "Material Transfer for Manufacture", 1)
+			)
+			entry.company = "_Test Company"
+			for row in entry.items:
+				row.update(
+					{
+						"s_warehouse": "_Test Warehouse - _TC",
+						"t_warehouse": "_Test Warehouse 1 - _TC",
+						"expense_account": None,
+						"cost_center": None,
+					}
+				)
+			return entry
+
+		own_work_order = make_wo_order_test_record(production_item=fg_item, qty=1)
+		new_transfer_entry(own_work_order).insert()
+
+		other_work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=other_bom.name, company="_Test Company 1", qty=1
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			f"Work Order {other_work_order.name} does not belong to Company _Test Company",
+			new_transfer_entry(other_work_order).insert,
+		)
+
+	def test_stock_entry_refuses_pick_list_row_of_other_pick_list(self):
+		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry as make_entry_from_pick_list
+
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		def new_pick_list(company, warehouse):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=5, basic_rate=100)
+			pick_list = frappe.get_doc(
+				{
+					"doctype": "Pick List",
+					"company": company,
+					"purpose": "Material Transfer",
+					"pick_manually": 1,
+					"locations": [{"item_code": item, "warehouse": warehouse, "qty": 5, "picked_qty": 5}],
+				}
+			).insert()
+			pick_list.submit()
+			return pick_list
+
+		own_pick_list = new_pick_list("_Test Company", "_Test Warehouse - _TC")
+		other_pick_list = new_pick_list("_Test Company 1", "_Test Warehouse 2 - _TC1")
+
+		receipt = frappe.get_doc(make_entry_from_pick_list(own_pick_list.as_dict()))
+		receipt.update({"purpose": "Material Receipt", "stock_entry_type": "Material Receipt"})
+		receipt.items[0].update(
+			{
+				"s_warehouse": None,
+				"t_warehouse": "_Test Warehouse - _TC",
+				"basic_rate": 100,
+				"pick_list_item": other_pick_list.locations[0].name,
+			}
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			f"Pick List Item {other_pick_list.locations[0].name} does not belong to Pick List {own_pick_list.name}",
+			receipt.insert,
+		)
+
+		transfer = frappe.get_doc(make_entry_from_pick_list(own_pick_list.as_dict()))
+		transfer.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		transfer.submit()
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", own_pick_list.locations[0].name, "transferred_qty"), 5
+		)
+
 	def test_get_pending_work_orders(self):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
@@ -5806,6 +6140,463 @@ class TestStockEntry(ERPNextTestSuite):
 
 		entry.insert()
 		return entry
+
+	def test_get_items_checks_work_order_and_bom_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		fg_item = make_item("_Test Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Steel Sheet", {"is_stock_item": 1}).name
+		own_bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3)
+		other_bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3, company="_Test Company 1")
+		other_work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=other_bom.name,
+			company="_Test Company 1",
+			qty=7,
+			source_warehouse=create_warehouse("_Test Stores", company="_Test Company 1"),
+		)
+
+		user = create_user("test_get_items_company_perm@example.com", "Stock User")
+		add_user_permission("Company", "_Test Company", user.name)
+		self.addCleanup(remove_user_permission, "Company", "_Test Company", user.name)
+
+		def new_stock_entry(**fields):
+			return frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"company": "_Test Company",
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					**fields,
+				}
+			)
+
+		with self.set_user(user.name):
+			own_entry = new_stock_entry(
+				purpose="Material Issue", from_bom=1, bom_no=own_bom.name, fg_completed_qty=2
+			)
+			own_entry.get_items()
+			self.assertEqual([(d.item_code, d.qty) for d in own_entry.items], [(rm_item, 6)])
+
+			for fields in (
+				{"purpose": "Material Issue", "from_bom": 1, "bom_no": other_bom.name, "fg_completed_qty": 1},
+				{
+					"purpose": "Material Transfer for Manufacture",
+					"work_order": other_work_order.name,
+					"fg_completed_qty": 7,
+				},
+			):
+				self.assertRaises(frappe.PermissionError, new_stock_entry(**fields).get_items)
+
+			entry = new_stock_entry(purpose="Manufacture", work_order=other_work_order.name)
+			self.assertRaises(frappe.PermissionError, entry.get_stock_and_rate)
+
+	def test_ceil_qty_ignores_float_noise(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import ceil_qty_if_uom_has_whole_number
+
+		frappe.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		self.assertEqual(ceil_qty_if_uom_has_whole_number(0.07 * 100, "Nos"), 7)
+
+	def test_disassemble_get_items_checks_manufacture_entry_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		fg_item = make_item("_Test Disassembled Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Disassembled Steel Sheet", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3, source_warehouse=warehouse)
+		receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=9, basic_rate=7.33)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=2, skip_transfer=1, source_warehouse=warehouse
+		)
+
+		def manufacture():
+			entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 1)).insert()
+			entry.submit()
+			return entry
+
+		def disassembly_items():
+			entry = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"purpose": "Disassemble",
+					"company": "_Test Company",
+					"work_order": work_order.name,
+					"fg_completed_qty": 1,
+				}
+			)
+			entry.get_items()
+			return entry
+
+		def allow_stock_entry(name):
+			add_user_permission("Stock Entry", name, user.name)
+			self.addCleanup(remove_user_permission, "Stock Entry", name, user.name)
+
+		user = create_user("test_disassemble_source_perm@example.com", "Manufacturing User")
+		allow_stock_entry(receipt.name)
+		first = manufacture()
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, disassembly_items)
+
+		allow_stock_entry(first.name)
+		with self.set_user(user.name):
+			self.assertEqual(disassembly_items().source_stock_entry, first.name)
+
+		second = manufacture()
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, disassembly_items)
+
+		allow_stock_entry(second.name)
+		with self.set_user(user.name):
+			entry = disassembly_items()
+		self.assertFalse(entry.source_stock_entry)
+		self.assertEqual(sorted(d.item_code for d in entry.items), sorted([fg_item, rm_item]))
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
+	def test_get_stock_and_rate_checks_bom_of_work_order(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		fg_item = make_item("_Test Costed Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Costed Steel Sheet", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=5, basic_rate=7.33)
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3, rate=7.33)
+		other_bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1, rate=7.33)
+		work_order = make_wo_order_test_record(production_item=fg_item, bom_no=bom.name, qty=7)
+
+		def finished_good_rate():
+			entry = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"purpose": "Manufacture",
+					"company": "_Test Company",
+					"work_order": work_order.name,
+					"fg_completed_qty": 1,
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					"items": [
+						{
+							"item_code": fg_item,
+							"t_warehouse": "_Test Warehouse 1 - _TC",
+							"qty": 1,
+							"uom": "_Test UOM",
+							"conversion_factor": 1,
+							"is_finished_item": 1,
+						}
+					],
+				}
+			)
+			entry.get_stock_and_rate()
+			return entry.items[0].basic_rate
+
+		allowed_user = create_user("test_stock_and_rate_bom_allowed@example.com", "Manufacturing User")
+		restricted_user = create_user("test_stock_and_rate_bom_restricted@example.com", "Manufacturing User")
+		for user, bom_name in ((allowed_user.name, bom.name), (restricted_user.name, other_bom.name)):
+			add_user_permission("BOM", bom_name, user, applicable_for="BOM")
+			self.addCleanup(remove_user_permission, "BOM", bom_name, user)
+
+		expected = finished_good_rate()
+		self.assertGreater(expected, 0)
+		with self.set_user(allowed_user.name):
+			self.assertEqual(finished_good_rate(), expected)
+
+		with self.set_user(restricted_user.name):
+			self.assertRaises(frappe.PermissionError, finished_good_rate)
+
+	def test_disassemble_get_items_checks_every_manufacture_entry(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		fg_item = make_item("_Test Thrice Disassembled Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Thrice Disassembled Steel Sheet", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3, source_warehouse=warehouse)
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=9, basic_rate=7.33)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=3, skip_transfer=1, source_warehouse=warehouse
+		)
+		entries = []
+		for _i in range(3):
+			entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 1)).insert()
+			entry.submit()
+			entries.append(entry.name)
+
+		user = create_user("test_disassemble_every_source_perm@example.com", "Manufacturing User").name
+		for name in entries[1:]:
+			add_user_permission("Stock Entry", name, user)
+			self.addCleanup(remove_user_permission, "Stock Entry", name, user)
+
+		def disassembly_items():
+			entry = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"purpose": "Disassemble",
+					"company": "_Test Company",
+					"work_order": work_order.name,
+					"fg_completed_qty": 1,
+				}
+			)
+			entry.get_items()
+			return entry
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, disassembly_items)
+
+		add_user_permission("Stock Entry", entries[0], user)
+		self.addCleanup(remove_user_permission, "Stock Entry", entries[0], user)
+		with self.set_user(user):
+			entry = disassembly_items()
+		self.assertEqual(sorted(d.item_code for d in entry.items), sorted([fg_item, rm_item]))
+
+	def test_get_items_checks_bom_of_work_order(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		fg_item = make_item("_Test Backflushed Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Backflushed Steel Sheet", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3)
+		other_bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=7,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+
+		def manufacture_raw_materials():
+			entry = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"purpose": "Manufacture",
+					"company": "_Test Company",
+					"work_order": work_order.name,
+					"fg_completed_qty": 7,
+					"posting_date": today(),
+					"posting_time": nowtime(),
+				}
+			)
+			entry.get_items()
+			return [(d.item_code, d.qty) for d in entry.items if d.s_warehouse]
+
+		allowed_user = create_user("test_get_items_bom_allowed@example.com", "Manufacturing User").name
+		restricted_user = create_user("test_get_items_bom_restricted@example.com", "Manufacturing User").name
+		for user, bom_name in ((allowed_user, bom.name), (restricted_user, other_bom.name)):
+			add_user_permission("BOM", bom_name, user, applicable_for="BOM")
+			self.addCleanup(remove_user_permission, "BOM", bom_name, user)
+
+		with self.set_user(allowed_user):
+			self.assertEqual(manufacture_raw_materials(), [(rm_item, 21)])
+
+		with self.set_user(restricted_user):
+			self.assertRaises(frappe.PermissionError, manufacture_raw_materials)
+
+	def test_make_stock_entry_needs_stock_entry_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		user = create_user("test_make_stock_entry_perm@example.com", "Delivery User")
+
+		with self.set_user(user.name):
+			self.assertRaises(
+				frappe.PermissionError,
+				make_stock_entry,
+				item_code="_Test Item",
+				target="_Test Warehouse - _TC",
+				qty=1,
+				do_not_save=1,
+			)
+
+	def test_get_warehouse_details_needs_stock_entry_read(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		user = create_user("test_warehouse_details_delivery@example.com", "Delivery User")
+		args = {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, args)
+
+	def test_get_warehouse_details_applies_warehouse_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		user = create_user("test_warehouse_details_stock@example.com", "Stock User")
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", user.name)
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", user.name)
+
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+		own_warehouse_args = {**args, "warehouse": "_Test Warehouse - _TC"}
+		expected = get_warehouse_details(own_warehouse_args)
+
+		with self.set_user(user.name):
+			self.assertEqual(get_warehouse_details(own_warehouse_args), expected)
+			self.assertRaises(
+				frappe.PermissionError,
+				get_warehouse_details,
+				{**args, "warehouse": "_Test Warehouse 1 - _TC"},
+			)
+
+	def test_get_warehouse_details_applies_warehouse_user_permission_for_stock_entry(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=10, basic_rate=100)
+		stock_entry_user = create_user("test_warehouse_details_scoped@example.com", "Stock User")
+		material_request_user = create_user("test_warehouse_details_other@example.com", "Stock User")
+		for user, applicable_for in (
+			(stock_entry_user.name, "Stock Entry"),
+			(material_request_user.name, "Material Request"),
+		):
+			add_user_permission("Warehouse", "_Test Warehouse - _TC", user, applicable_for=applicable_for)
+			self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", user)
+
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+		other_warehouse_args = {**args, "warehouse": "_Test Warehouse 1 - _TC"}
+		expected = get_warehouse_details(other_warehouse_args)
+
+		with self.set_user(stock_entry_user.name):
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, other_warehouse_args)
+
+		with self.set_user(material_request_user.name):
+			self.assertEqual(get_warehouse_details(other_warehouse_args), expected)
+
+	def test_get_warehouse_details_needs_item_select(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_permission
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		role = "_Test Stock Entry Reader"
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 0}).insert()
+		add_permission("Stock Entry", role)
+		self.addCleanup(frappe.clear_cache, doctype="Stock Entry")
+		user = create_user("test_warehouse_details_reader@example.com", role).name
+		args = {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}
+
+		with self.set_user(user):
+			self.assertTrue(frappe.has_permission("Stock Entry", "read"))
+			self.assertFalse(frappe.has_permission("Item", "select"))
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, args)
+
+	def test_get_warehouse_details_combines_warehouse_user_permissions_for_stock_entry(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=10, basic_rate=100)
+		user = create_user("test_warehouse_details_combined@example.com", "Stock User").name
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", user)
+		add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", user, applicable_for="Stock Entry")
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", user)
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse 1 - _TC", user)
+
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+		stock_entry_warehouse_args = {**args, "warehouse": "_Test Warehouse 1 - _TC"}
+		expected = get_warehouse_details(stock_entry_warehouse_args)
+
+		with self.set_user(user):
+			self.assertEqual(get_warehouse_details(stock_entry_warehouse_args), expected)
+			self.assertRaises(
+				frappe.PermissionError, get_warehouse_details, {**args, "warehouse": "Stores - _TC"}
+			)
+
+	def test_get_warehouse_details_applies_company_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		user = create_user("test_warehouse_details_company@example.com", "Stock User").name
+		add_user_permission("Company", "_Test Company", user)
+		self.addCleanup(remove_user_permission, "Company", "_Test Company", user)
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+
+		with self.set_user(user):
+			self.assertEqual(
+				set(get_warehouse_details({**args, "warehouse": "_Test Warehouse - _TC"})),
+				{"actual_qty", "basic_rate"},
+			)
+			self.assertRaises(
+				frappe.PermissionError,
+				get_warehouse_details,
+				{**args, "warehouse": "_Test Warehouse 2 - _TC1"},
+			)
+
+	def test_submit_locks_bins_before_validate(self):
+		from unittest.mock import patch
+
+		from frappe.utils import get_datetime
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+		from erpnext.stock.utils import lock_bins
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PTRB-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			do_not_submit=True,
+		)
+
+		calls = []
+		validate = StockEntry.validate
+		lock_time = get_datetime(f"{transfer.posting_date} 23:59:59.123456")
+		with (
+			patch(
+				"erpnext.stock.utils.lock_bins",
+				lambda item_warehouses: calls.append("lock_bins") or lock_bins(item_warehouses),
+			),
+			patch.object(StockEntry, "validate", lambda doc: calls.append("validate") or validate(doc)),
+			patch("erpnext.utilities.transaction_base.now_datetime", return_value=lock_time),
+		):
+			transfer.submit()
+
+		self.assertEqual(calls, ["lock_bins", "validate"])
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": transfer.name},
+			fields=["posting_datetime", "serial_and_batch_bundle"],
+		)
+		self.assertEqual(len(sles), 2)
+		for sle in sles:
+			self.assertEqual(get_datetime(sle.posting_datetime), lock_time)
+			bundle_time = frappe.db.get_value(
+				"Serial and Batch Bundle", sle.serial_and_batch_bundle, "posting_datetime"
+			)
+			self.assertEqual(get_datetime(bundle_time), lock_time)
 
 
 def make_serialized_item(self, **args):

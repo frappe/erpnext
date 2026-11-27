@@ -238,8 +238,8 @@ class Customer(TransactionBase):
 		self.payment_terms = self.default_price_list = ""
 
 		tables = [
-			["accounts", ["account"]],
-			["credit_limits", ["credit_limit", "overdue_billing_threshold"]],
+			["accounts", ["account", "advance_account"]],
+			["credit_limits", ["credit_limit", "overdue_billing_threshold", "bypass_credit_limit_check"]],
 		]
 		fields = ["payment_terms", "default_price_list"]
 
@@ -963,6 +963,8 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.on((returned_items.name == SalesInvoiceItem.dn_detail) & (SalesInvoice.is_return == 1))
 		.select(billed_dn_detail.as_("dn_detail"), Sum(SalesInvoiceItem.stock_qty).as_("billed_qty"))
 		.where(SalesInvoiceItem.docstatus == 1)
+		.where(SalesInvoice.customer == customer)
+		.where(SalesInvoice.company == company)
 		.where((SalesInvoice.is_return == 0) | (SalesInvoice.update_billed_amount_in_delivery_note == 1))
 		.groupby(billed_dn_detail)
 	)

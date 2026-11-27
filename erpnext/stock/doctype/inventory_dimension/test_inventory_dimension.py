@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from functools import partial
 from unittest.mock import patch
 
 import frappe
@@ -15,6 +16,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	delete_dimension,
 	get_evaluated_inventory_dimension,
 	get_inventory_dimensions,
+	get_parent_fields,
 )
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -133,6 +135,20 @@ class TestInventoryDimension(ERPNextTestSuite):
 			self.assertEqual(frappe.session.user, user.name)
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_parent_fields_need_inventory_dimension_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		projects_user = create_user("dimension-parent-fields-projects@example.com", "Projects User").name
+		stock_user = create_user("dimension-parent-fields-stock@example.com", "Stock User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(projects_user)
+		self.assertRaises(frappe.PermissionError, get_parent_fields, "Stock Entry Detail", "Warehouse")
+
+		frappe.set_user(stock_user)
+		fields = [field.value for field in get_parent_fields("Stock Entry Detail", "Warehouse")]
+		self.assertIn("from_warehouse", fields)
 
 	def test_inventory_dimension(self):
 		create_warehouse("Shelf Warehouse")
@@ -316,6 +332,30 @@ class TestInventoryDimension(ERPNextTestSuite):
 				self.assertEqual(
 					get_evaluated_inventory_dimension(row, frappe._dict(actual_qty=qty)), expected
 				)
+
+	def test_dimension_condition_reads_field_values_only(self):
+		stock_entry = make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=7, basic_rate=100, do_not_submit=True
+		)
+		row = stock_entry.items[0]
+		dimension = frappe._dict(
+			name="Pallet",
+			condition="parent.purpose == 'Material Receipt' and doc.qty == 7 and doc.doctype == 'Stock Entry Detail'",
+			type_of_transaction="Both",
+		)
+		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
+		with patch(f"{module}.get_document_wise_inventory_dimensions", return_value=[dimension]):
+			evaluate = partial(
+				get_evaluated_inventory_dimension, row, frappe._dict(actual_qty=7), stock_entry
+			)
+			self.assertEqual(evaluate(), [dimension])
+
+			dimension.condition = "parent.db_set('remarks', 'Changed by condition') or True"
+			self.assertRaises(TypeError, evaluate)
+
+		self.assertNotEqual(
+			frappe.db.get_value("Stock Entry", stock_entry.name, "remarks"), "Changed by condition"
+		)
 
 	def test_check_mandatory_depends_on_backend(self):
 		doc = create_inventory_dimension(

@@ -6,6 +6,11 @@ frappe.provide("erpnext.utils");
 const SALES_DOCTYPES = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"];
 const PURCHASE_DOCTYPES = ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"];
 
+erpnext.utils.get_party_account_currency = function (party, company) {
+	// the server allows only accounts in the billing currency, or in the company currency without one
+	return party.default_currency || erpnext.get_currency(company);
+};
+
 erpnext.utils.get_party_details = function (frm, method, args, callback) {
 	if (!method) {
 		method = "erpnext.accounts.party.get_party_details";
@@ -205,12 +210,16 @@ erpnext.utils.set_taxes_from_address = function (
 		);
 	}
 
+	const [party_type, party] = address_party(frm, billing_address_field);
+
 	frappe.call({
 		method: "erpnext.accounts.party.get_address_tax_category",
 		args: {
-			tax_category: frm.doc.tax_category,
 			billing_address: frm.doc[billing_address_field],
 			shipping_address: frm.doc[shipping_address_field],
+			party_type,
+			party,
+			pos_profile: frm.doc.is_pos ? frm.doc.pos_profile : "",
 		},
 		callback: function (r) {
 			if (!r.exc) {
@@ -268,7 +277,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 	if (frm.doc.lead) {
 		party_type = "Lead";
 		party = frm.doc.lead;
-	} else if (frm.doc.customer) {
+	} else if (frm.doctype != "Purchase Order" && frm.doc.customer) {
 		party_type = "Customer";
 		party = frm.doc.customer;
 	} else if (frm.doc.supplier) {
@@ -289,8 +298,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 			customer_group: frm.doc.customer_group,
 			supplier_group: frm.doc.supplier_group,
 			tax_category: frm.doc.tax_category,
-			billing_address:
-				frm.doc.customer || frm.doc.lead ? frm.doc.customer_address : frm.doc.supplier_address,
+			billing_address: party_type === "Supplier" ? frm.doc.supplier_address : frm.doc.customer_address,
 			shipping_address: frm.doc.shipping_address_name,
 		},
 		callback: function (r) {
@@ -394,6 +402,16 @@ function party_field(frm, party_type) {
 		return "lead";
 	}
 	return ["customer", "supplier", "lead"].find((field) => frappe.meta.get_docfield(frm.doc.doctype, field));
+}
+
+function address_party(frm, billing_address_field) {
+	if (billing_address_field === "supplier_address") {
+		return ["Supplier", frm.doc.supplier];
+	}
+	if (frm.doc.quotation_to) {
+		return [frm.doc.quotation_to, frm.doc.party_name];
+	}
+	return ["Customer", frm.doc.customer];
 }
 
 function party_label(frm, party_type) {

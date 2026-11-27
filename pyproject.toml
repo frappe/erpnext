@@ -29,6 +29,9 @@ dependencies = [
     # Pulls pdfminer.six (parsing), Pillow, and pypdfium2 (render backend for
     # Page.to_image) - all pure-Python wheels, no system binaries required.
     "pdfplumber>=0.11.0",
+
+    # Bank Transaction Rule regex conditions (supports a match timeout)
+    "regex>=2024.11.6",
 ]
 
 [build-system]
@@ -42,7 +45,7 @@ skip_namespaces = [
 ]
 
 [tool.bench.frappe-dependencies]
-frappe = ">=16.55.0,<17.0.0"
+frappe = ">=16.60.0,<17.0.0"
 
 [tool.bench.assets]
 build_dir = "./banking"

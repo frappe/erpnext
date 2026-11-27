@@ -32,19 +32,24 @@ frappe.ui.form.on("Sales Forecast", {
 			doc: frm.doc,
 			freeze: true,
 			callback: function (r) {
-				frm.reload_doc();
+				frm.dirty();
 			},
 		});
 	},
 
 	set_custom_buttons(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.status === "Planned") {
-			frm.add_custom_button(__("Create MPS"), () => {
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.sales_forecast.sales_forecast.create_mps",
-					frm: frm,
-				});
-			}).addClass("btn-primary");
+			frm.add_custom_button(
+				__("Create MPS"),
+				() => {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.manufacturing.doctype.sales_forecast.sales_forecast.create_mps",
+						frm: frm,
+					});
+				},
+				null,
+				"primary"
+			);
 		}
 	},
 });

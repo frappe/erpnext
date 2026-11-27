@@ -439,23 +439,17 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						);
 					}
 
-					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
-						let me = this;
-						let internal = me.frm.doc.is_internal_supplier;
-						if (internal) {
-							let button_label =
-								me.frm.doc.company === me.frm.doc.represents_company
-									? __("Internal Sales Order")
-									: __("Inter Company Sales Order");
+					if (doc.docstatus === 1 && doc.is_internal_supplier) {
+						let button_label =
+							doc.company === doc.represents_company
+								? __("Internal Sales Order")
+								: __("Inter Company Sales Order");
 
-							me.frm.add_custom_button(
-								button_label,
-								function () {
-									me.make_inter_company_order(me.frm);
-								},
-								__("Create")
-							);
-						}
+						this.add_inter_company_order_button(
+							button_label,
+							"Sales Order",
+							"purchase_order_item"
+						);
 					}
 				}
 

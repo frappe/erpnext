@@ -4,7 +4,7 @@ import json
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_months, flt, today
+from frappe.utils import add_days, add_months, flt, today
 
 from erpnext import get_company_currency
 from erpnext.controllers.accounts_controller import update_child_qty_rate
@@ -249,6 +249,21 @@ class TestBlanketOrder(ERPNextTestSuite):
 					self.assertEqual(target.items[0].rate, expected_rate)
 					self.assertEqual(target.items[0].blanket_order, blanket_order.name)
 
+	def test_price_list_in_order_currency_follows_the_exchange_rate(self):
+		company_currency = get_company_currency("_Test Company")
+		transaction_currency = "USD" if company_currency != "USD" else "EUR"
+		blanket_order = new_blanket_order("Selling", currency=transaction_currency, conversion_rate=85)
+		blanket_order.selling_price_list = make_blanket_order_price_list(transaction_currency, 100)
+		blanket_order.price_list_currency = transaction_currency
+		blanket_order.plc_conversion_rate = 83
+		blanket_order.append("items", {"item_code": "_Test Item", "qty": 10})
+
+		pricing = apply_price_list(blanket_order.as_dict())
+
+		self.assertEqual(pricing["parent"]["plc_conversion_rate"], 85)
+		self.assertEqual(pricing["children"][0]["price_list_rate"], 100)
+		self.assertEqual(pricing["children"][0]["base_price_list_rate"], 8500)
+
 	def test_applying_price_list_ignores_empty_item_rows(self):
 		blanket_order = frappe.new_doc("Blanket Order")
 		blanket_order.blanket_order_type = "Selling"
@@ -260,6 +275,53 @@ class TestBlanketOrder(ERPNextTestSuite):
 		pricing = apply_price_list(blanket_order.as_dict())
 
 		self.assertEqual(pricing["children"], [])
+
+	def test_applying_price_list_needs_blanket_order_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		blanket_order, _price_list = make_priced_blanket_order(price_list_rate=4321.5)
+		expected = apply_price_list(blanket_order.as_dict())
+		self.assertEqual(expected["children"][0]["price_list_rate"], 4321.5)
+
+		for user, roles in (
+			("_test_bo_no_role@example.com", []),
+			("_test_bo_sales@example.com", ["Sales User"]),
+		):
+			with as_user(make_fenced_user(user, roles)):
+				self.assertRaises(frappe.PermissionError, apply_price_list, blanket_order.as_dict())
+
+		with as_user(make_fenced_user("_test_bo_manager@example.com", ["System Manager", "Sales User"])):
+			self.assertEqual(apply_price_list(blanket_order.as_dict()), expected)
+
+	def test_applying_price_list_checks_party_and_user_permissions(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		for order_type, party_type, other_party, party_role in (
+			("Selling", "Customer", "_Test Customer 1", "Sales User"),
+			("Purchasing", "Supplier", "_Test Supplier 1", "Purchase User"),
+		):
+			with self.subTest(order_type=order_type):
+				blanket_order, _price_list = make_priced_blanket_order(order_type, price_list_rate=4321.5)
+				party = blanket_order.get(frappe.scrub(party_type))
+				expected = apply_price_list(blanket_order.as_dict())
+				prefix = f"_test_bo_{order_type.lower()}"
+				denied_users = (
+					make_fenced_user(f"{prefix}_no_party@example.com", ["System Manager"]),
+					make_fenced_user(
+						f"{prefix}_other_company@example.com",
+						["System Manager", party_role],
+						[("Company", "_Test Company 1")],
+					),
+					make_party_reader(
+						f"{prefix}_other_party@example.com", party_role, party_type, other_party
+					),
+				)
+				for user in denied_users:
+					with as_user(user):
+						self.assertRaises(frappe.PermissionError, apply_price_list, blanket_order.as_dict())
+
+				with as_user(make_party_reader(f"{prefix}_party@example.com", party_role, party_type, party)):
+					self.assertEqual(apply_price_list(blanket_order.as_dict()), expected)
 
 	def test_price_list_rate_is_fetched_on_item_selection(self):
 		company = "_Test Company"
@@ -376,6 +438,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 			"currency": transaction_currency,
 			"blanket_order_type": "Selling",
 			"item": blanket_order.items[0].item_code,
+			"party": blanket_order.customer,
 		}
 		matching_orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
 		self.assertIn(blanket_order.name, [order[0] for order in matching_orders])
@@ -517,6 +580,81 @@ class TestBlanketOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(details.blanket_order, bo.name)
 
+	def test_quotation_uses_only_a_selling_blanket_order_of_its_customer(self):
+		from erpnext.crm.doctype.lead.test_lead import make_lead
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		item = make_item("_Test Blanket Order Quotation Item", {"is_stock_item": 1}).name
+		purchasing = make_blanket_order(blanket_order_type="Purchasing", rate=40, item_code=item)
+		other_customer = make_blanket_order(
+			blanket_order_type="Selling", customer="_Test Customer 1", rate=60, item_code=item
+		)
+		selling = make_blanket_order(blanket_order_type="Selling", rate=90, item_code=item)
+		for bo, days in ((purchasing, 3), (other_customer, 5)):
+			bo.db_set("to_date", add_days(today(), days))
+
+		lookup = {
+			"company": "_Test Company",
+			"currency": selling.currency,
+			"customer": selling.customer,
+			"doctype": "Quotation",
+			"item_code": item,
+			"quotation_to": "Customer",
+			"transaction_date": today(),
+		}
+		self.assertEqual(get_blanket_order_details(lookup).blanket_order, selling.name)
+		self.assertFalse(get_blanket_order_details({**lookup, "customer": None}))
+
+		link_filters = {
+			"company": "_Test Company",
+			"blanket_order_type": "Selling",
+			"item": item,
+			"party": selling.customer,
+			"quotation_to": "Customer",
+		}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, link_filters)
+		self.assertEqual([order[0] for order in orders], [selling.name])
+
+		def quotation_against(bo):
+			quotation = make_quotation(item_code=item, party_name=selling.customer, do_not_save=True)
+			quotation.items[0].against_blanket_order = 1
+			quotation.items[0].blanket_order = bo.name
+			return quotation
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be used on", quotation_against(purchasing).insert
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is for", quotation_against(other_customer).insert)
+		quotation_against(selling).insert()
+
+		lead = make_lead()
+		frappe.db.set_value("Customer", other_customer.customer, "lead_name", lead.name)
+		lead_lookup = {**lookup, "quotation_to": "Lead", "customer": lead.name}
+		self.assertEqual(get_blanket_order_details(lead_lookup).blanket_order, other_customer.name)
+		lead_filters = {**link_filters, "party": lead.name, "quotation_to": "Lead"}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, lead_filters)
+		self.assertEqual([order[0] for order in orders], [other_customer.name])
+		lead_quotation = quotation_against(other_customer)
+		lead_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
+		lead_quotation.insert()
+
+	def test_blanket_order_link_matches_the_typed_text(self):
+		item = make_item("_Test Blanket Order Search Item", {"is_stock_item": 1}).name
+		first = make_blanket_order(blanket_order_type="Purchasing", item_code=item)
+		second = make_blanket_order(blanket_order_type="Purchasing", item_code=item)
+		link_filters = {
+			"company": "_Test Company",
+			"blanket_order_type": "Purchasing",
+			"item": item,
+			"party": first.supplier,
+		}
+
+		orders = get_blanket_orders("Blanket Order", first.name, "name", 0, 20, link_filters)
+		self.assertEqual([order[0] for order in orders], [first.name])
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, link_filters)
+		self.assertCountEqual([order[0] for order in orders], [first.name, second.name])
+		self.assertEqual(len(get_blanket_orders("Blanket Order", "", "name", 0, 1, link_filters)), 1)
+
 	def test_blanket_order_rate_is_set_by_the_server(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
 		po = make_purchase_order_against(bo, qty=10)
@@ -526,6 +664,33 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		self.assertEqual(po.items[0].blanket_order_rate, 100)
 		self.assertIn("differs from the rate", str(frappe.message_log[-1]))
+
+	def test_order_row_item_must_be_in_the_blanket_order(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		other_item = make_item("_Test Blanket Order Missing Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=10, rate=90)
+
+		so = make_sales_order(item_code=other_item, qty=500, do_not_save=True)
+		so.items[0].against_blanket_order = 1
+		so.items[0].blanket_order = bo.name
+		so.items[0].blanket_order_rate = 90
+
+		self.assertRaisesRegex(frappe.ValidationError, "is not in Blanket Order", so.insert)
+
+	def test_item_change_clears_a_blanket_order_without_the_new_item(self):
+		other_item = make_item("_Test Blanket Order Missing Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=10, rate=90)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.items[0].item_code = other_item
+		so.process_item_selection(item_idx=1, reset_item_details=True)
+
+		self.assertEqual(so.items[0].against_blanket_order, 1)
+		self.assertIsNone(so.items[0].blanket_order)
+		self.assertEqual(so.items[0].blanket_order_rate, 0)
 
 	def test_party_and_order_type_are_enforced(self):
 		bo = new_blanket_order(blanket_order_type="Selling")
@@ -641,6 +806,24 @@ def make_blanket_order(**args):
 	bo.insert()
 	bo.submit()
 	return bo
+
+
+def make_party_reader(email, party_role, party_type, party):
+	from erpnext.tests.permission_test_utils import make_fenced_user
+
+	user = make_fenced_user(email, ["System Manager", party_role])
+	frappe.get_doc(
+		{
+			"doctype": "User Permission",
+			"user": user,
+			"allow": party_type,
+			"for_value": party,
+			"apply_to_all_doctypes": 0,
+			"applicable_for": party_type,
+		}
+	).insert(ignore_permissions=True)
+	frappe.clear_cache(user=user)
+	return user
 
 
 def make_priced_blanket_order(

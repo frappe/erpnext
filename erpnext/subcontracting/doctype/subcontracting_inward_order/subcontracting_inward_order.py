@@ -66,12 +66,23 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	pass
 
+	def onload(self):
+		self.set_onload(
+			"allow_delivery_of_overproduced_qty",
+			frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty"),
+		)
+
+	def before_validate(self):
+		super().before_validate()
+		self.set_subcontracting_conversion_factor()
+
 	def validate(self):
 		super().validate()
 		check_on_hold_or_closed_status("Sales Order", self.sales_order)
 		self.set_is_customer_provided_item()
 		self.validate_customer_provided_items()
 		self.validate_customer_warehouse()
+		self.validate_with_previous_doc()
 		self.validate_service_items()
 		self.set_missing_values()
 
@@ -88,11 +99,12 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Sales Order", self.sales_order)
 
-		total_to_be_received = total_received = total_rm_returned = 0
+		total_to_be_received = total_received = total_usable = total_rm_returned = 0
 		for rm in self.get("received_items"):
 			if rm.get("is_customer_provided_item"):
 				total_to_be_received += flt(rm.required_qty)
 				total_received += flt(rm.received_qty)
+				total_usable += min(flt(rm.received_qty), flt(rm.required_qty))
 				total_rm_returned += flt(rm.returned_qty)
 
 		total_to_be_produced = total_produced = total_process_loss = total_delivered = total_fg_returned = 0
@@ -103,7 +115,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			total_delivered += flt(item.delivered_qty)
 			total_fg_returned += flt(item.returned_qty)
 
-		per_raw_material_received = flt(total_received / total_to_be_received * 100, 2)
+		per_raw_material_received = flt(total_usable / total_to_be_received * 100, 2)
 		per_raw_material_returned = flt(total_rm_returned / total_received * 100, 2) if total_received else 0
 		per_produced = flt(total_produced / total_to_be_produced * 100, 2)
 		per_process_loss = flt(total_process_loss / total_produced * 100, 2) if total_produced else 0
@@ -121,13 +133,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if self.docstatus == 1:
 				if self.status == "Draft":
 					status = "Open"
-				elif self.per_returned == 100:
+				elif self.per_returned >= 100:
 					status = "Returned"
-				elif self.per_delivered == 100:
+				elif self.per_delivered >= 100:
 					status = "Delivered"
-				elif self.per_produced == 100:
+				elif self.per_produced >= 100:
 					status = "Produced"
-				elif self.per_raw_material_received > 0:
+				elif total_received:
 					status = "Ongoing"
 				else:
 					status = "Open"
@@ -147,6 +159,21 @@ class SubcontractingInwardOrder(SubcontractingController):
 			)
 			doc.save()
 
+	def set_subcontracting_conversion_factor(self):
+		so_items = frappe.get_all(
+			"Sales Order Item",
+			filters={"parent": self.sales_order},
+			fields=["name", "stock_qty", "fg_item_qty"],
+		)
+		conversion_factors = {
+			d.name: flt(d.stock_qty) / flt(d.fg_item_qty)
+			for d in so_items
+			if flt(d.stock_qty) and flt(d.fg_item_qty)
+		}
+		for item in self.items:
+			if item.sales_order_item in conversion_factors:
+				item.subcontracting_conversion_factor = conversion_factors[item.sales_order_item]
+
 	def validate_customer_warehouse(self):
 		if frappe.get_cached_value("Warehouse", self.customer_warehouse, "customer") != self.customer:
 			frappe.throw(
@@ -154,6 +181,17 @@ class SubcontractingInwardOrder(SubcontractingController):
 					frappe.bold(self.customer_warehouse), frappe.bold(self.customer)
 				)
 			)
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Sales Order Item": {
+					"ref_dn_field": "sales_order_item",
+					"compare_fields": [],
+					"is_child_table": True,
+				},
+			}
+		)
 
 	def validate_service_items(self):
 		sales_order_items = [item.sales_order_item for item in self.items]
@@ -354,10 +392,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 				"qty_consumed_per_unit",
 			)
 			qty = flt(
-				qty_consumed_per_unit * data.process_loss_qty,
+				rm_item.required_qty
+				- rm_item.received_qty
+				+ rm_item.returned_qty
+				+ qty_consumed_per_unit * data.process_loss_qty,
 				frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty"),
 			)
-			return rm_item.required_qty - rm_item.received_qty + rm_item.returned_qty + qty
+			return max(qty, 0)
 
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
@@ -535,6 +576,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 		def postprocess(source, target):
 			target.purpose = "Subcontracting Return"
 			target.set_stock_entry_type()
+			delivery_accounts = source.get_delivery_accounts()
 
 			for fg_item in source.items:
 				qty = fg_item.delivered_qty - fg_item.returned_qty
@@ -549,6 +591,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 						"stock_uom": fg_item.stock_uom,
 						"scio_detail": fg_item.name,
 						"is_finished_item": 1,
+						"expense_account": delivery_accounts.get(fg_item.name),
 					},
 				)
 
@@ -573,6 +616,23 @@ class SubcontractingInwardOrder(SubcontractingController):
 			return stock_entry
 		else:
 			return stock_entry.as_dict()
+
+	def get_delivery_accounts(self):
+		"""Map each finished good row to the Difference Account of its deliveries, if they all used one."""
+		accounts = {}
+		for row in frappe.get_all(
+			"Stock Entry",
+			filters=[
+				["Stock Entry Detail", "scio_detail", "in", [item.name for item in self.items]],
+				["purpose", "=", "Subcontracting Delivery"],
+				["docstatus", "=", 1],
+			],
+			fields=["`tabStock Entry Detail`.scio_detail", "`tabStock Entry Detail`.expense_account"],
+			distinct=True,
+		):
+			accounts.setdefault(row.scio_detail, set()).add(row.expense_account)
+
+		return {scio_detail: used.pop() for scio_detail, used in accounts.items() if len(used) == 1}
 
 
 def set_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):

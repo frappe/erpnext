@@ -41,7 +41,12 @@ from erpnext.accounts.utils import (
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
-from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_received_stock_qty_status_args,
+	get_stock_qty,
+	get_transit_amount,
+)
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
@@ -281,6 +286,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_posting_date_with_po()
 
 		super().validate()
+		self.reset_receipt_qty()
 
 		if not self.is_return:
 			self.po_required()
@@ -323,6 +329,16 @@ class PurchaseInvoice(BuyingController):
 
 		if self.on_hold:
 			self.validate_invoice_hold()
+
+	def reset_receipt_qty(self):
+		"""Clear qty left over from Update Stock once it is turned off."""
+		if self.update_stock:
+			return
+
+		for row in self.items:
+			if not row.pr_detail:
+				row.received_qty = 0
+				row.rejected_qty = 0
 
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
@@ -506,6 +522,7 @@ class PurchaseInvoice(BuyingController):
 			if not for_validate:
 				if tax_withholding_category or tax_withholding_group:
 					self.apply_tds = 1
+					self.set_onload("apply_tds", 1)
 
 		super().set_missing_values(for_validate)
 
@@ -562,11 +579,7 @@ class PurchaseInvoice(BuyingController):
 			}
 		)
 
-		if (
-			cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate"))
-			and not self.is_return
-			and not self.is_internal_supplier
-		):
+		if cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")) and not self.is_return:
 			self.validate_rate_with_reference_doc(
 				[
 					["Purchase Order", "purchase_order", "po_detail"],
@@ -870,9 +883,9 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_dt": "Material Request",
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
-					"source_field": "stock_qty",
+					**get_received_stock_qty_status_args(),
 					"second_source_dt": "Purchase Receipt Item",
-					"second_source_field": "stock_qty",
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "material_request_item",
 					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
@@ -1216,9 +1229,15 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
-						credit_amount = item.base_net_amount
-						if self.is_internal_supplier and item.valuation_rate:
-							credit_amount = flt(item.valuation_rate * item.stock_qty)
+						rejected_amount = self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, inventory_account_map
+						)
+						credit_amount = self.get_transit_stock_value(item, voucher_wise_stock_value)
+						if credit_amount is None:
+							credit_amount = item.base_net_amount
+							if self.is_internal_supplier and item.valuation_rate:
+								credit_amount = flt(item.valuation_rate * item.stock_qty)
+							credit_amount += rejected_amount
 
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
@@ -1256,6 +1275,10 @@ class PurchaseInvoice(BuyingController):
 							)
 
 					else:
+						self.make_rejected_warehouse_gl_entry(
+							gl_entries, item, voucher_wise_stock_value, inventory_account_map
+						)
+
 						if not self.is_internal_transfer():
 							gl_entries.append(
 								self.get_gl_dict(
@@ -1554,6 +1577,62 @@ class PurchaseInvoice(BuyingController):
 				},
 			)
 
+	def make_rejected_warehouse_gl_entry(
+		self, gl_entries, item, voucher_wise_stock_value, inventory_account_map
+	) -> float:
+		"""Book the material the invoice moved into the rejected warehouse.
+
+		An internal transfer carries the value credited out of the in-transit warehouse along with
+		the accepted material, so the entry against it is that warehouse, and the caller credits it
+		for both. On an ordinary invoice the supplier entry already holds the cost.
+		"""
+		if not (item.rejected_warehouse and flt(item.rejected_qty)):
+			return 0.0
+
+		transfers_rejected_material = self.is_internal_transfer()
+
+		rejected_amount = flt(
+			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
+			item.precision("base_net_amount"),
+		)
+		if not rejected_amount:
+			return 0.0
+
+		rejected_account = self.get_inventory_account_dict(item, inventory_account_map, "rejected_warehouse")
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": rejected_account["account"],
+					"against": item.expense_account if transfers_rejected_material else self.supplier,
+					"cost_center": item.cost_center,
+					"project": item.project or self.project,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": rejected_amount,
+					"debit_in_transaction_currency": flt(
+						rejected_amount / self.conversion_rate, item.precision("net_amount")
+					),
+				},
+				rejected_account["account_currency"],
+				item=item,
+			)
+		)
+
+		return rejected_amount if transfers_rejected_material else 0.0
+
+	def get_transit_stock_value(self, item, voucher_wise_stock_value) -> float | None:
+		"""Stock value an internal transfer took out of the in-transit warehouse, negative for a return.
+
+		None when the rejected material stays in transit, as its stock value cannot be told apart then.
+		"""
+		if not (item.from_warehouse and self.is_internal_transfer()):
+			return None
+
+		if item.rejected_warehouse == item.from_warehouse:
+			return None
+
+		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
+		return None if stock_value is None else -flt(stock_value)
+
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		net_amt_precision = item.precision("base_net_amount")
 
@@ -1562,17 +1641,42 @@ class PurchaseInvoice(BuyingController):
 			net_amt_precision,
 		)
 
-		if self.is_return and self.update_stock and (self.is_internal_supplier or not self.return_against):
+		transit_stock_value = self.get_transit_stock_value(item, voucher_wise_stock_value)
+		if transit_stock_value is not None:
+			# The accepted and rejected warehouses together take what left transit, plus the landed
+			# cost; round each part as it is posted so the entries balance.
+			rejected_stock_value = voucher_wise_stock_value.get((item.name, item.rejected_warehouse))
+			warehouse_debit_amount = flt(
+				flt(transit_stock_value, net_amt_precision)
+				- flt(rejected_stock_value, net_amt_precision)
+				+ flt(item.landed_cost_voucher_amount),
+				net_amt_precision,
+			)
+
+		if (
+			transit_stock_value is None
+			and self.is_return
+			and self.update_stock
+			and (self.is_internal_supplier or not self.return_against)
+		):
 			net_rate = item.base_net_amount
-			if item.sales_incoming_rate:  # for internal transfer
-				net_rate = item.qty * item.sales_incoming_rate
+			if item.sales_incoming_rate:
+				# Material of a transfer goes back at the rate it came in with, the rejected
+				# material along with the accepted.
+				net_rate = get_transit_amount(item, item.qty) + get_transit_amount(item, item.rejected_qty)
 
 			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 			warehouse_debit_amount = flt(
 				voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision
 			)
 
-			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
+			# The rejected warehouse carries the rest of what the invoice paid for, and is booked
+			# by its own entry, so it is not a variance.
+			returned_stock_value = warehouse_debit_amount + flt(
+				voucher_wise_stock_value.get((item.name, item.rejected_warehouse)), net_amt_precision
+			)
+
+			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed", ignore_validation=True)
 					if item.is_fixed_asset
@@ -1587,7 +1691,7 @@ class PurchaseInvoice(BuyingController):
 					self.get_company_default("default_expense_account", ignore_validation=True)
 					or fallback_account
 				)
-				stock_adjustment_amt = stock_amount - warehouse_debit_amount
+				stock_adjustment_amt = stock_amount - returned_stock_value
 
 				gl_entries.append(
 					self.get_gl_dict(
@@ -1607,7 +1711,7 @@ class PurchaseInvoice(BuyingController):
 
 		elif (
 			self.update_stock
-			and voucher_wise_stock_value.get((item.name, item.warehouse))
+			and (transit_stock_value is not None or voucher_wise_stock_value.get((item.name, item.warehouse)))
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
@@ -1914,23 +2018,33 @@ class PurchaseInvoice(BuyingController):
 				else:
 					round_off_account = round_off_for_opening
 
+			round_off_account_currency = get_account_currency(round_off_account)
 			gl_entries.append(
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
 						"against": self.supplier,
-						"debit_in_account_currency": self.rounding_adjustment,
+						"debit_in_transaction_currency": flt(
+							self.rounding_adjustment, self.precision("rounding_adjustment")
+						),
+						"debit_in_account_currency": self.base_rounding_adjustment
+						if round_off_account_currency == self.company_currency
+						else self.rounding_adjustment,
 						"debit": self.base_rounding_adjustment,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
 						else (self.cost_center or round_off_cost_center),
 					},
+					round_off_account_currency,
 					item=self,
 				)
 			)
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
+		if self.is_return and self.is_internal_supplier:
+			# cancelling a return gives its qty back to the invoice it returned
+			self.validate_internal_transfer_qty()
 
 		super().on_cancel()
 		PurchaseTaxWithholding(self).on_cancel()
@@ -2270,21 +2384,30 @@ def make_purchase_receipt(source_name, target_doc=None, args=None):
 			merge_taxes(source_parent, target_parent)
 		target_parent.run_method("calculate_taxes_and_totals")
 
-	def update_item(obj, target, source_parent):
-		from erpnext.controllers.sales_and_purchase_return import get_returned_qty_map_for_row
-
-		returned_qty_map = (
-			get_returned_qty_map_for_row(
-				source_parent.name, source_parent.supplier, obj.name, "Purchase Invoice"
+	def get_returned_qty(obj, source_parent):
+		"""Qty cancelled by debit notes against the row, in the row's UOM."""
+		debit_note = frappe.qb.DocType("Purchase Invoice")
+		debit_note_item = frappe.qb.DocType("Purchase Invoice Item")
+		returned_stock_qty = (
+			frappe.qb.from_(debit_note_item)
+			.join(debit_note)
+			.on(debit_note.name == debit_note_item.parent)
+			.select(Sum(-debit_note_item.qty * debit_note_item.conversion_factor))
+			.where(
+				(debit_note.return_against == source_parent.name)
+				& (debit_note.is_return == 1)
+				& (debit_note.docstatus == 1)
+				& (debit_note_item.purchase_invoice_item == obj.name)
 			)
-			or {}
-		)
+		).run()[0][0]
+		return flt(returned_stock_qty) / flt(obj.conversion_factor or 1)
 
-		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj)
+	def update_item(obj, target, source_parent):
+		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj) - get_returned_qty(obj, source_parent)
+		pending_qty = max(flt(pending_qty, target.precision("qty")), 0)
 
-		target.qty = pending_qty - flt(returned_qty_map.get("qty"))
-		target.received_qty = pending_qty
-		target.stock_qty = (pending_qty - flt(returned_qty_map.get("qty"))) * flt(obj.conversion_factor)
+		target.qty = target.received_qty = pending_qty
+		target.stock_qty = pending_qty * flt(obj.conversion_factor)
 		target.amount = pending_qty * flt(obj.rate)
 		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 

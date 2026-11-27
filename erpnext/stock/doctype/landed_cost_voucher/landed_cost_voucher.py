@@ -7,6 +7,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, flt
 
 import erpnext
@@ -61,6 +62,7 @@ class LandedCostVoucher(Document):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
+				check_receipt_document_access(pr.receipt_document_type, pr.receipt_document)
 				pr_items = get_pr_items(pr)
 
 				for d in pr_items:
@@ -418,10 +420,7 @@ class LandedCostVoucher(Document):
 
 	@frappe.whitelist()
 	def get_receipt_document_details(self, receipt_document_type: str, receipt_document: str):
-		if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
-			frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
-
-		frappe.has_permission(receipt_document_type, "read", receipt_document, throw=True)
+		check_receipt_document_access(receipt_document_type, receipt_document)
 		if receipt_document_type in [
 			"Purchase Invoice",
 			"Purchase Receipt",
@@ -606,6 +605,13 @@ class LandedCostVoucher(Document):
 		}
 
 
+def check_receipt_document_access(receipt_document_type, receipt_document):
+	if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
+		frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
+
+	frappe.has_permission(receipt_document_type, "select", receipt_document, throw=True)
+
+
 def get_pr_items(purchase_receipt):
 	item = frappe.qb.DocType("Item")
 
@@ -640,6 +646,10 @@ def get_pr_items(purchase_receipt):
 			pr_item.amount.as_("base_amount"),
 		)
 
+		# secondary items take their share of the cost from the finished good
+		query = query.where(IfNull(pr_item.secondary_item_type, "") == "")
+		query = query.where(IfNull(pr_item.valuation_type, "") == "")
+
 	elif purchase_receipt.receipt_document_type == "Stock Entry":
 		query = query.select(
 			pr_item.basic_rate.as_("base_rate"),
@@ -666,7 +676,11 @@ def get_vendor_invoices(doctype, txt, searchfield, start, page_len, filters):
 	if txt and txt.lower().startswith(("select", "delete", "update")):
 		frappe.throw(_("Invalid search query"), title=_("Invalid Query"))
 
-	query = get_vendor_invoice_query(filters)
+	query = get_vendor_invoice_query(filters).where(
+		frappe.qb.DocType("Purchase Invoice").name.isin(
+			frappe.qb.get_query("Purchase Invoice", fields=["name"], ignore_permissions=False)
+		)
+	)
 
 	if txt:
 		query = query.where(frappe.qb.DocType(doctype).name.like(f"%{txt}%"))

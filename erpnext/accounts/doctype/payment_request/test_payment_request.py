@@ -4,20 +4,32 @@
 import json
 import re
 import unittest
+from itertools import product
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_days, cint, nowdate
+from frappe.handler import execute_cmd
+from frappe.query_builder.functions import Sum
+from frappe.utils import add_days, cint, nowdate, set_request
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	get_print_format_list,
+	make_payment_request,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_invoice as make_purchase_invoice_from_order,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 PAYMENT_URL = "https://example.com/payment"
@@ -100,6 +112,81 @@ class TestPaymentRequest(ERPNextTestSuite):
 		)
 		self._get_payment_gateway_controller = _get_payment_gateway_controller.start()
 		self.addCleanup(_get_payment_gateway_controller.stop)
+
+	def test_portal_customer_payment_permissions(self):
+		order = make_sales_order()
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "payment-portal-customer@example.com",
+				"first_name": "Portal Customer",
+				"user_type": "Website User",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Customer"}],
+			}
+		).insert()
+		customer = frappe.get_doc("Customer", order.customer)
+		customer.append("portal_users", {"user": user.name})
+		customer.save()
+		cmd = "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request"
+		self.addCleanup(setattr, frappe.local, "request", None)
+		self.addCleanup(setattr, frappe.local, "response", frappe._dict())
+
+		with self.set_user(user.name):
+			self.assertFalse(frappe.has_permission("Payment Request", "create"))
+			self.assertFalse(order.has_permission("read"))
+			for method in ("GET", "POST"):
+				set_request(method=method, path=f"/api/method/{cmd}")
+				frappe.local.form_dict = frappe._dict(
+					dt="Sales Order",
+					dn=order.name,
+					submit_doc="1",
+					order_type="Shopping Cart",
+					grand_total=1,
+					recipient_id="another-customer@example.com",
+					party="_Test Customer 1",
+					payment_gateway_account="_Test Gateway - USD - _TC",
+					ref_doc={"doctype": "Sales Order", "name": "other-order"},
+				)
+				if method == "GET":
+					self.assertRaises(frappe.PermissionError, execute_cmd, cmd)
+				else:
+					execute_cmd(cmd)
+
+		self.assertEqual(frappe.local.response.get("type"), "redirect")
+		self.assertEqual(frappe.local.response.get("location"), PAYMENT_URL)
+		request = frappe.get_doc("Payment Request", {"reference_name": order.name})
+		self.assertEqual(request.docstatus, 1)
+		self.assertEqual(request.grand_total, order.grand_total)
+		self.assertEqual(request.party, order.customer)
+		self.assertEqual(request.email_to, order.owner)
+		self.assertEqual(request.currency, order.currency)
+		self.assertTrue(request.make_sales_invoice)
+		self.assertNotEqual(request.payment_gateway_account, "_Test Gateway - USD - _TC")
+
+		cancelled_order = make_sales_order()
+		cancelled_order.cancel()
+		for payer, reference in (
+			(user.name, make_sales_order(customer="_Test Customer 1")),
+			(user.name, make_sales_order(do_not_submit=True)),
+			(user.name, cancelled_order),
+			(user.name, create_purchase_order()),
+			("Guest", order),
+		):
+			with self.subTest(payer=payer, reference=reference.name), self.set_user(payer):
+				self.assertRaises(
+					frappe.PermissionError,
+					make_payment_request,
+					dt=reference.doctype,
+					dn=reference.name,
+					order_type="Shopping Cart",
+					submit_doc=1,
+				)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, make_payment_request, dt=order.doctype, dn=order.name)
+		request.cancel()
+		order.reload().cancel()
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
@@ -438,6 +525,98 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(pe.paid_amount, 800)
 		self.assertEqual(pe.base_received_amount, 800)
 		self.assertEqual(pe.received_amount, 10)
+
+	def test_payment_entry_from_request_uses_bank_account_currency(self):
+		invoice = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=get_exchange_rate("USD", "INR"),
+			qty=1,
+			rate=200,
+		)
+		payment_request = make_payment_request(
+			dt="Sales Invoice",
+			dn=invoice.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		payment_entry = payment_request.create_payment_entry(submit=False)
+		self.assertEqual(payment_entry.paid_amount, 200)
+		self.assertEqual(payment_entry.received_amount, invoice.base_grand_total)
+		self.assertEqual(payment_entry.base_paid_amount, invoice.base_grand_total)
+		self.assertEqual(payment_entry.base_received_amount, invoice.base_grand_total)
+
+		payment_entry.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 0)
+		self.assertEqual(payment_request.reload().status, "Paid")
+
+		payment_entry.cancel()
+		self.assertEqual(invoice.reload().outstanding_amount, invoice.grand_total)
+		self.assertEqual(payment_request.reload().outstanding_amount, payment_request.grand_total)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_payment_request_preserves_requested_amount_after_exchange_rate_change(self):
+		invoice = create_sales_invoice(
+			customer="_Test Customer",
+			debit_to="Debtors - _TC",
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=10,
+		)
+		payment_request = make_payment_request(
+			dt="Sales Invoice",
+			dn=invoice.name,
+			recipient_id="saurabh@erpnext.com",
+			mute_email=1,
+			payment_gateway_account="_Test Gateway - USD - _TC",
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(payment_request.grand_total, 10)
+		self.assertEqual(payment_request.outstanding_amount, 800)
+		self.assertEqual(payment_request.party_account_currency, "INR")
+
+		frappe.db.delete(
+			"Currency Exchange",
+			{"date": nowdate(), "from_currency": "USD", "to_currency": "INR"},
+		)
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": nowdate(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 100,
+				"for_buying": 1,
+				"for_selling": 1,
+			}
+		).insert()
+
+		payment_entry = payment_request.create_payment_entry(submit=False)
+		self.assertEqual(payment_entry.paid_amount, 800)
+		self.assertEqual(payment_entry.received_amount, 10)
+
+		payment_entry.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 0)
+		self.assertEqual(payment_request.reload().status, "Paid")
+		self.assertEqual(payment_entry.reload().received_amount, 10)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": payment_entry.name},
+			fields=["debit", "credit"],
+		)
+		self.assertAlmostEqual(sum(row.debit - row.credit for row in gl_entries), 0, places=2)
+
+		payment_entry.cancel()
+		self.assertEqual(invoice.reload().outstanding_amount, 800)
+		self.assertEqual(payment_request.reload().outstanding_amount, 800)
 
 	def test_multiple_payment_if_partially_paid_for_same_currency(self):
 		so = make_sales_order(currency="INR", qty=1, rate=1000)
@@ -816,9 +995,11 @@ class TestPaymentRequest(ERPNextTestSuite):
 			patch.object(
 				frappe,
 				"get_system_settings",
-				side_effect=lambda k: 1
-				if k == "use_number_format_from_currency"
-				else frappe.db.get_single_value("System Settings", k),
+				side_effect=lambda k: (
+					1
+					if k == "use_number_format_from_currency"
+					else frappe.db.get_single_value("System Settings", k)
+				),
 			),
 			patch.object(pr_module, "get_company_currency", return_value="JPY"),
 			patch.object(
@@ -1006,6 +1187,79 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr.load_from_db()
 
 		self.assertEqual(pr.grand_total, pi.outstanding_amount)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	def test_unlink_advance_request_reverses_separate_account(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.book_advance_payments_in_separate_party_account = 1
+		company.default_advance_received_account = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="Customer Advance Request",
+			company=company.name,
+			account_type="Receivable",
+		)
+		company.default_advance_paid_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Supplier Advance Request",
+			company=company.name,
+			account_type="Payable",
+		)
+		company.save()
+
+		for order_type, qty, cancel_invoice in product(
+			("Sales Order", "Purchase Order"), (1, 2), (False, True)
+		):
+			with self.subTest(order_type=order_type, qty=qty, cancel_invoice=cancel_invoice):
+				order = (make_sales_order if order_type == "Sales Order" else create_purchase_order)(
+					qty=2, rate=50
+				)
+				request = make_payment_request(
+					dt=order.doctype, dn=order.name, submit_doc=True, return_doc=True, mute_email=True
+				)
+				payment = request.create_payment_entry()
+				invoice = (
+					make_sales_invoice if order_type == "Sales Order" else make_purchase_invoice_from_order
+				)(order.name)
+				invoice.items[0].qty = qty
+				invoice.allocate_advances_automatically = 1
+				invoice.insert().submit()
+
+				if cancel_invoice:
+					invoice.cancel()
+				else:
+					frappe.get_doc(
+						{
+							"doctype": "Unreconcile Payment",
+							"company": company.name,
+							"voucher_type": payment.doctype,
+							"voucher_no": payment.name,
+							"allocations": [
+								{"reference_doctype": invoice.doctype, "reference_name": invoice.name}
+							],
+						}
+					).insert().submit()
+					self.assertEqual(invoice.reload().outstanding_amount, qty * 50)
+
+				self.assertEqual((request.reload().status, request.outstanding_amount), ("Paid", 0))
+				self.assertEqual(payment.reload().total_allocated_amount, 100)
+				self.assertEqual(payment.unallocated_amount, 0)
+				party_account = invoice.debit_to if order_type == "Sales Order" else invoice.credit_to
+				for ledger in ("GL Entry", "Payment Ledger Entry"):
+					table = frappe.qb.DocType(ledger)
+					amount = table.debit - table.credit if ledger == "GL Entry" else table.amount
+					balance = (
+						frappe.qb.from_(table)
+						.select(Sum(amount))
+						.where(table.voucher_type == payment.doctype)
+						.where(table.voucher_no == payment.name)
+						.where(table.account == party_account)
+					).run()[0][0]
+					self.assertEqual(balance, 0, ledger)
+
+				if not cancel_invoice:
+					invoice.cancel()
+				payment.cancel()
+				self.assertEqual(request.reload().outstanding_amount, 100)
 
 	def test_payment_request_grand_total_from_selected_schedules(self):
 		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=100)
@@ -1392,6 +1646,31 @@ class TestPaymentRequest(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Payment Request", existing_pr.name, "status"), "Requested")
 
+	def test_print_format_list_follows_print_format_permissions(self):
+		print_format = frappe.get_doc(
+			{
+				"doctype": "Print Format",
+				"name": "_Test Payment Request Print Format",
+				"doc_type": "Sales Invoice",
+				"standard": "No",
+				"custom_format": 1,
+				"print_format_type": "Jinja",
+				"html": "<p>{{ doc.name }}</p>",
+			}
+		).insert()
+		# Accounts User has no Print Format role of its own, only select through Desk User
+		accounts_user = make_fenced_user("_test_pr_print_format_user@example.com", ["Accounts User"])
+		portal_user = make_portal_user("_test_pr_print_format_portal_user@example.com", "_Test Customer")
+
+		with as_user(accounts_user):
+			print_formats = get_print_format_list("Sales Invoice")["print_format"]
+		self.assertEqual(print_formats[0], "Standard")
+		self.assertIn(print_format.name, print_formats)
+
+		for user in (portal_user, "Guest"):
+			with self.subTest(user=user), as_user(user):
+				self.assertRaises(frappe.PermissionError, get_print_format_list, "Sales Invoice")
+
 	def test_loyalty_points_in_payment_request(self):
 		customer = frappe.db.get_value("Customer", {"customer_name": "Test Loyalty Customer"})
 		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
@@ -1606,3 +1885,11 @@ def make_shopping_cart_order(customer, rate=1000):
 	so.save()
 	so.submit()
 	return so
+
+
+def make_portal_user(email, customer):
+	user = make_fenced_user(email, ["Customer"])
+	customer_doc = frappe.get_doc("Customer", customer)
+	customer_doc.append("portal_users", {"user": user})
+	customer_doc.save()
+	return user

@@ -41,7 +41,6 @@ def create_transaction_deletion_record(company):
 	transaction_deletion_record.reload()
 
 	transaction_deletion_record.submit()
-	transaction_deletion_record.start_deletion_tasks()
 
 
 def clear_masters():

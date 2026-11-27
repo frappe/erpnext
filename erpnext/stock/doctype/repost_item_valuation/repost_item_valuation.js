@@ -87,12 +87,15 @@ frappe.ui.form.on("Repost Item Valuation", {
 
 	refresh: function (frm) {
 		if (frm.doc.status == "Failed" && frm.doc.docstatus == 1) {
-			frm.add_custom_button(__("Restart"), function () {
-				frm.trigger("restart_reposting");
-			}).addClass("btn-primary");
+			frm.add_custom_button(
+				__("Restart"),
+				function () {
+					frm.trigger("restart_reposting");
+				},
+				null,
+				"primary"
+			);
 		}
-
-		frm.trigger("show_update_valuation_field");
 
 		if (frm.doc.status !== "Completed") {
 			frm.trigger("show_reposting_progress");
@@ -101,13 +104,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 		if (frm.doc.status === "Queued" && frm.doc.docstatus === 1) {
 			frm.trigger("execute_reposting");
 		}
-	},
-
-	show_update_valuation_field(frm) {
-		frm.toggle_display(
-			"recalculate_valuation_rate",
-			["Purchase Receipt", "Purchase Invoice", "Stock Entry"].includes(frm.doc.voucher_type)
-		);
 	},
 
 	execute_reposting(frm) {
@@ -172,7 +168,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 
 	voucher_type: function (frm) {
 		frm.trigger("set_company_on_transaction");
-		frm.trigger("show_update_valuation_field");
 	},
 
 	voucher_no: function (frm) {

@@ -20,6 +20,7 @@ from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges, merge_taxes
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -251,7 +252,10 @@ class DeliveryNote(SellingController):
 					"target_parent_dt": "Delivery Note",
 					"target_parent_field": "per_returned",
 					"target_ref_field": "stock_qty",
-					"source_field": "-1 * stock_qty",
+					"source_field": "-1 * qty * conversion_factor",
+					"round_to_target_precision": frappe.get_single_value(
+						"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
+					),
 					"percent_join_field_parent": "return_against",
 				},
 			]
@@ -320,6 +324,7 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
+		self.validate_against_pick_list_items()
 		self.set_serial_and_batch_bundle_from_pick_list()
 		make_packing_list(self)
 		self.update_current_stock()
@@ -397,7 +402,6 @@ class DeliveryNote(SellingController):
 		if (
 			cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[
@@ -520,6 +524,8 @@ class DeliveryNote(SellingController):
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
 		self.validate_standalone_serial_nos_customer()
+		# reservations read the delivered serial and batch nos from the bundles
+		self.make_packed_item_bundles()
 		self.update_stock_reservation_entries()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -1152,11 +1158,13 @@ def make_sales_invoice(
 def make_delivery_trip(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
-	if frappe.db.get_value("Delivery Note", source_name, "docstatus") == 2:
+	docstatus, company = frappe.db.get_value("Delivery Note", source_name, ["docstatus", "company"])
+	if docstatus == 2:
 		frappe.throw(_("Delivery Note {0} is cancelled").format(source_name))
 
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
+		target_doc.company = company
 
 	def update_address(source_doc, target_doc, source_parent):
 		target_doc.address = source_doc.shipping_address_name or source_doc.customer_address
@@ -1437,6 +1445,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			)
 
 		target_doc.inter_company_invoice_reference = source_doc.name
+		clear_inapplicable_terms(target_doc)
 		if target_doc.doctype == "Purchase Receipt":
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")

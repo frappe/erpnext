@@ -102,13 +102,14 @@
   }
  ],
  "icon": "bell",
+ "link_display_mode": "Search",
  "links": [
   {
    "link_doctype": "Dunning",
    "link_fieldname": "dunning_type"
   }
  ],
- "modified": "2026-05-30 23:18:20.740726",
+ "modified": "2026-11-11 04:33:03.999443",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Type",
@@ -150,6 +151,12 @@
    "role": "Administrator",
    "share": 1,
    "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
   }
  ],
  "row_format": "Dynamic",

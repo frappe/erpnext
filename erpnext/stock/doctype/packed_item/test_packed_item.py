@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import add_to_date, nowdate
 
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
@@ -139,6 +140,49 @@ class TestPackedItem(ERPNextTestSuite):
 		so.save()
 		self.assertEqual(sorted(pi.qty for pi in so.packed_items), [4, 6])
 
+	def test_update_items_keeps_ordered_component_qty_after_uom_change(self):
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)  # 20 Nos
+		next(row for row in component.uoms if row.uom == "Box").conversion_factor = 12
+		component.save()
+
+		row = so.items[0]
+		for qty, packed_qty in ((2, 20), (3, 30)):
+			trans_item = {"docname": row.name, "item_code": bundle, "qty": qty, "rate": 150}
+			trans_item.update({"uom": row.uom, "conversion_factor": row.conversion_factor})
+			update_child_qty_rate("Sales Order", frappe.as_json([trans_item]), so.name)
+			so.reload()
+			self.assertEqual(so.packed_items[0].qty, packed_qty)
+
+	def test_update_items_packs_exact_component_qty_on_qty_increase(self):
+		"A qty increase packs from the exact conversion, not the ratio of the order's rounded packed qty."
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		component = make_item(
+			properties={"stock_uom": "Kg", "uoms": [{"uom": "Nos", "conversion_factor": 1 / 3}]}
+		)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Nos"})
+		bundle_doc.insert()
+
+		so = make_sales_order(item_code=bundle, qty=1, warehouse=self.warehouse)
+		row = so.items[0]
+		trans_item = {"docname": row.name, "item_code": bundle, "qty": 30, "rate": row.rate}
+		trans_item.update({"uom": row.uom, "conversion_factor": row.conversion_factor})
+		update_child_qty_rate("Sales Order", frappe.as_json([trans_item]), so.name)
+		so.reload()
+		self.assertEqual(so.packed_items[0].qty, 10)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_recurring_bundle_item(self):
 		"Test impact on packed items if same bundle item is added and removed."
@@ -189,6 +233,16 @@ class TestPackedItem(ERPNextTestSuite):
 
 		self.assertEqual(so.items[0].rate, 700)
 		self.assertEqual(so.items[0].amount, 1400)
+
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings", {"editable_bundle_item_rates": 1, "allow_zero_qty_in_sales_order": 1}
+	)
+	def test_zero_qty_bundle_row_keeps_its_rate(self):
+		so = make_sales_order(item_code=self.bundle, qty=1, rate=100, do_not_save=True)
+		so.items[0].qty = 0
+		so.save()
+
+		self.assertEqual(so.items[0].rate, 100)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_newly_mapped_doc_packed_items(self):
@@ -414,3 +468,43 @@ class TestPackedItem(ERPNextTestSuite):
 		for d in expected_returns:
 			d.qty /= 2
 		self.assertReturns(expected_returns, dn_ret.packed_items)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
+	def test_bundle_rate_from_components_is_per_row_uom(self):
+		"""The bundle row's rate is per its own UOM, so a Box of 12 bundles costs 12 components."""
+		bundle = make_item(
+			properties={
+				"is_stock_item": 0,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_product_bundle(bundle, [component], 1)
+
+		so = make_sales_order(item_code=bundle, qty=1, do_not_save=True)
+		so.items[0].update({"uom": "Box", "conversion_factor": 12})
+		so.save()
+		so.packed_items[0].rate = 10
+		so.save()
+
+		self.assertEqual(so.items[0].rate, 120)
+		self.assertEqual(so.items[0].amount, 120)
+
+	def test_return_keeps_bundle_rate_of_original(self):
+		"""A return credits its original's bundle rate, not one rebuilt from component rates."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=1, rate=100)
+		dn = make_delivery_note(so.name)
+		dn.save()
+		for row in dn.packed_items:
+			row.rate = 10
+		dn.save()
+		dn.submit()
+
+		with self.change_settings("Selling Settings", {"editable_bundle_item_rates": 1}):
+			dn_ret = make_sales_return(dn.name)
+			dn_ret.save()
+
+		self.assertEqual(dn_ret.items[0].rate, 100)

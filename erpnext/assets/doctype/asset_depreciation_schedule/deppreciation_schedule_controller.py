@@ -354,7 +354,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		)
 
 		if not self.current_fiscal_year_end_date:
-			self.current_fiscal_year_end_date = get_fiscal_year(self.fb_row.depreciation_start_date)[2]
+			self.current_fiscal_year_end_date = self.get_fiscal_year(self.fb_row.depreciation_start_date)[1]
 			self.fiscal_year_changed = True
 		elif getdate(schedule_date) > getdate(self.current_fiscal_year_end_date):
 			self.current_fiscal_year_end_date = add_years(self.current_fiscal_year_end_date, 1)
@@ -518,12 +518,12 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		return date_diff(fy_end_date, fy_start_date) + 1
 
 	def get_fiscal_year(self, date):
-		fy = get_fiscal_year(date, as_dict=True, raise_on_missing=False)
+		fy = get_fiscal_year(date, company=self.asset_doc.company, as_dict=True, raise_on_missing=False)
 		if fy:
 			fy_start_date = fy.year_start_date
 			fy_end_date = fy.year_end_date
 		else:
-			current_fy = get_fiscal_year(nowdate(), as_dict=True)
+			current_fy = get_fiscal_year(nowdate(), company=self.asset_doc.company, as_dict=True)
 			# get fiscal year start date of the year in which the schedule date falls
 			months = month_diff(date, current_fy.year_start_date)
 			if months % 12:

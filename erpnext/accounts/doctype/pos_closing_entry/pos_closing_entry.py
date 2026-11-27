@@ -64,9 +64,9 @@ class POSClosingEntry(StatusUpdater):
 		self.validate_invoice_mode()
 
 	def set_posting_date_and_time(self):
-		if self.posting_date:
+		if not self.posting_date:
 			self.posting_date = frappe.utils.nowdate()
-		if self.posting_time:
+		if self.posting_time in (None, ""):
 			self.posting_time = frappe.utils.nowtime()
 
 	def fetch_invoice_type(self):

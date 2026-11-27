@@ -56,6 +56,34 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "incomplete or damaged", read_step_file, content)
 
+	def test_step_file_with_more_parts_than_the_limit_is_rejected(self):
+		with patch("erpnext.manufacturing.doctype.bom_creator.step_file.MAX_PARTS", 6):
+			self.assertEqual(
+				len(read_step_file(make_step_content(BICYCLE_PRODUCTS, BICYCLE_LINKS))["parts"]), 3
+			)
+
+		with patch("erpnext.manufacturing.doctype.bom_creator.step_file.MAX_PARTS", 5):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"more than 5 parts",
+				read_step_file,
+				make_step_content(BICYCLE_PRODUCTS, BICYCLE_LINKS),
+			)
+
+	def test_step_file_with_shared_subassemblies_stops_at_the_part_limit(self):
+		products = {"ASSEMBLY-0": "Assembly"}
+		links = []
+		parents = ["ASSEMBLY-0"]
+		for level in range(1, 14):
+			children = [f"PART-{level}-A", f"PART-{level}-B"]
+			products.update({child: child for child in children})
+			links += [(parent, child, 1) for parent in parents for child in children]
+			parents = children
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "more than 5000 parts", read_step_file, make_step_content(products, links)
+		)
+
 	def test_design_file_must_be_readable_by_the_user(self):
 		from frappe.core.doctype.file.file import File
 

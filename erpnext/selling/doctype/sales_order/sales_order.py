@@ -25,7 +25,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
-from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.buying.utils import check_on_hold_or_closed_status, get_qty_to_order
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -687,7 +687,9 @@ class SalesOrder(SellingController):
 		if status == "Draft" and self.docstatus == 1:
 			self.check_credit_limit()
 		self.update_reserved_qty()
-		self.update_subcontracting_order_status()
+		# hold and reopen leave the inward orders as they are: a user may have closed them on purpose
+		if status == "Closed":
+			self.close_inward_orders()
 		self.notify_update()
 		clear_doctype_notifications(self)
 		self.update_blanket_order()
@@ -701,7 +703,7 @@ class SalesOrder(SellingController):
 				)
 			)
 
-	def update_subcontracting_order_status(self):
+	def close_inward_orders(self):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
 			set_subcontracting_inward_order_status as update_scio_status,
 		)
@@ -710,7 +712,7 @@ class SalesOrder(SellingController):
 			for scio in frappe.get_all(
 				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}, pluck="name"
 			):
-				update_scio_status(scio, "Closed" if self.status == "Closed" else None)
+				update_scio_status(scio, "Closed")
 
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -727,11 +729,11 @@ class SalesOrder(SellingController):
 
 		for d in self.get("items"):
 			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
-				if self.has_product_bundle(d.item_code):
-					for p in self.get("packed_items"):
-						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
-							_valid_for_reserve(p.item_code, p.warehouse)
-				else:
+				# the order's own packed rows, as the bundle may since be disabled
+				packed_items = [p for p in self.get("packed_items") if p.parent_detail_docname == d.name]
+				for p in packed_items:
+					_valid_for_reserve(p.item_code, p.warehouse)
+				if not packed_items:
 					_valid_for_reserve(d.item_code, d.warehouse)
 
 		for item_code, warehouse in item_wh_list:
@@ -1171,11 +1173,12 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
 	if item.get("delivered_qty") is not None:
-		return (
+		unreserved_qty = (
 			item.stock_qty
 			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
 			- existing_reserved_qty
 		)
+		precision = item.precision("stock_qty")
 	else:
 		stock_qty, delivered_qty, conversion_factor = frappe.get_value(
 			"Sales Order Item",
@@ -1186,7 +1189,11 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 			item.qty / stock_qty
 		)  # ratio of packed item qty to main item qty in product bundle
 		delivered_qty = delivered_qty * conversion_factor * bundle_conversion_factor
-		return item.qty - delivered_qty - existing_reserved_qty
+		unreserved_qty = item.qty - delivered_qty - existing_reserved_qty
+		precision = item.precision("qty")
+
+	# a residue below stock qty precision, as a fractional conversion factor leaves, is not unreserved
+	return unreserved_qty if flt(unreserved_qty, precision) > 0 else 0
 
 
 def get_list_context(context=None):
@@ -1695,7 +1702,7 @@ def make_sales_invoice(
 		)
 
 	def set_missing_values(source, target):
-		target.flags.ignore_permissions = True
+		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1904,8 +1911,13 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	from frappe.desk.calendar import get_event_conditions
+	from frappe.desk.reportview import get_match_cond
+
+	if frappe.only_has_select_perm("Sales Order"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	conditions = get_event_conditions("Sales Order", filters)
+	match_conditions = get_match_cond("Sales Order")
 
 	data = frappe.db.sql(
 		f"""
@@ -1921,6 +1933,7 @@ def get_events(start, end, filters=None):
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
 			{conditions}
+			{match_conditions}
 		""",
 		{"start": start, "end": end},
 		as_dict=True,
@@ -1958,7 +1971,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
-		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
@@ -1996,8 +2008,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
-		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target.qty = qty_to_order[source.name]
+		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
 
 	def update_item_for_packed_item(source, target, _):
@@ -2005,7 +2017,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	def filter_items(item, supplier):
 		if (
-			item.ordered_qty < item.stock_qty
+			qty_to_order[item.name] > 0
 			and not is_product_bundle(item.item_code)
 			and item.name in items_to_map
 			and items_to_map[item.name] == supplier
@@ -2016,6 +2028,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	sales_order = frappe.get_doc("Sales Order", source_name)
 	sales_order.check_permission("read")
+	qty_to_order = get_qty_to_order(sales_order.items, "sales_order_item")
 	items_to_map = {}
 	for item in selected_items:
 		filters = {"name": item.get("name")} if item.get("name") else {"item_code": item.get("item_code")}
@@ -2243,6 +2256,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			{
 				"item_code": item.get("item_code"),
 				"qty": item.get("quantity"),
+				"uom": item.get("uom"),
 				"schedule_date": schedule_date,
 				"warehouse": item_wh.get(item.get("main_bom_item")) or item.get("warehouse"),
 				"sales_order": sales_order,
@@ -2282,7 +2296,15 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 			parent
 			and parent.delivered_by_supplier != 1
 			and abs(parent.delivered_qty) < abs(parent.qty)
-			and flt(packed_item.qty) > 0
+			and get_packed_qty_to_pick(packed_item, parent) > 0
+		)
+
+	def get_packed_qty_to_pick(packed_item, parent) -> float:
+		# what is left on this component, as components of one bundle can be picked unevenly
+		delivered_qty = flt(packed_item.qty) * flt(parent.delivered_qty) / flt(parent.qty)
+		return flt(
+			flt(packed_item.qty) - max(flt(packed_item.picked_qty), delivered_qty),
+			packed_item.precision("qty"),
 		)
 
 	def update_item_quantity(source, target, source_parent) -> None:
@@ -2298,13 +2320,8 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		target.company_total_stock = bin_details.get("company_total_stock")
 
 	def update_packed_item_qty(source, target, source_parent) -> None:
-		qty = flt(source.qty)
-		for item in source_parent.items:
-			if source.parent_detail_docname == item.name:
-				picked_qty = flt(item.picked_qty) / (flt(item.conversion_factor) or 1)
-				pending_percent = (item.qty - max(picked_qty, item.delivered_qty)) / item.qty
-				target.qty = target.stock_qty = qty * pending_percent
-				return
+		target.qty = target.stock_qty = get_packed_qty_to_pick(source, so_items[source.parent_detail_docname])
+		target.conversion_factor = 1
 
 	def should_pick_order_item(item) -> bool:
 		return (
@@ -2648,10 +2665,11 @@ def get_potentially_billable_sales_orders(
 		ignore_permissions=False,
 	)
 
+	if not query.is_joined(so_item):
+		query = query.inner_join(so_item).on(so_item.parent == so.name)
+
 	return (
-		query.inner_join(so_item)
-		.on(so_item.parent == so.name)
-		.left_join(item)
+		query.left_join(item)
 		.on(item.name == so_item.item_code)
 		.where(get_potentially_billable_item_criterion(so, so_item, item))
 		.distinct()

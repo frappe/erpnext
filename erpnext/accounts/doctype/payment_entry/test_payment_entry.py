@@ -10,6 +10,7 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	get_early_payment_discount_loss,
 	get_outstanding_reference_documents,
 	get_party_details,
 	get_payment_entry,
@@ -621,6 +622,29 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertFalse(frappe.has_permission("Journal Entry", "read", journal.name))
 			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
 
+	def test_outstanding_documents_need_payment_entry_and_voucher_read(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		readable_si = create_sales_invoice(qty=1, rate=500)
+		args = {
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"party": "_Test Customer",
+			"party_account": "Debtors - _TC",
+			"get_outstanding_invoices": True,
+			"get_orders_to_be_billed": True,
+		}
+
+		user = make_fenced_user("outstanding-docs@example.com", ["Stock User"])
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer"))
+			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
+
+		make_fenced_user(user, ["Accounts User"], [("Sales Invoice", readable_si.name)])
+		with as_user(user):
+			vouchers = {d.voucher_no for d in get_outstanding_reference_documents(args)}
+			self.assertIn(readable_si.name, vouchers)
+			self.assertNotIn(si.name, vouchers)
+
 	def test_dashboard_shows_linked_exchange_gain_loss_journal(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
@@ -1160,6 +1184,51 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 23.6)
 
+	def test_early_payment_discount_loss_without_payment_entry(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = "Test Discount Template"
+
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 18,
+			},
+		)
+		si.save()
+
+		valid_discounts = [{"type": "Percentage", "discount": 10}]
+		rows, base_total_discount_loss = get_early_payment_discount_loss(
+			si, valid_discounts, "Receive", si.company, "_Test Cost Center - _TC"
+		)
+
+		self.assertEqual(
+			rows,
+			[
+				{"account": "Write Off - _TC", "cost_center": "_Test Cost Center - _TC", "amount": 20.0},
+				{
+					"account": "_Test Account Service Tax - _TC",
+					"cost_center": "_Test Cost Center - _TC",
+					"amount": 3.6,
+				},
+			],
+		)
+		self.assertEqual(base_total_discount_loss, 23.6)
+
+		rows, base_total_discount_loss = get_early_payment_discount_loss(
+			si, valid_discounts, "Pay", si.company
+		)
+		company_cost_center = frappe.get_cached_value("Company", si.company, "cost_center")
+		self.assertEqual([row["amount"] for row in rows], [-20.0, -3.6])
+		self.assertEqual([row["cost_center"] for row in rows], [company_cost_center] * 2)
+		self.assertEqual(base_total_discount_loss, 23.6)
+
 	def test_payment_entry_against_payment_terms_with_discount_amount(self):
 		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
 
@@ -1214,6 +1283,42 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 186)
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 50)
+
+	def test_early_payment_discount_on_usd_purchase_invoice_from_usd_bank(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			credit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=100,
+			do_not_save=1,
+		)
+		create_payment_terms_template_with_discount()
+		pi.payment_terms_template = "Test Discount Template"
+		frappe.db.set_value("Company", pi.company, "default_discount_account", "Write Off - _TC")
+		pi.save()
+		pi.submit()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+		self.assertEqual(pe.deductions[0].amount, -800)
+
+	def test_early_payment_discount_on_usd_sales_order(self):
+		so = make_sales_order(customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_save=1)
+		so.conversion_rate = 80
+		create_payment_terms_template_with_discount()
+		so.payment_terms_template = "Test Discount Template"
+		so.save()
+		so.submit()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank USD - _TC")
+		self.assertEqual(pe.paid_amount, 90)
+		self.assertEqual(pe.received_amount, 90)
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.paid_amount, 90)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
@@ -2096,7 +2201,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		payment.references[0].allocated_amount = 30
 		payment.references[1].allocated_amount = 18
 		payment.paid_amount = payment.received_amount = 48
-		with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+		# the journal has already cleared 80 from the schedule, so the first term has only 20 left
+		with self.assertRaisesRegex(frappe.ValidationError, "is greater than outstanding amount:20"):
 			payment.submit()
 
 		payment.references[0].allocated_amount = 20
@@ -2345,6 +2451,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_negative_outstanding_invoice_currency_multicurrency(self):
 		"""
 		A foreign-currency invoice whose party account is in company currency should report its

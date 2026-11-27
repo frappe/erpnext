@@ -9,6 +9,7 @@
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-order",
  "editable_grid": 1,
+ "enable_upload_first_workflow": 1,
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
@@ -1121,6 +1122,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Inter Company Order Reference",
+   "no_copy": 1,
    "options": "Purchase Order",
    "read_only": 1,
    "search_index": 1
@@ -1776,8 +1778,9 @@
  "icon": "shopping-cart",
  "idx": 105,
  "is_submittable": 1,
+ "link_display_mode": "Search",
  "links": [],
- "modified": "2026-10-13 12:12:32.190935",
+ "modified": "2026-11-16 04:16:51.560603",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

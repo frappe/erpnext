@@ -796,6 +796,27 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		self.assertEqual(jv.reference_types[invoice.name], "Sales Invoice")
 
+	def test_get_outstanding_requires_read_on_referenced_invoice(self):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import get_outstanding
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		invoice = create_sales_invoice(rate=500)
+		args = {"doctype": "Sales Invoice", "docname": invoice.name, "company": "_Test Company"}
+		self.assertEqual(get_outstanding(args)["party"], invoice.customer)
+
+		# Sales User reads Account but not Sales Invoice
+		user = "test_je_outstanding_sales_user@example.com"
+		if not frappe.db.exists("User", user):
+			sales_user = frappe.new_doc("User")
+			sales_user.email = user
+			sales_user.first_name = "JE Outstanding"
+			sales_user.append("roles", {"role": "Sales User"})
+			sales_user.insert(ignore_permissions=True)
+
+		frappe.set_user(user)
+		self.addCleanup(frappe.set_user, "Administrator")
+		self.assertRaises(frappe.PermissionError, get_outstanding, args)
+
 
 def make_journal_entry(
 	account1,
