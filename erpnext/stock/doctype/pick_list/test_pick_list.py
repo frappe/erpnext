@@ -2278,6 +2278,20 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual([row.qty for row in create_pick_list(sales_order.name).locations], [2, 4])
 
+		# one bundle from a pick list short on the first row, then one without it
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.locations[0].qty = pick_list.locations[0].stock_qty = 1
+		pick_list.submit()
+		for delivery_note in (create_delivery_note(pick_list.name), make_delivery_note(sales_order.name)):
+			delivery_note.items[0].qty = 1
+			delivery_note.submit()
+
+		self.assertEqual(
+			[(row.product_bundle_item, row.qty) for row in create_pick_list(sales_order.name).locations],
+			[(sales_order.packed_items[0].name, 1)],
+		)
+
 	def test_orders_with_different_discounts_get_their_own_delivery_note(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
