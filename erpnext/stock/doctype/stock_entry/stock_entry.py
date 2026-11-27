@@ -817,10 +817,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 		"""Scale the rows deducted from the finished good down to the consumed cost, as an earlier
 		entry may have consumed the whole unit they come from. Rounds the running total, so no row
 		goes negative and the rows add up to the consumed cost."""
+		if sum(flt(d.basic_amount) for d in rows) <= consumed_cost:
+			return
+
+		# a sub-assembly row is negative when own-cost rows exceed its components
+		for d in rows:
+			if flt(d.basic_amount) < 0:
+				d.basic_rate = d.basic_amount = 0.0
 		rows = [d for d in rows if flt(d.basic_amount)]
 		costed_out_cost = sum(flt(d.basic_amount) for d in rows)
-		if costed_out_cost <= consumed_cost:
-			return
 
 		scaled_cost = allocated_cost = 0.0
 		for d in rows:
