@@ -526,6 +526,20 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		bundle = rm_return.items[0].serial_and_batch_bundle
 		self.assertEqual(abs(frappe.get_value("Serial and Batch Bundle", bundle, "total_qty")), 2)
 
+	def test_rm_return_draft_with_raised_qty_takes_reserved_batches_up_to_new_qty(self):
+		so, scio = create_so_scio()
+		first_batch, second_batch = receive_batch_in_two_lots(scio)
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.items[0].update({"qty": 2, "use_serial_batch_fields": 1})
+		rm_return.save()
+
+		rm_return.items[0].qty = 5
+		rm_return.save()
+		rm_return.submit()
+
+		self.assertEqual(get_picked_batches(rm_return), [{first_batch: 3, second_batch: 2}])
+
 	def test_fg_return_takes_batches_up_to_their_delivered_qty(self):
 		first, second = (
 			frappe.get_doc(doctype="Batch", item="RM with Batch", batch_id=frappe.generate_hash(length=10))
