@@ -14,13 +14,13 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import PartialPaymentValidationError
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_not_found,
@@ -873,12 +873,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(si_lpe.redeem_against, pos_lpe.name)
 
 	def test_pos_batch_reservation(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
-		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
 		)
+		from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 
 		create_batch_item_with_batch("_BATCH ITEM Test For Reserve", "TestBatch-RS 02")
 		se = make_stock_entry(

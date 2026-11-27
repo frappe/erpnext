@@ -8,7 +8,7 @@ from frappe import _
 from frappe.query_builder.functions import Count, Lower, Sum
 from frappe.utils import cint, flt, parse_json
 
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+from erpnext.stock.doctype.serial_and_batch_bundle.api import (
 	create_serial_batch_no_ledgers,
 	get_type_of_transaction,
 )

@@ -8,21 +8,27 @@ import frappe
 from frappe.utils import add_days, add_to_date, flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.api import (
+	add_serial_batch_ledgers,
+	get_serial_batch_ledgers,
+	get_type_of_transaction,
+)
 from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import resolve_csv_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	SerialNoDuplicateError,
-	add_serial_batch_ledgers,
-	combine_datetime,
+)
+from erpnext.stock.doctype.serial_and_batch_bundle.services.batch_stock import BundleBatchStock
+from erpnext.stock.doctype.serial_and_batch_bundle.services.validation import BundleValidation
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_bundle.availability.batches import (
 	get_available_batches_qty,
 	get_qty_based_available_batches,
-	get_serial_batch_ledgers,
-	get_serial_nos_based_on_posting_date,
-	get_type_of_transaction,
-	parse_serial_nos,
 	update_available_batches,
 )
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_serial_nos_based_on_posting_date
+from erpnext.stock.serial_batch_bundle.bundle_entries import parse_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.utils import get_combine_datetime
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
@@ -47,7 +53,7 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 			warehouse="_Test Warehouse - _TC",
 			voucher_type="Purchase Receipt",
 			type_of_transaction="Inward",
-			posting_datetime=combine_datetime(today(), nowtime()),
+			posting_datetime=get_combine_datetime(today(), nowtime()),
 		)
 
 	def test_manual_serials_resolve_by_item_and_save(self):
@@ -189,7 +195,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			frappe._dict(
 				item_code=item_code,
 				warehouse=warehouse,
-				posting_datetime=combine_datetime(posting_date, "11:00:00"),
+				posting_datetime=get_combine_datetime(posting_date, "11:00:00"),
 			),
 			[serial_ids[1]],
 		)
@@ -368,7 +374,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertEqual(flt(stock_value_difference, 2), -500)
 
-	@patch("erpnext.stock.serial_batch_bundle.SERIAL_NO_QUERY_BATCH_SIZE", 1)
+	@patch("erpnext.stock.serial_batch_bundle.valuation.SERIAL_NO_QUERY_BATCH_SIZE", 1)
 	def test_outward_serial_valued_at_latest_inward_rate_in_warehouse(self):
 		item_code = make_item(
 			"_Test Serial Latest Inward Rate Item",
@@ -1154,7 +1160,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 	def test_serial_and_batch_bundle_company(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		item = make_item(
 			"Test Serial and Batch Bundle Company Item",
@@ -1203,7 +1209,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 					frappe.ValidationError,
 					"Company _Test Company 1 does not match with the company _Test Company",
 				):
-					SerialBatchBundleService(pr).validate_warehouse_of_sabb()
+					SerialBatchValidationService(pr).validate_warehouse_of_sabb()
 
 	def test_auto_cancel_serial_and_batch(self):
 		item_code = make_item(
@@ -1230,9 +1236,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		# ledger, live batch availability and repost/valuation replay. update_serial_batch_no_ledgers
 		# (which the whitelisted add_serial_batch_ledgers delegates to for an existing bundle) must
 		# refuse to rebuild -- and thereby inflate -- the quantities of an already submitted bundle.
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			update_serial_batch_no_ledgers,
-		)
+		from erpnext.stock.doctype.serial_and_batch_bundle.api import update_serial_batch_no_ledgers
 
 		item_code = make_item(
 			properties={
@@ -1951,7 +1955,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertEqual(json.loads(return_sle.stock_queue), [[5, 100]])
 
 	def test_get_picked_batches_runs(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_picked_batches
+		from erpnext.stock.serial_batch_bundle.availability.batches import get_picked_batches
 
 		# Sum(qty) is selected with bare batch_no/warehouse; without a GROUP BY this
 		# raises a GroupingError on Postgres (and collapses to one arbitrary row on
@@ -2126,7 +2130,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			BatchNegativeStockError,
-			SerialandBatchBundle,
 		)
 
 		item_code = "Test Hist Neg Batch Item"
@@ -2155,7 +2158,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			posting_date=add_days(today(), -365),
 			posting_time="10:00:00",
 		)
-		with patch.object(SerialandBatchBundle, "validate_negative_batch"):
+		with patch.object(BundleBatchStock, "validate_negative_batch"):
 			make_stock_entry(
 				item_code=item_code,
 				qty=5,
@@ -2285,11 +2288,14 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		bundle = frappe.get_doc("Serial and Batch Bundle", outward.items[0].serial_and_batch_bundle)
 		posting_datetime = frappe.utils.get_datetime(bundle.posting_datetime)
 
-		self.assertEqual(bundle.get_batchwise_qty_before(posting_datetime), {batch_no: 70})
+		self.assertEqual(BundleBatchStock(bundle).get_batchwise_qty_before(posting_datetime), {batch_no: 70})
 		self.assertEqual(
-			sorted(flt(row.qty) for row in bundle.get_available_qty_from_sabb(posting_datetime)), [-10, 20]
+			sorted(
+				flt(row.qty) for row in BundleBatchStock(bundle).get_available_qty_from_sabb(posting_datetime)
+			),
+			[-10, 20],
 		)
-		self.assertEqual(bundle.get_batchwise_available_qty(), {batch_no: 80})
+		self.assertEqual(BundleBatchStock(bundle).get_batchwise_available_qty(), {batch_no: 80})
 
 	def make_serial_item_for_valuation(self, item_code, use_serial_no_wise_valuation):
 		return make_item(
@@ -2634,7 +2640,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 	def test_legacy_serial_no_lookup_is_case_insensitive(self):
 		# MariaDB matches serial_no under a case insensitive collation, PostgreSQL does not.
 		# This asserts the lookup behaves the same on both; it can only fail on PostgreSQL.
-		from erpnext.stock.deprecated_serial_batch import DeprecatedSerialNoValuation
+		from erpnext.stock.serial_batch_bundle.legacy_valuation import DeprecatedSerialNoValuation
 
 		item = self.make_serial_item_for_valuation("_Test Legacy Serial Case", 1)
 		warehouse = "_Test Warehouse - _TC"
@@ -2716,9 +2722,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertEqual(item.use_serial_no_wise_valuation, 1)
 
 	def test_get_serial_batch_ledgers_fences_each_entry_batch(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_serial_batch_ledgers,
-		)
+		from erpnext.stock.doctype.serial_and_batch_bundle.api import get_serial_batch_ledgers
 
 		item = make_item(
 			"UP Fenced Batch Item",
@@ -2758,7 +2762,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			self.assertEqual(len(get_serial_batch_ledgers(name=bundle)), 1)
 
 	def test_get_auto_data_checks_warehouse_permission(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_data
+		from erpnext.stock.doctype.serial_and_batch_bundle.api import get_auto_data
 
 		item = make_item(
 			"_Test Auto Data Batch Item",
@@ -2791,7 +2795,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, get_batches)
 
 	def test_get_auto_data_fills_quantity_from_allowed_warehouses(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_data
+		from erpnext.stock.doctype.serial_and_batch_bundle.api import get_auto_data
 
 		batch_item = make_item(
 			"_Test Auto Data Allowed Batch Item",
@@ -2838,7 +2842,8 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			)
 
 	def test_get_auto_data_limits_serial_query_to_requested_quantity(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle import serial_and_batch_bundle
+		from erpnext.stock.doctype.serial_and_batch_bundle import api
+		from erpnext.stock.serial_batch_bundle.availability import serial_nos as available_serial_nos
 
 		item = make_item(
 			"_Test Auto Data Limited Serial Item",
@@ -2865,14 +2870,12 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			with (
 				as_user(fenced),
 				patch.object(
-					serial_and_batch_bundle,
+					available_serial_nos,
 					"get_serial_nos_based_on_filters",
-					wraps=serial_and_batch_bundle.get_serial_nos_based_on_filters,
+					wraps=available_serial_nos.get_serial_nos_based_on_filters,
 				) as serial_query,
 			):
-				rows = serial_and_batch_bundle.get_auto_data(
-					item_code=item, has_serial_no=1, qty=2, warehouse=warehouse
-				)
+				rows = api.get_auto_data(item_code=item, has_serial_no=1, qty=2, warehouse=warehouse)
 
 			self.assertEqual(serial_query.call_args.args[3].qty, 2)
 			self.assertEqual([row.warehouse for row in rows], ["_Test Warehouse 1 - _TC"] * 2)
@@ -3049,9 +3052,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"pick_serial_and_batch_based_on": "Expiry"})
 	def test_expiry_picks_serials_of_the_batch_that_expires_first(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_available_serial_nos,
-		)
+		from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 
 		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
 		for suffix, days in (("LATE", 60), ("SOON", 5)):
@@ -3185,7 +3186,7 @@ def make_serial_batch_bundle(kwargs):
 
 	posting_datetime = None
 	if kwargs.get("posting_date"):
-		posting_datetime = combine_datetime(kwargs.posting_date, kwargs.posting_time or nowtime())
+		posting_datetime = get_combine_datetime(kwargs.posting_date, kwargs.posting_time or nowtime())
 
 	company = kwargs.get("company")
 	if not company and kwargs.get("warehouse"):
@@ -3244,7 +3245,7 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 					if bundle:
 						bundles[bundle] = serials
 
-				module = "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle"
+				module = "erpnext.stock.serial_batch_bundle.availability.serial_nos"
 				with (
 					patch(f"{module}.get_stock_ledgers_for_serial_nos", return_value=entries),
 					patch(f"{module}.get_bundle_wise_serial_nos", return_value=bundles),
@@ -3346,22 +3347,26 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		doc.append("entries", {"serial_no": "SN1"})
 		doc.append("entries", {"serial_no": "SN1"})
-		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_serial_and_batch_no)
+		self.assertRaises(
+			frappe.ValidationError, BundleValidation(doc).validate_duplicate_serial_and_batch_no
+		)
 
 	def test_duplicate_batch_no_in_entries_is_rejected(self):
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		doc.append("entries", {"batch_no": "B1"})
 		doc.append("entries", {"batch_no": "B1"})
-		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_serial_and_batch_no)
+		self.assertRaises(
+			frappe.ValidationError, BundleValidation(doc).validate_duplicate_serial_and_batch_no
+		)
 
 	def test_voucher_no_is_mandatory(self):
 		doc = frappe.new_doc("Serial and Batch Bundle")
-		self.assertRaises(frappe.ValidationError, doc.validate_serial_and_batch_data)
+		self.assertRaises(frappe.ValidationError, BundleValidation(doc).validate_serial_and_batch_data)
 
 	def test_validate_docstatus_rejects_unsubmitted_entries(self):
 		doc = frappe.new_doc("Serial and Batch Bundle")
 		doc.append("entries", {"qty": 1})  # a fresh row has docstatus 0
-		self.assertRaises(frappe.ValidationError, doc.validate_docstatus)
+		self.assertRaises(frappe.ValidationError, BundleValidation(doc).validate_docstatus)
 
 	def test_calculate_total_qty_normalizes_and_signs(self):
 		inward = frappe.new_doc("Serial and Batch Bundle")
@@ -3387,9 +3392,7 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		self.assertEqual(serialized.total_qty, 1)
 
 	def test_get_bundle_wise_serial_nos(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_bundle_wise_serial_nos,
-		)
+		from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_bundle_wise_serial_nos
 
 		item_code = make_item(properties={"has_serial_no": 1, "serial_no_series": "TEST-BWSN-.#####"}).name
 

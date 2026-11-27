@@ -533,9 +533,7 @@ class TestSerialNo(ERPNextTestSuite):
 
 
 def get_auto_serial_nos(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		get_available_serial_nos,
-	)
+	from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 
 	serial_nos = get_available_serial_nos(kwargs)
 	return sorted([d.serial_no for d in serial_nos])

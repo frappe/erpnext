@@ -234,7 +234,7 @@ def auto_fetch_serial_number(
 
 	serial_numbers = []
 	if for_doctype == "POS Invoice":
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		from erpnext.stock.serial_batch_bundle.availability.reservations import (
 			get_reserved_serial_nos_for_pos,
 		)
 
@@ -250,9 +250,7 @@ def auto_fetch_serial_number(
 
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters: str | dict):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		get_reserved_serial_nos_for_pos,
-	)
+	from erpnext.stock.serial_batch_bundle.availability.reservations import get_reserved_serial_nos_for_pos
 
 	filters = frappe._dict(frappe.parse_json(filters))
 	frappe.has_permission("POS Invoice", "read", throw=True)
@@ -304,9 +302,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=None):
 
 
 def get_serial_nos_for_outward(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		get_available_serial_nos,
-	)
+	from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 
 	serial_nos = get_available_serial_nos(kwargs)
 
