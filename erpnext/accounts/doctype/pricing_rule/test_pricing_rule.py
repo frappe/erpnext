@@ -405,6 +405,57 @@ class TestPricingRule(FrappeTestCase):
 		self.assertEqual(so.items[0].discount_percentage, 0)
 		self.assertEqual(so.items[0].rate, 100)
 
+	def test_pricing_rule_min_qty_with_conversion_factor_float_precision(self):
+		item = make_box_item_with_pricing_rule(min_qty=57)
+
+		details = get_box_item_details(item.name)
+
+		self.assertEqual(details.discount_percentage, 10)
+		self.assertEqual(details.stock_qty, 57)
+
+	def test_pricing_rule_min_amount_with_conversion_factor_float_precision(self):
+		# 0.57 Box at 10000 is 5699.999999999999
+		item = make_box_item_with_pricing_rule(min_amt=5700)
+
+		details = get_box_item_details(item.name)
+
+		self.assertEqual(details.discount_percentage, 10)
+
+	def test_pricing_rule_max_qty_in_rule_uom_with_conversion_factor_float_precision(self):
+		item = make_box_item_with_pricing_rule(uom="Box", min_qty=0.5, max_qty=0.57)
+
+		details = get_box_item_details(item.name)
+
+		self.assertEqual(details.discount_percentage, 10)
+
+	def test_price_list_applies_min_qty_pricing_rule_with_conversion_factor_float_precision(self):
+		item = make_box_item_with_pricing_rule(min_qty=57)
+
+		result = apply_price_list(
+			frappe._dict(
+				company="_Test Company",
+				price_list="_Test Price List",
+				currency="INR",
+				doctype="Sales Order",
+				conversion_rate=1,
+				price_list_currency="INR",
+				plc_conversion_rate=1,
+				customer="_Test Customer",
+				transaction_date=today(),
+				items=[
+					frappe._dict(
+						doctype="Sales Order Item",
+						item_code=item.name,
+						uom="Box",
+						conversion_factor=100,
+						qty=0.57,
+					)
+				],
+			)
+		)
+
+		self.assertEqual(result["children"][0].discount_percentage, 10)
+
 	def test_pricing_rule_with_margin_and_discount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
 		make_pricing_rule(
@@ -2026,6 +2077,8 @@ def setup_pricing_rule_data():
 		).insert()
 
 
+<<<<<<< HEAD
+<<<<<<< HEAD
 def delete_existing_pricing_rules():
 	for doctype in [
 		"Pricing Rule",
@@ -2034,6 +2087,37 @@ def delete_existing_pricing_rules():
 		"Pricing Rule Brand",
 	]:
 		frappe.db.sql(f"delete from `tab{doctype}`")
+=======
+def make_box_item_with_min_qty_pricing_rule():
+	"""0.57 Box x 100 is 56.99999999999999 Nos, just below the rule's Min Qty of 57."""
+=======
+def make_box_item_with_pricing_rule(**rule_fields):
+	"""Item in Nos with a Box of 100, so 0.57 Box is 56.99999999999999 Nos."""
+>>>>>>> 2e50ad2 (test(accounts): a max qty rule in its own UOM applies at its boundary)
+	item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Box", "conversion_factor": 100}])
+	make_item_price(item.name, "_Test Price List", 100)
+	make_item_pricing_rule(item.name, discount_percentage=10, **rule_fields)
+	return item
+>>>>>>> 0505c70 (test(accounts): price list applies a min qty pricing rule despite float noise)
+
+
+def get_box_item_details(item_code):
+	return get_item_details(
+		frappe._dict(
+			item_code=item_code,
+			company="_Test Company",
+			price_list="_Test Price List",
+			currency="INR",
+			doctype="Sales Order",
+			conversion_rate=1,
+			price_list_currency="INR",
+			plc_conversion_rate=1,
+			order_type="Sales",
+			customer="_Test Customer",
+			uom="Box",
+			qty=0.57,
+		)
+	)
 
 
 def make_item_price(item, price_list_name, item_price):
