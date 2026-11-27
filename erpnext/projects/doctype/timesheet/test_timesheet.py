@@ -46,6 +46,7 @@ class TestTimesheet(FrappeTestCase):
 			[log.name for log in get_projectwise_timesheet_data(parent=timesheet.name)], [time_log]
 		)
 
+	@change_settings("Global Defaults", {"default_currency": "INR"})
 	def test_timesheet_base_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
@@ -55,6 +56,7 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 100)
 		self.assertEqual(timesheet.time_logs[0].base_costing_amount, 40)
 
+	@change_settings("Global Defaults", {"default_currency": "INR"})
 	def test_base_amounts_use_the_exchange_rate_being_saved(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		with patch_usd_rate(2):
@@ -72,6 +74,7 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(timesheet.time_logs[0].base_billing_amount, 150)
 		self.assertEqual(timesheet.base_total_billable_amount, 150)
 
+	@change_settings("Global Defaults", {"default_currency": "INR"})
 	def test_company_currency_timesheet_resets_a_foreign_exchange_rate(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(
@@ -82,6 +85,7 @@ class TestTimesheet(FrappeTestCase):
 		self.assertEqual(timesheet.base_total_billable_amount, 100)
 		self.assertEqual(timesheet.base_total_costing_amount, 40)
 
+	@change_settings("Global Defaults", {"default_currency": "INR"})
 	def test_foreign_currency_timesheet_fetches_a_missing_exchange_rate(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		with patch_usd_rate(2):
