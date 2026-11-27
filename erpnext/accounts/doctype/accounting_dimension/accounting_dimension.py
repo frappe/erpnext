@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.database.schema import validate_column_name
 from frappe.model import core_doctypes_list
 from frappe.model.document import Document
@@ -120,6 +121,7 @@ class AccountingDimension(Document):
 			frappe.enqueue(
 				make_dimension_in_accounting_doctypes, doc=self, queue="long", enqueue_after_commit=True
 			)
+		update_dimension_filter_options()
 
 	def on_trash(self):
 		if frappe.in_test:
@@ -232,8 +234,31 @@ def delete_accounting_dimension(doc):
 	budget_against_property.value = "\nCost Center\nProject\n" + "\n".join(value_list)
 	budget_against_property.save()
 
+	for name in frappe.get_all(
+		"Accounting Dimension Filter", filters={"accounting_dimension": doc.document_type}, pluck="name"
+	):
+		frappe.delete_doc("Accounting Dimension Filter", name, ignore_permissions=True)
+
+	update_dimension_filter_options(exclude=doc.document_type)
+
 	for doctype in doclist:
 		frappe.clear_cache(doctype=doctype)
+
+
+def update_dimension_filter_options(exclude=None):
+	dimensions = frappe.get_all(
+		"Accounting Dimension",
+		filters={"document_type": ["!=", exclude]} if exclude else None,
+		pluck="document_type",
+		order_by="creation",
+	)
+	options = "\n".join(["", "Cost Center", "Project", *dimensions])
+
+	meta = frappe.get_meta("Accounting Dimension Filter")
+	if meta.get_field("accounting_dimension").options == options:
+		return
+
+	make_property_setter("Accounting Dimension Filter", "accounting_dimension", "options", options, "Text")
 
 
 @frappe.whitelist(methods=["POST"])
