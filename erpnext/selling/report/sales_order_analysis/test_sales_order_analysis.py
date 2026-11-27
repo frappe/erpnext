@@ -334,7 +334,9 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 
 		credit_note = make_sales_return(sinv.name)
 		credit_note.update_billed_amount_in_sales_order = 1
-		credit_note.items[0].update({"uom": "Nos", "conversion_factor": 1, "qty": -2})
+		credit_note.items[0].update(
+			{"uom": "Nos", "conversion_factor": 1, "qty": -2, "rate": credit_note.items[0].rate / 10}
+		)
 		credit_note.submit()
 
 		columns, data, message, chart = execute(

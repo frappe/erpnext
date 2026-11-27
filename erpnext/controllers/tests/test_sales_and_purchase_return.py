@@ -392,6 +392,193 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		self.assertRaises(StockOverReturnError, return_doc.insert)
 
+	def test_return_in_another_uom_is_checked_per_stock_uom(self):
+		"""Return rates and quantities are compared per stock UOM, whatever UOM the return row uses."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=24, basic_rate=100)
+
+		def submit_one_box(doc):
+			doc.items[0].update(
+				{"uom": "Box", "conversion_factor": 12, "qty": 1, "rate": 2400, "price_list_rate": 2400}
+			)
+			return doc.submit()
+
+		def return_in_nos(original, qty, rate):
+			return_doc = make_return_doc(original.doctype, original.name)
+			return_doc.items[0].update(
+				{"uom": "Nos", "conversion_factor": 1, "qty": qty, "rate": rate, "price_list_rate": rate}
+			)
+			return return_doc
+
+		dn = submit_one_box(create_delivery_note(item_code=item_code, do_not_submit=True))
+		self.assertRaises(frappe.ValidationError, return_in_nos(dn, -5, 2400).insert)
+		return_in_nos(dn, -5, 200).submit()
+		# what is left is 7 Nos, which a whole number Box cannot hold, so it maps in stock UOM
+		rest = make_return_doc(dn.doctype, dn.name)
+		self.assertEqual((rest.items[0].uom, rest.items[0].qty, rest.items[0].rate), ("Nos", -7, 200))
+		rest.insert()
+
+		si = submit_one_box(create_sales_invoice(item_code=item_code, do_not_submit=True))
+		return_in_nos(si, -5, 200).insert()
+		self.assertRaises(frappe.ValidationError, return_in_nos(si, -1, 2400).insert)
+
+	def test_credit_note_qty_is_checked_in_return_row_uom(self):
+		"""A tiny conversion factor must not round an over-credit away in stock UOM."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "_Test UOM 1", "conversion_factor": 0.000001}]}
+		).name
+		si = create_sales_invoice(item_code=item_code, do_not_submit=True)
+		si.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 0.000001, "qty": 1})
+		si.submit()
+
+		credit_note = make_return_doc(si.doctype, si.name)
+		credit_note.items[0].qty = -100
+		self.assertRaises(StockOverReturnError, credit_note.insert)
+
+	def test_credit_note_in_a_larger_uom_cannot_round_the_billed_qty_up(self):
+		"""0.6 of a qty step billed in the return row's UOM must not round up to allow a whole step."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# the quantities are fractions of a qty step
+		for uom in ("Nos", "_Test UOM 1"):
+			frappe.db.set_value("UOM", uom, "must_be_whole_number", 0)
+		item_code = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "_Test UOM 1", "conversion_factor": 10}]}
+		).name
+		si = create_sales_invoice(item_code=item_code, do_not_submit=True)
+		step = 10 ** -si.items[0].precision("qty")
+		si.items[0].qty = 6 * step
+		si.submit()
+
+		credit_note = make_return_doc(si.doctype, si.name)
+		credit_note.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 10, "qty": -step})
+		self.assertRaises(StockOverReturnError, credit_note.insert)
+
+	def test_return_rate_ceiling_holds_for_large_conversion_factor(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 1000}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1000, basic_rate=1)
+
+		dn = create_delivery_note(item_code=item_code, do_not_submit=True)
+		dn.items[0].update(
+			{"uom": "Box", "conversion_factor": 1000, "qty": 1, "rate": 1, "price_list_rate": 1}
+		)
+		dn.submit()
+
+		return_dn = make_return_doc(dn.doctype, dn.name)
+		return_dn.items[0].update({"rate": 4, "price_list_rate": 4})
+		self.assertRaises(frappe.ValidationError, return_dn.insert)
+
+	def test_purchase_return_maps_after_accepted_and_rejected_warehouse_returns(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		pr = make_purchase_receipt(qty=5, rejected_qty=5)
+		accepted_return = make_purchase_return(pr.name)
+		accepted_return.items[0].update({"qty": -2, "rejected_qty": -1, "received_qty": -3})
+		accepted_return.submit()
+
+		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_return.items[0].update({"qty": -1, "received_qty": -1})
+		rejected_return.submit()
+
+		self.assertEqual(make_purchase_return(pr.name).items[0].qty, -3)
+
+	def test_purchase_return_maps_rejected_qty_after_return_in_another_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			uom="Box",
+			stock_uom="Nos",
+			conversion_factor=12,
+			qty=2,
+			rejected_qty=2,
+			rate=1200,
+		)
+		first_return = make_purchase_return(pr.name)
+		first_return.items[0].update(
+			{"uom": "Nos", "conversion_factor": 1, "qty": -12, "rejected_qty": -12, "received_qty": -24}
+		)
+		first_return.submit()
+
+		# 12 Nos accepted and 12 Nos rejected are left, mapped in the receipt row's UOM
+		self.assertEqual(make_purchase_return(pr.name).items[0].rejected_qty, -1)
+		self.assertEqual(make_purchase_return_against_rejected_warehouse(pr.name).items[0].qty, -1)
+
+	def test_purchase_invoice_return_maps_received_qty_after_return_in_another_uom(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		pi = make_purchase_invoice(item_code=item_code, uom="Nos", update_stock=1, do_not_save=True)
+		pi.items[0].update(
+			{"uom": "Box", "conversion_factor": 12, "qty": 10, "received_qty": 10, "rate": 120}
+		)
+		pi.submit()
+
+		first_return = make_return_doc(pi.doctype, pi.name)
+		first_return.items[0].update(
+			{"uom": "Nos", "conversion_factor": 1, "qty": -12, "received_qty": -12, "rate": 10}
+		)
+		first_return.submit()
+
+		# 108 Nos are left, mapped in the invoiced row's UOM, which must be whole
+		second_return = make_return_doc(pi.doctype, pi.name)
+		self.assertEqual(second_return.items[0].qty, -9)
+		self.assertEqual(second_return.items[0].received_qty, -9)
+		second_return.insert()
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
