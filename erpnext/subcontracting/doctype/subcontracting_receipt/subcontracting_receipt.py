@@ -967,7 +967,9 @@ class SubcontractingReceipt(SubcontractingController):
 				flt(row.amount) / flt(row.total_additional_costs) if flt(row.total_additional_costs) else 0
 			)
 			row_taken = flt(taken.get(row.name)) + flt(unlinked_taken.get(row.parent)) * row_share
-			costs_left[row.name] = (row.parent, flt(row.amount) - row_taken)
+			cost_left = flt(row.amount) - row_taken
+			# a row booked in full or more before the upgrade has nothing left, never a reversal
+			costs_left[row.name] = (row.parent, cost_left if cost_left * flt(row.amount) > 0 else 0)
 		return costs_left
 
 	def get_order_costs_taken_by_unlinked_receipts(self, orders: list[str]) -> dict[str, float]:
