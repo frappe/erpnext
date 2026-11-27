@@ -18,13 +18,11 @@ from erpnext.stock.doctype.pick_list.pick_list import (
 	get_items_with_location_and_quantity,
 	get_pick_list_holders,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_available_serial_nos,
-	get_batch_nos_from_sre,
-	get_reserved_serial_nos_for_pos,
-	get_serial_batch_numbers,
-	get_serial_batch_scan,
+from erpnext.stock.doctype.serial_and_batch_bundle.api import get_serial_batch_numbers, get_serial_batch_scan
+from erpnext.stock.doctype.serial_and_batch_bundle.services.future_transactions import (
+	BundleFutureTransactions,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.services.returns import BundleReturn
 from erpnext.stock.doctype.serial_no.serial_no import auto_fetch_serial_number, get_pos_reserved_serial_nos
 from erpnext.stock.doctype.stock_entry.services.disassemble import (
 	DisassembleStockEntry,
@@ -39,8 +37,12 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_reserved_materials
 from erpnext.stock.get_item_details import get_filtered_serial_nos, update_stock
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_nos_from_sre
+from erpnext.stock.serial_batch_bundle.availability.reservations import get_reserved_serial_nos_for_pos
+from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 from erpnext.stock.utils import get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -259,12 +261,12 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			returned_against="Original-Row",
 			entries=[{"serial_no": serial.name}],
 		)
-		with patch.object(bundle, "get_orignal_document_data", return_value=[original]):
-			bundle.validate_serial_and_batch_no_for_returned()
+		with patch.object(BundleReturn, "get_orignal_document_data", return_value=[original]):
+			BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 			bundle.item_code = self.other_item.name
 			bundle.entries[0].serial_no = other_serial.name
 			with self.assertRaisesRegex(frappe.ValidationError, "Returned-001.*not part") as error:
-				bundle.validate_serial_and_batch_no_for_returned()
+				BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 		self.assertNotIn(other_serial.name, str(error.exception))
 		self.assertEqual(original.serial_no, "returned-001")
 		self.assertEqual(bundle.entries[0].serial_no, other_serial.name)
@@ -284,16 +286,16 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			entries=[{"serial_no": serial.name}],
 		)
 		with (
-			patch.object(bundle, "get_orignal_document_data", return_value=[original]),
+			patch.object(BundleReturn, "get_orignal_document_data", return_value=[original]),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_nos_from_bundle",
+				"erpnext.stock.doctype.serial_and_batch_bundle.services.returns.get_serial_nos_from_bundle",
 				return_value=[serial.name],
 			),
 		):
-			bundle.validate_serial_and_batch_no_for_returned()
+			BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 			bundle.entries[0].serial_no = invalid_serial.name
 			with self.assertRaisesRegex(frappe.ValidationError, "Other-002.*not part") as error:
-				bundle.validate_serial_and_batch_no_for_returned()
+				BundleReturn(bundle).validate_serial_and_batch_no_for_returned()
 		self.assertNotIn(invalid_serial.name, str(error.exception))
 		self.assertNotIn(serial.serial_no, str(error.exception))
 		self.assertEqual(bundle.entries[0].serial_no, invalid_serial.name)
@@ -403,7 +405,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			entries=[{"serial_no": kept.name}, {"serial_no": removed.name}],
 		)
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_stock_reco_details",
+			"erpnext.stock.doctype.serial_and_batch_bundle.services.future_transactions.get_stock_reco_details",
 			return_value=row,
 		):
 			for numbers, expected in (
@@ -412,7 +414,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			):
 				with self.subTest(numbers=numbers):
 					row.serial_no = numbers
-					serials, batches = bundle.get_serial_nos_for_validate()
+					serials, batches = BundleFutureTransactions(bundle).get_serial_nos_for_validate()
 					self.assertEqual(set(serials), expected)
 					self.assertEqual(batches, [])
 					self.assertEqual(row.serial_no, numbers)
@@ -737,6 +739,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					voucher_no="Receipt",
 					consumed_qty=1,
 					serial_no="SUPPLIER-001" if receipt_text else None,
+					serial_and_batch_bundle=None if receipt_text else "Receipt Bundle",
 				)
 				transfer_bundles = (
 					{}
@@ -750,11 +753,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				receipt_bundles = (
 					{}
 					if receipt_text
-					else {
-						(self.item.name, key[1], warehouse, "Receipt"): frappe._dict(
-							serial_nos=[consumed.name]
-						)
-					}
+					else {"Receipt Bundle": [frappe._dict(serial_no=consumed.name, batch_no=None, qty=-1)]}
 				)
 				with (
 					patch.object(
@@ -770,8 +769,9 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					),
 					patch(
 						"erpnext.controllers.subcontracting_controller.get_voucher_wise_serial_batch_from_bundle",
-						side_effect=[transfer_bundles, receipt_bundles],
+						return_value=transfer_bundles,
 					),
+					patch.object(doc, "get_bundle_entries", return_value=receipt_bundles),
 					patch("erpnext.deprecation_dumpster.deprecation_warning"),
 				):
 					doc.get_available_materials()
@@ -1062,7 +1062,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					return_value=[transfer, consumption],
 				),
 				patch(
-					"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_voucher_wise_serial_batch_from_bundle",
+					"erpnext.stock.serial_batch_bundle.bundle_entries.get_voucher_wise_serial_batch_from_bundle",
 					return_value=bundle_data,
 				),
 			):
@@ -1094,7 +1094,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				return_value=rows,
 			),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_voucher_wise_serial_batch_from_bundle",
+				"erpnext.stock.serial_batch_bundle.bundle_entries.get_voucher_wise_serial_batch_from_bundle",
 				return_value=bundle_data,
 			),
 		):
@@ -1303,7 +1303,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		other_warehouse.db_set("warehouse", "_Test Warehouse 1 - _TC")
 		reserved = [serial.name for serial in [*serials, other_item, other_warehouse]]
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.reservations.get_reserved_serial_nos_for_pos",
 			return_value=reserved,
 		):
 			numbers = get_pos_reserved_serial_nos(
@@ -1489,7 +1489,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			return get_pos_reserved_serial_nos({"item_code": self.item.name, "warehouse": warehouse})
 
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.reservations.get_reserved_serial_nos_for_pos",
 			return_value=[serial.name],
 		):
 			with self.set_user(accounts_user):
@@ -1544,7 +1544,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		for serial in (reserved, selected, available, other):
 			serial.db_set("warehouse", warehouse)
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.reservations.get_reserved_serial_nos_for_pos",
 			return_value=[reserved.name],
 		):
 			self.assertEqual(
@@ -1597,7 +1597,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with (
 			patch("frappe.get_all", return_value=[row]),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle._get_serial_batch_ledgers",
+				"erpnext.stock.serial_batch_bundle.availability.reservations._get_serial_batch_ledgers",
 				return_value=[frappe._dict(serial_no=serial.name, name="POS-Bundle")],
 			),
 			patch(
@@ -1659,7 +1659,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			return [row.serial_no for row in get_available_serial_nos(kwargs)]
 
 		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			"erpnext.stock.serial_batch_bundle.availability.serial_nos.get_reserved_serial_nos_for_pos",
 			return_value=[reserved.name],
 		):
 			self.assertEqual(available([requested.name]), [requested.name])
@@ -1743,7 +1743,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			)
 		doc = self.make_receipt("SHARED-001")
 		doc.items[0].batch_no = batch.name
-		service = SerialBatchBundleService(doc)
+		service = SerialBatchValidationService(doc)
 		service.validate_serialized_batch()
 		doc.items[0].batch_no = wrong_batch.name
 		with self.assertRaisesRegex(frappe.ValidationError, "Shared-001 does not belong to Batch"):

@@ -866,7 +866,7 @@ def get_available_qty_to_reserve(
 ) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
+	from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
 
 	if batch_no:
 		return get_batch_qty_for_stock(
@@ -925,9 +925,7 @@ def get_available_serial_nos_to_reserve(
 ) -> list[tuple]:
 	"""Returns Available Serial Nos to Reserve (Available Serial Nos - Reserved Serial Nos)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		get_available_serial_nos,
-	)
+	from erpnext.stock.serial_batch_bundle.availability.serial_nos import get_available_serial_nos
 
 	available_serial_nos = get_available_serial_nos(
 		frappe._dict(
@@ -2139,7 +2137,7 @@ def add_available_serial_entries(sre, qty_needed, has_batch_no):
 
 
 def add_available_batch_entries(sre, qty_needed):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+	from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 
 	taken = {}
 	for row in sre.sb_entries:

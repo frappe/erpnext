@@ -566,9 +566,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			self._set_serial_batch_for_disassembly_from_available_materials()
 
 	def _set_serial_batch_for_disassembly_from_stock_entry(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_voucher_wise_serial_batch_from_bundle,
-		)
+		from erpnext.stock.serial_batch_bundle.bundle_entries import get_voucher_wise_serial_batch_from_bundle
 
 		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=[self.doc.source_stock_entry])
 		source_rows_by_name = {r.name: r for r in self.get_items_from_manufacture_stock_entry()}
@@ -865,9 +863,7 @@ def _apply_stock_entry_purpose_filter(query, se, sed, stock_entry_doc):
 
 
 def _enrich_with_bundle_data(data, stock_entry_doc):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		get_voucher_wise_serial_batch_from_bundle,
-	)
+	from erpnext.stock.serial_batch_bundle.bundle_entries import get_voucher_wise_serial_batch_from_bundle
 
 	voucher_nos = [row.get("name") for row in data if row.get("name")]
 	if not voucher_nos:

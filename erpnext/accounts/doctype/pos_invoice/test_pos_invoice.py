@@ -14,13 +14,13 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import PartialPaymentValidationError
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_not_found,
@@ -873,12 +873,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(si_lpe.redeem_against, pos_lpe.name)
 
 	def test_pos_batch_reservation(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
-		)
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_batch_item_with_batch,
 		)
+		from erpnext.stock.serial_batch_bundle.availability.batches import get_auto_batch_nos
 
 		create_batch_item_with_batch("_BATCH ITEM Test For Reserve", "TestBatch-RS 02")
 		se = make_stock_entry(
@@ -1198,6 +1196,32 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		with as_user(inside):
 			merge_log = make_merge_log([{"name": invoice.name}])
 		self.assertEqual(merge_log["pos_invoices"][0]["pos_invoice"], invoice.name)
+
+	def test_resending_phone_payment_request_needs_email_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.accounts.doctype.payment_request.payment_request import PaymentRequest
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import POSInvoice
+
+		invoice = frappe.new_doc("POS Invoice")
+		invoice.contact_mobile = "9999900000"
+		invoice.append("payments", {"type": "Phone", "amount": 100})
+		sales_user = make_fenced_user("pos-resend-sales@example.com", ["Sales User"])
+		accounts_user = make_fenced_user("pos-resend-accounts@example.com", ["Accounts User"])
+
+		with (
+			patch.object(
+				POSInvoice, "get_existing_payment_request", return_value=frappe.new_doc("Payment Request")
+			),
+			patch.object(PaymentRequest, "request_phone_payment") as request_phone_payment,
+		):
+			with as_user(sales_user):
+				self.assertRaises(frappe.PermissionError, invoice.create_payment_request)
+			request_phone_payment.assert_not_called()
+
+			with as_user(accounts_user):
+				invoice.create_payment_request()
+			request_phone_payment.assert_called_once()
 
 	def test_serial_and_batch_item_with_only_batch_in_fields(self):
 		from erpnext.stock.doctype.item.test_item import make_item

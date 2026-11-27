@@ -19,21 +19,21 @@ from erpnext.accounts.utils import _get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	combine_datetime,
-	get_available_serial_nos,
-	get_batch_qty_for_stock,
-	get_serial_nos_based_on_posting_date,
-)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.serial_batch_bundle.availability.batches import get_batch_qty_for_stock
+from erpnext.stock.serial_batch_bundle.availability.serial_nos import (
+	get_available_serial_nos,
+	get_serial_nos_based_on_posting_date,
+)
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import (
 	_get_incoming_rate,
 	_get_stock_balance,
 	check_company,
 	check_warehouse_company,
+	get_combine_datetime,
 	get_valuation_method,
 )
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
@@ -84,12 +84,11 @@ class StockReconciliation(StockController):
 	def validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+		from erpnext.stock.services.serial_batch_validation_service import SerialBatchValidationService
 
 		if self.purpose == ADJUSTMENT_ENTRY:
 			self.validate_adjustment_entry()
 			return
-
-		sbb = SerialBatchBundleService(self)
 
 		self.validate_standard_cost_items()
 		self.validate_items_exist()
@@ -102,7 +101,7 @@ class StockReconciliation(StockController):
 		self.validate_posting_time()
 		self.set_current_serial_and_batch_bundle()
 		self.set_new_serial_and_batch_bundle()
-		sbb.validate_duplicate_serial_and_batch_bundle("items")
+		SerialBatchValidationService(self).validate_duplicate_serial_and_batch_bundle("items")
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.change_row_indexes()
@@ -110,7 +109,7 @@ class StockReconciliation(StockController):
 		self.validate_opening_stock()
 		self.validate_customer_provided_item()
 		self.set_zero_value_for_customer_provided_items()
-		sbb.clean_serial_nos()
+		SerialBatchBundleService(self).clean_serial_nos()
 		self.set_total_qty_and_amount()
 		validate_putaway_capacity(self)
 		self.validate_inventory_dimension()
@@ -275,7 +274,7 @@ class StockReconciliation(StockController):
 					{
 						"item_code": row.item_code,
 						"warehouse": row.warehouse,
-						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+						"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
 						"voucher_detail_no": row.name,
@@ -451,7 +450,7 @@ class StockReconciliation(StockController):
 						"company": self.company,
 						"item_code": item.item_code,
 						"warehouse": item.warehouse,
-						"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+						"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 						"voucher_type": self.doctype,
 						"type_of_transaction": "Outward",
 					}
@@ -469,7 +468,7 @@ class StockReconciliation(StockController):
 						{
 							"item_code": item.item_code,
 							"warehouse": item.warehouse,
-							"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+							"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 							"ignore_warehouse": 1,
 							"ignore_reserved_stock": True,
 						}
@@ -619,7 +618,7 @@ class StockReconciliation(StockController):
 				{
 					"item_code": row.item_code,
 					"warehouse": row.warehouse,
-					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+					"posting_datetime": get_combine_datetime(self.posting_date, self.posting_time),
 					"serial_nos": serial_nos,
 					"check_serial_nos": True,
 					"voucher_no": self.name,
@@ -1349,7 +1348,7 @@ class StockReconciliation(StockController):
 				& sle.warehouse.isin({d.warehouse for d in self.items})
 				& (sle.is_cancelled == 0)
 				& (sle.voucher_no != self.name)
-				& (sle.posting_datetime <= combine_datetime(self.posting_date, self.posting_time))
+				& (sle.posting_datetime <= get_combine_datetime(self.posting_date, self.posting_time))
 			)
 			.run(as_dict=True)
 		)
@@ -1797,7 +1796,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None, posting
 		{"warehouse": warehouse, "from_date": posting_date, "to_date": posting_date, "company": company}
 	)
 	if posting_time:
-		filters.to_datetime = combine_datetime(posting_date, posting_time)
+		filters.to_datetime = get_combine_datetime(posting_date, posting_time)
 
 	if item_code:
 		filters.item_code = item_code
@@ -1945,7 +1944,7 @@ def _get_stock_balance_for(
 					{
 						"item_code": item_code,
 						"warehouse": warehouse,
-						"posting_datetime": combine_datetime(posting_date, posting_time),
+						"posting_datetime": get_combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 						"has_batch_no": 1,
 						"ignore_reserved_stock": True,

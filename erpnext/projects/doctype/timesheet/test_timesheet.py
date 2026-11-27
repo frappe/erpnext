@@ -4,7 +4,7 @@ import datetime
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_to_date, now_datetime, nowdate
+from frappe.utils import add_to_date, getdate, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -115,6 +115,27 @@ class TestTimesheet(ERPNextTestSuite):
 		completed.cancel()
 		self.assertEqual(task_status(), "Cancelled")
 
+	def test_task_completed_by_a_time_log_is_completed_on_the_log_date(self):
+		emp = make_employee("test_employee_completed_on@salary.com", company="_Test Company")
+		task = create_task("_Test Timesheet Completed On Task")
+
+		log = log_task_time(emp, task.name, days_ago=10, completed=1)
+
+		task.reload()
+		self.assertEqual(task.status, "Completed")
+		self.assertEqual(getdate(task.completed_on), getdate(log.to_time))
+
+	def test_task_completed_on_ignores_later_unchecked_time_logs(self):
+		emp = make_employee("test_employee_completed_on@salary.com", company="_Test Company")
+		task = create_task("_Test Timesheet Completed On Backdated Task")
+
+		log_task_time(emp, task.name, days_ago=5)
+		completed_log = log_task_time(emp, task.name, days_ago=10, completed=1)
+
+		task.reload()
+		self.assertEqual(task.status, "Completed")
+		self.assertEqual(getdate(task.completed_on), getdate(completed_log.to_time))
+
 	def test_timesheet_base_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
@@ -173,6 +194,34 @@ class TestTimesheet(ERPNextTestSuite):
 
 		self.assertEqual(timesheet.exchange_rate, 1)
 		self.assertEqual(timesheet.base_total_costing_amount, timesheet.total_costing_amount)
+
+	def test_foreign_currency_timesheet_gets_the_exchange_rate_on_its_start_date(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"employee": emp,
+				"currency": "USD",
+				"time_logs": [
+					{
+						"activity_type": "_Test Activity Type",
+						"from_time": "2026-09-25 10:00:00",
+						"hours": 2,
+						"costing_rate": 6,
+					}
+				],
+			}
+		)
+
+		def get_exchange_rate(from_currency, to_currency, transaction_date=None, *args):
+			return 80 if str(transaction_date) == "2026-09-25" else 62.9
+
+		with patch("erpnext.projects.doctype.timesheet.timesheet.get_exchange_rate", get_exchange_rate):
+			timesheet.insert()
+
+		self.assertEqual(timesheet.exchange_rate, 80)
+		self.assertEqual(timesheet.base_total_costing_amount, 960)
 
 	def test_amounts_follow_the_rates_without_an_activity_type(self):
 		from_time = now_datetime()
@@ -1033,6 +1082,17 @@ def make_portal_user(customer):
 	customer.append("portal_users", {"user": user})
 	customer.save()
 	return user
+
+
+def log_task_time(employee, task, days_ago, completed=0):
+	"""Submit a 2 hour time log on the task, `days_ago` days back."""
+	timesheet = make_timesheet(employee, simulate=True, task=task, do_not_submit=True)
+	log = timesheet.time_logs[0]
+	log.from_time = add_to_date(now_datetime(), days=-days_ago)
+	log.to_time = add_to_date(log.from_time, hours=2)
+	log.completed = completed
+	timesheet.submit()
+	return log
 
 
 def make_timesheet_without_employee(start, hours):
