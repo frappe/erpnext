@@ -97,5 +97,5 @@ PYTHON
 bench setup procfile
 sed -i -E \
     -e '/^(watch|schedule|socketio|redis_socketio):/s/^/# /' \
-    -e 's/^(web|worker[A-Za-z0-9_-]*): bench /\1: cd sites \&\& ../env/bin/python -m frappe.utils.bench_helper frappe /' \
+    -e 's@^(web|worker[A-Za-z0-9_-]*): bench @\1: cd sites \&\& ../env/bin/python -m frappe.utils.bench_helper frappe @' \
     Procfile
