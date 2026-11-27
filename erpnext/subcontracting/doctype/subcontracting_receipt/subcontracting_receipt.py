@@ -7,11 +7,15 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 <<<<<<< HEAD
+<<<<<<< HEAD
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 =======
 from frappe.query_builder.functions import IfNull, Sum
+=======
+from frappe.query_builder.functions import Sum
+>>>>>>> 01466aa (fix(subcontracting): count a receipt's costs for an order as unlinked unless linked to that order)
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 >>>>>>> 1f87a7f (fix(subcontracting): count additional costs booked by receipts without linked cost rows)
 
@@ -615,12 +619,16 @@ class SubcontractingReceipt(SubcontractingController):
 		receipt = frappe.qb.DocType("Subcontracting Receipt")
 		receipt_item = frappe.qb.DocType("Subcontracting Receipt Item")
 		charges = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		order_charges = frappe.qb.DocType("Landed Cost Taxes and Charges").as_("order_charges")
+		# receipts with a cost row linked to this item row's order
 		linked_receipts = (
 			frappe.qb.from_(charges)
+			.inner_join(order_charges)
+			.on(order_charges.name == charges.subcontracting_order_cost)
 			.select(charges.parent)
 			.where(
 				(charges.parenttype == "Subcontracting Receipt")
-				& (IfNull(charges.subcontracting_order_cost, "") != "")
+				& (order_charges.parent == receipt_item.subcontracting_order)
 			)
 		)
 		costing_qty = receipt_item.qty + receipt_item.rejected_qty + receipt_item.process_loss_qty
