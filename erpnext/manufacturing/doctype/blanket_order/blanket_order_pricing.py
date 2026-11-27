@@ -13,6 +13,8 @@ from erpnext.controllers.accounts_controller import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_item_prices_for_stock_uom
 
+BLANKET_RATE_DOCTYPES = ("Sales Order", "Quotation", "Purchase Order")
+
 _ORDER_TYPE_CONFIG = {
 	"Selling": {
 		"exchange_rate_type": "for_selling",
@@ -33,6 +35,15 @@ _ORDER_TYPE_CONFIG = {
 		"settings_doctype": "Buying Settings",
 	},
 }
+
+
+def get_effective_base_rate(item, price_list_rate) -> float:
+	"""Blanket order rate in the row's UOM if the row has one, else the price list rate."""
+	if item.parenttype in BLANKET_RATE_DOCTYPES and item.blanket_order_rate:
+		return flt(
+			item.blanket_order_rate * (flt(item.conversion_factor) or 1), item.precision("price_list_rate")
+		)
+	return flt(price_list_rate)
 
 
 def get_order_type_config(blanket_order_type):
