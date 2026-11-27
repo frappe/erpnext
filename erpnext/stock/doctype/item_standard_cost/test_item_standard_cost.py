@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, flt, nowtime, today
 
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -1001,6 +1002,76 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 		self.assertEqual(booked(ppv_account), 70)
 		self.assertEqual(booked(cogs_account), 0)
+
+	def test_zero_price_purchases_book_standard_cost(self):
+		ppv_account = "Stock Adjustment - TCP1"
+		stock_account = frappe.get_cached_value("Company", PI_COMPANY, "default_inventory_account")
+		item = create_standard_cost_item(
+			item_defaults=[
+				{
+					"company": PI_COMPANY,
+					"default_warehouse": PI_STORES,
+					"purchase_price_variance_account": ppv_account,
+				}
+			]
+		)
+		create_item_standard_cost(
+			item.name, rate=100, company=PI_COMPANY, effective_date=add_days(today(), -1)
+		)
+
+		for doctype, qty in (("Purchase Receipt", 5), ("Purchase Invoice", 3)):
+			with self.subTest(doctype=doctype):
+				purchase = frappe.get_doc(
+					{
+						"doctype": doctype,
+						"company": PI_COMPANY,
+						"supplier": "_Test Supplier",
+						"posting_date": today(),
+						"items": [
+							{
+								"item_code": item.name,
+								"warehouse": PI_STORES,
+								"qty": qty,
+								"rate": 0,
+								"allow_zero_valuation_rate": 1,
+							}
+						],
+					}
+				)
+				if doctype == "Purchase Invoice":
+					purchase.update_stock = 1
+				purchase.insert()
+				purchase.submit()
+
+				for sign in (1, -1):
+					doc = purchase
+					if sign == -1:
+						doc = make_return_doc(doctype, purchase.name)
+						doc.insert()
+						doc.submit()
+
+					filters = {"voucher_type": doctype, "voucher_no": doc.name, "is_cancelled": 0}
+					self.assertEqual(doc.items[0].valuation_rate, 0)
+					self.assertEqual(
+						frappe.db.get_value("Stock Ledger Entry", filters, "stock_value_difference"),
+						sign * qty * 100,
+					)
+					gl_entries = frappe.get_all(
+						"GL Entry", filters=filters, fields=["account", "debit", "credit"]
+					)
+					self.assertEqual(
+						{entry.account: entry.debit - entry.credit for entry in gl_entries},
+						{stock_account: sign * qty * 100, ppv_account: -sign * qty * 100},
+					)
+					if doc.is_return:
+						doc.cancel()
+						self.assertFalse(frappe.db.exists("GL Entry", filters))
+
+				purchase.reload()
+				purchase.cancel()
+				filters["voucher_no"] = purchase.name
+				self.assertFalse(frappe.db.exists("GL Entry", filters))
+				self.assertFalse(frappe.db.exists("Stock Ledger Entry", filters))
 
 	def test_pr_throws_without_ppv_account(self):
 		# Receiving a Standard Cost item with a variance but no PPV account configured must error.
