@@ -153,6 +153,12 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 		row = self.material_rows(work_order)[material]
 		self.assertEqual((row.required_qty, row.consumed_qty), (6, 6))
 
+		# Work Orders saved before returns were counted store consumed_qty net of returns
+		frappe.db.set_value(
+			"Work Order Item", {"parent": work_order.name, "item_code": material}, "consumed_qty", 6
+		)
+		self.assertEqual(self.material_rows(work_order)[material].consumed_qty, 6)
+
 	def test_material_rows_of_hidden_work_orders_are_left_out(self):
 		permitted = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2)
 		hidden = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2)
