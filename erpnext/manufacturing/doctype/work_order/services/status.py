@@ -596,12 +596,25 @@ class StatusService:
 			).run()[0][0]
 		)
 
-		for plan_reference in prod_plan.prod_plan_references:
-			if plan_reference.item_reference != item_reference:
-				continue
+		references = [row for row in prod_plan.prod_plan_references if row.item_reference == item_reference]
+		if not references:
+			return
 
+		bundle_lines = frappe.get_all(
+			"Packed Item",
+			filters={
+				"parenttype": "Sales Order",
+				"parent_detail_docname": ("in", [row.sales_order_item for row in references]),
+			},
+			pluck="parent_detail_docname",
+		)
+		for plan_reference in references:
 			allocated_qty = min(flt(plan_reference.qty), ordered_qty)
 			ordered_qty -= allocated_qty
+			# one component's Work Order cannot tell how many bundles are made, their planned qty counts them
+			if plan_reference.sales_order_item in bundle_lines:
+				continue
+
 			frappe.db.set_value(
 				"Sales Order Item",
 				plan_reference.sales_order_item,
