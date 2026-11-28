@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Min, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
@@ -1153,7 +1154,6 @@ class SellingController(StockController):
 
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_qty_to_undeliver,
 			get_qty_up_to_rounding,
 		)
 
@@ -1190,6 +1190,8 @@ class SellingController(StockController):
 						& (table.warehouse == item.warehouse)
 						& (table.delivered_qty < table.reserved_qty)
 					)
+					# serial and batch reservations first, so a qty one only takes what they did not match
+					.orderby(table.reservation_based_on, order=Order.desc)
 					.orderby(table.creation)
 				)
 				sre_list = query.run(pluck="name")
@@ -1211,7 +1213,8 @@ class SellingController(StockController):
 					if sre_doc.reservation_based_on == "Serial and Batch":
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in delivered_serial_nos:
+								# a serial no delivered again after a return goes to a Qty reservation
+								if entry.serial_no in delivered_serial_nos and not entry.delivered_qty:
 									entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
 									entry.db_update()
 									qty_can_be_deliver += 1
@@ -1247,74 +1250,61 @@ class SellingController(StockController):
 					qty_to_deliver -= qty_can_be_deliver
 
 		if self._action == "cancel":
+			order_rows = defaultdict(list)
 			for item in items:
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
-				if not item.get(so_field) or not item.so_detail:
-					continue
+				if item.get(so_field) and item.so_detail:
+					order_rows[(item.get(so_field), item.so_detail, item.warehouse)].append(item)
 
-				sre_list = frappe.db.get_all(
-					"Stock Reservation Entry",
-					{
-						"docstatus": 1,
-						"voucher_type": "Sales Order",
-						"voucher_no": item.get(so_field),
-						"voucher_detail_no": item.so_detail,
-						"warehouse": item.warehouse,
-						"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
-					},
-					order_by="creation",
+			other_deliveries = self.get_other_deliveries_of_order_rows(items)
+			for (sales_order, so_detail, warehouse), rows in order_rows.items():
+				give_back_stock_reservations(
+					sales_order, so_detail, warehouse, rows, other_deliveries[(so_detail, warehouse)]
 				)
 
-				# Skip if no Stock Reservation Entries.
-				if not sre_list:
-					continue
+	def get_other_deliveries_of_order_rows(self, items) -> defaultdict:
+		"""Stock qty, serial nos and batch qty of the other submitted deliveries of the order rows, by row and warehouse."""
+		deliveries = defaultdict(lambda: frappe._dict(qty=0.0, serial_nos=[], batch_qty=defaultdict(float)))
+		so_details = {item.so_detail for item in items if item.get("so_detail")}
+		if not so_details:
+			return deliveries
 
-				qty_to_undelivered = item.get("stock_qty") or item.qty
-				# shared by the row's reservations, so none gives back a serial / batch qty twice
-				(
-					serial_nos_to_undelivered,
-					batch_qty_to_undelivered,
-				) = get_delivered_serial_batch_for_reservation(item)
-				for sre in sre_list:
-					if qty_to_undelivered <= 0:
-						break
+		rows = []
+		for doctype in ("Delivery Note", "Sales Invoice"):
+			parent, child = frappe.qb.DocType(doctype), frappe.qb.DocType(f"{doctype} Item")
+			query = (
+				frappe.qb.from_(child)
+				.join(parent)
+				.on(parent.name == child.parent)
+				.select(child.so_detail, child.warehouse, child.stock_qty, child.serial_and_batch_bundle)
+				.where((parent.docstatus == 1) & (parent.is_return == 0) & child.so_detail.isin(so_details))
+			)
+			if doctype == self.doctype:
+				query = query.where(parent.name != self.name)
+			if doctype == "Sales Invoice":
+				query = query.where(parent.update_stock == 1)
+			rows += query.run(as_dict=True)
 
-					sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+		bundles = {}
+		for row in rows:
+			delivery = deliveries[(row.so_detail, row.warehouse)]
+			delivery.qty += flt(row.stock_qty)
+			if row.serial_and_batch_bundle:
+				bundles[row.serial_and_batch_bundle] = delivery
 
-					qty_can_be_undelivered = 0
-					if sre_doc.reservation_based_on == "Serial and Batch":
-						if sre_doc.has_serial_no:
-							for entry in sre_doc.sb_entries:
-								if entry.serial_no in serial_nos_to_undelivered:
-									entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
-									entry.db_update()
-									qty_can_be_undelivered += 1
-									serial_nos_to_undelivered.remove(entry.serial_no)
-						else:
-							for entry in sre_doc.sb_entries:
-								if batch_qty_to_undelivered.get(entry.batch_no, 0) > 0:
-									undelivered_qty = get_qty_to_undeliver(
-										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
-									)
-									entry.delivered_qty -= undelivered_qty
-									entry.db_update()
-									qty_can_be_undelivered += undelivered_qty
-									batch_qty_to_undelivered[entry.batch_no] -= undelivered_qty
-					else:
-						# `Qty to Undelivered` should be less than or equal to `Delivered Qty`.
-						qty_can_be_undelivered = min(sre_doc.delivered_qty, qty_to_undelivered)
+		entries = bundles and frappe.get_all(
+			"Serial and Batch Entry",
+			{"parent": ("in", list(bundles))},
+			["parent", "serial_no", "batch_no", "qty"],
+		)
+		for entry in entries or []:
+			delivery = bundles[entry.parent]
+			if entry.serial_no:
+				delivery.serial_nos.append(entry.serial_no)
+			if entry.batch_no:
+				delivery.batch_qty[entry.batch_no] += abs(flt(entry.qty))
 
-					sre_doc.delivered_qty -= qty_can_be_undelivered
-					sre_doc.db_update()
-
-					# Update Stock Reservation Entry `Status` based on `Delivered Qty`.
-					sre_doc.update_status()
-
-					# Update Reserved Stock in Bin.
-					sre_doc.update_reserved_stock_in_bin()
-					sre_doc.update_reserved_qty_in_voucher(update_modified=False)
-
-					qty_to_undelivered -= qty_can_be_undelivered
+		return deliveries
 
 	def validate_against_pick_list_items(self):
 		"""Refuse a row whose item is not the item picked on its Pick List row."""
@@ -1469,6 +1459,123 @@ def get_serial_and_batch_bundle(
 		add_picked_batches(picked_batches, doc.get("entries") or [])
 
 	return doc.name
+
+
+def give_back_stock_reservations(sales_order, so_detail, warehouse, rows, other_deliveries) -> None:
+	"""Give the cancelled rows' qty back to the reservations of their order row in a warehouse."""
+	sre_docs = [
+		frappe.get_doc("Stock Reservation Entry", name)
+		for name in frappe.db.get_all(
+			"Stock Reservation Entry",
+			{
+				"docstatus": 1,
+				"voucher_type": "Sales Order",
+				"voucher_no": sales_order,
+				"voucher_detail_no": so_detail,
+				"warehouse": warehouse,
+				"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
+			},
+			pluck="name",
+			order_by="creation",
+		)
+	]
+	if not sre_docs:
+		return
+
+	delivered_qty = {sre_doc.name: sre_doc.delivered_qty for sre_doc in sre_docs}
+	qty_docs = [doc for doc in sre_docs if doc.reservation_based_on != "Serial and Batch"]
+	for row in rows:
+		give_back_row_qty(row, sre_docs, qty_docs, other_deliveries)
+
+	# a delivery once counted on both kinds of reservation leaves more delivered than is still out
+	if rows[0].doctype != "Packed Item":
+		excess_qty = sum(doc.delivered_qty for doc in sre_docs) - other_deliveries.qty
+		give_back_qty(
+			qty_docs, flt(excess_qty, frappe.get_precision("Stock Reservation Entry", "delivered_qty"))
+		)
+
+	for sre_doc in sre_docs:
+		if sre_doc.delivered_qty != delivered_qty[sre_doc.name]:
+			sre_doc.db_update()
+			sre_doc.update_status()
+			sre_doc.update_reserved_stock_in_bin()
+			sre_doc.update_reserved_qty_in_voucher(update_modified=False)
+
+
+def give_back_row_qty(row, sre_docs, qty_docs, other_deliveries) -> None:
+	"""Give back a cancelled row's qty: first the serial / batch qty that the order row's other
+	deliveries do not hold, then Qty reservations, then the rest of its serial / batch qty."""
+	qty = row.get("stock_qty") or row.qty
+	serial_batch_docs = [doc for doc in sre_docs if doc.reservation_based_on == "Serial and Batch"]
+	if not serial_batch_docs:
+		give_back_qty(qty_docs, qty)
+		return
+
+	held_serial_nos, held_batch_qty = list(other_deliveries.serial_nos), other_deliveries.batch_qty.copy()
+	serial_nos, batch_qty = get_delivered_serial_batch_for_reservation(row)
+	for sre_doc in serial_batch_docs:
+		qty -= give_back_serial_batch(sre_doc, serial_nos, batch_qty, qty, held_serial_nos, held_batch_qty)
+
+	qty = give_back_qty(qty_docs, qty)
+	for sre_doc in serial_batch_docs:
+		qty -= give_back_serial_batch(sre_doc, serial_nos, batch_qty, qty)
+
+
+def give_back_serial_batch(
+	sre_doc, serial_nos, batch_qty, qty, held_serial_nos=None, held_batch_qty=None
+) -> float:
+	"""Give back up to `qty` of the serial / batch qty a cancelled row delivered on `sre_doc`.
+
+	The part of an entry that other deliveries still hold (`held_*`) is kept.
+	"""
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import get_qty_to_undeliver
+
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	given_qty = 0
+	for entry in sre_doc.sb_entries:
+		qty_left = flt(qty - given_qty, precision)
+		free_qty = entry.delivered_qty - get_held_qty(entry, held_serial_nos or [], held_batch_qty or {})
+		if entry.serial_no:
+			undelivered_qty = 1 if entry.serial_no in serial_nos and free_qty and qty_left >= 1 else 0
+			if undelivered_qty:
+				serial_nos.remove(entry.serial_no)
+		else:
+			# an entry with nothing to give back keeps its delivered qty as stored
+			qty_to_give = min(free_qty, batch_qty.get(entry.batch_no, 0), qty_left)
+			undelivered_qty = get_qty_to_undeliver(entry.delivered_qty, qty_to_give) if qty_to_give > 0 else 0
+			if undelivered_qty > 0:
+				batch_qty[entry.batch_no] -= undelivered_qty
+
+		if undelivered_qty > 0:
+			entry.delivered_qty -= undelivered_qty
+			entry.db_update()
+			given_qty += undelivered_qty
+
+	sre_doc.delivered_qty -= given_qty
+	return given_qty
+
+
+def give_back_qty(sre_docs, qty: float) -> float:
+	"""Give back up to `qty` from these Qty reservations, oldest first, and return the qty left."""
+	for sre_doc in sre_docs:
+		undelivered_qty = min(sre_doc.delivered_qty, max(qty, 0))
+		sre_doc.delivered_qty -= undelivered_qty
+		qty -= undelivered_qty
+	return qty
+
+
+def get_held_qty(entry, held_serial_nos: list, held_batch_qty: dict) -> float:
+	"""Part of a reservation entry's delivered qty that other deliveries hold, taken from the held qty."""
+	if entry.serial_no:
+		if entry.delivered_qty and entry.serial_no in held_serial_nos:
+			held_serial_nos.remove(entry.serial_no)
+			return entry.delivered_qty
+		return 0
+
+	held_qty = min(entry.delivered_qty, held_batch_qty.get(entry.batch_no, 0))
+	if held_qty > 0:
+		held_batch_qty[entry.batch_no] -= held_qty
+	return held_qty
 
 
 def get_delivered_serial_batch_for_reservation(item):
