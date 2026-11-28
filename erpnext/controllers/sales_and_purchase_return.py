@@ -414,9 +414,11 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	already_returned_data = already_returned_items.get(key) or {}
 	returns_nothing = not (flt(args.get("qty")) or flt(args.get("rejected_qty")))
 
-	# an invoice without Update Stock bills in the row's UOM, so its qty is checked in that UOM
+	# an invoice without Update Stock bills in the row's UOM, so its qty is checked in that UOM;
+	# other returns in the finer of the row and stock UOMs, so neither precision rounds a return away
 	bills_in_row_uom = doc.doctype in ("Purchase Invoice", "Sales Invoice") and not doc.update_stock
-	uom_factor = (flt(args.get("conversion_factor")) or 1) if bills_in_row_uom else 1
+	conversion_factor = flt(args.get("conversion_factor")) or 1
+	uom_factor = conversion_factor if bills_in_row_uom else min(conversion_factor, 1)
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	field_precision = get_field_precision(
