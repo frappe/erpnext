@@ -79,6 +79,31 @@ class FixedAssetService:
 				)
 			)
 
+	def validate_return_cancellation(self) -> None:
+		"""Cancelling a return sells the asset again on the sale date, so no depreciation may be booked after it."""
+		doc = self.doc
+		if not doc.is_return or doc.is_internal_transfer():
+			return
+
+		sale_date = getdate(self.get_disposal_date())
+		for item in doc.get("items"):
+			if not item.is_fixed_asset or not item.asset:
+				continue
+
+			last_depreciation_date = get_last_depreciation_date(item.asset)
+			if last_depreciation_date and getdate(last_depreciation_date) > sale_date:
+				frappe.throw(
+					_(
+						"Row #{0}: Asset {1} has a depreciation entry dated {2}, after its sale date {3}. Cancel the depreciation entries made after the sale before you cancel this return."
+					).format(
+						item.idx,
+						get_link_to_form("Asset", item.asset),
+						frappe.format(last_depreciation_date, "Date"),
+						frappe.format(sale_date, "Date"),
+					),
+					title=_("Depreciation After Sale"),
+				)
+
 	def set_income_account_for_fixed_assets(self) -> None:
 		for item in self.doc.items:
 			item.set_income_account_for_fixed_asset(self.doc.company)

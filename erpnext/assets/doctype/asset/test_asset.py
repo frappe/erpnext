@@ -1265,6 +1265,30 @@ class TestAsset(AssetSetup):
 			],
 		)
 
+	def test_return_cancel_refused_after_depreciation_past_sale_date(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_monthly_depreciating_asset(net_purchase_amount=120000, purchase_amount=120000)
+		post_depreciation_entries(date="2025-07-31")
+		sale_args = {"item_code": "Macbook Pro", "asset": asset.name, "rate": 50000}
+		sale = create_sales_invoice(qty=1, posting_date="2025-08-15", **sale_args)
+		sale_return = create_sales_invoice(
+			qty=-1, posting_date="2025-08-20", is_return=1, return_against=sale.name, **sale_args
+		)
+
+		post_depreciation_entries(date="2025-09-30")
+		self.assertRaises(frappe.ValidationError, sale_return.cancel)
+
+		for row in reversed(get_depr_schedule(asset.name, "Active")):
+			if row.journal_entry and getdate(row.schedule_date) > getdate("2025-08-15"):
+				frappe.get_doc("Journal Entry", row.journal_entry).cancel()
+
+		sale_return.reload()
+		sale_return.cancel()
+		asset.load_from_db()
+		self.assertEqual((asset.status, getdate(asset.disposal_date)), ("Sold", getdate("2025-08-15")))
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 75161.29)
+
 	def test_sale_and_return_gl_unchanged_on_repost(self):
 		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
 			update_repost_settings,

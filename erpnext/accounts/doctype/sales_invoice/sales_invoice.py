@@ -548,6 +548,7 @@ class SalesInvoice(SellingController):
 		validate_deferred_revenue_return_cancellation(self)
 		POSService(self).check_if_created_using_pos_and_pos_closing_entry_generated()
 		POSService(self).check_if_consolidated_invoice()
+		FixedAssetService(self).validate_return_cancellation()
 
 		super().before_cancel()
 		TimesheetBillingService(self).update_time_sheet(
