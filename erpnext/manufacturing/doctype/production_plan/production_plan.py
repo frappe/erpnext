@@ -385,11 +385,12 @@ class ProductionPlan(Document):
 			)
 
 	def get_allocated_references(self):
-		"""Combined references with the qty this plan gives each."""
+		"""Combined references with the qty this plan's consolidated rows give each."""
 		planned_qty = {}
 		for row in self.po_items:
-			key = (self.name, row.sales_order_item)
-			planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+			if not row.sales_order:
+				key = (self.name, row.sales_order_item)
+				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
 
 		return allocate_reference_qty(self.prod_plan_references, planned_qty)
 
@@ -457,22 +458,16 @@ class ProductionPlan(Document):
 
 	def get_consolidated_planned_qty(self):
 		"""Planned qty of consolidated rows allotted to their Sales Order lines, excluding product bundle lines."""
-		row_qty = {}
-		for row in self.po_items:
-			if not row.sales_order and row.sales_order_item:
-				key = (row.parent, row.sales_order_item)
-				row_qty[key] = row_qty.get(key, 0) + flt(row.planned_qty)
-
-		if not row_qty:
+		allotted = [row for row in self.get_allocated_references() if row.qty > 0]
+		if not allotted:
 			return []
 
-		allotted = allocate_reference_qty(self.prod_plan_references, row_qty)
 		bundle_lines = frappe.get_all(
 			"Packed Item",
 			filters={"parent_detail_docname": ("in", [row.sales_order_item for row in allotted])},
 			pluck="parent_detail_docname",
 		)
-		return [row for row in allotted if row.qty > 0 and row.sales_order_item not in bundle_lines]
+		return [row for row in allotted if row.sales_order_item not in bundle_lines]
 
 	def on_submit(self):
 		self.update_bin_qty()
