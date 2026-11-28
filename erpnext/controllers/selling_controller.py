@@ -1535,13 +1535,16 @@ def give_back_stock_reservations(sales_order, so_detail, warehouse, rows, other_
 			order_by="creation",
 		)
 	]
+	if not sre_docs:
+		return
+
 	delivered_qty = {sre_doc.name: sre_doc.delivered_qty for sre_doc in sre_docs}
 	qty_docs = [doc for doc in sre_docs if doc.reservation_based_on != "Serial and Batch"]
 	for row in rows:
 		give_back_row_qty(row, sre_docs, qty_docs, other_deliveries)
 
 	# a delivery once counted on both kinds of reservation leaves more delivered than is still out
-	if sre_docs and rows[0].doctype != "Packed Item":
+	if rows[0].doctype != "Packed Item":
 		excess_qty = sum(doc.delivered_qty for doc in sre_docs) - other_deliveries.qty
 		give_back_qty(
 			qty_docs, flt(excess_qty, frappe.get_precision("Stock Reservation Entry", "delivered_qty"))
@@ -1558,10 +1561,13 @@ def give_back_stock_reservations(sales_order, so_detail, warehouse, rows, other_
 def give_back_row_qty(row, sre_docs, qty_docs, other_deliveries) -> None:
 	"""Give back a cancelled row's qty: first the serial / batch qty that the order row's other
 	deliveries do not hold, then Qty reservations, then the rest of its serial / batch qty."""
-	serial_batch_docs = [doc for doc in sre_docs if doc.reservation_based_on == "Serial and Batch"]
-	held_serial_nos, held_batch_qty = list(other_deliveries.serial_nos), other_deliveries.batch_qty.copy()
-
 	qty = row.get("stock_qty") or row.qty
+	serial_batch_docs = [doc for doc in sre_docs if doc.reservation_based_on == "Serial and Batch"]
+	if not serial_batch_docs:
+		give_back_qty(qty_docs, qty)
+		return
+
+	held_serial_nos, held_batch_qty = list(other_deliveries.serial_nos), other_deliveries.batch_qty.copy()
 	serial_nos, batch_qty = get_delivered_serial_batch_for_reservation(row)
 	for sre_doc in serial_batch_docs:
 		qty -= give_back_serial_batch(sre_doc, serial_nos, batch_qty, qty, held_serial_nos, held_batch_qty)
@@ -1590,9 +1596,9 @@ def give_back_serial_batch(
 			if undelivered_qty:
 				serial_nos.remove(entry.serial_no)
 		else:
-			undelivered_qty = get_qty_to_undeliver(
-				entry.delivered_qty, min(free_qty, batch_qty.get(entry.batch_no, 0), qty_left)
-			)
+			# an entry with nothing to give back keeps its delivered qty as stored
+			qty_to_give = min(free_qty, batch_qty.get(entry.batch_no, 0), qty_left)
+			undelivered_qty = get_qty_to_undeliver(entry.delivered_qty, qty_to_give) if qty_to_give > 0 else 0
 			if undelivered_qty > 0:
 				batch_qty[entry.batch_no] -= undelivered_qty
 
