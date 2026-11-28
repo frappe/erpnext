@@ -2082,25 +2082,27 @@ def get_pick_list_query(doctype: Any, txt: str, searchfield: Any, start: int, pa
 	PICK_LIST_ITEM = frappe.qb.DocType("Pick List Item")
 	SALES_ORDER = frappe.qb.DocType("Sales Order")
 
+	# rows without a Sales Order belong to the Pick List's own customer
+	customer = Coalesce(SALES_ORDER.customer, PICK_LIST.customer)
 	query = (
 		frappe.qb.from_(PICK_LIST)
 		.join(PICK_LIST_ITEM)
 		.on(PICK_LIST.name == PICK_LIST_ITEM.parent)
-		.join(SALES_ORDER)
+		.left_join(SALES_ORDER)
 		.on(PICK_LIST_ITEM.sales_order == SALES_ORDER.name)
 		.select(
 			PICK_LIST.name,
-			SALES_ORDER.customer,
+			customer.as_("customer"),
 			Replace(GroupConcat(PICK_LIST_ITEM.sales_order).distinct(), ",", "<br>").as_("sales_order"),
 		)
 		.where(PICK_LIST.docstatus == 1)
 		.where(PICK_LIST.status.isin(["Open", "Partly Delivered"]))
 		.where(PICK_LIST.company == filters.get("company"))
-		.where(SALES_ORDER.customer == filters.get("customer"))
-		# customer is from the joined Sales Order, not Pick List's PK, so Postgres rejects it as a bare
-		# select under GROUP BY pick_list.name; it is pinned to one value by the filter above, so adding
+		.where(customer == filters.get("customer"))
+		# customer is not Pick List's PK, so Postgres rejects it as a bare select under
+		# GROUP BY pick_list.name; it is pinned to one value by the filter above, so adding
 		# it to the GROUP BY is valid on Postgres and identical on MariaDB.
-		.groupby(PICK_LIST.name, SALES_ORDER.customer)
+		.groupby(PICK_LIST.name, customer)
 	)
 
 	if filters.get("sales_order"):
