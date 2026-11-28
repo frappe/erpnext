@@ -341,7 +341,7 @@ class WorkOrderStockReservation:
 
 	@staticmethod
 	def _fg_reservation_row(item, row, reserved_qty, stock_entry):
-		return frappe._dict(
+		reservation = frappe._dict(
 			{
 				"voucher_no": item.voucher_no,
 				"voucher_type": item.voucher_type,
@@ -355,6 +355,11 @@ class WorkOrderStockReservation:
 				"serial_and_batch_bundles": [row.serial_and_batch_bundle],
 			}
 		)
+		if item.voucher_type == "Sales Order":
+			# Validation subtracts the row's delivered qty from `voucher_qty`, so it must be the
+			# full Sales Order row qty rather than the (already net of delivered) qty being reserved.
+			reservation["voucher_qty"] = item.stock_qty
+		return reservation
 
 	def get_items_to_reserve_for_job_card(self, stock_entry, finished_good):
 		for row in stock_entry.items:

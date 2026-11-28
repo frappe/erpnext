@@ -1478,7 +1478,9 @@ class StockReservation:
 			sre.voucher_no = item.get("voucher_no") or self.doc.name
 			sre.voucher_detail_no = item.get(child_doctype) or item.name or item.get("voucher_detail_no")
 			sre.available_qty = self.available_qty_to_reserve
-			sre.voucher_qty = self.get_voucher_qty(item, sre.voucher_detail_no) or qty
+			sre.voucher_qty = (
+				item.get("voucher_qty") or self.get_voucher_qty(item, sre.voucher_detail_no) or qty
+			)
 			sre.reserved_qty = self.qty_to_be_reserved
 			sre.company = self.doc.company
 			sre.stock_uom = item_details.stock_uom
