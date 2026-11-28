@@ -49,6 +49,7 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 			)
 
 		received_qty_ratios = doc.get_received_qty_ratios_for_return(doc.get_rejected_return_rows())
+		invoice_differences = doc.get_invoice_differences()
 		for item in doc.items:
 			if flt(item.rate) and flt(item.qty):
 				_inv_dict = doc.get_inventory_account_dict(item, inventory_account_map)
@@ -85,7 +86,12 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 					else:
 						service_qty = doc.get_qty_for_costing(item)
 
-					service_cost = flt(flt(item.service_cost_per_qty) * service_qty, item.precision("amount"))
+					# the service's difference with its Purchase Invoice moves from the service account into stock
+					service_cost = flt(
+						flt(item.service_cost_per_qty) * service_qty
+						+ flt(invoice_differences.get(item.name)),
+						item.precision("amount"),
+					)
 
 					self.add_gl_entry(
 						gl_entries=gl_entries,
