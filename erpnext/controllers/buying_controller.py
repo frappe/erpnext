@@ -885,18 +885,29 @@ class BuyingController(SubcontractingController):
 
 	def set_allocate_by_item_wise_tax(self):
 		"""Previous Row charges of documents valued before this flag keep their net amount split.
-		A return values its charges as its original did."""
-		allocate = True
-		if self.get("is_return") and self.get("return_against"):
-			allocate = frappe.db.exists(
-				"Purchase Taxes and Charges",
-				{"parenttype": self.doctype, "parent": self.return_against, "allocate_by_item_wise_tax": 1},
-			)
-
+		A return keeps the split of each charge it carries over from its original."""
+		original_split = self.get_original_previous_row_split()
 		for tax in self.get("taxes"):
-			tax.allocate_by_item_wise_tax = cint(
-				bool(allocate) and tax.charge_type in PREVIOUS_ROW_CHARGE_TYPES
-			)
+			allocate = 0
+			if tax.charge_type in PREVIOUS_ROW_CHARGE_TYPES:
+				allocate = original_split.get((tax.charge_type, tax.account_head), 1)
+
+			tax.allocate_by_item_wise_tax = cint(allocate)
+
+	def get_original_previous_row_split(self) -> dict:
+		if not (self.get("is_return") and self.get("return_against")):
+			return {}
+
+		charges = frappe.get_all(
+			"Purchase Taxes and Charges",
+			filters={
+				"parenttype": self.doctype,
+				"parent": self.return_against,
+				"charge_type": ["in", PREVIOUS_ROW_CHARGE_TYPES],
+			},
+			fields=["charge_type", "account_head", "allocate_by_item_wise_tax"],
+		)
+		return {(d.charge_type, d.account_head): d.allocate_by_item_wise_tax for d in charges}
 
 	def get_rejected_valuation_rate(self, row) -> float:
 		if not is_rejected_material_valued(self.doctype, row.name):
