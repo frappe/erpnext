@@ -5,24 +5,13 @@ frappe.query_reports["Consolidated Accounts Receivable"] = {
 	filters: [
 		{
 			fieldname: "companies",
-			label: __("Companies"),
-			fieldtype: "MultiSelectList",
-			options: "Company",
 			get_data: function (txt) {
 				return erpnext.utils.get_link_options("Company", txt);
 			},
 			description: __("Totals are dropped when the companies use different currencies"),
 		},
 		{
-			fieldname: "report_date",
-			label: __("Report Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
-		},
-		{
 			fieldname: "party_type",
-			label: __("Party Type"),
-			fieldtype: "Autocomplete",
 			options: get_party_type_options(),
 			on_change: function () {
 				frappe.query_report.set_filter_value("party", "");
@@ -34,9 +23,6 @@ frappe.query_reports["Consolidated Accounts Receivable"] = {
 		},
 		{
 			fieldname: "party",
-			label: __("Party"),
-			fieldtype: "MultiSelectList",
-			options: "party_type",
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 
@@ -47,101 +33,10 @@ frappe.query_reports["Consolidated Accounts Receivable"] = {
 			},
 		},
 		{
-			fieldname: "ageing_based_on",
-			label: __("Ageing Based On"),
-			fieldtype: "Select",
-			options: "Posting Date\nDue Date",
-			default: "Due Date",
-		},
-		{
-			fieldname: "age_as_on",
-			label: __("Age as on"),
-			fieldtype: "Select",
-			options: "Report Date\nToday",
-			default: "Report Date",
-		},
-		{
-			fieldname: "range",
-			label: __("Ageing Range"),
-			fieldtype: "Data",
-			default: "30, 60, 90, 120",
-		},
-		{
-			fieldname: "customer_group",
-			label: __("Customer Group"),
-			fieldtype: "Link",
-			options: "Customer Group",
-		},
-		{
 			fieldname: "territory",
-			label: __("Territory"),
-			fieldtype: "MultiSelectList",
-			options: "Territory",
 			get_data: function (txt) {
 				return erpnext.utils.get_link_options("Territory", txt);
 			},
-		},
-		{
-			fieldname: "sales_partner",
-			label: __("Sales Partner"),
-			fieldtype: "Link",
-			options: "Sales Partner",
-		},
-		{
-			fieldname: "sales_person",
-			label: __("Sales Person"),
-			fieldtype: "Link",
-			options: "Sales Person",
-		},
-		{
-			fieldname: "group_by_party",
-			label: __("Group By Customer"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "group_by_company",
-			label: __("Group By Company"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "ignore_accounts",
-			label: __("Group by Voucher"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "based_on_payment_terms",
-			label: __("Based On Payment Terms"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_future_payments",
-			label: __("Show Future Payments"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_remarks",
-			label: __("Show Remarks"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_sales_person",
-			label: __("Show Sales Person"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_delivery_notes",
-			label: __("Show Linked Delivery Notes"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "for_revaluation_journals",
-			label: __("Revaluation Journals"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "in_party_currency",
-			label: __("In Party Currency"),
-			fieldtype: "Check",
 		},
 	],
 	collapsible_filters: true,
