@@ -2963,6 +2963,80 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 		self.assertEqual(payment_request.reference_doctype, "Sales Invoice")
 		self.assertEqual(payment_request.reference_name, invoice_name)
 
+	def make_subscription_invoice(self, plan_name, payment_gateway_account=None):
+		create_plan(plan_name=plan_name, cost=900, currency="INR")
+		frappe.db.set_value("Subscription Plan", plan_name, "payment_gateway", payment_gateway_account)
+
+		subscription = create_subscription(
+			plans=[{"plan": plan_name, "qty": 1}],
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		return frappe.get_value(
+			"Sales Invoice",
+			{"subscription": subscription.name, "docstatus": 1, "is_return": 0},
+			"name",
+		)
+
+	def make_non_default_gateway_account(self):
+		if not frappe.db.exists("Payment Gateway", "_Test Gateway Subscription"):
+			frappe.get_doc({"doctype": "Payment Gateway", "gateway": "_Test Gateway Subscription"}).insert()
+
+		name = "_Test Gateway Subscription - INR - _TC"
+		if not frappe.db.exists("Payment Gateway Account", name):
+			frappe.get_doc(
+				{
+					"doctype": "Payment Gateway Account",
+					"payment_gateway": "_Test Gateway Subscription",
+					"payment_account": "_Test Bank - _TC",
+					"company": "_Test Company",
+				}
+			).insert()
+		return name
+
+	def test_payment_request_uses_subscription_plan_gateway(self):
+		gateway_account = self.make_non_default_gateway_account()
+		invoice_name = self.make_subscription_invoice("_Test Plan Own Gateway", gateway_account)
+
+		payment_request = make_payment_request(
+			dt="Sales Invoice", dn=invoice_name, recipient_id="test@example.com", return_doc=1
+		)
+
+		self.assertEqual(payment_request.payment_gateway_account, gateway_account)
+		self.assertEqual(payment_request.payment_gateway, "_Test Gateway Subscription")
+		self.assertEqual(payment_request.payment_account, "_Test Bank - _TC")
+		# the plan gateway passes the subscription validation
+		payment_request.insert()
+
+	def test_explicit_gateway_overrides_subscription_plan_gateway(self):
+		plan_gateway_account = self.make_non_default_gateway_account()
+		invoice_name = self.make_subscription_invoice("_Test Plan Explicit Gateway", plan_gateway_account)
+
+		payment_request = make_payment_request(
+			dt="Sales Invoice",
+			dn=invoice_name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			return_doc=1,
+		)
+
+		self.assertEqual(payment_request.payment_gateway_account, "_Test Gateway - INR - _TC")
+		# a gateway other than the plan's is still rejected, naming the plan
+		self.assertRaisesRegex(frappe.ValidationError, "_Test Plan Explicit Gateway", payment_request.insert)
+
+	def test_subscription_plan_without_gateway_uses_default_gateway(self):
+		invoice_name = self.make_subscription_invoice("_Test Plan No Gateway")
+
+		payment_request = make_payment_request(
+			dt="Sales Invoice", dn=invoice_name, recipient_id="test@example.com", return_doc=1
+		)
+
+		self.assertEqual(payment_request.payment_gateway_account, "_Test Gateway - INR - _TC")
+		self.assertEqual(payment_request.is_a_subscription, 1)
+		# a plan without a gateway does not block the payment request
+		payment_request.insert()
+
 	def test_payment_request_without_subscription(self):
 		si = create_sales_invoice()
 		payment_request = make_payment_request(
