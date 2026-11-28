@@ -3745,6 +3745,134 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(fg_row.qty), 3.0)
 		me_b.submit()
 
+	def test_subcontracted_job_card_received_qty_counts_for_later_operations(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+		from erpnext.manufacturing.doctype.job_card.mapper import make_subcontracting_po
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			get_mapped_subcontracting_receipt,
+		)
+
+		warehouse = "Stores - _TC"
+		rm = make_item("Subcontracted Later Op RM", {"is_stock_item": 1}).name
+		sfg = make_item("Subcontracted Later Op SFG", {"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		fg = make_item("Subcontracted Later Op FG", {"is_stock_item": 1}).name
+		service = make_item("Subcontracted Later Op Service", {"is_stock_item": 0}).name
+
+		sfg_bom = frappe.new_doc("BOM", company="_Test Company", item=sfg, quantity=1)
+		sfg_bom.append("items", {"item_code": rm, "qty": 1})
+		sfg_bom.insert()
+		sfg_bom.submit()
+		frappe.get_doc(
+			{
+				"doctype": "Subcontracting BOM",
+				"finished_good": sfg,
+				"finished_good_qty": 1,
+				"service_item": service,
+				"service_item_qty": 1,
+				"finished_good_bom": sfg_bom.name,
+				"is_active": 1,
+			}
+		).insert()
+
+		common = {
+			"workstation": "_Test Workstation A",
+			"finished_good_qty": 1,
+			"time_in_mins": 60,
+			"source_warehouse": warehouse,
+			"fg_warehouse": warehouse,
+			"skip_material_transfer": 1,
+		}
+		sterilization = {
+			**common,
+			"operation": "Subcontracted Later Op Sterilization",
+			"finished_good": sfg,
+			"is_subcontracted": 1,
+			"bom_no": sfg_bom.name,
+			"sequence_id": 1,
+			"batch_size": 6,
+		}
+		packaging = {
+			**common,
+			"operation": "Subcontracted Later Op Packaging",
+			"finished_good": fg,
+			"is_final_finished_good": 1,
+			"sequence_id": 2,
+		}
+		make_workstation(sterilization)
+		make_operation(sterilization)
+		make_operation(packaging)
+		frappe.db.set_value(
+			"Operation",
+			sterilization["operation"],
+			{"create_job_card_based_on_batch_size": 1, "batch_size": 6},
+		)
+
+		fg_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		fg_bom.append("operations", sterilization)
+		fg_bom.append("operations", packaging)
+		fg_bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
+		fg_bom.append("items", {"item_code": sfg, "qty": 1, "operation_row_id": 2})
+		fg_bom.insert()
+		fg_bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg,
+			qty=10,
+			source_warehouse=warehouse,
+			wip_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			bom_no=fg_bom.name,
+			skip_transfer=1,
+		)
+		make_stock_entry(item_code=rm, target=warehouse, qty=10, basic_rate=100)
+
+		first, second = frappe.get_all(
+			"Job Card",
+			filters={"work_order": work_order.name, "operation": sterilization["operation"]},
+			order_by="creation",
+			pluck="name",
+		)
+		frappe.get_doc("Job Card", first).submit()
+
+		# receive the first job card's 6 from the subcontractor
+		supplier_warehouse = create_warehouse("Subcontracted Later Op Supplier WH", company="_Test Company")
+		po = frappe.get_doc(make_subcontracting_po(first))
+		po.supplier = "_Test Supplier"
+		po.supplier_warehouse = supplier_warehouse
+		po.schedule_date = today()
+		for item in po.items:
+			item.schedule_date = today()
+			item.qty = item.fg_item_qty = 6
+		po.submit()
+		sco = make_subcontracting_order(po.name)
+		sco.supplier_warehouse = supplier_warehouse
+		sco.submit()
+		frappe.get_doc(make_rm_stock_entry(sco.name)).submit()
+		get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 6}]).submit()
+
+		packaging_job_card = self.get_semi_fg_job_card(work_order, packaging["operation"])
+		packaging_job_card.for_quantity = 6
+		packaging_job_card.append(
+			"time_logs",
+			{"from_time": "2024-02-01 08:00:00", "to_time": "2024-02-01 09:00:00", "completed_qty": 6},
+		)
+		packaging_job_card.submit()
+		frappe.get_doc(packaging_job_card.make_stock_entry_for_semi_fg_item()).submit()
+
+		# packaging used the 6 received, so the rest of sterilization can still be submitted
+		frappe.get_doc("Job Card", second).submit()
+
 	def make_semi_fg_work_order(self, prefix, qty=5):
 		"""Two-operation semi FG work order: Op A makes the SFG from RM 1, final Op B
 		consumes it. Both operations skip material transfer; stock is pre-seeded."""
