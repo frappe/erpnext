@@ -4775,6 +4775,37 @@ class TestPickList(ERPNextTestSuite):
 		)
 		self.assertIn(pl.name, [row["name"] for row in result])
 
+	def test_pick_list_query_lists_pick_list_without_sales_order_for_its_customer(self):
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_query
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item().name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Delivery",
+				"customer": "_Test Customer",
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 2,
+						"stock_qty": 2,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		def get_listed(customer):
+			filters = {"company": "_Test Company", "customer": customer}
+			return [row["name"] for row in get_pick_list_query("Pick List", "", "name", 0, 20, filters)]
+
+		self.assertIn(pick_list.name, get_listed("_Test Customer"))
+		self.assertNotIn(pick_list.name, get_listed("_Test Customer 1"))
+
 	def test_pick_list_query_keeps_company_restricted_user_in_own_company(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 		from frappe.permissions import add_user_permission
