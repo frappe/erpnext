@@ -103,6 +103,10 @@ class SalesOrderSourcingService:
 			self.get_items()
 			return
 
+		# already consolidated: its rows and references stay as they are
+		if self.doc.prod_plan_references:
+			return
+
 		items = [self._combined_so_item(row) for row in self.doc.po_items]
 		self.doc.set("po_items", [])
 		self.add_items(items)
