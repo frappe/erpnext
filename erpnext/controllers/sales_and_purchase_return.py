@@ -777,10 +777,11 @@ def set_qty_left_to_return(row, stock_qty_left: dict):
 
 
 def fits_in_uom(row, stock_qty) -> bool:
-	"""Whether the row's UOM holds the stock qty exactly. A Subcontracting Receipt row has no stock UOM qty."""
-	conversion_factor = flt(row.conversion_factor) or 1
-	if conversion_factor == 1 or row.doctype == "Subcontracting Receipt Item":
+	"""Whether the row's UOM holds the stock qty exactly. A Subcontracting Receipt row has no UOM field."""
+	if not row.get("uom") or row.uom == row.stock_uom:
 		return True
+
+	conversion_factor = flt(row.conversion_factor) or 1
 
 	qty = flt(stock_qty / conversion_factor, row.precision("qty"))
 	if frappe.get_cached_value("UOM", row.uom, "must_be_whole_number") and qty != cint(qty):
