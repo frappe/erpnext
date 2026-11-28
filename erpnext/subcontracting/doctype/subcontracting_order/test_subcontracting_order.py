@@ -9,6 +9,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.subcontracting_controller import (
 	get_materials_from_supplier,
 	make_rm_stock_entry,
@@ -29,6 +30,7 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
@@ -1604,30 +1606,10 @@ class TestSubcontractingOrder(FrappeTestCase):
 	def test_consumption_for_a_finished_good_counts_on_the_row_its_material_was_sent_on(self):
 		set_backflush_based_on("BOM")
 		rm_item = make_item("Subcontracted RM Item Sent For Other FG", {"is_stock_item": 1}).name
-		service_items = []
-		for code, service_item, qty in (
-			("A", "Subcontracted Service Item 2", 10),
-			("B", "Subcontracted Service Item 3", 6),
-		):
-			fg_item = make_item(
-				f"Subcontracted FG Item Sent For Other FG {code}",
-				{"is_stock_item": 1, "is_sub_contracted_item": 1},
-			).name
-			make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
-			service_items.append(
-				{
-					"warehouse": "_Test Warehouse - _TC",
-					"item_code": service_item,
-					"qty": qty,
-					"rate": 100,
-					"fg_item": fg_item,
-					"fg_item_qty": qty,
-				}
-			)
 
 		# 16 sent on FG A's and FG B's rows, then a receipt of 6 FG B
 		for sent, consumed in (((16, 0), [6, 0]), ((14, 2), [4, 2])):
-			sco = get_subcontracting_order(service_items=service_items)
+			sco = get_order_for_finished_goods("Sent For Other FG", rm_item, (10, 6))
 			make_stock_entry(
 				item_code=rm_item, target=sco.supplied_items[0].reserve_warehouse, qty=16, basic_rate=100
 			)
@@ -1637,14 +1619,93 @@ class TestSubcontractingOrder(FrappeTestCase):
 					transfer.items[0].qty = qty
 					transfer.submit()
 
-			receipt = make_subcontracting_receipt(sco.name)
-			receipt.remove(receipt.items[0])
-			receipt.submit()
+			make_receipt_for_finished_good(sco, sco.items[1].item_code).submit()
 
-			self.assertEqual(
-				[frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items],
-				consumed,
-			)
+			self.assertEqual(get_consumed_qty(sco), consumed)
+			self.assertEqual(get_returnable_items(sco), [(10, None, sco.supplied_items[0].name)])
+			set_backflush_based_on("Material Transferred for Subcontract")
+			receipt = make_receipt_for_finished_good(sco, sco.items[0].item_code)
+			receipt.save()
+			self.assertEqual([row.consumed_qty for row in receipt.supplied_items], [10])
+			set_backflush_based_on("BOM")
+
+	def test_consumed_batch_counts_on_the_row_that_sent_it(self):
+		"""Batch X is sent for FG A and batch Y for FG B; a receipt of FG C, sent nothing, consumes Y."""
+		set_backflush_based_on("BOM")
+		rm_item = make_item(
+			"Subcontracted RM Batch Sent For Other FG",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SRBOF.#####",
+			},
+		).name
+		sco = get_order_for_finished_goods("Batch Sent For Other FG", rm_item, (5, 5, 5))
+		batches = [send_serial_batch(sco, row, batch_no=True) for row in sco.supplied_items[:2]]
+
+		receipt = make_receipt_for_finished_good(sco, sco.items[2].item_code)
+		receipt.save()
+		receipt.supplied_items[0].update(
+			{"use_serial_batch_fields": 1, "serial_and_batch_bundle": None, "batch_no": batches[1]}
+		)
+		receipt.submit()
+
+		self.assertEqual(get_consumed_qty(sco), [0, 5, 0])
+		self.assertEqual(get_returnable_items(sco), [(5, batches[0], sco.supplied_items[0].name)])
+
+	def test_consumed_serial_no_counts_on_the_row_that_sent_it(self):
+		"""2 serial nos each are sent for FG A and FG B; a receipt of FG C, sent nothing, consumes one of B's."""
+		set_backflush_based_on("BOM")
+		rm_item = make_item(
+			"Subcontracted RM Serial Sent For Other FG",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SRSOF.#####"},
+		).name
+		sco = get_order_for_finished_goods("Serial Sent For Other FG", rm_item, (2, 2, 1))
+		serial_nos = [send_serial_batch(sco, row) for row in sco.supplied_items[:2]]
+
+		receipt = make_receipt_for_finished_good(sco, sco.items[2].item_code)
+		receipt.save()
+		receipt.supplied_items[0].update(
+			{"use_serial_batch_fields": 1, "serial_and_batch_bundle": None, "serial_no": serial_nos[1][0]}
+		)
+		receipt.submit()
+
+		self.assertEqual(get_consumed_qty(sco), [0, 1, 0])
+		returned = get_materials_from_supplier_for(sco)
+		self.assertEqual(
+			[sorted(row.serial_no.split("\n")) for row in returned.items], [serial_nos[0], serial_nos[1][1:]]
+		)
+
+		make_return_doc("Subcontracting Receipt", receipt.name).submit()
+		self.assertEqual(get_consumed_qty(sco), [0, 0, 0])
+
+	def test_consumption_of_two_orders_in_one_receipt_stays_on_each_order(self):
+		set_backflush_based_on("BOM")
+		rm_item = make_item(
+			"Subcontracted RM Batch Two Orders",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SRBTO.#####",
+			},
+		).name
+		orders = [get_order_for_finished_goods("Batch Two Orders", rm_item, (5,)) for _ in range(2)]
+		batches = [send_serial_batch(sco, sco.supplied_items[0], batch_no=True) for sco in orders]
+
+		receipt = make_subcontracting_receipt(orders[1].name, make_subcontracting_receipt(orders[0].name))
+		receipt.items[0].qty, receipt.items[1].qty = 2, 3
+		receipt.submit()
+
+		self.assertEqual([get_consumed_qty(sco) for sco in orders], [[2], [3]])
+		self.assertEqual(
+			[get_returnable_items(sco) for sco in orders],
+			[
+				[(3, batches[0], orders[0].supplied_items[0].name)],
+				[(2, batches[1], orders[1].supplied_items[0].name)],
+			],
+		)
 
 	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
 		sco = get_subcontracting_order_sharing_a_raw_material()
@@ -1858,6 +1919,71 @@ def set_alternative_item(item_code, alternative_item_code):
 	frappe.get_doc(
 		doctype="Item Alternative", item_code=item_code, alternative_item_code=alternative_item_code
 	).insert()
+
+
+def get_order_for_finished_goods(suffix, rm_item, fg_qtys):
+	"""A Subcontracting Order with a finished good of each qty, each made of 1 rm_item."""
+	service_items = []
+	for idx, qty in enumerate(fg_qtys):
+		fg_item = make_item(
+			f"Subcontracted FG Item {suffix} {'ABC'[idx]}", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+		service_items.append(
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": f"Subcontracted Service Item {idx + 2}",
+				"qty": qty,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": qty,
+			}
+		)
+
+	return get_subcontracting_order(service_items=service_items)
+
+
+def send_serial_batch(sco, row, batch_no=False):
+	"""Send the row's required qty of new stock; return its batch, or else its serial nos."""
+	stock_entry = make_stock_entry(
+		item_code=row.rm_item_code, target=row.reserve_warehouse, qty=row.required_qty, basic_rate=100
+	)
+	bundle = stock_entry.items[0].serial_and_batch_bundle
+	serial_batch = get_batch_from_bundle(bundle) if batch_no else get_serial_nos_from_bundle(bundle)
+
+	transfer = make_supplied_item_transfer(sco, row)
+	transfer.items[0].update(
+		{
+			"use_serial_batch_fields": 1,
+			"batch_no": serial_batch if batch_no else None,
+			"serial_no": None if batch_no else "\n".join(serial_batch),
+		}
+	)
+	transfer.submit()
+	return serial_batch
+
+
+def make_receipt_for_finished_good(sco, fg_item):
+	receipt = make_subcontracting_receipt(sco.name)
+	for item in [item for item in receipt.items if item.item_code != fg_item]:
+		receipt.remove(item)
+
+	return receipt
+
+
+def get_consumed_qty(sco):
+	return [frappe.db.get_value(row.doctype, row.name, "consumed_qty") for row in sco.supplied_items]
+
+
+def get_materials_from_supplier_for(sco):
+	"""Return of Components for the order's rows that still have material at the supplier."""
+	sco.load_from_db()
+	rm_details = [row.name for row in sco.supplied_items if row.total_supplied_qty != row.consumed_qty]
+	return get_materials_from_supplier(sco.name, rm_details)
+
+
+def get_returnable_items(sco):
+	return [(row.qty, row.batch_no, row.sco_rm_detail) for row in get_materials_from_supplier_for(sco).items]
 
 
 def make_supplied_item_transfer(sco, row, link=True):
