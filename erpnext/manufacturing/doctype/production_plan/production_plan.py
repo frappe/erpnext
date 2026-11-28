@@ -702,13 +702,14 @@ class ProductionPlan(Document):
 
 		for (sales_order, so_item), qty in planned_qty.items():
 			row = so_items[so_item]
+			qty = flt(qty, precision)
 			unplanned_qty = flt(
 				flt(row.stock_qty) * (1 + allowance / 100)
 				- flt(row.reserved_qty)
 				- flt(already_planned.get((sales_order, so_item))),
 				precision,
 			)
-			if flt(qty, precision) > unplanned_qty:
+			if qty > unplanned_qty:
 				frappe.throw(
 					_(
 						"Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan."
@@ -744,7 +745,34 @@ class ProductionPlan(Document):
 				key = (row.sales_order, row.sales_order_item)
 				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
 
+		for row in self.get_consolidated_planned_qty():
+			key = (row.sales_order, row.sales_order_item)
+			planned_qty[key] = planned_qty.get(key, 0) + row.qty
+
 		return planned_qty
+
+	def get_consolidated_planned_qty(self):
+		"""Planned qty of consolidated rows allotted to their Sales Order lines, excluding product bundle lines."""
+		allotted = [row for row in self.get_allocated_references() if row.qty > 0]
+		if not allotted:
+			return []
+
+		bundle_lines = frappe.get_all(
+			"Packed Item",
+			filters={"parent_detail_docname": ("in", [row.sales_order_item for row in allotted])},
+			pluck="parent_detail_docname",
+		)
+		return [row for row in allotted if row.sales_order_item not in bundle_lines]
+
+	def get_allocated_references(self):
+		"""Combined references with the qty this plan's consolidated rows give each."""
+		planned_qty = {}
+		for row in self.po_items:
+			if not row.sales_order:
+				key = (self.name, row.sales_order_item)
+				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+
+		return allocate_reference_qty(self.prod_plan_references, planned_qty)
 
 	def on_submit(self):
 		self.update_bin_qty()
@@ -1498,16 +1526,24 @@ def get_planned_qty_of_references(sales_orders):
 		.where(reference.parent.isin(plans))
 		.orderby(reference.idx)
 	).run(as_dict=True)
-	planned_qty = get_planned_qty_by_order_row(plans)
+	return allocate_reference_qty(references, get_planned_qty_by_order_row(plans))
 
+
+def allocate_reference_qty(references, planned_qty):
+	"""Split the planned qty of each combined row over its references, in order.
+	Qty above the references goes to the row's own line, its first reference."""
 	allocated = []
+	own_line = {}
 	for row in references:
 		key = (row.parent, row.item_reference)
 		qty = min(flt(row.qty), max(planned_qty.get(key, 0), 0))
 		planned_qty[key] = planned_qty.get(key, 0) - qty
-		allocated.append(
-			frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
-		)
+		line = frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
+		allocated.append(line)
+		own_line.setdefault(key, line)
+
+	for key, line in own_line.items():
+		line.qty += planned_qty[key]
 	return allocated
 
 
@@ -1525,11 +1561,12 @@ def get_plans_with_references(sales_orders):
 
 
 def get_planned_qty_by_order_row(plans):
+	"""Planned qty of consolidated rows, which have no Sales Order of their own."""
 	plan_item = frappe.qb.DocType("Production Plan Item")
 	rows = (
 		frappe.qb.from_(plan_item)
 		.select(plan_item.parent, plan_item.sales_order_item, Sum(plan_item.planned_qty).as_("qty"))
-		.where(plan_item.parent.isin(plans))
+		.where(plan_item.parent.isin(plans) & (IfNull(plan_item.sales_order, "") == ""))
 		.groupby(plan_item.parent, plan_item.sales_order_item)
 	).run(as_dict=True)
 	return {(row.parent, row.sales_order_item): flt(row.qty) for row in rows}
