@@ -345,11 +345,13 @@ def _set_so_item_pending_qty(items):
 
 def _set_packed_item_pending_qty(items):
 	"""Share out what is left to plan of each component of a Sales Order line across its packed rows."""
-	planned_qty = get_planned_bundle_component_qty([item.name for item in items])
+	so_items = [item.name for item in items]
+	planned_qty = get_planned_bundle_component_qty(so_items)
+	reserved_qty = get_reserved_bundle_component_qty(so_items)
 	totals = {}
 	for item in items:
 		key = (item.name, item.item_code)
-		unplanned, pending = totals.get(key, (-planned_qty.get(key, 0), 0))
+		unplanned, pending = totals.get(key, (-planned_qty.get(key, 0) - reserved_qty.get(key, 0), 0))
 		totals[key] = (unplanned + flt(item.qty), pending + flt(item.pending_qty))
 	remaining = {key: min(unplanned, pending) for key, (unplanned, pending) in totals.items()}
 
@@ -418,6 +420,33 @@ def get_planned_bundle_component_qty(so_items):
 		group_by="sales_order_item, item_code",
 	)
 	return {(row.sales_order_item, row.item_code): flt(row.qty) for row in rows}
+
+
+def get_reserved_bundle_component_qty(so_items):
+	"""Stock reserved for each product bundle component of a Sales Order line, less Work Order output."""
+	if not so_items:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	pi = frappe.qb.DocType("Packed Item")
+	rows = (
+		frappe.qb.from_(sre)
+		.join(pi)
+		.on(pi.name == sre.voucher_detail_no)
+		.select(
+			pi.parent_detail_docname,
+			pi.item_code,
+			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_("qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (IfNull(sre.from_voucher_type, "") != "Stock Entry")
+			& pi.parent_detail_docname.isin(so_items)
+		)
+		.groupby(pi.parent_detail_docname, pi.item_code)
+	).run(as_dict=True)
+	return {(row.parent_detail_docname, row.item_code): flt(row.qty) for row in rows}
 
 
 def get_planned_bundle_qty(sales_orders):

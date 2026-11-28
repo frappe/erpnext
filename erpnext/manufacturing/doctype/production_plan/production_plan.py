@@ -75,6 +75,7 @@ from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning
 	SalesOrderSourcingService,
 	get_planned_bundle_component_qty,
 	get_planned_bundle_qty,
+	get_reserved_bundle_component_qty,
 )
 from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
 	SubAssemblyService,
@@ -773,6 +774,7 @@ class ProductionPlan(Document):
 
 		so_items = list({key[1] for key in planned_qty})
 		already_planned = get_planned_bundle_component_qty(so_items)
+		reserved_qty = get_reserved_bundle_component_qty(so_items)
 		packed_qty = {
 			(row.parent_detail_docname, row.item_code): row
 			for row in frappe.get_all(
@@ -790,7 +792,9 @@ class ProductionPlan(Document):
 		for (sales_order, so_item, item_code), qty in planned_qty.items():
 			packed = packed_qty.get((so_item, item_code)) or frappe._dict()
 			unplanned_qty = flt(
-				flt(packed.qty) * (1 + allowance / 100) - already_planned.get((so_item, item_code), 0),
+				flt(packed.qty) * (1 + allowance / 100)
+				- reserved_qty.get((so_item, item_code), 0)
+				- already_planned.get((so_item, item_code), 0),
 				precision,
 			)
 			if flt(qty, precision) > unplanned_qty:
