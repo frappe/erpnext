@@ -1090,20 +1090,34 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			: __("Under FIFO the oldest lot goes out first");
 	}
 
+	change_label(kind) {
+		return {
+			in: __("In", null, "Valuation Rate Breakdown"),
+			out: __("Out", null, "Valuation Rate Breakdown"),
+			reconciliation: __("Count", null, "Valuation Rate Breakdown"),
+			revaluation: __("Change", null, "Valuation Rate Breakdown"),
+		}[kind];
+	}
+
 	math_html(entry) {
 		if (this.is_pooled_view()) return this.together_html(entry);
-		const change_labels = {
-			in: __("In"),
-			out: __("Out"),
-			reconciliation: __("Count"),
-			revaluation: __("Change"),
-		};
 		const qty_change = entry.qty_after - entry.qty_before;
 		const value_change = entry.value_after - entry.value_before;
 		const rows = [
-			this.math_row(__("Before"), entry.qty_before, entry.rate_before, entry.value_before),
-			this.math_row(change_labels[entry.kind], qty_change, entry.rate, value_change, "change"),
-			this.math_row(__("After"), entry.qty_after, entry.rate_after, entry.value_after, "total"),
+			this.math_row(
+				__("Before", null, "Valuation Rate Breakdown"),
+				entry.qty_before,
+				entry.rate_before,
+				entry.value_before
+			),
+			this.math_row(this.change_label(entry.kind), qty_change, entry.rate, value_change, "change"),
+			this.math_row(
+				__("After", null, "Valuation Rate Breakdown"),
+				entry.qty_after,
+				entry.rate_after,
+				entry.value_after,
+				"total"
+			),
 		];
 		return `<div class="vrb-math">${rows.join("")}</div>`;
 	}
@@ -1278,7 +1292,7 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			part
 		)}</span><span class="vrb-muted ellipsis">${note}</span></div>`;
 		const change = this.math_row(
-			part.qty > 0 ? __("In") : __("Out"),
+			this.change_label(part.qty > 0 ? "in" : "out"),
 			part.qty,
 			part.rate,
 			part.value,
@@ -1288,14 +1302,14 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 			return `<div class="vrb-batch">${head}<div class="vrb-math">${change}</div></div>`;
 		const rows = [
 			this.math_row(
-				__("Before"),
+				__("Before", null, "Valuation Rate Breakdown"),
 				part.qty_before,
 				this.per_unit(part.qty_before, part.value_before),
 				part.value_before
 			),
 			change,
 			this.math_row(
-				__("After"),
+				__("After", null, "Valuation Rate Breakdown"),
 				part.qty_after,
 				this.per_unit(part.qty_after, part.value_after),
 				part.value_after,
@@ -1386,22 +1400,25 @@ erpnext.ValuationRateBreakdown = class ValuationRateBreakdown {
 	}
 
 	together_html(entry) {
-		const change_labels = {
-			in: __("In"),
-			out: __("Out"),
-			reconciliation: __("Count"),
-			revaluation: __("Change"),
-		};
 		const title = this.is_serial() ? __("All serial numbers together") : __("All batches together");
 		const rows = [
-			this.plain_row(__("Before"), entry.qty_before, entry.value_before),
 			this.plain_row(
-				change_labels[entry.kind],
+				__("Before", null, "Valuation Rate Breakdown"),
+				entry.qty_before,
+				entry.value_before
+			),
+			this.plain_row(
+				this.change_label(entry.kind),
 				entry.qty_after - entry.qty_before,
 				entry.value_after - entry.value_before,
 				"change"
 			),
-			this.plain_row(__("After"), entry.qty_after, entry.value_after, "total"),
+			this.plain_row(
+				__("After", null, "Valuation Rate Breakdown"),
+				entry.qty_after,
+				entry.value_after,
+				"total"
+			),
 		];
 		return `<div><div class="vrb-subtitle">${title}</div><div class="vrb-math is-plain">${rows.join(
 			""
