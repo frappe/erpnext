@@ -452,6 +452,7 @@ def get_projectwise_timesheet_data(
 	parent: str | None = None,
 	from_time: str | None = None,
 	to_time: str | None = None,
+	customer: str | None = None,
 ):
 	tsd = frappe.qb.DocType("Timesheet Detail")
 	ts = frappe.qb.DocType("Timesheet")
@@ -496,6 +497,8 @@ def get_projectwise_timesheet_data(
 		query = query.where(tsd.project == project)
 	if parent:
 		query = query.where(tsd.parent == parent)
+	if customer:
+		query = query.where((ts.customer == customer) | (Coalesce(ts.customer, "") == ""))
 	if from_time and to_time:
 		query = query.where(Date(tsd.from_time).between(from_time, to_time))
 
