@@ -27,7 +27,6 @@ class SubscriptionPlan(Document):
 		cost_center: DF.Link | None
 		currency: DF.Link
 		item: DF.Link
-		payment_gateway: DF.Link | None
 		plan_name: DF.Data
 		price_determination: DF.Literal["", "Fixed Rate", "Based On Price List", "Monthly Rate"]
 		price_list: DF.Link | None
