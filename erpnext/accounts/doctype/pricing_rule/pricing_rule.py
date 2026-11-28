@@ -431,6 +431,13 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	if args.get("doctype") == "Material Request":
 		return out
 
+	if doc and not isinstance(doc, Document):
+		doc = frappe.parse_json(doc) if isinstance(doc, str) else doc
+		try:
+			doc = frappe.get_doc(doc)
+		except Exception:
+			doc = frappe._dict(doc)
+
 	item_list = args.get("items")
 	args.pop("items")
 
@@ -452,7 +459,248 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
+	if doc:
+		reprice_mixed_conditions_sibling_items(args, doc, item_list, out)
+
 	return out
+
+
+def _get_row_field(row_dict, field):
+	return row_dict.get(field) or frappe.get_cached_value("Item", row_dict.get("item_code"), field)
+
+
+def _build_row_pricing_args(base_args, doc, row_dict, row_name):
+	row_args = copy.deepcopy(base_args)
+	parent_dt = base_args.get("doctype") or (doc.get("doctype") if hasattr(doc, "get") else None)
+	row_args.update(row_dict)
+	row_args["doctype"] = row_dict.get("doctype") or (
+		f"{parent_dt} Item" if parent_dt and not parent_dt.endswith(" Item") else parent_dt
+	)
+	row_args["name"] = row_dict.get("name") or row_name
+	row_args["child_docname"] = row_dict.get("child_docname") or row_args["name"]
+	row_args["parenttype"] = row_dict.get("parenttype") or parent_dt
+	row_args["parent"] = (
+		row_dict.get("parent") or base_args.get("name") or (doc.get("name") if hasattr(doc, "get") else None)
+	)
+	row_args["conversion_factor"] = flt(row_args.get("conversion_factor")) or 1.0
+	set_transaction_type(row_args)
+	return row_args
+
+
+def _evaluate_independent_row(
+	base_args, doc, row_dict, row_name, *, initial_data=None, extra_pricing_rules=None
+):
+	"""Price a row independently through the standard pipeline without forwarding other-item triggers."""
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		is_non_target_other_rule,
+	)
+
+	row_args = _build_row_pricing_args(base_args, doc, row_dict, row_name)
+	eval_args = copy.deepcopy(row_args)
+	if initial_data is None:
+		initial_data = get_pricing_rule_for_item(eval_args, doc=doc, extra_pricing_rules=extra_pricing_rules)
+	else:
+		update_args_for_pricing_rule(eval_args)
+
+	applied_other_rules = [
+		frappe.get_cached_doc("Pricing Rule", r)
+		for r in get_applied_pricing_rules(initial_data.get("pricing_rules"))
+		if r and frappe.get_cached_value("Pricing Rule", r, "apply_rule_on_other")
+	]
+	non_target_rules = {pr.name for pr in applied_other_rules if is_non_target_other_rule(pr, eval_args)}
+
+	if non_target_rules:
+		clean_args = copy.deepcopy(row_args)
+		if clean_args.get("pricing_rules"):
+			remaining = [
+				r for r in get_applied_pricing_rules(clean_args["pricing_rules"]) if r not in non_target_rules
+			]
+			clean_args["pricing_rules"] = frappe.as_json(remaining) if remaining else ""
+
+		row_data = get_pricing_rule_for_item(
+			clean_args,
+			doc=doc,
+			exclude_other_trigger_rules=True,
+			extra_pricing_rules=extra_pricing_rules,
+		)
+		# Clear stale target rule names if Desk previously stored them on this trigger row.
+		if row_data.get("pricing_rules") is None and row_dict.get("pricing_rules"):
+			row_data["pricing_rules"] = ""
+	else:
+		row_data = initial_data
+
+	for field in ("applied_on_items", "apply_on", "apply_rule_on_other_items"):
+		if row_data.get(field):
+			row_data[field] = ""
+	return row_data, applied_other_rules
+
+
+def reprice_mixed_conditions_sibling_items(args, doc, item_list, out):
+	"""Reprice sibling rows in `doc.items` matching any affected mixed conditions pricing rules."""
+	doc_items = doc.get("items") if doc else None
+	if not doc_items or len(item_list) >= len(doc_items):
+		return
+
+	out_index_by_row_name = {
+		d.get("name") or d.get("child_docname"): idx
+		for idx, d in enumerate(out)
+		if (d.get("name") or d.get("child_docname"))
+	}
+	unpriced_rows = {}
+	for idx, row in enumerate(doc_items):
+		row_dict = row.as_dict() if hasattr(row, "as_dict") else dict(row)
+		row_name = row_dict.get("name") or row_dict.get("child_docname") or f"row_{idx}"
+		if not row_dict.get("is_free_item") and row_name not in out_index_by_row_name:
+			unpriced_rows[row_name] = row_dict
+
+	if not unpriced_rows:
+		return
+
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		get_pricing_rule_items,
+		get_product_discount_rule,
+	)
+
+	candidate_rules = {
+		r
+		for row in (out + item_list + list(unpriced_rows.values()))
+		for r in get_applied_pricing_rules(row.get("pricing_rules"))
+		if r
+	}
+	if not candidate_rules:
+		return
+
+	candidate_docs = {}
+	for rule_name in candidate_rules:
+		try:
+			candidate_docs[rule_name] = frappe.get_cached_doc("Pricing Rule", rule_name)
+		except frappe.DoesNotExistError:
+			pass
+
+	mixed_rule_criteria = []
+	for rule_name, pr_doc in candidate_docs.items():
+		# Include disabled mixed rules so editing one row still clears stale sibling discounts.
+		if pr_doc.mixed_conditions:
+			mixed_rule_criteria.append(
+				(rule_name, frappe.scrub(pr_doc.apply_on), set(get_pricing_rule_items(pr_doc) or []))
+			)
+
+	if not mixed_rule_criteria:
+		return
+
+	pending_target_rules = []
+	triggered_other_rule_names = set()
+	cross_dim_rules_by_name = {}
+
+	def _evaluate_and_record(row_dict, row_name, *, idx=None, **kwargs):
+		data, other_rules = _evaluate_independent_row(args, doc, row_dict, row_name, **kwargs)
+		if idx is None:
+			out_index_by_row_name[row_name] = len(out)
+			out.append(data)
+		else:
+			out[idx] = data
+		pending_target_rules.extend(other_rules)
+		triggered_other_rule_names.update(pr.name for pr in other_rules)
+
+	# Strip non-target `apply_rule_on_other` rules from edited rows so mixed + target discounts never compound.
+	for idx, item_data in enumerate(list(out)):
+		if any(
+			r and frappe.get_cached_value("Pricing Rule", r, "apply_rule_on_other")
+			for r in get_applied_pricing_rules(item_data.get("pricing_rules"))
+		):
+			_evaluate_and_record(
+				item_list[idx] if idx < len(item_list) else {},
+				item_data.get("name") or item_data.get("child_docname"),
+				idx=idx,
+				initial_data=item_data,
+			)
+
+	for row_name, row_dict in unpriced_rows.items():
+		row_rules = set(get_applied_pricing_rules(row_dict.get("pricing_rules")))
+		if row_name not in out_index_by_row_name and any(
+			rn in row_rules or _get_row_field(row_dict, fld) in r_items
+			for rn, fld, r_items in mixed_rule_criteria
+		):
+			_evaluate_and_record(row_dict, row_name)
+
+	# Queue stale `apply_rule_on_other` rules carried on unpriced rows when their triggers changed.
+	evaluated_rows = list(item_list) + [
+		unpriced_rows[rn] for rn in out_index_by_row_name if rn in unpriced_rows
+	]
+	for rule_name, pr_doc in candidate_docs.items():
+		if rule_name not in triggered_other_rule_names and pr_doc.apply_rule_on_other:
+			trigger_field = frappe.scrub(pr_doc.apply_on)
+			trigger_items = set(get_pricing_rule_items(pr_doc) or [])
+			if any(_get_row_field(r, trigger_field) in trigger_items for r in evaluated_rows):
+				pending_target_rules.append(pr_doc)
+
+	processed_target_rules = set()
+	while pending_target_rules:
+		target_pr = pending_target_rules.pop(0)
+		if target_pr.name in processed_target_rules:
+			continue
+		processed_target_rules.add(target_pr.name)
+
+		target_apply_on = frappe.scrub(target_pr.apply_rule_on_other)
+		target_items = set(get_pricing_rule_items(target_pr, other_items=True) or [])
+		if not target_items:
+			continue
+
+		is_actively_triggered = target_pr.name in triggered_other_rule_names
+		is_cross_dim = is_actively_triggered and target_pr.apply_on != target_pr.apply_rule_on_other
+		if is_cross_dim:
+			cross_dim_rules_by_name[target_pr.name] = (
+				target_apply_on,
+				target_items,
+				frappe._dict(target_pr.as_dict(), uom=None),
+			)
+
+		for row_name, row_dict in unpriced_rows.items():
+			if _get_row_field(row_dict, target_apply_on) not in target_items:
+				continue
+
+			existing_idx = out_index_by_row_name.get(row_name)
+			if existing_idx is not None and (
+				not is_cross_dim
+				or target_pr.name in get_applied_pricing_rules(out[existing_idx].get("pricing_rules"))
+			):
+				continue
+
+			extra_for_row = [
+				cand
+				for fld, t_items, cand in cross_dim_rules_by_name.values()
+				if _get_row_field(row_dict, fld) in t_items
+			]
+			_evaluate_and_record(
+				row_dict,
+				row_name,
+				idx=existing_idx,
+				extra_pricing_rules=extra_for_row or None,
+			)
+
+		# Keep triggered free-item product rules active even if no target row exists in doc.items yet.
+		if (
+			is_actively_triggered
+			and target_pr.price_or_product_discount == "Product"
+			and not any(
+				not r.get("is_free_item") and _get_row_field(r, target_apply_on) in target_items
+				for r in doc_items
+			)
+		):
+			trigger_items = set(get_pricing_rule_items(target_pr) or [])
+			trigger_field = frappe.scrub(target_pr.apply_on)
+			for idx, item_data in enumerate(out):
+				row_name = item_data.get("name") or item_data.get("child_docname")
+				row_dict = unpriced_rows.get(row_name) or (item_list[idx] if idx < len(item_list) else {})
+				if _get_row_field(row_dict, trigger_field) in trigger_items and target_pr.name not in {
+					f.get("pricing_rules") for f in (item_data.get("free_item_data") or [])
+				}:
+					get_product_discount_rule(
+						target_pr, item_data, _build_row_pricing_args(args, doc, row_dict, row_name), doc
+					)
+					break
 
 
 def update_pricing_rule_uom(pricing_rule, args):
@@ -467,7 +715,14 @@ def update_pricing_rule_uom(pricing_rule, args):
 			pricing_rule.uom = row.uom
 
 
-def get_pricing_rule_for_item(args, doc=None, for_validate=False):
+def get_pricing_rule_for_item(
+	args,
+	doc=None,
+	for_validate=False,
+	*,
+	exclude_other_trigger_rules=False,
+	extra_pricing_rules=None,
+):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
@@ -512,7 +767,13 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		if args.get("coupon_code")
 		else None
 	)
-	pricing_rules = select_pricing_rules(args, doc, for_validate)
+	pricing_rules = select_pricing_rules(
+		args,
+		doc,
+		for_validate,
+		exclude_other_trigger_rules=exclude_other_trigger_rules,
+		extra_pricing_rules=extra_pricing_rules,
+	)
 
 	selected_rules = {
 		rule if isinstance(rule, str) else rule.get("name") for rule in (pricing_rules or []) if rule
@@ -583,15 +844,11 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 			rules.append(get_pricing_rule_details(args, pricing_rule))
 
-			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
+			if pricing_rule.apply_rule_on_other:
 				item_details.update(
 					{
 						"price_or_product_discount": pricing_rule.price_or_product_discount,
-						"apply_rule_on": (
-							frappe.scrub(pricing_rule.apply_rule_on_other)
-							if pricing_rule.apply_rule_on_other
-							else frappe.scrub(pricing_rule.get("apply_on"))
-						),
+						"apply_rule_on": frappe.scrub(pricing_rule.apply_rule_on_other),
 					}
 				)
 
@@ -655,13 +912,25 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 	return item_details
 
 
-def select_pricing_rules(args, doc, for_validate):
+def select_pricing_rules(
+	args,
+	doc,
+	for_validate,
+	*,
+	exclude_other_trigger_rules=False,
+	extra_pricing_rules=None,
+):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules, get_pricing_rules
 
 	if for_validate and args.get("pricing_rules") and is_row_unchanged_since_save(args, doc):
 		return get_applied_pricing_rules(args.get("pricing_rules"))
 
-	return get_pricing_rules(args, doc)
+	return get_pricing_rules(
+		args,
+		doc,
+		exclude_other_trigger_rules=exclude_other_trigger_rules,
+		extra_pricing_rules=extra_pricing_rules,
+	)
 
 
 def is_row_unchanged_since_save(args, doc):
@@ -848,13 +1117,9 @@ def reset_pricing_rule_details(pricing_rules, item_details, item_code=None, rate
 				item_code if pricing_rule.get("same_item") else pricing_rule.get("free_item")
 			)
 
-		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
+		if pricing_rule.get("apply_rule_on_other"):
 			items = get_pricing_rule_items(pricing_rule, other_items=True)
-			item_details.apply_on = (
-				frappe.scrub(pricing_rule.apply_rule_on_other)
-				if pricing_rule.apply_rule_on_other
-				else frappe.scrub(pricing_rule.get("apply_on"))
-			)
+			item_details.apply_on = frappe.scrub(pricing_rule.apply_rule_on_other)
 			item_details.applied_on_items = ",".join(items)
 
 	item_details.pricing_rules = ""
