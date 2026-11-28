@@ -19,6 +19,7 @@ from frappe.utils import (
 	get_link_to_form,
 	get_time,
 	getdate,
+	now_datetime,
 	time_diff,
 	time_diff_in_hours,
 )
@@ -208,7 +209,7 @@ class JobCard(Document):
 		self.validate_on_hold()
 		self.validate_pending_qty()
 		self.validate_work_order()
-		self.set_employees()
+		self.add_logged_employees()
 
 		if self.docstatus == 1:
 			self.validate_input_from_previous_operations()
@@ -780,6 +781,7 @@ class JobCard(Document):
 			.select(jc.name)
 			.where(
 				(jctl.parent == jc.name)
+				& (jctl.parentfield == "time_logs")
 				& (jctl.employee == employee)
 				& (jc.docstatus < 1)
 				& (jc.name != self.name)
@@ -1849,7 +1851,13 @@ class JobCard(Document):
 			kwargs = frappe._dict(kwargs)
 
 		self.db_set("is_paused", 1)
+		self.set_pause_reason(kwargs.reason)
 		self.add_time_logs(to_time=kwargs.end_time, completed_qty=0.0, employees=self.employee)
+
+	def set_pause_reason(self, reason):
+		for row in self.time_logs:
+			if not row.to_time:
+				row.pause_reason = reason
 
 	@frappe.whitelist()
 	def resume_job(self, **kwargs):
@@ -1865,9 +1873,127 @@ class JobCard(Document):
 		self.db_set("is_paused", 0)
 		self.add_time_logs(
 			from_time=kwargs.start_time,
-			employees=self.employee,
+			employees=self.get_last_crew(),
 			completed_qty=0.0,
 		)
+
+	def get_last_crew(self):
+		closed = [row for row in self.time_logs if row.to_time]
+		if not closed:
+			return self.employee
+
+		last_end = max(get_datetime(row.to_time) for row in closed)
+		crew = {row.employee for row in closed if get_datetime(row.to_time) == last_end}
+		return [{"employee": employee} for employee in crew]
+
+	@frappe.whitelist(methods=["POST"])
+	def log_progress(
+		self,
+		employee: str,
+		completed_qty: float = 0,
+		process_loss_qty: float = 0,
+		loss_reason: str | None = None,
+	):
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+		self.validate_docstatus()
+
+		completed_qty, process_loss_qty = flt(completed_qty), flt(process_loss_qty)
+		log = self.get_running_log(employee)
+		self.validate_progress_qty(completed_qty, process_loss_qty, loss_reason)
+
+		end_time = now_datetime()
+		log.update(
+			{
+				"to_time": end_time,
+				"time_in_mins": time_diff_in_minutes(end_time, log.from_time),
+				"completed_qty": completed_qty,
+				"process_loss_qty": process_loss_qty,
+				"loss_reason": loss_reason if process_loss_qty else None,
+			}
+		)
+		self.append("time_logs", {"from_time": end_time, "employee": employee, "operation": log.operation})
+		self.set_progress_totals(completed_qty, process_loss_qty)
+		self.save()
+
+	def get_running_log(self, employee):
+		if self.is_paused:
+			frappe.throw(_("Resume Job Card {0} first.").format(bold(self.name)))
+
+		log = next((row for row in self.time_logs if not row.to_time and row.employee == employee), None)
+		if not log:
+			frappe.throw(
+				_("{0} is not working on Job Card {1}. Start the job first.").format(
+					bold(employee), bold(self.name)
+				)
+			)
+
+		return log
+
+	def validate_progress_qty(self, completed_qty, process_loss_qty, loss_reason):
+		if completed_qty < 0 or process_loss_qty < 0:
+			frappe.throw(_("Quantities cannot be negative."))
+
+		if not completed_qty and not process_loss_qty:
+			frappe.throw(_("Enter a completed or lost quantity."))
+
+		if process_loss_qty and not loss_reason:
+			frappe.throw(_("Enter the reason for the lost quantity."))
+
+		precision = self.precision("total_completed_qty")
+		qty = flt(completed_qty + process_loss_qty, precision)
+		left = flt(
+			flt(self.for_quantity) - flt(self.total_completed_qty) - flt(self.process_loss_qty), precision
+		)
+		if qty > left:
+			frappe.throw(
+				_("Only {0} is left to complete on Job Card {1}.").format(
+					bold(self.get_qty_with_uom(left)), bold(self.name)
+				)
+			)
+
+		self.validate_progress_input(qty, precision)
+
+	def validate_progress_input(self, qty, precision):
+		max_qty = self.get_max_completable_qty()
+		if max_qty is None:
+			return
+
+		ready = flt(max_qty - flt(self.process_loss_qty), precision)
+		if qty > ready:
+			frappe.throw(
+				_("Only {0} is ready from the previous operation for Job Card {1}.").format(
+					bold(self.get_qty_with_uom(max(ready, 0))), bold(self.name)
+				)
+			)
+
+	def set_progress_totals(self, completed_qty, process_loss_qty):
+		precision = self.precision("total_completed_qty")
+		self.process_loss_qty = flt(flt(self.process_loss_qty) + process_loss_qty, precision)
+		completed = flt(self.total_completed_qty) + completed_qty
+		self.pending_qty = flt(flt(self.for_quantity) - completed - self.process_loss_qty, precision)
+
+	@frappe.whitelist(methods=["POST"])
+	def change_crew(self, employees: list[str] | str):
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+		self.validate_docstatus()
+
+		employees = set(frappe.parse_json(employees) if isinstance(employees, str) else employees)
+		if not employees:
+			frappe.throw(_("Select at least one employee."))
+
+		running = [row for row in self.time_logs if not row.to_time]
+		if self.is_paused or not running:
+			frappe.throw(_("Job Card {0} is not running. Start or resume it first.").format(bold(self.name)))
+
+		now = now_datetime()
+		for row in running:
+			if row.employee not in employees:
+				row.update({"to_time": now, "time_in_mins": time_diff_in_minutes(now, row.from_time)})
+
+		for employee in employees - {row.employee for row in running}:
+			self.append("time_logs", {"from_time": now, "employee": employee})
+
+		self.save()
 
 	def validate_sequence_id(self):
 		if self.is_new() or self.is_corrective_job_card:
@@ -2114,12 +2240,13 @@ class JobCard(Document):
 		if self.is_work_order_closed():
 			frappe.throw(_("You cannot make any changes to Job Card since Work Order is closed."))
 
-	def set_employees(self):
-		self.employee = []
+	def add_logged_employees(self):
+		assigned = {row.employee for row in self.employee}
 		# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-child-tables-while-iterating -- appends to employee, not time_logs
-		for item in self.time_logs:
-			if not any(d.employee == item.employee for d in self.employee):
-				self.append("employee", {"employee": item.employee, "completed_qty": 0.0})
+		for log in self.time_logs:
+			if log.employee and log.employee not in assigned:
+				assigned.add(log.employee)
+				self.append("employee", {"employee": log.employee, "completed_qty": 0.0})
 
 	def is_work_order_closed(self):
 		if self.work_order:
