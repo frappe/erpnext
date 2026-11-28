@@ -12,6 +12,7 @@
   "cost_center",
   "debit",
   "credit",
+  "reporting_currency",
   "reporting_currency_exchange_rate",
   "debit_in_reporting_currency",
   "credit_in_reporting_currency",
@@ -142,6 +143,13 @@
    "options": "Company:company:reporting_currency"
   },
   {
+   "fieldname": "reporting_currency",
+   "fieldtype": "Link",
+   "label": "Reporting Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
    "fieldname": "reporting_currency_exchange_rate",
    "fieldtype": "Float",
    "label": "Reporting Currency Exchange Rate",
@@ -151,7 +159,7 @@
  "icon": "scale",
  "in_create": 1,
  "links": [],
- "modified": "2025-08-22 19:13:50.400404",
+ "modified": "2026-11-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Closing Balance",
