@@ -29,6 +29,18 @@ def make_dunning_type(dunning_type, company="_Test Company", **kwargs):
 	return doc
 
 
+def make_letter_dunning(dunning_type, **letter_text):
+	letter_text.update(language="en", is_default_language=1)
+	doc = make_dunning_type(dunning_type, dunning_letter_text=[letter_text])
+	doc.insert()
+
+	dunning = frappe.new_doc("Dunning")
+	dunning.company = doc.company
+	dunning.customer_name = "_Test Customer"
+	dunning.dunning_type = doc.name
+	return dunning
+
+
 class TestDunningType(FrappeTestCase):
 	def test_income_account_must_belong_to_company(self):
 		doc = make_dunning_type("_Test Dunning Wrong Company Account", income_account="Sales - _TC1")
@@ -172,6 +184,46 @@ class TestDunningType(FrappeTestCase):
 		)
 		doc.insert()
 		self.assertTrue(doc.name)
+
+	def test_letter_text_refuses_globals_the_sandbox_lacks(self):
+		doc = make_dunning_type(
+			"_Test Dunning Database Template",
+			dunning_letter_text=[{"language": "en", "body_text": "{{ frappe.db.sql('select 1') }}"}],
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be used in Dunning Letter Text", doc.insert)
+
+	def test_letter_text_renders_fields_and_formatting_helpers(self):
+		dunning = make_letter_dunning(
+			"_Test Dunning Helper Template",
+			body_text="{{ customer_name }} {{ frappe.utils.cint('30') }}",
+			closing_text="{{ frappe.bold('Thanks') }}",
+		)
+		dunning.get_dunning_letter_text()
+		self.assertEqual(dunning.body_text, "_Test Customer 30")
+		self.assertEqual(dunning.closing_text, "<strong>Thanks</strong>")
+
+	def test_stored_letter_text_cannot_query_database(self):
+		dunning = make_letter_dunning("_Test Dunning Stored Template", body_text="Body")
+		# saved before the letter sandbox lost frappe.db
+		frappe.db.set_value(
+			"Dunning Letter Text",
+			{"parent": dunning.dunning_type},
+			"body_text",
+			"{{ frappe.db.sql('select 1') }}",
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "could not be rendered", dunning.get_dunning_letter_text
+		)
+
+	def test_letter_render_errors_are_escaped_validation_errors(self):
+		dunning = make_letter_dunning("_Test Dunning Failing Template", body_text="Body")
+		for template in ("{{ 1 / 0 }}", "{{ frappe['<img src=x>']() }}"):
+			frappe.db.set_value(
+				"Dunning Letter Text", {"parent": dunning.dunning_type}, "body_text", template
+			)
+			with self.subTest(template=template), self.assertRaises(frappe.ValidationError) as error:
+				dunning.get_dunning_letter_text()
+			self.assertNotIn("<img", str(error.exception))
 
 	def test_set_default_dunning_type_unsets_previous_default(self):
 		first = make_dunning_type("_Test Dunning Default One", is_default=1)
