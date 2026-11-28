@@ -1333,18 +1333,20 @@ class SubcontractingReceipt(SubcontractingController):
 		for row in rows:
 			line_qty[row.purchase_order_item] += flt(row.qty) + flt(row.process_loss_qty)
 
-		# shares are rounded cumulatively, so they add up to the line's difference
+		# service cost and difference are rounded as one running total, so the rows' service credits add up
 		precision = frappe.get_precision("Subcontracting Receipt Item", "amount")
-		qty_so_far, allocated, differences = defaultdict(float), defaultdict(float), {}
+		cost_so_far, posted, differences = defaultdict(float), defaultdict(float), {}
 		for row in rows:
 			line = row.purchase_order_item
 			if not line_qty[line]:
 				continue
 
-			qty_so_far[line] += flt(row.qty) + flt(row.process_loss_qty)
-			share_so_far = flt(line_differences[line] * qty_so_far[line] / line_qty[line], precision)
-			differences[row.name] = flt(share_so_far - allocated[line], precision)
-			allocated[line] = share_so_far
+			service_cost = flt(row.service_cost_per_qty) * self.get_qty_for_costing(row)
+			share = line_differences[line] * (flt(row.qty) + flt(row.process_loss_qty)) / line_qty[line]
+			cost_so_far[line] += service_cost + share
+			row_cost = flt(cost_so_far[line], precision) - posted[line]
+			posted[line] = flt(cost_so_far[line], precision)
+			differences[row.name] = row_cost - service_cost
 
 		return differences
 
