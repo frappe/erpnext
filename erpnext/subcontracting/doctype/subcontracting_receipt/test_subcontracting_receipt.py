@@ -2581,16 +2581,18 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
 
 		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
-		scr = make_service_receipt(
-			"Subcontracted Service Item 10", "Subcontracted Item SA10", 1, 300, 3, rows=3
-		)
-		pr = make_purchase_receipt(scr.name)
-		pr.submit()
-		pi = make_purchase_invoice(pr.name)
-		pi.items[0].rate = 300.01
-		pi.submit()
+		for rate, invoice_rate in ((300, 300.01), (100.01, 100.02)):
+			with self.subTest(rate=rate):
+				scr = make_service_receipt(
+					"Subcontracted Service Item 10", "Subcontracted Item SA10", 1, rate, 3, rows=3
+				)
+				pr = make_purchase_receipt(scr.name)
+				pr.submit()
+				pi = make_purchase_invoice(pr.name)
+				pi.items[0].rate = invoice_rate
+				pi.submit()
 
-		self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
+				self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
 
 	def test_service_cost_split_over_finished_goods_is_credited_in_full(self):
 		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
