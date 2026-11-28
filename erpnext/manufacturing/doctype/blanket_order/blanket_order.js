@@ -122,7 +122,7 @@ frappe.ui.form.on("Blanket Order", {
 	supplier: reset_party_pricing,
 
 	currency: function (frm) {
-		return blanket_order_pricing.apply(frm, null, { reset_conversion_rate: true });
+		return blanket_order_pricing.apply(frm, null, { reset_conversion_rate: true, reset_rate: true });
 	},
 
 	from_date: function (frm) {
@@ -147,7 +147,11 @@ frappe.ui.form.on("Blanket Order", {
 });
 
 frappe.ui.form.on("Blanket Order Item", {
-	item_code: apply_item_pricing,
+	item_code: async function (frm, cdt, cdn) {
+		// the old item's rate must not survive a failed refresh or a new item without a price
+		await frappe.model.set_value(cdt, cdn, "rate", 0);
+		return blanket_order_pricing.apply(frm, cdn, { reset_rate: true });
+	},
 
 	qty: apply_item_pricing,
 
@@ -194,7 +198,8 @@ const blanket_order_pricing = {
 		}
 
 		if (frm.__applying_blanket_order_price_list) {
-			frm.__pending_blanket_order_price_list = { item_name, options };
+			frm.__pending_blanket_order_price_list ||= [];
+			frm.__pending_blanket_order_price_list.push({ item_name, options });
 			return;
 		}
 
@@ -209,10 +214,11 @@ const blanket_order_pricing = {
 					reset_party_values: options.reset_party_values,
 					reset_conversion_rate: options.reset_conversion_rate,
 					reset_plc_conversion_rate: options.reset_plc_conversion_rate,
+					reset_rate: options.reset_rate,
 				},
 			});
 			if (response.message) {
-				await frm.set_value(response.message.parent);
+				await frm.set_value(get_changed_values(frm.doc, response.message.parent));
 				for (const values of response.message.children) {
 					let { name, ...fields } = values;
 					let item = (frm.doc.items || []).find((row) => row.name === name);
@@ -227,8 +233,8 @@ const blanket_order_pricing = {
 			pending = frm.__pending_blanket_order_price_list;
 			frm.__pending_blanket_order_price_list = null;
 		}
-		if (pending) {
-			return this.apply(frm, pending.item_name, pending.options);
+		for (const { item_name, options } of pending || []) {
+			await this.apply(frm, item_name, options);
 		}
 	},
 };
@@ -238,11 +244,18 @@ function reset_party_pricing(frm) {
 }
 
 function reset_price_list_exchange_rate(frm) {
-	return blanket_order_pricing.apply(frm, null, { reset_plc_conversion_rate: true });
+	return blanket_order_pricing.apply(frm, null, { reset_plc_conversion_rate: true, reset_rate: true });
 }
 
 function apply_item_pricing(frm, cdt, cdn) {
 	return blanket_order_pricing.apply(frm, cdn);
+}
+
+function get_changed_values(doc, values) {
+	// treat undefined, null and "" as one value, so an unset price list does not fire its rate reset
+	return Object.fromEntries(
+		Object.entries(values).filter(([fieldname, value]) => (doc[fieldname] || null) !== (value || null))
+	);
 }
 
 function set_base_rate(frm, item) {
