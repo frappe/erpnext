@@ -1420,6 +1420,7 @@ class StockReservation:
 
 		child_doctype = frappe.scrub(self.doc.doctype + " Item")
 		allow_partial_reservation = frappe.get_single_value("Stock Settings", "allow_partial_reservation")
+		precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 
 		is_sre_created = False
 		for item in items:
@@ -1456,7 +1457,9 @@ class StockReservation:
 				self.throw_stock_not_exists_error(item.get("idx"), item_code, warehouse)
 
 			self.qty_to_be_reserved = (
-				qty if self.available_qty_to_reserve >= qty else self.available_qty_to_reserve
+				qty
+				if flt(self.available_qty_to_reserve, precision) >= flt(qty, precision)
+				else self.available_qty_to_reserve
 			)
 
 			if not self.qty_to_be_reserved:
