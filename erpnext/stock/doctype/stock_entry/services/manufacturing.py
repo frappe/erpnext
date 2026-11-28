@@ -473,11 +473,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return bool(self.wo_doc) and not self.wo_doc.track_semi_finished_goods
 
 	def get_bom_component_qty(self, bom_item):
-		"""Qty a BOM item must have: a whole-number item's share of the running total at the BOM qty."""
+		"""Qty a BOM item must have: a whole-number item's share of the running total at the BOM qty,
+		or what is left in WIP for the entry that uses up the transferred material."""
 		is_whole_number = cint(frappe.get_cached_value("UOM", bom_item.stock_uom, "must_be_whole_number"))
 		required_items = (
 			[row for row in self.wo_doc.required_items if row.item_code == bom_item.item_code]
-			if self.takes_running_total_share and is_whole_number
+			if self.takes_running_total_share and (is_whole_number or self.uses_up_transferred_material)
 			else []
 		)
 		required_qty = sum(flt(row.required_qty) for row in required_items)
@@ -736,21 +737,53 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def get_wo_raw_material_qty(self, row, qty_per_unit=None):
 		"""For a whole number UOM, round up the running total of the order's Manufacture entries
 		and take what earlier entries did not consume, so partial entries do not consume a whole unit each.
-		Never more than this entry's own share: a shortfall of earlier entries is not taken."""
+		Never more than this entry's own share: a shortfall of earlier entries is not taken.
+		The entry that uses up the transferred material takes what is left of it in WIP."""
 		if qty_per_unit is None:
 			qty_per_unit = row.required_qty / self.wo_doc.qty
-		fg_completed_qty = flt(self.doc.fg_completed_qty)
 		entry_qty = self.get_wo_raw_material_entry_qty(row, qty_per_unit)
-		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
-		if self.doc.purpose != "Manufacture" or not is_whole_number:
+		if self.doc.purpose != "Manufacture":
 			return entry_qty
 
-		done_qty = flt(self.wo_doc.produced_qty) + flt(self.wo_doc.process_loss_qty)
-		total_qty = ceil_qty_if_uom_has_whole_number(
-			qty_per_unit * (done_qty + fg_completed_qty), row.stock_uom
-		)
+		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
+		if not is_whole_number:
+			return (
+				self.get_wip_raw_material_qty(row, qty_per_unit)
+				if self.uses_up_transferred_material
+				else entry_qty
+			)
+
+		total_qty = ceil_qty_if_uom_has_whole_number(qty_per_unit * self.wo_done_qty, row.stock_uom)
 		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
 		return min(max(ceil(flt(total_qty - consumed_qty, 9)), 0), entry_qty)
+
+	def get_wip_raw_material_qty(self, row, qty_per_unit):
+		"""What rounding of partial entries left in WIP, or still owed, up to the order's running total.
+		An excess transfer stays in WIP."""
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		pending_qty = flt(qty_per_unit * self.wo_done_qty, precision) - (
+			flt(row.consumed_qty) - flt(row.returned_qty)
+		)
+		wip_qty = flt(row.transferred_qty) - flt(row.consumed_qty)
+		entry_qty = qty_per_unit * flt(self.doc.fg_completed_qty)
+		return max(flt(min(wip_qty, max(pending_qty, entry_qty)), precision), 0)
+
+	@property
+	def wo_done_qty(self):
+		"""Work Order qty produced or lost, this entry's included."""
+		wo = self.wo_doc
+		return flt(wo.produced_qty) + flt(wo.process_loss_qty) + flt(self.doc.fg_completed_qty)
+
+	@property
+	def uses_up_transferred_material(self):
+		"""The entry completes the Work Order with the last of the material transferred for it."""
+		wo = self.wo_doc
+		if not self.takes_running_total_share or wo.skip_transfer:
+			return False
+
+		precision = self.doc.precision("fg_completed_qty")
+		done_qty = flt(self.wo_done_qty, precision)
+		return flt(wo.qty, precision) <= done_qty <= flt(wo.material_transferred_for_manufacturing, precision)
 
 	def get_wo_raw_material_entry_qty(self, row, qty_per_unit=None):
 		"""This entry's own share of a Work Order raw material, rounded up for a whole number UOM."""
