@@ -2,32 +2,14 @@
 # See license.txt
 
 import frappe
-from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.permissions import add_user_permission
 
 from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_stock_summary
-from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPlantFloor(ERPNextTestSuite):
-	def test_shop_floor_work_orders_follow_user_permissions(self):
-		allowed = make_wo_order_test_record(qty=1)
-		restricted = make_wo_order_test_record(qty=1)
-		user = create_user("shop-floor-restricted@example.com", "Manufacturing User")
-		add_user_permission("Work Order", allowed.name, user.name)
-
-		with self.set_user(user.name):
-			hidden = get_work_orders("open", search=restricted.name)
-			visible = get_work_orders("open", search=allowed.name)
-
-		self.assertEqual(hidden["total"], 0)
-		self.assertEqual(hidden["work_orders"], [])
-		self.assertEqual([row.name for row in visible["work_orders"]], [allowed.name])
-
 	def test_stock_summary_includes_child_item_groups(self):
 		parent = make_item_group("_Test Plant Floor Parent Group", "All Item Groups", is_group=1)
 		child = make_item_group("_Test Plant Floor Child Group", parent)

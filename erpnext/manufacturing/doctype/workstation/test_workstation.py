@@ -404,7 +404,7 @@ class TestWorkstation(ERPNextTestSuite):
 		from frappe.tests.classes.context_managers import freeze_time
 		from frappe.utils import add_to_date, now_datetime, nowdate
 
-		from erpnext.manufacturing.page.shop_floor.shop_floor import get_workstation_oee
+		from erpnext.manufacturing.page.shop_floor.services.oee import get_workstation_oee
 
 		with freeze_time(f"{nowdate()} 12:00:00", tick=True):
 			start = add_to_date(now_datetime(), minutes=-90)
@@ -427,7 +427,7 @@ class TestWorkstation(ERPNextTestSuite):
 		from frappe.tests.classes.context_managers import freeze_time
 		from frappe.utils import add_to_date, now_datetime, nowdate
 
-		from erpnext.manufacturing.page.shop_floor.shop_floor import get_workstation_oee
+		from erpnext.manufacturing.page.shop_floor.services.oee import get_workstation_oee
 
 		with freeze_time(f"{nowdate()} 12:00:00", tick=True):
 			shifts = [("00:00:00", "23:59:00")]
@@ -458,7 +458,7 @@ class TestWorkstation(ERPNextTestSuite):
 		from frappe.tests.classes.context_managers import freeze_time
 		from frappe.utils import add_to_date, now_datetime, nowdate
 
-		from erpnext.manufacturing.page.shop_floor.shop_floor import get_workstation_oee
+		from erpnext.manufacturing.page.shop_floor.services.oee import get_workstation_oee
 		from erpnext.setup.doctype.employee.test_employee import make_employee
 
 		first = make_employee("oee-operator-1@example.com", company="_Test Company")

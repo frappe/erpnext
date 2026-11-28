@@ -94,7 +94,7 @@
  ],
  "icon": "clock-alert",
  "links": [],
- "modified": "2026-10-12 12:00:00.000000",
+ "modified": "2026-11-28 07:24:18.754943",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Downtime Entry",
@@ -135,6 +135,20 @@
    "role": "Manufacturing Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "role": "Shop Floor User"
+  },
+  {
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "role": "Shop Floor Manager"
   }
  ],
  "quick_entry": 1,

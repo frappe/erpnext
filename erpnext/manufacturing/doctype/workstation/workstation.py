@@ -55,10 +55,12 @@ class Workstation(Document):
 		disabled: DF.Check
 		holiday_list: DF.Link | None
 		hour_rate: DF.Currency
+		line_sequence: DF.Int
 		off_status_image: DF.AttachImage | None
 		on_status_image: DF.AttachImage | None
 		plant_floor: DF.Link | None
 		production_capacity: DF.Int
+		production_line: DF.Data | None
 		status: DF.Literal["Production", "Off", "Idle", "Problem", "Maintenance", "Setup"]
 		total_working_hours: DF.Float
 		warehouse: DF.Link | None

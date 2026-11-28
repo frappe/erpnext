@@ -216,11 +216,10 @@ frappe.ui.form.on("Work Order", {
 				flt(flt(op.completed_qty) + flt(op.process_loss_qty), precision("completed_qty", op)) <
 				erpnext.work_order.get_operation_target_qty(frm, op)
 		);
-		// Jump to the operator Shop Floor view, pre-filtered to this work order.
-		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed" && pending_ops && pending_ops.length > 0) {
-			frm.add_custom_button(__("Operator Dashboard"), () => {
-				frappe.route_options = { work_order: frm.doc.name };
-				frappe.set_route("shop-floor");
+		const next_workstation = pending_ops?.find((op) => op.workstation)?.workstation;
+		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed" && next_workstation) {
+			frm.add_custom_button(__("Shop Floor"), () => {
+				frappe.set_route("shop-floor", "station", next_workstation);
 			});
 		}
 		erpnext.work_order.add_start_button(frm);

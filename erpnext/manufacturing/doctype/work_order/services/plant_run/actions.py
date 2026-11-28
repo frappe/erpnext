@@ -11,7 +11,7 @@ from erpnext.manufacturing.doctype.work_order.services.plant_run.picks import (
 	PickedSerialBatch,
 	get_pick_options,
 )
-from erpnext.manufacturing.page.shop_floor.shop_floor import submit_quality_inspection
+from erpnext.manufacturing.page.shop_floor.services.quality import submit_quality_inspection
 
 
 class MachineBusyError(frappe.ValidationError):

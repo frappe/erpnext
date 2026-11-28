@@ -163,8 +163,7 @@ class VisualPlantFloor {
 			let workstation_name = $(e.currentTarget)
 				.closest(".workstation-wrapper")
 				.attr("data-workstation");
-			frappe.route_options = { workstation: workstation_name };
-			frappe.set_route("shop-floor");
+			frappe.set_route("shop-floor", "station", workstation_name);
 		});
 	}
 

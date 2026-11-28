@@ -14,6 +14,8 @@
   "workstation_name",
   "workstation_type",
   "plant_floor",
+  "production_line",
+  "line_sequence",
   "disabled",
   "column_break_3",
   "production_capacity",
@@ -131,6 +133,21 @@
    "options": "Plant Floor"
   },
   {
+   "depends_on": "plant_floor",
+   "description": "Workstations of one line show in one row on the Shop Floor",
+   "fieldname": "production_line",
+   "fieldtype": "Data",
+   "label": "Production Line"
+  },
+  {
+   "depends_on": "production_line",
+   "description": "Position of this workstation in its production line",
+   "fieldname": "line_sequence",
+   "fieldtype": "Int",
+   "label": "Line Sequence",
+   "non_negative": 1
+  },
+  {
    "fieldname": "workstation_status_tab",
    "fieldtype": "Tab Break",
    "label": "Workstation Status"
@@ -219,7 +236,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2026-11-27 10:20:31.208254",
+ "modified": "2026-11-28 07:24:18.754943",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
@@ -236,6 +253,16 @@
    "role": "Manufacturing User",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Shop Floor User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Shop Floor Manager"
   }
  ],
  "quick_entry": 1,
