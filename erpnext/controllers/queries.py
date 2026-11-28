@@ -43,8 +43,6 @@ def employee_query(
 	start: int,
 	page_len: int,
 	filters: dict | str | None = None,
-	reference_doctype: str | None = None,
-	ignore_user_permissions: bool = False,
 ):
 	doctype = "Employee"
 	fields = get_fields(doctype, ["name", "employee_name"])
