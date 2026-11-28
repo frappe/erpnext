@@ -126,6 +126,7 @@ class SalesOrderSourcingService:
 
 	def get_items(self):
 		self.doc.set("po_items", [])
+		self.doc.set("prod_plan_references", [])
 		if self.doc.get_items_from == "Sales Order":
 			self.get_so_items()
 		elif self.doc.get_items_from == "Material Request":
