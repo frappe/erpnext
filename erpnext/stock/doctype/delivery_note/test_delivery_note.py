@@ -550,9 +550,9 @@ class TestDeliveryNote(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_row_of_a_return_whose_stock_qty_rounds_to_nothing_puts_back_nothing(self):
-		"""Of 504 Box at 0.004 Kg (2.02 Kg), rows of 502, 1 and 2 Box put back 2.01 Kg, nothing as the
+		"""Of 505 Box at 0.004 Kg (2.02 Kg), rows of 502, 1 and 2 Box put back 2.01 Kg, nothing as the
 		1 Box row's stock qty rounds to 0, and the 0.01 Kg left."""
-		dn = self.deliver_for_returns_of_parts(0.004, 504)
+		dn = self.deliver_for_returns_of_parts(0.004, 505)
 		dn_return = make_sales_return(dn.name)
 		row = dn_return.items[0].as_dict(no_default_fields=True)
 		dn_return.items = []
