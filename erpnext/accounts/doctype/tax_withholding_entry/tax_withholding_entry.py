@@ -423,6 +423,13 @@ class TaxWithholdingController:
 
 		return category_names
 
+	def _set_party_tax_withholding_group(self):
+		# invoices get the group with the party details, payments and journals do not
+		if self.party_type in ("Customer", "Supplier") and self.party and not self.doc.tax_withholding_group:
+			self.doc.tax_withholding_group = frappe.get_cached_value(
+				self.party_type, self.party, "tax_withholding_group"
+			)
+
 	def calculate(self):
 		self.category_details = self._get_category_details()
 
@@ -1177,6 +1184,7 @@ class TaxWithholdingController:
 				"taxable_name": source_entry.taxable_name,
 				"taxable_date": source_entry.taxable_date,
 				"tax_withholding_category": category.name,
+				"tax_withholding_group": category.tax_withholding_group,
 				"tax_rate": tax_rate,
 				"party_type": self.party_type,
 				"party": self.party,
@@ -1269,6 +1277,10 @@ class PaymentTaxWithholding(TaxWithholdingController):
 		self.party_type = doc.party_type
 		self.party = doc.party
 
+	def calculate(self):
+		self._set_party_tax_withholding_group()
+		super().calculate()
+
 	def _get_category_names(self):
 		if not self.doc.tax_withholding_category:
 			return []
@@ -1343,6 +1355,10 @@ class JournalTaxWithholding(TaxWithholdingController):
 		self.reverse_field = None
 
 		self._setup_party_info()
+
+	def calculate(self):
+		self._set_party_tax_withholding_group()
+		super().calculate()
 
 	def _setup_party_info(self):
 		for row in self.doc.get("accounts"):
