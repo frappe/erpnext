@@ -3,7 +3,11 @@
 
 const BS_REPORT_NAME = "Balance Sheet";
 
-frappe.query_reports[BS_REPORT_NAME] = $.extend({}, erpnext.financial_statements);
+frappe.query_reports[BS_REPORT_NAME] = $.extend({}, erpnext.financial_statements, {
+	// own list: the shared one may already hold the filters pushed by another financial report
+	// whose script was loaded earlier in the session (e.g. by a dashboard chart)
+	filters: erpnext.financial_statements.get_filters(),
+});
 
 erpnext.utils.add_dimensions(BS_REPORT_NAME, 10);
 
