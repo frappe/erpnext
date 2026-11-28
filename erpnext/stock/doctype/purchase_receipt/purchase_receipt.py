@@ -16,7 +16,10 @@ from erpnext.controllers.buying_controller import (
 	get_returned_stock_qty_status_args,
 )
 from erpnext.controllers.item_close import validate_parent_reopen
-from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+	BillingStatusService,
+	adjust_incoming_rate_for_scr,
+)
 from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
 	ProvisionalAccountingService,
 )
@@ -418,6 +421,16 @@ class PurchaseReceipt(BuyingController):
 		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
+		self.revalue_subcontracting_receipt_on_cancel()
+
+	def revalue_subcontracting_receipt_on_cancel(self):
+		"""Its Subcontracting Receipt drops the service's invoice difference this receipt held."""
+		if self.subcontracting_receipt and any(
+			flt(item.amount_difference_with_purchase_invoice) for item in self.get_doc_before_save().items
+		):
+			adjust_incoming_rate_for_scr(
+				frappe.get_doc("Subcontracting Receipt", self.subcontracting_receipt)
+			)
 
 	def before_cancel(self):
 		super().before_cancel()
