@@ -5437,10 +5437,10 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
 	)
 	def test_last_manufacture_keeps_share_when_transfer_is_short(self):
-		"""A transfer edited down is a real shortage, not rounding, so the last entry keeps its share."""
+		"""A transfer edited down by one unit of precision is a shortage, not rounding, so the last entry keeps its share."""
 		wo, rm_item = make_rounding_work_order(1)
 		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 3))
-		transfer.items[0].qty = 1.5
+		transfer.items[0].qty = 3 - 10 ** -frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		transfer.submit()
 
 		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
