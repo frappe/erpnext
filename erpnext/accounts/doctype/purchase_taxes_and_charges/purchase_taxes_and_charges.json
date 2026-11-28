@@ -38,7 +38,8 @@
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "dont_recompute_tax"
+  "dont_recompute_tax",
+  "allocate_by_item_wise_tax"
  ],
  "fields": [
   {
@@ -286,6 +287,16 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "allocate_by_item_wise_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Allocate by Item-wise Tax",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "section_break_uhfl",
    "fieldtype": "Section Break"
   },
@@ -298,7 +309,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-21 17:13:05.586544",
+ "modified": "2026-11-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
