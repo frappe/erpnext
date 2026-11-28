@@ -446,7 +446,8 @@ class ProductionPlan(Document):
 				- already_planned.get((so_item, item_code), 0),
 				precision,
 			)
-			if flt(qty, precision) > unplanned_qty:
+			qty = flt(qty, precision)
+			if qty > unplanned_qty:
 				throw_sales_order_qty_exceeded(qty, packed.uom, item_code, sales_order, unplanned_qty)
 
 	@staticmethod
