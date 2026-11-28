@@ -43,14 +43,9 @@ def employee_query(
 	start: int,
 	page_len: int,
 	filters: dict | str | None = None,
-	reference_doctype: str | None = None,
-	ignore_user_permissions: bool = False,
 ):
 	doctype = "Employee"
 	fields = get_fields(doctype, ["name", "employee_name"])
-	ignore_user_permissions = bool(
-		reference_doctype and ignore_user_permissions and has_ignored_field(reference_doctype, doctype)
-	)
 
 	Employee = frappe.qb.DocType("Employee")
 	search_str = f"%{txt}%"
@@ -63,7 +58,6 @@ def employee_query(
 		fields=fields,
 		filters=filters,
 		ignore_permissions=False,
-		ignore_user_permissions=ignore_user_permissions,
 	)
 
 	query = (
