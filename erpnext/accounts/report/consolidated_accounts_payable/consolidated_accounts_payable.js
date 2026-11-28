@@ -5,24 +5,13 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 	filters: [
 		{
 			fieldname: "companies",
-			label: __("Companies"),
-			fieldtype: "MultiSelectList",
-			options: "Company",
 			get_data: function (txt) {
 				return erpnext.utils.get_link_options("Company", txt);
 			},
 			description: __("Totals are dropped when the companies use different currencies"),
 		},
 		{
-			fieldname: "report_date",
-			label: __("Report Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
-		},
-		{
 			fieldname: "party_type",
-			label: __("Party Type"),
-			fieldtype: "Autocomplete",
 			options: get_party_type_options(),
 			on_change: function () {
 				frappe.query_report.set_filter_value("party", "");
@@ -34,9 +23,6 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 		},
 		{
 			fieldname: "party",
-			label: __("Party"),
-			fieldtype: "MultiSelectList",
-			options: "party_type",
 			get_data: function (txt) {
 				if (!frappe.query_report.filters) return;
 
@@ -45,72 +31,6 @@ frappe.query_reports["Consolidated Accounts Payable"] = {
 
 				return erpnext.utils.get_link_options(party_type, txt);
 			},
-		},
-		{
-			fieldname: "ageing_based_on",
-			label: __("Ageing Based On"),
-			fieldtype: "Select",
-			options: "Posting Date\nDue Date\nSupplier Invoice Date",
-			default: "Due Date",
-		},
-		{
-			fieldname: "age_as_on",
-			label: __("Age as on"),
-			fieldtype: "Select",
-			options: "Report Date\nToday",
-			default: "Report Date",
-		},
-		{
-			fieldname: "range",
-			label: __("Ageing Range"),
-			fieldtype: "Data",
-			default: "30, 60, 90, 120",
-		},
-		{
-			fieldname: "supplier_group",
-			label: __("Supplier Group"),
-			fieldtype: "Link",
-			options: "Supplier Group",
-		},
-		{
-			fieldname: "group_by_party",
-			label: __("Group By Supplier"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "group_by_company",
-			label: __("Group By Company"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "ignore_accounts",
-			label: __("Group by Voucher"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "based_on_payment_terms",
-			label: __("Based On Payment Terms"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_future_payments",
-			label: __("Show Future Payments"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "show_remarks",
-			label: __("Show Remarks"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "for_revaluation_journals",
-			label: __("Revaluation Journals"),
-			fieldtype: "Check",
-		},
-		{
-			fieldname: "in_party_currency",
-			label: __("In Party Currency"),
-			fieldtype: "Check",
 		},
 	],
 	collapsible_filters: true,
