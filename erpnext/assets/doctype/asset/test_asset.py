@@ -1170,6 +1170,39 @@ class TestAsset(AssetSetup):
 				),
 			)
 
+	def test_value_on_disposal_date_includes_value_adjustment(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.assets.doctype.asset.depreciation import (
+			calculate_value_after_depreciation_on_disposal_date,
+		)
+		from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+			make_asset_value_adjustment,
+		)
+
+		asset = create_asset(
+			net_purchase_amount=120000,
+			purchase_amount=120000,
+			calculate_depreciation=1,
+			purchase_date="2026-04-01",
+			available_for_use_date="2026-04-01",
+			depreciation_start_date="2026-04-30",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+		post_depreciation_entries(date="2026-08-31")
+		make_asset_value_adjustment(
+			asset=asset.name, date="2026-08-31", current_asset_value=70000, new_asset_value=84000
+		).submit()
+
+		self.assertEqual(calculate_value_after_depreciation_on_disposal_date(asset.name, "2026-09-15"), 78000)
+
+		create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=50000, posting_date="2026-09-15"
+		)
+		asset.load_from_db()
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 78000)
+
 	def test_split_shares_value_adjustment(self):
 		from erpnext.assets.doctype.asset.depreciation import get_gross_asset_value
 		from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
