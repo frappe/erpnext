@@ -389,13 +389,8 @@ class ProductionPlan(Document):
 
 	def get_allocated_references(self):
 		"""Combined references with the qty this plan's consolidated rows give each."""
-		planned_qty = {}
-		for row in self.po_items:
-			if not row.sales_order:
-				key = (self.name, row.sales_order_item)
-				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
-
-		return allocate_reference_qty(self.prod_plan_references, planned_qty)
+		rows = [row for row in self.po_items if not row.sales_order]
+		return allocate_reference_qty(self.prod_plan_references, *group_planned_qty_by_item_reference(rows))
 
 	def validate_sales_order_planned_qty(self):
 		planned_qty = self.get_so_item_planned_qty()
@@ -824,11 +819,10 @@ def get_planned_qty_of_references(sales_orders):
 		.where(reference.parent.isin(plans))
 		.orderby(reference.idx)
 	).run(as_dict=True)
-	planned_qty, item_codes = get_planned_qty_by_item_reference(plans)
-	return allocate_reference_qty(references, planned_qty, item_codes)
+	return allocate_reference_qty(references, *get_planned_qty_by_item_reference(plans))
 
 
-def allocate_reference_qty(references, planned_qty, item_codes=None):
+def allocate_reference_qty(references, planned_qty, item_codes):
 	"""Split the planned qty of each combined row over its references, in order.
 	Qty above the references goes to the row's own line, its first reference."""
 	allocated = []
@@ -840,7 +834,7 @@ def allocate_reference_qty(references, planned_qty, item_codes=None):
 		line = frappe._dict(
 			sales_order=row.sales_order,
 			sales_order_item=row.sales_order_item,
-			item_code=(item_codes or {}).get(key),
+			item_code=item_codes.get(key),
 			qty=qty,
 		)
 		allocated.append(line)
@@ -865,13 +859,17 @@ def get_plans_with_references(sales_orders):
 
 
 def get_planned_qty_by_item_reference(plans):
-	"""Planned qty and item of the consolidated rows of plans, which have no Sales Order of their own.
-	Older plans point by Sales Order Item."""
+	"""Planned qty and item of the consolidated rows of plans, which have no Sales Order of their own."""
 	rows = frappe.get_all(
 		"Production Plan Item",
 		filters={"parent": ("in", plans), "sales_order": ("is", "not set")},
 		fields=["parent", "item_reference", "sales_order_item", "item_code", "planned_qty"],
 	)
+	return group_planned_qty_by_item_reference(rows)
+
+
+def group_planned_qty_by_item_reference(rows):
+	"""Planned qty and item of plan rows per plan and item reference; older plans point by Sales Order Item."""
 	planned_qty, item_codes = {}, {}
 	for row in rows:
 		key = (row.parent, row.item_reference or row.sales_order_item)
