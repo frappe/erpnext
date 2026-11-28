@@ -211,7 +211,7 @@ def create_dn_for_pick_lists(
 	)
 
 	if not sales_order_arg and not all(item.sales_order for item in pick_list.locations):
-		if isinstance(delivery_note, str):
+		if isinstance(delivery_note, str | dict):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
 		delivery_note = create_delivery_wo_so(
