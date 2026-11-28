@@ -2972,6 +2972,19 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		self.assertFalse(make_plan_from_sales_orders(sales_orders, combine_items=1).po_items)
 
+	def test_combined_bundle_work_orders_leave_the_rest_of_each_component_to_plan(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combined WO")
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+		plan = make_plan_from_sales_orders([sales_order], combine_items=1)
+		next(row for row in plan.po_items if row.item_code == components[1]).planned_qty = 4
+		plan.submit()
+		submit_plan_work_orders(plan)
+
+		next_plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual(
+			[(row.item_code, row.planned_qty) for row in next_plan.po_items], [(components[1], 16)]
+		)
+
 	def test_sub_assembly_work_order_of_combined_plan_submits(self):
 		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
 		sub_item = make_item("_Test PP Combined Sub SA", {"is_stock_item": 1}).name
@@ -7378,6 +7391,14 @@ def make_manufactured_bundle(prefix):
 	bundle_item = make_item(f"{prefix} Bundle", {"is_stock_item": 0}).name
 	make_product_bundle(parent=bundle_item, items=components, qty=2)
 	return bundle_item, components
+
+
+def submit_plan_work_orders(plan):
+	plan.make_work_order()
+	for name in frappe.get_all("Work Order", {"production_plan": plan.name}, pluck="name"):
+		work_order = frappe.get_doc("Work Order", name)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.submit()
 
 
 def make_plan_from_sales_orders(sales_orders, combine_items=0):
