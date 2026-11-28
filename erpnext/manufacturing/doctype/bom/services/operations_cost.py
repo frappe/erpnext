@@ -228,9 +228,11 @@ def _get_operation_cost_and_qty(stock_entry, work_order, operation):
 	if remaining_qty <= 0:
 		return 0, 0
 
-	# completed qty counts only good units, so lost units do not use it up
-	good_qty = flt(qty - flt(stock_entry.process_loss_qty), stock_entry.precision("fg_completed_qty"))
-	qty = min(remaining_qty, good_qty)
+	# a job card entry's loss is its operation's own, which completed qty leaves out
+	if stock_entry.job_card:
+		qty = flt(qty - flt(stock_entry.process_loss_qty), stock_entry.precision("fg_completed_qty"))
+
+	qty = min(remaining_qty, qty)
 	return remaining_cost / remaining_qty * qty, qty
 
 
