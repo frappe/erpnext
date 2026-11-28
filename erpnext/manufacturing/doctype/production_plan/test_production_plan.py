@@ -2985,6 +2985,30 @@ class TestProductionPlan(ERPNextTestSuite):
 			[(row.item_code, row.planned_qty) for row in next_plan.po_items], [(components[1], 16)]
 		)
 
+	def test_combined_bundle_item_with_its_own_bom_is_not_planned_again(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Phantom Bundle Line")
+		bom = make_bom(
+			item=bundle_item,
+			raw_materials=[make_item("_Test PP Phantom Bundle Line RM").name],
+			currency="INR",
+			do_not_save=True,
+		)
+		bom.is_phantom_bom = 1
+		bom.insert()
+		bom.submit()
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+		plan = make_plan_from_sales_orders([sales_order], combine_items=1)
+		for row in plan.po_items:
+			if row.item_code in components:
+				row.planned_qty = 4
+		plan.submit()
+
+		next_plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual(
+			sorted((row.item_code, row.planned_qty) for row in next_plan.po_items),
+			[(components[0], 16), (components[1], 16)],
+		)
+
 	def test_sub_assembly_work_order_of_combined_plan_submits(self):
 		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
 		sub_item = make_item("_Test PP Combined Sub SA", {"is_stock_item": 1}).name
