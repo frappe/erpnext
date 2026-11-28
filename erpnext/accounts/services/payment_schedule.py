@@ -180,7 +180,6 @@ class PaymentScheduleService:
 				"invoice_portion": schedule.invoice_portion,
 				"mode_of_payment": schedule.mode_of_payment,
 				"description": schedule.description,
-				"paid_amount": schedule.paid_amount,
 				"discount_type": schedule.discount_type,
 				"discount": schedule.discount,
 				"discount_date": schedule.discount_date,
