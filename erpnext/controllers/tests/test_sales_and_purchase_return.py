@@ -453,6 +453,34 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		credit_note.items[0].qty = -100
 		self.assertRaises(StockOverReturnError, credit_note.insert)
 
+	def test_stock_return_qty_is_checked_in_return_row_uom(self):
+		"""Returns below the stock qty precision must not pass again and again."""
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "_Test UOM 1", "conversion_factor": 0.000001}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		dn = create_delivery_note(item_code=item_code, do_not_submit=True)
+		dn.items[0].update({"uom": "_Test UOM 1", "conversion_factor": 0.000001, "qty": 10})
+		dn.submit()
+
+		def return_four():
+			return_dn = make_return_doc(dn.doctype, dn.name)
+			return_dn.items[0].qty = -4
+			return return_dn
+
+		return_four().submit()
+		return_four().submit()
+		self.assertRaises(StockOverReturnError, return_four().insert)
+
 	def test_credit_note_in_a_larger_uom_cannot_round_the_billed_qty_up(self):
 		"""0.6 of a qty step billed in the return row's UOM must not round up to allow a whole step."""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
