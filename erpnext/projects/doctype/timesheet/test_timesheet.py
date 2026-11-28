@@ -708,6 +708,40 @@ class TestTimesheet(ERPNextTestSuite):
 		to_time = timesheet.time_logs[0].to_time
 		self.assertEqual(to_time, add_to_date(from_time, hours=2, as_datetime=True))
 
+	def test_time_log_without_from_time_cannot_be_submitted(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		update_activity_type("_Test Activity Type")
+
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"employee": emp,
+				"time_logs": [
+					{"activity_type": "_Test Activity Type", "to_time": now_datetime(), "hours": 3}
+				],
+			}
+		).insert()
+		self.assertRaisesRegex(frappe.ValidationError, "From Time and To Time is mandatory", timesheet.submit)
+
+		# From Time and Hours are enough: To Time is filled in on save
+		timesheet = frappe.get_doc(
+			{
+				"doctype": "Timesheet",
+				"company": "_Test Company",
+				"employee": emp,
+				"time_logs": [
+					{
+						"activity_type": "_Test Activity Type",
+						"from_time": add_to_date(now_datetime(), hours=-10),
+						"hours": 3,
+					}
+				],
+			}
+		).insert()
+		timesheet.submit()
+		self.assertEqual(timesheet.docstatus, 1)
+
 	def test_logs_entered_with_hours(self):
 		update_activity_type("_Test Activity Type")
 		time_log = {
