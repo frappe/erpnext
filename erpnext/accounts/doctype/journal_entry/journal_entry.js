@@ -752,9 +752,56 @@ $.extend(erpnext.journal_entry, {
 			if (!frm.doc.company) frappe.throw(__("Please select Company first"));
 			if (!frm.doc.posting_date) frappe.throw(__("Please select Posting Date first"));
 
+<<<<<<< HEAD
 			const { account_currency, exchange_rate } = d;
 			return frappe.call({
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_details_and_party_type",
+=======
+	update_totals(frm) {
+		let total_debit = 0;
+		let total_credit = 0;
+		(frm.doc.accounts || []).forEach((row) => {
+			total_debit += flt(row.debit, precision("debit", row));
+			total_credit += flt(row.credit, precision("credit", row));
+		});
+
+		frm.doc.total_debit = flt(total_debit, precision("total_debit"));
+		frm.doc.total_credit = flt(total_credit, precision("total_credit"));
+		frm.doc.difference = flt(total_debit - total_credit, precision("difference"));
+		["total_debit", "total_credit", "difference"].forEach((field) => frm.refresh_field(field));
+	},
+
+	set_debit_credit_in_company_currency(frm, cdt, cdn) {
+		// Exchange gain/loss journals adjust base and account currency amounts independently.
+		if (frm.doc.voucher_type === "Exchange Gain Or Loss" && frm.doc.multi_currency) return;
+
+		const row = frappe.get_doc(cdt, cdn);
+		frappe.model.set_value(
+			cdt,
+			cdn,
+			"debit",
+			flt(flt(row.debit_in_account_currency) * row.exchange_rate, precision("debit", row))
+		);
+		frappe.model.set_value(
+			cdt,
+			cdn,
+			"credit",
+			flt(flt(row.credit_in_account_currency) * row.exchange_rate, precision("credit", row))
+		);
+		erpnext.journal_entry.update_totals(frm);
+	},
+
+	set_exchange_rate(frm, cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		const company_currency = erpnext.get_currency(frm.doc.company);
+
+		if (row.account_currency == company_currency || !frm.doc.multi_currency) {
+			row.exchange_rate = 1;
+			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
+		} else if (!row.exchange_rate || row.exchange_rate == 1 || row.account_type == "Bank") {
+			frappe.call({
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
+>>>>>>> eb610ea (fix(accounts): preserve exchange gain and loss amounts)
 				args: {
 					account: d.account,
 					date: frm.doc.posting_date,
