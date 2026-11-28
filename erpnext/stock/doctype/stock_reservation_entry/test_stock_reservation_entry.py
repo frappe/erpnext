@@ -1787,7 +1787,8 @@ class TestStockReservationEntry(FrappeTestCase):
 		)
 		second_dn.submit()
 		frappe.get_doc("Delivery Note", dn.name).cancel()
-		self.assertEqual(delivered_qty(), [0, 4])
+		# the remaining delivery's batch qty stays on the oldest reservation
+		self.assertEqual(delivered_qty(), [4, 0])
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
 	def test_reserved_stock_validation_for_batch_item(self):
