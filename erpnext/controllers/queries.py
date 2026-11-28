@@ -34,16 +34,15 @@ def employee_query(
 	start,
 	page_len,
 	filters,
-	reference_doctype: str | None = None,
-	ignore_user_permissions: bool = False,
 ):
 	doctype = "Employee"
 	conditions = []
 	fields = get_fields(doctype, ["name", "employee_name"])
 	ignore_permissions = False
 
-	if reference_doctype and ignore_user_permissions:
-		ignore_permissions = has_ignored_field(reference_doctype, doctype) and has_permission(
+	# link search sets this only after checking that the field may skip user permissions
+	if frappe.flags.get("ignore_user_permissions_for_doctype") == doctype:
+		ignore_permissions = has_permission(
 			doctype,
 			ptype="select" if frappe.only_has_select_perm(doctype) else "read",
 		)
