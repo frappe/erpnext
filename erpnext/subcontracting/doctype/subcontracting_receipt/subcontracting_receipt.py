@@ -1333,13 +1333,20 @@ class SubcontractingReceipt(SubcontractingController):
 		for row in rows:
 			line_qty[row.purchase_order_item] += flt(row.qty) + flt(row.process_loss_qty)
 
-		return {
-			row.name: line_differences[row.purchase_order_item]
-			* (flt(row.qty) + flt(row.process_loss_qty))
-			/ line_qty[row.purchase_order_item]
-			for row in rows
-			if line_qty[row.purchase_order_item]
-		}
+		# shares are rounded cumulatively, so they add up to the line's difference
+		precision = frappe.get_precision("Subcontracting Receipt Item", "amount")
+		qty_so_far, allocated, differences = defaultdict(float), defaultdict(float), {}
+		for row in rows:
+			line = row.purchase_order_item
+			if not line_qty[line]:
+				continue
+
+			qty_so_far[line] += flt(row.qty) + flt(row.process_loss_qty)
+			share_so_far = flt(line_differences[line] * qty_so_far[line] / line_qty[line], precision)
+			differences[row.name] = flt(share_so_far - allocated[line], precision)
+			allocated[line] = share_so_far
+
+		return differences
 
 	def get_returned_costs(self) -> dict[str, frappe._dict]:
 		"""Service and secondary items cost per qty of the returned receipt row, for each return row."""
