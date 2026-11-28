@@ -115,6 +115,9 @@
   "terms_section_break",
   "tc_name",
   "terms",
+  "signature_section",
+  "portal_response",
+  "customer_signature",
   "more_info_tab",
   "auto_repeat_section",
   "auto_repeat",
@@ -804,6 +807,33 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:doc.portal_response || doc.customer_signature",
+   "fieldname": "signature_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Portal"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "What the customer answered on the portal. The sales pipeline is unaffected.",
+   "fieldname": "portal_response",
+   "fieldtype": "Select",
+   "label": "Portal Response",
+   "no_copy": 1,
+   "options": "\nAccepted\nChanges Requested\nRejected",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Drawn by the customer when they accept the quotation on the portal.",
+   "fieldname": "customer_signature",
+   "fieldtype": "Signature",
+   "label": "Customer Signature",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
    "fieldname": "print_settings",
    "fieldtype": "Section Break",
    "label": "Print Settings"
@@ -1181,7 +1211,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-27 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

@@ -1,0 +1,39 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@app/*": [
+				"./*"
+			],
+			"vue": [
+				"../../../studio/frontend/node_modules/vue"
+			],
+			"frappe-ui": [
+				"../../../studio/frontend/node_modules/frappe-ui/src/index.ts"
+			],
+			"frappe-ui/experimental": [
+				"../../../studio/frontend/node_modules/frappe-ui/experimental.ts"
+			],
+			"@framework/ui": [
+				"../../../frappe/ui/src/index.ts"
+			],
+			"@framework/ui/*": [
+				"../../../frappe/ui/src/*"
+			]
+		},
+		"allowJs": true,
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"target": "es2020",
+		"lib": [
+			"es2020",
+			"dom"
+		],
+		"skipLibCheck": true
+	},
+	"include": [
+		"**/*.ts"
+	]
+}
