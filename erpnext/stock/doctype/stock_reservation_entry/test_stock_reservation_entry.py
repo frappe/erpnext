@@ -1455,20 +1455,6 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		{
 			"allow_negative_stock": 0,
 			"enable_stock_reservation": 1,
-<<<<<<< HEAD
-			"auto_reserve_serial_and_batch": 1,
-			"pick_serial_and_batch_based_on": "FIFO",
-			"use_serial_batch_fields": 1,
-		},
-	)
-	def test_batch_shared_across_sales_orders_can_be_delivered(self) -> None:
-		# Regression (#57159): one batch reserved by two Sales Orders. Delivering each order's own
-		# reserved unit must not raise Reserved Batch Conflict — the remainder covers the other order.
-		# The batch is set on the row explicitly as the v16 reserved-stock mapper does not carry
-		# the reserved batch onto the Delivery Note row.
-		item_doc = make_batch_item()
-		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
-=======
 			"allow_partial_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"use_serial_batch_fields": 1,
@@ -1532,7 +1518,23 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		frappe.get_doc("Delivery Note", dn.name).cancel()
 		self.assertEqual(delivered_qty(), [0, 4])
 
->>>>>>> 2745ae0 (test: batch delivery is counted once across the reservations of a row)
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_batch_shared_across_sales_orders_can_be_delivered(self) -> None:
+		# Regression (#57159): one batch reserved by two Sales Orders. Delivering each order's own
+		# reserved unit must not raise Reserved Batch Conflict — the remainder covers the other order.
+		# The batch is set on the row explicitly as the v16 reserved-stock mapper does not carry
+		# the reserved batch onto the Delivery Note row.
+		item_doc = make_batch_item()
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
 
 		orders = []
 		for _i in range(2):
