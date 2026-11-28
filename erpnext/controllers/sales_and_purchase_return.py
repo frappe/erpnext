@@ -405,12 +405,12 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 
 	# an invoice without Update Stock bills in the row's UOM, so its qty is checked in that UOM
 	bills_in_row_uom = doc.doctype in ("Purchase Invoice", "Sales Invoice") and not doc.update_stock
-	uom_factor = (flt(args.get("conversion_factor")) or 1) if bills_in_row_uom else 1
+	uom_factor = get_return_check_uom_factor(doc, key, args, bills_in_row_uom)
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	field_precision = get_field_precision(
 		frappe.get_meta(doc.doctype + " Item").get_field(
-			"stock_qty" if doc.get("update_stock", "") else "qty"
+			"stock_qty" if doc.get("update_stock") and uom_factor == 1 else "qty"
 		),
 		currency=company_currency,
 	)
@@ -467,6 +467,20 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 					),
 					StockOverReturnError,
 				)
+
+
+def get_return_check_uom_factor(doc, key, row, bills_in_row_uom) -> float:
+	"""Factor from stock UOM to the UOM a return row's qty is checked in."""
+	conversion_factor = flt(row.get("conversion_factor")) or 1
+	if bills_in_row_uom:
+		return conversion_factor
+
+	# a Delivery Note's item total counts unlinked rows at their stored stock qty, which may be rounded
+	if doc.doctype == "Delivery Note" and key == row.item_code:
+		return 1
+
+	# the finer of the row and stock UOMs, so that neither precision rounds a return away
+	return min(conversion_factor, 1)
 
 
 def round_down(value: float, precision: int) -> float:
