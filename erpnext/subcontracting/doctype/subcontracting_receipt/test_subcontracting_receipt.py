@@ -2584,7 +2584,12 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		for rate, invoice_rate in ((300, 300.01), (100.01, 100.02)):
 			with self.subTest(rate=rate):
 				scr = make_service_receipt(
-					"Subcontracted Service Item 10", "Subcontracted Item SA10", 1, rate, 3, rows=3
+					"Subcontracted Service Item 10",
+					"Subcontracted Item SA10",
+					1,
+					rate,
+					3,
+					rows=[{"qty": 1}] * 3,
 				)
 				pr = make_purchase_receipt(scr.name)
 				pr.submit()
@@ -2593,6 +2598,40 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				pi.submit()
 
 				self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"bill_for_rejected_quantity_in_purchase_invoice": 0,
+		},
+	)
+	def test_rejected_row_takes_no_share_of_service_invoice_rate(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
+		# 1 of 5 finished goods is a fraction of the service unit
+		uom = frappe.get_doc("UOM", frappe.db.get_value("Item", "Subcontracted Service Item 10", "stock_uom"))
+		uom.must_be_whole_number = 0
+		uom.save()
+		rejected_row = {"qty": 0, "rejected_qty": 1, "rejected_warehouse": "Finished Goods - TCP1"}
+		scr = make_service_receipt(
+			"Subcontracted Service Item 10",
+			"Subcontracted Item SA10",
+			1,
+			166.67,
+			5,
+			rows=[rejected_row, {"qty": 1}],
+		)
+		pr = make_purchase_receipt(scr.name)
+		pr.submit()
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].rate = 166.70
+		pi.submit()
+
+		self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
 
 	def test_service_cost_split_over_finished_goods_is_credited_in_full(self):
 		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
@@ -6692,7 +6731,7 @@ def set_service_expense_account(service_item):
 	return service_expense_account
 
 
-def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_values=None, rows=1):
+def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_values=None, rows=None):
 	service_items = [
 		{
 			"warehouse": "Stores - TCP1",
@@ -6719,10 +6758,10 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_v
 
 	scr = make_subcontracting_receipt(sco.name)
 	scr.items[0].update(fg_row_values or {})
-	if rows > 1:
-		scr.items[0].qty = fg_item_qty / rows
-		for _ in range(rows - 1):
-			scr.append("items", {**scr.items[0].as_dict(), "name": None, "idx": None})
+	# one finished good row per dict of values
+	for values in (rows or [])[1:]:
+		scr.append("items", {**scr.items[0].as_dict(), "name": None, "idx": None, **values})
+	scr.items[0].update((rows or [{}])[0])
 	scr.submit()
 	return scr
 
