@@ -2531,6 +2531,44 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_service_invoice_rate_revalues_finished_goods(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
+		scr = make_service_receipt("Subcontracted Service Item 10", "Subcontracted Item SA10", 10, 100, 10)
+		pr = make_purchase_receipt(scr.name)
+		pr.submit()
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].rate = 120
+		pi.submit()
+
+		def get_finished_good_value_and_service_balance():
+			stock_value = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": scr.name, "voucher_detail_no": scr.items[0].name, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			service_entries = frappe.get_all(
+				"GL Entry",
+				filters={
+					"voucher_no": ("in", [scr.name, pi.name]),
+					"account": service_expense_account,
+					"is_cancelled": 0,
+				},
+				fields=["debit", "credit"],
+			)
+			return stock_value, sum(row.debit - row.credit for row in service_entries)
+
+		self.assertEqual(get_finished_good_value_and_service_balance(), (2200, 0))
+
+		pi.reload()
+		pi.cancel()
+		self.assertEqual(get_finished_good_value_and_service_balance(), (2000, -1000))
+
 	def test_service_cost_split_over_finished_goods_is_credited_in_full(self):
 		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
 		scr = make_service_receipt("Subcontracted Service Item 10", "Subcontracted Item SA10", 1, 100, 6)
