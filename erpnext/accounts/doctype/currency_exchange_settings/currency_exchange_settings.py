@@ -8,7 +8,9 @@ import frappe
 import requests
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import nowdate
+from frappe.utils import flt, nowdate
+
+import erpnext
 
 
 class CurrencyExchangeSettings(Document):
@@ -88,15 +90,20 @@ class CurrencyExchangeSettings(Document):
 			self.append("result_key", {"key": "rate"})
 			self.append("req_params", {"key": "date", "value": "{transaction_date}"})
 
+	def get_test_args(self):
+		"""Test the provider with a pair the default company actually needs, not a fixed USD to INR."""
+		to_currency = erpnext.get_default_currency() or "INR"
+		from_currency = "EUR" if to_currency == "USD" else "USD"
+		return {"transaction_date": nowdate(), "from_currency": from_currency, "to_currency": to_currency}
+
 	def validate_parameters(self):
+		args = self.get_test_args()
 		params = {}
 		for row in self.req_params:
-			params[row.key] = row.value.format(
-				transaction_date=nowdate(), to_currency="INR", from_currency="USD"
-			)
+			params[row.key] = row.value.format(**args)
 		params.update(get_auth_params(self))
 
-		api_url = self.api_endpoint.format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
+		api_url = self.api_endpoint.format(**args)
 
 		try:
 			response = requests.get(
@@ -111,17 +118,25 @@ class CurrencyExchangeSettings(Document):
 		return response, value
 
 	def validate_result(self, response, value):
+		args = self.get_test_args()
 		try:
 			for key in self.result_key:
-				value = value[
-					str(key.key).format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
-				]
+				value = get_result_value(value, str(key.key).format(**args))
 		except Exception:
 			frappe.throw(_("Invalid result key. Response:") + " " + response.text)
-		if isinstance(value, bool) or not isinstance(value, int | float) or not isfinite(value) or value <= 0:
+		# Same conversion as the real lookup, so numeric text like "1.4257" is accepted.
+		rate = 0 if isinstance(value, bool) else flt(value)
+		if not isfinite(rate) or rate <= 0:
 			frappe.throw(_("Returned exchange rate must be a positive finite number."))
 
 		self.url = remove_access_key(response.url)
+
+
+def get_result_value(value, key: str):
+	"""Step into the response by one result key; a number picks an item from a list."""
+	if isinstance(value, list):
+		return value[int(key)]
+	return value[key]
 
 
 def get_auth_params(settings: "CurrencyExchangeSettings") -> dict:

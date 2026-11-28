@@ -163,6 +163,7 @@ def get_exchange_rate(
 
 			from erpnext.accounts.doctype.currency_exchange_settings.currency_exchange_settings import (
 				get_auth_params,
+				get_result_value,
 			)
 
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
@@ -190,7 +191,7 @@ def get_exchange_rate(
 			response.raise_for_status()
 			value = response.json()
 			for res_key in settings.result_key:
-				value = value[format_ces_api(str(res_key.key), req_params)]
+				value = get_result_value(value, format_ces_api(str(res_key.key), req_params))
 			if isinstance(value, bool):
 				raise ValueError("Invalid exchange rate")
 			value = float(value)
