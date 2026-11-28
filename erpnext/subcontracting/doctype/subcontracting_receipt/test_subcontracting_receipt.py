@@ -2634,6 +2634,32 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"maintain_same_rate": 0,
+			"set_landed_cost_based_on_purchase_invoice_rate": 1,
+			"allow_multiple_items": 1,
+		},
+	)
+	def test_service_invoice_rate_adds_up_over_split_service_receipt_rows(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
+		scr = make_service_receipt("Subcontracted Service Item 10", "Subcontracted Item SA10", 10, 100, 10)
+		pr = make_purchase_receipt(scr.name)
+		pr.items[0].qty = 6
+		pr.append("items", {**pr.items[0].as_dict(), "name": None, "idx": None, "qty": 4})
+		pr.submit()
+		pi = make_purchase_invoice(pr.name)
+		for item in pi.items:
+			item.rate = 120
+		pi.submit()
+
+		self.assertEqual(get_receipt_stock_value(scr), 2200)
+		self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
+
 	def test_service_cost_split_over_finished_goods_is_credited_in_full(self):
 		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
 		scr = make_service_receipt("Subcontracted Service Item 10", "Subcontracted Item SA10", 1, 100, 6)
