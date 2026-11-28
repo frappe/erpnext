@@ -2096,6 +2096,7 @@ def get_pick_list_query(doctype: Any, txt: str, searchfield: Any, start: int, pa
 			Replace(GroupConcat(PICK_LIST_ITEM.sales_order).distinct(), ",", "<br>").as_("sales_order"),
 		)
 		.where(PICK_LIST.docstatus == 1)
+		.where(PICK_LIST.purpose == "Delivery")
 		.where(PICK_LIST.status.isin(["Open", "Partly Delivered"]))
 		.where(PICK_LIST.company == filters.get("company"))
 		.where(customer == filters.get("customer"))
