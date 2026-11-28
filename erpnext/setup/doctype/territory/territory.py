@@ -49,3 +49,18 @@ class Territory(NestedSet):
 
 def on_doctype_update():
 	frappe.db.add_index("Territory", ["lft", "rgt"])
+
+
+def restrict_customer_territory_permissions():
+	"""Clear output and sharing grants without Read after custom permissions are synced."""
+	ptypes = ("print", "email", "export", "report", "share")
+	for row in frappe.get_all(
+		"Custom DocPerm",
+		filters={"parent": "Territory", "role": "Customer", "permlevel": 0, "read": 0},
+		fields=["name", *ptypes],
+	):
+		values = {ptype: 0 for ptype in ptypes if row.get(ptype)}
+		if values:
+			rule = frappe.get_doc("Custom DocPerm", row.name)
+			rule.update(values)
+			rule.save()
