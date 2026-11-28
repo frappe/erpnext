@@ -500,10 +500,14 @@ def make_sales_invoice(
 		)
 
 	def postprocess(source, target):
+		from erpnext.accounts.services.advances import can_read_advance_vouchers, set_advances
+
 		set_missing_values(source, target)
 		# Get the advance paid Journal Entries in Sales Invoice Advance
-		if target.get("allocate_advances_automatically"):
-			target.set_advances()
+		if target.get("allocate_advances_automatically") and (
+			ignore_permissions or can_read_advance_vouchers()
+		):
+			set_advances(target)
 
 		make_packing_list(target)
 		set_serial_batch_for_bundle_reservation(

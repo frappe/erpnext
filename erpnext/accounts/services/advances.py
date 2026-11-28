@@ -59,6 +59,11 @@ def set_advances(doc) -> None:
 		doc.append("advances", advance_row)
 
 
+def can_read_advance_vouchers() -> bool:
+	"""Advance rows show Payment Entry and Journal Entry data, so the user must be able to read both."""
+	return all(frappe.has_permission(doctype, "read") for doctype in ("Payment Entry", "Journal Entry"))
+
+
 def get_advance_entries(doc, include_unallocated: bool = True) -> list:
 	"""Return advance journal and payment entries applicable to `doc`."""
 	party_account = []
@@ -70,14 +75,17 @@ def get_advance_entries(doc, include_unallocated: bool = True) -> list:
 		amount_field = "credit_in_account_currency"
 		order_field = "sales_order"
 		order_doctype = "Sales Order"
-		party_account.append(doc.debit_to)
+		party_account_field = "debit_to"
 	else:
 		party_type = "Supplier"
 		party = doc.supplier
 		amount_field = "debit_in_account_currency"
 		order_field = "purchase_order"
 		order_doctype = "Purchase Order"
-		party_account.append(doc.credit_to)
+		party_account_field = "credit_to"
+
+	validate_party_account_company(doc, party_account_field)
+	party_account.append(doc.get(party_account_field))
 
 	party_accounts = get_party_account(party_type, party=party, company=doc.company, include_advance=True)
 
@@ -529,6 +537,23 @@ def get_common_query(
 	q = q.limit(limit) if limit else q
 
 	return q
+
+
+def validate_party_account_company(doc, fieldname: str) -> None:
+	"""Advances are looked up by this account, so it must belong to the document's company."""
+	account = doc.get(fieldname)
+	if not account:
+		return
+
+	if isinstance(account, str) and frappe.get_cached_value("Account", account, "company") == doc.company:
+		return
+
+	frappe.throw(
+		_("{0} account {1} does not belong to company {2}").format(
+			frappe.bold(_(doc.meta.get_label(fieldname))), frappe.bold(account), frappe.bold(doc.company)
+		),
+		title=_("Invalid Account"),
+	)
 
 
 def _set_je_amounts(entry, amount, default_amount=None, is_credit=True):
