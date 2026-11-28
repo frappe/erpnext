@@ -50,7 +50,7 @@
   }
  ],
  "links": [],
- "modified": "2021-02-08 16:37:53.936656",
+ "modified": "2026-11-26 15:55:06.420092",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",
@@ -79,6 +79,15 @@
    "role": "Accounts Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
   }
  ],
  "sort_field": "modified",
