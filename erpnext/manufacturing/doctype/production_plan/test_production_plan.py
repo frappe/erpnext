@@ -3176,6 +3176,37 @@ class TestProductionPlan(ERPNextTestSuite):
 		extra_plan.po_items[0].product_bundle_item = bundle_item
 		self.assertRaisesRegex(frappe.ValidationError, "is left to plan", extra_plan.submit)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_planned_and_reserved_bundle_components_are_not_planned_again(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Reserved")
+		warehouse = "_Test Warehouse - _TC"
+		sales_order = make_sales_order(item_code=bundle_item, qty=10, warehouse=warehouse)
+		first_plan = make_plan_from_sales_orders([sales_order])
+		first_plan.set("po_items", [row for row in first_plan.po_items if row.item_code == components[0]])
+		first_plan.po_items[0].planned_qty = 12
+		first_plan.submit()
+
+		make_stock_entry(item_code=components[0], target=warehouse, qty=10, basic_rate=100)
+		sales_order.reload()
+		sales_order.create_stock_reservation_entries(
+			items_details=[
+				{
+					"sales_order_item": sales_order.packed_items[0].name,
+					"item_code": components[0],
+					"qty_to_reserve": 10,
+					"warehouse": warehouse,
+				}
+			],
+			notify=False,
+		)
+
+		second_plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual([row.item_code for row in second_plan.po_items], [components[1]])
+
+		extra_plan = frappe.copy_doc(first_plan)
+		extra_plan.po_items[0].planned_qty = 8
+		self.assertRaisesRegex(frappe.ValidationError, "is left to plan", extra_plan.submit)
+
 	def test_bundle_components_on_work_orders_are_not_subtracted_twice(self):
 		bundle_item, components = make_manufactured_bundle("_Test PP Bundle WO")
 		sales_order = make_sales_order(item_code=bundle_item, qty=10)
