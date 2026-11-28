@@ -5446,6 +5446,60 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
 		self.assertEqual(sum(row.qty for row in manufacture.items if row.item_code == rm_item), 3)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 0,
+			"disable_capacity_planning": 1,
+		},
+	)
+	def test_last_manufacture_counts_only_transfers_of_its_material(self):
+		"""Each Job Card moves its own material, so another operation's transfer does not count."""
+		rm_items = [make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name for _ in range(2)]
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operations = [make_review_operation() for _ in rm_items]
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": item, "qty": 2.0018, "operation": operation}
+				for item, (operation, _workstation) in zip(rm_items, operations, strict=True)
+			],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 6}
+				for operation, workstation in operations
+			],
+		)
+		for item in rm_items:
+			test_stock_entry.make_stock_entry(
+				item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=45
+			)
+
+		wo = make_review_work_order(fg_item, bom.name, 3, transfer_material_against="Job Card")
+		for job_card_name in frappe.get_all(
+			"Job Card", {"work_order": wo.name}, pluck="name", order_by="name"
+		):
+			transfer = frappe.get_doc(make_stock_entry_from_jc(job_card_name))
+			transfer.get_items()
+			transfer.submit()
+			job_card = frappe.get_doc("Job Card", job_card_name)
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date(now(), hours=-2),
+					"to_time": add_to_date(now(), hours=-1),
+					"completed_qty": 3,
+					"time_in_mins": 60,
+				},
+			)
+			job_card.submit()
+		for qty in (1, 2):
+			frappe.get_doc(make_stock_entry(wo.name, "Manufacture", qty)).submit()
+
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		for item in rm_items:
+			self.assertEqual(flt(get_bin(item, "_Test Warehouse 1 - _TC").actual_qty, precision), 0)
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
