@@ -31,7 +31,7 @@ const qualityOpen = ref(false);
 
 const active = computed(() => ["running", "paused"].includes(props.jobCard.phase));
 const phase = computed(() => phaseOf(props.jobCard));
-const steps = [__("Start"), __("Log quantities"), __("Complete")];
+const steps = [__("Start"), __("Add quantities"), __("Complete")];
 const stepIndex = computed(() => (active.value ? 1 : props.jobCard.phase === "done" ? 2 : 0));
 const blocked = computed(() => {
 	if (props.station.workstation.status === "Problem")

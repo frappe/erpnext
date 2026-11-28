@@ -26,7 +26,7 @@ function logEvents(log) {
 		events.push({
 			time: log.to_time,
 			icon: "lucide-circle-check",
-			title: __("{0} good logged", [fmt(log.completed_qty)]),
+			title: __("{0} done", [fmt(log.completed_qty)]),
 			detail: who,
 		});
 	if (log.process_loss_qty)

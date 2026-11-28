@@ -25,7 +25,7 @@ const available = computed(() =>
 	Math.max(0, Math.min(num(props.jobCard.ready_qty), num(props.jobCard.left_qty)))
 );
 const counts = computed(() => [
-	{ label: __("Good"), value: props.jobCard.total_completed_qty, tone: "text-ink-gray-9" },
+	{ label: __("Done"), value: props.jobCard.total_completed_qty, tone: "text-ink-gray-9" },
 	{
 		label: __("Lost"),
 		value: props.jobCard.process_loss_qty,
@@ -69,7 +69,7 @@ const logLoss = (reason, lost) =>
 		</div>
 
 		<div v-if="jobCard.crew.length > 1" class="space-y-1.5">
-			<p class="text-sm text-ink-gray-6">{{ __("Logging for") }}</p>
+			<p class="text-sm text-ink-gray-6">{{ __("Adding for") }}</p>
 			<TabButtons
 				v-model="who"
 				:options="jobCard.crew.map((id) => ({ label: jobCard.names[id] || id, value: id }))"
@@ -98,7 +98,7 @@ const logLoss = (reason, lost) =>
 					size="lg"
 					variant="solid"
 					icon-left="lucide-circle-check"
-					:label="__('Log Good')"
+					:label="__('Add to Done')"
 					:disabled="stopped || busy || qtyError"
 					@click="log(num(qty))"
 				/>
@@ -111,7 +111,7 @@ const logLoss = (reason, lost) =>
 				variant="outline"
 				theme="red"
 				icon-left="lucide-circle-x"
-				:label="__('Log Loss')"
+				:label="__('Add to Lost')"
 				:disabled="stopped || busy || available < 1"
 				@click="lossOpen = true"
 			/>
@@ -134,19 +134,19 @@ const logLoss = (reason, lost) =>
 					row.employee_name || row.employee
 				}}</span>
 				<span class="tabular-nums text-ink-gray-7">{{
-					__("{0} good · {1} lost", [fmt(row.completed_qty), fmt(row.process_loss_qty)])
+					__("{0} done · {1} lost", [fmt(row.completed_qty), fmt(row.process_loss_qty)])
 				}}</span>
 			</div>
 		</div>
 
 		<ReasonDialog
 			v-model:open="lossOpen"
-			:title="__('Log Loss')"
+			:title="__('Lost Quantity')"
 			:hint="__('Rejected or scrapped quantity. It counts as process loss on the Job Card.')"
 			:reasons="jobCard.loss_reasons"
 			with-qty
 			:max-qty="available"
-			:action="__('Log Loss')"
+			:action="__('Add to Lost')"
 			theme="red"
 			@confirm="logLoss"
 		/>

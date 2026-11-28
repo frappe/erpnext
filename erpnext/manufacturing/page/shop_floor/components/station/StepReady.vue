@@ -13,7 +13,7 @@ const facts = computed(() => {
 		[__("Quantity"), `${fmt(row.for_quantity)} ${row.stock_uom}`],
 		[
 			__("Done so far"),
-			__("{0} good · {1} lost", [fmt(row.total_completed_qty), fmt(row.process_loss_qty)]),
+			__("{0} done · {1} lost", [fmt(row.total_completed_qty), fmt(row.process_loss_qty)]),
 		],
 		[__("Ready to work on"), `${fmt(row.ready_qty)} ${row.stock_uom}`],
 		[__("Operation"), __("{0} of {1}", [row.sequence_id || 1, row.operation_count || 1])],
