@@ -33,9 +33,35 @@ class SubcontractingInwardController:
 		self.create_stock_reservation_entries_for_inward()
 		self.update_inward_order_status()
 
-	def on_cancel_subcontracting_inward(self):
+	def validate_subcontracting_inward_cancel(self):
+		"""Runs before the stock ledger, which would refuse delivered finished goods less clearly."""
 		self.update_inward_order_item()
 		self.validate_manufacture_entry_cancel()
+		self.validate_finished_good_reservation_not_delivered()
+
+	def validate_finished_good_reservation_not_delivered(self):
+		"""A delivery that used this entry's finished good reservation stays tied to it, so it is cancelled first."""
+		if (
+			self.subcontracting_inward_order
+			and self.purpose == "Manufacture"
+			and frappe.db.exists(
+				"Stock Reservation Entry",
+				{
+					"docstatus": 1,
+					"voucher_type": "Subcontracting Inward Order",
+					"from_voucher_type": "Stock Entry",
+					"from_voucher_no": self.name,
+					"delivered_qty": (">", 0),
+				},
+			)
+		):
+			frappe.throw(
+				_(
+					"Cannot cancel this Manufacturing Stock Entry as its Finished Good is already delivered against {0}. Cancel that Subcontracting Delivery first."
+				).format(get_link_to_form("Subcontracting Inward Order", self.subcontracting_inward_order))
+			)
+
+	def on_cancel_subcontracting_inward(self):
 		self.validate_delivery()
 		self.validate_receive_from_customer_cancel()
 		self.update_inward_order_received_items()
