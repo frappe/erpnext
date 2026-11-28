@@ -4,6 +4,7 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.desk.search import search_widget
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.test_item import make_item
@@ -379,14 +380,22 @@ class TestQueries(ERPNextTestSuite):
 				"ignore_user_permissions": 1,
 			}
 
-			result = queries.employee_query(**params)
+			result = search_widget(
+				"Employee",
+				"",
+				query="erpnext.controllers.queries.employee_query",
+				page_length=20,
+				reference_doctype="Payment Entry",
+				ignore_user_permissions=1,
+				link_fieldname="party",
+			)
 			self.assertGreater(len(result), 1)
 
-			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
-
-			# only one employee should be returned even though ignore_user_permissions is passed as 1
+			# only the link search may skip user permissions, not a direct call
 			result = queries.employee_query(**params)
 			self.assertEqual(len(result), 1)
+
+			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
 
 	def test_employee_query_checks_child_table_filters_when_ignoring_user_permissions(self):
 		employee = frappe.get_doc("Employee", {"first_name": "_Test Employee"})
