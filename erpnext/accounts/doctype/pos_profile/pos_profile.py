@@ -6,7 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form, now
+from frappe.utils import get_link_to_form, get_user_display_id, now
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -142,7 +142,7 @@ class POSProfile(Document):
 			if row.default and res:
 				msgprint(
 					_("Already set default in pos profile {0} for user {1}, kindly disabled default").format(
-						res[0][0], row.user
+						res[0][0], get_user_display_id(row.user)
 					),
 					raise_exception=1,
 				)
@@ -150,7 +150,7 @@ class POSProfile(Document):
 				msgprint(
 					_(
 						"User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User."
-					).format(row.user, row.idx)
+					).format(get_user_display_id(row.user), row.idx)
 				)
 
 	def validate_all_link_fields(self):

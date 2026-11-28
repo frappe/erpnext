@@ -90,7 +90,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 						}
 						<div class="customer-email">${frappe.utils.escape_html(this.customer_email)}</div>
 					</div>
-					<div class="cashier">${__("Sold by")}: ${frappe.utils.escape_html(doc.owner)}</div>
+					<div class="cashier">${__("Sold by")}: ${frappe.utils.escape_html(frappe.user.full_name(doc.owner))}</div>
 				</div>
 				<div class="right-section">
 					<div class="paid-amount">${format_currency(doc.paid_amount, doc.currency)}</div>

@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, get_user_display_id
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -60,7 +60,11 @@ class POSOpeningEntry(StatusUpdater):
 			)
 
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
-			frappe.throw(_("User {0} is disabled. Please select valid user/cashier").format(self.user))
+			frappe.throw(
+				_("User {0} is disabled. Please select valid user/cashier").format(
+					get_user_display_id(self.user)
+				)
+			)
 
 		self.validate_cashier_of_pos_profile()
 
@@ -73,7 +77,7 @@ class POSOpeningEntry(StatusUpdater):
 		if cashiers and all(cashiers) and self.user not in cashiers:
 			frappe.throw(
 				_("User {0} is not in Applicable for Users of POS Profile {1}").format(
-					frappe.bold(self.user), frappe.bold(self.pos_profile)
+					frappe.bold(get_user_display_id(self.user)), frappe.bold(self.pos_profile)
 				),
 				title=_("Invalid Cashier"),
 			)

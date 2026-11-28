@@ -147,13 +147,13 @@ class Supplier(TransactionBase):
 
 		if "System Manager" not in frappe.get_roles():
 			frappe.msgprint(
-				_("Please add 'Supplier' role to user {0}.").format(portal_user.user),
+				_("Please add 'Supplier' role to user {0}.").format(user_doc.email),
 				alert=True,
 			)
 			return
 
 		user_doc.add_roles("Supplier")
-		frappe.msgprint(_("Added Supplier Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True)
+		frappe.msgprint(_("Added Supplier Role to User {0}.").format(frappe.bold(user_doc.email)), alert=True)
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()

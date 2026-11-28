@@ -41,7 +41,13 @@ class OpportunitySummaryBySalesStage:
 
 		if self.filters.get("based_on") == "Opportunity Owner":
 			self.columns.append(
-				{"label": _("Opportunity Owner"), "fieldname": "opportunity_owner", "width": 200}
+				{
+					"label": _("Opportunity Owner"),
+					"fieldname": "opportunity_owner",
+					"fieldtype": "Link",
+					"options": "User",
+					"width": 200,
+				}
 			)
 
 		if self.filters.get("based_on") == "Source":

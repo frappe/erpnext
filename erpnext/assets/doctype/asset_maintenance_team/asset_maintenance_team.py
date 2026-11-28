@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_user_display_id
 
 
 class AssetMaintenanceTeam(Document):
@@ -76,7 +77,7 @@ class AssetMaintenanceTeam(Document):
 		if assignees:
 			frappe.throw(
 				_("Reassign the maintenance tasks of {0} before removing them from the team.").format(
-					", ".join(frappe.bold(assignee) for assignee in assignees)
+					", ".join(frappe.bold(get_user_display_id(assignee)) for assignee in assignees)
 				)
 			)
 

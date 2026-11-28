@@ -300,7 +300,7 @@ frappe.ui.form.on("Shipment", {
 						__("Full Name, Email or Phone/Mobile of the user are mandatory to continue.") +
 							"</br>" +
 							__("Please first set Full Name, Email and Phone for the user") +
-							` <a href="/app/user/${frappe.session.user}">${frappe.session.user}</a>`
+							` <a href="/app/user/${frappe.session.user}">${frappe.session.user_email}</a>`
 					);
 				}
 				let contact_display = r.full_name;
