@@ -769,7 +769,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if flt(wip_qty, precision) != flt(rounded_wip_qty, precision):
 			return entry_qty
 
-		return max(flt(wip_qty, 9), 0)
+		return max(flt(wip_qty, precision), 0)
 
 	@cached_property
 	def wo_entry_qtys(self):
