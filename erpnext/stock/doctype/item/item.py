@@ -801,8 +801,6 @@ class Item(Document):
 			"is_stock_item",
 			"has_serial_no",
 			"has_batch_no",
-			"has_variants",
-			"variant_of",
 		]
 		new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
 

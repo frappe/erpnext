@@ -1313,6 +1313,22 @@ class TestItem(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, frappe.rename_doc, "Item", item, template, merge=True)
 
+	def test_item_can_be_merged_into_a_variant(self):
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+			}
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.save()
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		frappe.rename_doc("Item", item, variant.name, merge=True)
+
+		self.assertFalse(frappe.db.exists("Item", item))
+
 	def test_add_item_barcode(self):
 		# Clean up
 		item_code = "Test Item Barcode"
