@@ -233,7 +233,7 @@ const blanket_order_pricing = {
 				},
 			});
 			if (response.message) {
-				await frm.set_value(response.message.parent);
+				await frm.set_value(get_changed_values(frm.doc, response.message.parent));
 				for (const values of response.message.children) {
 					let { name, ...fields } = values;
 					let item = (frm.doc.items || []).find((row) => row.name === name);
@@ -314,6 +314,13 @@ function reset_price_list_exchange_rate(frm) {
 
 function apply_item_pricing(frm, cdt, cdn) {
 	return blanket_order_pricing.apply(frm, cdn);
+}
+
+function get_changed_values(doc, values) {
+	// treat undefined, null and "" as one value, so an unset price list does not fire its rate reset
+	return Object.fromEntries(
+		Object.entries(values).filter(([fieldname, value]) => (doc[fieldname] || null) !== (value || null))
+	);
 }
 
 function set_base_rate(frm, item) {
