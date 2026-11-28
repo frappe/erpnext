@@ -11,6 +11,8 @@ from frappe.utils.background_jobs import create_job_id, is_job_enqueued
 from frappe.utils.data import comma_and
 from frappe.utils.scheduler import is_scheduler_inactive
 
+from erpnext.accounts.services.gl_validator import validate_accounting_period
+
 # a batch has to finish well within the timeout of the job reposting it
 MAX_VOUCHERS_PER_REPOST = 50
 
@@ -53,6 +55,7 @@ class RepostAccountingLedger(Document):
 		"""The checks a repost queued days ago could have outlived, re-run before it touches
 		the ledger. Vouchers cancelled since are skipped one by one while reposting."""
 		self.validate_for_closed_fiscal_year()
+		self.validate_for_closed_accounting_period()
 		self.validate_for_deferred_accounting()
 
 	def validate_for_deferred_accounting(self):
@@ -86,6 +89,28 @@ class RepostAccountingLedger(Document):
 					)[0]
 					if latest_voucher and latest_pcv[0] >= latest_voucher:
 						frappe.throw(_("Cannot Resubmit Ledger entries for vouchers in Closed fiscal year."))
+
+	def validate_for_closed_accounting_period(self):
+		# the repost job would fail on each of these vouchers, so refuse them before it is queued
+		for vtype in self._allowed_types:
+			names = [x.voucher_no for x in self.vouchers if x.voucher_type == vtype]
+			if not names:
+				continue
+
+			# the voucher's own company, as its GL entries carry it; the header company is optional
+			for voucher in frappe.get_all(
+				vtype,
+				filters={"name": ["in", names]},
+				fields=["company", "posting_date"],
+				distinct=True,
+			):
+				validate_accounting_period(
+					[
+						frappe._dict(
+							company=voucher.company, voucher_type=vtype, posting_date=voucher.posting_date
+						)
+					]
+				)
 
 	def validate_vouchers(self):
 		if not self.vouchers:

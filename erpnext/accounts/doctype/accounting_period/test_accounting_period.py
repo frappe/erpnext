@@ -9,10 +9,16 @@ from erpnext.accounts.doctype.accounting_period.accounting_period import (
 	OverlapError,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccountingPeriod(ERPNextTestSuite):
+	def setUp(self):
+		# test_accounting_period_exempted_role leaves its user logged in
+		frappe.set_user("Administrator")
+
 	def test_overlap(self):
 		ap1 = create_accounting_period(
 			start_date="2018-04-01", end_date="2018-06-30", company="Wind Power LLC"
@@ -86,6 +92,45 @@ class TestAccountingPeriod(ERPNextTestSuite):
 
 		doc.submit()  # Should not raise
 		self.assertEqual(doc.docstatus, 1)
+
+	def test_insert_without_closed_documents_closes_every_hooked_doctype(self):
+		ap = frappe.get_doc(
+			{
+				"doctype": "Accounting Period",
+				"period_name": "Test Accounting Period Bootstrap",
+				"company": "_Test Company",
+				"start_date": "2018-01-01",
+				"end_date": "2018-01-31",
+			}
+		).insert()
+
+		self.assertEqual(
+			sorted(d.document_type for d in ap.closed_documents),
+			sorted(frappe.get_hooks("period_closing_doctypes")),
+		)
+		self.assertTrue(all(d.closed for d in ap.closed_documents))
+
+	def test_only_managers_can_change_a_period(self):
+		accounts_user = make_fenced_user("period-accounts-user@example.com", ["Accounts User"])
+		accounts_manager = make_fenced_user("period-accounts-manager@example.com", ["Accounts Manager"])
+
+		for ptype in ("create", "write", "delete"):
+			self.assertFalse(frappe.has_permission("Accounting Period", ptype, user=accounts_user))
+			self.assertTrue(frappe.has_permission("Accounting Period", ptype, user=accounts_manager))
+		self.assertTrue(frappe.has_permission("Accounting Period", "read", user=accounts_user))
+
+	def test_cancel_without_gl_inside_closed_period(self):
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		transfer = make_stock_entry(
+			item_code="_Test Item", source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
+		)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": transfer.name, "is_cancelled": 0}))
+
+		ap = create_accounting_period(period_name="Test Accounting Period Cancel")
+		ap.closed_documents[0].document_type = "Stock Entry"
+		ap.save()
+
+		self.assertRaisesRegex(ClosedAccountingPeriod, "cannot cancel", transfer.cancel)
 
 
 def create_accounting_period(**args):
