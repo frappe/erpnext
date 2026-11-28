@@ -5411,16 +5411,14 @@ class TestWorkOrder(ERPNextTestSuite):
 		},
 	)
 	def test_last_manufacture_takes_raw_material_left_in_wip_by_rounding(self):
-		"""Partial entries round 2.1825 per unit on their own; the one that completes the order takes the rest."""
-		for transfers, manufactures in (([3], [2, 1]), ([1, 1, 1], [3])):
-			with self.subTest(transfers=transfers, manufactures=manufactures):
-				rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
-				fg_item = make_item(properties={"is_stock_item": 1}).name
-				bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 2.1825}])
-				test_stock_entry.make_stock_entry(
-					item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=45
-				)
-				wo = make_review_work_order(fg_item, bom.name, 3)
+		"""Partial entries round their share on their own; the one that completes the order takes the rest."""
+		for qty_per_unit, transfers, manufactures in (
+			(2.1825, [3], [2, 1]),
+			(2.1825, [1, 1, 1], [3]),
+			(2.188, [1, 1, 1], [3]),
+		):
+			with self.subTest(qty_per_unit=qty_per_unit, transfers=transfers, manufactures=manufactures):
+				wo, rm_item = make_rounding_work_order(qty_per_unit)
 				for qty in transfers:
 					frappe.get_doc(
 						make_stock_entry(wo.name, "Material Transfer for Manufacture", qty)
@@ -5434,6 +5432,19 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(wo.status, "Completed")
 				self.assertEqual(flt(row.transferred_qty - row.consumed_qty, precision), 0)
 				self.assertEqual(flt(get_bin(rm_item, "_Test Warehouse 1 - _TC").actual_qty, precision), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_last_manufacture_keeps_share_when_transfer_is_short(self):
+		"""A transfer edited down is a real shortage, not rounding, so the last entry keeps its share."""
+		wo, rm_item = make_rounding_work_order(1)
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 3))
+		transfer.items[0].qty = 1.5
+		transfer.submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		self.assertEqual(sum(row.qty for row in manufacture.items if row.item_code == rm_item), 3)
 
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
@@ -11122,6 +11133,17 @@ def make_multi_level_manufacture_entry(fg_item, bom_no):
 	se_doc.insert()
 	se_doc.submit()
 	return se_doc
+
+
+def make_rounding_work_order(qty_per_unit):
+	"""Work Order for 3 of a finished good that needs qty_per_unit Kg of a raw material."""
+	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+	fg_item = make_item(properties={"is_stock_item": 1}).name
+	bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": qty_per_unit}])
+	test_stock_entry.make_stock_entry(
+		item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=45
+	)
+	return make_review_work_order(fg_item, bom.name, 3), rm_item
 
 
 def make_whole_number_partial_work_order(
