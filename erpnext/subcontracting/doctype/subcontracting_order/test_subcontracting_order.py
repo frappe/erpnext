@@ -1978,12 +1978,8 @@ def get_consumed_qty(sco):
 def get_materials_from_supplier_for(sco):
 	"""Return of Components for the order's rows that still have material at the supplier."""
 	sco.load_from_db()
-	frappe.flags.args = {
-		"rm_details": [row.name for row in sco.supplied_items if row.total_supplied_qty != row.consumed_qty]
-	}
-	returned = get_materials_from_supplier(sco.name)
-	frappe.flags.args = None
-	return returned
+	rm_details = [row.name for row in sco.supplied_items if row.total_supplied_qty != row.consumed_qty]
+	return get_materials_from_supplier(sco.name, rm_details)
 
 
 def get_returnable_items(sco):
