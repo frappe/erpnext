@@ -1661,8 +1661,78 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 		condition = parser.build_condition(mock_row_invalid, account_table)
 		self.assertIsNone(condition)
 
+	def test_json_literals_in_filter(self):
+		from frappe.query_builder import DocType
+
+		parser = FilterExpressionParser()
+		account_table = DocType("Account")
+
+		formula = '{"and": [["account_type", "=", "Cash"], ["disabled", "=", false]]}'
+		condition = str(parser.build_condition(self._create_mock_report_row(formula), account_table))
+		self.assertIn("account_type", condition)
+		self.assertIn("disabled", condition)
+
+	def test_filters_that_match_nothing_are_refused(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
+			AccountFilterValidator,
+		)
+
+		# the engine reads the logical operator in lower case only, and skips a null value
+		for formula in ('{"AND": [["account_type", "=", "Cash"]]}', '["account_type", "=", null]'):
+			row = self._create_mock_report_row(formula)
+			self.assertFalse(AccountFilterValidator().validate_filter(row).is_valid)
+
 
 class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
+	def test_accumulated_values_start_at_the_report_start(self):
+		company = "_Test Company"
+		cash_account = "_Test Cash - _TC"
+		income_account = "Sales - _TC"
+
+		jv_before = make_journal_entry(
+			account1=cash_account,
+			account2=income_account,
+			amount=7000,
+			posting_date="2024-09-15",
+			company=company,
+			submit=True,
+		)
+		jv_nov = make_journal_entry(
+			account1=cash_account,
+			account2=income_account,
+			amount=5000,
+			posting_date="2024-11-20",
+			company=company,
+			submit=True,
+		)
+
+		try:
+			filters = {
+				"company": company,
+				"from_fiscal_year": "2024",
+				"to_fiscal_year": "2024",
+				"period_start_date": "2024-10-01",
+				"period_end_date": "2024-12-31",
+				"filter_based_on": "Date Range",
+				"periodicity": "Monthly",
+				"accumulated_values": 1,
+			}
+			periods = [
+				{"key": "2024_oct", "from_date": "2024-10-01", "to_date": "2024-10-31"},
+				{"key": "2024_nov", "from_date": "2024-11-01", "to_date": "2024-11-30"},
+				{"key": "2024_dec", "from_date": "2024-12-01", "to_date": "2024-12-31"},
+			]
+			accounts = [frappe._dict({"name": income_account, "account_name": "Sales", "account_number": ""})]
+			income = FinancialQueryBuilder(filters, periods).fetch_account_balances(accounts)[income_account]
+			opening = income.get_period("2024_oct").opening
+
+			# accumulated from October: 0, then -5000; the 7000 of September is not added
+			self.assertEqual([income.get_period(p["key"]).movement for p in periods], [0.0, -5000.0, -5000.0])
+			self.assertEqual(income.get_period("2024_dec").closing, opening - 5000)
+		finally:
+			for jv in (jv_nov, jv_before):
+				jv.cancel()
+
 	def test_fetch_balances_with_journal_entries(self):
 		company = "_Test Company"
 		cash_account = "_Test Cash - _TC"
