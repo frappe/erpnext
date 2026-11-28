@@ -63,6 +63,7 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
+	"Project": "public/js/projects/project_tasks_tab.js",
 	"Customer": [
 		"public/js/party_overview.js",
 		"public/js/customer_overview.js",
