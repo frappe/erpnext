@@ -354,6 +354,21 @@ permission_query_conditions = {
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+<<<<<<< HEAD
+=======
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.get_permission_query_conditions",
+	"Activity Cost": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Asset Maintenance Log": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Asset Shift Allocation": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Bank Guarantee": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Delivery Schedule Item": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Packing Slip": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Process Payment Reconciliation Log": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Process Period Closing Voucher": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Process Subscription": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+	"Project Update": "erpnext.controllers.linked_company_permission.get_permission_query_conditions",
+>>>>>>> 206c60e (fix: apply company user permissions to records linked to a company)
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.get_inherited_permission_query_conditions",
 }
 
@@ -365,6 +380,21 @@ has_permission = {
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+<<<<<<< HEAD
+=======
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
+	"Activity Cost": "erpnext.controllers.linked_company_permission.has_permission",
+	"Asset Maintenance Log": "erpnext.controllers.linked_company_permission.has_permission",
+	"Asset Shift Allocation": "erpnext.controllers.linked_company_permission.has_permission",
+	"Bank Guarantee": "erpnext.controllers.linked_company_permission.has_permission",
+	"Delivery Schedule Item": "erpnext.controllers.linked_company_permission.has_permission",
+	"Packing Slip": "erpnext.controllers.linked_company_permission.has_permission",
+	"Process Payment Reconciliation Log": "erpnext.controllers.linked_company_permission.has_permission",
+	"Process Period Closing Voucher": "erpnext.controllers.linked_company_permission.has_permission",
+	"Process Subscription": "erpnext.controllers.linked_company_permission.has_permission",
+	"Project Update": "erpnext.controllers.linked_company_permission.has_permission",
+>>>>>>> 206c60e (fix: apply company user permissions to records linked to a company)
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.has_inherited_permission",
 }
 
