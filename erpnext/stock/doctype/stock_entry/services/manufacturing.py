@@ -474,7 +474,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def get_bom_component_qty(self, bom_item):
 		"""Qty a BOM item must have: a whole-number item's share of the running total at the BOM qty,
-		or what is left in WIP for the entry that uses up the transferred material."""
+		or what rounding left in WIP for the entry that uses up the transferred material."""
 		is_whole_number = cint(frappe.get_cached_value("UOM", bom_item.stock_uom, "must_be_whole_number"))
 		required_items = (
 			[row for row in self.wo_doc.required_items if row.item_code == bom_item.item_code]
@@ -738,7 +738,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		"""For a whole number UOM, round up the running total of the order's Manufacture entries
 		and take what earlier entries did not consume, so partial entries do not consume a whole unit each.
 		Never more than this entry's own share: a shortfall of earlier entries is not taken.
-		The entry that uses up the transferred material takes what is left of it in WIP."""
+		The entry that uses up the transferred material takes what rounding left of it in WIP."""
 		if qty_per_unit is None:
 			qty_per_unit = row.required_qty / self.wo_doc.qty
 		entry_qty = self.get_wo_raw_material_entry_qty(row, qty_per_unit)
@@ -748,7 +748,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
 		if not is_whole_number:
 			return (
-				self.get_wip_raw_material_qty(row, qty_per_unit)
+				self.get_wip_raw_material_qty(row, entry_qty)
 				if self.uses_up_transferred_material
 				else entry_qty
 			)
@@ -757,16 +757,29 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
 		return min(max(ceil(flt(total_qty - consumed_qty, 9)), 0), entry_qty)
 
-	def get_wip_raw_material_qty(self, row, qty_per_unit):
-		"""What rounding of partial entries left in WIP, or still owed, up to the order's running total.
-		An excess transfer stays in WIP."""
-		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
-		pending_qty = flt(qty_per_unit * self.wo_done_qty, precision) - (
-			flt(row.consumed_qty) - flt(row.returned_qty)
-		)
+	def get_wip_raw_material_qty(self, row, entry_qty):
+		"""What partial entries left in WIP, when it differs from the entry's share only by their
+		rounding. A real shortage or excess transfer keeps the share."""
 		wip_qty = flt(row.transferred_qty) - flt(row.consumed_qty)
-		entry_qty = qty_per_unit * flt(self.doc.fg_completed_qty)
-		return max(flt(min(wip_qty, max(pending_qty, entry_qty)), precision), 0)
+		if flt(abs(wip_qty - entry_qty) - self.rounding_tolerance, 9) > 0:
+			return entry_qty
+
+		# drop float noise only: rows of one component are rounded and checked on their total
+		return max(flt(wip_qty, 9), 0)
+
+	@cached_property
+	def rounding_tolerance(self):
+		"""Half a unit of stock qty precision for each transfer or Manufacture of the order, this one included."""
+		entries = frappe.db.count(
+			"Stock Entry",
+			{
+				"work_order": self.doc.work_order,
+				"docstatus": 1,
+				"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
+			},
+		)
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		return (entries + 1) * 0.5 / 10**precision
 
 	@property
 	def wo_done_qty(self):
