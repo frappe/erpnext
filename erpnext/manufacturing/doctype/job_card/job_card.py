@@ -1350,18 +1350,8 @@ class JobCard(Document):
 		if work_order.production_plan:
 			ProductionPlanWorkOrderQuantities(work_order.production_plan).lock_plan_row(work_order)
 
-		job_cards = frappe.get_all(
-			"Job Card",
-			filters={
-				"work_order": self.work_order,
-				"operation_id": self.operation_id,
-				"docstatus": 1,
-				"is_corrective_job_card": 0,
-			},
-			fields=["manufactured_qty", "total_completed_qty"],
-		)
-
-		completed_qty = sum(max(flt(row.manufactured_qty), flt(row.total_completed_qty)) for row in job_cards)
+		job_cards = self.get_submitted_operation_job_cards()
+		completed_qty = get_semi_fg_completed_qty(job_cards)
 
 		frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", completed_qty)
 		if self.finished_good and work_order.production_item == self.finished_good:
@@ -1458,6 +1448,18 @@ class JobCard(Document):
 		data.actual_operation_time = time_in_mins
 		data.actual_start_time = time_data[0].start_time if time_data else None
 		data.actual_end_time = time_data[0].end_time if time_data else None
+
+	def get_submitted_operation_job_cards(self):
+		return frappe.get_all(
+			"Job Card",
+			filters={
+				"work_order": self.work_order,
+				"operation_id": self.operation_id,
+				"docstatus": 1,
+				"is_corrective_job_card": 0,
+			},
+			fields=["manufactured_qty", "total_completed_qty"],
+		)
 
 	def get_current_operation_data(self):
 		return frappe.get_all(
@@ -1888,8 +1890,13 @@ class JobCard(Document):
 		if self.is_corrective_job_card or not (self.work_order and self.sequence_id and self.operation_id):
 			return
 
-		data = self.get_current_operation_data()
-		operation_qty = flt(data[0].completed_qty) if data else 0.0
+		if self.track_semi_finished_goods:
+			operation_qty = get_semi_fg_completed_qty(self.get_submitted_operation_job_cards())
+		else:
+			data = self.get_current_operation_data()
+			operation_qty = flt(data[0].completed_qty) if data else 0.0
+
+		operation_qty = flt(operation_qty, self.precision("total_completed_qty"))
 		later_operations = frappe.get_all(
 			"Work Order Operation",
 			filters={"parent": self.work_order, "sequence_id": (">", self.sequence_id)},
@@ -2524,6 +2531,11 @@ def get_workstation_minutes(time_logs):
 	if current_end:
 		minutes += time_diff_in_minutes(current_end, current_start)
 	return minutes
+
+
+def get_semi_fg_completed_qty(job_cards):
+	"""A subcontracted job card records its output in manufactured qty, not total completed qty."""
+	return sum(max(flt(row.manufactured_qty), flt(row.total_completed_qty)) for row in job_cards)
 
 
 def validate_job_card_submitted_for_manufacture(job_card):
