@@ -27,10 +27,8 @@ concurrency:
   group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
-# Shared across both jobs. Both run in the SAME CI image so the bench lives at the identical
-# path (/home/ci/frappe-bench) on the setup runner and the test shards — that's what makes the
-# packaged Python venv portable between them.
 env:
+  BENCH_PATH: /home/ci/pilot/benches/frappe-bench
   TZ: 'Asia/Kolkata'
   DEBIAN_FRONTEND: noninteractive
   NODE_ENV: "production"
@@ -93,25 +91,21 @@ jobs:
           SKIP_SYSTEM_SETUP: "1"
 
       - name: Install
-        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        run: |
+          chown "$ERPNEXT_CI_USER:$ERPNEXT_CI_USER" "$HOME" "$GITHUB_WORKSPACE"
+          su -m "$ERPNEXT_CI_USER" -s /bin/bash -c 'bash "$GITHUB_WORKSPACE/.github/helper/setup-pilot.sh"'
         env:
           DB: mariadb
           TYPE: server
           FRAPPE_USER: ${{ github.event.inputs.user }}
           FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
-          # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
           CI_GITHUB_TOKEN: ${{ github.token }}
-          DB_HOST: 127.0.0.1
-          DB_USER_HOST: '%'
-          WKHTMLTOX_DEB: /tmp/wkhtmltox.deb
-          SKIP_SYSTEM_SETUP: "1"
-          SKIP_WKHTMLTOX_SETUP: "1"
 
       - name: Warm up test data
         run: |
           su -m "${ERPNEXT_CI_USER:-frappe}" -s /bin/bash <<'EOF'
-          cd ~/frappe-bench/
-          bench --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
+          cd "$BENCH_PATH"
+          "$HOME/pilot/bin/pilot" -b frappe-bench frappe --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
           EOF
 
       # Clean shutdown (consistent InnoDB datadir), then stage it inside the bench for packaging.
@@ -122,7 +116,7 @@ jobs:
           # Don't bake a dirty datadir — fail if mariadbd didn't finish stopping, rather than ship
           # an inconsistent datadir the shards would have to crash-recover.
           [ -f "${CI_DB_DATADIR}/mysqld.pid" ] && { echo "mariadbd did not shut down cleanly"; exit 1; }
-          mv "${CI_DB_DATADIR}" /home/ci/frappe-bench/mariadb-data
+          mv "${CI_DB_DATADIR}" /home/ci/pilot/benches/frappe-bench/mariadb-data
 
       # Package the whole bench (apps, venv, node_modules, sites, the DB dump, and hydrate.sh)
       # into one artifact for the test shards to consume.
@@ -133,14 +127,20 @@ jobs:
       - name: Stage bench on node (hostPath)
         id: stage
         run: |
-          cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/ci/frappe-bench/hydrate.sh
-          cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/frappe-bench/start-db.sh
+          cat > "$BENCH_PATH/Procfile" <<'EOF'
+          redis_cache: redis-server config/redis_cache.conf
+          redis_queue: redis-server config/redis_queue.conf
+          web: cd sites && "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe serve --port 8000
+          worker: (cd sites && "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe worker) >> logs/worker.log 2>&1
+          EOF
+          cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/ci/pilot/benches/frappe-bench/hydrate.sh
+          cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/pilot/benches/frappe-bench/start-db.sh
           mkdir -p /opt/ci-bench-staging
           # self-clean: drop bench tars from runs older than 24h
           find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +1440 -delete 2>/dev/null || true
           # Exclude .git/node_modules; the mariadb-data datadir IS included (the pre-loaded DB).
           sha256=$(tar -I 'zstd -T0' -cpf - -C /home/ci \
-            --exclude='.git' --exclude='node_modules' frappe-bench \
+            --exclude='.git' --exclude='node_modules' pilot/benches/frappe-bench \
             | tee "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" | sha256sum | cut -d' ' -f1)
           ls -lh "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst"
           echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
@@ -182,23 +182,24 @@ jobs:
           echo "${BENCH_SHA256}  /tmp/bench.tar.zst" | sha256sum --check --strict -
           tar -I zstd -xpf /tmp/bench.tar.zst -C /home/ci
           rm /tmp/bench.tar.zst
-          ls -ld /home/ci/frappe-bench
+          ls -ld /home/ci/pilot/benches/frappe-bench
         env:
           BENCH_SHA256: ${{ needs.setup.outputs.bench_sha256 }}
 
-      - name: Hydrate (start DB on baked datadir + bench start)
-        run: bash /home/ci/frappe-bench/hydrate.sh
+      - name: Hydrate staged MariaDB and Frappe
+        run: bash /home/ci/pilot/benches/frappe-bench/hydrate.sh
         env:
+          CI_DB_DATADIR: /home/ci/pilot/benches/frappe-bench/mariadb-data
           DB_HOST: 127.0.0.1
           SKIP_SYSTEM_SETUP: "1"
 
       - name: Run Tests
         run: |
           su -m "${ERPNEXT_CI_USER:-frappe}" -s /bin/bash <<'EOF'
-          cd ~/frappe-bench/
+          cd "$BENCH_PATH/sites"
           coverage_flag=""
           if [ "$WITH_COVERAGE" = "true" ]; then coverage_flag="--with-coverage"; fi
-          bench --site test_site run-parallel-tests --lightmode --app erpnext \
+          "$BENCH_PATH/env/bin/python" -m frappe.utils.bench_helper frappe --site test_site run-parallel-tests --lightmode --app erpnext \
             --total-builds ${{ strategy.job-total }} \
             --build-number ${{ matrix.container }} \
             $coverage_flag
@@ -208,14 +209,14 @@ jobs:
 
       - name: Show bench output
         if: ${{ always() }}
-        run: cat ~/frappe-bench/bench_start.log || true
+        run: cat "$BENCH_PATH/bench_start.log" || true
 
       - name: Upload coverage data
         if: ${{ env.WITH_COVERAGE == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.container }}
-          path: /home/ci/frappe-bench/sites/coverage.xml
+          path: /home/ci/pilot/benches/frappe-bench/sites/coverage.xml
 
   coverage:
     name: Coverage Wrap Up
