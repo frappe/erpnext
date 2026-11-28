@@ -1182,6 +1182,8 @@ class SellingController(StockController):
 					continue
 
 				qty_to_deliver = item.stock_qty
+				# shared by the row's reservations, so none counts a serial / batch qty twice
+				delivered_serial_nos, delivered_batch_qty = get_bundle_serial_batch_qty(item)
 				for sre in sre_list:
 					if qty_to_deliver <= 0:
 						break
@@ -1190,9 +1192,7 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch" and item.serial_and_batch_bundle:
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 						if sre_doc.has_serial_no:
-							delivered_serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in delivered_serial_nos:
 									entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
@@ -1200,7 +1200,6 @@ class SellingController(StockController):
 									qty_can_be_deliver += 1
 									delivered_serial_nos.remove(entry.serial_no)
 						else:
-							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in delivered_batch_qty:
 									pending_qty = entry.qty - entry.delivered_qty
@@ -1252,6 +1251,8 @@ class SellingController(StockController):
 					continue
 
 				qty_to_undelivered = item.stock_qty
+				# shared by the row's reservations, so none gives back a serial / batch qty twice
+				serial_nos_to_undelivered, batch_qty_to_undelivered = get_bundle_serial_batch_qty(item)
 				for sre in sre_list:
 					if qty_to_undelivered <= 0:
 						break
@@ -1260,9 +1261,7 @@ class SellingController(StockController):
 
 					qty_can_be_undelivered = 0
 					if sre_doc.reservation_based_on == "Serial and Batch" and item.serial_and_batch_bundle:
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 						if sre_doc.has_serial_no:
-							serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in serial_nos_to_undelivered:
 									entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
@@ -1270,7 +1269,6 @@ class SellingController(StockController):
 									qty_can_be_undelivered += 1
 									serial_nos_to_undelivered.remove(entry.serial_no)
 						else:
-							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if batch_qty_to_undelivered.get(entry.batch_no, 0) > 0:
 									undelivered_qty = get_qty_to_undeliver(
@@ -1294,6 +1292,15 @@ class SellingController(StockController):
 					sre_doc.update_reserved_stock_in_bin()
 
 					qty_to_undelivered -= qty_can_be_undelivered
+
+
+def get_bundle_serial_batch_qty(item):
+	"""Serial nos and per-batch qty in a stock row's Serial and Batch Bundle."""
+	if not item.serial_and_batch_bundle:
+		return [], {}
+
+	sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+	return [d.serial_no for d in sbb.entries], {d.batch_no: -1 * d.qty for d in sbb.entries}
 
 
 def set_default_income_account_for_item(obj):
