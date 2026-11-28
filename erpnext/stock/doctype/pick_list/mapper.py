@@ -291,12 +291,12 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
 	)
 	condition = item_mapper.get("condition")
-	moved_serial_nos = get_moved_serial_nos(
-		[location for location in pick_list.locations if location.sales_order == sales_order]
-	)
+	# an emptied Sales Order link is stored as ""
+	locations = [row for row in pick_list.locations if (row.sales_order or None) == sales_order]
+	moved_serial_nos = get_moved_serial_nos(locations)
 
-	for location in pick_list.locations:
-		if location.sales_order != sales_order or location.product_bundle_item:
+	for location in locations:
+		if location.product_bundle_item:
 			continue
 
 		if selected_locations and location.name not in selected_locations:
