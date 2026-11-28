@@ -1,5 +1,5 @@
 {
- "columns": "[{\"fieldname\": \"subject\", \"label\": \"Subject\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"issue_type\", \"label\": \"Issue Type\"}, {\"fieldname\": \"opening_date\", \"label\": \"Opening Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "columns": "[{\"fieldname\": \"subject\", \"label\": \"Subject\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"priority\", \"label\": \"Priority\"}, {\"fieldname\": \"issue_type\", \"label\": \"Issue Type\"}, {\"fieldname\": \"opening_date\", \"label\": \"Opening Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
  "creation": "2026-09-30 21:12:56.976234",
  "docstatus": 0,
  "doctype": "List Filter",
@@ -9,7 +9,7 @@
  "idx": 0,
  "is_standard": 1,
  "layout_order": 1,
- "modified": "2026-09-30 21:12:56.976234",
+ "modified": "2026-11-16 18:21:20.810330",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue-Open",
