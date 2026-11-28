@@ -2415,6 +2415,20 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(descendants.call_count, 1)
 		self.assertEqual([d.discount_percentage for d in si.items], [15, 0, 0])
 
+	def test_same_item_free_row_is_removed_with_its_rule(self):
+		from erpnext.accounts.doctype.pricing_rule.pricing_rule import remove_pricing_rule_for_item
+
+		item = make_item("PR Same Item Free Row", {"is_stock_item": 0}).name
+		make_item_pricing_rule(item, price_or_product_discount="Product", same_item=1, min_qty=2, free_qty=1)
+		si = create_sales_invoice(item_code=item, qty=2, do_not_submit=True)
+		self.assertEqual([(d.item_code, d.qty) for d in si.items if d.is_free_item], [(item, 1)])
+
+		# The form calls this when the qty changes, then drops the free row it names.
+		row = si.items[0]
+		row_details = {"item_code": item, "parenttype": si.doctype, "parent": si.name}
+		details = remove_pricing_rule_for_item(row.pricing_rules, frappe.as_json(row_details), item_code=item)
+		self.assertEqual(details.remove_free_item, item)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)

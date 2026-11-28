@@ -843,7 +843,9 @@ def reset_pricing_rule_details(pricing_rules, item_details, item_code=None, rate
 			if pricing_rule.margin_type in ["Percentage", "Amount"]:
 				item_details.margin_rate_or_amount = 0.0
 				item_details.margin_type = None
-		elif pricing_rule.get("free_item") and not pricing_rule.get("dont_enforce_free_item_qty"):
+		elif (pricing_rule.get("free_item") or pricing_rule.get("same_item")) and not pricing_rule.get(
+			"dont_enforce_free_item_qty"
+		):
 			item_details.remove_free_item = (
 				item_code if pricing_rule.get("same_item") else pricing_rule.get("free_item")
 			)
