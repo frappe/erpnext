@@ -51,7 +51,7 @@ def create_delivery(
 	if any(
 		not row.sales_order and flt(row.picked_qty) > flt(row.delivered_qty) for row in pick_list.locations
 	):
-		documents.append(create_delivery_wo_so(pick_list, target, target_doc))
+		documents.append(create_delivery_wo_so(pick_list, target, target_doc).save())
 
 	if not documents:
 		frappe.throw(_("Nothing picked in this Pick List is left to deliver."))
@@ -147,7 +147,7 @@ def get_sales_order_taxes(sales_orders):
 
 
 def create_dn_wo_so(pick_list, delivery_note=None):
-	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
+	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note).save()
 
 
 def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations=None):
@@ -174,7 +174,6 @@ def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations
 	target_doc.flags.ignore_mandatory = True
 	if target == "Sales Invoice":
 		target_doc.update_stock = 1
-	target_doc.save()
 
 	return target_doc
 
@@ -210,8 +209,14 @@ def create_dn_for_pick_lists(
 		pick_list, sales_orders, "Delivery Note", target_doc=target_doc, kwargs=kwargs
 	)
 
-	if not sales_order_arg and not all(item.sales_order for item in pick_list.locations):
-		if isinstance(delivery_note, str):
+	# rows without a Sales Order belong to the Pick List's own customer, if it has one
+	is_other_customer = customer_arg and pick_list.customer and customer_arg != pick_list.customer
+	if (
+		not sales_order_arg
+		and not is_other_customer
+		and not all(item.sales_order for item in pick_list.locations)
+	):
+		if isinstance(delivery_note, str | dict):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
 		delivery_note = create_delivery_wo_so(
@@ -292,12 +297,12 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
 	)
 	condition = item_mapper.get("condition")
-	moved_serial_nos = get_moved_serial_nos(
-		[location for location in pick_list.locations if location.sales_order == sales_order]
-	)
+	# an emptied Sales Order link is stored as ""
+	locations = [row for row in pick_list.locations if (row.sales_order or None) == sales_order]
+	moved_serial_nos = get_moved_serial_nos(locations)
 
-	for location in pick_list.locations:
-		if location.sales_order != sales_order or location.product_bundle_item:
+	for location in locations:
+		if location.product_bundle_item:
 			continue
 
 		if selected_locations and location.name not in selected_locations:

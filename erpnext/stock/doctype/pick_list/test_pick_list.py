@@ -4775,6 +4775,52 @@ class TestPickList(ERPNextTestSuite):
 		)
 		self.assertIn(pl.name, [row["name"] for row in result])
 
+	def test_pick_list_query_lists_pick_list_without_sales_order_for_its_customer(self):
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_query
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item().name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		def make_pick_list(purpose):
+			return frappe.get_doc(
+				{
+					"doctype": "Pick List",
+					"company": "_Test Company",
+					"purpose": purpose,
+					"customer": "_Test Customer",
+					"locations": [
+						{
+							"item_code": item,
+							"qty": 2,
+							"stock_qty": 2,
+							"conversion_factor": 1,
+							"warehouse": warehouse,
+						}
+					],
+				}
+			).submit()
+
+		def get_listed(customer):
+			filters = {"company": "_Test Company", "customer": customer}
+			return [row["name"] for row in get_pick_list_query("Pick List", "", "name", 0, 20, filters)]
+
+		pick_list = make_pick_list("Delivery")
+		transfer_pick_list = make_pick_list("Material Transfer")
+
+		self.assertIn(pick_list.name, get_listed("_Test Customer"))
+		self.assertNotIn(pick_list.name, get_listed("_Test Customer 1"))
+		self.assertNotIn(transfer_pick_list.name, get_listed("_Test Customer"))
+
+		# Get Items From fills the open form and leaves saving to the user
+		delivery_note = frappe.new_doc("Delivery Note", company="_Test Company", customer="_Test Customer")
+		delivery_note = create_dn_for_pick_lists(
+			pick_list.name, delivery_note.as_dict(), {"customer": "_Test Customer"}
+		)
+
+		self.assertTrue(delivery_note.is_new())
+		self.assertEqual([row.against_pick_list for row in delivery_note.items], [pick_list.name])
+
 	def test_pick_list_query_keeps_company_restricted_user_in_own_company(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 		from frappe.permissions import add_user_permission
