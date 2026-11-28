@@ -36,8 +36,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Serial No",
-   "options": "Serial No",
-   "search_index": 1
+   "options": "Serial No"
   },
   {
    "depends_on": "eval:parent.has_batch_no == 1",
@@ -190,7 +189,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-19 12:00:00.000000",
+ "modified": "2026-11-27 17:04:32.620050",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Entry",
