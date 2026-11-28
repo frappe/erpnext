@@ -2080,7 +2080,8 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		)
 		second_dn.submit()
 		frappe.get_doc("Delivery Note", dn.name).cancel()
-		self.assertEqual(delivered_qty(), [0, 4])
+		# the remaining delivery's batch qty stays on the oldest reservation
+		self.assertEqual(delivered_qty(), [4, 0])
 
 
 SR_ITEM_PROPERTIES = {
