@@ -93,7 +93,14 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertRaisesRegex(
 			frappe.ValidationError, "Finished Good is already delivered", get_manufacture(scio, "asc").cancel
 		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_manufacture_cancel_allowed_when_its_reservation_is_not_delivered(self):
+		scio = make_scio_with_two_manufactures(create_warehouse("_Test SCIO Delivery Warehouse"))
+		make_delivery_of_qty(scio, 2)
+
 		get_manufacture(scio, "desc").cancel()
+
 		self.assertEqual(get_delivered_reservations(scio), [(3, 2)])
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
