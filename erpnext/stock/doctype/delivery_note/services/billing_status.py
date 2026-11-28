@@ -8,7 +8,7 @@ from frappe import _
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Abs, IfNull, Sum
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.controllers.item_close import validate_parent_reopen
 
@@ -83,6 +83,7 @@ def get_creditable_qty(return_doc) -> dict:
 	available = get_billed_stock_qty({row.name for row in original_rows})
 	apply_earlier_credits(available, original_rows, return_doc)
 	settled_qty = get_settled_return_qty(return_doc.return_against)
+	credited_stock_qty = get_credited_stock_qty([d.name for d in return_doc.items])
 
 	creditable_qty = {}
 	rows = [d for d in return_doc.items if d.dn_detail] + [d for d in return_doc.items if not d.dn_detail]
@@ -94,10 +95,53 @@ def get_creditable_qty(return_doc) -> dict:
 		)
 		factor = flt(row.conversion_factor) or 1
 		returned = abs(flt(row.stock_qty) or flt(row.qty) * factor)
-		needed = max(returned - flt(settled_qty.get(row.name)) * factor, 0)
+		settled = flt(settled_qty.get(row.name)) * factor
+		needed = max(returned - settled - flt(credited_stock_qty.get(row.name)), 0)
 		creditable_qty[row.name] = flt(take_credit(available, sources, needed) / factor, 6)
 
 	return creditable_qty
+
+
+def validate_credit_of_returns(credit_note) -> None:
+	"""Reject a credit note that credits more of a return Delivery Note than is still creditable.
+
+	After a draft credit note was made, an invoice can deduct the same return or another credit
+	note can credit it. Check again against the submitted documents.
+	"""
+	credit_rows = [row for row in credit_note.items if row.dn_detail and flt(row.qty) < 0]
+	if not credit_rows:
+		return
+
+	return_notes = frappe.get_all(
+		"Delivery Note",
+		filters={
+			"name": ("in", list({row.delivery_note for row in credit_rows})),
+			"is_return": 1,
+			"return_against": ("is", "set"),
+		},
+		pluck="name",
+	)
+	precision = frappe.get_precision("Sales Invoice Item", "stock_qty")
+	for return_note in return_notes:
+		return_doc = frappe.get_doc("Delivery Note", return_note)
+		creditable_qty = get_creditable_qty(return_doc)
+		for return_row in return_doc.items:
+			rows = [row for row in credit_rows if row.dn_detail == return_row.name]
+			credited = sum(abs(flt(row.stock_qty)) for row in rows)
+			creditable = flt(creditable_qty.get(return_row.name)) * (flt(return_row.conversion_factor) or 1)
+			if rows and flt(credited - creditable, precision) > 0:
+				frappe.throw(
+					_(
+						"Row #{0}: Only {1} {2} of {3} returned in {4} can still be credited. Invoices or credit notes of {5} already cover the rest."
+					).format(
+						rows[0].idx,
+						flt(creditable, precision),
+						return_row.stock_uom,
+						frappe.bold(return_row.item_code),
+						get_link_to_form("Delivery Note", return_doc.name),
+						get_link_to_form("Delivery Note", return_doc.return_against),
+					)
+				)
 
 
 def get_original_rows(return_doc) -> list:
@@ -186,6 +230,7 @@ def get_row_billed_qty(row, invoiced) -> float:
 
 
 def get_earlier_credits(original_rows: list, return_doc) -> list:
+	"""Credits made from the returns of `original_rows`, including `return_doc` itself."""
 	dn = frappe.qb.DocType("Delivery Note")
 	dni = frappe.qb.DocType("Delivery Note Item")
 	sii = frappe.qb.DocType("Sales Invoice Item")
@@ -200,14 +245,7 @@ def get_earlier_credits(original_rows: list, return_doc) -> list:
 		.join(dn)
 		.on(dn.name == dni.parent)
 		.select(dni.dn_detail, dni.item_code, Abs(Sum(sii.stock_qty)).as_("stock_qty"))
-		.where(
-			condition
-			& (dn.docstatus == 1)
-			& (dn.is_return == 1)
-			& (dn.name != return_doc.name)
-			& (sii.docstatus == 1)
-			& (sii.qty < 0)
-		)
+		.where(condition & (dn.docstatus == 1) & (dn.is_return == 1) & (sii.docstatus == 1) & (sii.qty < 0))
 		.groupby(dni.name, dni.dn_detail, dni.item_code)
 	).run(as_dict=True)
 
@@ -249,11 +287,15 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 	so_details = {row.so_detail for row in original_rows.values() if row.so_detail}
 	invoiced_qty = get_invoiced_qty_of_rows(delivery_note, so_details)
 	overbilled_qty = get_overbilled_qty_of_delivery_rows(so_details)
+	credited_stock_qty = get_credited_stock_qty([row.name for row in return_rows])
 	# A return row can use another UOM than its original row: compare qty in the original's UOM.
+	# Credited qty needs no deduction, so only the rest of each return can be settled.
 	for row in return_rows:
 		original_factor = flt(original_rows[row.dn_detail].conversion_factor) or 1
 		row.to_original_uom = (flt(row.conversion_factor) or 1) / original_factor
-		row.original_qty = abs(flt(row.qty)) * row.to_original_uom
+		returned = abs(flt(row.qty)) * row.to_original_uom
+		credited = flt(credited_stock_qty.get(row.name)) / original_factor
+		row.original_qty = max(returned - credited, 0)
 
 	returned_qty = {}
 	for row in return_rows:
@@ -304,14 +346,18 @@ def get_overbilled_qty_of_delivery_rows(so_details: set) -> dict[str, float]:
 		.orderby(dn.posting_date, dn.posting_time, dn.name, dn_item.idx)
 		.run(as_dict=True)
 	)
-	# Return rows have a negative qty.
-	returned_stock_qty = dict(
+	# Return rows have a negative qty. Credited returns are not left to settle.
+	return_rows = (
 		frappe.qb.from_(dn_item)
-		.select(dn_item.dn_detail, Sum(dn_item.stock_qty))
+		.select(dn_item.name, dn_item.dn_detail, dn_item.stock_qty)
 		.where(dn_item.dn_detail.isin([row.name for row in delivery_rows]) & (dn_item.docstatus == 1))
-		.groupby(dn_item.dn_detail)
-		.run()
+		.run(as_dict=True)
 	)
+	credited_stock_qty = get_credited_stock_qty([row.name for row in return_rows])
+	returned_stock_qty = {}
+	for row in return_rows:
+		uncredited = abs(flt(row.stock_qty)) - flt(credited_stock_qty.get(row.name))
+		returned_stock_qty[row.dn_detail] = flt(returned_stock_qty.get(row.dn_detail)) + max(uncredited, 0)
 	invoiced_qty = get_invoiced_qty_against_dn(dn_details=[row.name for row in delivery_rows])
 
 	# Rows, returns and invoices can use different UOMs: share in stock qty.
@@ -319,7 +365,7 @@ def get_overbilled_qty_of_delivery_rows(so_details: set) -> dict[str, float]:
 	overbilled_qty = {}
 	for row in delivery_rows:
 		factor = flt(row.conversion_factor) or 1
-		returned = abs(flt(returned_stock_qty.get(row.name)))
+		returned = flt(returned_stock_qty.get(row.name))
 		uninvoiced = (flt(row.qty) - flt(invoiced_qty.get(row.name))) * factor
 		uninvoiced_returned = max(min(returned, uninvoiced), 0)
 		share = min(uninvoiced_returned, so_overbilled_stock_qty[row.so_detail])
@@ -349,7 +395,8 @@ def get_so_overbilled_stock_qty(so_details: set) -> dict[str, float]:
 		.where(
 			si_item.so_detail.isin(list(so_details))
 			& (si_item.docstatus == 1)
-			& (si.is_return == 0)
+			# Credits that update the Sales Order billing reduce the billed qty.
+			& ((si.is_return == 0) | (si.update_billed_amount_in_sales_order == 1))
 			& (si.update_stock == 0)
 		)
 		.groupby(si_item.so_detail)
@@ -378,6 +425,22 @@ def get_so_overbilled_stock_qty(so_details: set) -> dict[str, float]:
 	return overbilled_qty
 
 
+def get_credited_stock_qty(return_rows: list[str]) -> dict[str, float]:
+	"""Stock qty that credit notes credited on each return row."""
+	if not return_rows:
+		return {}
+
+	si_item = frappe.qb.DocType("Sales Invoice Item")
+	credits = (
+		frappe.qb.from_(si_item)
+		.select(si_item.dn_detail, Sum(si_item.stock_qty))
+		.where(si_item.dn_detail.isin(return_rows) & (si_item.docstatus == 1))
+		.groupby(si_item.dn_detail)
+		.run()
+	)
+	return {return_row: abs(flt(stock_qty)) for return_row, stock_qty in credits}
+
+
 def update_billing_percentage_of_returns(delivery_note: str, already_updated: set) -> None:
 	"""Update the returns against `delivery_note`, except the ones in `already_updated`."""
 	# Side effect on other documents, like for `return_against`: keep their modified timestamp.
@@ -403,26 +466,6 @@ def limit_to_creditable_qty(return_invoice, creditable_qty: dict) -> None:
 
 
 def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = True) -> list[str]:
-	# Billed against Sales Order directly
-	si = frappe.qb.DocType("Sales Invoice").as_("si")
-	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
-	sum_amount = Sum(si_item.amount).as_("amount")
-
-	billed_against_so = (
-		frappe.qb.from_(si_item)
-		.join(si)
-		.on(si.name == si_item.parent)
-		.select(sum_amount)
-		.where(
-			(si_item.so_detail == so_detail)
-			& ((si_item.dn_detail.isnull()) | (si_item.dn_detail == ""))
-			& (si_item.docstatus == 1)
-			& (si.update_stock == 0)
-		)
-		.run()
-	)
-	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
-
 	# Get all Delivery Note Item rows against the Sales Order Item row
 	dn = frappe.qb.DocType("Delivery Note").as_("dn")
 	dn_item = frappe.qb.DocType("Delivery Note Item").as_("dn_item")
@@ -441,6 +484,11 @@ def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = Tru
 		.run(as_dict=True)
 	)
 
+	# Billed against Sales Order directly. An invoice that made a delivery bills that delivery
+	# first, before the FIFO gives the rest to the other deliveries.
+	billed_by_deliveries_from_invoice = sum(flt(dnd.amount) for dnd in dn_details if dnd.si_detail)
+	billed_against_so = max(get_billed_against_so(so_detail, "amount") - billed_by_deliveries_from_invoice, 0)
+
 	updated_dn = []
 	for dnd in dn_details:
 		billed_amt_against_dn = 0
@@ -448,7 +496,6 @@ def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = Tru
 		# If delivered against Sales Invoice
 		if dnd.si_detail:
 			billed_amt_against_dn = flt(dnd.amount)
-			billed_against_so -= billed_amt_against_dn
 		else:
 			# Get billed amount directly against Delivery Note
 			billed_amt_against_dn = frappe.get_all(
@@ -484,19 +531,24 @@ def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = Tru
 def get_invoiced_qty_against_dn(
 	*, delivery_note: str | None = None, dn_details: list[str] | None = None
 ) -> dict[str, float]:
-	"""Return directly invoiced qty, excluding returns that do not update DN billing."""
+	"""Return directly invoiced qty in the UOM of the Delivery Note row, excluding returns that do
+	not update DN billing."""
 	si = frappe.qb.DocType("Sales Invoice").as_("si")
 	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
+	dn_item = frappe.qb.DocType("Delivery Note Item").as_("dn_item")
 
+	# Invoices and credits can use another UOM than the Delivery Note row.
 	query = (
 		frappe.qb.from_(si_item)
 		.join(si)
 		.on(si.name == si_item.parent)
-		.select(si_item.dn_detail, Sum(si_item.qty).as_("qty"))
+		.join(dn_item)
+		.on(dn_item.name == si_item.dn_detail)
+		.select(si_item.dn_detail, (Sum(si_item.stock_qty) / dn_item.conversion_factor).as_("qty"))
 		.where(
 			(si_item.docstatus == 1) & ((si.is_return == 0) | (si.update_billed_amount_in_delivery_note == 1))
 		)
-		.groupby(si_item.dn_detail)
+		.groupby(si_item.dn_detail, dn_item.conversion_factor)
 	)
 
 	if delivery_note:
@@ -519,31 +571,20 @@ def get_invoiced_qty_of_rows(delivery_note: str, so_details: set) -> dict[str, f
 
 def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 	"""Invoiced qty per Delivery Note Item, distributed FIFO like the amount side."""
-	si = frappe.qb.DocType("Sales Invoice").as_("si")
-	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
-
-	billed_qty_against_so = (
-		frappe.qb.from_(si_item)
-		.join(si)
-		.on(si.name == si_item.parent)
-		.select(Sum(si_item.qty))
-		.where(
-			(si_item.so_detail == so_detail)
-			& ((si_item.dn_detail.isnull()) | (si_item.dn_detail == ""))
-			& (si_item.docstatus == 1)
-			& (si.update_stock == 0)
-		)
-		.run()
-	)
-	billed_qty_against_so = billed_qty_against_so and billed_qty_against_so[0][0] or 0
-
 	dn = frappe.qb.DocType("Delivery Note").as_("dn")
 	dn_item = frappe.qb.DocType("Delivery Note Item").as_("dn_item")
 
 	dn_details = (
 		frappe.qb.from_(dn)
 		.from_(dn_item)
-		.select(dn_item.name, dn_item.qty, dn_item.returned_qty, dn_item.si_detail)
+		.select(
+			dn_item.name,
+			dn_item.qty,
+			dn_item.stock_qty,
+			dn_item.returned_qty,
+			dn_item.conversion_factor,
+			dn_item.si_detail,
+		)
 		.where(
 			(dn.name == dn_item.parent)
 			& (dn_item.so_detail == so_detail)
@@ -554,33 +595,58 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 		.run(as_dict=True)
 	)
 
+	# An invoice that made a delivery bills that delivery first, before the FIFO gives the rest
+	# to the other deliveries. Its returns stay with it: credit or deduct them on that invoice.
+	billed_by_deliveries_from_invoice = sum(flt(dnd.stock_qty) for dnd in dn_details if dnd.si_detail)
+	billed_stock_qty_against_so = max(
+		get_billed_against_so(so_detail, "stock_qty") - billed_by_deliveries_from_invoice, 0
+	)
+
 	billed_qty_against_dns = {}
 	if dn_details_without_si := [dnd.name for dnd in dn_details if not dnd.si_detail]:
 		billed_qty_against_dns = get_invoiced_qty_against_dn(dn_details=dn_details_without_si)
 
 	qty_map = {}
 	for dnd in dn_details:
-		# Cap FIFO capacity at net delivered qty so returns free qty for later DNs
-		net_qty = flt(dnd.qty) - flt(dnd.returned_qty)
+		# Cap FIFO capacity at net delivered qty so returns free qty for later DNs.
+		# Returned qty is in stock UOM: distribute in stock qty.
+		factor = flt(dnd.conversion_factor) or 1
+		net_stock_qty = flt(dnd.stock_qty) - flt(dnd.returned_qty)
 
-		# If delivered against Sales Invoice
 		if dnd.si_detail:
-			billed_qty_against_dn = net_qty
-			billed_qty_against_so -= billed_qty_against_dn
+			billed_stock_qty = net_stock_qty
 		else:
-			# Get billed qty directly against Delivery Note
-			billed_qty_against_dn = billed_qty_against_dns.get(dnd.name, 0)
+			billed_stock_qty = flt(billed_qty_against_dns.get(dnd.name)) * factor
 
 		# Distribute qty billed directly against SO between DNs based on FIFO
-		if billed_qty_against_so and billed_qty_against_dn < net_qty:
-			pending_to_bill = net_qty - billed_qty_against_dn
-			if pending_to_bill <= billed_qty_against_so:
-				billed_qty_against_dn += pending_to_bill
-				billed_qty_against_so -= pending_to_bill
-			else:
-				billed_qty_against_dn += billed_qty_against_so
-				billed_qty_against_so = 0
+		pending_to_bill = net_stock_qty - billed_stock_qty
+		if billed_stock_qty_against_so > 0 and pending_to_bill > 0:
+			share = min(pending_to_bill, billed_stock_qty_against_so)
+			billed_stock_qty += share
+			billed_stock_qty_against_so -= share
 
-		qty_map[dnd.name] = flt(billed_qty_against_dn)
+		qty_map[dnd.name] = flt(billed_stock_qty / factor)
 
 	return qty_map
+
+
+def get_billed_against_so(so_detail: str, field: str) -> float:
+	"""Sum of `field` of the invoice rows billed against the Sales Order row without a Delivery
+	Note."""
+	si = frappe.qb.DocType("Sales Invoice").as_("si")
+	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
+
+	result = (
+		frappe.qb.from_(si_item)
+		.join(si)
+		.on(si.name == si_item.parent)
+		.select(Sum(si_item[field]))
+		.where(
+			(si_item.so_detail == so_detail)
+			& ((si_item.dn_detail.isnull()) | (si_item.dn_detail == ""))
+			& (si_item.docstatus == 1)
+			& (si.update_stock == 0)
+		)
+		.run()
+	)
+	return flt(result[0][0]) if result else 0.0

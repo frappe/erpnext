@@ -545,6 +545,13 @@ class StockController(AccountsController):
 			total_ref += net_amount
 			total_billed += max(amount_billed, qty_billed)
 
+		if not total_ref and self.is_return:
+			# A zero-value return has no amount to measure: use its credited and deducted qty.
+			total_ref = sum(abs(flt(item.qty)) for item in items)
+			total_billed = sum(
+				min(abs(flt(invoiced_qty_map.get(item.name))), abs(flt(item.qty))) for item in items
+			)
+
 		return round(total_billed / total_ref * 100, 6) if total_ref else 0
 
 	def get_invoiced_qty_map(self):
