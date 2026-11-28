@@ -4880,6 +4880,7 @@ class TestJobCard(ERPNextTestSuite):
 					"completed_qty": 2,
 				},
 			)
+			job_card.process_loss_qty = 1
 			job_card.submit()
 
 		# each card ran for an hour, so its 2 good units carry one hour of cost
