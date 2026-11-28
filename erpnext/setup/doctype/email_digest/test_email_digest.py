@@ -47,7 +47,7 @@ class TestEmailDigest(ERPNextTestSuite):
 		messages = []
 		with patch("frappe.sendmail", side_effect=lambda **kwargs: messages.append(kwargs["recipients"])):
 			digest.send()
-		self.assertEqual(messages, [system_user.name])
+		self.assertEqual(messages, [system_user.email])
 
 	def test_company_totals_are_not_sent_without_transaction_access(self):
 		from unittest.mock import patch
@@ -137,8 +137,9 @@ class TestEmailDigest(ERPNextTestSuite):
 		):
 			digest.send()
 		for i, user in enumerate(users):
-			self.assertIn(f"Digest private event {i}", messages[user])
-			self.assertNotIn(f"Digest private event {1 - i}", messages[user])
+			email = frappe.utils.get_email_address(user)
+			self.assertIn(f"Digest private event {i}", messages[email])
+			self.assertNotIn(f"Digest private event {1 - i}", messages[email])
 
 	def test_overdue_purchase_orders_respect_user_permissions(self):
 		user = "digest-purchase@example.com"
@@ -599,6 +600,19 @@ class TestEmailDigest(ERPNextTestSuite):
 		self.assertLess(order.index(empty_pri), order.index(high_dated))
 		# within the High tier, a NULL date must sort before a real date (MariaDB NULLs-first)
 		self.assertLess(order.index(high_nulldate), order.index(high_dated))
+
+	def test_digest_is_sent_to_user_email(self):
+		from unittest.mock import patch
+
+		from frappe.core.doctype.user.test_user import test_user
+
+		with test_user(roles=["Projects User"], generated_id=True) as user:
+			digest = create_email_digest(recipients=[user.name])
+			messages = []
+			with patch("frappe.sendmail", side_effect=lambda **kwargs: messages.append(kwargs["recipients"])):
+				digest.send()
+
+		self.assertEqual(messages, [user.email])
 
 
 def make_digest_test_user(email, system_user=False):

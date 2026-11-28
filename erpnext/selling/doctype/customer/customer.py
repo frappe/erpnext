@@ -16,7 +16,17 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import CustomFunction, Field, functions
 from frappe.query_builder.functions import Cast, Coalesce, Max
-from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
+from frappe.utils import (
+	cint,
+	cstr,
+	flt,
+	fmt_money,
+	get_email_addresses,
+	get_formatted_email,
+	get_link_to_form,
+	getdate,
+	today,
+)
 from frappe.utils.user import get_users_with_role
 
 from erpnext import get_company_currency
@@ -704,7 +714,9 @@ def send_emails(customer: str, company: str):
 		fmt_money(outstanding, currency=currency),
 		fmt_money(get_credit_limit(customer, company), currency=currency),
 	)
-	frappe.sendmail(recipients=get_credit_controller_users(), subject=subject, message=message)
+	frappe.sendmail(
+		recipients=get_email_addresses(get_credit_controller_users()), subject=subject, message=message
+	)
 
 
 def get_credit_controller_users():

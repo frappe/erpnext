@@ -19,6 +19,7 @@ from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_sum
 	execute as get_ageing,
 )
 from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
+from erpnext.utilities import get_user_email
 from erpnext.utilities.query import get_match_conditions_qb
 
 
@@ -566,7 +567,7 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 			if doc.sender:
 				sender_email = frappe.db.get_value("Email Account", doc.sender, "email_id")
 			else:
-				sender_email = frappe.session.user
+				sender_email = get_user_email()
 
 			frappe.enqueue(
 				queue="short",
