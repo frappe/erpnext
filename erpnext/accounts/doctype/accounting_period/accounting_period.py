@@ -59,6 +59,9 @@ class AccountingPeriod(Document):
 		self.name = " - ".join([self.period_name, company_abbr])
 
 	def validate_overlap(self):
+		if self.disabled:
+			return
+
 		AccountingPeriod = frappe.qb.DocType("Accounting Period")
 
 		query = (
@@ -68,6 +71,7 @@ class AccountingPeriod(Document):
 			.where(AccountingPeriod.end_date >= self.start_date)
 			.where(AccountingPeriod.name != self.name)
 			.where(AccountingPeriod.company == self.company)
+			.where(AccountingPeriod.disabled == 0)
 		)
 
 		existing_accounting_period = query.run(as_dict=True)
