@@ -408,13 +408,14 @@ class ProductionPlan(Document):
 
 		for (sales_order, so_item), qty in planned_qty.items():
 			row = so_items[so_item]
+			qty = flt(qty, precision)
 			unplanned_qty = flt(
 				flt(row.stock_qty) * (1 + allowance / 100)
 				- flt(row.reserved_qty)
 				- flt(already_planned.get((sales_order, so_item))),
 				precision,
 			)
-			if flt(qty, precision) > unplanned_qty:
+			if qty > unplanned_qty:
 				frappe.throw(
 					_(
 						"Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan."
