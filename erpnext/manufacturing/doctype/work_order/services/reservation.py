@@ -31,11 +31,11 @@ _SCIO_FIELDS = [
 	"item_code",
 	"name",
 	"qty as stock_qty",
+	# the produced qty already counts what was delivered
 	"produced_qty as stock_reserved_qty",
 	"delivery_warehouse as warehouse",
 	"parent as voucher_no",
 	"parenttype as voucher_type",
-	"delivered_qty",
 ]
 _SO_FIELDS = [
 	"item_code",
@@ -304,7 +304,7 @@ class WorkOrderStockReservation:
 		return self.get_so_details()
 
 	def _reserve_finished_good(self, items, item, stock_entry):
-		qty_to_reserve = flt(item.stock_qty) - flt(item.stock_reserved_qty + item.delivered_qty)
+		qty_to_reserve = flt(item.stock_qty) - flt(item.stock_reserved_qty) - flt(item.get("delivered_qty"))
 		if qty_to_reserve <= 0:
 			return
 
