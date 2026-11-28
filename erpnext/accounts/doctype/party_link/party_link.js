@@ -12,12 +12,9 @@ frappe.ui.form.on("Party Link", {
 		});
 
 		frm.set_query("secondary_role", () => {
-			let party_types = Object.keys(frappe.boot.party_account_types).filter(
-				(p) => p != frm.doc.primary_role
-			);
 			return {
 				filters: {
-					name: ["in", party_types],
+					name: ["in", ["Customer", "Supplier"].filter((p) => p != frm.doc.primary_role)],
 				},
 			};
 		});

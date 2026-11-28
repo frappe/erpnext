@@ -30,10 +30,20 @@ class PartyLink(Document):
 				title=_("Invalid Primary Role"),
 			)
 
-		existing_party_link = frappe.get_all(
-			"Party Link",
-			{"primary_party": self.primary_party, "secondary_party": self.secondary_party},
-			pluck="primary_role",
+		secondary_role = "Supplier" if self.primary_role == "Customer" else "Customer"
+		if self.secondary_role != secondary_role:
+			frappe.throw(
+				_("The secondary role must be {0} when the primary role is {1}.").format(
+					_(secondary_role), _(self.primary_role)
+				),
+				title=_("Invalid Secondary Role"),
+			)
+
+		existing_party_link = self.get_other_links(
+			primary_role=self.primary_role,
+			primary_party=self.primary_party,
+			secondary_role=self.secondary_role,
+			secondary_party=self.secondary_party,
 		)
 		if existing_party_link:
 			frappe.throw(
@@ -45,9 +55,9 @@ class PartyLink(Document):
 				)
 			)
 
-		existing_party_link = frappe.get_all(
-			"Party Link", {"primary_party": self.secondary_party}, pluck="primary_role"
-		)
+		existing_party_link = self.get_other_links(
+			primary_role=self.secondary_role, primary_party=self.secondary_party
+		) or self.get_other_links(secondary_role=self.secondary_role, secondary_party=self.secondary_party)
 		if existing_party_link:
 			frappe.throw(
 				_("{0} {1} is already linked with another {2}").format(
@@ -55,8 +65,8 @@ class PartyLink(Document):
 				)
 			)
 
-		existing_party_link = frappe.get_all(
-			"Party Link", {"secondary_party": self.primary_party}, pluck="primary_role"
+		existing_party_link = self.get_other_links(
+			secondary_role=self.primary_role, secondary_party=self.primary_party
 		)
 		if existing_party_link:
 			frappe.throw(
@@ -64,6 +74,12 @@ class PartyLink(Document):
 					self.primary_role, self.primary_party, existing_party_link[0]
 				)
 			)
+
+	def get_other_links(self, **filters):
+		"""Primary roles of the other Party Links that match the filters."""
+		if not self.is_new():
+			filters["name"] = ("!=", self.name)
+		return frappe.get_all("Party Link", filters, pluck="primary_role")
 
 
 @frappe.whitelist()
