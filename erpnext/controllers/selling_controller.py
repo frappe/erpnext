@@ -1223,7 +1223,8 @@ class SellingController(StockController):
 					if sre_doc.reservation_based_on == "Serial and Batch" and item.serial_and_batch_bundle:
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in delivered_serial_nos:
+								# a serial no delivered again after a return goes to a Qty reservation
+								if entry.serial_no in delivered_serial_nos and not entry.delivered_qty:
 									entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
 									entry.db_update()
 									qty_can_be_deliver += 1
@@ -1258,17 +1259,20 @@ class SellingController(StockController):
 
 		if self._action == "cancel":
 <<<<<<< HEAD
+<<<<<<< HEAD
 			for item in self.get("items"):
 =======
 			other_deliveries = self.get_other_deliveries_of_order_rows(items)
+=======
+			order_rows = defaultdict(list)
+>>>>>>> d3742fc (fix(stock): give back a cancelled delivery's lines of one order row together)
 			for item in items:
 >>>>>>> fd2577f (fix(stock): on cancel, keep the serial / batch qty other deliveries of the row still hold)
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 				if item.get(so_field) and item.so_detail:
-					self.give_back_stock_reservations(
-						item, so_field, other_deliveries[(item.so_detail, item.warehouse)]
-					)
+					order_rows[(item.get(so_field), item.so_detail, item.warehouse)].append(item)
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 				# a serial no only goes to its own reservation, but a batch may have gone to a qty one
 				# after its batch reservation was full, so a batch item gives back qty reservations first
@@ -1339,6 +1343,13 @@ class SellingController(StockController):
 				sre_doc.update_status()
 				sre_doc.update_reserved_stock_in_bin()
 				sre_doc.update_reserved_qty_in_voucher(update_modified=False)
+=======
+			other_deliveries = self.get_other_deliveries_of_order_rows(items)
+			for (sales_order, so_detail, warehouse), rows in order_rows.items():
+				give_back_stock_reservations(
+					sales_order, so_detail, warehouse, rows, other_deliveries[(so_detail, warehouse)]
+				)
+>>>>>>> d3742fc (fix(stock): give back a cancelled delivery's lines of one order row together)
 
 	def get_other_deliveries_of_order_rows(self, items) -> defaultdict:
 		"""Stock qty, serial nos and batch qty of the other submitted deliveries of the order rows, by row and warehouse."""
@@ -1355,6 +1366,7 @@ class SellingController(StockController):
 				.join(parent)
 				.on(parent.name == child.parent)
 				.select(child.so_detail, child.warehouse, child.stock_qty, child.serial_and_batch_bundle)
+<<<<<<< HEAD
 				.where(
 					(parent.docstatus == 1)
 					& (parent.is_return == 0)
@@ -1362,7 +1374,12 @@ class SellingController(StockController):
 					& child.so_detail.isin(so_details)
 >>>>>>> fd2577f (fix(stock): on cancel, keep the serial / batch qty other deliveries of the row still hold)
 				)
+=======
+				.where((parent.docstatus == 1) & (parent.is_return == 0) & child.so_detail.isin(so_details))
+>>>>>>> d3742fc (fix(stock): give back a cancelled delivery's lines of one order row together)
 			)
+			if doctype == self.doctype:
+				query = query.where(parent.name != self.name)
 			if doctype == "Sales Invoice":
 				query = query.where(parent.update_stock == 1)
 			rows += query.run(as_dict=True)
@@ -1519,6 +1536,7 @@ def get_serial_and_batch_bundle(
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 def get_serial_and_batch_reservations_first(sre_list: list[dict]) -> list[str]:
 	"""Reservation names, Serial and Batch ones first so they claim their serial / batch nos before Qty ones."""
@@ -1528,6 +1546,62 @@ def get_serial_and_batch_reservations_first(sre_list: list[dict]) -> list[str]:
 =======
 >>>>>>> 873de51 (refactor: order a row's reservations in the query, as stock_controller does)
 =======
+=======
+def give_back_stock_reservations(sales_order, so_detail, warehouse, rows, other_deliveries) -> None:
+	"""Give the cancelled rows' qty back to the reservations of their order row in a warehouse."""
+	sre_docs = [
+		frappe.get_doc("Stock Reservation Entry", name)
+		for name in frappe.db.get_all(
+			"Stock Reservation Entry",
+			{
+				"docstatus": 1,
+				"voucher_type": "Sales Order",
+				"voucher_no": sales_order,
+				"voucher_detail_no": so_detail,
+				"warehouse": warehouse,
+				"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
+			},
+			pluck="name",
+			order_by="creation",
+		)
+	]
+	delivered_qty = {sre_doc.name: sre_doc.delivered_qty for sre_doc in sre_docs}
+	qty_docs = [doc for doc in sre_docs if doc.reservation_based_on != "Serial and Batch"]
+	for row in rows:
+		give_back_row_qty(row, sre_docs, qty_docs, other_deliveries)
+
+	# a delivery once counted on both kinds of reservation leaves more delivered than is still out
+	if sre_docs and rows[0].doctype != "Packed Item":
+		excess_qty = sum(doc.delivered_qty for doc in sre_docs) - other_deliveries.qty
+		give_back_qty(
+			qty_docs, flt(excess_qty, frappe.get_precision("Stock Reservation Entry", "delivered_qty"))
+		)
+
+	for sre_doc in sre_docs:
+		if sre_doc.delivered_qty != delivered_qty[sre_doc.name]:
+			sre_doc.db_update()
+			sre_doc.update_status()
+			sre_doc.update_reserved_stock_in_bin()
+			sre_doc.update_reserved_qty_in_voucher(update_modified=False)
+
+
+def give_back_row_qty(row, sre_docs, qty_docs, other_deliveries) -> None:
+	"""Give back a cancelled row's qty: first the serial / batch qty that the order row's other
+	deliveries do not hold, then Qty reservations, then the rest of its serial / batch qty."""
+	serial_batch_docs = [doc for doc in sre_docs if doc.reservation_based_on == "Serial and Batch"]
+	held_serial_nos, held_batch_qty = list(other_deliveries.serial_nos), other_deliveries.batch_qty.copy()
+
+	qty = row.get("stock_qty") or row.qty
+	serial_nos, batch_qty = get_delivered_serial_batch_for_reservation(row)
+	for sre_doc in serial_batch_docs:
+		qty -= give_back_serial_batch(sre_doc, serial_nos, batch_qty, qty, held_serial_nos, held_batch_qty)
+
+	qty = give_back_qty(qty_docs, qty)
+	for sre_doc in serial_batch_docs:
+		qty -= give_back_serial_batch(sre_doc, serial_nos, batch_qty, qty)
+
+
+>>>>>>> d3742fc (fix(stock): give back a cancelled delivery's lines of one order row together)
 def give_back_serial_batch(
 	sre_doc, serial_nos, batch_qty, qty, held_serial_nos=None, held_batch_qty=None
 ) -> float:
