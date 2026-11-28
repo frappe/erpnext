@@ -8,6 +8,7 @@ from erpnext.selling.doctype.sales_order.mapper import make_subcontracting_inwar
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB, take_reserved_entries
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.serial_batch_bundle import get_batch_nos
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
@@ -83,6 +84,28 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		second.cancel()
 
 		self.assertEqual(get_delivered_reservations(scio), [(3, 3), (2, 0)])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_manufacture_cancel_refused_when_its_reservation_is_delivered(self):
+		scio = make_scio_with_two_manufactures(create_warehouse("_Test SCIO Delivery Warehouse"))
+		make_delivery_of_qty(scio, 2)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Finished Good is already delivered", get_manufacture(scio, "asc").cancel
+		)
+		get_manufacture(scio, "desc").cancel()
+		self.assertEqual(get_delivered_reservations(scio), [(3, 2)])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_manufacture_cancel_refused_when_less_is_left_than_delivered(self):
+		scio = make_scio_with_two_manufactures(create_warehouse("_Test SCIO Delivery Warehouse"))
+		make_delivery_of_qty(scio, 4)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"produced cannot be less than quantity delivered",
+			get_manufacture(scio, "desc").cancel,
+		)
 
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
@@ -2524,11 +2547,11 @@ def make_manufacture_with_extra_material(extra_qtys):
 	return scio, manufacture
 
 
-def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
+def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item", warehouse="_Test Warehouse - _TC"):
 	item_list = [{"item_code": service_item, "qty": 5, "fg_item": fg_item, "fg_item_qty": 5}]
 	so = make_sales_order(is_subcontracted=1, item_list=item_list)
 	scio = make_subcontracting_inward_order(so.name)
-	scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+	scio.items[0].delivery_warehouse = warehouse
 	scio.submit()
 	scio.reload()
 	return so, scio
@@ -2542,9 +2565,9 @@ def cancel_one_of_two_deliveries(index):
 	return get_delivered_reservations(scio)
 
 
-def make_scio_with_two_manufactures():
+def make_scio_with_two_manufactures(warehouse="_Test Warehouse - _TC"):
 	"""Order with 3 and then 2 manufactured, each reserved for delivery."""
-	so, scio = create_so_scio()
+	so, scio = create_so_scio(warehouse=warehouse)
 	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
 	scio.reload()
 	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
@@ -2562,6 +2585,17 @@ def make_delivery_of_qty(scio, qty):
 	delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 	delivery.items[0].qty = qty
 	return delivery.submit()
+
+
+def get_manufacture(scio, order):
+	"""First (`asc`) or last (`desc`) Manufacture entry that reserved the order's finished good."""
+	name = frappe.db.get_value(
+		"Stock Reservation Entry",
+		{"voucher_detail_no": scio.items[0].name, "docstatus": 1},
+		"from_voucher_no",
+		order_by=f"creation {order}",
+	)
+	return frappe.get_doc("Stock Entry", name)
 
 
 def get_delivered_reservations(scio):
