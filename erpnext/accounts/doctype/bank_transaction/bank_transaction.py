@@ -9,6 +9,8 @@ from frappe.query_builder import Tuple
 from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils import flt, getdate
 
+from erpnext.accounts.doctype.bank_clearance.bank_clearance import set_clearance_date
+
 
 # nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting-other-method -- set_status uses db_set once submitted or cancelled
 class BankTransaction(Document):
@@ -264,16 +266,7 @@ class BankTransaction(Document):
 		if doctype not in get_doctypes_for_bank_reconciliation():
 			return
 
-		if doctype == "Sales Invoice":
-			frappe.db.set_value(
-				"Sales Invoice Payment",
-				dict(parenttype=doctype, parent=docname),
-				"clearance_date",
-				clearance_date,
-			)
-			return
-
-		frappe.db.set_value(doctype, docname, "clearance_date", clearance_date)
+		set_clearance_date(frappe.get_doc(doctype, docname), clearance_date)
 
 	def update_linked_bank_transaction(self, bank_transaction_name, allocated_amount=None):
 		"""For when a second bank transaction has fixed another, e.g. refund"""
