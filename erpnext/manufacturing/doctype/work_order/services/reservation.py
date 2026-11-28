@@ -304,7 +304,10 @@ class WorkOrderStockReservation:
 		return self.get_so_details()
 
 	def _reserve_finished_good(self, items, item, stock_entry):
-		qty_to_reserve = flt(item.stock_qty) - flt(item.stock_reserved_qty) - flt(item.get("delivered_qty"))
+		qty_to_reserve = flt(
+			flt(item.stock_qty) - flt(item.stock_reserved_qty + item.get("delivered_qty", 0)),
+			frappe.get_precision("Stock Reservation Entry", "reserved_qty"),
+		)
 		if qty_to_reserve <= 0:
 			return
 
