@@ -5451,6 +5451,28 @@ class TestWorkOrder(ERPNextTestSuite):
 		{
 			"backflush_raw_materials_based_on": "BOM",
 			"material_consumption": 0,
+			"validate_components_quantities_per_bom": 0,
+		},
+	)
+	def test_last_manufacture_keeps_share_when_a_transfer_is_edited(self):
+		"""A transfer edited below its rounded share is a shortage, even when it fits the rounding bound."""
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		wo, rm_item = make_rounding_work_order(2.183)
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		transfer.items[0].qty = flt(2.183, precision) - 10**-precision
+		transfer.submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1)).submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 2))
+		consumed_qty = sum(row.qty for row in manufacture.items if row.item_code == rm_item)
+		self.assertEqual(flt(consumed_qty, precision), flt(2.183 * 2, precision))
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 0,
 			"transfer_extra_materials_percentage": 50,
 		},
 	)
