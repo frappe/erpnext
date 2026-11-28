@@ -1335,7 +1335,7 @@ def get_open_pick_list_items_query(item_codes, exclude_pick_list=None):
 			& (pi.status != "Completed")
 			& (pi.status != "Cancelled")
 			& (pi_item.docstatus != 2)
-			& ExistsCriterion(get_delivered_sales_order_item_query(pi_item)).negate()
+			& ExistsCriterion(get_settled_sales_order_item_query(pi_item)).negate()
 		)
 	)
 
@@ -1345,12 +1345,19 @@ def get_open_pick_list_items_query(item_codes, exclude_pick_list=None):
 	return query
 
 
-def get_delivered_sales_order_item_query(pi_item):
+def get_settled_sales_order_item_query(pi_item):
+	"""Sales Order rows delivered in full or closed, whose pick list rows no longer hold stock."""
+	so = frappe.qb.DocType("Sales Order")
 	so_item = frappe.qb.DocType("Sales Order Item")
 	return (
 		frappe.qb.from_(so_item)
+		.inner_join(so)
+		.on(so.name == so_item.parent)
 		.select(so_item.name)
-		.where((so_item.name == pi_item.sales_order_item) & (so_item.delivered_qty >= so_item.qty))
+		.where(
+			(so_item.name == pi_item.sales_order_item)
+			& ((so_item.delivered_qty >= so_item.qty) | (so_item.closed == 1) | (so.status == "Closed"))
+		)
 	)
 
 
