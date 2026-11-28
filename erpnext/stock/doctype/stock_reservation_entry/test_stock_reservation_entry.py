@@ -1116,12 +1116,7 @@ class TestStockReservationEntry(FrappeTestCase):
 		# Test - 1: ValidationError should be thrown as the inwarded stock is reserved.
 		self.assertRaises(frappe.ValidationError, se.cancel)
 
-<<<<<<< HEAD
-	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
-	def test_reserved_stock_validation_for_batch_item(self):
-		item_properties = {
-=======
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
@@ -1189,47 +1184,9 @@ class TestStockReservationEntry(FrappeTestCase):
 		frappe.get_doc("Delivery Note", dn.name).cancel()
 		self.assertEqual(delivered_qty(), [0, 4])
 
-
-SR_ITEM_PROPERTIES = {
-	"stock": {"is_stock_item": 1, "valuation_rate": 100},
-	"serial": {
-		"is_stock_item": 1,
-		"valuation_rate": 200,
-		"has_serial_no": 1,
-		"serial_no_series": "SRSI-.#####",
-	},
-	"batch": {
-		"is_stock_item": 1,
-		"valuation_rate": 300,
-		"has_batch_no": 1,
-		"create_new_batch": 1,
-		"batch_number_series": "SRBI-.#####.",
-	},
-	"serial_and_batch": {
-		"is_stock_item": 1,
-		"valuation_rate": 400,
-		"has_serial_no": 1,
-		"serial_no_series": "SRSBI-.#####",
-		"has_batch_no": 1,
-		"create_new_batch": 1,
-		"batch_number_series": "SRSBI-.#####.",
-	},
-}
-
-
-def create_items(*kinds: str) -> dict:
-	items = {}
-	for kind in kinds or SR_ITEM_PROPERTIES:
-		item = make_item(properties=SR_ITEM_PROPERTIES[kind])
-		items[item.name] = item
-
-	return items
-
-
-def make_batch_item():
-	return make_item(
-		properties={
->>>>>>> 2745ae0 (test: batch delivery is counted once across the reservations of a row)
+	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
+	def test_reserved_stock_validation_for_batch_item(self):
+		item_properties = {
 			"is_stock_item": 1,
 			"valuation_rate": 100,
 			"has_batch_no": 1,
