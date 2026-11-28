@@ -2546,28 +2546,51 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		pi.items[0].rate = 120
 		pi.submit()
 
-		def get_finished_good_value_and_service_balance():
-			stock_value = frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": scr.name, "voucher_detail_no": scr.items[0].name, "is_cancelled": 0},
-				"stock_value_difference",
-			)
-			service_entries = frappe.get_all(
-				"GL Entry",
-				filters={
-					"voucher_no": ("in", [scr.name, pi.name]),
-					"account": service_expense_account,
-					"is_cancelled": 0,
-				},
-				fields=["debit", "credit"],
-			)
-			return stock_value, sum(row.debit - row.credit for row in service_entries)
-
-		self.assertEqual(get_finished_good_value_and_service_balance(), (2200, 0))
+		self.assertEqual(get_receipt_stock_value(scr), 2200)
+		self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
 
 		pi.reload()
 		pi.cancel()
-		self.assertEqual(get_finished_good_value_and_service_balance(), (2000, -1000))
+		self.assertEqual(get_receipt_stock_value(scr), 2000)
+		self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), -1000)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_cancelled_service_receipt_drops_invoice_rate_from_finished_goods(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		scr = make_service_receipt("Subcontracted Service Item 10", "Subcontracted Item SA10", 10, 100, 10)
+		pr = make_purchase_receipt(scr.name)
+		pr.submit()
+		pi = make_purchase_invoice(scr.items[0].purchase_order)
+		pi.items[0].rate = 120
+		pi.submit()
+		self.assertEqual(get_receipt_stock_value(scr), 2200)
+
+		pr.reload()
+		pr.cancel()
+		self.assertEqual(get_receipt_stock_value(scr), 2000)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_service_invoice_rate_split_over_rows_adds_up(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
+		scr = make_service_receipt(
+			"Subcontracted Service Item 10", "Subcontracted Item SA10", 1, 300, 3, rows=3
+		)
+		pr = make_purchase_receipt(scr.name)
+		pr.submit()
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].rate = 300.01
+		pi.submit()
+
+		self.assertEqual(get_account_balance(service_expense_account, [scr.name, pi.name]), 0)
 
 	def test_service_cost_split_over_finished_goods_is_credited_in_full(self):
 		service_expense_account = set_service_expense_account("Subcontracted Service Item 10")
@@ -6667,7 +6690,7 @@ def set_service_expense_account(service_item):
 	return service_expense_account
 
 
-def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_values=None):
+def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_values=None, rows=1):
 	service_items = [
 		{
 			"warehouse": "Stores - TCP1",
@@ -6694,8 +6717,31 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty, fg_row_v
 
 	scr = make_subcontracting_receipt(sco.name)
 	scr.items[0].update(fg_row_values or {})
+	if rows > 1:
+		scr.items[0].qty = fg_item_qty / rows
+		for _ in range(rows - 1):
+			scr.append("items", {**scr.items[0].as_dict(), "name": None, "idx": None})
 	scr.submit()
 	return scr
+
+
+def get_receipt_stock_value(scr):
+	return sum(
+		frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": scr.name, "is_cancelled": 0, "actual_qty": (">", 0)},
+			pluck="stock_value_difference",
+		)
+	)
+
+
+def get_account_balance(account, vouchers):
+	entries = frappe.get_all(
+		"GL Entry",
+		filters={"voucher_no": ("in", vouchers), "account": account, "is_cancelled": 0},
+		fields=["debit", "credit"],
+	)
+	return flt(sum(row.debit - row.credit for row in entries), 2)
 
 
 def make_receipt_with_scrap(
