@@ -1312,18 +1312,19 @@ class SubcontractingReceipt(SubcontractingController):
 		if self.is_return or self.is_new():
 			return {}
 
-		line_differences = dict(
-			frappe.get_all(
-				"Purchase Receipt Item",
-				filters={
-					"docstatus": 1,
-					"subcontracting_receipt_item": ("in", [row.name for row in self.items]),
-					"amount_difference_with_purchase_invoice": ("!=", 0),
-				},
-				fields=["purchase_order_item", "amount_difference_with_purchase_invoice"],
-				as_list=True,
-			)
-		)
+		line_differences = defaultdict(float)
+		for line, difference in frappe.get_all(
+			"Purchase Receipt Item",
+			filters={
+				"docstatus": 1,
+				"subcontracting_receipt_item": ("in", [row.name for row in self.items]),
+				"amount_difference_with_purchase_invoice": ("!=", 0),
+			},
+			fields=["purchase_order_item", "amount_difference_with_purchase_invoice"],
+			as_list=True,
+		):
+			# a service row split over several Purchase Receipt rows has a difference on each
+			line_differences[line] += flt(difference)
 		if not line_differences:
 			return {}
 
