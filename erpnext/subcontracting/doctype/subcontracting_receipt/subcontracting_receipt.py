@@ -1327,8 +1327,13 @@ class SubcontractingReceipt(SubcontractingController):
 		if not line_differences:
 			return {}
 
-		# the Purchase Receipt row receives the service for the accepted and lost qty of its rows
-		rows = [row for row in self.items if row.bom and row.purchase_order_item in line_differences]
+		# only rows with accepted qty post a service credit, and the Purchase Receipt row
+		# receives the service for the accepted and lost qty of its rows
+		rows = [
+			row
+			for row in self.items
+			if row.bom and flt(row.qty) and row.purchase_order_item in line_differences
+		]
 		line_qty = defaultdict(float)
 		for row in rows:
 			line_qty[row.purchase_order_item] += flt(row.qty) + flt(row.process_loss_qty)
