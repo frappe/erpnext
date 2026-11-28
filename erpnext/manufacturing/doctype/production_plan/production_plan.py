@@ -586,11 +586,12 @@ class ProductionPlan(Document):
 		)
 
 		bundle_qty = get_planned_bundle_qty(sales_orders)
-		bundle_lines = {row.sales_order_item for row in bundle_qty}
+		bundle_items = {row.sales_order_item: row.item_code for row in bundle_qty}
+		# bundle_qty counts a bundle line's components, but not the bundle item planned with its own BOM
 		data += [
 			row
 			for row in get_planned_qty_of_references(sales_orders)
-			if row.sales_order_item not in bundle_lines
+			if bundle_items.get(row.sales_order_item, row.item_code) == row.item_code
 		]
 		data += bundle_qty
 

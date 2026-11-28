@@ -475,15 +475,17 @@ def get_planned_bundle_qty(sales_orders):
 	planned_qty = get_planned_bundle_component_qty(list({row.sales_order_item for row in components}))
 	precision = frappe.get_precision("Sales Order Item", "production_plan_qty")
 
-	bundle_qty = {}
+	bundle_qty, bundle_items = {}, {}
 	for row in components:
 		key = (row.sales_order, row.sales_order_item)
 		planned = planned_qty.get((row.sales_order_item, row.item_code), 0)
 		qty = flt(planned * flt(row.stock_qty) / flt(row.qty), precision)
 		bundle_qty[key] = min(bundle_qty.get(key, qty), qty)
+		bundle_items[key] = row.bundle_item
 
 	return [
-		frappe._dict(sales_order=key[0], sales_order_item=key[1], qty=qty) for key, qty in bundle_qty.items()
+		frappe._dict(sales_order=key[0], sales_order_item=key[1], item_code=bundle_items[key], qty=qty)
+		for key, qty in bundle_qty.items()
 	]
 
 
@@ -502,11 +504,12 @@ def _get_manufactured_bundle_components(sales_orders):
 			pi.parent.as_("sales_order"),
 			so_item.name.as_("sales_order_item"),
 			so_item.stock_qty,
+			so_item.item_code.as_("bundle_item"),
 			pi.item_code,
 			Sum(pi.qty).as_("qty"),
 		)
 		.where((pi.parenttype == "Sales Order") & pi.parent.isin(sales_orders) & (pi.qty > 0) & bom_exists)
-		.groupby(pi.parent, so_item.name, so_item.stock_qty, pi.item_code)
+		.groupby(pi.parent, so_item.name, so_item.stock_qty, so_item.item_code, pi.item_code)
 	).run(as_dict=True)
 
 
