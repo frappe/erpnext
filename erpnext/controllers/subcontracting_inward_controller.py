@@ -33,9 +33,12 @@ class SubcontractingInwardController:
 		self.create_stock_reservation_entries_for_inward()
 		self.update_inward_order_status()
 
-	def on_cancel_subcontracting_inward(self):
+	def validate_subcontracting_inward_cancel(self):
+		"""Runs before the stock ledger, which would refuse delivered finished goods less clearly."""
 		self.update_inward_order_item()
 		self.validate_manufacture_entry_cancel()
+
+	def on_cancel_subcontracting_inward(self):
 		self.validate_delivery()
 		self.validate_receive_from_customer_cancel()
 		self.update_inward_order_received_items()
