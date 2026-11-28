@@ -51,7 +51,7 @@ def create_delivery(
 	if any(
 		not row.sales_order and flt(row.picked_qty) > flt(row.delivered_qty) for row in pick_list.locations
 	):
-		documents.append(create_delivery_wo_so(pick_list, target, target_doc))
+		documents.append(create_delivery_wo_so(pick_list, target, target_doc).save())
 
 	if not documents:
 		frappe.throw(_("Nothing picked in this Pick List is left to deliver."))
@@ -147,7 +147,7 @@ def get_sales_order_taxes(sales_orders):
 
 
 def create_dn_wo_so(pick_list, delivery_note=None):
-	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
+	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note).save()
 
 
 def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations=None):
@@ -174,7 +174,6 @@ def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations
 	target_doc.flags.ignore_mandatory = True
 	if target == "Sales Invoice":
 		target_doc.update_stock = 1
-	target_doc.save()
 
 	return target_doc
 
