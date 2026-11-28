@@ -3515,6 +3515,19 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual(plan.po_items[0].planned_qty, 12)
 
+	def test_combined_plan_fetched_again_plans_only_its_sales_orders(self):
+		item = "Test Production Item 1"
+		old_order, new_order = (make_sales_order(item_code=item, qty=10) for _ in range(2))
+		plan = make_plan_from_sales_orders([old_order], combine_items=1)
+		plan.set("sales_orders", [{"sales_order": new_order.name}])
+		plan.get_items()
+		plan.submit()
+
+		self.assertEqual([row.sales_order for row in plan.prod_plan_references], [new_order.name])
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", new_order.items[0].name, "production_plan_qty"), 10
+		)
+
 	def test_combined_plan_cannot_submit_closed_sales_order_row(self):
 		from erpnext.controllers.item_close import update_closed_status
 
