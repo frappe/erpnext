@@ -758,18 +758,23 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return min(max(ceil(flt(total_qty - consumed_qty, 9)), 0), entry_qty)
 
 	def get_wip_raw_material_qty(self, row, qty_per_unit, entry_qty):
-		"""What is left of the material in WIP, when it differs from this entry's share only by the
-		rounding of each transfer's and Manufacture's share. Otherwise the share."""
+		"""What is left of the material in WIP, when every entry moved its own rounded share and the
+		leftover differs from this entry's share only by that rounding. Otherwise the share."""
 		# transfers of a material on several rows are split over its rows
 		if sum(d.item_code == row.item_code for d in self.wo_doc.required_items) > 1:
 			return entry_qty
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		entries = self.wo_material_entries[row.item_code]
+		# an edited entry moved more or less than its share
+		if any(flt(d.qty, precision) != flt(qty_per_unit * d.fg_completed_qty, precision) for d in entries):
+			return entry_qty
+
 		wip_qty = flt(flt(row.transferred_qty) - flt(row.consumed_qty), precision)
 		gap = flt(abs(wip_qty - flt(entry_qty, precision)), precision)
 		rounding = sum(
 			abs(flt(qty_per_unit * qty, precision) - qty_per_unit * qty)
-			for qty in [*self.wo_entry_qtys_by_material[row.item_code], flt(self.doc.fg_completed_qty)]
+			for qty in [*(d.fg_completed_qty for d in entries), flt(self.doc.fg_completed_qty)]
 		)
 		# a negative balance is over-consumption, not material left in WIP
 		if wip_qty < 0 or gap > flt(rounding, 9):
@@ -778,8 +783,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return wip_qty
 
 	@cached_property
-	def wo_entry_qtys_by_material(self):
-		"""Qty of each submitted transfer and Manufacture of the order, per raw material it moves."""
+	def wo_material_entries(self):
+		"""Qty of each submitted transfer and Manufacture of the order and what it moved, per raw material."""
 		ste = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
 		item_code = Coalesce(NullIf(detail.original_item, ""), detail.item_code)
@@ -787,21 +792,21 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(detail)
 			.join(ste)
 			.on(detail.parent == ste.name)
-			.select(ste.name, item_code.as_("item_code"), ste.fg_completed_qty)
-			.distinct()
+			.select(item_code.as_("item_code"), ste.fg_completed_qty, Sum(detail.transfer_qty).as_("qty"))
 			.where(
 				(ste.work_order == self.doc.work_order)
 				& (ste.docstatus == 1)
 				& ste.purpose.isin(["Material Transfer for Manufacture", "Manufacture"])
 				& (IfNull(detail.s_warehouse, "") != "")
 			)
+			.groupby(ste.name, ste.fg_completed_qty, item_code)
 		).run(as_dict=True)
 
-		qtys = defaultdict(list)
+		entries = defaultdict(list)
 		for d in rows:
-			qtys[d.item_code].append(flt(d.fg_completed_qty))
+			entries[d.item_code].append(d)
 
-		return qtys
+		return entries
 
 	@property
 	def wo_done_qty(self):
