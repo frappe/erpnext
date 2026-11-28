@@ -2616,6 +2616,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		uom = frappe.get_doc("UOM", frappe.db.get_value("Item", "Subcontracted Service Item 10", "stock_uom"))
 		uom.must_be_whole_number = 0
 		uom.save()
+		self.addCleanup(frappe.clear_document_cache, "UOM", uom.name)
 		rejected_row = {"qty": 0, "rejected_qty": 1, "rejected_warehouse": "Finished Goods - TCP1"}
 		scr = make_service_receipt(
 			"Subcontracted Service Item 10",
