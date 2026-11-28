@@ -5474,49 +5474,52 @@ class TestWorkOrder(ERPNextTestSuite):
 	)
 	def test_last_manufacture_counts_only_transfers_of_its_material(self):
 		"""Each Job Card moves its own material, so another operation's transfer does not count."""
-		rm_items = [make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name for _ in range(2)]
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		operations = [make_review_operation() for _ in rm_items]
-		bom = make_review_bom(
-			fg_item,
-			[
-				{"item_code": item, "qty": 2.0018, "operation": operation}
-				for item, (operation, _workstation) in zip(rm_items, operations, strict=True)
-			],
-			operations=[
-				{"operation": operation, "workstation": workstation, "time_in_mins": 6}
-				for operation, workstation in operations
-			],
-		)
-		for item in rm_items:
-			test_stock_entry.make_stock_entry(
-				item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=45
-			)
-
-		wo = make_review_work_order(fg_item, bom.name, 3, transfer_material_against="Job Card")
-		for job_card_name in frappe.get_all(
-			"Job Card", {"work_order": wo.name}, pluck="name", order_by="name"
-		):
-			transfer = frappe.get_doc(make_stock_entry_from_jc(job_card_name))
-			transfer.get_items()
-			transfer.submit()
-			job_card = frappe.get_doc("Job Card", job_card_name)
-			job_card.append(
-				"time_logs",
-				{
-					"from_time": add_to_date(now(), hours=-2),
-					"to_time": add_to_date(now(), hours=-1),
-					"completed_qty": 3,
-					"time_in_mins": 60,
-				},
-			)
-			job_card.submit()
+		wo, rm_items = make_job_card_rounding_work_order(2.0018)
+		transfer_against_job_cards(wo)
 		for qty in (1, 2):
 			frappe.get_doc(make_stock_entry(wo.name, "Manufacture", qty)).submit()
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for item in rm_items:
 			self.assertEqual(flt(get_bin(item, "_Test Warehouse 1 - _TC").actual_qty, precision), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 0,
+			"disable_capacity_planning": 1,
+			"job_card_excess_transfer": 1,
+		},
+	)
+	def test_last_manufacture_keeps_share_for_excess_job_card_transfer(self):
+		"""Another operation's transfer does not widen the rounding bound, so an excess transfer keeps the share."""
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		wo, rm_items = make_job_card_rounding_work_order(2.0018)
+		transfer_against_job_cards(wo, excess_qty=10**-precision)
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		for item in rm_items:
+			consumed_qty = sum(row.qty for row in manufacture.items if row.item_code == item)
+			self.assertEqual(flt(consumed_qty, precision), flt(2.0018 * 3, precision))
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_last_manufacture_keeps_share_when_wip_balance_is_negative(self):
+		"""Earlier entries that consumed more than was transferred leave nothing in WIP to take."""
+		wo, rm_item = make_rounding_work_order(0.006, qty=5)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse 1 - _TC", qty=1, basic_rate=45
+		)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 5)).submit()
+		for _ in range(4):
+			frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1)).submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		consumed_qty = sum(row.qty for row in manufacture.items if row.item_code == rm_item)
+		self.assertEqual(flt(consumed_qty, precision), flt(0.006, precision))
 
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
@@ -11207,15 +11210,62 @@ def make_multi_level_manufacture_entry(fg_item, bom_no):
 	return se_doc
 
 
-def make_rounding_work_order(qty_per_unit):
-	"""Work Order for 3 of a finished good that needs qty_per_unit Kg of a raw material."""
+def make_rounding_work_order(qty_per_unit, qty=3):
+	"""Work Order for qty of a finished good that needs qty_per_unit Kg of a raw material."""
 	rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
 	fg_item = make_item(properties={"is_stock_item": 1}).name
 	bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": qty_per_unit}])
 	test_stock_entry.make_stock_entry(
 		item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=45
 	)
-	return make_review_work_order(fg_item, bom.name, 3), rm_item
+	return make_review_work_order(fg_item, bom.name, qty), rm_item
+
+
+def make_job_card_rounding_work_order(qty_per_unit):
+	"""Work Order for 3 whose two operations each need qty_per_unit Kg of their own raw material."""
+	rm_items = [make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name for _ in range(2)]
+	fg_item = make_item(properties={"is_stock_item": 1}).name
+	operations = [make_review_operation() for _ in rm_items]
+	bom = make_review_bom(
+		fg_item,
+		[
+			{"item_code": item, "qty": qty_per_unit, "operation": operation}
+			for item, (operation, _workstation) in zip(rm_items, operations, strict=True)
+		],
+		operations=[
+			{"operation": operation, "workstation": workstation, "time_in_mins": 6}
+			for operation, workstation in operations
+		],
+	)
+	for item in rm_items:
+		test_stock_entry.make_stock_entry(
+			item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=45
+		)
+
+	return make_review_work_order(fg_item, bom.name, 3, transfer_material_against="Job Card"), rm_items
+
+
+def transfer_against_job_cards(wo, excess_qty=0):
+	"""Transfer each Job Card's material, the first one excess_qty over, and complete it for 3."""
+	for idx, job_card_name in enumerate(
+		frappe.get_all("Job Card", {"work_order": wo.name}, pluck="name", order_by="name")
+	):
+		transfer = frappe.get_doc(make_stock_entry_from_jc(job_card_name))
+		transfer.get_items()
+		if not idx:
+			transfer.items[0].qty += excess_qty
+		transfer.submit()
+		job_card = frappe.get_doc("Job Card", job_card_name)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": add_to_date(now(), hours=-2),
+				"to_time": add_to_date(now(), hours=-1),
+				"completed_qty": 3,
+				"time_in_mins": 60,
+			},
+		)
+		job_card.submit()
 
 
 def make_whole_number_partial_work_order(
