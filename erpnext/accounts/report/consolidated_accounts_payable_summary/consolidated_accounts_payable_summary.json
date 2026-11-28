@@ -2,14 +2,111 @@
  "add_total_row": 0,
  "add_translate_data": 0,
  "columns": [],
- "creation": "2026-08-07 10:00:00.000000",
+ "creation": "2026-08-07 10:00:00",
+ "disable_prepared_report_automation": 0,
  "disabled": 0,
  "docstatus": 0,
  "doctype": "Report",
- "filters": [],
+ "doctype_to_sync": [],
+ "filters": [
+  {
+   "fieldname": "companies",
+   "fieldtype": "MultiSelectList",
+   "label": "Companies",
+   "mandatory": 0,
+   "options": "Company",
+   "wildcard_filter": 0
+  },
+  {
+   "default": "Today",
+   "fieldname": "report_date",
+   "fieldtype": "Date",
+   "label": "Report Date",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "default": "Due Date",
+   "fieldname": "ageing_based_on",
+   "fieldtype": "Select",
+   "label": "Ageing Based On",
+   "mandatory": 0,
+   "options": "Posting Date\nDue Date\nSupplier Invoice Date",
+   "wildcard_filter": 0
+  },
+  {
+   "default": "Report Date",
+   "fieldname": "age_as_on",
+   "fieldtype": "Select",
+   "label": "Age as on",
+   "mandatory": 0,
+   "options": "Report Date\nToday",
+   "wildcard_filter": 0
+  },
+  {
+   "default": "30, 60, 90, 120",
+   "fieldname": "range",
+   "fieldtype": "Data",
+   "label": "Ageing Range",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Autocomplete",
+   "label": "Party Type",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "MultiSelectList",
+   "label": "Party",
+   "mandatory": 0,
+   "options": "party_type",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "label": "Supplier Group",
+   "mandatory": 0,
+   "options": "Supplier Group",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "show_future_payments",
+   "fieldtype": "Check",
+   "label": "Show Future Payments",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "show_gl_balance",
+   "fieldtype": "Check",
+   "label": "Show GL Balance",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "based_on_payment_terms",
+   "fieldtype": "Check",
+   "label": "Based On Payment Terms",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "for_revaluation_journals",
+   "fieldtype": "Check",
+   "label": "Revaluation Journals",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  }
+ ],
+ "generate_csv": 0,
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2026-08-07 10:00:00.000000",
+ "modified": "2026-11-27 03:04:22.683886",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Consolidated Accounts Payable Summary",
@@ -32,5 +129,8 @@
    "role": "Auditor"
   }
  ],
- "timeout": 0
+ "site_print_defaults": 0,
+ "snapshot_report": 0,
+ "timeout": 0,
+ "validate_filters": 1
 }
