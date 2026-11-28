@@ -874,5 +874,7 @@ def group_planned_qty_by_item_reference(rows):
 	for row in rows:
 		key = (row.parent, row.item_reference or row.sales_order_item)
 		planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
-		item_codes[key] = row.item_code
+		# components of an older bundle plan share one key, so its item is unknown
+		item_code = item_codes.get(key, row.item_code)
+		item_codes[key] = row.item_code if item_code == row.item_code else None
 	return planned_qty, item_codes
