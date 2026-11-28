@@ -1,9 +1,11 @@
 from functools import partial
+from unittest.mock import patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.desk.search import search_widget
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.test_item import make_item
@@ -379,14 +381,22 @@ class TestQueries(ERPNextTestSuite):
 				"ignore_user_permissions": 1,
 			}
 
-			result = queries.employee_query(**params)
+			result = search_widget(
+				"Employee",
+				"",
+				query="erpnext.controllers.queries.employee_query",
+				page_length=20,
+				reference_doctype="Payment Entry",
+				ignore_user_permissions=1,
+				link_fieldname="party",
+			)
 			self.assertGreater(len(result), 1)
 
-			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
-
-			# only one employee should be returned even though ignore_user_permissions is passed as 1
-			result = queries.employee_query(**params)
+			# only the link search may skip user permissions, not a request to the query itself
+			result = frappe.call(queries.employee_query, **params)
 			self.assertEqual(len(result), 1)
+
+			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
 
 	def test_employee_query_checks_child_table_filters_when_ignoring_user_permissions(self):
 		employee = frappe.get_doc("Employee", {"first_name": "_Test Employee"})
@@ -394,18 +404,18 @@ class TestQueries(ERPNextTestSuite):
 		employee.save()
 
 		user = create_user("employee_query_accounts_user@example.com", "Accounts User")
-		params = {
-			"doctype": "Employee",
-			"txt": "",
-			"searchfield": "name",
-			"start": 0,
-			"page_len": 20,
-			"reference_doctype": "Asset",
-			"ignore_user_permissions": 1,
-		}
+		search = partial(
+			search_widget,
+			"Employee",
+			"",
+			query="erpnext.controllers.queries.employee_query",
+			page_length=20,
+			reference_doctype="Asset",
+			ignore_user_permissions=1,
+			link_fieldname="custodian",
+		)
 
-		with self.set_user(user.name):
-			self.assert_nested_in(employee.name, queries.employee_query(**params, filters=None))
-
-			with self.assertRaises(frappe.PermissionError):
-				queries.employee_query(**params, filters={"external_work_history.salary": 4242.97})
+		# search_widget re-raises the query's PermissionError only in developer mode
+		with self.set_user(user.name), patch.dict(frappe.local.conf, {"developer_mode": 0}):
+			self.assert_nested_in(employee.name, search())
+			self.assertEqual(search(filters={"external_work_history.salary": 4242.97}), [])
