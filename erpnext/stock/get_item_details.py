@@ -293,11 +293,17 @@ def update_bin_details(args, out, doc):
 		out.update(_get_bin_details(args.item_code, args.get("from_warehouse") if is_permitted else None))
 
 	elif out.get("warehouse"):
-		bin_details = _get_bin_details(
-			args.item_code, out.warehouse, args.company, include_child_warehouses=True
-		)
+		company = args.company if needs_company_total_stock(args) else None
+		bin_details = _get_bin_details(args.item_code, out.warehouse, company, include_child_warehouses=True)
 
 		out.update(bin_details)
+
+
+def needs_company_total_stock(args):
+	if not args.get("child_doctype"):
+		return True
+
+	return frappe.get_meta(args.child_doctype).has_field("company_total_stock")
 
 
 def update_stock(ctx, out, doc=None, has_locked_rate=False):
