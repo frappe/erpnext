@@ -134,15 +134,19 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	company: function (frm) {
-		frm.trigger("currency");
+		// the currency is the same, so the activity rates are not fetched again
+		set_exchange_rate(frm);
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	currency: function (frm) {
+		keep_rates_in_company_currency(frm);
 		set_exchange_rate(frm);
 		frm.trigger("set_dynamic_field_label");
 	},
 
 	exchange_rate: function (frm) {
+		convert_kept_rates(frm);
 		$.each(frm.doc.time_logs, function (i, d) {
 			calculate_billing_costing_amount(frm, d.doctype, d.name);
 		});
@@ -247,6 +251,19 @@ frappe.ui.form.on("Timesheet", {
 			set_activity_costs(frm);
 		}
 	},
+
+	validate: function (frm) {
+		// a save waits for the exchange rate, so that the rates are sent in the new currency
+		return Promise.resolve(frm.exchange_rate_request).then(
+			() => frm.exchange_rate_applied,
+			() => {}
+		);
+	},
+
+	after_save: function (frm) {
+		// rates still waiting for an exchange rate are saved as they are
+		frm.kept_rates = null;
+	},
 });
 
 frappe.ui.form.on("Timesheet Detail", {
@@ -299,11 +316,15 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	billing_rate: function (frm, cdt, cdn) {
+		// a rate set after the currency change is already in the new currency
+		if (frm.kept_rates?.[cdn]) delete frm.kept_rates[cdn].billing_rate;
 		calculate_billing_costing_amount(frm, cdt, cdn);
 		calculate_time_and_amount(frm);
 	},
 
 	costing_rate: function (frm, cdt, cdn) {
+		// a rate set after the currency change is already in the new currency
+		if (frm.kept_rates?.[cdn]) delete frm.kept_rates[cdn].costing_rate;
 		calculate_billing_costing_amount(frm, cdt, cdn);
 		calculate_time_and_amount(frm);
 	},
@@ -469,6 +490,35 @@ var fetch_activity_cost = function (frm, activity_type, callback) {
 	});
 };
 
+// on a currency change, remember what each rate is worth in company currency
+var keep_rates_in_company_currency = function (frm) {
+	let exchange_rate = flt(frm.doc.exchange_rate);
+	// without a rate the earlier currency change is still waiting for its own
+	if (!exchange_rate) return;
+
+	frm.kept_rates = {};
+	(frm.doc.time_logs || []).forEach((row) => {
+		frm.kept_rates[row.name] = {
+			billing_rate: flt(row.billing_rate) * exchange_rate,
+			costing_rate: flt(row.costing_rate) * exchange_rate,
+		};
+	});
+};
+
+// once the new exchange rate is known, the rates keep their worth in company currency
+var convert_kept_rates = function (frm) {
+	let exchange_rate = flt(frm.doc.exchange_rate);
+	if (!frm.kept_rates || !exchange_rate) return;
+
+	(frm.doc.time_logs || []).forEach((row) => {
+		Object.entries(frm.kept_rates[row.name] || {}).forEach(([fieldname, base_rate]) => {
+			row[fieldname] = base_rate / exchange_rate;
+		});
+	});
+	frm.kept_rates = null;
+	frm.refresh_fields("time_logs");
+};
+
 var set_exchange_rate = function (frm) {
 	let company_currency = erpnext.get_currency(frm.doc.company);
 	let transaction_date = get_start_date(frm);
@@ -483,7 +533,8 @@ var set_exchange_rate = function (frm) {
 
 	// clear the old quote, so that a failed lookup does not keep it
 	frm.set_value("exchange_rate", 0);
-	frappe.call({
+	frm.exchange_rate_applied = null;
+	frm.exchange_rate_request = frappe.call({
 		method: "erpnext.setup.utils.get_exchange_rate",
 		args: {
 			from_currency: frm.doc.currency,
@@ -493,7 +544,7 @@ var set_exchange_rate = function (frm) {
 		callback: function (r) {
 			if (frm.exchange_rate_quote !== quote || !r.message) return;
 
-			frm.set_value("exchange_rate", flt(r.message));
+			frm.exchange_rate_applied = frm.set_value("exchange_rate", flt(r.message));
 			frm.set_df_property(
 				"exchange_rate",
 				"description",

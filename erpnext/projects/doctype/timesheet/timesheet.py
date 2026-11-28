@@ -77,6 +77,7 @@ class Timesheet(Document):
 		self.validate_tasks_not_cancelled()
 		self.set_dates()
 		self.set_exchange_rate()
+		self.keep_rates_on_currency_change()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
@@ -101,6 +102,28 @@ class Timesheet(Document):
 				).format(self.currency, self.get_company_currency(), formatdate(self.start_date)),
 				title=_("Exchange Rate Missing"),
 			)
+
+	def keep_rates_on_currency_change(self):
+		"""When the currency changes, a rate that was left untouched keeps its worth in
+		company currency. The form sends its rates with their new base rates, so they are kept."""
+		previous = self.get_doc_before_save()
+		if not previous or not previous.currency or previous.currency == self.currency:
+			return
+
+		conversion = (flt(previous.exchange_rate) or 1.0) / (flt(self.exchange_rate) or 1.0)
+		previous_logs = {row.name: row for row in previous.time_logs}
+		for time_log in self.time_logs:
+			previous_log = previous_logs.get(time_log.name)
+			if not previous_log:
+				continue
+
+			for fieldname in ("billing_rate", "costing_rate"):
+				untouched = all(
+					flt(time_log.get(field)) == flt(previous_log.get(field))
+					for field in (fieldname, f"base_{fieldname}")
+				)
+				if untouched:
+					time_log.set(fieldname, flt(previous_log.get(fieldname)) * conversion)
 
 	def get_company_currency(self):
 		if self.company:
