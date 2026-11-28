@@ -4796,6 +4796,102 @@ class TestJobCard(ERPNextTestSuite):
 		]
 		self.assertEqual(operating_costs, [(operation_id, 600)])
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_semi_fg_entry_leaves_process_loss_out_of_operating_cost_qty(self):
+		from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		operation = {
+			"operation": "_Test Operation Process Loss Cost",
+			"workstation": "_Test Workstation Process Loss Cost",
+			"hour_rate_labour": 600,
+		}
+		setup_operations([operation])
+		rm_item = make_item("_Test RM Process Loss Cost", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test FG Process Loss Cost", {"is_stock_item": 1}).name
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"quantity": 1,
+				"with_operations": 1,
+				"track_semi_finished_goods": 1,
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100, "operation_row_id": 1}],
+				"operations": [
+					{
+						"operation": operation["operation"],
+						"workstation": operation["workstation"],
+						"time_in_mins": 60,
+						"finished_good": fg_item,
+						"finished_good_qty": 1,
+						"is_final_finished_good": 1,
+						"sequence_id": 1,
+						"source_warehouse": warehouse,
+						"fg_warehouse": warehouse,
+						"skip_material_transfer": 1,
+					}
+				],
+			}
+		)
+		bom.insert()
+		bom.submit()
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=10, basic_rate=100)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=6,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+			fg_warehouse=warehouse,
+		)
+		operation_id = work_order.operations[0].name
+		first_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		first_card.for_quantity = 3
+		first_card.save()
+		make_job_card(
+			work_order.name,
+			[
+				{
+					"name": operation_id,
+					"operation": operation["operation"],
+					"qty": 3,
+					"pending_qty": 3,
+					"skip_material_transfer": 1,
+				}
+			],
+		)
+
+		# each card makes 2 good units and loses 1
+		job_cards = frappe.get_all(
+			"Job Card", {"work_order": work_order.name}, pluck="name", order_by="creation"
+		)
+		for day, name in enumerate(job_cards, start=1):
+			job_card = frappe.get_doc("Job Card", name)
+			job_card.semi_fg_bom = bom.name
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": f"2024-02-0{day} 08:00:00",
+					"to_time": f"2024-02-0{day} 09:00:00",
+					"completed_qty": 2,
+				},
+			)
+			job_card.submit()
+
+		# each card ran for an hour, so its 2 good units carry one hour of cost
+		for name in job_cards:
+			job_card = frappe.get_doc("Job Card", name)
+			entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+			entry.submit()
+			operating_costs = [
+				(row.qty, row.amount) for row in entry.additional_costs if row.has_operating_cost
+			]
+			self.assertEqual(operating_costs, [(2, flt(job_card.hour_rate, 2))])
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_stock_entry_needs_a_job_card_item_reference(self):
 		create_bom_with_multiple_operations()
