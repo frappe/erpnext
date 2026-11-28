@@ -209,7 +209,12 @@ def create_dn_for_pick_lists(
 		pick_list, sales_orders, "Delivery Note", target_doc=target_doc, kwargs=kwargs
 	)
 
-	if not sales_order_arg and not all(item.sales_order for item in pick_list.locations):
+	# rows without a Sales Order belong to the Pick List's own customer
+	if (
+		not sales_order_arg
+		and (not customer_arg or customer_arg == pick_list.customer)
+		and not all(item.sales_order for item in pick_list.locations)
+	):
 		if isinstance(delivery_note, str | dict):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
