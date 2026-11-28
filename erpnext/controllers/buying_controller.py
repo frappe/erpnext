@@ -5,7 +5,7 @@
 import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import render_address
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate
 from frappe.utils.data import nowtime
 
@@ -609,16 +609,25 @@ class BuyingController(SubcontractingController):
 		return [d.item_code for d in self.items if d.is_fixed_asset]
 
 	def set_landed_cost_voucher_amount(self):
+		landed_costs = self.get_landed_cost_by_receipt_row()
 		for d in self.get("items"):
-			lc_voucher_data = frappe.db.sql(
-				"""select sum(applicable_charges), cost_center
-				from `tabLanded Cost Item`
-				where docstatus = 1 and purchase_receipt_item = %s and receipt_document = %s""",
-				(d.name, self.name),
+			amount, cost_center = landed_costs.get(d.name, (0.0, None))
+			d.landed_cost_voucher_amount = amount
+			if not d.cost_center and cost_center:
+				d.db_set("cost_center", cost_center)
+
+	def get_landed_cost_by_receipt_row(self):
+		lcv_item = frappe.qb.DocType("Landed Cost Item")
+		rows = (
+			frappe.qb.from_(lcv_item)
+			.select(
+				lcv_item.purchase_receipt_item, Sum(lcv_item.applicable_charges), Max(lcv_item.cost_center)
 			)
-			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
-			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
-				d.db_set("cost_center", lc_voucher_data[0][1])
+			.where((lcv_item.docstatus == 1) & (lcv_item.receipt_document == self.name))
+			.groupby(lcv_item.purchase_receipt_item)
+		).run(as_list=True)
+
+		return {row: (amount, cost_center) for row, amount, cost_center in rows}
 
 	def validate_from_warehouse(self):
 		for item in self.get("items"):
