@@ -562,6 +562,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_cancel"):
 			self.purpose_cls(self).on_cancel()
 
+		self.validate_subcontracting_inward_cancel()
 		self.validate_asset_repair_is_cancelled()
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
