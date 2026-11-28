@@ -3534,6 +3534,28 @@ class TestProductionPlan(ERPNextTestSuite):
 			row.planned_qty = 5
 		plan.submit()
 
+	def test_consolidated_plan_combined_again_keeps_its_sales_orders(self):
+		item = "Test Production Item 1"
+		for older_plan in (False, True):
+			sales_orders = [make_sales_order(item_code=item, qty=10) for _ in range(2)]
+			plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+			if older_plan:
+				# older plans pointed references at the first Sales Order line
+				plan.po_items[0].item_reference = None
+				for row in plan.prod_plan_references:
+					row.item_reference = sales_orders[0].items[0].name
+			plan.combine_so_items()
+			plan.combine_so_items()
+			plan.submit()
+
+			self.assertEqual(
+				[
+					frappe.db.get_value("Sales Order Item", order.items[0].name, "production_plan_qty")
+					for order in sales_orders
+				],
+				[10, 10],
+			)
+
 	def test_combined_plan_fetched_again_plans_only_its_sales_orders(self):
 		item = "Test Production Item 1"
 		old_order, new_order = (make_sales_order(item_code=item, qty=10) for _ in range(2))
