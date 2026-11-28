@@ -826,6 +826,18 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery.items[0].serial_no = "\n".join(delivery_serial_list)
 		self.assertRaises(frappe.ValidationError, delivery.submit)
 
+	def test_manufacture_after_a_delivery_reserves_its_finished_good(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = submit_work_order(scio)
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 3)).submit()
+		make_delivery_of_qty(scio, 2)
+
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 2)).submit()
+
+		self.assertEqual(get_delivered_reservations(scio), [(3, 2), (2, 0)])
+
 	def test_fg_item_fields(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
