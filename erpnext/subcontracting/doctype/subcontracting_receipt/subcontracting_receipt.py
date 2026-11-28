@@ -1423,7 +1423,7 @@ class SubcontractingReceipt(SubcontractingController):
 				continue
 
 			for bom_item in self._get_materials_from_bom(
-				row.item_code, row.bom, row.get("include_exploded_items")
+				row.item_code, row.bom, row.get("include_exploded_items"), row.get("job_card")
 			):
 				required = rm_dict.setdefault(
 					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)

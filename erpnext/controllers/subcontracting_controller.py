@@ -1038,7 +1038,7 @@ class SubcontractingController(StockController):
 		if item.get("serial_and_batch_bundle"):
 			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
 
-	def _get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
+	def _get_materials_from_bom(self, item_code, bom_no, exploded_item=0, job_card=None):
 		data = []
 
 		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
@@ -1062,7 +1062,7 @@ class SubcontractingController(StockController):
 		]
 
 		if doctype == "BOM Item":
-			fields_list.extend(["is_phantom_item", "bom_no"])
+			fields_list.extend(["is_phantom_item", "bom_no", "operation", "operation_row_id"])
 			# BOM Item rate is in the BOM currency and UOM
 			fields.append(
 				{"DIV": ["`tabBOM Item`.`base_rate`", "`tabBOM Item`.`conversion_factor`"], "as": "rate"}
@@ -1081,6 +1081,9 @@ class SubcontractingController(StockController):
 		]
 
 		data = frappe.get_all("BOM", fields=fields, filters=filters, order_by=f"`tab{doctype}`.`idx`") or []
+		if job_card and doctype == "BOM Item":
+			data = self.get_job_card_materials(data, bom_no, job_card)
+
 		to_remove = []
 		for item in data:
 			if item.is_phantom_item:
@@ -1097,6 +1100,14 @@ class SubcontractingController(StockController):
 			data.remove(item)
 
 		return data
+
+	def get_job_card_materials(self, materials, bom_no, job_card):
+		"""The Work Order BOM lists the materials of every operation; a Job Card uses only its own."""
+		job_card = frappe.get_cached_doc("Job Card", job_card)
+		if bom_no != frappe.db.get_value("Work Order", job_card.work_order, "bom_no"):
+			return materials
+
+		return [row for row in materials if job_card.is_own_material(row)]
 
 	def __update_reserve_warehouse(self, row, item, job_card_warehouses):
 		if (
@@ -1475,7 +1486,7 @@ class SubcontractingController(StockController):
 				self.backflush_based_on == "BOM" or self.is_return
 			):
 				for bom_item in self._get_materials_from_bom(
-					row.item_code, row.bom, row.get("include_exploded_items")
+					row.item_code, row.bom, row.get("include_exploded_items"), row.get("job_card")
 				):
 					qty = (
 						flt(bom_item.qty_consumed_per_unit)

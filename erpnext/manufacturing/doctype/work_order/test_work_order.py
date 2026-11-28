@@ -6866,6 +6866,109 @@ class TestWorkOrder(ERPNextTestSuite):
 		sco.submit()
 		return sco
 
+	def test_subcontracted_final_operation_without_bom_supplies_only_its_own_materials(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+		from erpnext.manufacturing.doctype.job_card.mapper import make_subcontracting_po
+
+		company = "_Test Company"
+		cloth = make_item("Test SFO Cloth", {"is_stock_item": 1}).name
+		cut_cloth = make_item("Test SFO Cut Cloth", {"is_stock_item": 1}).name
+		shirt = make_item("Test SFO Shirt", {"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		service_item = make_item("Test SFO Stitching Service", {"is_stock_item": 0}).name
+
+		cut_cloth_bom = frappe.new_doc("BOM")
+		cut_cloth_bom.company = company
+		cut_cloth_bom.item = cut_cloth
+		cut_cloth_bom.quantity = 1
+		cut_cloth_bom.append("items", {"item_code": cloth, "qty": 1})
+		cut_cloth_bom.insert()
+		cut_cloth_bom.submit()
+
+		if not frappe.db.exists("Workstation", "Test SFO Workstation"):
+			make_workstation(workstation="Test SFO Workstation", production_capacity=1)
+		for operation in ("Test SFO Cutting", "Test SFO Stitching"):
+			if not frappe.db.exists("Operation", operation):
+				make_operation(operation=operation, workstation="Test SFO Workstation")
+
+		# The final operation has no BOM of its own, so its Job Card uses this one.
+		bom = frappe.new_doc("BOM")
+		bom.company = company
+		bom.item = shirt
+		bom.quantity = 1
+		bom.with_operations = 1
+		bom.track_semi_finished_goods = 1
+		bom.append(
+			"operations",
+			{
+				"operation": "Test SFO Cutting",
+				"workstation": "Test SFO Workstation",
+				"finished_good": cut_cloth,
+				"finished_good_qty": 1,
+				"bom_no": cut_cloth_bom.name,
+				"time_in_mins": 60,
+				"sequence_id": 1,
+			},
+		)
+		bom.append(
+			"operations",
+			{
+				"operation": "Test SFO Stitching",
+				"workstation": "Test SFO Workstation",
+				"finished_good": shirt,
+				"finished_good_qty": 1,
+				"is_final_finished_good": 1,
+				"is_subcontracted": 1,
+				"time_in_mins": 60,
+				"sequence_id": 2,
+			},
+		)
+		bom.append("items", {"item_code": cloth, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": cut_cloth, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+		bom.submit()
+
+		if not frappe.db.exists("Subcontracting BOM", {"finished_good": shirt}):
+			frappe.get_doc(
+				{
+					"doctype": "Subcontracting BOM",
+					"finished_good": shirt,
+					"finished_good_qty": 1,
+					"service_item": service_item,
+					"service_item_qty": 1,
+					"finished_good_bom": bom.name,
+					"is_active": 1,
+				}
+			).insert()
+
+		wo = make_wo_order_test_record(
+			production_item=shirt,
+			qty=10,
+			bom_no=bom.name,
+			skip_transfer=1,
+			source_warehouse="Stores - _TC",
+			wip_warehouse="Stores - _TC",
+			fg_warehouse="Stores - _TC",
+		)
+		job_card = frappe.db.get_value("Job Card", {"work_order": wo.name, "operation": "Test SFO Stitching"})
+
+		supplier_warehouse = create_warehouse("Test SFO Supplier WH", company=company)
+		po = frappe.get_doc(make_subcontracting_po(job_card))
+		po.supplier = "_Test Supplier"
+		po.supplier_warehouse = supplier_warehouse
+		po.schedule_date = nowdate()
+		for item in po.items:
+			item.schedule_date = nowdate()
+		po.insert()
+		po.submit()
+
+		sco = make_subcontracting_order(po.name)
+		sco.supplier_warehouse = supplier_warehouse
+		sco.insert()
+
+		# The cloth belongs to the Cutting operation, which the Work Order does itself.
+		supplied = {row.rm_item_code: row.required_qty for row in sco.supplied_items}
+		self.assertEqual(supplied, {cut_cloth: 10})
+
 	def test_rework_keeps_the_reworked_item_reserved(self):
 		warehouse = "Stores - _TC"
 		item = make_item("Test Rework Item", {"is_stock_item": 1}).name
