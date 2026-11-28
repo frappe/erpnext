@@ -748,7 +748,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		is_whole_number = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
 		if not is_whole_number:
 			return (
-				self.get_wip_raw_material_qty(row, entry_qty)
+				self.get_wip_raw_material_qty(row, qty_per_unit, entry_qty)
 				if self.uses_up_transferred_material
 				else entry_qty
 			)
@@ -757,29 +757,33 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		consumed_qty = flt(row.consumed_qty) - flt(row.returned_qty)
 		return min(max(ceil(flt(total_qty - consumed_qty, 9)), 0), entry_qty)
 
-	def get_wip_raw_material_qty(self, row, entry_qty):
-		"""What partial entries left in WIP, when it differs from the entry's share only by their
-		rounding. A real shortage or excess transfer keeps the share."""
+	def get_wip_raw_material_qty(self, row, qty_per_unit, entry_qty):
+		"""What partial entries left in WIP, when it is exactly what rounding each entry's share
+		leaves. A shortage, an excess transfer or an edited entry keeps the share."""
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		rounded_wip_qty = sum(
+			flt(qty_per_unit * qty, precision) * (1 if purpose == "Material Transfer for Manufacture" else -1)
+			for purpose, qty in self.wo_entry_qtys
+		)
 		wip_qty = flt(row.transferred_qty) - flt(row.consumed_qty)
-		if flt(abs(wip_qty - entry_qty) - self.rounding_tolerance, 9) > 0:
+		if flt(wip_qty, precision) != flt(rounded_wip_qty, precision):
 			return entry_qty
 
-		# drop float noise only: rows of one component are rounded and checked on their total
 		return max(flt(wip_qty, 9), 0)
 
 	@cached_property
-	def rounding_tolerance(self):
-		"""Half a unit of stock qty precision for each transfer or Manufacture of the order, this one included."""
-		entries = frappe.db.count(
+	def wo_entry_qtys(self):
+		"""Purpose and For Quantity of the order's submitted transfers and Manufactures."""
+		return frappe.get_all(
 			"Stock Entry",
-			{
+			filters={
 				"work_order": self.doc.work_order,
 				"docstatus": 1,
 				"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
 			},
+			fields=["purpose", "fg_completed_qty"],
+			as_list=True,
 		)
-		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
-		return (entries + 1) * 0.5 / 10**precision
 
 	@property
 	def wo_done_qty(self):
