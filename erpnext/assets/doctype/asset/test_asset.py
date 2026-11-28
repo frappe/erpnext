@@ -1265,6 +1265,43 @@ class TestAsset(AssetSetup):
 			],
 		)
 
+	def test_sale_on_last_schedule_date_takes_the_last_row(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_asset(
+			calculate_depreciation=1,
+			purchase_date="2026-04-01",
+			available_for_use_date="2026-04-01",
+			depreciation_start_date="2026-04-30",
+			depreciation_method="Written Down Value",
+			rate_of_depreciation=40,
+			total_number_of_depreciations=4,
+			frequency_of_depreciation=1,
+			expected_value_after_useful_life=10000,
+			submit=1,
+		)
+		self.assertEqual(get_depr_schedule(asset.name, "Active")[-1].depreciation_amount, 80000.01)
+		post_depreciation_entries(date="2026-06-30")
+
+		sale = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=10000, posting_date="2026-07-31"
+		)
+
+		asset.load_from_db()
+		last_row = get_depr_schedule(asset.name, "Active")[-1]
+		self.assertEqual(
+			(getdate(last_row.schedule_date), last_row.depreciation_amount), (getdate("2026-07-31"), 80000.01)
+		)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 10000)
+		self.assertCountEqual(
+			get_gl_entries("Sales Invoice", sale.name),
+			(
+				("_Test Accumulated Depreciations - _TC", 90000.0, 0.0),
+				("_Test Fixed Asset - _TC", 0.0, 100000.0),
+				("Debtors - _TC", 10000.0, 0.0),
+			),
+		)
+
 	def test_sale_and_return_gl_unchanged_on_repost(self):
 		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
 			update_repost_settings,
