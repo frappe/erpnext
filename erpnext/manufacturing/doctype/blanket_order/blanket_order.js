@@ -147,7 +147,9 @@ frappe.ui.form.on("Blanket Order", {
 });
 
 frappe.ui.form.on("Blanket Order Item", {
-	item_code: function (frm, cdt, cdn) {
+	item_code: async function (frm, cdt, cdn) {
+		// the old item's rate must not survive a failed refresh or a new item without a price
+		await frappe.model.set_value(cdt, cdn, "rate", 0);
 		return blanket_order_pricing.apply(frm, cdn, { reset_rate: true });
 	},
 
