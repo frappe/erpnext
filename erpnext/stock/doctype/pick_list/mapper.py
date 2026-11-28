@@ -209,10 +209,11 @@ def create_dn_for_pick_lists(
 		pick_list, sales_orders, "Delivery Note", target_doc=target_doc, kwargs=kwargs
 	)
 
-	# rows without a Sales Order belong to the Pick List's own customer
+	# rows without a Sales Order belong to the Pick List's own customer, if it has one
+	is_other_customer = customer_arg and pick_list.customer and customer_arg != pick_list.customer
 	if (
 		not sales_order_arg
-		and (not customer_arg or customer_arg == pick_list.customer)
+		and not is_other_customer
 		and not all(item.sales_order for item in pick_list.locations)
 	):
 		if isinstance(delivery_note, str | dict):
