@@ -758,66 +758,33 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		return min(max(ceil(flt(total_qty - consumed_qty, 9)), 0), entry_qty)
 
 	def get_wip_raw_material_qty(self, row, qty_per_unit, entry_qty):
-		"""What partial entries left in WIP, when it is exactly what rounding each entry's share
-		leaves. A shortage, an excess transfer, an edited entry or a material on several rows keeps the share."""
+		"""What is left of the material in WIP, when it differs from this entry's share only by the
+		rounding of each transfer's and Manufacture's share. Otherwise the share."""
 		# transfers of a material on several rows are split over its rows
 		if sum(d.item_code == row.item_code for d in self.wo_doc.required_items) > 1:
 			return entry_qty
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
-		wip_qty = flt(row.transferred_qty) - flt(row.consumed_qty)
-		rounded_wip_qty = self.get_rounded_wip_qty(row.item_code, qty_per_unit)
-		if flt(wip_qty, precision) != flt(rounded_wip_qty, precision):
-			return entry_qty
-
-		return max(flt(wip_qty, precision), 0)
-
-	def get_rounded_wip_qty(self, item_code, qty_per_unit):
-		"""What the order's entries that move the material leave in WIP, each share rounded as the
-		entry rounds it. A return moves its actual qty."""
-		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
-		qty = 0.0
-		for d in self.wo_material_movements[item_code]:
-			if d.purpose == "Manufacture":
-				qty -= flt(qty_per_unit * flt(d.fg_completed_qty), precision)
-			elif d.is_return:
-				qty -= flt(d.qty)
-			else:
-				qty += flt(qty_per_unit * flt(d.fg_completed_qty), precision)
-
-		return qty
+		wip_qty = flt(flt(row.transferred_qty) - flt(row.consumed_qty), precision)
+		gap = flt(abs(wip_qty - flt(entry_qty, precision)), precision)
+		rounding = sum(
+			abs(flt(qty_per_unit * qty, precision) - qty_per_unit * qty)
+			for qty in [*self.wo_entry_fg_completed_qtys, flt(self.doc.fg_completed_qty)]
+		)
+		return wip_qty if gap <= flt(rounding, 9) else entry_qty
 
 	@cached_property
-	def wo_material_movements(self):
-		"""Each raw material's submitted transfers and Manufactures of the order, one per entry."""
-		ste = frappe.qb.DocType("Stock Entry")
-		detail = frappe.qb.DocType("Stock Entry Detail")
-		item_code = Coalesce(NullIf(detail.original_item, ""), detail.item_code)
-		rows = (
-			frappe.qb.from_(detail)
-			.join(ste)
-			.on(detail.parent == ste.name)
-			.select(
-				item_code.as_("item_code"),
-				ste.purpose,
-				ste.is_return,
-				ste.fg_completed_qty,
-				Sum(detail.transfer_qty).as_("qty"),
-			)
-			.where(
-				(ste.work_order == self.doc.work_order)
-				& (ste.docstatus == 1)
-				& ste.purpose.isin(["Material Transfer for Manufacture", "Manufacture"])
-				& (IfNull(detail.s_warehouse, "") != "")
-			)
-			.groupby(ste.name, ste.purpose, ste.is_return, ste.fg_completed_qty, item_code)
-		).run(as_dict=True)
-
-		movements = defaultdict(list)
-		for d in rows:
-			movements[d.item_code].append(d)
-
-		return movements
+	def wo_entry_fg_completed_qtys(self):
+		"""Qty of each submitted transfer and Manufacture of the order."""
+		return frappe.get_all(
+			"Stock Entry",
+			filters={
+				"work_order": self.doc.work_order,
+				"docstatus": 1,
+				"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
+			},
+			pluck="fg_completed_qty",
+		)
 
 	@property
 	def wo_done_qty(self):
@@ -1708,10 +1675,10 @@ def _check_bom_component_qty(doc, bom_items, get_qty=None):
 			if flt(row.qty, precision) != flt(stock_qty, precision):
 				frappe.throw(
 					_(
-						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}. Click Get Items to fetch the quantities again."
+						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
 					).format(
 						bold(row.item_code),
-						flt(row.qty, precision),
+						flt(row.qty),
 						get_link_to_form("BOM", doc.bom_no),
 					),
 					title=_("Incorrect Component Quantity"),
