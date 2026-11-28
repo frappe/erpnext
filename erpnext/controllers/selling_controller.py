@@ -1255,6 +1255,9 @@ class SellingController(StockController):
 				if not item.get(so_field) or not item.so_detail:
 					continue
 
+				# a serial no only goes to its own reservation, but a batch may have gone to a qty one
+				# after its batch reservation was full, so a batch item gives back qty reservations first
+				has_serial_no = frappe.get_cached_value("Item", item.item_code, "has_serial_no")
 				sre_list = frappe.db.get_all(
 					"Stock Reservation Entry",
 					{
@@ -1265,7 +1268,7 @@ class SellingController(StockController):
 						"warehouse": item.warehouse,
 						"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
 					},
-					order_by="reservation_based_on desc, creation",
+					order_by=f"reservation_based_on {'desc' if has_serial_no else 'asc'}, creation",
 				)
 
 				# Skip if no Stock Reservation Entries.
@@ -1295,10 +1298,16 @@ class SellingController(StockController):
 									serial_nos_to_undelivered.remove(entry.serial_no)
 						else:
 							for entry in sre_doc.sb_entries:
-								if batch_qty_to_undelivered.get(entry.batch_no, 0) > 0:
-									undelivered_qty = get_qty_to_undeliver(
-										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
-									)
+								# qty reservations given back first have used part of the row qty
+								batch_qty = min(
+									batch_qty_to_undelivered.get(entry.batch_no, 0),
+									flt(
+										qty_to_undelivered - qty_can_be_undelivered,
+										frappe.get_precision("Serial and Batch Entry", "qty"),
+									),
+								)
+								if batch_qty > 0:
+									undelivered_qty = get_qty_to_undeliver(entry.delivered_qty, batch_qty)
 									entry.delivered_qty -= undelivered_qty
 									entry.db_update()
 									qty_can_be_undelivered += undelivered_qty
