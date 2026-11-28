@@ -1367,6 +1367,7 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
 			remove_from_bank_transaction,
 		)
+		from erpnext.accounts.services.exchange_gain_loss import validate_settlement_can_be_undone
 		from erpnext.accounts.utils import (
 			cancel_common_party_journal,
 			cancel_exchange_gain_loss_journal,
@@ -1376,6 +1377,7 @@ class AccountsController(TransactionBase):
 		remove_from_bank_transaction(self.doctype, self.name)
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
+			validate_settlement_can_be_undone(self.doctype, self.name)
 			self.cancel_system_generated_credit_debit_notes()
 
 			# Cancel Exchange Gain/Loss Journal before unlinking
