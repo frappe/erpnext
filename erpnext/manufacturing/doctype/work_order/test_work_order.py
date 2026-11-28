@@ -5451,6 +5451,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		{
 			"backflush_raw_materials_based_on": "BOM",
 			"material_consumption": 0,
+			"transfer_extra_materials_percentage": 50,
+		},
+	)
+	def test_last_manufacture_keeps_share_when_transfer_is_in_excess(self):
+		"""An excess transfer is more than rounding, so the last entry keeps its share."""
+		wo, rm_item = make_rounding_work_order(2.1825)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		consumed_qty = sum(row.qty for row in manufacture.items if row.item_code == rm_item)
+		self.assertEqual(flt(consumed_qty, precision), flt(2.1825 * 3, precision))
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "BOM",
+			"material_consumption": 0,
 			"disable_capacity_planning": 1,
 		},
 	)
