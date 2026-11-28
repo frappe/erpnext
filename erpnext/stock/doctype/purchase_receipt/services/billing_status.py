@@ -590,6 +590,19 @@ def adjust_incoming_rate_for_pr(doc) -> None:
 
 	doc.repost_future_sle_and_gle(force=True)
 
+	if doc.get("subcontracting_receipt"):
+		adjust_incoming_rate_for_scr(frappe.get_doc("Subcontracting Receipt", doc.subcontracting_receipt))
+
+
+def adjust_incoming_rate_for_scr(scr) -> None:
+	"""Revalue the finished goods with the service's Amount Difference with Purchase Invoice."""
+	scr.calculate_items_qty_and_amount()
+	scr.db_update()
+	for item in scr.items:
+		item.db_update()
+
+	scr.repost_future_sle_and_gle(force=True)
+
 
 def get_item_wise_returned_qty(items: list) -> dict:
 	return frappe._dict(

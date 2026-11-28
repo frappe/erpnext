@@ -646,7 +646,9 @@ class SubcontractingReceipt(SubcontractingController):
 			original_row.received_qty - original_row.process_loss_qty, precision
 		)
 
-	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map) -> dict:
+	def calculate_percentage_secondary_rows(
+		self, percentage_rows, secondary_items_cost_map, invoice_differences
+	) -> dict:
 		"""Price the % rows; returns the % allocated to them, by finished good row."""
 		allocated_per = defaultdict(float)
 		allocation_map = self.get_cost_allocation_map(percentage_rows)
@@ -661,6 +663,7 @@ class SubcontractingReceipt(SubcontractingController):
 					flt(allocation_map[item.bom_secondary_item]),
 					qty,
 					secondary_items_cost_map.get(item.reference_name, 0),
+					flt(invoice_differences.get(fg_row.name)),
 				)
 			item.amount = qty * flt(item.rate)
 
@@ -797,9 +800,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 		return self.get_percentage_secondary_rate(item, secondary_item.cost_allocation_per, qty, own_cost)
 
-	def get_percentage_secondary_rate(self, fg_row, cost_allocation_per, qty, own_cost):
+	def get_percentage_secondary_rate(
+		self, fg_row, cost_allocation_per, qty, own_cost, invoice_difference=0.0
+	):
 		received_qty = flt(fg_row.received_qty) or flt(fg_row.qty)
-		lcv_cost_per_qty = flt(fg_row.landed_cost_voucher_amount) / received_qty if received_qty else 0.0
+		landed_cost = flt(fg_row.landed_cost_voucher_amount) + invoice_difference
+		lcv_cost_per_qty = landed_cost / received_qty if received_qty else 0.0
 		fg_item_cost = (
 			flt(fg_row.rm_cost_per_qty)
 			+ flt(fg_row.additional_cost_per_qty)
@@ -1200,6 +1206,8 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rm_supp_cost = rm_cost_map[item.name]
 				item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
 
+		invoice_differences = self.get_invoice_differences()
+
 		# own-cost rows first: they are deducted from the finished good, and the
 		# percentage rows reprice from the basis net of them
 		secondary_items_cost_map = {}
@@ -1233,7 +1241,9 @@ class SubcontractingReceipt(SubcontractingController):
 		allocated_per = (
 			self.get_returned_allocated_per()
 			if is_return
-			else self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
+			else self.calculate_percentage_secondary_rows(
+				percentage_rows, secondary_items_cost_map, invoice_differences
+			)
 		)
 
 		rejected_return_rows = self.get_rejected_return_rows()
@@ -1262,8 +1272,9 @@ class SubcontractingReceipt(SubcontractingController):
 						item.secondary_items_cost_per_qty = 0
 
 				lcv_cost_per_qty = 0.0
-				if item.landed_cost_voucher_amount:
-					lcv_cost_per_qty = item.landed_cost_voucher_amount / (item.received_qty or item.qty)
+				landed_cost = flt(item.landed_cost_voucher_amount) + flt(invoice_differences.get(item.name))
+				if landed_cost:
+					lcv_cost_per_qty = landed_cost / (item.received_qty or item.qty)
 
 				item.rate = (
 					flt(item.rm_cost_per_qty)
@@ -1295,6 +1306,40 @@ class SubcontractingReceipt(SubcontractingController):
 			total_amount += item.amount
 		self.total_qty = total_qty
 		self.total = total_amount
+
+	def get_invoice_differences(self) -> dict[str, float]:
+		"""Service difference with its Purchase Invoice by finished good row, split by qty over its order line."""
+		if self.is_return or self.is_new():
+			return {}
+
+		line_differences = dict(
+			frappe.get_all(
+				"Purchase Receipt Item",
+				filters={
+					"docstatus": 1,
+					"subcontracting_receipt_item": ("in", [row.name for row in self.items]),
+					"amount_difference_with_purchase_invoice": ("!=", 0),
+				},
+				fields=["purchase_order_item", "amount_difference_with_purchase_invoice"],
+				as_list=True,
+			)
+		)
+		if not line_differences:
+			return {}
+
+		# the Purchase Receipt row receives the service for the accepted and lost qty of its rows
+		rows = [row for row in self.items if row.bom and row.purchase_order_item in line_differences]
+		line_qty = defaultdict(float)
+		for row in rows:
+			line_qty[row.purchase_order_item] += flt(row.qty) + flt(row.process_loss_qty)
+
+		return {
+			row.name: line_differences[row.purchase_order_item]
+			* (flt(row.qty) + flt(row.process_loss_qty))
+			/ line_qty[row.purchase_order_item]
+			for row in rows
+			if line_qty[row.purchase_order_item]
+		}
 
 	def get_returned_costs(self) -> dict[str, frappe._dict]:
 		"""Service and secondary items cost per qty of the returned receipt row, for each return row."""
