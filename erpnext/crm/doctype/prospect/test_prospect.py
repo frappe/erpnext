@@ -185,6 +185,46 @@ class TestProspect(ERPNextTestSuite):
 		prospect.prospect_owner = None
 		self.assertIsNone(prospect.get_notification_email())
 
+	def test_crm_deal_owner_is_found_by_email(self):
+		from unittest.mock import patch
+
+		from frappe.core.doctype.user.test_user import test_user
+
+		from erpnext.crm.frappe_crm_api import create_prospect_against_crm_deal
+
+		self.addCleanup(setattr, frappe.local, "form_dict", frappe._dict())
+		with (
+			test_user(roles=["Sales User"], generated_id=True) as user,
+			patch("erpnext.crm.frappe_crm_api.validate_frappe_crm_sync"),
+		):
+			# Frappe CRM on another site sends the deal owner's email
+			frappe.local.form_dict = frappe._dict(
+				organization=f"CRM Org {random_string(6)}",
+				deal_owner=user.email,
+				erpnext_company="_Test Company",
+			)
+			create_prospect_against_crm_deal()
+
+			prospect = frappe.response["message"]
+			self.assertEqual(frappe.db.get_value("Prospect", prospect, "prospect_owner"), user.name)
+
+	def test_crm_deal_owned_by_administrator_keeps_owner(self):
+		from unittest.mock import patch
+
+		from erpnext.crm.frappe_crm_api import create_prospect_against_crm_deal
+
+		self.addCleanup(setattr, frappe.local, "form_dict", frappe._dict())
+		with patch("erpnext.crm.frappe_crm_api.validate_frappe_crm_sync"):
+			frappe.local.form_dict = frappe._dict(
+				organization=f"CRM Org {random_string(6)}",
+				deal_owner="Administrator",
+				erpnext_company="_Test Company",
+			)
+			create_prospect_against_crm_deal()
+
+		prospect = frappe.response["message"]
+		self.assertEqual(frappe.db.get_value("Prospect", prospect, "prospect_owner"), "Administrator")
+
 
 def lead_row_status(lead: str) -> str:
 	return frappe.db.get_value("Prospect Lead", {"lead": lead}, "status")

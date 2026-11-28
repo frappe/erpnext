@@ -9,6 +9,7 @@ from frappe.utils import flt
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
 	get_service_level_agreement_fields,
+	reset_service_level_agreement,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -414,6 +415,21 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
+
+	@ERPNextTestSuite.change_settings("Support Settings", {"allow_resetting_service_level_agreement": 1})
+	def test_reset_comment_records_the_session_users_email(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		lead = make_lead(index=5, company="_Test Support SLA")
+		with test_user(roles=["Sales User"], generated_id=True) as user, self.set_user(user.name):
+			reset_service_level_agreement("Lead", lead.name, "Test reset")
+
+			comment_email = frappe.db.get_value(
+				"Comment",
+				{"reference_doctype": "Lead", "reference_name": lead.name, "comment_type": "Info"},
+				"comment_email",
+			)
+			self.assertEqual(comment_email, user.email)
 
 
 def get_link_filters(field_doctype, filters):

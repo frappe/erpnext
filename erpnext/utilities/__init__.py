@@ -71,6 +71,16 @@ def get_site_info(site_info):
 	return {"company": company, "domain": domain, "activation": get_level(site_info)}
 
 
+def get_user_email(user: str | None = None) -> str | None:
+	"""Return the value to save for a user in an email field.
+
+	- Other users: their email.
+	- Administrator and Guest: their name, as saved before.
+	"""
+	user = user or frappe.session.user
+	return user if user in frappe.STANDARD_USERS else frappe.utils.get_email_address(user)
+
+
 @contextmanager
 def payment_app_import_guard():
 	marketplace_link = '<a href="https://frappecloud.com/marketplace/apps/payments">Marketplace</a>'

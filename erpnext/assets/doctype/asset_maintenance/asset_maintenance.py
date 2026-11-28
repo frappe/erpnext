@@ -8,7 +8,17 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
-from frappe.utils import DateTimeLikeObject, add_days, add_months, add_years, getdate, nowdate
+from frappe.utils import (
+	DateTimeLikeObject,
+	add_days,
+	add_months,
+	add_years,
+	get_user_display_id,
+	getdate,
+	nowdate,
+)
+
+from erpnext.utilities import get_user_email
 
 
 class AssetMaintenance(Document):
@@ -61,7 +71,7 @@ class AssetMaintenance(Document):
 		if task.assign_to and task.assign_to not in team_members:
 			throw(
 				_("Row #{0}: {1} is not a member of the maintenance team {2}").format(
-					task.idx, task.assign_to, self.maintenance_team
+					task.idx, get_user_display_id(task.assign_to), self.maintenance_team
 				)
 			)
 
@@ -222,7 +232,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 				"has_certificate": task.certificate_required,
 				"description": task.description,
 				"assign_to_name": task.assign_to_name,
-				"task_assignee_email": task.assign_to,
+				"task_assignee_email": task.assign_to and get_user_email(task.assign_to),
 				"periodicity": str(task.periodicity),
 				"maintenance_type": task.maintenance_type,
 				"due_date": task.next_due_date,

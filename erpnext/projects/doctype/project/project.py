@@ -573,7 +573,7 @@ def get_users_for_project(doctype: str, txt: str, searchfield: str, start: int, 
 
 	query = frappe.qb.get_query(
 		"User",
-		fields=["name", "full_name"],
+		fields=["name", "full_name", "email"],
 		filters=filters,
 		ignore_permissions=False,
 	)
@@ -581,7 +581,9 @@ def get_users_for_project(doctype: str, txt: str, searchfield: str, start: int, 
 	return (
 		query.where(User.enabled == 1)
 		.where(User.name.notin(["Guest", "Administrator"]))
-		.where(User[searchfield].like(search_str) | User.full_name.like(search_str))
+		.where(
+			User[searchfield].like(search_str) | User.full_name.like(search_str) | User.email.like(search_str)
+		)
 		.orderby(
 			Case()
 			.when(

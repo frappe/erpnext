@@ -7,6 +7,8 @@ from frappe.query_builder.functions import Lower
 from frappe.rate_limiter import rate_limit
 from frappe.utils import escape_html, strip_html, validate_email_address
 
+from erpnext.utilities import get_user_email
+
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public Contact Us form; only parses the sender and sets lead ownership
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -33,9 +35,7 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 
 	lead = None
 	# a guest's address is unverified, so only a signed-in sender is matched to a customer
-	customer = (
-		get_customer_from_contact_email(sender) if frappe.session.user.lower() == sender.lower() else None
-	)
+	customer = get_customer_from_contact_email(sender) if get_user_email() == sender.lower() else None
 
 	if not customer:
 		lead = frappe.db.get_value("Lead", dict(email_id=sender))

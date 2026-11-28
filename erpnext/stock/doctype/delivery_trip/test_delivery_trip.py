@@ -488,6 +488,14 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		self.delivery_trip.delivery_stops[0].contact = other_contact.name
 		self.assertRaises(frappe.ValidationError, self.delivery_trip.save)
 
+	def test_driver_email_is_the_email_of_its_user(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		driver = self.delivery_trip.driver
+		with test_user(roles=["Delivery User"], generated_id=True) as user:
+			frappe.db.set_value("Driver", driver, "user", user.name)
+			self.assertEqual(get_driver_email(driver), {"email": user.email})
+
 
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):

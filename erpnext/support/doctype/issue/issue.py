@@ -25,6 +25,8 @@ from frappe.utils import (
 )
 from frappe.utils.user import is_website_user
 
+from erpnext.utilities import get_user_email
+
 # without an SLA, an Issue is resolved as by an SLA fulfilled on these statuses and paused on none
 RESOLVED_STATUSES = ("Resolved", "Closed")
 
@@ -82,10 +84,8 @@ class Issue(Document):
 		if is_website_user() or frappe.flags.in_web_form:
 			self.restore_staff_only_fields()
 
-		if frappe.flags.in_web_form and self.is_new():
-			self.raised_by = frappe.session.user
-		elif not self.raised_by:
-			self.raised_by = frappe.session.user
+		if not self.raised_by or (frappe.flags.in_web_form and self.is_new()):
+			self.raised_by = get_user_email()
 
 		self.set_lead_contact(self.raised_by)
 		self.set_opening_time()
@@ -297,7 +297,7 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 		if customers := get_parents_for_user("Customer"):
 			filters["customer"] = ["in", customers]
 		else:
-			filters["raised_by"] = user
+			filters["raised_by"] = get_user_email(user)
 
 		ignore_permissions = True
 
@@ -353,7 +353,7 @@ def auto_close_tickets():
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 
-	if doc.raised_by == user:
+	if doc.raised_by and doc.raised_by == get_user_email(user):
 		return True
 
 	# other issues of the customer can be viewed, but only the user's own issues can be changed
