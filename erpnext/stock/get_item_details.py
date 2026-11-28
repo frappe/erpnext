@@ -1196,7 +1196,11 @@ def calculate_service_end_date(ctx: ItemDetailsCtx, item: Document | None = None
 		account = "deferred_expense_account"
 
 	service_start_date = ctx.service_start_date if ctx.service_start_date else ctx.transaction_date
-	service_end_date = add_months(service_start_date, item.get(no_of_months))
+	months = cint(item.get(no_of_months))
+	service_end_date = add_months(service_start_date, months)
+	# The end date is inclusive, so 12 months from 1 Apr end on 31 Mar.
+	if months > 0:
+		service_end_date = add_days(service_end_date, -1)
 	deferred_detail = {"service_start_date": service_start_date, "service_end_date": service_end_date}
 	deferred_detail[enable_deferred] = item.get(enable_deferred)
 	deferred_detail[account] = get_default_deferred_account(ctx, item, fieldname=account)
