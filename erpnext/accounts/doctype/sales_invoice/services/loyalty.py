@@ -21,8 +21,10 @@ class LoyaltyService:
 	def make_loyalty_point_entry(self) -> None:
 		doc = self.doc
 		returned_amount = self._get_returned_amount()
-		current_amount = flt(doc.grand_total) - cint(doc.loyalty_amount)
-		eligible_amount = current_amount - returned_amount
+		# loyalty_amount and the tier limits are in company currency
+		current_amount = flt(doc.base_grand_total) - flt(doc.loyalty_amount)
+		# a return can be more than the amount left after the redemption; it earns no points
+		eligible_amount = max(current_amount - returned_amount, 0)
 		lp_details = get_loyalty_program_details_with_points(
 			doc.customer,
 			company=doc.company,
@@ -61,6 +63,25 @@ class LoyaltyService:
 			self._set_loyalty_program_tier()
 
 	def delete_loyalty_point_entry(self) -> None:
+		"""Delete the points the invoice earned and the points it redeemed."""
+		doc = self.doc
+		self._validate_earned_points_not_redeemed()
+		frappe.db.delete("Loyalty Point Entry", filters={"invoice": doc.name})
+		self._set_loyalty_program_tier()
+
+	def recompute_earned_points(self) -> None:
+		"""Rebuild the points earned after a return. The points the invoice redeemed stay."""
+		doc = self.doc
+		if doc.get("dont_create_loyalty_points"):
+			return
+
+		self._validate_earned_points_not_redeemed()
+		frappe.db.delete(
+			"Loyalty Point Entry", filters={"invoice": doc.name, "redeem_against": ("is", "not set")}
+		)
+		self.make_loyalty_point_entry()
+
+	def _validate_earned_points_not_redeemed(self) -> None:
 		doc = self.doc
 		lp_entry = frappe.db.get_all(
 			"Loyalty Point Entry", filters={"invoice": doc.name, "loyalty_points": (">", 0)}, fields=["name"]
@@ -83,9 +104,6 @@ class LoyaltyService:
 					"First cancel the {1} No {2}"
 				).format(doc.doctype, doc.doctype, invoice_list)
 			)
-		else:
-			frappe.db.delete("Loyalty Point Entry", filters={"invoice": doc.name})
-			self._set_loyalty_program_tier()
 
 	def apply_loyalty_points(self) -> None:
 		from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry import (
@@ -103,7 +121,10 @@ class LoyaltyService:
 		for lp_entry in loyalty_point_entries:
 			if lp_entry.invoice == doc.name:
 				continue
-			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
+			available_points = lp_entry.loyalty_points + flt(redemption_details.get(lp_entry.name))
+			if available_points <= 0:
+				continue
+
 			redeemed_points = min(available_points, points_to_redeem)
 			entry = frappe.get_doc(
 				{
@@ -144,7 +165,7 @@ class LoyaltyService:
 		doc = frappe.qb.DocType(self.doc.doctype)
 		returned_amount = (
 			frappe.qb.from_(doc)
-			.select(Sum(doc.grand_total))
+			.select(Sum(doc.base_grand_total))
 			.where((doc.docstatus == 1) & (doc.is_return == 1) & (doc.return_against == self.doc.name))
 		).run()
 

@@ -189,6 +189,112 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 			except frappe.TimestampMismatchError:
 				frappe.get_doc("Sales Invoice", d.name).cancel()
 
+	def test_credit_note_keeps_redemption_of_the_invoice(self):
+		customer = make_loyalty_customer()
+		make_loyalty_invoice(customer)
+		redeeming_invoice = make_loyalty_invoice(customer, qty=2, redeem=5)
+
+		make_loyalty_invoice(customer, qty=-1, is_return=1, return_against=redeeming_invoice.name)
+
+		redeemed = frappe.get_all(
+			"Loyalty Point Entry",
+			filters={"invoice": redeeming_invoice.name, "loyalty_points": ("<", 0)},
+			pluck="loyalty_points",
+		)
+		self.assertEqual(redeemed, [-5])
+
+	def test_full_return_of_redeeming_invoice_earns_no_negative_points(self):
+		customer = make_loyalty_customer()
+		make_loyalty_invoice(customer, qty=100)
+		redeeming_invoice = make_loyalty_invoice(customer, redeem=1000)
+
+		credit_note = make_loyalty_invoice(
+			customer, qty=-1, is_return=1, return_against=redeeming_invoice.name
+		)
+
+		def points(redeemed):
+			return frappe.get_all(
+				"Loyalty Point Entry",
+				filters={
+					"invoice": redeeming_invoice.name,
+					"redeem_against": ("is", "set") if redeemed else ("is", "not set"),
+				},
+				pluck="loyalty_points",
+			)
+
+		self.assertEqual(points(redeemed=False), [0])
+		self.assertEqual(points(redeemed=True), [-1000])
+
+		credit_note.cancel()
+		self.assertEqual(points(redeemed=False), [9])
+		self.assertEqual(points(redeemed=True), [-1000])
+
+	def test_redemption_uses_points_left_after_earlier_redemptions(self):
+		customer = make_loyalty_customer()
+		first_invoice = make_loyalty_invoice(customer)
+		first_entry = frappe.db.get_value("Loyalty Point Entry", {"invoice": first_invoice.name}, "name")
+		make_loyalty_invoice(customer, redeem=4, dont_create_loyalty_points=1)
+
+		later_invoice = make_loyalty_invoice(customer)
+		frappe.db.set_value(
+			"Loyalty Point Entry", {"invoice": later_invoice.name}, "expiry_date", add_days(today(), 30)
+		)
+		make_loyalty_invoice(customer, redeem=8, dont_create_loyalty_points=1)
+
+		redeemed = frappe.get_all(
+			"Loyalty Point Entry", filters={"redeem_against": first_entry}, pluck="loyalty_points"
+		)
+		self.assertEqual(sum(redeemed), -10)
+
+	def test_cancel_removes_redemption_of_invoice_without_earned_points(self):
+		customer = make_loyalty_customer()
+		make_loyalty_invoice(customer)
+		redeeming_invoice = make_loyalty_invoice(customer, redeem=5, dont_create_loyalty_points=1)
+
+		redeeming_invoice.cancel()
+
+		self.assertFalse(frappe.db.exists("Loyalty Point Entry", {"invoice": redeeming_invoice.name}))
+
+	def test_credit_note_creates_no_points_for_invoice_without_points(self):
+		customer = make_loyalty_customer()
+		invoice = make_loyalty_invoice(customer, qty=2, dont_create_loyalty_points=1)
+
+		make_loyalty_invoice(customer, qty=-1, is_return=1, return_against=invoice.name)
+
+		self.assertFalse(frappe.db.exists("Loyalty Point Entry", {"invoice": invoice.name}))
+
+	def test_points_are_earned_on_the_company_currency_amount(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		frappe.db.set_value("Customer", "_Test Customer USD", "loyalty_program", "Test Single Loyalty")
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			qty=1,
+			rate=100,
+		)
+
+		self.assertEqual(si.base_grand_total, 5000)
+		self.assertEqual(
+			frappe.db.get_value("Loyalty Point Entry", {"invoice": si.name}, "loyalty_points"), 5
+		)
+
+	def test_payment_schedule_leaves_out_the_redeemed_amount(self):
+		customer = make_loyalty_customer()
+		make_loyalty_invoice(customer)
+
+		si = create_sales_invoice_record()
+		si.customer = customer
+		si.redeem_loyalty_points = 1
+		si.loyalty_points = 5
+		si.loyalty_amount = 5
+		si.insert()
+
+		self.assertEqual(si.outstanding_amount, 9995)
+		self.assertEqual(sum(row.payment_amount for row in si.payment_schedule), 9995)
+
 	def test_loyalty_points_for_dashboard(self):
 		doc = frappe.get_doc("Customer", "Test Loyalty Customer")
 		company_wise_info = get_dashboard_info("Customer", doc.name, doc.loyalty_program)
@@ -314,6 +420,38 @@ def get_points_earned(self):
 		points_earned = cint(eligible_amount / lp_details.collection_factor)
 
 	return points_earned or 0
+
+
+def make_loyalty_customer():
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": f"_Test Loyalty Customer {frappe.generate_hash(length=8)}",
+				"customer_type": "Individual",
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+				"loyalty_program": "Test Single Loyalty",
+			}
+		)
+		.insert()
+		.name
+	)
+
+
+def make_loyalty_invoice(customer, qty=1, redeem=0, **fields):
+	si = create_sales_invoice_record(qty)
+	si.customer = customer
+	si.conversion_rate = 1
+	if redeem:
+		# the test programs convert one point to one unit of company currency
+		si.redeem_loyalty_points = 1
+		si.loyalty_points = redeem
+		si.loyalty_amount = redeem
+	si.update(fields)
+	si.insert()
+	si.submit()
+	return si
 
 
 def create_sales_invoice_record(qty=1):
