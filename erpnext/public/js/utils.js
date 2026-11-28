@@ -676,6 +676,11 @@ $.extend(erpnext.utils, {
 	},
 });
 
+erpnext.utils.get_default_account = function (company, purpose) {
+	// purpose is a key of erpnext.accounts.default_accounts, for example "RECEIVABLE"
+	return locals[":Company"]?.[company]?.default_accounts?.[purpose];
+};
+
 erpnext.utils.confirm_negative_stock = function (frm) {
 	if (!frm.doc.allow_negative_stock) return;
 

@@ -348,7 +348,7 @@ class Account(NestedSet):
 				throw(
 					msg.format(
 						frappe.bold(self.name),
-						frappe.bold(default_account_fields.get(d)),
+						frappe.bold(_(default_account_fields.get(d))),
 						frappe.bold(self.company),
 					)
 				)
@@ -801,6 +801,10 @@ def _ensure_idle_system():
 
 
 def get_company_default_account_fields():
+	"""Return {fieldname: label} of the Company default accounts that block disabling an Account.
+
+	This is a subset of the registry. A new entry blocks more accounts, so it changes behavior.
+	"""
 	return {
 		"default_bank_account": "Default Bank Account",
 		"default_cash_account": "Default Cash Account",

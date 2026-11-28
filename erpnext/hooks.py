@@ -629,6 +629,9 @@ advance_payment_payable_doctypes = ["Purchase Order"]
 
 invoice_doctypes = ["Sales Invoice", "Purchase Invoice"]
 
+# Default accounts of a Company. Other apps add their own purposes the same way.
+company_default_accounts = ["erpnext.accounts.default_accounts.get_erpnext_purposes"]
+
 bank_reconciliation_doctypes = [
 	"Payment Entry",
 	"Journal Entry",
