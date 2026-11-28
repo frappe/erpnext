@@ -5,6 +5,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import cstr, flt, fmt_money
 
+from erpnext import allow_regional
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
@@ -17,6 +18,13 @@ REFERENCE_PARTY_ACCOUNT_FIELDS = {
 	"Sales Order": ["Customer"],
 	"Purchase Order": ["Supplier"],
 }
+
+
+@allow_regional
+def is_link_used_as_reference_only(doc, row) -> bool:
+	"""Return True when the row's reference only records which document
+	the entry relates to and nothing else."""
+	return False
 
 
 class JournalEntryReferenceValidator:
@@ -39,7 +47,7 @@ class JournalEntryReferenceValidator:
 		self.doc.reference_accounts = {}
 		for row in self.doc.get("accounts"):
 			self._normalize_reference_fields(row)
-			if not self._has_party_reference(row):
+			if not self._has_party_reference(row) or is_link_used_as_reference_only(self.doc, row):
 				continue
 			self._validate_order_direction(row)
 			self._register_reference(row)
