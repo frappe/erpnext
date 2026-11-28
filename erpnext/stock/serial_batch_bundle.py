@@ -855,6 +855,9 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		latest_inward = {}
 		for serial_nos_batch in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
 			for entry in self.get_inward_serial_no_entries(serial_nos_batch):
+				if entry.warehouse != self.sle.warehouse:
+					continue
+
 				key = (entry.posting_datetime, entry.creation)
 				if entry.serial_no not in latest_inward or key > latest_inward[entry.serial_no][0]:
 					latest_inward[entry.serial_no] = (key, entry.incoming_rate)
@@ -867,13 +870,13 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			frappe.qb.from_(bundle_child)
 			.select(
 				bundle_child.serial_no,
+				bundle_child.warehouse,
 				bundle_child.incoming_rate,
 				bundle_child.posting_datetime,
 				bundle_child.creation,
 			)
 			.where(
 				(bundle_child.serial_no.isin(serial_nos))
-				& (bundle_child.warehouse == self.sle.warehouse)
 				& (bundle_child.qty > 0)
 				& (bundle_child.docstatus == 1)
 				& (bundle_child.item_code == self.sle.item_code)
