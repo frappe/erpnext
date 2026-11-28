@@ -14,10 +14,8 @@ frappe.ui.form.on("Workstation", {
 		frm.trigger("set_illustration_image");
 
 		if (!frm.is_new()) {
-			// Operator workflow now lives on the Shop Floor page; jump there filtered to this machine.
 			frm.add_custom_button(__("Shop Floor"), () => {
-				frappe.route_options = { workstation: frm.doc.name };
-				frappe.set_route("shop-floor");
+				frappe.set_route("shop-floor", "station", frm.doc.name);
 			});
 		}
 	},

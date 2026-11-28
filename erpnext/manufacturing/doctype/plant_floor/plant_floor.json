@@ -77,7 +77,7 @@
  "icon": "layout-grid",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-21 23:11:45.858553",
+ "modified": "2026-11-28 07:24:18.754943",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",
@@ -99,6 +99,14 @@
   {
    "role": "Manufacturing User",
    "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Shop Floor User"
+  },
+  {
+   "read": 1,
+   "role": "Shop Floor Manager"
   }
  ],
  "row_format": "Dynamic",

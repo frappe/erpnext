@@ -1184,16 +1184,19 @@ class JobCard(Document):
 			frappe.msgprint(message, alert=True, indicator="orange")
 
 	def validate_transfer_qty(self):
-		if self.track_semi_finished_goods and self.skip_material_transfer:
-			return
+		if self.is_material_transfer_pending():
+			self.throw_materials_not_moved()
 
-		if (
+	def is_material_transfer_pending(self):
+		if self.track_semi_finished_goods and self.skip_material_transfer:
+			return False
+
+		return bool(
 			not self.finished_good
 			and not self.is_corrective_job_card
 			and self.items
 			and (self.transferred_qty < self.for_quantity or self.has_short_transferred_material())
-		):
-			self.throw_materials_not_moved()
+		)
 
 	def validate_job_card(self):
 		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped":

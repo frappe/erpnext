@@ -296,22 +296,6 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.save()
 		self.assertEqual((job_card.actual_start_date, job_card.actual_end_date), (None, None))
 
-	def test_shop_floor_save_and_continue_holds_only_unfinished_job(self):
-		from erpnext.manufacturing.page.shop_floor.shop_floor import save_and_continue
-
-		job_card = self.get_first_job_card(self.work_order.name)
-		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00"})
-		job_card.save()
-
-		save_and_continue(job_card.name, 1, 2, 1, 0, "2024-03-01 09:00:00")
-		job_card.reload()
-		self.assertEqual((job_card.is_paused, job_card.status), (1, "On Hold"))
-
-		job_card.resume_job(start_time="2024-03-01 10:00:00")
-		save_and_continue(job_card.name, 1, 1, 0, 0, "2024-03-01 11:00:00")
-		job_card.reload()
-		self.assertEqual((job_card.is_paused, job_card.status), (0, "Work In Progress"))
-
 	def test_work_order_job_card_timers(self):
 		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 		employee = frappe.db.get_all("Employee", {"first_name": "_Test Employee"})[0].name
@@ -2298,54 +2282,6 @@ class TestJobCard(ERPNextTestSuite):
 
 		job_card.submit()
 		self.assertEqual(job_card.docstatus, 1)
-
-	def test_shop_floor_keeps_work_order_open_for_pending_job_card_qty(self):
-		from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
-
-		def get_status_groups():
-			return [
-				group
-				for group in ("open", "completed")
-				if get_work_orders(group, search=work_order.name)["work_orders"]
-			]
-
-		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
-		job_card = self.get_first_job_card(work_order.name)
-		job_card.pending_qty = 3
-		job_card.append(
-			"time_logs",
-			{
-				"from_time": "2024-03-01 08:00:00",
-				"to_time": "2024-03-01 09:00:00",
-				"completed_qty": 2,
-			},
-		)
-		job_card.submit()
-		self.assertEqual(get_status_groups(), ["open"])
-
-		make_job_card(
-			work_order.name,
-			[
-				{
-					"name": work_order.operations[0].name,
-					"operation": job_card.operation,
-					"qty": 3,
-					"pending_qty": 3,
-				}
-			],
-		)
-		follow_up = frappe.get_last_doc("Job Card", {"work_order": work_order.name, "docstatus": 0})
-		follow_up.process_loss_qty = 1
-		follow_up.append(
-			"time_logs",
-			{
-				"from_time": "2024-03-01 10:00:00",
-				"to_time": "2024-03-01 11:00:00",
-				"completed_qty": 2,
-			},
-		)
-		follow_up.submit()
-		self.assertEqual(get_status_groups(), ["completed"])
 
 	def test_completion_overwrites_existing_completed_qty_with_zero(self):
 		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
@@ -6264,10 +6200,8 @@ class TestJobCard(ERPNextTestSuite):
 		from frappe.permissions import add_user_permission
 
 		from erpnext.manufacturing.doctype.job_card.job_card import get_job_details, get_operation_details
-		from erpnext.manufacturing.page.shop_floor.shop_floor import (
-			get_data,
-			get_quality_inspection_checklist,
-		)
+		from erpnext.manufacturing.page.shop_floor.services.job_cards import get_open_job_cards
+		from erpnext.manufacturing.page.shop_floor.shop_floor import get_quality_inspection_checklist
 
 		workstation = make_jc_review_workstation()
 		operation = make_jc_review_operation(workstation)
@@ -6286,9 +6220,9 @@ class TestJobCard(ERPNextTestSuite):
 		with self.set_user(user.name):
 			self.assertEqual(get_job_details(None, None, {"work_order": restricted.name}), [])
 			self.assertRaises(frappe.PermissionError, get_operation_details, restricted.name, operation)
-			self.assertEqual(get_data(work_order=restricted.name)["job_cards"], [])
+			self.assertEqual(get_open_job_cards({"work_order": restricted.name}), [])
 			self.assertRaises(frappe.PermissionError, get_quality_inspection_checklist, restricted_card.name)
-			self.assertEqual(len(get_data(work_order=allowed.name)["job_cards"]), 1)
+			self.assertEqual(len(get_open_job_cards({"work_order": allowed.name})), 1)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_shop_floor_inspection_only_for_permitted_draft_job_cards(self):

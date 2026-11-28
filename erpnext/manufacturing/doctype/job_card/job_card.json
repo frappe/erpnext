@@ -705,7 +705,7 @@
  "icon": "clipboard-list",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-28 07:13:17.816933",
+ "modified": "2026-11-28 07:24:18.754943",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
@@ -756,6 +756,22 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "write": 1,
+   "submit": 1,
+   "report": 1,
+   "print": 1,
+   "role": "Shop Floor User"
+  },
+  {
+   "read": 1,
+   "write": 1,
+   "submit": 1,
+   "report": 1,
+   "print": 1,
+   "role": "Shop Floor Manager"
   }
  ],
  "row_format": "Dynamic",

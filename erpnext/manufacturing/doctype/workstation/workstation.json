@@ -236,7 +236,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2026-11-28 07:18:26.476645",
+ "modified": "2026-11-28 07:24:18.754943",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
@@ -253,6 +253,16 @@
    "role": "Manufacturing User",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Shop Floor User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Shop Floor Manager"
   }
  ],
  "quick_entry": 1,

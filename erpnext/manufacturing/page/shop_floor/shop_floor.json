@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-06-05 00:24:12.148085",
+ "modified": "2026-11-28 07:28:52.432361",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "shop-floor",
@@ -22,11 +22,15 @@
   },
   {
    "role": "Shop Floor User"
+  },
+  {
+   "role": "System Manager"
   }
  ],
  "script": null,
  "standard": "Yes",
  "style": null,
  "system_page": 0,
- "title": "Shop Floor"
+ "title": "Shop Floor",
+ "type": "Frappe UI"
 }
