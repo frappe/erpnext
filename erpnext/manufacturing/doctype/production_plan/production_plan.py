@@ -509,12 +509,17 @@ class ProductionPlan(Document):
 		if not allotted:
 			return []
 
-		packed_lines = frappe.get_all(
+		packed = frappe.get_all(
 			"Packed Item",
 			filters={"parent_detail_docname": ("in", [row.sales_order_item for row in allotted])},
-			pluck="parent_detail_docname",
+			fields=["parent_detail_docname", "item_code"],
 		)
-		return [row for row in allotted if (row.sales_order_item in packed_lines) == bundle_lines]
+		components = {(row.parent_detail_docname, row.item_code) for row in packed}
+		# the item of an older bundle plan's row is unknown, so a packed line is enough
+		components |= {(row.parent_detail_docname, None) for row in packed}
+		return [
+			row for row in allotted if ((row.sales_order_item, row.item_code) in components) == bundle_lines
+		]
 
 	def on_submit(self):
 		self.update_bin_qty()
