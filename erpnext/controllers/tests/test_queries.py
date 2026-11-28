@@ -5,6 +5,7 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.desk.search import search_widget
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.test_item import make_item
@@ -353,11 +354,19 @@ class TestQueries(ERPNextTestSuite):
 				"ignore_user_permissions": 1,
 			}
 
-			result = queries.employee_query(**params)
+			result = search_widget(
+				"Employee",
+				"",
+				query="erpnext.controllers.queries.employee_query",
+				page_length=20,
+				reference_doctype="Payment Entry",
+				ignore_user_permissions=1,
+				link_fieldname="party",
+			)
 			self.assertGreater(len(result), 1)
 
-			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
-
-			# only one employee should be returned even though ignore_user_permissions is passed as 1
-			result = queries.employee_query(**params)
+			# only the link search may skip user permissions, not a request to the query itself
+			result = frappe.call(queries.employee_query, **params)
 			self.assertEqual(len(result), 1)
+
+			ps.delete(ignore_permissions=1, force=1, delete_permanently=1)
