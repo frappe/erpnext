@@ -578,6 +578,35 @@ class TestSalesAndPurchaseReturn(FrappeTestCase):
 		self.assertEqual(second_return.items[0].received_qty, -9)
 		second_return.insert()
 
+	def test_rest_of_return_in_whole_number_uom_of_factor_one_maps_in_stock_uom(self):
+		"""A factor of 1 does not make a whole number UOM hold a fraction of the stock UOM."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 1}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, basic_rate=100)
+
+		dn = create_delivery_note(item_code=item_code, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 1, "qty": 2})
+		dn.submit()
+
+		first_return = make_return_doc(dn.doctype, dn.name)
+		first_return.items[0].update({"uom": "Kg", "qty": -0.5})
+		first_return.submit()
+
+		rest = make_return_doc(dn.doctype, dn.name)
+		self.assertEqual((rest.items[0].uom, rest.items[0].qty), ("Kg", -1.5))
+		rest.insert()
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
