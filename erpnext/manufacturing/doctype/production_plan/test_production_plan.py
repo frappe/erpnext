@@ -3056,6 +3056,24 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.insert()
 		plan.submit()
 
+	def test_consolidated_bundle_made_with_its_own_bom_submits(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		rm_item = make_item("_Test PP Phantom Bundle RM", {"is_stock_item": 1}).name
+		component = make_item("_Test PP Phantom Bundle A", {"is_stock_item": 1}).name
+		bundle_item = make_item("_Test PP Phantom Bundle", {"is_stock_item": 0}).name
+		make_product_bundle(parent=bundle_item, items=[component], qty=2)
+		bom = make_bom(item=bundle_item, raw_materials=[rm_item], currency="INR", do_not_save=True)
+		bom.is_phantom_bom = 1
+		bom.insert()
+		bom.submit()
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+
+		plan = make_plan_from_sales_orders([sales_order], combine_items=1)
+		plan.submit()
+
+		self.assertEqual([(row.item_code, row.planned_qty) for row in plan.po_items], [(bundle_item, 10)])
+
 	def test_sub_assembly_work_order_of_combined_plan_submits(self):
 		rm_item = make_item("_Test PP Combined Sub RM", {"is_stock_item": 1}).name
 		sub_item = make_item("_Test PP Combined Sub SA", {"is_stock_item": 1}).name
