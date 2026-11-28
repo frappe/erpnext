@@ -553,9 +553,9 @@ class TestDeliveryNote(FrappeTestCase):
 	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@change_settings("System Settings", {"float_precision": 2})
 	def test_row_of_a_return_whose_stock_qty_rounds_to_nothing_puts_back_nothing(self):
-		"""Of 504 Box at 0.004 Kg (2.02 Kg), rows of 502, 1 and 2 Box put back 2.01 Kg, nothing as the
+		"""Of 505 Box at 0.004 Kg (2.02 Kg), rows of 502, 1 and 2 Box put back 2.01 Kg, nothing as the
 		1 Box row's stock qty rounds to 0, and the 0.01 Kg left."""
-		dn = self.deliver_for_returns_of_parts(0.004, 504)
+		dn = self.deliver_for_returns_of_parts(0.004, 505)
 		dn_return = make_sales_return(dn.name)
 		row = dn_return.items[0].as_dict(no_default_fields=True)
 		dn_return.items = []
@@ -620,6 +620,23 @@ class TestDeliveryNote(FrappeTestCase):
 		last_return = make_sales_return(dn.name)
 		last_return.items[0].dn_detail = None
 		self.assertRaises(StockOverReturnError, last_return.submit)
+
+	@change_settings("System Settings", {"float_precision": 2})
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_full_return_without_dn_detail_counts_at_its_stored_stock_qty(self):
+		"""3 Box at 0.3356 Kg store 1.01 Kg, which an unlinked return of the 3 Box may put back."""
+		item = make_item(
+			"_Test Item For Unlinked Full Return",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		dn = create_delivery_note(item_code=item, qty=3, rate=100, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		dn.submit()
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].dn_detail = None
+		dn_return.submit()
 
 	@change_settings("System Settings", {"float_precision": 2})
 	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
