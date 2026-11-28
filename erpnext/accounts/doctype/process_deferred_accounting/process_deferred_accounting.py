@@ -36,6 +36,20 @@ class ProcessDeferredAccounting(Document):
 		if self.end_date < self.start_date:
 			frappe.throw(_("End date cannot be before start date"))
 
+		self.validate_account_company()
+
+	def validate_account_company(self):
+		if not self.account:
+			return
+
+		if frappe.get_cached_value("Account", self.account, "company") != self.company:
+			frappe.throw(
+				_("Account {0} does not belong to Company {1}").format(
+					frappe.bold(self.account), frappe.bold(self.company)
+				),
+				title=_("Invalid Account"),
+			)
+
 	def on_submit(self):
 		conditions = build_conditions(self.type, self.account, self.company)
 		if self.type == "Income":
