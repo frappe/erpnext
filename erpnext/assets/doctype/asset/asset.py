@@ -655,7 +655,7 @@ class Asset(AccountsController):
 				"reference_doctype": reference_doctype,
 				"reference_name": reference_docname,
 			}
-		).insert()
+		).insert(ignore_permissions=True)
 		asset_movement.submit()
 
 	def set_depreciation_rate(self):
