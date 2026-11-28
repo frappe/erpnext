@@ -3515,6 +3515,25 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual(plan.po_items[0].planned_qty, 12)
 
+	def test_older_combined_bundle_plan_leaves_component_qty_unknown(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Older Combine")
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+		bundle_line = sales_order.items[0].name
+		older_plan = make_plan_from_sales_orders([sales_order], combine_items=1)
+		# older plans pointed every component reference at the bundle's Sales Order line
+		for row in older_plan.po_items:
+			row.item_reference = None
+			row.planned_qty = 15
+		for row in older_plan.prod_plan_references:
+			row.item_reference = bundle_line
+		older_plan.submit()
+
+		plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual(sorted(row.item_code for row in plan.po_items), sorted(components))
+		for row in plan.po_items:
+			row.planned_qty = 5
+		plan.submit()
+
 	def test_combined_plan_fetched_again_plans_only_its_sales_orders(self):
 		item = "Test Production Item 1"
 		old_order, new_order = (make_sales_order(item_code=item, qty=10) for _ in range(2))
