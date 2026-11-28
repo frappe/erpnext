@@ -2038,7 +2038,13 @@ def get_advance_ledger_entry(gle, against_voucher_type, against_voucher_no, amou
 
 
 def create_payment_ledger_entry(
-	gl_entries, cancel=0, adv_adj=0, update_outstanding="Yes", from_repost=0, partial_cancel=False
+	gl_entries,
+	cancel=0,
+	adv_adj=0,
+	update_outstanding="Yes",
+	from_repost=0,
+	partial_cancel=False,
+	posting_date=None,
 ):
 	if gl_entries:
 		ple_map = get_payment_ledger_entries(gl_entries, cancel=cancel)
@@ -2051,7 +2057,12 @@ def create_payment_ledger_entry(
 					delink_original_entry(ple, partial_cancel=partial_cancel)
 				else:
 					ple.delinked = 0
+<<<<<<< HEAD
 					ple.posting_date = frappe.form_dict.get("posting_date") or getdate()
+=======
+					ple.posting_date = posting_date or getdate()
+				ple.flags.ignore_links = True
+>>>>>>> 2ac71b5 (fix(accounts): book immutable ledger reversals on the cancellation date)
 
 			ple.flags.ignore_permissions = 1
 			ple.flags.adv_adj = adv_adj
