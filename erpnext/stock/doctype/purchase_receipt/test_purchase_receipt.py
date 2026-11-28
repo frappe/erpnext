@@ -10548,50 +10548,96 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		return_receipt.insert()
 		self.assertEqual([d.item_tax_amount for d in return_receipt.items], [-25, -25])
 
-	def make_receipt_with_previous_row_charge(self):
-		"""Item A is exempt from the 10% tax that a 50% Previous Row valuation charge is based on."""
-		excise_account = "_Test Account Excise Duty - _TC"
-		nil_rated = frappe.get_doc(
-			{
-				"doctype": "Item Tax Template",
-				"title": "_Test Nil Rated Excise",
-				"company": "_Test Company",
-				"taxes": [{"tax_type": excise_account, "tax_rate": 0}],
-			}
-		).insert()
-		exempt_item = make_item("_Test Excise Exempt Item", {"is_stock_item": 1}).name
-		taxed_item = make_item("_Test Excise Taxed Item", {"is_stock_item": 1}).name
+	def test_charge_added_on_return_follows_each_item_tax(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
-		receipt = make_purchase_receipt(item_code=exempt_item, qty=10, rate=100, do_not_save=True)
-		receipt.items[0].item_tax_template = nil_rated.name
+		receipt = self.make_receipt_with_previous_row_charge(with_charge=False)
+		receipt.submit()
+
+		return_receipt = make_purchase_return(receipt.name)
+		return_receipt.append("taxes", self.get_previous_row_charge())
+		return_receipt.insert()
+		self.assertEqual([d.item_tax_amount for d in return_receipt.items], [0, -50])
+
+	def test_previous_row_charge_that_totals_zero_spreads_nothing(self):
+		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"stock_received_but_not_billed": "Stock Received But Not Billed - _TC",
+				"default_inventory_account": "Stock In Hand - _TC",
+			},
+		)
+		receipt = self.make_receipt_with_previous_row_charge(tax_rates=(10, -10), second_is_stock=0)
+		receipt.submit()
+
+		self.assertEqual(receipt.taxes[1].base_tax_amount, 0)
+		self.assertEqual(receipt.items[0].item_tax_amount, 0)
+		gl_entries = get_gl_entries("Purchase Receipt", receipt.name)
+		self.assertEqual(sum(d.debit for d in gl_entries), 1000)
+		self.assertEqual(sum(d.credit for d in gl_entries), 1000)
+
+	def make_receipt_with_previous_row_charge(self, tax_rates=(0, None), second_is_stock=1, with_charge=True):
+		"""Two items at 1000 under a 10% tax, each at its Item Tax Template rate (None: no template),
+		and a 50% Previous Row valuation charge on that tax."""
+		items = [
+			make_item("_Test Excise Exempt Item", {"is_stock_item": 1}).name,
+			make_item(
+				"_Test Excise Taxed Item" if second_is_stock else "_Test Excise Non Stock Item",
+				{"is_stock_item": second_is_stock},
+			).name,
+		]
+
+		receipt = make_purchase_receipt(item_code=items[0], qty=10, rate=100, do_not_save=True)
 		row = receipt.items[0]
 		receipt.append(
 			"items",
-			{"item_code": taxed_item, "qty": 10, "rate": 100, "warehouse": row.warehouse, "uom": row.uom},
+			{"item_code": items[1], "qty": 10, "rate": 100, "warehouse": row.warehouse, "uom": row.uom},
 		)
+		for item, rate in zip(receipt.items, tax_rates, strict=True):
+			if rate is not None:
+				item.item_tax_template = self.get_excise_tax_template(rate)
+
 		receipt.append(
 			"taxes",
 			{
 				"category": "Total",
 				"charge_type": "On Net Total",
-				"account_head": excise_account,
+				"account_head": "_Test Account Excise Duty - _TC",
 				"description": "Excise",
 				"rate": 10,
 			},
 		)
-		receipt.append(
-			"taxes",
-			{
-				"category": "Valuation and Total",
-				"charge_type": "On Previous Row Amount",
-				"row_id": 1,
-				"account_head": "_Test Account Shipping Charges - _TC",
-				"cost_center": "Main - _TC",
-				"description": "Freight on excise",
-				"rate": 50,
-			},
-		)
+		if with_charge:
+			receipt.append("taxes", self.get_previous_row_charge())
+
 		return receipt.insert()
+
+	def get_excise_tax_template(self, rate):
+		title = f"_Test Excise Rate {rate}"
+		if not frappe.db.exists("Item Tax Template", f"{title} - _TC"):
+			frappe.get_doc(
+				{
+					"doctype": "Item Tax Template",
+					"title": title,
+					"company": "_Test Company",
+					"taxes": [{"tax_type": "_Test Account Excise Duty - _TC", "tax_rate": rate}],
+				}
+			).insert()
+
+		return f"{title} - _TC"
+
+	def get_previous_row_charge(self):
+		return {
+			"category": "Valuation and Total",
+			"charge_type": "On Previous Row Amount",
+			"row_id": 1,
+			"account_head": "_Test Account Shipping Charges - _TC",
+			"cost_center": "Main - _TC",
+			"description": "Freight on excise",
+			"rate": 50,
+		}
 
 	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
 		from erpnext.buying.doctype.purchase_order.mapper import (
