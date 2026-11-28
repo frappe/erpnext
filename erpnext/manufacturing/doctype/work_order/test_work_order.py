@@ -6222,6 +6222,74 @@ class TestWorkOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	def test_partly_delivered_sales_order_linked_work_order_reserves_finished_good(self):
+		# SO row of 8, 4 delivered from existing stock, Work Order makes the remaining 4 with
+		# Reserve Stock on. Submitting the Manufacture must succeed and reserve the 4 new units.
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		try:
+			warehouse = "_Test Warehouse - _TC"
+			wip = "_Test Warehouse 1 - _TC"
+			fg = make_item("Test SR SO-WO Partial FG", {"is_stock_item": 1}).name
+			rm = make_item("Test SR SO-WO Partial RM", {"is_stock_item": 1}).name
+
+			bom = make_bom(item=fg, raw_materials=[rm], source_warehouse=warehouse, do_not_submit=True)
+			bom.save()
+			bom.submit()
+			make_stock_entry_test_record(item_code=rm, target=warehouse, qty=10, basic_rate=100)
+			# Existing finished stock that will be delivered.
+			make_stock_entry_test_record(item_code=fg, target=warehouse, qty=4, basic_rate=100)
+
+			so = make_sales_order(item_code=fg, warehouse=warehouse, qty=8, rate=500)
+
+			dn = make_delivery_note(so.name)
+			dn.items[0].qty = 4
+			dn.items[0].warehouse = warehouse
+			dn.insert()
+			dn.submit()
+			self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 4)
+
+			wo = make_wo_order_test_record(
+				production_item=fg,
+				qty=4,
+				bom_no=bom.name,
+				sales_order=so.name,
+				reserve_stock=1,
+				source_warehouse=warehouse,
+				wip_warehouse=wip,
+				fg_warehouse=warehouse,
+				do_not_save=True,
+			)
+			wo.save()
+			wo.submit()
+
+			transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4))
+			transfer.submit()
+			manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
+			# Currently raises "Cannot reserve more than Allowed Qty" (delivered qty subtracted twice).
+			manufacture.submit()
+
+			reserved = sum(
+				flt(r.reserved_qty)
+				for r in frappe.get_all(
+					"Stock Reservation Entry",
+					filters={
+						"voucher_type": "Sales Order",
+						"voucher_no": so.name,
+						"item_code": fg,
+						"docstatus": 1,
+					},
+					fields=["reserved_qty"],
+				)
+			)
+			self.assertEqual(reserved, 4, "The 4 manufactured units should be reserved for the Sales Order")
+		finally:
+			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
 	)
