@@ -621,12 +621,8 @@ class TestDeliveryNote(FrappeTestCase):
 		last_return.items[0].dn_detail = None
 		self.assertRaises(StockOverReturnError, last_return.submit)
 
-<<<<<<< HEAD
 	@change_settings("System Settings", {"float_precision": 2})
 	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
-=======
-	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_full_return_without_dn_detail_counts_at_its_stored_stock_qty(self):
 		"""3 Box at 0.3356 Kg store 1.01 Kg, which an unlinked return of the 3 Box may put back."""
 		item = make_item(
@@ -642,9 +638,8 @@ class TestDeliveryNote(FrappeTestCase):
 		dn_return.items[0].dn_detail = None
 		dn_return.submit()
 
-	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
->>>>>>> a3862af (test: full Delivery Note return without dn_detail counts at its stored stock qty)
+	@change_settings("System Settings", {"float_precision": 2})
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_return_of_a_bundle_whose_stock_qty_rounds(self):
 		"""A bundle row whose stock qty rounds returns its components at the qty they were packed at."""
 		bundle = make_item(
