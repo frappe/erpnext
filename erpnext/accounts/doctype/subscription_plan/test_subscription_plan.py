@@ -4,7 +4,9 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import add_days, nowdate
 
+from erpnext.accounts.doctype.subscription.test_subscription import create_subscription
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -66,6 +68,77 @@ class TestSubscriptionPlan(ERPNextTestSuite):
 		plan.insert()
 		rate = get_plan_rate(plan.name, start_date="2026-01-01", end_date="2027-02-28")
 		self.assertEqual(rate, 1400)
+
+	@ERPNextTestSuite.change_settings("Subscription Settings", {"prorate": 1})
+	def test_monthly_rate_for_periods_not_starting_on_the_first(self):
+		plan = self.make_plan(price_determination="Monthly Rate", cost=1000)
+		plan.insert()
+		for start_date, end_date, expected in (
+			("2026-01-15", "2026-02-14", 1000),  # one whole month
+			("2026-01-15", "2026-02-28", 1500),  # one month and 14 of the 28 days to 2026-03-15
+			("2026-01-01", "2026-03-31", 3000),
+		):
+			with self.subTest(start_date=start_date, end_date=end_date):
+				rate = get_plan_rate(plan.name, start_date=start_date, end_date=end_date)
+				self.assertAlmostEqual(rate, expected)
+
+	def make_price_list_plan(self):
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": f"_Test Subscription Prices {frappe.generate_hash(length=6)}",
+				"currency": "INR",
+				"selling": 1,
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": "_Test Item",
+				"price_list": price_list.name,
+				"price_list_rate": 1000,
+			}
+		).insert()
+		plan = self.make_plan(price_determination="Based On Price List")
+		plan.price_list = price_list.name
+		return plan.insert()
+
+	def test_price_list_plan_needs_a_price_list(self):
+		plan = self.make_plan(price_determination="Based On Price List")
+		self.assertRaisesRegex(frappe.ValidationError, "Price List is required", plan.insert)
+
+	def test_price_list_rate_uses_the_customer(self):
+		plan = self.make_price_list_plan()
+		with patch(
+			"erpnext.utilities.product.get_pricing_rule_for_item",
+			return_value=frappe._dict(price_list_rate=1000),
+		) as get_pricing_rule:
+			# Subscription passes the party positionally as `customer`
+			for args, kwargs in (((1, "_Test Customer"), {}), ((), {"party": "_Test Customer"})):
+				with self.subTest(args=args, kwargs=kwargs):
+					self.assertEqual(get_plan_rate(plan.name, *args, **kwargs), 1000)
+					self.assertEqual(get_pricing_rule.call_args.args[0].customer, "_Test Customer")
+
+	def test_interval_change_refused_while_mixed_in_a_subscription(self):
+		plan, other_plan, single_plan = (
+			self.make_plan(price_determination="Fixed Rate", cost=100).insert() for _ in range(3)
+		)
+		start_date = add_days(nowdate(), 30)
+		create_subscription(
+			start_date=start_date,
+			plans=[{"plan": plan.name, "qty": 1}, {"plan": other_plan.name, "qty": 1}],
+		)
+		create_subscription(start_date=start_date, plans=[{"plan": single_plan.name, "qty": 1}])
+
+		for changes in ({"billing_interval": "Year"}, {"billing_interval_count": 2}):
+			with self.subTest(changes=changes):
+				plan.reload()
+				plan.update(changes)
+				self.assertRaisesRegex(frappe.ValidationError, "also use other plans", plan.save)
+
+		# a plan that is alone in its subscription can still change
+		single_plan.billing_interval = "Year"
+		single_plan.save()
 
 	def test_price_list_discounts(self):
 		price_list = frappe.get_doc(
