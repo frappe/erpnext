@@ -455,7 +455,12 @@ class SellingController(StockController):
 				title=_("Invalid Selling Price"),
 			)
 
-		if self.get("is_return") or not frappe.get_single_value("Selling Settings", "validate_selling_price"):
+		# a debit note's rate is an extra charge on an earlier sale, not a selling price
+		if (
+			self.get("is_return")
+			or self.get("is_debit_note")
+			or not frappe.get_single_value("Selling Settings", "validate_selling_price")
+		):
 			return
 
 		# an internal transfer is not a sale, so neither rate applies
