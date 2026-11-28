@@ -530,6 +530,8 @@ class Asset(AccountsController):
 				frappe.throw(_("Enter depreciation details"))
 			if self.is_fully_depreciated:
 				frappe.throw(_("Depreciation cannot be calculated for fully depreciated assets"))
+			if not self.available_for_use_date:
+				frappe.throw(_("Available for use date is required"), frappe.MandatoryError)
 
 		if self.asset_type == "Existing Asset":
 			return

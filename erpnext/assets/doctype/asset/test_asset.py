@@ -90,6 +90,20 @@ class TestAsset(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
+	def test_available_for_use_date_is_mandatory_if_calculate_depreciation_is_enabled(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			purchase_date=nowdate(),
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+			depreciation_start_date=get_last_day(add_months(nowdate(), 1)),
+			do_not_save=1,
+		)
+		asset.available_for_use_date = None
+
+		self.assertRaises(frappe.MandatoryError, asset.save)
+
 	def test_item_exists(self):
 		asset = create_asset(item_code="MacBook", do_not_save=1)
 
