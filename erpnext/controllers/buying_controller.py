@@ -2065,7 +2065,12 @@ def is_valued_by_item_wise_tax(tax) -> bool:
 	if tax.charge_type == "On Item Quantity":
 		return True
 
-	return tax.charge_type in PREVIOUS_ROW_CHARGE_TYPES and bool(tax.get("allocate_by_item_wise_tax"))
+	# a charge that totals zero spreads nothing, so no item gets a share that has no credit
+	return (
+		tax.charge_type in PREVIOUS_ROW_CHARGE_TYPES
+		and bool(tax.get("allocate_by_item_wise_tax"))
+		and bool(flt(tax.base_tax_amount_after_discount_amount))
+	)
 
 
 def get_stock_qty(row, qty) -> float:
