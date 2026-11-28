@@ -447,6 +447,114 @@ class TestJobCard(ERPNextTestSuite):
 		open_logs = sorted(log.employee for log in job_card.time_logs if not log.to_time)
 		self.assertEqual(open_logs, sorted([operator, helper]))
 
+	def test_assigned_employees_stay_when_others_log_time(self):
+		job_card = make_jc_review_job_cards(make_jc_review_workstation(), 1)[0]
+		assigned, helper = make_jc_review_employee(), make_jc_review_employee()
+		job_card.append("employee", {"employee": assigned})
+		job_card.save()
+
+		job_card.start_timer(start_time=now(), employees=helper)
+		job_card.reload()
+		self.assertEqual(sorted(row.employee for row in job_card.employee), sorted([assigned, helper]))
+
+	def test_resume_restarts_only_the_crew_that_paused(self):
+		job_card = make_jc_review_job_cards(make_jc_review_workstation(), 1)[0]
+		operator, assigned = make_jc_review_employee(), make_jc_review_employee()
+		job_card.append("employee", {"employee": assigned})
+		job_card.save()
+
+		job_card.start_timer(start_time=add_to_date(now(), minutes=-30), employees=operator)
+		job_card.reload()
+		job_card.pause_job(end_time=add_to_date(now(), minutes=-10), reason="Tea break")
+		job_card.reload()
+		self.assertEqual(job_card.time_logs[-1].pause_reason, "Tea break")
+
+		job_card.resume_job(start_time=now())
+		job_card.reload()
+		self.assertEqual([log.employee for log in job_card.time_logs if not log.to_time], [operator])
+
+	def test_assignment_alone_is_not_open_work(self):
+		first, second = make_jc_review_job_cards(make_jc_review_workstation(capacity=2), 2)
+		employee = make_jc_review_employee()
+		first.append("employee", {"employee": employee})
+		first.save()
+		self.assertEqual(second.get_open_job_cards(employee), [])
+
+		first.start_timer(start_time=now(), employees=employee)
+		self.assertEqual(second.get_open_job_cards(employee), [first.name])
+
+	def test_progress_is_logged_per_employee(self):
+		job_card = make_jc_review_job_cards(make_jc_review_workstation(), 1)[0]
+		operator = make_jc_review_employee()
+		job_card.start_timer(start_time=add_to_date(now(), minutes=-20), employees=operator)
+		job_card.reload()
+
+		job_card.log_progress(operator, completed_qty=4)
+		job_card.log_progress(operator, process_loss_qty=1, loss_reason="Broken stitch")
+		job_card.reload()
+		closed = [
+			(log.completed_qty, log.process_loss_qty, log.loss_reason or None)
+			for log in job_card.time_logs
+			if log.to_time
+		]
+		self.assertEqual(closed, [(4, 0, None), (0, 1, "Broken stitch")])
+		self.assertEqual(
+			(job_card.total_completed_qty, job_card.process_loss_qty, job_card.pending_qty), (4, 1, 5)
+		)
+		self.assertEqual(len([log for log in job_card.time_logs if not log.to_time]), 1)
+
+		self.assertRaises(frappe.ValidationError, job_card.log_progress, operator, completed_qty=6)
+		self.assertRaises(frappe.ValidationError, job_card.log_progress, operator, process_loss_qty=1)
+		self.assertRaises(
+			frappe.ValidationError, job_card.log_progress, make_jc_review_employee(), completed_qty=1
+		)
+
+		job_card.log_progress(operator, completed_qty=5)
+		job_card.complete_job_card(end_time=now(), qty=0, auto_submit=1)
+		job_card.reload()
+		self.assertEqual(
+			(job_card.docstatus, job_card.total_completed_qty, job_card.process_loss_qty), (1, 9, 1)
+		)
+
+	def test_progress_is_limited_to_previous_operation_output(self):
+		work_order = self.make_two_operation_work_order()
+		first, second = get_jc_review_job_cards(work_order.name)
+		first.append(
+			"time_logs",
+			{
+				"from_time": add_to_date(now(), hours=-3),
+				"to_time": add_to_date(now(), hours=-2),
+				"completed_qty": 6,
+			},
+		)
+		first.pending_qty = 4
+		first.save()
+		first.submit()
+
+		operator = make_jc_review_employee()
+		second.start_timer(start_time=add_to_date(now(), minutes=-30), employees=operator)
+		second.reload()
+		self.assertRaises(frappe.ValidationError, second.log_progress, operator, completed_qty=7)
+
+		second.log_progress(operator, completed_qty=5, process_loss_qty=1, loss_reason="Wrong fold")
+		second.reload()
+		self.assertEqual((second.total_completed_qty, second.process_loss_qty), (5, 1))
+
+	def test_crew_change_closes_and_opens_logs(self):
+		job_card = make_jc_review_job_cards(make_jc_review_workstation(), 1)[0]
+		first, second = make_jc_review_employee(), make_jc_review_employee()
+		job_card.start_timer(start_time=add_to_date(now(), minutes=-20), employees=first)
+		job_card.reload()
+
+		job_card.change_crew([second])
+		job_card.reload()
+		self.assertEqual([log.employee for log in job_card.time_logs if not log.to_time], [second])
+		self.assertEqual(sorted(row.employee for row in job_card.employee), sorted([first, second]))
+
+		job_card.pause_job(end_time=now(), reason="Shift handover")
+		job_card.reload()
+		self.assertRaises(frappe.ValidationError, job_card.change_crew, [first])
+
 	def test_job_card_timer_action_edge_cases(self):
 		def timer(**overrides):
 			job_card = frappe._dict(

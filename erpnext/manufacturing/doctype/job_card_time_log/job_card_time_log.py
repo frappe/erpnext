@@ -17,10 +17,12 @@ class JobCardTimeLog(Document):
 		completed_qty: DF.Float
 		employee: DF.Link | None
 		from_time: DF.Datetime | None
+		loss_reason: DF.Data | None
 		operation: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		pause_reason: DF.Data | None
 		process_loss_qty: DF.Float
 		time_in_mins: DF.Float
 		to_time: DF.Datetime | None

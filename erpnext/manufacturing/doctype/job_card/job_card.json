@@ -401,7 +401,7 @@
    "fieldtype": "Table MultiSelect",
    "label": "Employee",
    "options": "Job Card Time Log",
-   "read_only": 1
+   "description": "Operators assigned to this job card. The Shop Floor shows the job card only to them. Anyone who logs time is added."
   },
   {
    "fieldname": "serial_no",
@@ -705,7 +705,7 @@
  "icon": "clipboard-list",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-04 18:54:22.353167",
+ "modified": "2026-11-28 07:13:17.816933",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
