@@ -960,6 +960,7 @@ class TestStockReservationEntry(FrappeTestCase):
 		first_dn = self.deliver_batch(so, batch_no, 5)
 		self.deliver_batch(so, batch_no, 5)
 
+		first_dn.reload()
 		first_dn.cancel()
 		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 0), ("Serial and Batch", 5)])
 
@@ -994,6 +995,7 @@ class TestStockReservationEntry(FrappeTestCase):
 		other_batch_dn = self.deliver_batch(so, other_batch_no, 5)
 		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 5), ("Serial and Batch", 5)])
 
+		batch_dn.reload()
 		batch_dn.cancel()
 		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 5), ("Serial and Batch", 0)])
 		self.assertEqual(
@@ -1003,6 +1005,7 @@ class TestStockReservationEntry(FrappeTestCase):
 			5,
 		)
 
+		other_batch_dn.reload()
 		other_batch_dn.cancel()
 		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 0), ("Serial and Batch", 0)])
 		self.assertEqual(
@@ -1012,6 +1015,7 @@ class TestStockReservationEntry(FrappeTestCase):
 			10,
 		)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
