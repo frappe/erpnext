@@ -370,7 +370,7 @@ def get_doctypes_for_bank_reconciliation():
 	return frappe.get_hooks("bank_reconciliation_doctypes")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def unreconcile_transaction(transaction_name: str | int):
 	"""
 	Unreconcile an entire bank transaction - this does not handle individual entries but clears the entire transaction

@@ -29,6 +29,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.assertions import assert_post_only
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
@@ -73,6 +74,9 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 			.insert()
 			.name
 		)
+
+	def test_reconciliation_writes_reject_get(self):
+		assert_post_only(self, auto_reconcile_vouchers, update_clearance_date, clear_clearing_date)
 
 	def test_auto_reconcile(self):
 		# make payment

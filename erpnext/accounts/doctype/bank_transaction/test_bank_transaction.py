@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	get_linked_payments,
 	reconcile_vouchers,
 )
+from erpnext.accounts.doctype.bank_transaction.bank_transaction import unreconcile_transaction
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
@@ -18,6 +19,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_paymen
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.tests.assertions import assert_post_only
 from erpnext.tests.utils import ERPNextTestSuite, if_lending_app_installed
 
 
@@ -29,6 +31,9 @@ class TestBankTransaction(ERPNextTestSuite):
 		self.bank_account = create_bank_account(
 			gl_account=self.gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
+
+	def test_unreconcile_transaction_rejects_get(self):
+		assert_post_only(self, unreconcile_transaction)
 
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
