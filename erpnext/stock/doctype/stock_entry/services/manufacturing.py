@@ -771,7 +771,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			abs(flt(qty_per_unit * qty, precision) - qty_per_unit * qty)
 			for qty in [*self.wo_entry_fg_completed_qtys, flt(self.doc.fg_completed_qty)]
 		)
-		return wip_qty if gap <= flt(rounding, 9) else entry_qty
+		# a negative balance is over-consumption, not material left in WIP
+		if wip_qty < 0 or gap > flt(rounding, 9):
+			return entry_qty
+
+		return wip_qty
 
 	@cached_property
 	def wo_entry_fg_completed_qtys(self):
