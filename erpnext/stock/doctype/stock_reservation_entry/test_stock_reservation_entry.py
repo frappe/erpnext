@@ -678,6 +678,74 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		second_dn.cancel()
 		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 0), ("Serial and Batch", 5)])
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 0,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_cancel_gives_back_the_qty_reservation_when_the_other_delivery_holds_the_batch(self) -> None:
+		"""Cancelling the first of two deliveries of a fully reserved batch keeps the batch reservation delivered."""
+		so, batch_no = self.make_qty_and_batch_reserved_sales_order()
+		first_dn = self.deliver_batch(so, batch_no, 5)
+		self.deliver_batch(so, batch_no, 5)
+
+		first_dn.cancel()
+		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 0), ("Serial and Batch", 5)])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 0,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_cancel_of_deliveries_of_two_batches_gives_back_each_reservation(self) -> None:
+		"""The batch reservation is given back by the delivery of its batch, the Qty one by the other batch."""
+		so, batch_no = self.make_qty_and_batch_reserved_sales_order()
+		item_code = so.items[0].item_code
+		other_batch_no = (
+			frappe.get_doc({"doctype": "Batch", "item": item_code, "batch_id": item_code + "-C"})
+			.insert()
+			.name
+		)
+		make_stock_entry(
+			item_code=item_code,
+			qty=5,
+			rate=10,
+			to_warehouse=self.warehouse,
+			batch_no=other_batch_no,
+			use_serial_batch_fields=1,
+		)
+		batch_dn = self.deliver_batch(so, batch_no, 5)
+		other_batch_dn = self.deliver_batch(so, other_batch_no, 5)
+		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 5), ("Serial and Batch", 5)])
+
+		batch_dn.cancel()
+		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 5), ("Serial and Batch", 0)])
+		self.assertEqual(
+			frappe.db.get_value(
+				"Bin", {"item_code": item_code, "warehouse": self.warehouse}, "reserved_stock"
+			),
+			5,
+		)
+
+		other_batch_dn.cancel()
+		self.assertEqual(self.get_delivered_qty_by_reservation(so), [("Qty", 0), ("Serial and Batch", 0)])
+		self.assertEqual(
+			frappe.db.get_value(
+				"Bin", {"item_code": item_code, "warehouse": self.warehouse}, "reserved_stock"
+			),
+			10,
+		)
+
 	def make_qty_and_batch_reserved_sales_order(self):
 		"""Sales Order for 10 of a batch item with a Qty reservation of 5, then a batch reservation of 5."""
 		item_code = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
