@@ -527,6 +527,87 @@ class TestStockEntry(ERPNextTestSuite):
 		remaining_entry = make_stock_in_entry(transit_entry.name)
 		self.assertEqual(remaining_entry.items[0].qty, smallest_qty)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_second_end_transit_maps_only_the_serial_and_batch_still_in_transit(self):
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		transit_warehouse = get_in_transit_warehouse("_Test Company")
+
+		batch_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRB-.#####",
+			}
+		).name
+		serial_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TRS-.#####"}
+		).name
+		make_stock_entry(item_code=batch_item, target=source_warehouse, qty=6, basic_rate=100)
+		make_stock_entry(item_code=batch_item, target=source_warehouse, qty=4, basic_rate=100)
+		make_stock_entry(item_code=serial_item, target=source_warehouse, qty=10, basic_rate=100)
+
+		def get_entries(bundle):
+			return frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": bundle},
+				fields=["serial_no", "batch_no", "qty"],
+				order_by="idx",
+			)
+
+		for item_code in (batch_item, serial_item):
+			# the serial nos go out typed in the row, which keeps them after its bundle is made
+			typed_serial_nos = {}
+			if item_code == serial_item:
+				typed_serial_nos = {
+					"use_serial_batch_fields": 1,
+					"serial_no": "\n".join(
+						frappe.get_all("Serial No", {"item_code": item_code}, pluck="serial_no")
+					),
+				}
+			transit_entry = make_stock_entry(
+				item_code=item_code,
+				source=source_warehouse,
+				target=transit_warehouse,
+				purpose="Material Transfer",
+				add_to_transit=1,
+				qty=10,
+				basic_rate=100,
+				**typed_serial_nos,
+			)
+			sent = get_entries(transit_entry.items[0].serial_and_batch_bundle)
+
+			# the first receipt takes 4: four serial nos, or the batch that went out with 4
+			partial_entry = make_stock_in_entry(transit_entry.name)
+			row = partial_entry.items[0]
+			row.update({"qty": 4, "t_warehouse": target_warehouse, "serial_and_batch_bundle": None})
+			row.use_serial_batch_fields = 1
+			if item_code == serial_item:
+				row.serial_no = "\n".join(
+					frappe.db.get_value("Serial No", entry.serial_no, "serial_no") for entry in sent[:4]
+				)
+				in_transit = [(entry.serial_no, None, -1) for entry in sent[4:]]
+			else:
+				row.batch_no = next(entry.batch_no for entry in sent if entry.qty == -4)
+				in_transit = [(None, entry.batch_no, -6) for entry in sent if entry.qty == -6]
+			partial_entry.save().submit()
+
+			remaining_entry = make_stock_in_entry(transit_entry.name)
+			remaining_entry.items[0].t_warehouse = target_warehouse
+
+			self.assertEqual(remaining_entry.items[0].qty, 6)
+			self.assertEqual(
+				[
+					(entry.serial_no, entry.batch_no, entry.qty)
+					for entry in get_entries(remaining_entry.items[0].serial_and_batch_bundle)
+				],
+				in_transit,
+			)
+
+			remaining_entry.save().submit()
+			self.assertEqual(frappe.db.get_value("Stock Entry", transit_entry.name, "per_transferred"), 100)
+
 	def test_add_to_transit_non_transit_target_warehouse_validation(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
