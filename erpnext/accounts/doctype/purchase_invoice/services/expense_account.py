@@ -159,7 +159,9 @@ class ExpenseAccountService:
 
 	def validate_expense_account(self) -> None:
 		for item in self.doc.get("items"):
-			validate_account_head(item.idx, item.expense_account, self.doc.company, _("Expense"))
+			validate_account_head(
+				item.idx, item.expense_account, self.doc.company, _("Expense"), allow_party_account=False
+			)
 
 	def set_against_expense_account(self) -> None:
 		doc = self.doc
