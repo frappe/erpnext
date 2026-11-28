@@ -1670,10 +1670,10 @@ def _check_bom_component_qty(doc, bom_items, get_qty=None):
 			if flt(row.qty, precision) != flt(stock_qty, precision):
 				frappe.throw(
 					_(
-						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
+						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}. Click Get Items to fetch the quantities again."
 					).format(
 						bold(row.item_code),
-						flt(row.qty),
+						flt(row.qty, precision),
 						get_link_to_form("BOM", doc.bom_no),
 					),
 					title=_("Incorrect Component Quantity"),
