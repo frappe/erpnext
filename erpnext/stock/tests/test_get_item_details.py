@@ -9,6 +9,7 @@ from erpnext.stock.get_item_details import (
 	get_price_list_currency_and_exchange_rate,
 	get_projected_qty,
 	get_valuation_rate,
+	validate_conversion_rate,
 )
 from erpnext.stock.utils import get_latest_stock_qty
 from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
@@ -1363,7 +1364,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 		self.make_item_price(item_code, "Standard Buying", 0)
 		return item_code
 
-	def test_supplier_quotation_uses_buying_price_list_exchange_rate(self):
+	def test_exchange_rates_follow_the_doctype_side(self):
 		for exchange_rate, for_buying in ((90, 1), (95, 0)):
 			frappe.get_doc(
 				{
@@ -1390,6 +1391,17 @@ class TestGetItemDetail(ERPNextTestSuite):
 		)
 
 		self.assertEqual(details.plc_conversion_rate, 90)
+
+		for doctype, expected_rate in (("Supplier Quotation", 90), ("Sales Order", 95)):
+			ctx = frappe._dict(
+				doctype=doctype,
+				company="_Test Company",
+				currency="EUR",
+				conversion_rate=1,
+				transaction_date=today(),
+			)
+			validate_conversion_rate(ctx, frappe.get_meta(doctype))
+			self.assertEqual(ctx.conversion_rate, expected_rate)
 
 	def make_multi_uom_item(self) -> str:
 		from erpnext.stock.doctype.item.test_item import make_item
